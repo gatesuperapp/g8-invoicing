@@ -4,7 +4,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import g8invoicing.DeliveryNote
-import g8invoicing.DeliveryNoteProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,8 +16,8 @@ class DeliveryNoteLocalDataSource(
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
-    private val clientCompanyDataQueries = db.clientOrIssuerCompanyIdentificationQueries
-    private val companyIdQueries = db.companyIdentificationQueries
+    private val clientOrIssuerCompanyDataQueries = db.clientOrIssuerCompanyDataQueries
+    private val companyIdQueries = db.companyDataQueries
     private val deliveryNoteProductQueries = db.deliveryNoteProductQueries
     private val documentProductQueries = db.documentProductQueries
 
@@ -43,13 +42,13 @@ class DeliveryNoteLocalDataSource(
         this.client_id?.let {
             client = clientOrIssuerQueries.getClientOrIssuer(it)
                 .executeAsOneOrNull()
-                ?.transformIntoEditable(clientCompanyDataQueries, companyIdQueries)
+                ?.transformIntoEditable(clientOrIssuerCompanyDataQueries, companyIdQueries)
         }
 
         this.issuer_id?.let {
             issuer = clientOrIssuerQueries.getClientOrIssuer(it)
                 .executeAsOneOrNull()
-                ?.transformIntoEditable(clientCompanyDataQueries, companyIdQueries)
+                ?.transformIntoEditable(clientOrIssuerCompanyDataQueries, companyIdQueries)
         }
 
         this.let {

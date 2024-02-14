@@ -5,8 +5,8 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.screens.PersonType
 import g8invoicing.ClientOrIssuer
-import g8invoicing.ClientOrIssuerCompanyIdentificationQueries
-import g8invoicing.CompanyIdentificationQueries
+import g8invoicing.ClientOrIssuerCompanyDataQueries
+import g8invoicing.CompanyDataQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -16,13 +16,12 @@ class ClientOrIssuerLocalDataSource(
     db: Database,
 ) : ClientOrIssuerLocalDataSourceInterface {
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
-    private val companyIdQueries = db.companyIdentificationQueries
-    private val companyDataQueries = db.clientOrIssuerCompanyIdentificationQueries
-    private val clientOrIssuerCompanyIdQueries = db.clientOrIssuerCompanyIdentificationQueries
+    private val companyDataQueries = db.companyDataQueries
+    private val clientOrIssuerCompanyDataQueries = db.clientOrIssuerCompanyDataQueries
 
     override fun fetchClientOrIssuer(id: Long): ClientOrIssuerEditable? {
         return clientOrIssuerQueries.getClientOrIssuer(id).executeAsOneOrNull()
-            ?.transformIntoEditable(companyDataQueries, companyIdQueries)
+            ?.transformIntoEditable(clientOrIssuerCompanyDataQueries, companyDataQueries)
     }
 
     override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerEditable>> {
@@ -32,8 +31,8 @@ class ClientOrIssuerLocalDataSource(
                 query.executeAsList()
                     .map {
                         it.transformIntoEditable(
-                            companyDataQueries,
-                            companyIdQueries
+                            clientOrIssuerCompanyDataQueries,
+                            companyDataQueries
                         )
                     }
             }
@@ -89,7 +88,7 @@ class ClientOrIssuerLocalDataSource(
             try {
                 client.companyData?.forEach { companyData ->
                     companyData.id?.let {
-                        companyIdQueries.updateCompanyData(
+                        companyDataQueries.updateCompanyData(
                             company_identification_id = it,
                             label = companyData.label,
                             number = companyData.number
@@ -149,19 +148,19 @@ class ClientOrIssuerLocalDataSource(
         client: ClientOrIssuerEditable,
     ) {
         // Save the values
-        companyIdQueries.saveCompanyData(
+        companyDataQueries.saveCompanyData(
             company_identification_id = null,
             label = companyIdentification.label,
             number = companyIdentification.number
         )
 
         // Get the ID of the last inserted row
-        val companyIdentificationId: Long? = companyIdQueries.lastInsertRowId().executeAsOneOrNull()
+        val companyIdentificationId: Long? = companyDataQueries.lastInsertRowId().executeAsOneOrNull()
 
         // Save the company identifiants for the client
         client.id?.let { clientId ->
             companyIdentificationId?.let { companyId ->
-                clientOrIssuerCompanyIdQueries.saveClientOrIssuerCompanyData(
+                clientOrIssuerCompanyDataQueries.saveClientOrIssuerCompanyData(
                     id = null,
                     client_or_issuer_id = clientId.toLong(),
                     company_identification_id = companyId,
@@ -172,18 +171,18 @@ class ClientOrIssuerLocalDataSource(
 }
 
 fun ClientOrIssuer.transformIntoEditable(
-    companyDataQueries: ClientOrIssuerCompanyIdentificationQueries,
-    companyQueries: CompanyIdentificationQueries,
+    clientOrIssuerCompanyDataQueries: ClientOrIssuerCompanyDataQueries,
+    companyDataQueries: CompanyDataQueries,
 ): ClientOrIssuerEditable {
     val companyData: MutableList<CompanyDataEditable> = mutableListOf()
     val clientOrIssuer = this
 
     val identifiers =
-        companyDataQueries.getClientOrIssuerCompanyData(clientOrIssuer.client_or_issuer_id)
+        clientOrIssuerCompanyDataQueries.getClientOrIssuerCompanyData(clientOrIssuer.client_or_issuer_id)
             .executeAsList()
 
     identifiers.forEach {
-        companyQueries.getCompanyData(it).executeAsOneOrNull()?.let { data ->
+        companyDataQueries.getCompanyData(it).executeAsOneOrNull()?.let { data ->
             companyData += CompanyDataEditable(
                 id = data.company_identification_id,
                 label = data.label,

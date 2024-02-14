@@ -30,8 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.data.ProductEditable
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
-import g8invoicing.Product
-import java.text.DecimalFormat
+
 
 @Composable
 fun ProductListItem(
