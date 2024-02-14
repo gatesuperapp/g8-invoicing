@@ -1,0 +1,40 @@
+CREATE TABLE CompanyData (
+  company_identification_id INTEGER PRIMARY KEY NOT NULL,
+  label TEXT NOT NULL,
+  number TEXT NOT NULL
+  );
+
+INSERT INTO CompanyData (company_identification_id, label, number)
+VALUES (1,'TVA', 'TVAIEURY8'),
+(2,'SIREN', 'SIRENNUEE'),
+(3,'RCS', 'RCSSS'),
+(4,'TVA', 'XFGUI33');
+
+
+getCompanyData:
+SELECT *
+FROM CompanyData
+WHERE company_identification_id = :id;
+
+getAllCompaniesData:
+SELECT *
+FROM CompanyData;
+
+updateCompanyData:
+UPDATE CompanyData
+SET label = :label,
+    number = :number
+WHERE
+    company_identification_id = :company_identification_id;
+
+saveCompanyData:
+INSERT OR REPLACE
+INTO CompanyData (company_identification_id, label, number)
+VALUES (?, ?, ?);
+
+deleteCompanyData:
+DELETE FROM CompanyData
+WHERE company_identification_id = :id;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

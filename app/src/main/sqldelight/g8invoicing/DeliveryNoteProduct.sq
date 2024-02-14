@@ -1,0 +1,33 @@
+CREATE TABLE DeliveryNoteProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  delivery_note_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(document_product_id)
+          ON DELETE CASCADE
+);
+
+INSERT INTO DeliveryNoteProduct (id, delivery_note_id, document_product_id)
+VALUES (1, 1, 1),
+(2, 1, 2),
+(3, 1, 3),
+(4, 1, 4),
+(5, 1, 5),
+(6, 1, 6),
+(7, 1, 7)
+;
+
+getDeliveryNoteProductIds:
+SELECT id
+FROM DeliveryNoteProduct
+WHERE delivery_note_id = :delivery_note_id;
+
+saveDeliveryNoteProduct:
+INSERT
+INTO DeliveryNoteProduct (id, delivery_note_id, document_product_id)
+VALUES (?, ?, ?);
+
+deleteDeliveryNoteProduct:
+DELETE FROM DeliveryNoteProduct
+WHERE document_product_id = :document_product_id;

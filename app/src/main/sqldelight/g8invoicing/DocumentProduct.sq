@@ -1,0 +1,61 @@
+CREATE TABLE DocumentProduct (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  quantity REAL NOT NULL,
+  description TEXT,
+  final_price REAL,
+  tax_rate INTEGER,
+  price_without_tax REAL,
+  unit TEXT,
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  product_id INTEGER,
+
+    FOREIGN KEY(product_id)
+            REFERENCES Product(product_id)
+            ON DELETE CASCADE
+);
+
+INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, price_without_tax, unit, product_id)
+VALUES (1, 'Carottes',1, 'vichou', 5, 20, 6.8, 'kg', 1),
+(2, 'Tomates', 1.5,'vichou', 15, 20, 6, 'kg', 1),
+(3, 'BEtterave',1, 'vichou', 2, 5, 4.34, 'kg', 1),
+(4, 'chou',3.5, 'vichou', 15, 5, 9, 'kg', 1),
+(5, 'aa', 1,'vichou', 15, 20, 4.34, 'kg', 1),
+(6, 'ee',1, 'vichou', 2, 5, 2.90, 'kg', 1),
+(7, 'eez',1, 'vichou', 15, 5, 6, 'kg', 1) ;
+
+
+getDocumentProduct:
+SELECT *
+FROM DocumentProduct
+WHERE document_product_id = :id;
+
+getAllDocumentProducts:
+SELECT *
+FROM DocumentProduct;
+
+saveDocumentProduct:
+INSERT
+INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, price_without_tax, unit, product_id)
+VALUES (?, ?, ?, ?, ?, ?,?,?,?);
+
+updateDocumentProduct:
+UPDATE DocumentProduct
+SET name = :name,
+    quantity = :quantity,
+    description = :description,
+    final_price = :price,
+    tax_rate = :tax_rate,
+    price_without_tax = :price_without_tax,
+    unit = :unit,
+    product_id =: product_id
+WHERE
+    document_product_id = :document_product_id;
+
+deleteDocumentProduct:
+DELETE FROM DocumentProduct
+WHERE document_product_id = :id;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

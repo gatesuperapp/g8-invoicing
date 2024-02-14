@@ -1,0 +1,83 @@
+CREATE TABLE ClientOrIssuer (
+  client_or_issuer_id INTEGER PRIMARY KEY NOT NULL,
+  type TEXT,
+  first_name TEXT,
+  name TEXT NOT NULL,
+  address1 TEXT,
+  address2 TEXT,
+  zip_code TEXT,
+  city TEXT,
+  phone TEXT,
+  email TEXT,
+  notes TEXT,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  deleted_at REAL DEFAULT (datetime('now', 'localtime'))
+);
+
+INSERT INTO ClientOrIssuer (client_or_issuer_id, type, first_name, name, address1, address2, zip_code,
+city, phone, email, notes)
+VALUES (1,  'issuer', 'issuerAudus', 'Zu', '7 rue pacha',
+'appt 777', '31400','Toulouse', '0789384749', 'audus@rich.fr', 'millionariat en vue'),
+ (2, 'client', 'clientHaha', 'Biocoop', '7 rue pacha', 'appt 777', '31400',
+'Toulouse', '0789384749', 'client@', 'millionariat en vue'),
+ (3, 'client', 'clientBernadoutteett', 'Delaplandidugg', '7 rue pacha', 'appt 777', '31400',
+'Toulouse', '0789384749', 'client@', 'millionariat en vue')
+;
+
+
+getClientOrIssuer:
+SELECT *
+FROM ClientOrIssuer
+WHERE client_or_issuer_id = :id;
+
+getClientOrIssuerIdByMail:
+SELECT client_or_issuer_id
+FROM ClientOrIssuer
+WHERE email = :email;
+
+getClientOrIssuerIdByName:
+SELECT client_or_issuer_id
+FROM ClientOrIssuer
+WHERE name = :name AND first_name =: first_name;
+
+getAll:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = :type;
+
+checkIfEmpty:
+SELECT count(*) FROM ClientOrIssuer LIMIT 1;
+
+countDuplicates:
+SELECT COUNT(*)
+FROM ClientOrIssuer
+WHERE instr(name, :name);
+
+saveClientOrIssuer:
+INSERT INTO ClientOrIssuer (client_or_issuer_id, type, first_name, name, address1, address2,
+zip_code, city, phone, email, notes)
+VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
+
+updateClientOrIssuer:
+UPDATE ClientOrIssuer
+SET type = :type,
+    first_name = :first_name,
+    name = :name,
+    address1 = :address1,
+    address2 = :address2,
+    zip_code = :zip_code,
+    city = :city,
+    phone = :phone,
+    email = :email,
+    notes = :notes
+WHERE
+    client_or_issuer_id = :client_or_issuer_id;
+
+deleteClientOrIssuer:
+DELETE FROM ClientOrIssuer
+WHERE client_or_issuer_id = :id;
+
+getLastInsertedRowId:
+SELECT last_insert_rowid();

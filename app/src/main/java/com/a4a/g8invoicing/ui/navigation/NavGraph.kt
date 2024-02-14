@@ -1,0 +1,255 @@
+package com.a4a.g8invoicing.ui.navigation
+
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.navigation
+import androidx.navigation.navArgument
+import com.a4a.g8invoicing.ui.screens.PersonType
+
+/*
+Process to add a new screen/VM/datasource:
+1. Adding screen to navgraph
+- Add the screen name to the Screen enum class (bottom of this file)
+- Add the extension (fun NavGraphBuilder.newScreen)
+- call extension from NavHost
+2. Annotate the VM with hilt stuff
+3. Add datasource in AppModule
+*/
+
+@Composable
+fun NavGraph(navController: NavHostController) {
+    NavHost(
+        navController,
+        startDestination = (Screen.DeliveryNoteList.name),
+        //startDestination = (Screen.ProductList.name),
+        //startDestination = (Screen.DeliveryNoteAddEdit.name),
+        //startDestination = (Screen.ClientOrIssuerAddEdit.name),
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
+    ) {
+        //  homeScreen(navController)
+        deliveryNotesList(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickListItem = {
+                val params = ("?itemId=${it}")
+                navController.navigate(Screen.DeliveryNoteAddEdit.name + params)
+            },
+            onClickNew = {
+                navController.navigate(Screen.DeliveryNoteAddEdit.name)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            })
+        clientOrIssuerList(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickListItem = {
+                val params = ("?itemId=${it.id}")
+                navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
+            },
+            onClickNew = {
+                navController.navigate(Screen.ClientOrIssuerAddEdit.name)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            }
+        )
+        clientOrIssuerAddEdit(
+            navController = navController,
+            goToPreviousScreen = { key, result ->
+                navigateBackWithResult(navController, key, result)
+            }
+        )
+        deliveryNoteAddEdit(
+            navController = navController,
+            onClickBack = {
+                navigateBack(navController)
+            },
+            onClickForward = {},
+            onClickNewClientOrIssuer = {
+                if (it == PersonType.Client) {
+                    val params = ("?type=client")
+                    navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
+                } else {
+                    val params = ("?type=issuer")
+                    navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
+                }
+            }
+        )
+        productList(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickListItem = {
+                val params = ("?itemId=${it}&type=product")
+                navController.navigate("ProductCreation$params") {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            },
+            onClickNew = {
+                navController.navigate("ProductCreation") {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            onClickBack = {
+                navigateBack(navController)
+            }
+        )
+
+        // Product Add/Edit NESTED NAVIGATION.
+        // ****The parent/start destination route is named "ProductCreation"****
+        // and contains "ProductAddEdit" & "TaxRates"
+        // The goal is to share the ViewModel between those 2 screens
+        // The argument "isNewProduct" indicates if it's accessed through the "Add new" button,
+        // or if it's an update of an existing product
+        navigation(
+            startDestination = Screen.ProductAddEdit.name + "?itemId={itemId}&type={type}",
+            route = "ProductCreation?itemId={itemId}&type={type}",
+            arguments = listOf(
+                navArgument("itemId") { nullable = true },
+                navArgument("type") { nullable = true },
+            )
+        ) {
+            productAddEdit(
+                navController = navController,
+                onClickBack = {
+                    navigateBack(navController)
+                },
+                onClickForward = {
+                    navController.navigate(Screen.ProductTaxRates.name) {
+                        popUpTo("ProductCreation") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+
+            productTaxRates(
+                navController = navController,
+                onClickBackOrSelect = {
+                    navigateToPreviousNestedScreen(
+                        navController,
+                        Screen.ProductAddEdit.name,
+                        "ProductCreation"
+                    )
+                }
+            )
+        }
+
+/*       // DocumentProduct Add/Edit NESTED NAVIGATION.
+        navigation(
+            startDestination = Screen.DocumentProductAddEdit.name + "?itemId={itemId}&type={type}",
+            route = "DocumentProductCreation?itemId={itemId}&type={type}",
+            arguments = listOf(
+                navArgument("itemId") { nullable = true },
+                navArgument("type") { nullable = true },
+            )
+        ) {
+            documentProductAddEdit(
+                navController = navController,
+                onClickBack = {
+                    navigateBack(navController)
+                },
+                onClickForward = {
+                    navController.navigate(Screen.ProductTaxRates.name) {
+                        popUpTo("DocumentProductCreation") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+
+            documentProductTaxRates(
+                navController = navController,
+                onClickBackOrSelect = {
+                    navigateToPreviousNestedScreen(
+                        navController,
+                        Screen.DocumentProductAddEdit.name,
+                        "DocumentProductCreation"
+                    )
+                }
+            )
+        }*/
+    }
+}
+
+private fun navigateBack(navController: NavController) {
+    navController.popBackStack()
+}
+
+private fun navigateBackWithResult(
+    navController: NavController,
+    key: String,
+    value: Pair<String, String>,
+) {
+    navController.previousBackStackEntry
+        ?.savedStateHandle
+        ?.set(key, value)
+    navController.popBackStack()
+}
+
+private fun navigateToPreviousNestedScreen(
+    navController: NavController,
+    previousScreen: String,
+    route: String,
+) {
+    navController.navigate(previousScreen) {
+        popUpTo(route) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+private fun NavHostController.navigateAndReplaceStartDestination(
+    category: Category,
+) {
+    // The chosen category becomes the new start destination
+    popBackStack(graph.startDestinationId, true)
+    graph.setStartDestination(category.route)
+    navigate(category.route)
+}
+
+
+@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavController): T {
+    val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+    val parentEntry = remember(this) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+    return hiltViewModel(parentEntry)
+}
