@@ -2,23 +2,18 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissValue
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 /**/
 @Composable
 fun DeliveryNoteListContent(
-    deliveryNotes: List<DeliveryNoteEditable>,
+    deliveryNotes: List<DeliveryNoteState>,
     onItemClick: (Int) -> Unit = {},
-    addDeliveryNoteToSelectedList: (DeliveryNoteEditable) -> Unit = {},
-    removeDeliveryNoteFromSelectedList: (DeliveryNoteEditable) -> Unit = {},
+    addDeliveryNoteToSelectedList: (DeliveryNoteState) -> Unit = {},
+    removeDeliveryNoteFromSelectedList: (DeliveryNoteState) -> Unit = {},
     keyToUnselectAll: Boolean,
 ) {
     LazyColumn {

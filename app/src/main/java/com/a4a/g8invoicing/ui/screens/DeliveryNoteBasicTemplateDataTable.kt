@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.DocumentProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
 import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallAndItalic
 import java.math.RoundingMode
@@ -35,7 +35,7 @@ import java.math.RoundingMode
 
 @Composable
 fun DataTable(
-    tableData: List<DocumentProductEditable>,
+    tableData: List<DocumentProductState>,
 ) {
     val column1Weight = .8f // 70%
 

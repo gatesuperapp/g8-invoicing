@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.data.ClientOrIssuerEditable
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
@@ -49,7 +49,7 @@ import kotlin.math.abs
 
 @Composable
 fun DeliveryNoteBasicTemplate(
-    uiState: DeliveryNoteEditable,
+    uiState: DeliveryNoteState,
     onClickDeliveryNoteNumber: () -> Unit,
     onClickDate: () -> Unit,
     onClickIssuer: () -> Unit,

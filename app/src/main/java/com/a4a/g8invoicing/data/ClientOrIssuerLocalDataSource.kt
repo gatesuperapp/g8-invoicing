@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.screens.PersonType
+import com.a4a.g8invoicing.ui.states.CompanyDataState
 import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerCompanyDataQueries
 import g8invoicing.CompanyDataQueries
@@ -144,7 +145,7 @@ class ClientOrIssuerLocalDataSource(
     }
 
     private fun saveCompanyId(
-        companyIdentification: CompanyDataEditable,
+        companyIdentification: CompanyDataState,
         client: ClientOrIssuerEditable,
     ) {
         // Save the values
@@ -174,7 +175,7 @@ fun ClientOrIssuer.transformIntoEditable(
     clientOrIssuerCompanyDataQueries: ClientOrIssuerCompanyDataQueries,
     companyDataQueries: CompanyDataQueries,
 ): ClientOrIssuerEditable {
-    val companyData: MutableList<CompanyDataEditable> = mutableListOf()
+    val companyData: MutableList<CompanyDataState> = mutableListOf()
     val clientOrIssuer = this
 
     val identifiers =
@@ -183,7 +184,7 @@ fun ClientOrIssuer.transformIntoEditable(
 
     identifiers.forEach {
         companyDataQueries.getCompanyData(it).executeAsOneOrNull()?.let { data ->
-            companyData += CompanyDataEditable(
+            companyData += CompanyDataState(
                 id = data.company_identification_id,
                 label = data.label,
                 number = data.number

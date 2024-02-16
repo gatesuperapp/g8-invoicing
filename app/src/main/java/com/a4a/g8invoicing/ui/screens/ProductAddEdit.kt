@@ -20,7 +20,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionDone
 import com.a4a.g8invoicing.ui.shared.DecimalInput
@@ -36,7 +36,7 @@ import java.math.RoundingMode
 @Composable
 fun ProductAddEdit(
     navController: NavController,
-    product: ProductEditable,
+    product: ProductState,
     isNew: Boolean,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,

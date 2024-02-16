@@ -20,13 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.a4a.g8invoicing.data.DocumentProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import icons.IconDelete
 
 @Composable
 fun DocumentProductListItem(
-    documentProduct: DocumentProductEditable,
+    documentProduct: DocumentProductState,
     onClickDocumentProduct: () -> Unit,
     onClickDeleteDocumentProduct: () -> Unit,
 ) {

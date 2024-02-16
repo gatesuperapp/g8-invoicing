@@ -7,11 +7,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.data.DocumentProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 
 @Composable
 fun DocumentProductListContent(
-    documentProducts: List<DocumentProductEditable>,
+    documentProducts: List<DocumentProductState>,
     onItemClick: (Int) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
 ) {

@@ -9,18 +9,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductListContent(
-    products: List<ProductEditable>,
+    products: List<ProductState>,
     onItemClick: (Int) -> Unit = {},
     onClickNew: () -> Unit = {}, // Used only in documents, clicking the "Add new" button
     displayTopButton: Boolean = false,
-    addProductToSelectedList: (ProductEditable) -> Unit = {},
-    removeProductFromSelectedList: (ProductEditable) -> Unit = {},
+    addProductToSelectedList: (ProductState) -> Unit = {},
+    removeProductFromSelectedList: (ProductState) -> Unit = {},
     keyToUnselectAll: Boolean = false,
     currentProductsIds: List<Int>? = null,
 ) {

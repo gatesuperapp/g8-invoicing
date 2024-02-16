@@ -28,9 +28,9 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.ClientOrIssuerEditable
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
-import com.a4a.g8invoicing.data.DocumentProductEditable
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionComponents
@@ -48,14 +48,13 @@ import java.util.Locale
 @Composable
 fun DeliveryNoteAddEdit(
     navController: NavController,
-    deliveryNote: DeliveryNoteEditable,
+    deliveryNote: DeliveryNoteState,
     clients: MutableList<ClientOrIssuerEditable>,
     issuers: MutableList<ClientOrIssuerEditable>,
-    products: MutableList<ProductEditable>,
+    products: MutableList<ProductState>,
     isNewDeliveryNote: Boolean,
     onClickDone: (Boolean) -> Unit,
     onClickBack: () -> Unit,
-    onClickForward: (ScreenElement) -> Unit, // To access Client list, Issuer or DocumentProducts
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onClickNewClientOrIssuer: (PersonType) -> Unit,
     //onClickNewProduct: () -> Unit,
@@ -65,7 +64,7 @@ fun DeliveryNoteAddEdit(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     productOnValueChange: (ScreenElement, Any, Int) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (DocumentProductEditable, TypeOfProductCreation) -> Unit,
+    onClickDoneForm: (DocumentProductState, TypeOfProductCreation) -> Unit,
 ) {
     /*    // The state is hoisted here & shared between the template & the bottom sheet
         var deliveryNote by remember { mutableStateOf(deliveryNoteUiState) }*/
@@ -116,7 +115,6 @@ fun DeliveryNoteAddEdit(
                 onDismissBottomSheet = {
                     hideBottomSheet(scope, scaffoldState, keyboardController)
                 },
-                onClickForward = onClickForward,
                 isBottomSheetVisible = isBottomSheetOpened,
                 clients = clients,
                 issuers = issuers,

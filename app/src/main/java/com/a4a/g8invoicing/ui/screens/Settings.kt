@@ -25,12 +25,10 @@ import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ForwardInputCreatorGoForward
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.SharedBottomBar
-import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 
 @Composable
 fun Settings(
     navController: NavController,
-    uiState: ClientsOrIssuerUiState,
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
     onClickForward: (ScreenElement) -> Unit
@@ -38,7 +36,7 @@ fun Settings(
     Scaffold(
         topBar = {
             TopBar(
-                title = R.string.appbar_settings,
+                title = R.string.appbar_about,
                 navController = navController,
                 onClickBackArrow = onClickBack
             )
@@ -68,7 +66,6 @@ fun Settings(
                         interactionSource = interactionSource,
                         indication = rememberRipple(color = Color.Black, bounded = true),
                         onClick = {
-                            onClickForward(ScreenElement.SETTINGS_ACCOUNT)
                         }
                     )
                     .fillMaxWidth()

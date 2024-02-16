@@ -21,7 +21,6 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
     onClickBack: () -> Unit,
-    onClickForward: (ScreenElement) -> Unit,
     onClickNewClientOrIssuer: (PersonType) -> Unit = {},
 ) {
     composable(
@@ -86,7 +85,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 onClickBack()
             },
             onClickBack = onClickBack,
-            onClickForward = onClickForward,
             clients = clientsUiState.clientsOrIssuers.toMutableList(),
             issuers = issuersUiState.clientsOrIssuers.toMutableList(),
             products = productsUiState.products.toMutableList(),

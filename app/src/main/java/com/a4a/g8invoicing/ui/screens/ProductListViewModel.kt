@@ -3,7 +3,7 @@ package com.a4a.g8invoicing.ui.screens
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.ProductsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,7 +48,7 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
-    fun deleteProducts(selectedProducts: List<ProductEditable>) {
+    fun deleteProducts(selectedProducts: List<ProductState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
@@ -67,7 +67,7 @@ class ProductListViewModel @Inject constructor(
         }
     }
 
-    fun duplicateProducts(selectedProducts: List<ProductEditable>) {
+    fun duplicateProducts(selectedProducts: List<ProductState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {

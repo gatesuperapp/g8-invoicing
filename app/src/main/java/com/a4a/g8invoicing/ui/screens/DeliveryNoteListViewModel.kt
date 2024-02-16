@@ -3,7 +3,7 @@ package com.a4a.g8invoicing.ui.screens
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +49,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteEditable>) {
+    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
@@ -64,7 +64,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
-    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteEditable>) {
+    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {

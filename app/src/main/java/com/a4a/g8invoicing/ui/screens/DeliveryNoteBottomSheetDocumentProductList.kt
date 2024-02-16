@@ -14,14 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.DocumentProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
 fun DeliveryNoteBottomSheetDocumentProductList(
-    list: List<DocumentProductEditable>,
+    list: List<DocumentProductState>,
     onClickBack: () -> Unit,
     onClickChooseProduct: () -> Unit, // Add a new product to the document (product list)
     onDocumentProductClick: (Int) -> Unit, // Edit an existing document product (add/edit screen)

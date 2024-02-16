@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.data.ClientOrIssuerEditable
-import com.a4a.g8invoicing.data.CompanyDataEditable
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
-import com.a4a.g8invoicing.data.DocumentProductEditable
+import com.a4a.g8invoicing.ui.states.CompanyDataState
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
 import com.a4a.g8invoicing.ui.theme.textForDocuments
@@ -43,7 +43,7 @@ import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateContent(
-    uiState: DeliveryNoteEditable,
+    uiState: DeliveryNoteState,
     onClickDeliveryNoteNumber: () -> Unit,
     onClickDate: () -> Unit,
     onClickIssuer: () -> Unit,
@@ -344,11 +344,11 @@ private fun fakeIssuer() =
         email = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_email)),
         notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_notes)),
         companyData = listOf(
-            CompanyDataEditable(
+            CompanyDataState(
                 label = stringResource(id = R.string.delivery_note_default_issuer_company_label1),
                 number = stringResource(id = R.string.delivery_note_default_issuer_company_number1)
             ),
-            CompanyDataEditable(
+            CompanyDataState(
                 label = stringResource(id = R.string.delivery_note_default_issuer_company_label2),
                 number = stringResource(id = R.string.delivery_note_default_issuer_company_number2)
             )
@@ -369,7 +369,7 @@ private fun fakeClient() =
         email = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_email)),
         notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_notes)),
         companyData = listOf(
-            CompanyDataEditable(
+            CompanyDataState(
                 label = stringResource(id = R.string.delivery_note_default_client_company_label1),
                 number = stringResource(id = R.string.delivery_note_default_client_company_number1)
             )
@@ -379,7 +379,7 @@ private fun fakeClient() =
 @Composable
 private fun fakeDocumentProducts() =
     listOf(
-        DocumentProductEditable(
+        DocumentProductState(
             id = 1,
             name = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_name)),
             description = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_description)),

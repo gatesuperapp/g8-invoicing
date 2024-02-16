@@ -36,7 +36,20 @@ fun NavGraph(navController: NavHostController) {
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
-        //  homeScreen(navController)
+        account(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            })
+        clientOrIssuerAddEdit(
+            navController = navController,
+            goToPreviousScreen = { key, result ->
+                navigateBackWithResult(navController, key, result)
+            }
+        )
         deliveryNotesList(
             navController = navController,
             onClickCategory = {
@@ -79,7 +92,6 @@ fun NavGraph(navController: NavHostController) {
             onClickBack = {
                 navigateBack(navController)
             },
-            onClickForward = {},
             onClickNewClientOrIssuer = {
                 if (it == PersonType.Client) {
                     val params = ("?type=client")
@@ -166,43 +178,6 @@ fun NavGraph(navController: NavHostController) {
                 }
             )
         }
-
-/*       // DocumentProduct Add/Edit NESTED NAVIGATION.
-        navigation(
-            startDestination = Screen.DocumentProductAddEdit.name + "?itemId={itemId}&type={type}",
-            route = "DocumentProductCreation?itemId={itemId}&type={type}",
-            arguments = listOf(
-                navArgument("itemId") { nullable = true },
-                navArgument("type") { nullable = true },
-            )
-        ) {
-            documentProductAddEdit(
-                navController = navController,
-                onClickBack = {
-                    navigateBack(navController)
-                },
-                onClickForward = {
-                    navController.navigate(Screen.ProductTaxRates.name) {
-                        popUpTo("DocumentProductCreation") {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
-
-            documentProductTaxRates(
-                navController = navController,
-                onClickBackOrSelect = {
-                    navigateToPreviousNestedScreen(
-                        navController,
-                        Screen.DocumentProductAddEdit.name,
-                        "DocumentProductCreation"
-                    )
-                }
-            )
-        }*/
     }
 }
 

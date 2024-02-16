@@ -7,8 +7,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.DocumentProductEditable
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -32,11 +32,11 @@ class ProductAddEditViewModel @Inject constructor(
     private val id: String? = savedStateHandle["itemId"]
     private val type: String? = savedStateHandle["type"]
 
-    private val _productUiState = mutableStateOf(ProductEditable())
-    val productUiState: State<ProductEditable> = _productUiState
+    private val _productUiState = mutableStateOf(ProductState())
+    val productUiState: State<ProductState> = _productUiState
 
-    private val _documentProductUiState = mutableStateOf(DocumentProductEditable())
-    val documentProductUiState: State<DocumentProductEditable> = _documentProductUiState
+    private val _documentProductUiState = mutableStateOf(DocumentProductState())
+    val documentProductUiState: State<DocumentProductState> = _documentProductUiState
 
     init {
         if (type == ProductType.PRODUCT.name.lowercase()) {
@@ -156,10 +156,10 @@ class ProductAddEditViewModel @Inject constructor(
 }
 
 private fun updateProductUiState(
-    product: ProductEditable,
+    product: ProductState,
     element: ScreenElement,
     value: Any,
-): ProductEditable {
+): ProductState {
     var product = product
     when (element) {
         ScreenElement.PRODUCT_NAME -> {
@@ -186,10 +186,10 @@ enum class ProductType {
 }
 
 private fun updateDocumentProductUiState(
-    documentProduct: DocumentProductEditable,
+    documentProduct: DocumentProductState,
     element: ScreenElement,
     value: Any,
-): DocumentProductEditable {
+): DocumentProductState {
     var product = documentProduct
     when (element) {
         ScreenElement.DOCUMENT_PRODUCT_NAME -> {

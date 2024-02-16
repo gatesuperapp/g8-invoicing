@@ -3,6 +3,8 @@ package com.a4a.g8invoicing.data
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -21,12 +23,12 @@ class DeliveryNoteLocalDataSource(
     private val deliveryNoteProductQueries = db.deliveryNoteProductQueries
     private val documentProductQueries = db.documentProductQueries
 
-    override fun fetchDeliveryNote(id: Long): DeliveryNoteEditable? {
+    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
         return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
             ?.transformIntoEditableNote()
     }
 
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteEditable>> {
+    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
             .asFlow()
             .map { query ->
@@ -34,10 +36,10 @@ class DeliveryNoteLocalDataSource(
             }
     }
 
-    private fun DeliveryNote.transformIntoEditableNote(): DeliveryNoteEditable {
+    private fun DeliveryNote.transformIntoEditableNote(): DeliveryNoteState {
         var client: ClientOrIssuerEditable? = null
         var issuer: ClientOrIssuerEditable? = null
-        var deliveryNote: DeliveryNoteEditable
+        var deliveryNote: DeliveryNoteState
 
         this.client_id?.let {
             client = clientOrIssuerQueries.getClientOrIssuer(it)
@@ -85,7 +87,7 @@ class DeliveryNoteLocalDataSource(
                 amountsPerTaxRate.add(Pair(key, amounts[index]))
             } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
 
-            deliveryNote = DeliveryNoteEditable(
+            deliveryNote = DeliveryNoteState(
                 deliveryNoteId = it.delivery_note_id.toInt(),
                 number = TextFieldValue(text = it.number),
                 deliveryDate = it.delivery_date,
@@ -102,8 +104,8 @@ class DeliveryNoteLocalDataSource(
         return deliveryNote
     }
 
-    private fun buildDocumentProductList(deliveryNoteId: Long): List<DocumentProductEditable> {
-        val documentProducts: MutableList<DocumentProductEditable> = mutableListOf()
+    private fun buildDocumentProductList(deliveryNoteId: Long): List<DocumentProductState> {
+        val documentProducts: MutableList<DocumentProductState> = mutableListOf()
 
         val identifiers =
             deliveryNoteProductQueries.getDeliveryNoteProductIds(deliveryNoteId).executeAsList()
@@ -116,8 +118,7 @@ class DeliveryNoteLocalDataSource(
         return documentProducts
     }
 
-
-    override suspend fun saveDeliveryNote(deliveryNote: DeliveryNoteEditable) {
+    override suspend fun saveDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
                 getExistingIssuerOrSaveNewIssuer(deliveryNote)
@@ -141,7 +142,7 @@ class DeliveryNoteLocalDataSource(
     }
 
 
-    override suspend fun duplicateDeliveryNote(deliveryNote: DeliveryNoteEditable) {
+    override suspend fun duplicateDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
                 deliveryNoteQueries.saveDeliveryNote(
@@ -158,7 +159,7 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteEditable) {
+    override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
                 getExistingIssuerOrSaveNewIssuer(deliveryNote)
@@ -202,7 +203,7 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    private fun getExistingIssuerOrSaveNewIssuer(deliveryNote: DeliveryNoteEditable) {
+    private fun getExistingIssuerOrSaveNewIssuer(deliveryNote: DeliveryNoteState) {
         deliveryNote.issuer?.id ?: deliveryNote.issuer?.let {
             clientOrIssuerQueries.saveClientOrIssuer(
                 client_or_issuer_id = null,
@@ -219,8 +220,6 @@ class DeliveryNoteLocalDataSource(
             )
         }
     }
-
-
 }
 
 

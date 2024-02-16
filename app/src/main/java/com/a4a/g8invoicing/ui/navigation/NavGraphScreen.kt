@@ -12,6 +12,7 @@ enum class Screen {
     InvoiceList,
     DeliveryNoteList,
     DeliveryNoteAddEdit,
+    Account,
     Settings,
-    AboutScreen,
+    About
 }

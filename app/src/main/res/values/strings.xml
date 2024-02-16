@@ -41,8 +41,7 @@
     <string name="appbar_client_edit">Modifier client</string>
     <string name="appbar_product_edit">Modifier produit</string>
     <string name="drawer_settings">Réglages</string>
-    <string name="appbar_settings">Réglages</string>
-    <string name="appbar_account">Compte</string>
+    <string name="appbar_account">Mon Compte</string>
     <string name="drawer_about">À propos</string>
     <string name="appbar_about">À propos</string>
     <string name="drawer_menu_description">Menu navigation button</string>
@@ -172,12 +171,10 @@
     <string name="delivery_note_modal_new_product">Nouveau produit</string>
     <string name="delivery_note_modal_new_product_cancel">Annuler</string>
     <string name="delivery_note_modal_new_product_save">Valider</string>
-    <string name="settings_account_label">Mon compte</string>
-    <string name="settings_create_project_info">The Gate (G8) est une application open-source, initialement conçue pour les petits producteurs mais qui s\'adresse à tout type d\'entreprise.
-        Son objectif est de fournir une solution de facturation simple, intuitive et qui protège vos données.
-        Abonnez-vous pour soutenir le projet et bénéficier
+    <string name="account_label">Mon compte</string>
+    <string name="account_project_info">The Gate (G8) est une application open-source, conçue pour les paysan·ne·s mais qui peut convenir à tout type d\'entreprise.\n\n L\'objectif de fournir une solution de facturation simple, sécurisée et qui vous fait gagner du temps.\n\n Inscrivez-vous pour soutenir le projet et bénéficier des prochaines fonctionnalités :
+        export de données, templates de documents, application de bureau et + encore ! \n
+        &#128522;
     </string>
-    <string name="settings_create_project_info_end">des prochaines fonctionnalités &#128522;</string>
-    <string name="settings_create_account_button"> Créer mon compte </string>
-
+    <string name="account_button_create"> Créer mon compte </string>
 </resources>

@@ -8,15 +8,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerEditable
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
-import com.a4a.g8invoicing.data.DocumentProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,8 +30,8 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
     private val id: String? = savedStateHandle["itemId"]
-    private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteEditable())
-    val deliveryNoteUiState: State<DeliveryNoteEditable> = _deliveryNoteUiState
+    private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteState())
+    val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
 
     init {
         id?.let {
@@ -94,7 +93,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun addDocumentProductToDeliveryNote(documentProduct: DocumentProductEditable) {
+    fun addDocumentProductToDeliveryNote(documentProduct: DocumentProductState) {
        viewModelScope.launch {
             try {
                 documentProductDataSource.saveDocumentProduct(documentProduct)
@@ -148,10 +147,10 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 }
 
 fun updateDeliveryNoteUiState(
-    deliveryNote: DeliveryNoteEditable,
+    deliveryNote: DeliveryNoteState,
     element: ScreenElement,
     value: Any,
-): DeliveryNoteEditable {
+): DeliveryNoteState {
     var note = deliveryNote
     when (element) {
         ScreenElement.DOCUMENT_NUMBER -> {
@@ -175,7 +174,7 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_PRODUCTS -> {
-            note = note.copy(documentProducts = value as List<DocumentProductEditable>)
+            note = note.copy(documentProducts = value as List<DocumentProductState>)
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {

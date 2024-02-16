@@ -5,7 +5,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
@@ -15,7 +15,7 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 
 @Composable
 fun DeliveryNoteBottomSheetContent(
-    deliveryNote: DeliveryNoteEditable,
+    deliveryNote: DeliveryNoteState,
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,

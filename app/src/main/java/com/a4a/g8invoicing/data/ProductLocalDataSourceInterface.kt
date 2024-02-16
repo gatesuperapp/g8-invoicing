@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.data
 
+import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductState
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -9,14 +11,14 @@ import kotlinx.coroutines.flow.Flow
  */
 
 interface ProductLocalDataSourceInterface {
-    fun fetchProduct(id: Long): ProductEditable?
-    fun fetchDocumentProduct(id: Long): DocumentProductEditable?
-    fun fetchAllProducts(): Flow<List<ProductEditable>>
-    suspend fun saveProduct(product: ProductEditable)
-    suspend fun saveDocumentProduct(documentProduct: DocumentProductEditable)
-    suspend fun duplicateProduct(product: ProductEditable)
-    suspend fun updateProduct(product: ProductEditable)
-    suspend fun updateDocumentProduct(documentProduct: DocumentProductEditable)
+    fun fetchProduct(id: Long): ProductState?
+    fun fetchDocumentProduct(id: Long): DocumentProductState?
+    fun fetchAllProducts(): Flow<List<ProductState>>
+    suspend fun saveProduct(product: ProductState)
+    suspend fun saveDocumentProduct(documentProduct: DocumentProductState)
+    suspend fun duplicateProduct(product: ProductState)
+    suspend fun updateProduct(product: ProductState)
+    suspend fun updateDocumentProduct(documentProduct: DocumentProductState)
     fun checkIfEmpty(): Int
     suspend fun deleteProduct(id: Long)
     suspend fun deleteDocumentProduct(id: Long)

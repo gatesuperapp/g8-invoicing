@@ -3,6 +3,8 @@ package com.a4a.g8invoicing.data
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
+import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductState
 import g8invoicing.DocumentProduct
 import g8invoicing.Product
 import g8invoicing.TaxRateQueries
@@ -24,17 +26,17 @@ class ProductLocalDataSource(
     private val taxQueries = db.taxRateQueries
     private val documentProductQueries = db.documentProductQueries
 
-    override fun fetchProduct(id: Long): ProductEditable? {
+    override fun fetchProduct(id: Long): ProductState? {
         return productQueries.getProduct(id).executeAsOneOrNull()
             ?.transformIntoEditableProduct(taxQueries)
     }
 
-    override fun fetchDocumentProduct(id: Long): DocumentProductEditable? {
+    override fun fetchDocumentProduct(id: Long): DocumentProductState? {
         return documentProductQueries.getDocumentProduct(id).executeAsOneOrNull()
             ?.transformIntoEditableDocumentProduct()
     }
 
-    override fun fetchAllProducts(): Flow<List<ProductEditable>> {
+    override fun fetchAllProducts(): Flow<List<ProductState>> {
         return productQueries.getAllProducts()
             .asFlow()
             .map { query ->
@@ -43,7 +45,7 @@ class ProductLocalDataSource(
             }
     }
 
-    override suspend fun saveProduct(product: ProductEditable) {
+    override suspend fun saveProduct(product: ProductState) {
         return withContext(Dispatchers.IO) {
             try {
                 product.priceWithoutTax?.let {
@@ -70,7 +72,7 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun saveDocumentProduct(documentProduct: DocumentProductEditable) {
+    override suspend fun saveDocumentProduct(documentProduct: DocumentProductState) {
         return withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.saveDocumentProduct(
@@ -90,7 +92,7 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun duplicateProduct(product: ProductEditable) {
+    override suspend fun duplicateProduct(product: ProductState) {
         return withContext(Dispatchers.IO) {
             try {
                 productQueries.saveProduct(
@@ -110,7 +112,7 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun updateProduct(product: ProductEditable) {
+    override suspend fun updateProduct(product: ProductState) {
         return withContext(Dispatchers.IO) {
             try {
                 productQueries.updateProduct(
@@ -129,7 +131,7 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun updateDocumentProduct(documentProduct: DocumentProductEditable) {
+    override suspend fun updateDocumentProduct(documentProduct: DocumentProductState) {
         return withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.updateDocumentProduct(
@@ -167,8 +169,8 @@ class ProductLocalDataSource(
 
 fun Product.transformIntoEditableProduct(
     taxQueries: TaxRateQueries,
-): ProductEditable {
-    return ProductEditable(
+): ProductState {
+    return ProductState(
         productId = this.product_id.toInt(),
         name = TextFieldValue(this.name),
         description = TextFieldValue(this.description ?: ""),
@@ -181,8 +183,8 @@ fun Product.transformIntoEditableProduct(
     )
 }
 
-fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductEditable {
-    return DocumentProductEditable(
+fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState {
+    return DocumentProductState(
         id = this.document_product_id.toInt(),
         name = TextFieldValue(this.name),
         description = TextFieldValue(this.description ?: ""),

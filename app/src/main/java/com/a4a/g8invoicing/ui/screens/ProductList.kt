@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.SharedBottomBar
@@ -24,8 +24,8 @@ import com.a4a.g8invoicing.ui.states.ProductsUiState
 fun ProductList(
     navController: NavController,
     productsUiState: ProductsUiState,
-    onClickDelete: (List<ProductEditable>) -> Unit,
-    onClickDuplicate: (List<ProductEditable>) -> Unit,
+    onClickDelete: (List<ProductState>) -> Unit,
+    onClickDuplicate: (List<ProductState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -33,7 +33,7 @@ fun ProductList(
 
     ) {
     // Main list to handle actions with selected items
-    val selectedItems = mutableListOf<ProductEditable>()
+    val selectedItems = mutableListOf<ProductState>()
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
@@ -100,7 +100,7 @@ fun ProductList(
 }
 
 private fun resetSelectedItems(
-    selectedItems: MutableList<ProductEditable>,
+    selectedItems: MutableList<ProductState>,
     selectedMode: MutableState<Boolean>,
     triggerRecompose: MutableState<Boolean>,
 ) {

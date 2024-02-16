@@ -32,24 +32,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.a4a.g8invoicing.data.ClientOrIssuerEditable
-import com.a4a.g8invoicing.data.DeliveryNoteEditable
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.data.DocumentProductEditable
-import com.a4a.g8invoicing.data.ProductEditable
+import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.textSmall
 import com.a4a.g8invoicing.ui.theme.textTitle
-import java.math.BigDecimal
 
 
 @OptIn(
@@ -57,15 +55,14 @@ import java.math.BigDecimal
 )
 @Composable
 fun DeliveryNoteBottomSheet(
-    deliveryNote: DeliveryNoteEditable,
+    deliveryNote: DeliveryNoteState,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
-    onClickForward: (ScreenElement) -> Unit,
     isBottomSheetVisible: Boolean,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerEditable>,
     issuers: MutableList<ClientOrIssuerEditable>,
-    products: MutableList<ProductEditable>,
+    products: MutableList<ProductState>,
     onClickNewClientOrIssuer: (PersonType) -> Unit = {},
     // onClickNewProduct: () -> Unit = {},
     //onDocumentProductClick: (Int) -> Unit,
@@ -77,7 +74,7 @@ fun DeliveryNoteBottomSheet(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     productOnValueChange: (ScreenElement, Any, Int) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (DocumentProductEditable, TypeOfProductCreation) -> Unit,
+    onClickDoneForm: (DocumentProductState, TypeOfProductCreation) -> Unit,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -199,16 +196,16 @@ fun SlideInNextComponent(
     currentProductsIds: List<Int>? = null,
     productOnValueChange: (ScreenElement, Any, Int) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (DocumentProductEditable, TypeOfProductCreation) -> Unit,
+    onClickDoneForm: (DocumentProductState, TypeOfProductCreation) -> Unit,
 
     ) {
     var isProductListVisible by remember { mutableStateOf(false) }
     var productCreation: TypeOfProductCreation? by remember { mutableStateOf(null) }
     var documentProductId: Int? by remember { mutableStateOf(null) }
     var productId: Int? by remember { mutableStateOf(null) }
-    var documentProduct: DocumentProductEditable? by remember {
+    var documentProduct: DocumentProductState? by remember {
         mutableStateOf(
-            DocumentProductEditable()
+            DocumentProductState()
         )
     }
 
@@ -233,7 +230,7 @@ fun SlideInNextComponent(
     }
 
     if (pageElement == ScreenElement.DOCUMENT_PRODUCTS) {
-        val params = parameters as Pair<List<DocumentProductEditable>, List<ProductEditable>>?
+        val params = parameters as Pair<List<DocumentProductState>, List<ProductState>>?
 
         DeliveryNoteBottomSheetDocumentProductList(
             list = params?.first ?: emptyList(),
@@ -318,7 +315,7 @@ fun SlideUpTheForm(
     onClickDone: () -> Unit,
     productOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    documentProduct: DocumentProductEditable?,
+    documentProduct: DocumentProductState?,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
