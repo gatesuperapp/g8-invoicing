@@ -130,20 +130,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             )
         )
     }
-
-    fun updateProductState(pageElement: ScreenElement, value: Any, documentProductId: Int) {
-        /*val documentProductToUpdate =  _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
-        documentProductToUpdate?.let {
-            val newDocumentProduct = updateDocumentProductUiState(it, pageElement, value)
-
-            val newList = _deliveryNoteUiState.value.documentProducts?.toMutableList()
-                ?.filter { it.id != documentProductId }
-
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy()
-
-        }*/
-
-    }
 }
 
 fun updateDeliveryNoteUiState(

@@ -28,7 +28,7 @@ fun ProductList(
     onClickDuplicate: (List<ProductState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
-    onClickListItem: (Int) -> Unit,
+    onClickListItem: (ProductState) -> Unit,
     onClickBack: () -> Unit,
 
     ) {
@@ -82,7 +82,7 @@ fun ProductList(
             // thus the list is updated when anything changes in db
             ProductListContent(
                 products = productsUiState.products,
-                onItemClick = onClickListItem,
+                onProductClick = onClickListItem,
                 addProductToSelectedList = {
                     selectedItems.add(it)
                     selectedMode.value = true

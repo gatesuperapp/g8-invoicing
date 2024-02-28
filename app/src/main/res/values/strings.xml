@@ -36,7 +36,7 @@
     <string name="appbar_client_list">Clients</string>
     <string name="appbar_title_add_new">Nouveau</string>
     <string name="appbar_product_add">Ajout produit</string>
-    <string name="appbar_title_info">Détails</string>
+    <string name="appbar_title_info">Infos client</string>
     <string name="appbar_product_detail">Infos produit</string>
     <string name="appbar_client_edit">Modifier client</string>
     <string name="appbar_product_edit">Modifier produit</string>

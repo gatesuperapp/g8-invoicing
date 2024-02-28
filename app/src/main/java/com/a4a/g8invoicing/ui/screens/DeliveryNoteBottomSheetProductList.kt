@@ -19,7 +19,7 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 fun DeliveryNoteBottomSheetProductList(
     list: List<ProductState>,
     onClickBack: () -> Unit,
-    onProductClick: (Int) -> Unit, // To select a product
+    onProductClick: (ProductState) -> Unit, // To select a product
     onClickNewProduct: () -> Unit, // To create a new product
     currentProductsIds: List<Int>? = null,
 ) {
@@ -44,7 +44,7 @@ fun DeliveryNoteBottomSheetProductList(
         // Display the existing list
         ProductListContent(
             products = list,
-            onItemClick = onProductClick,
+            onProductClick = onProductClick,
             onClickNew = onClickNewProduct,
             displayTopButton = true,  // Display "Add new" button, that will open the Add/Edit screen
             currentProductsIds = currentProductsIds

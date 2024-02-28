@@ -59,8 +59,7 @@ fun ProductTaxRates(
                 onClickBackArrow = onClickBack
             )
         }
-    ) {
-        it
+    ) { it
 
         Column(
             modifier = Modifier

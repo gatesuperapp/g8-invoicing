@@ -45,7 +45,6 @@ fun FormInputCreatorTextStateful(
     )
 
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
-        Text("stateful")
         BasicTextField(
             modifier = Modifier
                 .fillMaxWidth(),

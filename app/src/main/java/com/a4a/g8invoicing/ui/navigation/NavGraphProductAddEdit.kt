@@ -34,13 +34,13 @@ fun NavGraphBuilder.productAddEdit(
                 viewModel.updateProductState(pageElement, value, ProductType.PRODUCT)
             },
             placeCursorAtTheEndOfText = { pageElement ->
-                viewModel.updateCursorOfProductState(pageElement)
+                viewModel.updateCursor(pageElement, ProductType.PRODUCT)
             },
             onClickDone = {
                 if (isNew) {
-                    viewModel.saveProductInLocalDb(ProductType.PRODUCT)
+                    viewModel.saveInLocalDb(ProductType.PRODUCT)
                 } else {
-                    viewModel.updateProductInLocalDb(ProductType.PRODUCT)
+                    viewModel.updateInLocalDb(ProductType.PRODUCT)
                 }
                 onClickBack()
             },

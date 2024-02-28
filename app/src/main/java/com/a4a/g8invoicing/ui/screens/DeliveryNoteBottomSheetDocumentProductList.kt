@@ -24,7 +24,7 @@ fun DeliveryNoteBottomSheetDocumentProductList(
     list: List<DocumentProductState>,
     onClickBack: () -> Unit,
     onClickChooseProduct: () -> Unit, // Add a new product to the document (product list)
-    onDocumentProductClick: (Int) -> Unit, // Edit an existing document product (add/edit screen)
+    onDocumentProductClick: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
     onClickDeleteDocumentProduct: (Int) -> Unit, // Delete a document product
 ) {
     Column(

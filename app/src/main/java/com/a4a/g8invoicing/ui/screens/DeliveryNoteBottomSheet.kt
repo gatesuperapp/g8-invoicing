@@ -64,17 +64,19 @@ fun DeliveryNoteBottomSheet(
     issuers: MutableList<ClientOrIssuerEditable>,
     products: MutableList<ProductState>,
     onClickNewClientOrIssuer: (PersonType) -> Unit = {},
-    // onClickNewProduct: () -> Unit = {},
-    //onDocumentProductClick: (Int) -> Unit,
+    onProductClick: (ProductState) -> Unit,
+    documentProductUiState: DocumentProductState,
+    onNewProductClick: () -> Unit = {},
+    onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
-    // onProductClick: (Int) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     currentProductsIds: List<Int>? = null,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    productOnValueChange: (ScreenElement, Any, Int) -> Unit,
+    documentProductOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (DocumentProductState, TypeOfProductCreation) -> Unit,
+    onClickDoneForm: (TypeOfProductCreation) -> Unit,
+    onClickCancelForm: () -> Unit,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -151,9 +153,11 @@ fun DeliveryNoteBottomSheet(
                     onValueChange(slideOtherComponent.value!!, it)
                     slideOtherComponent.value = null
                 },
-                // onDocumentProductClick = onDocumentProductClick,
+                onProductClick = onProductClick,
+                documentProductUiState = documentProductUiState,
+                onNewProductClick = onNewProductClick,
+                onDocumentProductClick = onDocumentProductClick,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                // onProductClick =  onProductClick,
                 onClickNewClientOrIssuer = {
                     if (slideOtherComponent.value == ScreenElement.DOCUMENT_ISSUER) {
                         onClickNewClientOrIssuer(PersonType.Issuer)
@@ -161,15 +165,15 @@ fun DeliveryNoteBottomSheet(
                         onClickNewClientOrIssuer(PersonType.Client)
                     }
                 },
-                //  onClickNewProduct = BetterModalBottomSheet(),
                 datePickerState = datePickerState,
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId,
                 currentProductsIds = currentProductsIds,
-                productOnValueChange = productOnValueChange,
+                documentProductOnValueChange = documentProductOnValueChange,
                 productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
-                onClickDoneForm = onClickDoneForm
-            )
+                onClickDoneForm = onClickDoneForm,
+                onClickCancelForm = onClickCancelForm
+                )
         }
     }
     // Closing the bottom sheet when going back with system navigation
@@ -185,29 +189,27 @@ fun SlideInNextComponent(
     parameters: Any?,
     onClickBack: () -> Unit,
     onClientOrIssuerClick: (ClientOrIssuerEditable) -> Unit,
-    // onDocumentProductClick: (Int) -> Unit,
+    onProductClick: (ProductState) -> Unit,
+    documentProductUiState: DocumentProductState,
+    onNewProductClick: () -> Unit,
+    onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
-    //  onProductClick: (Int) -> Unit,
     onClickNewClientOrIssuer: () -> Unit,
-    //  onClickNewProduct: () -> Unit,
     datePickerState: DatePickerState,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     currentProductsIds: List<Int>? = null,
-    productOnValueChange: (ScreenElement, Any, Int) -> Unit,
+    documentProductOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (DocumentProductState, TypeOfProductCreation) -> Unit,
+    onClickDoneForm: (TypeOfProductCreation) -> Unit,
+    onClickCancelForm: () -> Unit,
 
     ) {
     var isProductListVisible by remember { mutableStateOf(false) }
-    var productCreation: TypeOfProductCreation? by remember { mutableStateOf(null) }
-    var documentProductId: Int? by remember { mutableStateOf(null) }
+    var typeOfCreation: TypeOfProductCreation by remember { mutableStateOf(TypeOfProductCreation.EDIT_PRODUCT) }
+    var isDocumentFormVisible by remember { mutableStateOf(false) }
     var productId: Int? by remember { mutableStateOf(null) }
-    var documentProduct: DocumentProductState? by remember {
-        mutableStateOf(
-            DocumentProductState()
-        )
-    }
+    // var documentProduct: DocumentProductState by remember { mutableStateOf(DocumentProductState()) }
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         DeliveryNoteBottomSheetClientOrIssuerList(
@@ -236,11 +238,12 @@ fun SlideInNextComponent(
             list = params?.first ?: emptyList(),
             onClickBack = onClickBack,
             onClickChooseProduct = { isProductListVisible = true },
-            onDocumentProductClick = {
-                documentProductId = it
-                // documentProduct = params?.first?.firstOrNull { it.id == documentProductId }
-                productCreation = TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT
-            },
+            onDocumentProductClick = onDocumentProductClick
+            /*       {
+                       documentProduct = it
+                       typeOfCreation = TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT
+                       isDocumentFormVisible = true
+                   }*/,
             onClickDeleteDocumentProduct = onClickDeleteDocumentProduct
         )
 
@@ -249,57 +252,35 @@ fun SlideInNextComponent(
                 list = params?.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
-/*                    productId = it
-                    val product = params?.second?.firstOrNull { it.productId == productId }
-                    documentProduct = DocumentProductEditable(
-                        id = null,
-                        name = product?.name ?: TextFieldValue(""),
-                        description = product?.description,
-                        finalPrice = product?.finalPrice ?: BigDecimal(0),
-                        priceWithoutTax = product?.priceWithoutTax ?: BigDecimal(0),
-                        taxRate = product?.taxRate ?: BigDecimal(0),
-                        quantity = BigDecimal(1),
-                        unit = product?.unit,
-                        productId = productId
-                    )
-                    productCreation = TypeOfProductCreation.ADD_DOCUMENT_PRODUCT*/
+                    onProductClick(it) // Will update the ProductAddEditViewModel with the chosen product
+                    //documentProduct = documentProductUiState // To open bottom document form with the chosen product
+                    typeOfCreation = TypeOfProductCreation.EDIT_PRODUCT
+                    isDocumentFormVisible = true
                 },
-                onClickNewProduct = {
-                    productCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
-                },
+                onClickNewProduct = onNewProductClick
+                /*     {
+                                 typeOfCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
+                                 isDocumentFormVisible = true
+                             }*/,
                 currentProductsIds = currentProductsIds
             )
         }
 
-        if (productCreation != null) {
+        if (isDocumentFormVisible) {
             SlideUpTheForm(
-                productCreation,
-                onDismissRequest = {
-                    productCreation = null
-                    documentProductId = null
-                    productId = null
-                },
-                documentProduct = params?.first?.firstOrNull { it.id == documentProductId },
+                typeOfCreation,
+                documentProduct = documentProductUiState,
                 productOnValueChange = { screenElement, value ->
-                    documentProductId?.let {
-                        productOnValueChange(screenElement, value, it)
-                    }
+                    documentProductOnValueChange(screenElement, value)
                 },
                 productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                onClickCancel = { // Re-initialize
+                    isDocumentFormVisible = false
+                    onClickCancelForm()
+                },
                 onClickDone = {
-                    if (documentProductId != null) { // Existing document product being edited
-                        documentProduct?.let {
-                            onClickDoneForm(it, TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT)
-                        }
-                    } else if (productId != null) { // New document product (user has clicked on a product)
-                        documentProduct?.let {
-                            onClickDoneForm(it, TypeOfProductCreation.ADD_DOCUMENT_PRODUCT)
-                        }
-                    } else {
-                        documentProduct?.let {// New product (user has clicked "New product")
-                            onClickDoneForm(it, TypeOfProductCreation.CREATE_NEW_PRODUCT)
-                        }
-                    }
+                    onClickDoneForm(typeOfCreation)
+                    isDocumentFormVisible = false
                 }
             )
         }
@@ -311,7 +292,7 @@ fun SlideInNextComponent(
 @Composable
 fun SlideUpTheForm(
     productCreation: TypeOfProductCreation?,
-    onDismissRequest: () -> Unit,
+    onClickCancel: () -> Unit,
     onClickDone: () -> Unit,
     productOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -322,9 +303,7 @@ fun SlideUpTheForm(
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     ModalBottomSheet(
-        onDismissRequest = {
-            onDismissRequest()
-        },
+        onDismissRequest = onClickCancel,
         sheetState = sheetState,
         dragHandle = null
     ) {
@@ -344,7 +323,7 @@ fun SlideUpTheForm(
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(top = 20.dp)
-                            .clickable { onDismissRequest() },
+                            .clickable { onClickCancel() },
                         style = MaterialTheme.typography.textSmall,
                         text = stringResource(id = R.string.delivery_note_modal_new_product_cancel)
                     )
@@ -355,7 +334,7 @@ fun SlideUpTheForm(
                         style = MaterialTheme.typography.textTitle,
                         text = when (productCreation) {
                             TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_edit_product)
-                            TypeOfProductCreation.ADD_DOCUMENT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
+                            TypeOfProductCreation.EDIT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
                             TypeOfProductCreation.CREATE_NEW_PRODUCT -> stringResource(id = R.string.delivery_note_modal_new_product)
                             else -> ""
                         }
@@ -383,7 +362,7 @@ fun SlideUpTheForm(
 
 enum class TypeOfProductCreation {
     EDIT_DOCUMENT_PRODUCT,
-    ADD_DOCUMENT_PRODUCT,
+    EDIT_PRODUCT,
     CREATE_NEW_PRODUCT
 }
 

@@ -39,15 +39,35 @@ class ProductAddEditViewModel @Inject constructor(
     val documentProductUiState: State<DocumentProductState> = _documentProductUiState
 
     init {
+        // We initialize only if coming from the navigation (NavGraph)
+        // Not if calling from a document (to open the bottom sheet form),
         if (type == ProductType.PRODUCT.name.lowercase()) {
             id?.let {
                 fetchProductFromLocalDb(it.toLong())
             }
-        } else {
+        } else if(type == ProductType.DOCUMENT_PRODUCT.name.lowercase()) {
             id?.let {
                 fetchDocumentProductFromLocalDb(it.toLong())
             }
         }
+    }
+
+    fun setDocumentProductUiState(product: ProductState) { // Used when sliding the form in documents
+        _documentProductUiState.value = DocumentProductState(
+            id = null,
+            name = product.name,
+            description = product.description,
+            finalPrice = product.finalPrice ?: BigDecimal(0),
+            priceWithoutTax = product.priceWithoutTax ?: BigDecimal(0),
+            taxRate = product.taxRate ?: BigDecimal(0),
+            quantity = BigDecimal(1),
+            unit = product.unit,
+            productId = product.productId
+        )
+    }
+
+    fun clearDocumentProductUiState() { // Used when sliding the form in documents
+        _documentProductUiState.value = DocumentProductState()
     }
 
     private fun fetchProductFromLocalDb(id: Long) {
@@ -102,7 +122,7 @@ class ProductAddEditViewModel @Inject constructor(
         return taxRates
     }
 
-    fun saveProductInLocalDb(type: ProductType) {
+    fun saveInLocalDb(type: ProductType) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
@@ -117,7 +137,7 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateProductInLocalDb(type: ProductType) {
+    fun updateInLocalDb(type: ProductType) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
@@ -140,7 +160,14 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateCursorOfProductState(pageElement: ScreenElement) {
+    fun updateCursor(pageElement: ScreenElement, productType: ProductType) {
+        if (productType == ProductType.PRODUCT) {
+            updateCursorOfProductState(pageElement)
+        } else {
+            updateCursorOfDocumentProductState(pageElement)
+        }
+    }
+    private fun updateCursorOfProductState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.PRODUCT_NAME -> productUiState.value.name.text
             ScreenElement.PRODUCT_DESCRIPTION -> productUiState.value.description?.text
@@ -150,6 +177,21 @@ class ProductAddEditViewModel @Inject constructor(
             _productUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
+            )
+        )
+    }
+    private fun updateCursorOfDocumentProductState(pageElement: ScreenElement) {
+        val input = when (pageElement) {
+            ScreenElement.DOCUMENT_PRODUCT_NAME -> documentProductUiState.value.name
+            ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> documentProductUiState.value.quantity
+            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description
+            ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit
+            else -> ""
+        }
+        _documentProductUiState.value = updateDocumentProductUiState(
+            _documentProductUiState.value, pageElement, TextFieldValue(
+                text = input.toString(),
+                selection = TextRange(input?.toString()?.length ?: 0)
             )
         )
     }
@@ -196,17 +238,17 @@ private fun updateDocumentProductUiState(
             product = product.copy(name = value as TextFieldValue)
         }
 
+        ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> {
+            val quantity = value as String
+            product = product.copy(quantity = BigDecimal(quantity.toDoubleOrNull() ?: 0.0))
+        }
+
         ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> {
             product = product.copy(description = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_PRODUCT_UNIT -> {
             product = product.copy(unit = value as TextFieldValue)
-        }
-
-        ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> {
-            val quantity = value as String
-            product = product.copy(quantity = BigDecimal(quantity.toDoubleOrNull() ?: 0.0))
         }
 
         else -> null

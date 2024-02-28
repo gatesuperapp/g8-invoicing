@@ -92,7 +92,8 @@ fun DocumentProductForm(
                             placeholder = stringResource(id = R.string.document_product_quantity_input),
                             onValueChange = {
                                 onValueChange(ScreenElement.DOCUMENT_PRODUCT_QUANTITY, it)
-                            }
+                            },
+                            keyboardType = KeyboardType.Decimal
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_QUANTITY
                     ),
@@ -191,7 +192,7 @@ fun DocumentProductForm(
                     localFocusManager = localFocusManager,
                     onClickForward = onClickForward,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    isFormStateful = true
+                    isFormStateful = false
                 )
             }
         }

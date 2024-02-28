@@ -16,7 +16,7 @@ import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 @Composable
 fun ProductListContent(
     products: List<ProductState>,
-    onItemClick: (Int) -> Unit = {},
+    onProductClick: (ProductState) -> Unit = {},
     onClickNew: () -> Unit = {}, // Used only in documents, clicking the "Add new" button
     displayTopButton: Boolean = false,
     addProductToSelectedList: (ProductState) -> Unit = {},
@@ -43,17 +43,13 @@ fun ProductListContent(
                 product.productId!!
             }
         ) { product ->
-
-
             // If a client has already been selected for a document, it must be highlighted in the list
             val highlightInList = currentProductsIds?.let { product.productId in it } ?: false
 
             ProductListItem(
                 product = product,
                 onItemClick = {
-                    product.productId?.let {
-                        onItemClick(it.toInt())
-                    }
+                    onProductClick(product)
                 },
                 onItemCheckboxClick = { isChecked ->
                     // Update product list

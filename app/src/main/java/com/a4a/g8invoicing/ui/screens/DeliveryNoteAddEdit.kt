@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.unit.dp
@@ -57,15 +58,19 @@ fun DeliveryNoteAddEdit(
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onClickNewClientOrIssuer: (PersonType) -> Unit,
-    //onClickNewProduct: () -> Unit,
-    //onDocumentProductClick: (Int) -> Unit,
+    onProductClick: (ProductState) -> Unit,
+    documentProductUiState: DocumentProductState,
+    onNewProductClick: () -> Unit,
+    onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
-    // onProductClick: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    productOnValueChange: (ScreenElement, Any, Int) -> Unit,
-    productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (DocumentProductState, TypeOfProductCreation) -> Unit,
+    documentProductOnValueChange: (ScreenElement, Any) -> Unit,
+    documentProductPlaceCursor: (ScreenElement) -> Unit,
+    onClickDoneForm: (TypeOfProductCreation) -> Unit,
+    onClickCancelForm: () -> Unit,
 ) {
+    val localFocusManager = LocalFocusManager.current
+
     /*    // The state is hoisted here & shared between the template & the bottom sheet
         var deliveryNote by remember { mutableStateOf(deliveryNoteUiState) }*/
 
@@ -121,17 +126,19 @@ fun DeliveryNoteAddEdit(
                 products = products,
                 onValueChange = onValueChange,
                 onClickNewClientOrIssuer = onClickNewClientOrIssuer,
-                // onClickNewProduct = onClickNewProduct,
-                // onDocumentProductClick = onDocumentProductClick,
+                onProductClick = onProductClick,
+                documentProductUiState = documentProductUiState,
+                onNewProductClick = onNewProductClick,
+                onDocumentProductClick = onDocumentProductClick,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                // onProductClick = onProductClick,
                 currentClientId = deliveryNote.client?.id,
                 currentIssuerId = deliveryNote.issuer?.id,
                 currentProductsIds = deliveryNote.documentProducts?.mapNotNull { it.productId },
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                productOnValueChange = productOnValueChange,
-                productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
-                onClickDoneForm = onClickDoneForm
+                documentProductOnValueChange = documentProductOnValueChange,
+                productPlaceCursorAtTheEndOfText = documentProductPlaceCursor,
+                onClickDoneForm = onClickDoneForm,
+                onClickCancelForm = onClickCancelForm,
             )
         },
         sheetShadowElevation = 30.dp

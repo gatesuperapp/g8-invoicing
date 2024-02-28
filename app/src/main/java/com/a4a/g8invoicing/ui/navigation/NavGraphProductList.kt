@@ -8,11 +8,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.screens.ProductList
 import com.a4a.g8invoicing.ui.screens.ProductListViewModel
+import com.a4a.g8invoicing.ui.states.ProductState
 
 fun NavGraphBuilder.productList(
     navController: NavController,
     onClickCategory: (Category) -> Unit,
-    onClickListItem: (Int) -> Unit,
+    onClickListItem: (ProductState) -> Unit,
     onClickNew: () -> Unit,
     onClickBack: () -> Unit,
 ) {
