@@ -48,6 +48,11 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.textSmall
 import com.a4a.g8invoicing.ui.theme.textTitle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 
 @OptIn(
@@ -256,8 +261,18 @@ fun SlideInNextComponent(
                     // To open bottom document form with the chosen product
                     typeOfCreation = TypeOfProductCreation.ADD_PRODUCT
                     isDocumentFormVisible = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        // Wait for the bottom form to be opened to come back
+                        // to previous screen, so it is in background
+                        delay(TimeUnit.MILLISECONDS.toMillis(500))
+                        isProductListVisible = false
+                    }
+
                 },
-                onClickNewProduct = onNewProductClick
+                onClickNewProduct = {
+                    onNewProductClick()
+                    isProductListVisible = false
+                }
                 /*     {
                                  typeOfCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
                                  isDocumentFormVisible = true

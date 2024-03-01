@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -71,14 +72,18 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     fun saveDocumentProductInDbAndAddToDeliveryNote(documentProduct: DocumentProductState) {
         //Saving the new documentProduct in UI State
-        val newList: MutableList<DocumentProductState>? = _deliveryNoteUiState.value.documentProducts?.toMutableList()
-        _deliveryNoteUiState.value.documentProducts?.last()?.id?.let {
-            // Setting an id to be able to use the key in the DocumentProductListContent lazyColumn
-            val doc = documentProduct.copy(id = it + 1)
-            newList?.add(doc)
-            newList?.let {
-                updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
-            }
+        val newList: MutableList<DocumentProductState>? =
+            _deliveryNoteUiState.value.documentProducts?.toMutableList()
+        val newDocumentProductId =
+            _deliveryNoteUiState.value.documentProducts?.lastOrNull()?.id?.let {
+                it + 1
+            } ?: 1
+
+        // Setting an id to be able to use the key in the DocumentProductListContent lazyColumn
+        val doc = documentProduct.copy(id = newDocumentProductId)
+        newList?.add(doc)
+        newList?.let {
+            updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
         }
 
         // Saving the new documentProduct in db: in DocumentProduct & DeliveryNoteProduct
@@ -101,12 +106,14 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     }
 
     fun removeDocumentProductFromDeliveryNote(documentProductId: Int) {
+        // Update the Ui State
         val newList = _deliveryNoteUiState.value.documentProducts?.toMutableList()
             ?.filter { it.id != documentProductId }
         newList?.let {
             updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
         }
 
+        // Update the db
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
@@ -171,6 +178,10 @@ fun updateDeliveryNoteUiState(
 
         ScreenElement.DOCUMENT_PRODUCTS -> {
             note = note.copy(documentProducts = value as List<DocumentProductState>)
+            // Recalculate the prices
+            note.documentProducts?.let {
+                note = note.copy(documentPrices = calculateDocumentPrices(it))
+            }
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {

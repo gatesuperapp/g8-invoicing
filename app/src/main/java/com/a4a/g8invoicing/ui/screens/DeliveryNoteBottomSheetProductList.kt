@@ -46,8 +46,7 @@ fun DeliveryNoteBottomSheetProductList(
             products = list,
             onProductClick = onProductClick,
             onClickNew = onClickNewProduct,
-            displayTopButton = true,  // Display "Add new" button, that will open the Add/Edit screen
-            currentProductsIds = currentProductsIds
+            displayTopButton = true // Display "Add new" button, that will open the Add/Edit screen
         )
     }
 }

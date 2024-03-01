@@ -16,8 +16,12 @@ data class DeliveryNoteState(
     var issuer: ClientOrIssuerEditable? = null,
     var client: ClientOrIssuerEditable? = null,
     var documentProducts: List<DocumentProductState>? = null,
+    var documentPrices: DocumentPrices? = null,
+    var currency: TextFieldValue? = null,
+)
+
+data class DocumentPrices(
     var totalPriceWithoutTax: BigDecimal? = null,
     var totalAmountsOfEachTax: MutableList<Pair<BigDecimal, BigDecimal>>? = null,
     var totalPriceWithTax: BigDecimal? = null,
-    var currency: TextFieldValue? = null,
 )

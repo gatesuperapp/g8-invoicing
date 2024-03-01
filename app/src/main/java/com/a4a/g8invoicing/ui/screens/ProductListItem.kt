@@ -37,18 +37,13 @@ fun ProductListItem(
     product: ProductState,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
-    keyToResetCheckboxes: Boolean,
-    highlightInList: Boolean = false
+    keyToResetCheckboxes: Boolean
 ) {
 
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
-    val itemBackground = if (highlightInList) {
-        ColorLightGreenTransp
-    } else {
-        Color.White
-    }
+
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -85,7 +80,7 @@ fun ProductListItem(
         // not centered anymore)
         Row(
             modifier = Modifier
-                .background(itemBackground)
+                .background(Color.White)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,

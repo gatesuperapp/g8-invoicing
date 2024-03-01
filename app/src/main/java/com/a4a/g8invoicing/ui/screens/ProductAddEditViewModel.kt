@@ -182,10 +182,10 @@ class ProductAddEditViewModel @Inject constructor(
     }
     private fun updateCursorOfDocumentProductState(pageElement: ScreenElement) {
         val input = when (pageElement) {
-            ScreenElement.DOCUMENT_PRODUCT_NAME -> documentProductUiState.value.name
+            ScreenElement.DOCUMENT_PRODUCT_NAME -> documentProductUiState.value.name.text
             ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> documentProductUiState.value.quantity
-            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description
-            ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit
+            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description?.text
+            ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit?.text
             else -> ""
         }
         _documentProductUiState.value = updateDocumentProductUiState(

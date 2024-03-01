@@ -22,7 +22,6 @@ fun ProductListContent(
     addProductToSelectedList: (ProductState) -> Unit = {},
     removeProductFromSelectedList: (ProductState) -> Unit = {},
     keyToUnselectAll: Boolean = false,
-    currentProductsIds: List<Int>? = null,
 ) {
     LazyColumn {
         if (displayTopButton) {
@@ -43,9 +42,6 @@ fun ProductListContent(
                 product.productId!!
             }
         ) { product ->
-            // If a client has already been selected for a document, it must be highlighted in the list
-            val highlightInList = currentProductsIds?.let { product.productId in it } ?: false
-
             ProductListItem(
                 product = product,
                 onItemClick = {
@@ -59,8 +55,7 @@ fun ProductListContent(
                         removeProductFromSelectedList(product)
                     }
                 },
-                keyToUnselectAll,
-                highlightInList
+                keyToUnselectAll
             )
 
 

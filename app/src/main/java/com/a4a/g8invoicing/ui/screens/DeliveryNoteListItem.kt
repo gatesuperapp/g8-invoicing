@@ -147,7 +147,7 @@ fun DeliveryNoteListItem(
                 Row(
                 ) {
                     Text(
-                        text = deliveryNote.totalPriceWithTax.toString() + stringResource(id = R.string.currency),
+                        text = deliveryNote.documentPrices?.totalPriceWithTax.toString() + stringResource(id = R.string.currency),
                     )
                 }
             }

@@ -5,6 +5,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.screens.PersonType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import kotlinx.coroutines.Dispatchers
@@ -56,37 +57,7 @@ class DeliveryNoteLocalDataSource(
 
         this.let {
             val items = buildDocumentProductList(it.delivery_note_id)
-
-            val totalPriceWithoutTax = items.sumOf {
-                (it.priceWithoutTax) * (it.quantity)
-            }.setScale(2, RoundingMode.HALF_UP)
-
-            /*val totalPriceWithoutTax = BigDecimal(0).setScale(2, RoundingMode.HALF_UP)
-
-            items.forEach {
-                totalPriceWithoutTax.add((it.priceWithoutTax) * (it.quantity))
-            }*/
-
-            // Calculate the total amount of each tax
-            val groupedItems = items.groupBy {
-                it.taxRate
-            }
-            val taxes = groupedItems.keys.distinct() // ex: taxes= [20, 10]
-
-            val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [7.2, 2.4]
-            groupedItems.values.forEach { documentProduct ->
-                val listOfAmounts = documentProduct.map { item ->
-                    item.priceWithoutTax * item.quantity * item.taxRate / BigDecimal(100)
-                }
-                val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
-                amounts.add(
-                    sumOfAmounts
-                )
-            }
-            val amountsPerTaxRate: MutableList<Pair<BigDecimal, BigDecimal>> = mutableListOf()
-            taxes.forEachIndexed { index, key ->
-                amountsPerTaxRate.add(Pair(key, amounts[index]))
-            } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
+            val documentPrices = calculateDocumentPrices(items)
 
             deliveryNote = DeliveryNoteState(
                 deliveryNoteId = it.delivery_note_id.toInt(),
@@ -96,14 +67,14 @@ class DeliveryNoteLocalDataSource(
                 issuer = issuer,
                 client = client,
                 documentProducts = items,
-                totalPriceWithoutTax = totalPriceWithoutTax,
-                totalAmountsOfEachTax = amountsPerTaxRate,
-                totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it },
+                documentPrices = documentPrices
             )
         }
 
         return deliveryNote
     }
+
+
 
     private fun buildDocumentProductList(deliveryNoteId: Long): List<DocumentProductState> {
         val documentProducts: MutableList<DocumentProductState> = mutableListOf()
@@ -221,6 +192,39 @@ class DeliveryNoteLocalDataSource(
             )
         }
     }
+}
+
+fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
+    val totalPriceWithoutTax = products.sumOf {
+        (it.priceWithoutTax) * (it.quantity)
+    }.setScale(2, RoundingMode.HALF_UP)
+
+    // Calculate the total amount of each tax
+    val groupedItems = products.groupBy {
+        it.taxRate
+    }
+    val taxes = groupedItems.keys.distinct() // ex: taxes= [20, 10]
+
+    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [7.2, 2.4]
+    groupedItems.values.forEach { documentProduct ->
+        val listOfAmounts = documentProduct.map { item ->
+            item.priceWithoutTax * item.quantity * item.taxRate / BigDecimal(100)
+        }
+        val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
+        amounts.add(
+            sumOfAmounts
+        )
+    }
+    val amountsPerTaxRate: MutableList<Pair<BigDecimal, BigDecimal>> = mutableListOf()
+    taxes.forEachIndexed { index, key ->
+        amountsPerTaxRate.add(Pair(key, amounts[index]))
+    } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
+
+    return DocumentPrices(
+        totalPriceWithoutTax = totalPriceWithoutTax,
+        totalAmountsOfEachTax = amountsPerTaxRate,
+        totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }
+    )
 }
 
 
