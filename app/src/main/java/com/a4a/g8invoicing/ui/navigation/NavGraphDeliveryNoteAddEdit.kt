@@ -88,12 +88,14 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             issuers = issuersUiState.clientsOrIssuers.toMutableList(),
             products = productListUiState.products.toMutableList(), // The list of products to display when choosing to add a product
             onValueChange = { pageElement, value ->
-                deliveryNoteViewModel.updateDeliveryNote(pageElement, value)
+                deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
+                deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
+
             },
             onClickNewClientOrIssuer = onClickNewClientOrIssuer,
             onProductClick = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
-               productAddEditViewModel.setDocumentProductUiState(it)
+                productAddEditViewModel.setDocumentProductUiState(it)
             },
             documentProductUiState = documentProductUiState, // Used when choosing a product or creating new product from the bottom sheet
             onNewProductClick = {},
@@ -105,20 +107,25 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
             },
             documentProductOnValueChange = { pageElement, value ->
-                productAddEditViewModel.updateProductState(pageElement, value, ProductType.DOCUMENT_PRODUCT)
+                productAddEditViewModel.updateProductState(
+                    pageElement,
+                    value,
+                    ProductType.DOCUMENT_PRODUCT
+                )
             },
             documentProductPlaceCursor = { pageElement ->
                 productAddEditViewModel.updateCursor(pageElement, ProductType.DOCUMENT_PRODUCT)
             },
             onClickDoneForm = { typeOfCreation ->
-                when(typeOfCreation) {
-                     TypeOfProductCreation.EDIT_PRODUCT -> {
-                         productAddEditViewModel.saveInLocalDb(ProductType.DOCUMENT_PRODUCT)
-                         deliveryNoteViewModel.addDocumentProductToDeliveryNote(documentProductUiState)
-                     }
-                     TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT -> {
-                         productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-                     }
+                when (typeOfCreation) {
+                    TypeOfProductCreation.ADD_PRODUCT -> {
+                        deliveryNoteViewModel.saveDocumentProductInDbAndAddToDeliveryNote(documentProductUiState)
+                    }
+
+                    TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT -> {
+                        productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                    }
+
                     TypeOfProductCreation.CREATE_NEW_PRODUCT -> {
                         productAddEditViewModel.saveInLocalDb(ProductType.PRODUCT)
                         productAddEditViewModel.saveInLocalDb(ProductType.DOCUMENT_PRODUCT)

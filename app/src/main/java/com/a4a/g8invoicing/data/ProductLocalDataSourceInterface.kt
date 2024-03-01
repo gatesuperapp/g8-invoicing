@@ -15,7 +15,7 @@ interface ProductLocalDataSourceInterface {
     fun fetchDocumentProduct(id: Long): DocumentProductState?
     fun fetchAllProducts(): Flow<List<ProductState>>
     suspend fun saveProduct(product: ProductState)
-    suspend fun saveDocumentProduct(documentProduct: DocumentProductState)
+    suspend fun saveDocumentProduct(documentProduct: DocumentProductState): Int?
     suspend fun duplicateProduct(product: ProductState)
     suspend fun updateProduct(product: ProductState)
     suspend fun updateDocumentProduct(documentProduct: DocumentProductState)

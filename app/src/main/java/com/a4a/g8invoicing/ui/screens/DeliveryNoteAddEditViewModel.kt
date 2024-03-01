@@ -50,9 +50,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         saveJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.saveDeliveryNote(deliveryNoteUiState.value)
-                deliveryNoteUiState.value.documentProducts?.forEach {
-                    documentProductDataSource.saveDocumentProduct(it)
-                }
             } catch (e: Exception) {
                 println("Saving deliveryNotes failed with exception: ${e.localizedMessage}")
             }
@@ -72,11 +69,42 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
+    fun saveDocumentProductInDbAndAddToDeliveryNote(documentProduct: DocumentProductState) {
+        //Saving the new documentProduct in UI State
+        val newList: MutableList<DocumentProductState>? = _deliveryNoteUiState.value.documentProducts?.toMutableList()
+        _deliveryNoteUiState.value.documentProducts?.last()?.id?.let {
+            // Setting an id to be able to use the key in the DocumentProductListContent lazyColumn
+            val doc = documentProduct.copy(id = it + 1)
+            newList?.add(doc)
+            newList?.let {
+                updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
+            }
+        }
+
+        // Saving the new documentProduct in db: in DocumentProduct & DeliveryNoteProduct
+        viewModelScope.launch {
+            try {
+                val documentProductId =
+                    documentProductDataSource.saveDocumentProduct(documentProduct)
+                documentProductId?.let { id ->
+                    _deliveryNoteUiState.value.deliveryNoteId?.toLong()?.let { deliveryNoteId ->
+                        deliveryNoteDataSource.addDeliveryNoteProduct(
+                            deliveryNoteId,
+                            id.toLong()
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                println("Saving delivery note product failed with exception: ${e.localizedMessage}")
+            }
+        }
+    }
+
     fun removeDocumentProductFromDeliveryNote(documentProductId: Int) {
         val newList = _deliveryNoteUiState.value.documentProducts?.toMutableList()
             ?.filter { it.id != documentProductId }
         newList?.let {
-            updateDeliveryNote(ScreenElement.DOCUMENT_PRODUCTS, it)
+            updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
         }
 
         updateJob?.cancel()
@@ -86,34 +114,16 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 deliveryNoteUiState.value.deliveryNoteId?.toLong()?.let {
                     deliveryNoteDataSource.deleteDeliveryNoteProduct(documentProductId.toLong())
                 }
-
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun addDocumentProductToDeliveryNote(documentProduct: DocumentProductState) {
-       viewModelScope.launch {
-            try {
-                documentProductDataSource.saveDocumentProduct(documentProduct)
-                deliveryNoteUiState.value.deliveryNoteId?.toLong()?.let {deliveryNoteId ->
-                    documentProduct.id?.toLong()?.let {documentProductId ->
-                        deliveryNoteDataSource.addDeliveryNoteProduct(
-                            deliveryNoteId,
-                            documentProductId
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
-            }
-        }
-    }
 
-    fun updateDeliveryNote(pageElement: ScreenElement, value: Any) {
-        _deliveryNoteUiState.value = updateDeliveryNoteUiState(_deliveryNoteUiState.value, pageElement, value)
-        updateDeliveryNoteInLocalDb()
+    fun updateDeliveryNoteState(pageElement: ScreenElement, value: Any) {
+        _deliveryNoteUiState.value =
+            updateDeliveryNoteUiState(_deliveryNoteUiState.value, pageElement, value)
     }
 
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {

@@ -206,7 +206,7 @@ fun SlideInNextComponent(
 
     ) {
     var isProductListVisible by remember { mutableStateOf(false) }
-    var typeOfCreation: TypeOfProductCreation by remember { mutableStateOf(TypeOfProductCreation.EDIT_PRODUCT) }
+    var typeOfCreation: TypeOfProductCreation by remember { mutableStateOf(TypeOfProductCreation.ADD_PRODUCT) }
     var isDocumentFormVisible by remember { mutableStateOf(false) }
     var productId: Int? by remember { mutableStateOf(null) }
     // var documentProduct: DocumentProductState by remember { mutableStateOf(DocumentProductState()) }
@@ -253,8 +253,8 @@ fun SlideInNextComponent(
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
                     onProductClick(it) // Will update the ProductAddEditViewModel with the chosen product
-                    //documentProduct = documentProductUiState // To open bottom document form with the chosen product
-                    typeOfCreation = TypeOfProductCreation.EDIT_PRODUCT
+                    // To open bottom document form with the chosen product
+                    typeOfCreation = TypeOfProductCreation.ADD_PRODUCT
                     isDocumentFormVisible = true
                 },
                 onClickNewProduct = onNewProductClick
@@ -334,7 +334,7 @@ fun SlideUpTheForm(
                         style = MaterialTheme.typography.textTitle,
                         text = when (productCreation) {
                             TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_edit_product)
-                            TypeOfProductCreation.EDIT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
+                            TypeOfProductCreation.ADD_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
                             TypeOfProductCreation.CREATE_NEW_PRODUCT -> stringResource(id = R.string.delivery_note_modal_new_product)
                             else -> ""
                         }
@@ -362,7 +362,7 @@ fun SlideUpTheForm(
 
 enum class TypeOfProductCreation {
     EDIT_DOCUMENT_PRODUCT,
-    EDIT_PRODUCT,
+    ADD_PRODUCT,
     CREATE_NEW_PRODUCT
 }
 

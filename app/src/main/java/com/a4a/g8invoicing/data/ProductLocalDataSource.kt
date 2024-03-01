@@ -54,7 +54,6 @@ class ProductLocalDataSource(
                         amount = it.toDouble(),
                     )
                 }
-
                 productQueries.saveProduct(
                     product_id = null,
                     name = product.name.text,
@@ -72,8 +71,9 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun saveDocumentProduct(documentProduct: DocumentProductState) {
-        return withContext(Dispatchers.IO) {
+    override suspend fun saveDocumentProduct(documentProduct: DocumentProductState): Int? {
+        var documentProductId: Int? = null
+        withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.saveDocumentProduct(
                     document_product_id = null,
@@ -85,11 +85,13 @@ class ProductLocalDataSource(
                     price_without_tax = documentProduct.priceWithoutTax.toDouble(),
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong()
-
                 )
+                documentProductId = documentProductQueries.lastInsertRowId().executeAsOneOrNull()?.toInt()
+
             } catch (cause: Throwable) {
             }
         }
+        return documentProductId
     }
 
     override suspend fun duplicateProduct(product: ProductState) {
@@ -194,7 +196,8 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
             ?: BigDecimal(0),
         taxRate = this.tax_rate?.toBigDecimal()?.setScale(0, RoundingMode.HALF_UP)
             ?: BigDecimal(0),
-        quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP).stripTrailingZeros(),
+        quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)
+            .stripTrailingZeros(),
         unit = TextFieldValue(this.unit ?: ""),
         productId = this.product_id?.toInt()
     )
