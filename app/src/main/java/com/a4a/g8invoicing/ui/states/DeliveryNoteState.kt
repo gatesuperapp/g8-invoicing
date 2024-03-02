@@ -1,7 +1,10 @@
 package com.a4a.g8invoicing.ui.states
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.math.BigDecimal
 
 // This Client is created to manipulate client data,

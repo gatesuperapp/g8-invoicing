@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface DeliveryNoteLocalDataSourceInterface {
-    fun fetchDeliveryNote(id: Long): DeliveryNoteState?
+    fun fetchDeliveryNote(id: Long): Flow<DeliveryNoteState?>
     fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>
     suspend fun saveDeliveryNote(deliveryNote: DeliveryNoteState)
     suspend fun duplicateDeliveryNote(deliveryNote: DeliveryNoteState)

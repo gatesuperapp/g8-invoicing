@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,6 +26,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
+    private var fetchJob: Job? = null
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
@@ -41,8 +43,17 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     }
 
     private fun fetchDeliveryNoteFromLocalDb(id: Long) {
-        deliveryNoteDataSource.fetchDeliveryNote(id)?.let {
-            _deliveryNoteUiState.value = it
+        fetchJob?.cancel()
+        fetchJob = viewModelScope.launch {
+            try {
+                deliveryNoteDataSource.fetchDeliveryNote(id).collect {
+                    it?.let {
+                        _deliveryNoteUiState.value = it
+                    }
+                }
+            } catch (e: Exception) {
+                println("Fetching deliveryNotes failed with exception: ${e.localizedMessage}")
+            }
         }
     }
 

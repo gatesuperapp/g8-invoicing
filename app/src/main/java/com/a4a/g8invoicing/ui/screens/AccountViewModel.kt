@@ -32,8 +32,7 @@ class AccountViewModel @Inject constructor(
         authenticate()
     }
 
-    fun
-            fetchResult() {
+    fun fetchResult() {
         viewModelScope.launch {
             try {
                 authResults.collect {

@@ -3,14 +3,21 @@ package com.a4a.g8invoicing.data
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
-import com.a4a.g8invoicing.ui.screens.PersonType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -25,23 +32,59 @@ class DeliveryNoteLocalDataSource(
     private val deliveryNoteProductQueries = db.deliveryNoteProductQueries
     private val documentProductQueries = db.documentProductQueries
 
-    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
-        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
-            ?.transformIntoEditableNote()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun fetchDeliveryNote(id: Long): Flow<DeliveryNoteState?> {
+        return deliveryNoteQueries.getDeliveryNote(id)
+            .asFlow()
+            .flatMapMerge { query ->
+                val deliveryNote = query.executeAsOne()
+                fetchDocumentProducts(deliveryNote.delivery_note_id)
+                    .map {
+                        deliveryNote.transformIntoEditableNote(it)
+                    }
+            }
     }
 
+    private fun fetchDocumentProducts(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
+        return deliveryNoteProductQueries.getDeliveryNoteProductIds(deliveryNoteId)
+            .asFlow()
+            .map { query ->
+                query.executeAsList().mapNotNull { getDocumentProductState(it) }
+            }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+        return deliveryNoteQueries.getAllDeliveryNotes()
+            .asFlow()
+            .flatMapMerge { query ->
+                combine(
+                    query.executeAsList().map {deliveryNote ->
+                        fetchDocumentProducts(deliveryNote.delivery_note_id)
+                            .mapNotNull {
+                                deliveryNote.transformIntoEditableNote(it)
+                            }
+                    }
+                ) {
+                    it.asList()
+                }
+            }
+
+    }
+
+
+    /*override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
             .asFlow()
             .map { query ->
                 query.executeAsList().map { it.transformIntoEditableNote() }
             }
-    }
+    }*/
 
-    private fun DeliveryNote.transformIntoEditableNote(): DeliveryNoteState {
+    private fun DeliveryNote.transformIntoEditableNote(documentProducts: List<DocumentProductState>): DeliveryNoteState {
+        // It's a suspend function so we can observe changes on DocumentProducts
         var client: ClientOrIssuerEditable? = null
         var issuer: ClientOrIssuerEditable? = null
-        var deliveryNote: DeliveryNoteState
 
         this.client_id?.let {
             client = clientOrIssuerQueries.getClientOrIssuer(it)
@@ -56,38 +99,32 @@ class DeliveryNoteLocalDataSource(
         }
 
         this.let {
-            val items = buildDocumentProductList(it.delivery_note_id)
-            val documentPrices = calculateDocumentPrices(items)
-
-            deliveryNote = DeliveryNoteState(
+            // Adding every fields except documentProducts & prices
+            return DeliveryNoteState(
                 deliveryNoteId = it.delivery_note_id.toInt(),
                 number = TextFieldValue(text = it.number),
                 deliveryDate = it.delivery_date,
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
                 issuer = issuer,
                 client = client,
-                documentProducts = items,
-                documentPrices = documentPrices
+                documentProducts = documentProducts,
+                documentPrices = calculateDocumentPrices(documentProducts)
             )
         }
-
-        return deliveryNote
     }
 
 
+    private fun fetchDocumentProductList(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
+        return deliveryNoteProductQueries.getDeliveryNoteProductIds(deliveryNoteId)
+            .asFlow()
+            .map { query ->
+                query.executeAsList().mapNotNull { getDocumentProductState(it) }
+            }
+    }
 
-    private fun buildDocumentProductList(deliveryNoteId: Long): List<DocumentProductState> {
-        val documentProducts: MutableList<DocumentProductState> = mutableListOf()
-
-        val identifiers =
-            deliveryNoteProductQueries.getDeliveryNoteProductIds(deliveryNoteId).executeAsList()
-        identifiers.forEach {
-            documentProductQueries.getDocumentProduct(it).executeAsOneOrNull()
-                ?.let { documentProduct ->
-                    documentProducts += documentProduct.transformIntoEditableDocumentProduct()
-                }
-        }
-        return documentProducts
+    private fun getDocumentProductState(id: Long): DocumentProductState? {
+        return documentProductQueries.getDocumentProduct(id).executeAsOneOrNull()
+            ?.transformIntoEditableDocumentProduct()
     }
 
     override suspend fun saveDeliveryNote(deliveryNote: DeliveryNoteState) {
@@ -171,7 +208,8 @@ class DeliveryNoteLocalDataSource(
             deliveryNoteProductQueries.saveDeliveryNoteProduct(
                 id = null,
                 delivery_note_id = deliveryNoteId,
-                document_product_id = documentProductId)
+                document_product_id = documentProductId
+            )
         }
     }
 
@@ -192,6 +230,8 @@ class DeliveryNoteLocalDataSource(
             )
         }
     }
+
+
 }
 
 fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
@@ -226,5 +266,3 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrice
         totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }
     )
 }
-
-

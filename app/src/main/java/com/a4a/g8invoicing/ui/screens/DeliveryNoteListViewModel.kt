@@ -65,15 +65,25 @@ class DeliveryNoteListViewModel @Inject constructor(
     }
 
     fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
+
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
+                var deliveryNote: DeliveryNoteState? = null
                 selectedDeliveryNotes.forEach { selectedDeliveryNote ->
-                    selectedDeliveryNote.deliveryNoteId?.let {noteId ->
-                        var deliveryNote = deliveryNoteDataSource.fetchDeliveryNote(
-                            noteId.toLong()
-                        )
+                    selectedDeliveryNote.deliveryNoteId?.let {deliveryNoteId ->
+                        // Fetch the delivery note
+                        try {
+                            deliveryNoteDataSource.fetchDeliveryNote(deliveryNoteId.toLong()).collect {
+                                it?.let {
+                                    deliveryNote = it
+                                }
+                            }
+                        } catch (e: Exception) {
+                            println("Fetching deliveryNotes failed with exception: ${e.localizedMessage}")
+                        }
 
+                        //Duplicate the delivery note
                         //TODO: get the string outta here
                         selectedDeliveryNote.number?.let {
                             deliveryNote = deliveryNote?.copy(
