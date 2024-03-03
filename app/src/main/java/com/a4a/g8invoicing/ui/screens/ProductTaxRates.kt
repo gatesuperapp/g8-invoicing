@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,8 +45,8 @@ fun ProductTaxRates(
     val scrollState = rememberScrollState()
     var chosenOption by remember { mutableStateOf(currentTaxRate) }
 
-    // When going back with system navigation, we should save the state
-    // (same as with back arrow). It's because we use nested navigation
+    // When going back with system navigation, we save the state (same as with back arrow).
+    // It's because we use nested navigation
     BackHandler {
         onClickBack()
     }

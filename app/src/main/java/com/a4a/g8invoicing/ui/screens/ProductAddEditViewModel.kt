@@ -45,7 +45,7 @@ class ProductAddEditViewModel @Inject constructor(
             id?.let {
                 fetchProductFromLocalDb(it.toLong())
             }
-        } else if(type == ProductType.DOCUMENT_PRODUCT.name.lowercase()) {
+        } else if (type == ProductType.DOCUMENT_PRODUCT.name.lowercase()) {
             id?.let {
                 fetchDocumentProductFromLocalDb(it.toLong())
             }
@@ -57,12 +57,22 @@ class ProductAddEditViewModel @Inject constructor(
             id = null,
             name = product.name,
             description = product.description,
-            finalPrice = product.finalPrice ?: BigDecimal(0),
-            priceWithoutTax = product.priceWithoutTax ?: BigDecimal(0),
+            priceWithTax = product.finalPrice ?: BigDecimal(0),
             taxRate = product.taxRate ?: BigDecimal(0),
             quantity = BigDecimal(1),
             unit = product.unit,
             productId = product.productId
+        )
+    }
+
+    fun setProductUiState() {
+        _productUiState.value = ProductState(
+            productId = null,
+            name = _documentProductUiState.value.name,
+            description = _documentProductUiState.value.description,
+            finalPrice = _documentProductUiState.value.priceWithTax,
+            taxRate = _documentProductUiState.value.taxRate,
+            unit = _documentProductUiState.value.unit
         )
     }
 
@@ -90,9 +100,9 @@ class ProductAddEditViewModel @Inject constructor(
         _documentProductUiState.value = _documentProductUiState.value.copy(
             productId = documentProduct?.productId,
             name = documentProduct?.name ?: TextFieldValue(""),
+            quantity = documentProduct?.quantity ?: BigDecimal(0),
             description = documentProduct?.description,
-            finalPrice = documentProduct?.finalPrice ?: BigDecimal(0),
-            priceWithoutTax = documentProduct?.priceWithoutTax ?: BigDecimal(0),
+            priceWithTax = documentProduct?.priceWithTax ?: BigDecimal(0),
             taxRate = documentProduct?.taxRate ?: BigDecimal(0),
             unit = documentProduct?.unit
         )
@@ -156,7 +166,8 @@ class ProductAddEditViewModel @Inject constructor(
         if (productType == ProductType.PRODUCT) {
             _productUiState.value = updateProductUiState(_productUiState.value, pageElement, value)
         } else {
-            _documentProductUiState.value = updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
+            _documentProductUiState.value =
+                updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
         }
     }
 
@@ -167,6 +178,7 @@ class ProductAddEditViewModel @Inject constructor(
             updateCursorOfDocumentProductState(pageElement)
         }
     }
+
     private fun updateCursorOfProductState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.PRODUCT_NAME -> productUiState.value.name.text
@@ -180,6 +192,7 @@ class ProductAddEditViewModel @Inject constructor(
             )
         )
     }
+
     private fun updateCursorOfDocumentProductState(pageElement: ScreenElement) {
         val input = when (pageElement) {
             ScreenElement.DOCUMENT_PRODUCT_NAME -> documentProductUiState.value.name.text
@@ -189,7 +202,9 @@ class ProductAddEditViewModel @Inject constructor(
             else -> ""
         }
         _documentProductUiState.value = updateDocumentProductUiState(
-            _documentProductUiState.value, pageElement, TextFieldValue(
+            _documentProductUiState.value,
+            pageElement,
+            TextFieldValue(
                 text = input.toString(),
                 selection = TextRange(input?.toString()?.length ?: 0)
             )
@@ -222,7 +237,6 @@ private fun updateProductUiState(
 }
 
 
-
 enum class ProductType {
     PRODUCT, DOCUMENT_PRODUCT
 }
@@ -232,26 +246,30 @@ private fun updateDocumentProductUiState(
     element: ScreenElement,
     value: Any,
 ): DocumentProductState {
-    var product = documentProduct
+    var documentProduct = documentProduct
     when (element) {
         ScreenElement.DOCUMENT_PRODUCT_NAME -> {
-            product = product.copy(name = value as TextFieldValue)
+            documentProduct = documentProduct.copy(name = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> {
-            val quantity = value as String
-            product = product.copy(quantity = BigDecimal(quantity.toDoubleOrNull() ?: 0.0))
+            documentProduct =
+                documentProduct.copy(quantity = (value as String).toBigDecimalOrNull() ?: BigDecimal(0))
         }
 
         ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> {
-            product = product.copy(description = value as TextFieldValue)
+            documentProduct = documentProduct.copy(description = value as TextFieldValue)
+        }
+
+        ScreenElement.DOCUMENT_PRODUCT_FINAL_PRICE -> {
+            documentProduct = documentProduct.copy(priceWithTax = (value as String).toBigDecimalOrNull() ?: BigDecimal(0))
         }
 
         ScreenElement.DOCUMENT_PRODUCT_UNIT -> {
-            product = product.copy(unit = value as TextFieldValue)
+            documentProduct = documentProduct.copy(unit = value as TextFieldValue)
         }
 
         else -> null
     }
-    return product
+    return documentProduct
 }

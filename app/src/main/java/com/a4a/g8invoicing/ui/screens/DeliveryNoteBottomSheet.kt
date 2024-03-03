@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -55,15 +53,12 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class,
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveryNoteBottomSheet(
     deliveryNote: DeliveryNoteState,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
-    isBottomSheetVisible: Boolean,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerEditable>,
     issuers: MutableList<ClientOrIssuerEditable>,
@@ -181,10 +176,6 @@ fun DeliveryNoteBottomSheet(
                 )
         }
     }
-    // Closing the bottom sheet when going back with system navigation
-    BackHandler(enabled = isBottomSheetVisible) {
-        onDismissBottomSheet()
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -257,26 +248,27 @@ fun SlideInNextComponent(
                 list = params?.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
-                    onProductClick(it) // Will update the ProductAddEditViewModel with the chosen product
-                    // To open bottom document form with the chosen product
+                    onProductClick(it) // Update the ProductAddEditViewModel with the chosen product
+                    // so we open bottom document form with the chosen product
                     typeOfCreation = TypeOfProductCreation.ADD_PRODUCT
                     isDocumentFormVisible = true
                     CoroutineScope(Dispatchers.IO).launch {
-                        // Wait for the bottom form to be opened to come back
-                        // to previous screen, so it is in background
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
+                        // Waits for the bottom form to be opened,
+                        // so previous screen change is in background
                         isProductListVisible = false
                     }
 
                 },
                 onClickNewProduct = {
                     onNewProductClick()
-                    isProductListVisible = false
-                }
-                /*     {
-                                 typeOfCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
-                                 isDocumentFormVisible = true
-                             }*/,
+                    typeOfCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
+                    isDocumentFormVisible = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(TimeUnit.MILLISECONDS.toMillis(500))
+                        isProductListVisible = false
+                    }
+                },
                 currentProductsIds = currentProductsIds
             )
         }
@@ -365,7 +357,7 @@ fun SlideUpTheForm(
                 }
             }
             DocumentProductForm(
-                product = documentProduct,
+                documentProduct = documentProduct,
                 onValueChange = productOnValueChange,
                 placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
                 onClickForward = {}

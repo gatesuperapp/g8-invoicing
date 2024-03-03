@@ -108,7 +108,7 @@ fun NavGraph(navController: NavHostController) {
                 navController.navigateAndReplaceStartDestination(it)
             },
             onClickListItem = {
-                val params = ("?itemId=${it}&type=product")
+                val params = ("?itemId=${it.productId}&type=product")
                 navController.navigate("ProductCreation$params") {
                     // Pop up to the start destination of the graph to
                     // avoid building up a large stack of destinations
@@ -117,7 +117,7 @@ fun NavGraph(navController: NavHostController) {
                         saveState = true
                     }
                     // Avoid multiple copies of the same destination when
-                    // reselecting the same item
+                    // re-selecting the same item
                     launchSingleTop = true
                     // Restore state when reselecting a previously selected item
                     restoreState = true

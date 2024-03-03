@@ -27,6 +27,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
 import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallAndItalic
+import java.math.BigDecimal
 import java.math.RoundingMode
 
 // We use leftBorder, rightBorder, BottomBorder & TopBorder, because if we used simple "border"
@@ -51,33 +52,30 @@ fun DataTable(
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_description),
             weight = column1Weight,
-            false,
             true
         )
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_quantity),
-            alignEnd = true,
-            isColumnTitle = true
+            alignEnd = true
         )
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_tax_rate),
-            alignEnd = true,
-            isColumnTitle = true
+            alignEnd = true
         )
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_unit_price_without_tax),
-            alignEnd = true,
-            isColumnTitle = true
+            alignEnd = true
         )
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_total_price_without_tax),
-            alignEnd = true,
-            isColumnTitle = true
+            alignEnd = true
         )
     }
 
     // All the lines of the table.
     tableData.forEach() {
+        val priceWithoutTax = it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
+
         Row(
             Modifier
                 .fillMaxWidth()
@@ -90,28 +88,23 @@ fun DataTable(
                 text = it.name.text,
                 weight = column1Weight,
                 alignEnd = false,
-                false,
                 subText = it.description?.text
             )
             TableCell(
                 text = it.quantity.toString() + " " + it.unit?.text.toString(),
-                alignEnd = true,
-                isColumnTitle = false
+                alignEnd = true
             )
             TableCell(
                 text = (it.taxRate).toString() + "%",
-                alignEnd = true,
-                isColumnTitle = false
+                alignEnd = true
             )
             TableCell(
-                text = it.priceWithoutTax.toString(),
-                alignEnd = true,
-                isColumnTitle = false
+                text = priceWithoutTax.toString(),
+                alignEnd = true
             )
             TableCell(
-                text = (it.priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP).toString(),
-                alignEnd = true,
-                isColumnTitle = false
+                text = (priceWithoutTax * it.quantity).toString(),
+                alignEnd = true
             )
         }
     }
@@ -123,7 +116,6 @@ fun RowScope.TableCell(
     text: String,
     weight: Float = .22f, // Width of all the cells except the "description" one
     alignEnd: Boolean,
-    isColumnTitle: Boolean,
     subText: String? = null,
 ) {
     Column(

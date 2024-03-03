@@ -80,9 +80,8 @@ class ProductLocalDataSource(
                     name = documentProduct.name.text,
                     quantity = documentProduct.quantity.toDouble(),
                     description = documentProduct.description?.text,
-                    final_price = documentProduct.finalPrice.toDouble(),
+                    final_price = documentProduct.priceWithTax.toDouble(),
                     tax_rate = documentProduct.taxRate.toLong(),
-                    price_without_tax = documentProduct.priceWithoutTax.toDouble(),
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong()
                 )
@@ -141,9 +140,8 @@ class ProductLocalDataSource(
                     name = documentProduct.name.text,
                     quantity = documentProduct.quantity.toDouble(),
                     description = documentProduct.description?.text,
-                    price = documentProduct.finalPrice.toDouble(),
+                    price_with_tax = documentProduct.priceWithTax.toDouble(),
                     tax_rate = documentProduct.taxRate.toLong(),
-                    price_without_tax = documentProduct.priceWithoutTax.toDouble(),
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong(),
                 )
@@ -190,9 +188,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
         id = this.document_product_id.toInt(),
         name = TextFieldValue(this.name),
         description = TextFieldValue(this.description ?: ""),
-        finalPrice = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)
-            ?: BigDecimal(0),
-        priceWithoutTax = this.price_without_tax?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)
+        priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)
             ?: BigDecimal(0),
         taxRate = this.tax_rate?.toBigDecimal()?.setScale(0, RoundingMode.HALF_UP)
             ?: BigDecimal(0),

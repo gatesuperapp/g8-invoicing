@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
@@ -15,8 +16,8 @@ import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,7 +47,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.fetchDeliveryNote(id).collect {
+                deliveryNoteDataSource.fetchDeliveryNoteFlow(id).collect {
                     it?.let {
                         _deliveryNoteUiState.value = it
                     }
@@ -81,40 +82,18 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInDbAndAddToDeliveryNote(documentProduct: DocumentProductState) {
-        //Saving the new documentProduct in UI State
-        val newList: MutableList<DocumentProductState>? =
-            _deliveryNoteUiState.value.documentProducts?.toMutableList()
-        val newDocumentProductId =
-            _deliveryNoteUiState.value.documentProducts?.lastOrNull()?.id?.let {
-                it + 1
-            } ?: 1
-
-        // Setting an id to be able to use the key in the DocumentProductListContent lazyColumn
-        val doc = documentProduct.copy(id = newDocumentProductId)
-        newList?.add(doc)
-        newList?.let {
-            updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
-        }
-
-        // Saving the new documentProduct in db: in DocumentProduct & DeliveryNoteProduct
-        viewModelScope.launch {
-            try {
-                val documentProductId =
-                    documentProductDataSource.saveDocumentProduct(documentProduct)
-                documentProductId?.let { id ->
-                    _deliveryNoteUiState.value.deliveryNoteId?.toLong()?.let { deliveryNoteId ->
-                        deliveryNoteDataSource.addDeliveryNoteProduct(
-                            deliveryNoteId,
-                            id.toLong()
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                println("Saving delivery note product failed with exception: ${e.localizedMessage}")
-            }
+    fun saveDocumentProductInLocalDb(documentProduct: DocumentProductState) {
+        _deliveryNoteUiState.value.deliveryNoteId?.let {
+            saveDocumentProductInDatabase(
+                documentProduct = documentProduct,
+                deliveryNoteDataSource = deliveryNoteDataSource,
+                documentProductDataSource = documentProductDataSource,
+                viewModelScope = viewModelScope,
+                deliveryNoteId = it.toLong()
+            )
         }
     }
+
 
     fun removeDocumentProductFromDeliveryNote(documentProductId: Int) {
         // Update the Ui State
@@ -205,4 +184,25 @@ fun updateDeliveryNoteUiState(
 }
 
 
-
+fun saveDocumentProductInDatabase(
+    documentProduct: DocumentProductState,
+    deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+    documentProductDataSource: ProductLocalDataSourceInterface,
+    viewModelScope: CoroutineScope,
+    deliveryNoteId: Long,
+) {
+    viewModelScope.launch {
+        try {
+            val documentProductId =
+                documentProductDataSource.saveDocumentProduct(documentProduct)
+            documentProductId?.let { id ->
+                deliveryNoteDataSource.addDeliveryNoteProduct(
+                    deliveryNoteId,
+                    id.toLong()
+                )
+            }
+        } catch (e: Exception) {
+            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
+        }
+    }
+}

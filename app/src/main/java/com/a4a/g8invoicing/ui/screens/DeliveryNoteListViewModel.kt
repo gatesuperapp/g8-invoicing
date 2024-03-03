@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DeliveryNoteListViewModel @Inject constructor(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+    private val documentProductDataSource: ProductLocalDataSourceInterface,
 ) : ViewModel() {
 
     private val _deliveryNotesUiState = MutableStateFlow(DeliveryNotesUiState())
@@ -65,25 +67,15 @@ class DeliveryNoteListViewModel @Inject constructor(
     }
 
     fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
-
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                var deliveryNote: DeliveryNoteState? = null
                 selectedDeliveryNotes.forEach { selectedDeliveryNote ->
-                    selectedDeliveryNote.deliveryNoteId?.let {deliveryNoteId ->
-                        // Fetch the delivery note
-                        try {
-                            deliveryNoteDataSource.fetchDeliveryNote(deliveryNoteId.toLong()).collect {
-                                it?.let {
-                                    deliveryNote = it
-                                }
-                            }
-                        } catch (e: Exception) {
-                            println("Fetching deliveryNotes failed with exception: ${e.localizedMessage}")
-                        }
+                    selectedDeliveryNote.deliveryNoteId?.let { noteId ->
+                        var deliveryNote = deliveryNoteDataSource.fetchDeliveryNote(
+                            noteId.toLong()
+                        )
 
-                        //Duplicate the delivery note
                         //TODO: get the string outta here
                         selectedDeliveryNote.number?.let {
                             deliveryNote = deliveryNote?.copy(
@@ -92,7 +84,19 @@ class DeliveryNoteListViewModel @Inject constructor(
                         }
 
                         deliveryNote?.let {
-                            deliveryNoteDataSource.duplicateDeliveryNote(it)
+                            val deliveryNoteId = deliveryNoteDataSource.duplicateDeliveryNote(it)
+
+                            deliveryNoteId?.let { id ->
+                                it.documentProducts?.forEach { documentProduct ->
+                                    saveDocumentProductInDatabase(
+                                        documentProduct = documentProduct,
+                                        deliveryNoteDataSource = deliveryNoteDataSource,
+                                        documentProductDataSource = documentProductDataSource,
+                                        viewModelScope = viewModelScope,
+                                        deliveryNoteId = id
+                                    )
+                                }
+                            }
                         }
                     }
                 }

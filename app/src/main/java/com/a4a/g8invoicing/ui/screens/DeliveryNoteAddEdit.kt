@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,7 +47,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveryNoteAddEdit(
     navController: NavController,
@@ -69,11 +71,6 @@ fun DeliveryNoteAddEdit(
     onClickDoneForm: (TypeOfProductCreation) -> Unit,
     onClickCancelForm: () -> Unit,
 ) {
-    val localFocusManager = LocalFocusManager.current
-
-    /*    // The state is hoisted here & shared between the template & the bottom sheet
-        var deliveryNote by remember { mutableStateOf(deliveryNoteUiState) }*/
-
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -87,9 +84,21 @@ fun DeliveryNoteAddEdit(
     // Keyboard: if it was open and the user swipes down the bottom sheet:
     // close the keyboard (if we close keyboard before sheet, there is a weird effect)
     val keyboardController = LocalSoftwareKeyboardController.current
-    val isBottomSheetOpened = scaffoldState.bottomSheetState.isVisible
-    if (!isBottomSheetOpened) {
+    if (!scaffoldState.bottomSheetState.isVisible) {
         keyboardController?.hide()
+    }
+    println("ssss" + scaffoldState.bottomSheetState.currentValue)
+
+    // Handling native navigation back action
+    BackHandler {
+        println("ssssAA" + scaffoldState.bottomSheetState.currentValue)
+        // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
+        // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+            hideBottomSheet(scope, scaffoldState, keyboardController)
+        } else {
+            onClickBack()
+        }
     }
 
     // Date picker & formatter
@@ -120,7 +129,6 @@ fun DeliveryNoteAddEdit(
                 onDismissBottomSheet = {
                     hideBottomSheet(scope, scaffoldState, keyboardController)
                 },
-                isBottomSheetVisible = isBottomSheetOpened,
                 clients = clients,
                 issuers = issuers,
                 products = products,

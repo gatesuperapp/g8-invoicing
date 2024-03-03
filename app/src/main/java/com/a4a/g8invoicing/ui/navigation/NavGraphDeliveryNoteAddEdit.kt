@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductListViewModel
 import com.a4a.g8invoicing.ui.screens.ProductType
 import com.a4a.g8invoicing.ui.screens.TypeOfProductCreation
+import com.a4a.g8invoicing.ui.states.ProductState
 
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
@@ -98,7 +99,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
             documentProductUiState = documentProductUiState, // Used when choosing a product or creating new product from the bottom sheet
-            onNewProductClick = {},
+            onNewProductClick = {
+
+            },
             onDocumentProductClick = {},
             onClickDeleteDocumentProduct = {
                 deliveryNoteViewModel.removeDocumentProductFromDeliveryNote(it)
@@ -119,7 +122,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {
                     TypeOfProductCreation.ADD_PRODUCT -> {
-                        deliveryNoteViewModel.saveDocumentProductInDbAndAddToDeliveryNote(documentProductUiState)
+                        deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProductUiState)
                     }
 
                     TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT -> {
@@ -127,8 +130,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
 
                     TypeOfProductCreation.CREATE_NEW_PRODUCT -> {
+                        productAddEditViewModel.setProductUiState()
                         productAddEditViewModel.saveInLocalDb(ProductType.PRODUCT)
-                        productAddEditViewModel.saveInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                        deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProductUiState)
                     }
                 }
             },

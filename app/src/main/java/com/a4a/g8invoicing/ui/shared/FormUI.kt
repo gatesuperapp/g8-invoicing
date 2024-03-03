@@ -46,7 +46,7 @@ fun FormUI(
         it.pageElement
     }
 
-    // We want to create a focus requester for each input element, eg: inputsAndFocusRequesters = listOf(
+    // Create a focus requester for each input element, ex: inputsAndFocusRequesters = listOf(
     //            Pair(PageElement.DELIVERY_NOTE_NUMBER, FocusRequester()),
     //            Pair(PageElement.ORDER_NUMBER, FocusRequester())
     //        )
@@ -59,7 +59,7 @@ fun FormUI(
     val focusRequesters: List<Pair<ScreenElement, FocusRequester>> =
         remember { inputsWithFocusRequester }
 
-    //  We want to remember which input element is focused, eg:  inputsAndFocused = listOf(
+    //  Remember which input element is focused, ex:  inputsAndFocused = listOf(
     //            Pair(PageElement.DELIVERY_NOTE_NUMBER, Boolean),
     //            Pair(PageElement.ORDER_NUMBER, Boolean)
     //        )

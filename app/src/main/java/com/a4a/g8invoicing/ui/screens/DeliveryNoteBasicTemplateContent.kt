@@ -383,9 +383,8 @@ private fun fakeDocumentProducts() =
             id = 1,
             name = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_name)),
             description = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_description)),
-            finalPrice = BigDecimal(4),
+            priceWithTax = BigDecimal(4),
             taxRate = BigDecimal(20),
-            priceWithoutTax = BigDecimal(4.80),
             quantity = BigDecimal(2),
             unit = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_unit)),
             productId = 1
