@@ -91,6 +91,11 @@ fun ProductAddEdit(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
 
                 ) {
+                    var priceWithoutTax: BigDecimal
+                    product.let {
+                        priceWithoutTax =
+                            it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
+                    }
                     // Create the list with all fields
                     val inputList = listOfNotNull(
                         FormInput(
@@ -120,46 +125,19 @@ fun ProductAddEdit(
                                 id = R.string.product_price
                             ),
                             inputType = DecimalInput(
-                                text = product.finalPrice?.setScale(2, RoundingMode.HALF_UP).toString(),
+                                text = product.priceWithTax.setScale(2, RoundingMode.HALF_UP)
+                                    .toString(),
                                 taxRate = product.taxRate,
                                 placeholder = stringResource(id = R.string.product_price_input),
                                 onValueChange = {
-                                    val finalPrice = it.toBigDecimalOrNull()
-                                    if (finalPrice == null) { // Empty input
-                                        product.priceWithoutTax = null
-                                        product.finalPrice = null
-                                    } else {
-                                        product.finalPrice = finalPrice
-                                        product.taxRate?.let { tax ->
-                                            product.priceWithoutTax =
-                                                finalPrice - finalPrice * tax / BigDecimal(100)
-                                        }
-                                    }
+                                    onValueChange(ScreenElement.PRODUCT_FINAL_PRICE, it)
                                 },
                                 keyboardType = KeyboardType.Decimal
                             ),
                             inputType2 = DecimalInput(
-                                text = product.priceWithoutTax?.setScale(2, RoundingMode.HALF_UP).toString(),
-                                placeholder = product.taxRate?.let {
-                                    (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(
-                                        100
-                                    )
-                                            ).toString()
-                                } ?: "",
-                                onValueChange = {
-                                    val priceWithoutTax = it.toBigDecimalOrNull()
-                                    if (priceWithoutTax == null) { // Empty input
-                                        product.priceWithoutTax = null
-                                        product.finalPrice = null
-                                    } else {
-                                        product.priceWithoutTax = priceWithoutTax
-                                        product.taxRate?.let { tax ->
-                                            product.finalPrice =
-                                                priceWithoutTax + priceWithoutTax * tax / BigDecimal(
-                                                    100
-                                                )
-                                        }
-                                    }
+                                text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP).toString(),
+                                placeholder = product.taxRate.let {
+                                    (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
                                 },
                                 keyboardType = KeyboardType.Decimal
                             ),
@@ -168,7 +146,7 @@ fun ProductAddEdit(
                         FormInput(
                             label = stringResource(id = R.string.product_tax),
                             inputType = ForwardElement(
-                                text = product.taxRate?.let { taxRate ->
+                                text = product.taxRate.let { taxRate ->
                                     if (taxRate == BigDecimal(0)) {
                                         "-"
                                     } else {

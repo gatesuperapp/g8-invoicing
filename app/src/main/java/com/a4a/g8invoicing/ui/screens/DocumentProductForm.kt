@@ -31,7 +31,7 @@ import java.math.RoundingMode
 // Can be Product or DocumentProduct. Names are "Product" to simplify.
 @Composable
 fun DocumentProductForm(
-    documentProduct: DocumentProductState?,
+    documentProduct: DocumentProductState,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickForward: (ScreenElement) -> Unit,
@@ -73,8 +73,9 @@ fun DocumentProductForm(
 
             ) {
                 var priceWithoutTax = BigDecimal(0)
-                documentProduct?.let {
-                    priceWithoutTax = it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
+                documentProduct.let {
+                    priceWithoutTax =
+                        it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
                 }
 
                 // Create the list with all fields
@@ -82,7 +83,7 @@ fun DocumentProductForm(
                     FormInput(
                         label = stringResource(id = R.string.product_name),
                         inputType = TextInput(
-                            text = documentProduct?.name,
+                            text = documentProduct.name,
                             placeholder = stringResource(id = R.string.product_name_input),
                             onValueChange = {
                                 onValueChange(ScreenElement.DOCUMENT_PRODUCT_NAME, it)
@@ -93,7 +94,8 @@ fun DocumentProductForm(
                     FormInput(
                         label = stringResource(id = R.string.document_product_quantity),
                         inputType = DecimalInput(
-                            text = documentProduct?.quantity?.setScale(2, RoundingMode.HALF_UP).toString(),
+                            text = documentProduct.quantity.setScale(2, RoundingMode.HALF_UP)
+                                .toString(),
                             placeholder = stringResource(id = R.string.document_product_quantity_input),
                             onValueChange = {
                                 onValueChange(ScreenElement.DOCUMENT_PRODUCT_QUANTITY, it)
@@ -105,7 +107,7 @@ fun DocumentProductForm(
                     FormInput(
                         label = stringResource(id = R.string.product_description),
                         inputType = TextInput(
-                            text = documentProduct?.description,
+                            text = documentProduct.description,
                             placeholder = stringResource(id = R.string.product_description_input),
                             onValueChange = {
                                 onValueChange(ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION, it)
@@ -118,8 +120,9 @@ fun DocumentProductForm(
                             id = R.string.product_price
                         ),
                         inputType = DecimalInput(
-                            text = documentProduct?.priceWithTax?.setScale(2, RoundingMode.HALF_UP).toString(),
-                            taxRate = documentProduct?.taxRate,
+                            text = documentProduct.priceWithTax.setScale(2, RoundingMode.HALF_UP)
+                                .toString(),
+                            taxRate = documentProduct.taxRate,
                             placeholder = stringResource(id = R.string.product_price_input),
                             onValueChange = {
                                 onValueChange(ScreenElement.DOCUMENT_PRODUCT_FINAL_PRICE, it)
@@ -129,12 +132,8 @@ fun DocumentProductForm(
                         inputType2 = DecimalInput(
                             text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
                                 .toString(),
-                            placeholder = documentProduct?.taxRate?.let {
-                                (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(
-                                    100
-                                )
-                                        ).toString()
-                            } ?: "",
+                            placeholder = (BigDecimal(3) + BigDecimal(3) * documentProduct.taxRate
+                                    / BigDecimal(100)).toString(),
                             keyboardType = KeyboardType.Decimal
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_PRICE
@@ -142,7 +141,7 @@ fun DocumentProductForm(
                     FormInput(
                         label = stringResource(id = R.string.product_tax),
                         inputType = ForwardElement(
-                            text = documentProduct?.taxRate?.let { taxRate ->
+                            text = documentProduct.taxRate.let { taxRate ->
                                 if (taxRate == BigDecimal(0)) {
                                     "-"
                                 } else {
@@ -155,7 +154,7 @@ fun DocumentProductForm(
                     FormInput(
                         label = stringResource(id = R.string.product_unit),
                         inputType = TextInput(
-                            text = documentProduct?.unit,
+                            text = documentProduct.unit,
                             placeholder = stringResource(id = R.string.product_unit_input),
                             onValueChange = {
                                 onValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT, it)

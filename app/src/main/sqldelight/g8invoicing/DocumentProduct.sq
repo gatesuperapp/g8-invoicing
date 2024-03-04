@@ -47,8 +47,7 @@ SET name = :name,
     description = :description,
     final_price = :price_with_tax,
     tax_rate = :tax_rate,
-    unit = :unit,
-    product_id =: product_id
+    unit = :unit
 WHERE
     document_product_id = :document_product_id;
 

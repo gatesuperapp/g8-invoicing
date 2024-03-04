@@ -52,12 +52,16 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun setDocumentProductUiState(product: ProductState) { // Used when sliding the form in documents
+    fun setDocumentProductUiState(documentProduct: DocumentProductState) { // Used when sliding the form in documents
+        _documentProductUiState.value = documentProduct
+    }
+
+    fun setDocumentProductUiStateWithProduct(product: ProductState) { // Used when sliding the form in documents
         _documentProductUiState.value = DocumentProductState(
             id = null,
             name = product.name,
             description = product.description,
-            priceWithTax = product.finalPrice ?: BigDecimal(0),
+            priceWithTax = product.priceWithTax ?: BigDecimal(0),
             taxRate = product.taxRate ?: BigDecimal(0),
             quantity = BigDecimal(1),
             unit = product.unit,
@@ -70,7 +74,7 @@ class ProductAddEditViewModel @Inject constructor(
             productId = null,
             name = _documentProductUiState.value.name,
             description = _documentProductUiState.value.description,
-            finalPrice = _documentProductUiState.value.priceWithTax,
+            priceWithTax = _documentProductUiState.value.priceWithTax,
             taxRate = _documentProductUiState.value.taxRate,
             unit = _documentProductUiState.value.unit
         )
@@ -87,9 +91,8 @@ class ProductAddEditViewModel @Inject constructor(
             productId = product?.productId,
             name = product?.name ?: TextFieldValue(),
             description = product?.description,
-            finalPrice = product?.finalPrice,
-            taxRate = product?.taxRate,
-            priceWithoutTax = product?.priceWithoutTax,
+            priceWithTax = product?.priceWithTax ?: BigDecimal(0),
+            taxRate = product?.taxRate ?: BigDecimal(0),
             unit = product?.unit
         )
     }
@@ -111,12 +114,7 @@ class ProductAddEditViewModel @Inject constructor(
     // When user chooses a new tax rate
     fun updateTaxRate(taxRate: BigDecimal?) {
         _productUiState.value = _productUiState.value.copy(
-            taxRate = taxRate,
-            priceWithoutTax = _productUiState.value.finalPrice?.let {
-                taxRate?.let { tax ->
-                    it - it * tax / BigDecimal(100)
-                }
-            }
+            taxRate = taxRate ?: BigDecimal(0)
         )
     }
 
@@ -227,6 +225,11 @@ private fun updateProductUiState(
             product = product.copy(description = value as TextFieldValue)
         }
 
+        ScreenElement.PRODUCT_FINAL_PRICE -> {
+            product =
+                product.copy(priceWithTax = (value as String).toBigDecimalOrNull() ?: BigDecimal(0))
+        }
+
         ScreenElement.PRODUCT_UNIT -> {
             product = product.copy(unit = value as TextFieldValue)
         }
@@ -254,7 +257,9 @@ private fun updateDocumentProductUiState(
 
         ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> {
             documentProduct =
-                documentProduct.copy(quantity = (value as String).toBigDecimalOrNull() ?: BigDecimal(0))
+                documentProduct.copy(
+                    quantity = (value as String).toBigDecimalOrNull() ?: BigDecimal(0)
+                )
         }
 
         ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> {
@@ -262,7 +267,9 @@ private fun updateDocumentProductUiState(
         }
 
         ScreenElement.DOCUMENT_PRODUCT_FINAL_PRICE -> {
-            documentProduct = documentProduct.copy(priceWithTax = (value as String).toBigDecimalOrNull() ?: BigDecimal(0))
+            documentProduct = documentProduct.copy(
+                priceWithTax = (value as String).toBigDecimalOrNull() ?: BigDecimal(0)
+            )
         }
 
         ScreenElement.DOCUMENT_PRODUCT_UNIT -> {

@@ -11,20 +11,16 @@ CREATE TABLE Product (
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
 
-    FOREIGN KEY(product_additional_price_id)
-            REFERENCES ProductAdditionalPrice(product_price_id)
-            ON DELETE CASCADE,
-
     FOREIGN KEY(product_tax_id)
           REFERENCES TaxRate(product_tax_id)
           ON DELETE CASCADE
 );
 
-INSERT INTO Product (product_id, name, description, final_price, product_additional_price_id, price_without_tax, product_tax_id, unit)
-VALUES (1, 'Carottes', 'vichou', 10, 1, 8.9, 1, "kg"),
-(2, 'zz', 'vichou', 3, 1, 4.3, 1, "kg"),
-(3, 'azeaz', 'vichou', 2, 1, 8.0,2, "kg"),
-(4, 'aaaa', 'vichou', 2, 1, 2.3,2, "kg")
+INSERT INTO Product (product_id, name, description, final_price, product_additional_price_id,  product_tax_id, unit)
+VALUES (1, 'Carottes', 'vichou', 10, 8.9, 1, "kg"),
+(2, 'zz', 'vichou', 3, 1,  1, "kg"),
+(3, 'azeaz', 'vichou', 2, 1, 2, "kg"),
+(4, 'aaaa', 'vichou', 2, 1, 2, "kg")
 ;
 
 getProduct:
@@ -37,8 +33,8 @@ SELECT *
 FROM Product;
 
 saveProduct:
-INSERT INTO Product (product_id, name, description, final_price, product_additional_price_id,  product_tax_id, price_without_tax, unit)
-VALUES (?, ?, ?,?, ?, ?, ?, ?);
+INSERT INTO Product (product_id, name, description, final_price, product_additional_price_id,  product_tax_id,unit)
+VALUES (?, ?, ?,?, ?, ?, ?);
 
 updateProduct:
 UPDATE Product
@@ -46,7 +42,6 @@ SET name = :name,
     description = :description,
     final_price = :final_price,
     product_tax_id = :product_tax_id,
-    price_without_tax = :price_without_tax,
     unit = :unit
 WHERE
     product_id = :product_id;

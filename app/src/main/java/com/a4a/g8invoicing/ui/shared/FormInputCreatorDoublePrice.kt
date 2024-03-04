@@ -25,7 +25,7 @@ import com.a4a.g8invoicing.R
 import java.math.BigDecimal
 import java.text.DecimalFormat
 
-// Used in Product Add/Edit
+// Used in forms with a product or documentProduct
 // for changing alternatively Price & Price including tax
 @Composable
 fun FormInputCreatorDoublePrice(
@@ -46,7 +46,7 @@ fun FormInputCreatorDoublePrice(
     // for instance, allow the input of only 1 separator (2,15 and not 2,15.23,23)
     val decimalFormatter = DecimalFormatter()
 
-    fun onValueChange(newValue: String, isFirstField: Boolean) {
+    fun updateFieldsWithCalculatedValues(newValue: String, isFirstField: Boolean) {
         taxRate?.let { tax ->
             if (isFirstField) {
                 text2 = newValue.toBigDecimalOrNull()?.let {
@@ -59,6 +59,7 @@ fun FormInputCreatorDoublePrice(
             }
         }
     }
+
     // If the product has a tax rate, we display price with tax & price without tax
     if (taxRate != null) {
         Column(
@@ -69,7 +70,7 @@ fun FormInputCreatorDoublePrice(
         ) {
             Text(
                 modifier = Modifier
-                    .padding(top = 2.dp, bottom = 3.dp),
+                    .padding(bottom = 3.dp),
                 text = stringResource(id = R.string.product_price_with_tax),
                 fontWeight = FontWeight.SemiBold
             )
@@ -85,19 +86,20 @@ fun FormInputCreatorDoublePrice(
         // If no tax rate has been chosen:
         //      it's the only displayed field & it displays the price
         // If a tax rate has been chosen :
-        //      it displays price with tax (HT = 4)
+        //      it displays price WITH tax (ex: TTC = 4.4)
 
         CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
 
             BasicTextField(
                 maxLines = 1,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(bottom = 3.dp),
                 value = text1 ?: "",
                 onValueChange = {
                     text1 = decimalFormatter.cleanup(it)
-                    onValueChange(it.replace(",", "."), true)
-                    textInput1.onValueChange(it.replace(",", "."))
+                    updateFieldsWithCalculatedValues(it.replace(",", "."), true)
+                    textInput1.onValueChange(it)
                 },
                 textStyle = LocalTextStyle.current,
                 keyboardOptions = KeyboardOptions(
@@ -121,7 +123,7 @@ fun FormInputCreatorDoublePrice(
             // If no tax rate has been chosen:
             // Not displayed
             // If a tax rate has been chosen :
-            // it's the first field and it displays price wit tax (TTC = 4.4)
+            // it's the first field and it displays price WITHOUT tax (HT = 4)
             if (taxRate != null) {
                 BasicTextField(
                     maxLines = 1,
@@ -130,8 +132,8 @@ fun FormInputCreatorDoublePrice(
                     value = text2 ?: "",
                     onValueChange = {
                         text2 = decimalFormatter.cleanup(it)
-                        onValueChange(it.replace(",", "."), false)
-                        textInput2.onValueChange(it.replace(",", "."))
+                        updateFieldsWithCalculatedValues(it.replace(",", "."), false)
+                        textInput1.onValueChange(text1 ?: "")
                     },
                     textStyle = LocalTextStyle.current,
                     keyboardOptions = KeyboardOptions(

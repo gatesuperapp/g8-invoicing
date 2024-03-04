@@ -94,7 +94,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-
     fun removeDocumentProductFromDeliveryNote(documentProductId: Int) {
         // Update the Ui State
         val newList = _deliveryNoteUiState.value.documentProducts?.toMutableList()

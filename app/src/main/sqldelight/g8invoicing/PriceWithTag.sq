@@ -3,10 +3,6 @@ item_price_id INTEGER NOT NULL,
 client_tag_id INTEGER NOT NULL,
 PRIMARY KEY (item_price_id, client_tag_id),
 
-  FOREIGN KEY(item_price_id)
-        REFERENCES ProductAdditionalPrice(product_price_id)
-        ON DELETE CASCADE,
-
   FOREIGN KEY(client_tag_id)
          REFERENCES ClientTag(client_tag_id)
          ON DELETE CASCADE

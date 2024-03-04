@@ -46,7 +46,7 @@ fun FormInputCreatorDecimal(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         BasicTextField(
             modifier = customModifier,
-            value = input.text ?: "",
+            value = text ?: "",
             onValueChange = {
                 text = decimalFormatter.cleanup(it)
                 input.onValueChange(it)

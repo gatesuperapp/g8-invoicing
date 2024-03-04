@@ -5,7 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductTaxRates
-import java.math.BigDecimal
 
 fun NavGraphBuilder.productTaxRates(
     navController: NavController,
@@ -15,11 +14,10 @@ fun NavGraphBuilder.productTaxRates(
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
         val taxRates = viewModel.fetchTaxRatesFromLocalDb()
 
-
         ProductTaxRates(
             navController = navController,
             taxRates = taxRates,
-            currentTaxRate = viewModel.productUiState.value.taxRate ?: BigDecimal(0),
+            currentTaxRate = viewModel.productUiState.value.taxRate,
             onSelectTaxRate = { selectedTaxRate ->
                 onClickBackOrSelect()
                 viewModel.updateTaxRate(selectedTaxRate)

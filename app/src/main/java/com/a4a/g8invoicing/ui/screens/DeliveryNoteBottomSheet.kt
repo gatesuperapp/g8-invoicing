@@ -66,7 +66,6 @@ fun DeliveryNoteBottomSheet(
     onClickNewClientOrIssuer: (PersonType) -> Unit = {},
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
-    onNewProductClick: () -> Unit = {},
     onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     currentClientId: Int? = null,
@@ -155,7 +154,6 @@ fun DeliveryNoteBottomSheet(
                 },
                 onProductClick = onProductClick,
                 documentProductUiState = documentProductUiState,
-                onNewProductClick = onNewProductClick,
                 onDocumentProductClick = onDocumentProductClick,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                 onClickNewClientOrIssuer = {
@@ -187,7 +185,6 @@ fun SlideInNextComponent(
     onClientOrIssuerClick: (ClientOrIssuerEditable) -> Unit,
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
-    onNewProductClick: () -> Unit,
     onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickNewClientOrIssuer: () -> Unit,
@@ -234,12 +231,15 @@ fun SlideInNextComponent(
             list = params?.first ?: emptyList(),
             onClickBack = onClickBack,
             onClickChooseProduct = { isProductListVisible = true },
-            onDocumentProductClick = onDocumentProductClick
-            /*       {
-                       documentProduct = it
-                       typeOfCreation = TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT
-                       isDocumentFormVisible = true
-                   }*/,
+            onDocumentProductClick = {
+                onDocumentProductClick(it)
+                typeOfCreation = TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT
+                isDocumentFormVisible = true
+                CoroutineScope(Dispatchers.IO).launch {
+                    delay(TimeUnit.MILLISECONDS.toMillis(500))
+                    isProductListVisible = false
+                }
+            },
             onClickDeleteDocumentProduct = onClickDeleteDocumentProduct
         )
 
@@ -261,7 +261,6 @@ fun SlideInNextComponent(
 
                 },
                 onClickNewProduct = {
-                    onNewProductClick()
                     typeOfCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
                     isDocumentFormVisible = true
                     CoroutineScope(Dispatchers.IO).launch {
@@ -303,7 +302,7 @@ fun SlideUpTheForm(
     onClickDone: () -> Unit,
     productOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    documentProduct: DocumentProductState?,
+    documentProduct: DocumentProductState,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()

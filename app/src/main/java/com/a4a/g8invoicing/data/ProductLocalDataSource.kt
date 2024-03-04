@@ -22,7 +22,6 @@ class ProductLocalDataSource(
     db: Database,
 ) : ProductLocalDataSourceInterface {
     private val productQueries = db.productQueries
-    private val productPriceQueries = db.productAdditionalPriceQueries
     private val taxQueries = db.taxRateQueries
     private val documentProductQueries = db.documentProductQueries
 
@@ -48,22 +47,16 @@ class ProductLocalDataSource(
     override suspend fun saveProduct(product: ProductState) {
         return withContext(Dispatchers.IO) {
             try {
-                product.priceWithoutTax?.let {
-                    productPriceQueries.saveProductPrice(
-                        product_price_id = null,
-                        amount = it.toDouble(),
-                    )
-                }
+
                 productQueries.saveProduct(
                     product_id = null,
                     name = product.name.text,
                     description = product.description?.text,
-                    final_price = product.finalPrice?.toDouble(),
+                    final_price = product.priceWithTax?.toDouble(),
                     product_additional_price_id = null, //TODO get the price id from db
                     product_tax_id = product.taxRate?.let {
                         taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
                     },
-                    price_without_tax = product.priceWithoutTax?.toDouble(),
                     unit = product.unit?.text
                 )
             } catch (cause: Throwable) {
@@ -85,7 +78,8 @@ class ProductLocalDataSource(
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong()
                 )
-                documentProductId = documentProductQueries.lastInsertRowId().executeAsOneOrNull()?.toInt()
+                documentProductId =
+                    documentProductQueries.lastInsertRowId().executeAsOneOrNull()?.toInt()
 
             } catch (cause: Throwable) {
             }
@@ -100,12 +94,11 @@ class ProductLocalDataSource(
                     product_id = null,
                     name = product.name.text,
                     description = product.description?.text,
-                    final_price = product.finalPrice?.toDouble(),
+                    final_price = product.priceWithTax?.toDouble(),
                     product_tax_id = product.taxRate?.let {
                         taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
                     },
                     product_additional_price_id = 1, // TODO change when adding several prices / product
-                    price_without_tax = product.priceWithoutTax?.toDouble(),
                     unit = product.unit?.text
                 )
             } catch (cause: Throwable) {
@@ -116,17 +109,18 @@ class ProductLocalDataSource(
     override suspend fun updateProduct(product: ProductState) {
         return withContext(Dispatchers.IO) {
             try {
-                productQueries.updateProduct(
-                    product_id = product.productId?.toLong() ?: 0,
-                    name = product.name.text,
-                    description = product.description?.text ?: "",
-                    final_price = product.finalPrice?.toDouble(),
-                    product_tax_id = product.taxRate?.let {
-                        taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
-                    },
-                    price_without_tax = product.priceWithoutTax?.toDouble(),
-                    unit = product.unit?.text
-                )
+                product.productId?.toLong()?.let {
+                    productQueries.updateProduct(
+                        product_id = it,
+                        name = product.name.text,
+                        description = product.description?.text ?: "",
+                        final_price = product.priceWithTax?.toDouble(),
+                        product_tax_id = product.taxRate?.let {
+                            taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
+                        },
+                        unit = product.unit?.text
+                    )
+                }
             } catch (cause: Throwable) {
             }
         }
@@ -135,16 +129,17 @@ class ProductLocalDataSource(
     override suspend fun updateDocumentProduct(documentProduct: DocumentProductState) {
         return withContext(Dispatchers.IO) {
             try {
-                documentProductQueries.updateDocumentProduct(
-                    document_product_id = documentProduct.id?.toLong() ?: 0,
-                    name = documentProduct.name.text,
-                    quantity = documentProduct.quantity.toDouble(),
-                    description = documentProduct.description?.text,
-                    price_with_tax = documentProduct.priceWithTax.toDouble(),
-                    tax_rate = documentProduct.taxRate.toLong(),
-                    unit = documentProduct.unit?.text,
-                    product_id = documentProduct.productId?.toLong(),
-                )
+                documentProduct.id?.toLong()?.let {
+                    documentProductQueries.updateDocumentProduct(
+                        document_product_id = it,
+                        name = documentProduct.name.text,
+                        quantity = documentProduct.quantity.toDouble(),
+                        description = documentProduct.description?.text,
+                        price_with_tax = documentProduct.priceWithTax.toDouble(),
+                        tax_rate = documentProduct.taxRate.toLong(),
+                        unit = documentProduct.unit?.text
+                    )
+                }
             } catch (cause: Throwable) {
             }
         }
@@ -167,18 +162,16 @@ class ProductLocalDataSource(
     }
 }
 
-fun Product.transformIntoEditableProduct(
-    taxQueries: TaxRateQueries,
-): ProductState {
+fun Product.transformIntoEditableProduct(taxQueries: TaxRateQueries): ProductState {
     return ProductState(
         productId = this.product_id.toInt(),
         name = TextFieldValue(this.name),
         description = TextFieldValue(this.description ?: ""),
-        finalPrice = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
-        priceWithoutTax = this.price_without_tax?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
+        priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)
+            ?: BigDecimal(0),
         taxRate = this.product_tax_id?.let {
             taxQueries.getTaxRate(it)
-        }?.executeAsOneOrNull()?.toBigDecimal(),
+        }?.executeAsOneOrNull()?.toBigDecimal() ?: BigDecimal(0),
         unit = TextFieldValue(this.unit ?: "")
     )
 }

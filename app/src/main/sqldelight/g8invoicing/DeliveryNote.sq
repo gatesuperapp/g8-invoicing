@@ -11,10 +11,6 @@ CREATE TABLE DeliveryNote (
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
   deleted_at REAL DEFAULT (datetime('now', 'localtime')),
 
-    FOREIGN KEY(issuer_id)
-            REFERENCES ProductAdditionalPrice(product_price_id)
-            ON DELETE CASCADE,
-
     FOREIGN KEY(client_id)
           REFERENCES TaxRate(product_tax_id)
           ON DELETE CASCADE

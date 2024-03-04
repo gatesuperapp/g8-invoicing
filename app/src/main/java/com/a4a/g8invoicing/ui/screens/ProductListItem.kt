@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
 
 
 @Composable
@@ -116,7 +115,7 @@ fun ProductListItem(
                 )
 
                 Text(
-                    text = product.finalPrice?.let {
+                    text = product.priceWithTax?.let {
                         it.toString() + stringResource(R.string.currency)
                     } ?: " - "
                 )

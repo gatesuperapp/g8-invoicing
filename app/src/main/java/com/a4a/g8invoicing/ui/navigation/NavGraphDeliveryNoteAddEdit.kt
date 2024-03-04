@@ -16,7 +16,6 @@ import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductListViewModel
 import com.a4a.g8invoicing.ui.screens.ProductType
 import com.a4a.g8invoicing.ui.screens.TypeOfProductCreation
-import com.a4a.g8invoicing.ui.states.ProductState
 
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
@@ -94,15 +93,14 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
             },
             onClickNewClientOrIssuer = onClickNewClientOrIssuer,
-            onProductClick = {
-                // Initialize documentProductUiState to display it in the bottomSheet form
+            onDocumentProductClick = {
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
-            documentProductUiState = documentProductUiState, // Used when choosing a product or creating new product from the bottom sheet
-            onNewProductClick = {
-
+            onProductClick = {
+                // Initialize documentProductUiState to display it in the bottomSheet form
+                productAddEditViewModel.setDocumentProductUiStateWithProduct(it)
             },
-            onDocumentProductClick = {},
+            documentProductUiState = documentProductUiState, // Used when choosing a product or creating new product from the bottom sheet
             onClickDeleteDocumentProduct = {
                 deliveryNoteViewModel.removeDocumentProductFromDeliveryNote(it)
             },
