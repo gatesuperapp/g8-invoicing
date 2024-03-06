@@ -47,7 +47,6 @@ class ProductLocalDataSource(
     override suspend fun saveProduct(product: ProductState) {
         return withContext(Dispatchers.IO) {
             try {
-
                 productQueries.saveProduct(
                     product_id = null,
                     name = product.name.text,

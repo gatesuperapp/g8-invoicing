@@ -86,6 +86,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onClickBack = onClickBack,
             clients = clientsUiState.clientsOrIssuers.toMutableList(),
             issuers = issuersUiState.clientsOrIssuers.toMutableList(),
+            taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
             products = productListUiState.products.toMutableList(), // The list of products to display when choosing to add a product
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
@@ -136,7 +137,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickCancelForm = {
                 productAddEditViewModel.clearDocumentProductUiState()
-            }
+            },
+            onSelectTaxRate = { productAddEditViewModel.updateTaxRate(it) }
         )
     }
 }

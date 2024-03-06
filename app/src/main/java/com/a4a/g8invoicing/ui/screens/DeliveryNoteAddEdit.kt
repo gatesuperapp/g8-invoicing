@@ -43,6 +43,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,6 +55,7 @@ fun DeliveryNoteAddEdit(
     deliveryNote: DeliveryNoteState,
     clients: MutableList<ClientOrIssuerEditable>,
     issuers: MutableList<ClientOrIssuerEditable>,
+    taxRates: List<BigDecimal>,
     products: MutableList<ProductState>,
     isNewDeliveryNote: Boolean,
     onClickDone: (Boolean) -> Unit,
@@ -69,6 +71,7 @@ fun DeliveryNoteAddEdit(
     documentProductPlaceCursor: (ScreenElement) -> Unit,
     onClickDoneForm: (TypeOfProductCreation) -> Unit,
     onClickCancelForm: () -> Unit,
+    onSelectTaxRate: (BigDecimal?) -> Unit
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -131,6 +134,7 @@ fun DeliveryNoteAddEdit(
                 clients = clients,
                 issuers = issuers,
                 products = products,
+                taxRates = taxRates,
                 onValueChange = onValueChange,
                 onClickNewClientOrIssuer = onClickNewClientOrIssuer,
                 onProductClick = onProductClick,
@@ -145,6 +149,7 @@ fun DeliveryNoteAddEdit(
                 productPlaceCursorAtTheEndOfText = documentProductPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
+                onSelectTaxRate = onSelectTaxRate
             )
         },
         sheetShadowElevation = 30.dp

@@ -95,7 +95,7 @@ fun FormInputCreatorDoublePrice(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 3.dp),
-                value = text1 ?: "",
+                value = text1?.replace(".", ",") ?: "",
                 onValueChange = {
                     text1 = decimalFormatter.cleanup(it)
                     updateFieldsWithCalculatedValues(it.replace(",", "."), true)
@@ -129,7 +129,7 @@ fun FormInputCreatorDoublePrice(
                     maxLines = 1,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    value = text2 ?: "",
+                    value = text2?.replace(".", ",") ?: "",
                     onValueChange = {
                         text2 = decimalFormatter.cleanup(it)
                         updateFieldsWithCalculatedValues(it.replace(",", "."), false)

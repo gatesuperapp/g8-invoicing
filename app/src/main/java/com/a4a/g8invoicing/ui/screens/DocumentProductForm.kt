@@ -43,9 +43,7 @@ fun DocumentProductForm(
             .fillMaxHeight(0.7f)
             .fillMaxWidth()
             .imePadding()
-            .padding(
-                top = 30.dp,
-            )
+            .padding(top = 30.dp)
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     localFocusManager.clearFocus()
@@ -72,7 +70,7 @@ fun DocumentProductForm(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
 
             ) {
-                var priceWithoutTax = BigDecimal(0)
+                var priceWithoutTax: BigDecimal
                 documentProduct.let {
                     priceWithoutTax =
                         it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)

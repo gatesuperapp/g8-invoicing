@@ -30,6 +30,10 @@ getAllDeliveryNotes:
 SELECT *
 FROM DeliveryNote;
 
+getAllDeliveryNotesIds:
+SELECT delivery_note_id
+FROM DeliveryNote;
+
 saveDeliveryNote:
 INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, issuer_id, client_id, currency)
 VALUES (?,  ?,  ?, ?, ?, ?, ?);

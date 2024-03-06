@@ -26,6 +26,7 @@ class DeliveryNoteListViewModel @Inject constructor(
     val deliveryNotesUiState: StateFlow<DeliveryNotesUiState> = _deliveryNotesUiState.asStateFlow()
 
     private var fetchJob: Job? = null
+    private var fetchJob1: Job? = null
     private var deleteJob: Job? = null
     private var saveJob: Job? = null
     private var duplicateJob: Job? = null
@@ -39,14 +40,14 @@ class DeliveryNoteListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.fetchAllDeliveryNotes().collect {
-                    _deliveryNotesUiState.update { deliveryNotesUiState ->
+                   _deliveryNotesUiState.update { deliveryNotesUiState ->
                         deliveryNotesUiState.copy(
                             deliveryNoteItems = it
                         )
                     }
                 }
             } catch (e: Exception) {
-                println("Fetching deliveryNotes failed with exception: ${e.localizedMessage}")
+                println("Fetching all deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }

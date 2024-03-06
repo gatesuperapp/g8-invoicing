@@ -46,10 +46,10 @@ fun FormInputCreatorDecimal(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         BasicTextField(
             modifier = customModifier,
-            value = text ?: "",
+            value = text?.replace(".", ",") ?: "",
             onValueChange = {
                 text = decimalFormatter.cleanup(it)
-                input.onValueChange(it)
+                input.onValueChange(it.replace(",", "."))
             },
             textStyle = LocalTextStyle.current,
             keyboardOptions = KeyboardOptions(

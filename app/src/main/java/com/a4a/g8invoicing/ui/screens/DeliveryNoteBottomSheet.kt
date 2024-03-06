@@ -50,6 +50,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
 
@@ -63,6 +64,7 @@ fun DeliveryNoteBottomSheet(
     clients: MutableList<ClientOrIssuerEditable>,
     issuers: MutableList<ClientOrIssuerEditable>,
     products: MutableList<ProductState>,
+    taxRates: List<BigDecimal>,
     onClickNewClientOrIssuer: (PersonType) -> Unit = {},
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
@@ -76,6 +78,7 @@ fun DeliveryNoteBottomSheet(
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickDoneForm: (TypeOfProductCreation) -> Unit,
     onClickCancelForm: () -> Unit,
+    onSelectTaxRate: (BigDecimal?) -> Unit
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -139,7 +142,12 @@ fun DeliveryNoteBottomSheet(
                 parameters = when (slideOtherComponent.value) {
                     ScreenElement.DOCUMENT_ISSUER -> issuers
                     ScreenElement.DOCUMENT_CLIENT -> clients
-                    ScreenElement.DOCUMENT_PRODUCTS -> Pair(deliveryNote.documentProducts, products)
+                    ScreenElement.DOCUMENT_PRODUCTS -> listOf(
+                        deliveryNote.documentProducts,
+                        products,
+                        taxRates
+                    )
+
                     ScreenElement.DOCUMENT_DATE -> deliveryNote.deliveryDate
                     else -> {}
                 },
@@ -170,8 +178,9 @@ fun DeliveryNoteBottomSheet(
                 documentProductOnValueChange = documentProductOnValueChange,
                 productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
                 onClickDoneForm = onClickDoneForm,
-                onClickCancelForm = onClickCancelForm
-                )
+                onClickCancelForm = onClickCancelForm,
+                onSelectTaxRate = onSelectTaxRate
+            )
         }
     }
 }
@@ -196,13 +205,11 @@ fun SlideInNextComponent(
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickDoneForm: (TypeOfProductCreation) -> Unit,
     onClickCancelForm: () -> Unit,
-
-    ) {
+    onSelectTaxRate: (BigDecimal?) -> Unit,
+) {
     var isProductListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: TypeOfProductCreation by remember { mutableStateOf(TypeOfProductCreation.ADD_PRODUCT) }
     var isDocumentFormVisible by remember { mutableStateOf(false) }
-    var productId: Int? by remember { mutableStateOf(null) }
-    // var documentProduct: DocumentProductState by remember { mutableStateOf(DocumentProductState()) }
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         DeliveryNoteBottomSheetClientOrIssuerList(
@@ -225,10 +232,10 @@ fun SlideInNextComponent(
     }
 
     if (pageElement == ScreenElement.DOCUMENT_PRODUCTS) {
-        val params = parameters as Pair<List<DocumentProductState>, List<ProductState>>?
+        val params = parameters as List<List<Any>?>
 
         DeliveryNoteBottomSheetDocumentProductList(
-            list = params?.first ?: emptyList(),
+            list = params.first() as List<DocumentProductState>? ?: emptyList(),
             onClickBack = onClickBack,
             onClickChooseProduct = { isProductListVisible = true },
             onDocumentProductClick = {
@@ -245,7 +252,7 @@ fun SlideInNextComponent(
 
         if (isProductListVisible) {
             DeliveryNoteBottomSheetProductList(
-                list = params?.second ?: emptyList(),
+                list = params[1] as List<ProductState>? ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
                     onProductClick(it) // Update the ProductAddEditViewModel with the chosen product
@@ -276,6 +283,7 @@ fun SlideInNextComponent(
             SlideUpTheForm(
                 typeOfCreation,
                 documentProduct = documentProductUiState,
+                taxRates = params[2] as List<BigDecimal> ?: emptyList(),
                 productOnValueChange = { screenElement, value ->
                     documentProductOnValueChange(screenElement, value)
                 },
@@ -287,7 +295,8 @@ fun SlideInNextComponent(
                 onClickDone = {
                     onClickDoneForm(typeOfCreation)
                     isDocumentFormVisible = false
-                }
+                },
+                onSelectTaxRate = onSelectTaxRate
             )
         }
     }
@@ -298,15 +307,17 @@ fun SlideInNextComponent(
 @Composable
 fun SlideUpTheForm(
     productCreation: TypeOfProductCreation?,
+    documentProduct: DocumentProductState,
+    taxRates: List<BigDecimal>,
     onClickCancel: () -> Unit,
     onClickDone: () -> Unit,
     productOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    documentProduct: DocumentProductState,
+    onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    var isTaxSelectionVisible by remember { mutableStateOf(false) }
 
     ModalBottomSheet(
         onDismissRequest = onClickCancel,
@@ -355,15 +366,39 @@ fun SlideUpTheForm(
                     )
                 }
             }
-            DocumentProductForm(
-                documentProduct = documentProduct,
-                onValueChange = productOnValueChange,
-                placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
-                onClickForward = {}
-            )
+            if (!isTaxSelectionVisible) {
+                DocumentProductForm(
+                    documentProduct = documentProduct,
+                    onValueChange = productOnValueChange,
+                    placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                    onClickForward = {
+                        isTaxSelectionVisible = true
+                    }
+                )
+            } else {
+                OpenTaxSelection(taxRates,
+                    documentProduct.taxRate,
+                    onSelectTaxRate = {
+                        isTaxSelectionVisible = false
+                        onSelectTaxRate(it)
+                    }
+                )
+            }
         }
-
     }
+}
+
+@Composable
+fun OpenTaxSelection(
+    taxRates: List<BigDecimal>,
+    currentTaxRate: BigDecimal,
+    onSelectTaxRate: (BigDecimal?) -> Unit,
+) {
+    ProductTaxRatesContent(
+        taxRates,
+        currentTaxRate,
+        onSelectTaxRate,
+    )
 }
 
 enum class TypeOfProductCreation {

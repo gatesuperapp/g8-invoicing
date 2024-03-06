@@ -43,7 +43,6 @@ fun ProductTaxRates(
     onClickBack: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    var chosenOption by remember { mutableStateOf(currentTaxRate) }
 
     // When going back with system navigation, we save the state (same as with back arrow).
     // It's because we use nested navigation
@@ -58,8 +57,8 @@ fun ProductTaxRates(
                 onClickBackArrow = onClickBack
             )
         }
-    ) { it
-
+    ) {
+        it
         Column(
             modifier = Modifier
                 .background(Color.LightGray.copy(alpha = 0.4f))
@@ -70,105 +69,9 @@ fun ProductTaxRates(
                     top = 80.dp,
                 )
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(12.dp),
-                //.fillMaxHeight(0.9f),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            )
-            {
-                Column(
-                    modifier = Modifier
-                        .background(color = Color.White, shape = RoundedCornerShape(6.dp))
-                        .fillMaxWidth()
-                        .padding(
-                            top = 8.dp,
-                            bottom = 8.dp
-                        )
-
-                ) {
-                    // Add the "no Tax" value to the list
-                    val taxRatesIncludingNoTax = taxRates.toMutableList()
-                    taxRatesIncludingNoTax.add(0, BigDecimal(0))
-
-                    taxRatesIncludingNoTax.forEach { taxRate ->
-
-                        val isCurrentTaxRate = taxRate == chosenOption
-
-                        Row(
-                            verticalAlignment = Alignment.Top, // For label to stay on top when multiline text
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    start = 20.dp,
-                                    end = 20.dp,
-                                    top = 16.dp,
-                                    bottom = 16.dp
-                                )
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .clickable(
-                                        onClick = {
-                                            chosenOption = taxRate
-                                            onSelectTaxRate(
-                                                if (taxRate == BigDecimal(0)) {
-                                                    null
-                                                } else taxRate
-                                            )
-                                        }
-                                    )
-                                    .weight(1F)
-                                    .fillMaxWidth(0.4f)
-                                    .padding(
-                                        start = 20.dp,
-                                        end = 8.dp
-                                    ),
-                                text = if (taxRate == BigDecimal(0)) {
-                                    "-"
-                                } else {
-                                    "$taxRate%"
-                                },
-                                style = LocalTextStyle.current
-                            )
-                            if (isCurrentTaxRate) {
-                                Icon(
-                                    imageVector = IconDone,
-                                    contentDescription = "Selected tax rate"
-                                )
-                            }
-                            /* //TODO allow to delete taxrates when edit mode on
-                               else {
-                                     Icon(
-                                         imageVector = IconCancel,
-                                         contentDescription = "Selected tax rate",
-                                         tint = ColorLightGrayGreen
-                                     )
-                                 }*/
-                        }
-
-                        if (taxRate != taxRates.last()) {
-                            Separator()
-                        }
-                    }
-                }
-
-                /*          //TODO add this text to trigger edition
-                  Text(
-                                    modifier = Modifier
-                                        .clickable(
-                                            onClick = { isEditMode = true }
-                                        )
-                                        .align(Alignment.End)
-                                        .fillMaxWidth(0.4f)
-                                        .padding(
-
-                                        ),
-                                    text = stringResource(id = R.string.tax_rate_change_rates) ,
-                                )*/
-
-            }
+            ProductTaxRatesContent(taxRates, currentTaxRate, onSelectTaxRate)
         }
+
     }
 }
 
