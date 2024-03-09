@@ -2,24 +2,23 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 
 @Composable
 fun ClientOrIssuerListContent(
-    clientsOrIssuers: List<ClientOrIssuerEditable>,
-    onItemClick: (ClientOrIssuerEditable) -> Unit = {},
+    clientsOrIssuers: List<ClientOrIssuerState>,
+    onItemClick: (ClientOrIssuerState) -> Unit = {},
     onClickNew: () -> Unit = {}, // Used only in documents, clicking the "Add new" button
     displayTopButton: Boolean = false,
-    addToSelectedList: (ClientOrIssuerEditable) -> Unit = {},
-    removeFromSelectedList: (ClientOrIssuerEditable) -> Unit = {},
+    addToSelectedList: (ClientOrIssuerState) -> Unit = {},
+    removeFromSelectedList: (ClientOrIssuerState) -> Unit = {},
     keyToUnselectAll: Boolean = false,
     isCheckboxDisplayed: Boolean = true,
     currentClientOrIssuerId: Int? = null,

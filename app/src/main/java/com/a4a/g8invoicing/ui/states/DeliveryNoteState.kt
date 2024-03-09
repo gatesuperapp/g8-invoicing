@@ -1,10 +1,7 @@
 package com.a4a.g8invoicing.ui.states
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.text.input.TextFieldValue
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import java.math.BigDecimal
 
 // This Client is created to manipulate client data,
@@ -16,8 +13,8 @@ data class DeliveryNoteState(
     var number: TextFieldValue? = null, // Mandatory to control placing the cursor in the field
     var deliveryDate: String? = null,
     var orderNumber: TextFieldValue? = null,
-    var issuer: ClientOrIssuerEditable? = null,
-    var client: ClientOrIssuerEditable? = null,
+    var issuer: ClientOrIssuerState? = null,
+    var client: ClientOrIssuerState? = null,
     var documentProducts: List<DocumentProductState>? = null,
     var documentPrices: DocumentPrices? = null,
     var currency: TextFieldValue? = null,

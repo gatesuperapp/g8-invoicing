@@ -29,10 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -61,11 +60,10 @@ fun DeliveryNoteBottomSheet(
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
-    clients: MutableList<ClientOrIssuerEditable>,
-    issuers: MutableList<ClientOrIssuerEditable>,
+    clients: MutableList<ClientOrIssuerState>,
+    issuers: MutableList<ClientOrIssuerState>,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
-    onClickNewClientOrIssuer: (PersonType) -> Unit = {},
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
     onDocumentProductClick: (DocumentProductState) -> Unit,
@@ -74,11 +72,11 @@ fun DeliveryNoteBottomSheet(
     currentIssuerId: Int? = null,
     currentProductsIds: List<Int>? = null,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    documentProductOnValueChange: (ScreenElement, Any) -> Unit,
-    productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (TypeOfProductCreation) -> Unit,
+    bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
+    bottomFormPlaceCursor: (ScreenElement) -> Unit,
+    onClickDoneForm: (TypeOfBottomSheetForm) -> Unit,
     onClickCancelForm: () -> Unit,
-    onSelectTaxRate: (BigDecimal?) -> Unit
+    onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -155,8 +153,8 @@ fun DeliveryNoteBottomSheet(
                     slideOtherComponent.value = null
                 },
                 onClientOrIssuerClick = {
-                    // Must select it, display it
-                    // in the document & go back to previous screen
+                    // Select it, display it in the document
+                    //  & go back to previous screen
                     onValueChange(slideOtherComponent.value!!, it)
                     slideOtherComponent.value = null
                 },
@@ -164,19 +162,12 @@ fun DeliveryNoteBottomSheet(
                 documentProductUiState = documentProductUiState,
                 onDocumentProductClick = onDocumentProductClick,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                onClickNewClientOrIssuer = {
-                    if (slideOtherComponent.value == ScreenElement.DOCUMENT_ISSUER) {
-                        onClickNewClientOrIssuer(PersonType.Issuer)
-                    } else {
-                        onClickNewClientOrIssuer(PersonType.Client)
-                    }
-                },
                 datePickerState = datePickerState,
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId,
                 currentProductsIds = currentProductsIds,
-                documentProductOnValueChange = documentProductOnValueChange,
-                productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                bottomFormOnValueChange = bottomFormOnValueChange,
+                productPlaceCursorAtTheEndOfText = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate
@@ -191,33 +182,43 @@ fun SlideInNextComponent(
     pageElement: ScreenElement?,
     parameters: Any?,
     onClickBack: () -> Unit,
-    onClientOrIssuerClick: (ClientOrIssuerEditable) -> Unit,
+    onClientOrIssuerClick: (ClientOrIssuerState) -> Unit,
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
     onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
-    onClickNewClientOrIssuer: () -> Unit,
     datePickerState: DatePickerState,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     currentProductsIds: List<Int>? = null,
-    documentProductOnValueChange: (ScreenElement, Any) -> Unit,
+    bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    onClickDoneForm: (TypeOfProductCreation) -> Unit,
+    onClickDoneForm: (TypeOfBottomSheetForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
     var isProductListVisible by remember { mutableStateOf(false) }
-    var typeOfCreation: TypeOfProductCreation by remember { mutableStateOf(TypeOfProductCreation.ADD_PRODUCT) }
+    var typeOfCreation: TypeOfBottomSheetForm by remember { mutableStateOf(TypeOfBottomSheetForm.ADD_PRODUCT) }
     var isDocumentFormVisible by remember { mutableStateOf(false) }
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         DeliveryNoteBottomSheetClientOrIssuerList(
-            list = parameters?.let { it as List<ClientOrIssuerEditable> } ?: emptyList(),
+            list = parameters?.let { it as List<ClientOrIssuerState> } ?: emptyList(),
             pageElement = pageElement,
             onClickBack = onClickBack,
-            onClientOrIssuerClick = onClientOrIssuerClick,
-            onClickNewClientOrIssuer = onClickNewClientOrIssuer,
+            onClientOrIssuerClick = {
+                onClientOrIssuerClick(it)
+                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                    TypeOfBottomSheetForm.ADD_CLIENT
+                } else TypeOfBottomSheetForm.ADD_ISSUER
+
+            },
+            onClickNewClientOrIssuer = {
+                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                    TypeOfBottomSheetForm.NEW_CLIENT
+                } else TypeOfBottomSheetForm.NEW_ISSUER
+                isDocumentFormVisible = true
+            },
             currentClientId = currentClientId,
             currentIssuerId = currentIssuerId
         )
@@ -240,7 +241,7 @@ fun SlideInNextComponent(
             onClickChooseProduct = { isProductListVisible = true },
             onDocumentProductClick = {
                 onDocumentProductClick(it)
-                typeOfCreation = TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT
+                typeOfCreation = TypeOfBottomSheetForm.EDIT_DOCUMENT_PRODUCT
                 isDocumentFormVisible = true
                 CoroutineScope(Dispatchers.IO).launch {
                     delay(TimeUnit.MILLISECONDS.toMillis(500))
@@ -257,7 +258,7 @@ fun SlideInNextComponent(
                 onProductClick = {
                     onProductClick(it) // Update the ProductAddEditViewModel with the chosen product
                     // so we open bottom document form with the chosen product
-                    typeOfCreation = TypeOfProductCreation.ADD_PRODUCT
+                    typeOfCreation = TypeOfBottomSheetForm.ADD_PRODUCT
                     isDocumentFormVisible = true
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
@@ -265,10 +266,9 @@ fun SlideInNextComponent(
                         // so previous screen change is in background
                         isProductListVisible = false
                     }
-
                 },
                 onClickNewProduct = {
-                    typeOfCreation = TypeOfProductCreation.CREATE_NEW_PRODUCT
+                    typeOfCreation = TypeOfBottomSheetForm.NEW_PRODUCT
                     isDocumentFormVisible = true
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
@@ -283,9 +283,9 @@ fun SlideInNextComponent(
             SlideUpTheForm(
                 typeOfCreation,
                 documentProduct = documentProductUiState,
-                taxRates = params[2] as List<BigDecimal> ?: emptyList(),
-                productOnValueChange = { screenElement, value ->
-                    documentProductOnValueChange(screenElement, value)
+                taxRates = params[2] as List<BigDecimal>,
+                bottomFormOnValueChange = { screenElement, value ->
+                    bottomFormOnValueChange(screenElement, value)
                 },
                 productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
                 onClickCancel = { // Re-initialize
@@ -302,16 +302,15 @@ fun SlideInNextComponent(
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SlideUpTheForm(
-    productCreation: TypeOfProductCreation?,
+    typeOfElement: TypeOfBottomSheetForm?,
     documentProduct: DocumentProductState,
     taxRates: List<BigDecimal>,
     onClickCancel: () -> Unit,
     onClickDone: () -> Unit,
-    productOnValueChange: (ScreenElement, Any) -> Unit,
+    bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
     productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
@@ -324,7 +323,6 @@ fun SlideUpTheForm(
         sheetState = sheetState,
         dragHandle = null
     ) {
-
         Column(modifier = Modifier.padding(bottom = bottomPadding)) {
             Row(
                 modifier = Modifier
@@ -340,19 +338,27 @@ fun SlideUpTheForm(
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(top = 20.dp)
-                            .clickable { onClickCancel() },
+                            .clickable {
+                                if (isTaxSelectionVisible) {
+                                    isTaxSelectionVisible = false
+                                } else onClickCancel()
+                            },
                         style = MaterialTheme.typography.textSmall,
-                        text = stringResource(id = R.string.delivery_note_modal_new_product_cancel)
+                        text = if (!isTaxSelectionVisible) {
+                            stringResource(id = R.string.delivery_note_modal_product_cancel)
+                        } else stringResource(id = R.string.delivery_note_modal_product_tva_back)
                     )
                     Text(
                         modifier = Modifier
                             .padding(bottom = 20.dp)
                             .align(Alignment.TopCenter),
                         style = MaterialTheme.typography.textTitle,
-                        text = when (productCreation) {
-                            TypeOfProductCreation.EDIT_DOCUMENT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_edit_product)
-                            TypeOfProductCreation.ADD_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
-                            TypeOfProductCreation.CREATE_NEW_PRODUCT -> stringResource(id = R.string.delivery_note_modal_new_product)
+                        text = when (typeOfElement) {
+                            TypeOfBottomSheetForm.NEW_ISSUER -> stringResource(id = R.string.delivery_note_modal_new_issuer)
+                            TypeOfBottomSheetForm.NEW_CLIENT -> stringResource(id = R.string.delivery_note_modal_new_client)
+                            TypeOfBottomSheetForm.EDIT_DOCUMENT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_edit_product)
+                            TypeOfBottomSheetForm.ADD_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
+                            TypeOfBottomSheetForm.NEW_PRODUCT -> stringResource(id = R.string.delivery_note_modal_new_product)
                             else -> ""
                         }
                     )
@@ -362,27 +368,39 @@ fun SlideUpTheForm(
                             .align(Alignment.TopEnd)
                             .clickable { onClickDone() },
                         style = MaterialTheme.typography.textSmall,
-                        text = stringResource(id = R.string.delivery_note_modal_new_product_save)
+                        text = if (!isTaxSelectionVisible) {
+                            stringResource(id = R.string.delivery_note_modal_product_save)
+                        } else ""
                     )
                 }
             }
-            if (!isTaxSelectionVisible) {
-                DocumentProductForm(
-                    documentProduct = documentProduct,
-                    onValueChange = productOnValueChange,
+            if (typeOfElement == TypeOfBottomSheetForm.NEW_CLIENT || typeOfElement == TypeOfBottomSheetForm.NEW_ISSUER) {
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuer = ClientOrIssuerState(),
+                    onValueChange = bottomFormOnValueChange,
                     placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
-                    onClickForward = {
-                        isTaxSelectionVisible = true
-                    }
+                    isDisplayedInBottomSheet = true
+
                 )
             } else {
-                OpenTaxSelection(taxRates,
-                    documentProduct.taxRate,
-                    onSelectTaxRate = {
-                        isTaxSelectionVisible = false
-                        onSelectTaxRate(it)
-                    }
-                )
+                if (!isTaxSelectionVisible) {
+                    DocumentProductForm(
+                        documentProduct = documentProduct,
+                        bottomFormOnValueChange = bottomFormOnValueChange,
+                        placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                        onClickForward = {
+                            isTaxSelectionVisible = true
+                        }
+                    )
+                } else {
+                    OpenTaxSelection(taxRates,
+                        documentProduct.taxRate,
+                        onSelectTaxRate = {
+                            isTaxSelectionVisible = false
+                            onSelectTaxRate(it)
+                        }
+                    )
+                }
             }
         }
     }
@@ -398,13 +416,18 @@ fun OpenTaxSelection(
         taxRates,
         currentTaxRate,
         onSelectTaxRate,
+        true
     )
 }
 
-enum class TypeOfProductCreation {
+enum class TypeOfBottomSheetForm {
+    NEW_CLIENT,
+    ADD_CLIENT,
+    NEW_ISSUER,
+    ADD_ISSUER,
     EDIT_DOCUMENT_PRODUCT,
     ADD_PRODUCT,
-    CREATE_NEW_PRODUCT
+    NEW_PRODUCT
 }
 
 //TODO animation: slide elements from right to left on open, and left to right on close

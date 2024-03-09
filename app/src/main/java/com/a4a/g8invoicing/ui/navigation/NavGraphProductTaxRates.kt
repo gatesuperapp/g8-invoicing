@@ -5,6 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductTaxRates
+import com.a4a.g8invoicing.ui.screens.ProductType
 
 fun NavGraphBuilder.productTaxRates(
     navController: NavController,
@@ -20,7 +21,7 @@ fun NavGraphBuilder.productTaxRates(
             currentTaxRate = viewModel.productUiState.value.taxRate,
             onSelectTaxRate = { selectedTaxRate ->
                 onClickBackOrSelect()
-                viewModel.updateTaxRate(selectedTaxRate)
+                viewModel.updateTaxRate(selectedTaxRate, ProductType.PRODUCT)
             },
             onClickBack = onClickBackOrSelect,
         )

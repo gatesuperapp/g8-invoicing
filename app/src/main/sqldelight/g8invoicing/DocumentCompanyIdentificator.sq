@@ -1,0 +1,40 @@
+CREATE TABLE DocumentCompanyIdentificator (
+  document_company_identificator_id INTEGER PRIMARY KEY NOT NULL,
+  label TEXT NOT NULL,
+  number TEXT NOT NULL
+  );
+
+INSERT INTO DocumentCompanyIdentificator (document_company_identificator_id, label, number)
+VALUES (1,'TVA', 'TVAIEURY8'),
+(2,'SIREN', 'SIRENNUEE'),
+(3,'RCS', 'RCSSS'),
+(4,'TVA', 'XFGUI33');
+
+
+get:
+SELECT *
+FROM DocumentCompanyIdentificator
+WHERE document_company_identificator_id = :id;
+
+getAll:
+SELECT *
+FROM DocumentCompanyIdentificator;
+
+update:
+UPDATE DocumentCompanyIdentificator
+SET label = :label,
+    number = :number
+WHERE
+    document_company_identificator_id = :id;
+
+save:
+INSERT OR REPLACE
+INTO DocumentCompanyIdentificator (document_company_identificator_id, label, number)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM DocumentCompanyIdentificator
+WHERE document_company_identificator_id = :id;
+
+lastInsertRowId:
+SELECT last_insert_rowid();

@@ -27,17 +27,17 @@ VALUES (1,  'issuer', 'issuerAudus', 'Zu', '7 rue pacha',
 ;
 
 
-getClientOrIssuer:
+get:
 SELECT *
 FROM ClientOrIssuer
 WHERE client_or_issuer_id = :id;
 
-getClientOrIssuerIdByMail:
+getIdByMail:
 SELECT client_or_issuer_id
 FROM ClientOrIssuer
 WHERE email = :email;
 
-getClientOrIssuerIdByName:
+getIdByName:
 SELECT client_or_issuer_id
 FROM ClientOrIssuer
 WHERE name = :name AND first_name =: first_name;
@@ -55,12 +55,12 @@ SELECT COUNT(*)
 FROM ClientOrIssuer
 WHERE instr(name, :name);
 
-saveClientOrIssuer:
+save:
 INSERT INTO ClientOrIssuer (client_or_issuer_id, type, first_name, name, address1, address2,
 zip_code, city, phone, email, notes)
 VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
 
-updateClientOrIssuer:
+update:
 UPDATE ClientOrIssuer
 SET type = :type,
     first_name = :first_name,
@@ -73,9 +73,9 @@ SET type = :type,
     email = :email,
     notes = :notes
 WHERE
-    client_or_issuer_id = :client_or_issuer_id;
+    client_or_issuer_id = :id;
 
-deleteClientOrIssuer:
+delete:
 DELETE FROM ClientOrIssuer
 WHERE client_or_issuer_id = :id;
 

@@ -1,0 +1,19 @@
+CREATE TABLE LinkDocClientOrIssuerToDocCompanyIdentificator (
+  id INTEGER PRIMARY KEY NOT NULL,
+  doc_client_or_issuer_id INTEGER NOT NULL,
+  doc_company_identification_id INTEGER NOT NULL
+  );
+
+get:
+SELECT doc_company_identification_id
+FROM LinkDocClientOrIssuerToDocCompanyIdentificator
+WHERE doc_client_or_issuer_id = :id;
+
+save:
+INSERT OR REPLACE
+INTO LinkDocClientOrIssuerToDocCompanyIdentificator (id, doc_client_or_issuer_id, doc_company_identification_id)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM LinkDocClientOrIssuerToDocCompanyIdentificator
+WHERE doc_client_or_issuer_id = :id;

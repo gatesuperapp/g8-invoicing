@@ -1,0 +1,59 @@
+CREATE TABLE DocumentClientOrIssuer (
+  document_client_or_issuer_id INTEGER PRIMARY KEY NOT NULL,
+  type TEXT,
+  first_name TEXT,
+  name TEXT NOT NULL,
+  address1 TEXT,
+  address2 TEXT,
+  zip_code TEXT,
+  city TEXT,
+  phone TEXT,
+  email TEXT,
+  notes TEXT,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  deleted_at REAL DEFAULT (datetime('now', 'localtime'))
+);
+
+get:
+SELECT *
+FROM DocumentClientOrIssuer
+WHERE document_client_or_issuer_id = :id;
+
+getIdByMail:
+SELECT document_client_or_issuer_id
+FROM DocumentClientOrIssuer
+WHERE email = :email;
+
+getIdByName:
+SELECT document_client_or_issuer_id
+FROM DocumentClientOrIssuer
+WHERE name = :name AND first_name =: first_name;
+
+save:
+INSERT INTO DocumentClientOrIssuer (document_client_or_issuer_id, type, first_name, name, address1, address2,
+zip_code, city, phone, email, notes)
+VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
+
+update:
+UPDATE DocumentClientOrIssuer
+SET type = :type,
+    first_name = :first_name,
+    name = :name,
+    address1 = :address1,
+    address2 = :address2,
+    zip_code = :zip_code,
+    city = :city,
+    phone = :phone,
+    email = :email,
+    notes = :notes
+WHERE
+    document_client_or_issuer_id = :id;
+
+delete:
+DELETE FROM DocumentClientOrIssuer
+WHERE document_client_or_issuer_id = :id;
+
+getLastInsertedRowId:
+SELECT last_insert_rowid();

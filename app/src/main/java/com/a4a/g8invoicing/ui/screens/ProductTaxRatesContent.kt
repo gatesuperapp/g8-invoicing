@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,12 +30,23 @@ fun ProductTaxRatesContent(
     taxRates: List<BigDecimal>,
     currentTaxRate: BigDecimal,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    isDisplayedInBottomSheet: Boolean = false
 ) {
     var chosenOption by remember { mutableStateOf(currentTaxRate) }
 
+    var modifier = Modifier.fillMaxWidth()
+
+    modifier = if (isDisplayedInBottomSheet)
+        modifier.then(Modifier
+            .fillMaxHeight(0.7f)
+            .padding(top = 30.dp, end = 60.dp, start = 60.dp))
+    else
+        modifier.then(Modifier
+            .padding(12.dp)
+        )
+
     Column(
-        modifier = Modifier
-            .padding(12.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     )
     {
@@ -53,7 +65,8 @@ fun ProductTaxRatesContent(
 
             taxRatesIncludingNoTax.forEach { taxRate ->
 
-                val isCurrentTaxRate = taxRate == chosenOption
+                val isCurrentTaxRate = taxRate.compareTo(chosenOption) == 0
+                //We use compareTo() because if we use taxRate == chosenOption it compares 20 with 20.0 and returns false
 
                 Row(
                     verticalAlignment = Alignment.Top, // For label to stay on top when multiline text

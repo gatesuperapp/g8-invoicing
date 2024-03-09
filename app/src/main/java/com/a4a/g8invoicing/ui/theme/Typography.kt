@@ -190,3 +190,17 @@ val Typography.textTitle: TextStyle
             )
         )
     }
+
+val Typography.textFormBlock: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            color = ColorDarkGrayTransp,
+            fontFamily = uiFont,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 20.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }

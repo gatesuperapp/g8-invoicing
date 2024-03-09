@@ -16,7 +16,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,12 +24,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -53,23 +50,22 @@ import java.util.Locale
 fun DeliveryNoteAddEdit(
     navController: NavController,
     deliveryNote: DeliveryNoteState,
-    clients: MutableList<ClientOrIssuerEditable>,
-    issuers: MutableList<ClientOrIssuerEditable>,
+    clients: MutableList<ClientOrIssuerState>,
+    issuers: MutableList<ClientOrIssuerState>,
     taxRates: List<BigDecimal>,
     products: MutableList<ProductState>,
     isNewDeliveryNote: Boolean,
     onClickDone: (Boolean) -> Unit,
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
-    onClickNewClientOrIssuer: (PersonType) -> Unit,
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
     onDocumentProductClick: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    documentProductOnValueChange: (ScreenElement, Any) -> Unit,
-    documentProductPlaceCursor: (ScreenElement) -> Unit,
-    onClickDoneForm: (TypeOfProductCreation) -> Unit,
+    bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
+    bottomFormPlaceCursor: (ScreenElement) -> Unit,
+    onClickDoneForm: (TypeOfBottomSheetForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit
 ) {
@@ -83,13 +79,13 @@ fun DeliveryNoteAddEdit(
     )
     val scope = rememberCoroutineScope()
 
-    // Keyboard: if it was open and the user swipes down the bottom sheet:
+/*    // Keyboard: if it was open and the user swipes down the bottom sheet:
     // close the keyboard (if we close keyboard before sheet, there is a weird effect)
     val keyboardController = LocalSoftwareKeyboardController.current
     if (!scaffoldState.bottomSheetState.isVisible) {
         keyboardController?.hide()
     }
-    println("ssss" + scaffoldState.bottomSheetState.currentValue)
+    println("ssss" + scaffoldState.bottomSheetState.currentValue)*/
 
     // Handling native navigation back action
     BackHandler {
@@ -97,7 +93,7 @@ fun DeliveryNoteAddEdit(
         // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
         // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-            hideBottomSheet(scope, scaffoldState, keyboardController)
+           // hideBottomSheet(scope, scaffoldState, keyboardController)
         } else {
             onClickBack()
         }
@@ -129,14 +125,13 @@ fun DeliveryNoteAddEdit(
                 deliveryNote = deliveryNote,
                 datePickerState = datePickerState,
                 onDismissBottomSheet = {
-                    hideBottomSheet(scope, scaffoldState, keyboardController)
+                 //   hideBottomSheet(scope, scaffoldState, keyboardController)
                 },
                 clients = clients,
                 issuers = issuers,
                 products = products,
                 taxRates = taxRates,
                 onValueChange = onValueChange,
-                onClickNewClientOrIssuer = onClickNewClientOrIssuer,
                 onProductClick = onProductClick,
                 documentProductUiState = documentProductUiState,
                 onDocumentProductClick = onDocumentProductClick,
@@ -145,8 +140,8 @@ fun DeliveryNoteAddEdit(
                 currentIssuerId = deliveryNote.issuer?.id,
                 currentProductsIds = deliveryNote.documentProducts?.mapNotNull { it.productId },
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                documentProductOnValueChange = documentProductOnValueChange,
-                productPlaceCursorAtTheEndOfText = documentProductPlaceCursor,
+                bottomFormOnValueChange = bottomFormOnValueChange,
+                bottomFormPlaceCursor = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate

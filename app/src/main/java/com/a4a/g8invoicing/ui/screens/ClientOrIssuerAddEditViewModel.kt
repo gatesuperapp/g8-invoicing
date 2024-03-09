@@ -7,7 +7,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,32 +26,35 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
     // Getting the argument in "ClientAddEdit?itemId={itemId}" with savedStateHandle
     private val id: String? = savedStateHandle["itemId"]
-    private val _uiState = mutableStateOf(
-        ClientOrIssuerEditable(
-            id = null,
-            firstName = TextFieldValue(""),
-            name = TextFieldValue(""),
-            address1 = TextFieldValue(""),
-            address2 = TextFieldValue(""),
-            zipCode = TextFieldValue(""),
-            city = TextFieldValue(""),
-            phone = TextFieldValue(""),
-            email = TextFieldValue(""),
-            notes = TextFieldValue("")
-        )
-    )
-    val uiState: State<ClientOrIssuerEditable> = _uiState
+    private val type: String? = savedStateHandle["type"]
+
+    private val _clientUiState = mutableStateOf(ClientOrIssuerState())
+    val clientUiState: State<ClientOrIssuerState> = _clientUiState
+
+    private val _issuerUiState = mutableStateOf(ClientOrIssuerState())
+    val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
     init {
-        id?.let {
-            fetchFromLocalDb(it.toLong())
+        // We initialize only if coming from the navigation (NavGraph)
+        // Not if calling from a document (to open the bottom sheet form)
+        if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
+            id?.let {
+                fetchFromLocalDb(it.toLong())
+            }
         }
     }
 
-    private fun fetchFromLocalDb(id: Long) {
-        val clientOrIssuer: ClientOrIssuerEditable? = dataSource.fetchClientOrIssuer(id)
+    fun setClientUiState(client: ClientOrIssuerState) {
+        _clientUiState.value = client
+    }
+    fun setIssuerUiState(issuer: ClientOrIssuerState) {
+        _issuerUiState.value = issuer
+    }
 
-        _uiState.value = _uiState.value.copy(
+    private fun fetchFromLocalDb(id: Long) {
+        val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
+
+        _clientUiState.value = _clientUiState.value.copy(
             id = clientOrIssuer?.id,
             firstName = TextFieldValue(clientOrIssuer?.firstName?.text ?: ""),
             name = TextFieldValue(clientOrIssuer?.name?.text ?: ""),
@@ -69,34 +72,18 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                dataSource.saveClientOrIssuer(uiState.value, type)
+                dataSource.saveClientOrIssuer(clientUiState.value, type)
             } catch (e: Exception) {
                 println("Saving clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun saveInLocalDbBlocking(type: String) { // We need it to be blocking for the documents,
-        // because we retrieve the id to pass back to the document Add/Edit
-        // TODO: make it blocking only if previous screen is DeliveryclientOrIssuer Add/Edit or Invoice Add/edit
-        // no need to be blocking coming from Clients page
-        runBlocking {
-            val getLastItemIdJob = launch {
-                try {
-                    dataSource.saveClientOrIssuer(uiState.value, type)
-                } catch (e: Exception) {
-                }
-            }
-            getLastItemIdJob.join() // Waiting for the coroutine to complete
-        }
-    }
-
-
     fun updateClientInInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                dataSource.updateClientOrIssuer(uiState.value)
+                dataSource.updateClientOrIssuer(clientUiState.value)
             } catch (e: Exception) {
                 println("Updating clients failed with exception: ${e.localizedMessage}")
             }
@@ -104,24 +91,24 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     }
 
     fun updateClientOrIssuerState(pageElement: ScreenElement, value: Any) {
-        _uiState.value = updateProductUiState(_uiState.value, pageElement, value)
+        _clientUiState.value = updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
     }
 
     fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
         val text = when (pageElement) {
-            ScreenElement.CLIENT_NAME -> uiState.value.name.text
-            ScreenElement.CLIENT_FIRST_NAME -> uiState.value.firstName?.text
-            ScreenElement.CLIENT_EMAIL -> uiState.value.email?.text
-            ScreenElement.CLIENT_ADDRESS1 -> uiState.value.address1?.text
-            ScreenElement.CLIENT_ADDRESS2 -> uiState.value.address2?.text
-            ScreenElement.CLIENT_ZIP -> uiState.value.zipCode?.text
-            ScreenElement.CLIENT_CITY -> uiState.value.city?.text
-            ScreenElement.CLIENT_PHONE -> uiState.value.phone?.text
-            ScreenElement.CLIENT_NOTES -> uiState.value.notes?.text
+            ScreenElement.CLIENT_NAME -> clientUiState.value.name.text
+            ScreenElement.CLIENT_FIRST_NAME -> clientUiState.value.firstName?.text
+            ScreenElement.CLIENT_EMAIL -> clientUiState.value.email?.text
+            ScreenElement.CLIENT_ADDRESS1 -> clientUiState.value.address1?.text
+            ScreenElement.CLIENT_ADDRESS2 -> clientUiState.value.address2?.text
+            ScreenElement.CLIENT_ZIP -> clientUiState.value.zipCode?.text
+            ScreenElement.CLIENT_CITY -> clientUiState.value.city?.text
+            ScreenElement.CLIENT_PHONE -> clientUiState.value.phone?.text
+            ScreenElement.CLIENT_NOTES -> clientUiState.value.notes?.text
             else -> null
         }
-        _uiState.value = updateProductUiState(
-            _uiState.value, pageElement, TextFieldValue(
+        _clientUiState.value = updateClientOrIssuerUiState(
+            _clientUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
             )
@@ -133,8 +120,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         runBlocking {
             val getLastItemIdJob = launch {
                 try {
-                    lastClientId = dataSource.getLastCreatedId()
-                    println("clientDataSource.getLastCreatedClient() = " + dataSource.getLastCreatedId())
+                    lastClientId = dataSource.getLastCreatedClientOrIssuerId()
+                    println("clientDataSource.getLastCreatedClient() = " + dataSource.getLastCreatedClientOrIssuerId())
                 } catch (e: Exception) {
                     println("Getting last client failed with exception: ${e.localizedMessage}")
                 }
@@ -143,52 +130,56 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
         return lastClientId
     }
+
+    private fun updateClientOrIssuerUiState(
+        clientOrIssuer: ClientOrIssuerState,
+        element: ScreenElement,
+        value: Any,
+    ): ClientOrIssuerState {
+        var person = clientOrIssuer
+        when (element) {
+            ScreenElement.CLIENT_NAME -> {
+                person = person.copy(name = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_FIRST_NAME -> {
+                person = person.copy(firstName = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_EMAIL -> {
+                person = person.copy(email = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_ADDRESS1 -> {
+                person = person.copy(address1 = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_ADDRESS2 -> {
+                person = person.copy(address2 = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_ZIP -> {
+                person = person.copy(zipCode = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_CITY -> {
+                person = person.copy(city = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_PHONE -> {
+                person = person.copy(phone = value as TextFieldValue)
+            }
+
+            ScreenElement.CLIENT_NOTES -> {
+                person = person.copy(notes = value as TextFieldValue)
+            }
+
+            else -> null
+        }
+        return person
+    }
 }
 
-private fun updateProductUiState(
-    clientOrIssuer: ClientOrIssuerEditable,
-    element: ScreenElement,
-    value: Any,
-): ClientOrIssuerEditable {
-    var person = clientOrIssuer
-    when (element) {
-        ScreenElement.CLIENT_NAME -> {
-            person = person.copy(name = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_FIRST_NAME -> {
-            person = person.copy(firstName = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_EMAIL -> {
-            person = person.copy(email = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_ADDRESS1 -> {
-            person = person.copy(address1 = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_ADDRESS2 -> {
-            person = person.copy(address2 = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_ZIP -> {
-            person = person.copy(zipCode = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_CITY -> {
-            person = person.copy(city = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_PHONE -> {
-            person = person.copy(phone = value as TextFieldValue)
-        }
-
-        ScreenElement.CLIENT_NOTES -> {
-            person = person.copy(notes = value as TextFieldValue)
-        }
-
-        else -> null
-    }
-    return person
+enum class ClientOrIssuerType {
+    CLIENT, ISSUER
 }

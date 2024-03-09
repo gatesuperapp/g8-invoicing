@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -76,11 +76,11 @@ class ClientOrIssuerListViewModel @Inject constructor(
         }
     }
 
-    fun fetchClientOrIssuerFromLocalDb(id: Long): ClientOrIssuerEditable? {
+    fun fetchClientOrIssuerFromLocalDb(id: Long): ClientOrIssuerState? {
         return clientOrIssuerDataSource.fetchClientOrIssuer(id)
     }
 
-    fun deleteClientsOrIssuers(selectedItems: List<ClientOrIssuerEditable>) {
+    fun deleteClientsOrIssuers(selectedItems: List<ClientOrIssuerState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
@@ -95,7 +95,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
         }
     }
 
-    fun duplicateClientsOrIssuers(selectedItems: List<ClientOrIssuerEditable>) {
+    fun duplicateClientsOrIssuers(selectedItems: List<ClientOrIssuerState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {

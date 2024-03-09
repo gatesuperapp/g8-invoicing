@@ -73,7 +73,7 @@ class ProductLocalDataSource(
                     quantity = documentProduct.quantity.toDouble(),
                     description = documentProduct.description?.text,
                     final_price = documentProduct.priceWithTax.toDouble(),
-                    tax_rate = documentProduct.taxRate.toLong(),
+                    tax_rate = documentProduct.taxRate.toDouble(),
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong()
                 )
@@ -135,17 +135,13 @@ class ProductLocalDataSource(
                         quantity = documentProduct.quantity.toDouble(),
                         description = documentProduct.description?.text,
                         price_with_tax = documentProduct.priceWithTax.toDouble(),
-                        tax_rate = documentProduct.taxRate.toLong(),
+                        tax_rate = documentProduct.taxRate.toDouble(),
                         unit = documentProduct.unit?.text
                     )
                 }
             } catch (cause: Throwable) {
             }
         }
-    }
-
-    override fun checkIfEmpty(): Int {
-        return productQueries.checkIfEmpty().executeAsOne().toInt()
     }
 
     override suspend fun deleteProduct(id: Long) {

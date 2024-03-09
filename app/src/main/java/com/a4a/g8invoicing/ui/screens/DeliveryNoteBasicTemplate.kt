@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.textForDocuments
@@ -156,7 +156,7 @@ fun DeliveryNoteBasicTemplate(
 }
 
 @Composable
-fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerEditable) {
+fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
     Text(
         modifier = Modifier
             .padding(bottom = 2.dp)

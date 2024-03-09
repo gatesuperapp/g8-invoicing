@@ -6,8 +6,11 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.screens.PersonType
 import com.a4a.g8invoicing.ui.states.CompanyDataState
 import g8invoicing.ClientOrIssuer
-import g8invoicing.ClientOrIssuerCompanyDataQueries
-import g8invoicing.CompanyDataQueries
+import g8invoicing.CompanyIdentificatorQueries
+import g8invoicing.DocumentClientOrIssuer
+import g8invoicing.DocumentCompanyIdentificatorQueries
+import g8invoicing.LinkClientOrIssuerToCompanyIdentificatorQueries
+import g8invoicing.LinkDocClientOrIssuerToDocCompanyIdentificatorQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -17,35 +20,44 @@ class ClientOrIssuerLocalDataSource(
     db: Database,
 ) : ClientOrIssuerLocalDataSourceInterface {
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
-    private val companyDataQueries = db.companyDataQueries
-    private val clientOrIssuerCompanyDataQueries = db.clientOrIssuerCompanyDataQueries
+    private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
+    private val companyIdentificatorQueries = db.companyIdentificatorQueries
+    private val linkToCompanyQueries = db.linkClientOrIssuerToCompanyIdentificatorQueries
+    private val documentCompanyIdentificatorQueries = db.documentCompanyIdentificatorQueries
+    private val linkToDocumentCompanyQueries = db.linkDocClientOrIssuerToDocCompanyIdentificatorQueries
 
-    override fun fetchClientOrIssuer(id: Long): ClientOrIssuerEditable? {
-        return clientOrIssuerQueries.getClientOrIssuer(id).executeAsOneOrNull()
-            ?.transformIntoEditable(clientOrIssuerCompanyDataQueries, companyDataQueries)
+
+    override fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
+        return clientOrIssuerQueries.get(id).executeAsOneOrNull()
+            ?.transformIntoEditable(linkToCompanyQueries, companyIdentificatorQueries)
     }
 
-    override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerEditable>> {
+    override fun fetchDocumentClientOrIssuer(id: Long): ClientOrIssuerState? {
+        return documentClientOrIssuerQueries.get(id).executeAsOneOrNull()
+            ?.transformIntoEditable(linkToDocumentCompanyQueries, documentCompanyIdentificatorQueries)
+    }
+
+    override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>> {
         return clientOrIssuerQueries.getAll(type.name.lowercase())
             .asFlow()
             .map { query ->
                 query.executeAsList()
                     .map {
                         it.transformIntoEditable(
-                            clientOrIssuerCompanyDataQueries,
-                            companyDataQueries
+                            linkToCompanyQueries,
+                            companyIdentificatorQueries
                         )
                     }
             }
     }
 
-    override suspend fun saveClientOrIssuer(clientOrIssuer: ClientOrIssuerEditable, type: String) {
+    override suspend fun saveClientOrIssuer(clientOrIssuer: ClientOrIssuerState, type: String) {
         return withContext(Dispatchers.IO) {
             try {
                 clientOrIssuer.companyData?.forEach { companyIdentification ->
-                    saveCompanyId(companyIdentification, clientOrIssuer)
+                    saveCompanyData(companyIdentification, clientOrIssuer)
                 }
-                clientOrIssuerQueries.saveClientOrIssuer(
+                clientOrIssuerQueries.save(
                     client_or_issuer_id = null,
                     type = type,
                     clientOrIssuer.firstName?.text,
@@ -63,10 +75,39 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    override suspend fun duplicateClientOrIssuer(client: ClientOrIssuerEditable) {
+    override suspend fun saveDocumentClientOrIssuer(clientOrIssuer: ClientOrIssuerState, type: String): Int? {
+        var documentClientOrIssuerId: Int? = null
+       withContext(Dispatchers.IO) {
+            try {
+                clientOrIssuer.companyData?.forEach { companyIdentification ->
+                    saveDocumentCompanyData(companyIdentification, clientOrIssuer)
+                }
+                documentClientOrIssuerQueries.save(
+                    document_client_or_issuer_id = null,
+                    type = type,
+                    clientOrIssuer.firstName?.text,
+                    clientOrIssuer.name.text,
+                    clientOrIssuer.address1?.text,
+                    clientOrIssuer.address2?.text,
+                    clientOrIssuer.zipCode?.text,
+                    clientOrIssuer.city?.text,
+                    clientOrIssuer.phone?.text,
+                    clientOrIssuer.email?.text,
+                    clientOrIssuer.notes?.text
+                )
+                documentClientOrIssuerId =
+                    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
+
+            } catch (cause: Throwable) {
+            }
+        }
+        return documentClientOrIssuerId
+    }
+
+    override suspend fun duplicateClientOrIssuer(client: ClientOrIssuerState) {
         return withContext(Dispatchers.IO) {
             try {
-                clientOrIssuerQueries.saveClientOrIssuer(
+                clientOrIssuerQueries.save(
                     client_or_issuer_id = null,
                     type = "client",
                     client.firstName?.text,
@@ -84,22 +125,22 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    override suspend fun updateClientOrIssuer(client: ClientOrIssuerEditable) {
+    override suspend fun updateClientOrIssuer(client: ClientOrIssuerState) {
         return withContext(Dispatchers.IO) {
             try {
                 client.companyData?.forEach { companyData ->
                     companyData.id?.let {
-                        companyDataQueries.updateCompanyData(
-                            company_identification_id = it,
+                        companyIdentificatorQueries.update(
+                            id = it,
                             label = companyData.label,
-                            number = companyData.number
+                            number = companyData.number.toString()
                         )
-                    } ?: saveCompanyId(companyData, client)
+                    } ?: saveCompanyData(companyData, client)
                 }
 
                 client.id?.let {
-                    clientOrIssuerQueries.updateClientOrIssuer(
-                        client_or_issuer_id = it.toLong(),
+                    clientOrIssuerQueries.update(
+                        id = it.toLong(),
                         type = "client",
                         first_name = client.firstName?.text,
                         name = client.name.text,
@@ -117,51 +158,123 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    /*
-        override fun checkIfEmpty(): Int {
-            return clientQueries.checkIfEmpty().executeAsOne().toInt()
+    override suspend fun updateDocumentClientOrIssuer(documentClient: ClientOrIssuerState) {
+        return withContext(Dispatchers.IO) {
+            try {
+                documentClient.companyData?.forEach { companyIdentificator ->
+                    companyIdentificator.id?.let {
+                        documentCompanyIdentificatorQueries.update(
+                            id = it,
+                            label = companyIdentificator.label,
+                            number = companyIdentificator.number.toString()
+                        )
+                    } ?: saveDocumentCompanyData(companyIdentificator, documentClient)
+                }
+
+                documentClient.id?.let {
+                    documentClientOrIssuerQueries.update(
+                        id = it.toLong(),
+                        type = "client",
+                        first_name = documentClient.firstName?.text,
+                        name = documentClient.name.text,
+                        address1 = documentClient.address1?.text,
+                        address2 = documentClient.address2?.text,
+                        zip_code = documentClient.zipCode?.text,
+                        city = documentClient.city?.text,
+                        phone = documentClient.phone?.text,
+                        email = documentClient.email?.text,
+                        notes = documentClient.notes?.text
+                    )
+                }
+            } catch (cause: Throwable) {
+            }
         }
-    */
+    }
 
     override suspend fun deleteClientOrIssuer(id: Long) {
         return withContext(Dispatchers.IO) {
             try {
-                clientOrIssuerQueries.deleteClientOrIssuer(id.toLong())
+                clientOrIssuerQueries.delete(id)
             } catch (cause: Throwable) {
             }
         }
     }
 
-    override suspend fun getLastCreatedId(): Long? {
-        var lastinsert: Long? = null
+    override suspend fun deleteDocumentClientOrIssuer(id: Long) {
+        return withContext(Dispatchers.IO) {
+            try {
+                documentClientOrIssuerQueries.delete(id)
+            } catch (cause: Throwable) {
+            }
+        }
+    }
+
+    override suspend fun getLastCreatedClientOrIssuerId(): Long? {
+        var lastInserted: Long? = null
         withContext(Dispatchers.IO) {
             try {
-                lastinsert = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                lastInserted = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
             } catch (cause: Throwable) {
             }
         }
-        println("lastinsert = " + lastinsert)
-        return lastinsert
+        return lastInserted
     }
 
-    private fun saveCompanyId(
+    override suspend fun getLastCreatedDocumentClientOrIssuerId(): Long? {
+        var lastInserted: Long? = null
+        withContext(Dispatchers.IO) {
+            try {
+                lastInserted = documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+            } catch (cause: Throwable) {
+            }
+        }
+        return lastInserted
+    }
+
+    private fun saveCompanyData(
         companyIdentification: CompanyDataState,
-        client: ClientOrIssuerEditable,
+        client: ClientOrIssuerState,
     ) {
         // Save the values
-        companyDataQueries.saveCompanyData(
-            company_identification_id = null,
+        companyIdentificatorQueries.save(
+            company_identificator_id = null,
             label = companyIdentification.label,
-            number = companyIdentification.number
+            number = companyIdentification.number.toString()
         )
 
         // Get the ID of the last inserted row
-        val companyIdentificationId: Long? = companyDataQueries.lastInsertRowId().executeAsOneOrNull()
+        val companyIdentificationId: Long? = companyIdentificatorQueries.lastInsertRowId().executeAsOneOrNull()
 
         // Save the company identifiants for the client
         client.id?.let { clientId ->
             companyIdentificationId?.let { companyId ->
-                clientOrIssuerCompanyDataQueries.saveClientOrIssuerCompanyData(
+                linkToCompanyQueries.save(
+                    id = null,
+                    client_or_issuer_id = clientId.toLong(),
+                    company_identification_id = companyId,
+                )
+            }
+        }
+    }
+
+    private fun saveDocumentCompanyData(
+        companyIdentification: CompanyDataState,
+        documentClient: ClientOrIssuerState,
+    ) {
+        // Save the values
+        documentCompanyIdentificatorQueries.save(
+            document_company_identificator_id = null,
+            label = companyIdentification.label,
+            number = companyIdentification.number.toString()
+        )
+
+        // Get the ID of the last inserted row
+        val companyIdentificationId: Long? = documentCompanyIdentificatorQueries.lastInsertRowId().executeAsOneOrNull()
+
+        // Save the company identifiants for the client
+        documentClient.id?.let { clientId ->
+            companyIdentificationId?.let { companyId ->
+                linkToCompanyQueries.save(
                     id = null,
                     client_or_issuer_id = clientId.toLong(),
                     company_identification_id = companyId,
@@ -172,28 +285,62 @@ class ClientOrIssuerLocalDataSource(
 }
 
 fun ClientOrIssuer.transformIntoEditable(
-    clientOrIssuerCompanyDataQueries: ClientOrIssuerCompanyDataQueries,
-    companyDataQueries: CompanyDataQueries,
-): ClientOrIssuerEditable {
+    linkToCompanyQueries: LinkClientOrIssuerToCompanyIdentificatorQueries,
+    companyDataQueries: CompanyIdentificatorQueries,
+): ClientOrIssuerState {
     val companyData: MutableList<CompanyDataState> = mutableListOf()
     val clientOrIssuer = this
 
-    val identifiers =
-        clientOrIssuerCompanyDataQueries.getClientOrIssuerCompanyData(clientOrIssuer.client_or_issuer_id)
+    val identifiers = linkToCompanyQueries.get(clientOrIssuer.client_or_issuer_id)
             .executeAsList()
 
     identifiers.forEach {
-        companyDataQueries.getCompanyData(it).executeAsOneOrNull()?.let { data ->
+        companyDataQueries.get(it).executeAsOneOrNull()?.let { data ->
             companyData += CompanyDataState(
-                id = data.company_identification_id,
+                id = data.company_identificator_id,
                 label = data.label,
-                number = data.number
+                number = TextFieldValue(text = data.number)
             )
         }
     }
 
-    return ClientOrIssuerEditable(
+    return ClientOrIssuerState(
         id = clientOrIssuer.client_or_issuer_id.toInt(),
+        firstName = TextFieldValue(text = clientOrIssuer.first_name ?: ""),
+        name = TextFieldValue(text = clientOrIssuer.name),
+        address1 = TextFieldValue(text = clientOrIssuer.address1 ?: ""),
+        address2 = TextFieldValue(text = clientOrIssuer.address2 ?: ""),
+        zipCode = TextFieldValue(text = clientOrIssuer.zip_code ?: ""),
+        city = TextFieldValue(text = clientOrIssuer.city ?: ""),
+        phone = TextFieldValue(text = clientOrIssuer.phone ?: ""),
+        email = TextFieldValue(text = clientOrIssuer.email ?: ""),
+        notes = TextFieldValue(text = clientOrIssuer.notes ?: ""),
+        companyData = companyData.ifEmpty { null }
+    )
+}
+
+fun DocumentClientOrIssuer.transformIntoEditable(
+    linkToCompanyQueries: LinkDocClientOrIssuerToDocCompanyIdentificatorQueries,
+    companyDataQueries: DocumentCompanyIdentificatorQueries,
+): ClientOrIssuerState {
+    val companyData: MutableList<CompanyDataState> = mutableListOf()
+    val clientOrIssuer = this
+
+    val identifiers = linkToCompanyQueries.get(clientOrIssuer.document_client_or_issuer_id)
+        .executeAsList()
+
+    identifiers.forEach {
+        companyDataQueries.get(it).executeAsOneOrNull()?.let { data ->
+            companyData += CompanyDataState(
+                id = data.document_company_identificator_id,
+                label = data.label,
+                number = TextFieldValue(text = data.number)
+            )
+        }
+    }
+
+    return ClientOrIssuerState(
+        id = clientOrIssuer.document_client_or_issuer_id.toInt(),
         firstName = TextFieldValue(text = clientOrIssuer.first_name ?: ""),
         name = TextFieldValue(text = clientOrIssuer.name),
         address1 = TextFieldValue(text = clientOrIssuer.address1 ?: ""),

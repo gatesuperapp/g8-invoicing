@@ -40,29 +40,29 @@ class ProductAddEditViewModel @Inject constructor(
 
     init {
         // We initialize only if coming from the navigation (NavGraph)
-        // Not if calling from a document (to open the bottom sheet form),
+        // Not if calling from a document (to open the bottom sheet form)
         if (type == ProductType.PRODUCT.name.lowercase()) {
             id?.let {
                 fetchProductFromLocalDb(it.toLong())
             }
-        } else if (type == ProductType.DOCUMENT_PRODUCT.name.lowercase()) {
-            id?.let {
-                fetchDocumentProductFromLocalDb(it.toLong())
-            }
         }
     }
 
-    fun setDocumentProductUiState(documentProduct: DocumentProductState) { // Used when sliding the form in documents
+    // Used when sliding the bottom form from documents
+    // Editing an already selected document product
+    fun setDocumentProductUiState(documentProduct: DocumentProductState) {
         _documentProductUiState.value = documentProduct
     }
 
-    fun setDocumentProductUiStateWithProduct(product: ProductState) { // Used when sliding the form in documents
+    // Used when sliding the bottom form from documents
+    // Choosing a product
+    fun setDocumentProductUiStateWithProduct(product: ProductState) {
         _documentProductUiState.value = DocumentProductState(
             id = null,
             name = product.name,
             description = product.description,
-            priceWithTax = product.priceWithTax ?: BigDecimal(0),
-            taxRate = product.taxRate ?: BigDecimal(0),
+            priceWithTax = product.priceWithTax,
+            taxRate = product.taxRate,
             quantity = BigDecimal(1),
             unit = product.unit,
             productId = product.productId
@@ -112,10 +112,16 @@ class ProductAddEditViewModel @Inject constructor(
     }
 
     // When user chooses a new tax rate
-    fun updateTaxRate(taxRate: BigDecimal?) {
-        _productUiState.value = _productUiState.value.copy(
-            taxRate = taxRate ?: BigDecimal(0)
-        )
+    fun updateTaxRate(taxRate: BigDecimal?, type: ProductType) {
+        if (type == ProductType.PRODUCT) {
+            _productUiState.value = _productUiState.value.copy(
+                taxRate = taxRate ?: BigDecimal(0)
+            )
+        } else {
+            _documentProductUiState.value = _documentProductUiState.value.copy(
+                taxRate = taxRate ?: BigDecimal(0)
+            )
+        }
     }
 
     fun fetchTaxRatesFromLocalDb(): List<BigDecimal> {
@@ -162,7 +168,7 @@ class ProductAddEditViewModel @Inject constructor(
 
     fun updateProductState(pageElement: ScreenElement, value: Any, productType: ProductType) {
         if (productType == ProductType.PRODUCT) {
-            _productUiState.value = updateProductUiState(_productUiState.value, pageElement, value)
+            _productUiState.value = updateClientOrIssuerUiState(_productUiState.value, pageElement, value)
         } else {
             _documentProductUiState.value =
                 updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
@@ -183,7 +189,7 @@ class ProductAddEditViewModel @Inject constructor(
             ScreenElement.PRODUCT_DESCRIPTION -> productUiState.value.description?.text
             else -> ""
         }
-        _productUiState.value = updateProductUiState(
+        _productUiState.value = updateClientOrIssuerUiState(
             _productUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
@@ -210,7 +216,7 @@ class ProductAddEditViewModel @Inject constructor(
     }
 }
 
-private fun updateProductUiState(
+private fun updateClientOrIssuerUiState(
     product: ProductState,
     element: ScreenElement,
     value: Any,

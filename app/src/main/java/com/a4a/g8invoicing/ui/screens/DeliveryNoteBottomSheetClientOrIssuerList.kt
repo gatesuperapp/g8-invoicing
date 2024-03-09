@@ -11,17 +11,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
 fun DeliveryNoteBottomSheetClientOrIssuerList(
-    list: List<ClientOrIssuerEditable>,
+    list: List<ClientOrIssuerState>,
     pageElement: ScreenElement,
     onClickBack: () -> Unit,
-    onClientOrIssuerClick: (ClientOrIssuerEditable) -> Unit,
+    onClientOrIssuerClick: (ClientOrIssuerState) -> Unit,
     onClickNewClientOrIssuer: () -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,

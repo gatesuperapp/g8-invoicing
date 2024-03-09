@@ -30,7 +30,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CompanyDataState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -331,7 +331,7 @@ private fun Modifier.customCombinedClickable(
 
 @Composable
 private fun fakeIssuer() =
-    ClientOrIssuerEditable(
+    ClientOrIssuerState(
         // Fill with dummy values to show how it looks
         id = null,
         firstName = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_firstName)),
@@ -346,18 +346,18 @@ private fun fakeIssuer() =
         companyData = listOf(
             CompanyDataState(
                 label = stringResource(id = R.string.delivery_note_default_issuer_company_label1),
-                number = stringResource(id = R.string.delivery_note_default_issuer_company_number1)
+                number = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_number1))
             ),
             CompanyDataState(
                 label = stringResource(id = R.string.delivery_note_default_issuer_company_label2),
-                number = stringResource(id = R.string.delivery_note_default_issuer_company_number2)
+                number = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_number2))
             )
         )
     )
 
 @Composable
 private fun fakeClient() =
-    ClientOrIssuerEditable(
+    ClientOrIssuerState(
         id = null,
         firstName = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_firstName)),
         name = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_name)),
@@ -371,7 +371,7 @@ private fun fakeClient() =
         companyData = listOf(
             CompanyDataState(
                 label = stringResource(id = R.string.delivery_note_default_client_company_label1),
-                number = stringResource(id = R.string.delivery_note_default_client_company_number1)
+                number = TextFieldValue(stringResource(id = R.string.delivery_note_default_client_company_number1))
             )
         )
     )

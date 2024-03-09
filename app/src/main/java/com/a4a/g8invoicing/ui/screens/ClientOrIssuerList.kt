@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.SharedBottomBar
@@ -23,15 +23,15 @@ import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 fun ClientOrIssuerList(
     navController: NavController,
     uiState: ClientsOrIssuerUiState,
-    onClickDelete: (List<ClientOrIssuerEditable>) -> Unit,
-    onClickDuplicate: (List<ClientOrIssuerEditable>) -> Unit,
+    onClickDelete: (List<ClientOrIssuerState>) -> Unit,
+    onClickDuplicate: (List<ClientOrIssuerState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
-    onClickListItem: (ClientOrIssuerEditable) -> Unit,
+    onClickListItem: (ClientOrIssuerState) -> Unit,
     onClickBack: () -> Unit,
 ) {
     // Main list to handle actions with selected items
-    val selectedItems = mutableListOf<ClientOrIssuerEditable>()
+    val selectedItems = mutableListOf<ClientOrIssuerState>()
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
@@ -100,7 +100,7 @@ fun ClientOrIssuerList(
 }
 
 private fun resetSelectedItems(
-    selectedItems: MutableList<ClientOrIssuerEditable>,
+    selectedItems: MutableList<ClientOrIssuerState>,
     selectedMode: MutableState<Boolean>,
     keyToResetCheckboxes: MutableState<Boolean>,
 ) {

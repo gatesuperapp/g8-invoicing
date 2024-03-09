@@ -23,9 +23,9 @@ class DeliveryNoteLocalDataSource(
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
-    private val clientOrIssuerCompanyDataQueries = db.clientOrIssuerCompanyDataQueries
-    private val companyIdQueries = db.companyDataQueries
-    private val deliveryNoteProductQueries = db.deliveryNoteProductQueries
+    private val linkToCompanyQueries = db.linkClientOrIssuerToCompanyIdentificatorQueries
+    private val companyIdQueries = db.companyIdentificatorQueries
+    private val linkDeliveryNoteToDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
     private val documentProductQueries = db.documentProductQueries
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -69,19 +69,19 @@ class DeliveryNoteLocalDataSource(
 
     private fun DeliveryNote.transformIntoEditableNote(documentProducts: List<DocumentProductState>): DeliveryNoteState {
         // It's a suspend function so we can observe changes on DocumentProducts
-        var client: ClientOrIssuerEditable? = null
-        var issuer: ClientOrIssuerEditable? = null
+        var client: ClientOrIssuerState? = null
+        var issuer: ClientOrIssuerState? = null
 
-        this.client_id?.let {
-            client = clientOrIssuerQueries.getClientOrIssuer(it)
+        this.document_client_id?.let {
+            client = clientOrIssuerQueries.get(it)
                 .executeAsOneOrNull()
-                ?.transformIntoEditable(clientOrIssuerCompanyDataQueries, companyIdQueries)
+                ?.transformIntoEditable(linkToCompanyQueries, companyIdQueries)
         }
 
-        this.issuer_id?.let {
-            issuer = clientOrIssuerQueries.getClientOrIssuer(it)
+        this.document_issuer_id?.let {
+            issuer = clientOrIssuerQueries.get(it)
                 .executeAsOneOrNull()
-                ?.transformIntoEditable(clientOrIssuerCompanyDataQueries, companyIdQueries)
+                ?.transformIntoEditable(linkToCompanyQueries, companyIdQueries)
         }
 
         this.let {
@@ -101,7 +101,7 @@ class DeliveryNoteLocalDataSource(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
-        return deliveryNoteProductQueries.getDeliveryNoteProduct(deliveryNoteId)
+        return linkDeliveryNoteToDocumentProductQueries.getDeliveryNoteProduct(deliveryNoteId)
             .asFlow()
             .flatMapLatest { query ->
                 combine(
@@ -122,7 +122,7 @@ class DeliveryNoteLocalDataSource(
         val documentProducts: MutableList<DocumentProductState> = mutableListOf()
 
         val identifiers =
-            deliveryNoteProductQueries.getDeliveryNoteProduct(deliveryNoteId).executeAsList()
+            linkDeliveryNoteToDocumentProductQueries.getDeliveryNoteProduct(deliveryNoteId).executeAsList()
         identifiers.forEach {
             documentProductQueries.getDocumentProduct(it.document_product_id).executeAsOneOrNull()
                 ?.let { documentProduct ->
@@ -142,12 +142,12 @@ class DeliveryNoteLocalDataSource(
                     number = deliveryNote.number?.text ?: "",
                     delivery_date = deliveryNote.deliveryDate.toString(),
                     order_number = deliveryNote.orderNumber?.text,
-                    issuer_id = deliveryNote.issuer?.id?.toLong()
+                    document_issuer_id = deliveryNote.issuer?.id?.toLong()
                         ?: deliveryNote.issuer?.email?.let {
-                            clientOrIssuerQueries.getClientOrIssuerIdByMail(it.text)
+                            clientOrIssuerQueries.getIdByMail(it.text)
                                 .executeAsOneOrNull()
                         },
-                    client_id = deliveryNote.client?.id?.toLong(),
+                    document_client_id = deliveryNote.client?.id?.toLong(),
                     currency = deliveryNote.currency?.text
                 )
             } catch (cause: Throwable) {
@@ -164,8 +164,8 @@ class DeliveryNoteLocalDataSource(
                     number = deliveryNote.number?.text ?: " - ",
                     delivery_date = deliveryNote.deliveryDate,
                     order_number = deliveryNote.orderNumber?.text,
-                    issuer_id = deliveryNote.issuer?.id?.toLong(),
-                    client_id = deliveryNote.client?.id?.toLong(),
+                    document_issuer_id = deliveryNote.issuer?.id?.toLong(),
+                    document_client_id = deliveryNote.client?.id?.toLong(),
                     currency = deliveryNote.currency?.text
                 )
                 deliveryNoteId = documentProductQueries.lastInsertRowId().executeAsOneOrNull()
@@ -185,10 +185,10 @@ class DeliveryNoteLocalDataSource(
                     delivery_note_id = deliveryNote.deliveryNoteId?.toLong() ?: 0,
                     number = deliveryNote.number?.text ?: "",
                     delivery_date = deliveryNote.deliveryDate.toString(),
-                    client_id = deliveryNote.client?.id?.toLong(),
-                    issuer_id = deliveryNote.issuer?.id?.toLong()
+                    document_client_id = deliveryNote.client?.id?.toLong(),
+                    document_issuer_id = deliveryNote.issuer?.id?.toLong()
                         ?: deliveryNote.issuer?.email?.let {
-                            clientOrIssuerQueries.getClientOrIssuerIdByMail(it.text)
+                            clientOrIssuerQueries.getIdByMail(it.text)
                                 .executeAsOneOrNull()
                         },
                     order_number = deliveryNote.orderNumber?.text,
@@ -207,13 +207,13 @@ class DeliveryNoteLocalDataSource(
 
     override suspend fun deleteDeliveryNoteProduct(documentProductId: Long) {
         return withContext(Dispatchers.IO) {
-            deliveryNoteProductQueries.deleteDeliveryNoteProduct(documentProductId)
+            linkDeliveryNoteToDocumentProductQueries.deleteDeliveryNoteProduct(documentProductId)
         }
     }
 
     override suspend fun addDeliveryNoteProduct(deliveryNoteId: Long, documentProductId: Long) {
         return withContext(Dispatchers.IO) {
-            deliveryNoteProductQueries.saveDeliveryNoteProduct(
+            linkDeliveryNoteToDocumentProductQueries.saveDeliveryNoteProduct(
                 id = null,
                 delivery_note_id = deliveryNoteId,
                 document_product_id = documentProductId
@@ -223,7 +223,7 @@ class DeliveryNoteLocalDataSource(
 
     private fun getExistingIssuerOrSaveNewIssuer(deliveryNote: DeliveryNoteState) {
         deliveryNote.issuer?.id ?: deliveryNote.issuer?.let {
-            clientOrIssuerQueries.saveClientOrIssuer(
+            clientOrIssuerQueries.save(
                 client_or_issuer_id = null,
                 type = "issuer",
                 first_name = it.firstName?.text,

@@ -33,7 +33,7 @@ fun FormUI(
     inputList: List<FormInput>,
     keyboard: KeyboardOpt = KeyboardOpt.GO_TO_NEXT_INPUT,
     localFocusManager: FocusManager,
-    onClickForward: (ScreenElement) -> Unit,
+    onClickForward: (ScreenElement) -> Unit = {},
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
     isFormStateful: Boolean = false,
     ) {

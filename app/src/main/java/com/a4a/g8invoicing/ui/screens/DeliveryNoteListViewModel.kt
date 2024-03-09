@@ -89,7 +89,7 @@ class DeliveryNoteListViewModel @Inject constructor(
 
                             deliveryNoteId?.let { id ->
                                 it.documentProducts?.forEach { documentProduct ->
-                                    saveDocumentProductInDatabase(
+                                    saveDocumentProductInDbAndLinkToDeliveryNote(
                                         documentProduct = documentProduct,
                                         deliveryNoteDataSource = deliveryNoteDataSource,
                                         documentProductDataSource = documentProductDataSource,

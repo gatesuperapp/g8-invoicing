@@ -1,0 +1,25 @@
+CREATE TABLE LinkClientOrIssuerToCompanyIdentificator (
+  id INTEGER PRIMARY KEY NOT NULL,
+  client_or_issuer_id INTEGER NOT NULL,
+  company_identification_id INTEGER NOT NULL
+  );
+
+INSERT INTO LinkClientOrIssuerToCompanyIdentificator (id, client_or_issuer_id, company_identification_id)
+VALUES (1,1, 1),
+ (2,1, 2),
+ (3,1, 3),
+ (4,2, 4);
+
+get:
+SELECT company_identification_id
+FROM LinkClientOrIssuerToCompanyIdentificator
+WHERE client_or_issuer_id = :id;
+
+save:
+INSERT OR REPLACE
+INTO LinkClientOrIssuerToCompanyIdentificator (id, client_or_issuer_id, company_identification_id)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM LinkClientOrIssuerToCompanyIdentificator
+WHERE client_or_issuer_id = :id;

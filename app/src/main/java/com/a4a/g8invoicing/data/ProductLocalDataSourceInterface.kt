@@ -19,7 +19,6 @@ interface ProductLocalDataSourceInterface {
     suspend fun duplicateProduct(product: ProductState)
     suspend fun updateProduct(product: ProductState)
     suspend fun updateDocumentProduct(documentProduct: DocumentProductState)
-    fun checkIfEmpty(): Int
     suspend fun deleteProduct(id: Long)
     suspend fun deleteDocumentProduct(id: Long)
 }

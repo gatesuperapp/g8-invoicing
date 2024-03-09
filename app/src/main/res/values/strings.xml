@@ -77,6 +77,8 @@
     <string name="client_first_name_input">Calliteara</string>
     <string name="client_name">Nom <sup>*</sup></string>
     <string name="client_name_input">Pudibunda</string>
+    <string name="client_block_address">Adresse</string>
+    <string name="client_block_identification">Identification</string>
     <string name="client_address">Adresse</string>
     <string name="client_address1">Adresse 1</string>
     <string name="client_address1_input">6 rue caterpillar</string>
@@ -90,7 +92,9 @@
     <string name="client_email_input">pudib@ecomail.fr</string>
     <string name="client_phone">Téléphone</string>
     <string name="client_phone_input">0787878787</string>
-    <string name="client_notes">Notes </string>
+    <string name="client_company_identification1_input">123456789 12345</string>
+    <string name="client_company_identification2_input">123456789</string>
+    <string name="client_notes">Notes privées</string>
     <string name="client_notes_input">La pudibonde est une chenille.</string>
     <string name="client_detail_balance">Solde</string>
     <string name="client_detail_paid">Payé</string>
@@ -169,8 +173,12 @@
     <string name="delivery_note_modal_add_product">Ajout produit</string>
     <string name="delivery_note_modal_edit_product">Édition produit</string>
     <string name="delivery_note_modal_new_product">Nouveau produit</string>
-    <string name="delivery_note_modal_new_product_cancel">Annuler</string>
-    <string name="delivery_note_modal_new_product_save">Valider</string>
+    <string name="delivery_note_modal_new_issuer">Nouvel émetteur</string>
+    <string name="delivery_note_modal_new_client">Nouveau client</string>
+    <string name="delivery_note_modal_product_cancel">Annuler</string>
+    <string name="delivery_note_modal_product_save">Valider</string>
+    <string name="delivery_note_modal_product_tva_back">Retour</string>
+    <string name="delivery_note_modal_product_tva_title">TVA</string>
     <string name="account_label">Mon compte</string>
     <string name="account_project_info">The Gate (G8) est une application open-source, conçue pour les paysan·ne·s mais qui peut convenir à tout type d\'entreprise.\n\n L\'objectif de fournir une solution de facturation simple, sécurisée et qui vous fait gagner du temps.\n\n Inscrivez-vous pour soutenir le projet et bénéficier des prochaines fonctionnalités :
         export de données, templates de documents, application de bureau et + encore ! \n

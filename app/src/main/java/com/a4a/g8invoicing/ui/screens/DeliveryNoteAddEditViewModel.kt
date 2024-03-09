@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
@@ -8,7 +7,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSource
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -24,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DeliveryNoteAddEditViewModel @Inject constructor(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+    private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -82,9 +84,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInLocalDb(documentProduct: DocumentProductState) {
+    fun saveDocumentProductInLocalDbAndInDeliveryNote(documentProduct: DocumentProductState) {
         _deliveryNoteUiState.value.deliveryNoteId?.let {
-            saveDocumentProductInDatabase(
+            saveDocumentProductInDbAndLinkToDeliveryNote(
                 documentProduct = documentProduct,
                 deliveryNoteDataSource = deliveryNoteDataSource,
                 documentProductDataSource = documentProductDataSource,
@@ -154,11 +156,11 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_CLIENT -> {
-            note = note.copy(client = value as ClientOrIssuerEditable)
+            note = note.copy(client = value as ClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
-            note = note.copy(issuer = value as ClientOrIssuerEditable)
+            note = note.copy(issuer = value as ClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ORDER_NUMBER -> {
@@ -183,7 +185,7 @@ fun updateDeliveryNoteUiState(
 }
 
 
-fun saveDocumentProductInDatabase(
+fun saveDocumentProductInDbAndLinkToDeliveryNote(
     documentProduct: DocumentProductState,
     deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
     documentProductDataSource: ProductLocalDataSourceInterface,

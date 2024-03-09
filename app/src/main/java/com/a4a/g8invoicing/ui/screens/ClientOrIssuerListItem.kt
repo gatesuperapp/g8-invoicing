@@ -25,12 +25,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.a4a.g8invoicing.data.ClientOrIssuerEditable
+import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
 
 @Composable
 fun ClientOrIssuerListItem(
-    clientOrIssuer: ClientOrIssuerEditable,
+    clientOrIssuer: ClientOrIssuerState,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,

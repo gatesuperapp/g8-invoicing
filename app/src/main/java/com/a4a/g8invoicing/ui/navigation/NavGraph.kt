@@ -29,10 +29,10 @@ Process to add a new screen/VM/datasource:
 fun NavGraph(navController: NavHostController) {
     NavHost(
         navController,
-        startDestination = (Screen.DeliveryNoteList.name),
+        //startDestination = (Screen.DeliveryNoteList.name),
         //startDestination = (Screen.ProductList.name),
         //startDestination = (Screen.DeliveryNoteAddEdit.name),
-        //startDestination = (Screen.ClientOrIssuerAddEdit.name),
+        startDestination = (Screen.ClientOrIssuerAddEdit.name),
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
@@ -71,7 +71,7 @@ fun NavGraph(navController: NavHostController) {
                 navController.navigateAndReplaceStartDestination(it)
             },
             onClickListItem = {
-                val params = ("?itemId=${it.id}")
+                val params = ("?itemId=${it.id}&type=client")
                 navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
             },
             onClickNew = {
@@ -91,15 +91,6 @@ fun NavGraph(navController: NavHostController) {
             navController = navController,
             onClickBack = {
                 navigateBack(navController)
-            },
-            onClickNewClientOrIssuer = {
-                if (it == PersonType.Client) {
-                    val params = ("?type=client")
-                    navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
-                } else {
-                    val params = ("?type=issuer")
-                    navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
-                }
             }
         )
         productList(
