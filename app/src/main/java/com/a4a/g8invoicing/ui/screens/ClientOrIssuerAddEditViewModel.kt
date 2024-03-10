@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.CompanyDataState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -105,6 +106,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ScreenElement.CLIENT_CITY -> clientUiState.value.city?.text
             ScreenElement.CLIENT_PHONE -> clientUiState.value.phone?.text
             ScreenElement.CLIENT_NOTES -> clientUiState.value.notes?.text
+/*            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> clientUiState.value.companyData?.first()?.label?.text
+            ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> clientUiState.value.companyData?.first()?.number?.text
+            ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> clientUiState.value.companyData?.get(1)?.label?.text
+            ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
             else -> null
         }
         _clientUiState.value = updateClientOrIssuerUiState(
@@ -137,43 +142,33 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         value: Any,
     ): ClientOrIssuerState {
         var person = clientOrIssuer
+        val companyData = mutableListOf(CompanyDataState(), CompanyDataState())
         when (element) {
-            ScreenElement.CLIENT_NAME -> {
-                person = person.copy(name = value as TextFieldValue)
+            ScreenElement.CLIENT_NAME -> person = person.copy(name = value as TextFieldValue)
+            ScreenElement.CLIENT_FIRST_NAME ->         person = person.copy(firstName = value as TextFieldValue)
+            ScreenElement.CLIENT_EMAIL ->     person = person.copy(email = value as TextFieldValue)
+            ScreenElement.CLIENT_ADDRESS1 -> person = person.copy(address1 = value as TextFieldValue)
+            ScreenElement.CLIENT_ADDRESS2 -> person = person.copy(address2 = value as TextFieldValue)
+            ScreenElement.CLIENT_ZIP -> person = person.copy(zipCode = value as TextFieldValue)
+            ScreenElement.CLIENT_CITY -> person = person.copy(city = value as TextFieldValue)
+            ScreenElement.CLIENT_PHONE -> person = person.copy(phone = value as TextFieldValue)
+            ScreenElement.CLIENT_NOTES -> person = person.copy(notes = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> {
+                companyData.first().label = value as TextFieldValue
+                person = person.copy(companyData = companyData)
             }
-
-            ScreenElement.CLIENT_FIRST_NAME -> {
-                person = person.copy(firstName = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> {
+                companyData.first().number = value as TextFieldValue
+                person = person.copy(companyData = companyData)
             }
-
-            ScreenElement.CLIENT_EMAIL -> {
-                person = person.copy(email = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION2_LABEL ->  {
+                companyData[1].label = value as TextFieldValue
+                person = person.copy(companyData = companyData)
             }
-
-            ScreenElement.CLIENT_ADDRESS1 -> {
-                person = person.copy(address1 = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION2_VALUE ->  {
+                companyData[1].number = value as TextFieldValue
+                person = person.copy(companyData = companyData)
             }
-
-            ScreenElement.CLIENT_ADDRESS2 -> {
-                person = person.copy(address2 = value as TextFieldValue)
-            }
-
-            ScreenElement.CLIENT_ZIP -> {
-                person = person.copy(zipCode = value as TextFieldValue)
-            }
-
-            ScreenElement.CLIENT_CITY -> {
-                person = person.copy(city = value as TextFieldValue)
-            }
-
-            ScreenElement.CLIENT_PHONE -> {
-                person = person.copy(phone = value as TextFieldValue)
-            }
-
-            ScreenElement.CLIENT_NOTES -> {
-                person = person.copy(notes = value as TextFieldValue)
-            }
-
             else -> null
         }
         return person

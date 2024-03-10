@@ -8,6 +8,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 // and to change properties values (var instead of val)
 data class CompanyDataState(
     var id: Long? = null,
-    var label: String = "",
+    var label: TextFieldValue? = null,
     var number: TextFieldValue? = null
 )

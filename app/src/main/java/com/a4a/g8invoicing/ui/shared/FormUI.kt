@@ -1,13 +1,13 @@
 package com.a4a.g8invoicing.ui.shared
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Text
@@ -35,8 +35,7 @@ fun FormUI(
     localFocusManager: FocusManager,
     onClickForward: (ScreenElement) -> Unit = {},
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
-    isFormStateful: Boolean = false,
-    ) {
+) {
     // handle focus
     val focusManager = LocalFocusManager.current
 
@@ -71,13 +70,11 @@ fun FormUI(
     }
     val focusStates: MutableList<Pair<ScreenElement, Boolean>> = remember { inputsWithBoolean }
 
-    // Create the LazyColumn with all inputs
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                start = 20.dp,
-                end = 20.dp,
+                start = 10.dp,
                 bottom = 14.dp
             )
             .pointerInput(Unit) {
@@ -86,7 +83,7 @@ fun FormUI(
                 })
             }
     ) {
-        items(items = inputList) { item ->
+        inputList.forEach { item ->
             // Keyboard actions and options
             val isLastInput = item == inputList.last()
             val imeAction = if (isLastInput || keyboard == KeyboardOpt.VALIDATE_INPUT) {
@@ -127,7 +124,6 @@ fun FormUI(
                         saveFocusForTheRow(focusStates, item.pageElement)
                     }
                 },
-                isFormStateful = isFormStateful
             )
         }
     }
@@ -154,8 +150,7 @@ fun PageElementCreator(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
-    isFormStateful: Boolean,
-    ) {
+) {
 
     RowWithLabelAndInput(
         formInput = item,
@@ -164,7 +159,6 @@ fun PageElementCreator(
         focusRequester = focusRequester,
         onClickRow = onClickRow,
         onClickForward = onClickForward,
-        isFormStateful = isFormStateful
     )
 
     if (!isLastInput) {
@@ -180,7 +174,6 @@ fun RowWithLabelAndInput(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
-    isFormStateful: Boolean
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
@@ -200,40 +193,40 @@ fun RowWithLabelAndInput(
             )
             .fillMaxWidth()
             .padding(
-                start = 20.dp,
-                end = 20.dp,
+                start = 16.dp,
+                end = 16.dp,
                 top = 14.dp,
                 bottom = 14.dp
             )
     ) {
         // Label
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(0.4f)
-                .padding(end = 13.dp),
-            text = formInput.label,
-            fontWeight = FontWeight.SemiBold
-        )
+
+       when (formInput.label) {
+            is String -> Text(
+                modifier = Modifier
+                    .fillMaxWidth(0.4f),
+                text = formInput.label,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            is TextInput -> FormInputCreatorText(
+                input = formInput.label,
+                keyboardOption = imeAction,
+                formActions = formActions,
+                focusRequester = focusRequester,
+                isEditableLabel = true
+            )
+        }
 
         when (formInput.inputType) {
             is TextInput -> {
-                if (isFormStateful) {
-                    FormInputCreatorTextStateful(
-                        input = formInput.inputType,
-                        keyboardOption = imeAction,
-                        formActions = formActions,
-                       // focusRequester = focusRequester,
-                    )
-                } else {
-                    FormInputCreatorTextStateless(
-                        input = formInput.inputType,
-                        keyboardOption = imeAction,
-                        formActions = formActions,
-                        focusRequester = focusRequester,
-                    )
-                }
+                FormInputCreatorText(
+                    input = formInput.inputType,
+                    keyboardOption = imeAction,
+                    formActions = formActions,
+                    focusRequester = focusRequester,
+                )
             }
-
             is DecimalInput -> if (formInput.inputType2 is DecimalInput) {
                 FormInputCreatorDoublePrice(
                     textInput1 = formInput.inputType,
@@ -260,7 +253,7 @@ fun RowWithLabelAndInput(
 }
 
 class FormInput(
-    val label: String,
+    val label: Any,
     val inputType: Any,
     val inputType2: Any? = null, // Used for DoubleInputCreator
     val pageElement: ScreenElement,

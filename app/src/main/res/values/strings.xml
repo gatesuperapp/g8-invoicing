@@ -92,7 +92,10 @@
     <string name="client_email_input">pudib@ecomail.fr</string>
     <string name="client_phone">Téléphone</string>
     <string name="client_phone_input">0787878787</string>
+    <string name="form_label_edit">Modifier</string>
+    <string name="client_company_identification1">N° SIRET</string>
     <string name="client_company_identification1_input">123456789 12345</string>
+    <string name="client_company_identification2">N° TVA</string>
     <string name="client_company_identification2_input">123456789</string>
     <string name="client_notes">Notes privées</string>
     <string name="client_notes_input">La pudibonde est une chenille.</string>

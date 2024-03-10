@@ -132,7 +132,7 @@ class ClientOrIssuerLocalDataSource(
                     companyData.id?.let {
                         companyIdentificatorQueries.update(
                             id = it,
-                            label = companyData.label,
+                            label = companyData.label.toString(),
                             number = companyData.number.toString()
                         )
                     } ?: saveCompanyData(companyData, client)
@@ -165,7 +165,7 @@ class ClientOrIssuerLocalDataSource(
                     companyIdentificator.id?.let {
                         documentCompanyIdentificatorQueries.update(
                             id = it,
-                            label = companyIdentificator.label,
+                            label = companyIdentificator.label.toString(),
                             number = companyIdentificator.number.toString()
                         )
                     } ?: saveDocumentCompanyData(companyIdentificator, documentClient)
@@ -238,7 +238,7 @@ class ClientOrIssuerLocalDataSource(
         // Save the values
         companyIdentificatorQueries.save(
             company_identificator_id = null,
-            label = companyIdentification.label,
+            label = companyIdentification.label.toString(),
             number = companyIdentification.number.toString()
         )
 
@@ -264,7 +264,7 @@ class ClientOrIssuerLocalDataSource(
         // Save the values
         documentCompanyIdentificatorQueries.save(
             document_company_identificator_id = null,
-            label = companyIdentification.label,
+            label = companyIdentification.label.toString(),
             number = companyIdentification.number.toString()
         )
 
@@ -298,7 +298,7 @@ fun ClientOrIssuer.transformIntoEditable(
         companyDataQueries.get(it).executeAsOneOrNull()?.let { data ->
             companyData += CompanyDataState(
                 id = data.company_identificator_id,
-                label = data.label,
+                label = TextFieldValue(data.label),
                 number = TextFieldValue(text = data.number)
             )
         }
@@ -333,7 +333,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         companyDataQueries.get(it).executeAsOneOrNull()?.let { data ->
             companyData += CompanyDataState(
                 id = data.document_company_identificator_id,
-                label = data.label,
+                label = TextFieldValue(data.label),
                 number = TextFieldValue(text = data.number)
             )
         }

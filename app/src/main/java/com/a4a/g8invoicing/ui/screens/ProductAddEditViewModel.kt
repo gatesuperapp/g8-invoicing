@@ -168,7 +168,7 @@ class ProductAddEditViewModel @Inject constructor(
 
     fun updateProductState(pageElement: ScreenElement, value: Any, productType: ProductType) {
         if (productType == ProductType.PRODUCT) {
-            _productUiState.value = updateClientOrIssuerUiState(_productUiState.value, pageElement, value)
+            _productUiState.value = updateProductUiState(_productUiState.value, pageElement, value)
         } else {
             _documentProductUiState.value =
                 updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
@@ -189,7 +189,7 @@ class ProductAddEditViewModel @Inject constructor(
             ScreenElement.PRODUCT_DESCRIPTION -> productUiState.value.description?.text
             else -> ""
         }
-        _productUiState.value = updateClientOrIssuerUiState(
+        _productUiState.value = updateProductUiState(
             _productUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
@@ -216,7 +216,7 @@ class ProductAddEditViewModel @Inject constructor(
     }
 }
 
-private fun updateClientOrIssuerUiState(
+private fun updateProductUiState(
     product: ProductState,
     element: ScreenElement,
     value: Any,

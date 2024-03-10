@@ -345,11 +345,11 @@ private fun fakeIssuer() =
         notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_notes)),
         companyData = listOf(
             CompanyDataState(
-                label = stringResource(id = R.string.delivery_note_default_issuer_company_label1),
+                label = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
                 number = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_number1))
             ),
             CompanyDataState(
-                label = stringResource(id = R.string.delivery_note_default_issuer_company_label2),
+                label = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
                 number = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_number2))
             )
         )
@@ -370,7 +370,7 @@ private fun fakeClient() =
         notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_notes)),
         companyData = listOf(
             CompanyDataState(
-                label = stringResource(id = R.string.delivery_note_default_client_company_label1),
+                label = TextFieldValue(stringResource(id = R.string.delivery_note_default_client_company_label1)),
                 number = TextFieldValue(stringResource(id = R.string.delivery_note_default_client_company_number1))
             )
         )

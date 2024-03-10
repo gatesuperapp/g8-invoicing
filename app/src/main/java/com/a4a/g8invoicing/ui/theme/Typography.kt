@@ -204,3 +204,16 @@ val Typography.textFormBlock: TextStyle
             )
         )
     }
+
+val Typography.textForFormLabelVerySmall: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = documentsFont,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 10.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }

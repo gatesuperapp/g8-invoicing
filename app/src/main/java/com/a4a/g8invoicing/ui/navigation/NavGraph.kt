@@ -30,9 +30,10 @@ fun NavGraph(navController: NavHostController) {
     NavHost(
         navController,
         //startDestination = (Screen.DeliveryNoteList.name),
-        //startDestination = (Screen.ProductList.name),
+        // startDestination = (Screen.ProductList.name),
         //startDestination = (Screen.DeliveryNoteAddEdit.name),
-        startDestination = (Screen.ClientOrIssuerAddEdit.name),
+        // startDestination = (Screen.ClientOrIssuerAddEdit.name),
+         startDestination = (Screen.ClientOrIssuerList.name),
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {

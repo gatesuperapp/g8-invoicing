@@ -40,22 +40,12 @@ fun ClientOrIssuerAddEdit(
         }
     ) {
         it
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .background(Color.LightGray.copy(alpha = 0.4f))
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .imePadding()
-                .padding(
-                    top = 80.dp,
-                )
-        ) {
+
         ClientOrIssuerAddEditForm(
             clientOrIssuer,
             onValueChange,
             placeCursorAtTheEndOfText
-        )}
+        )
 
     }
 }
