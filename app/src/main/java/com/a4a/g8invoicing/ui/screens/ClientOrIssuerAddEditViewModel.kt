@@ -65,7 +65,11 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             city = TextFieldValue(clientOrIssuer?.city?.text ?: ""),
             phone = TextFieldValue(clientOrIssuer?.phone?.text ?: ""),
             email = TextFieldValue(clientOrIssuer?.email?.text ?: ""),
-            notes = TextFieldValue(clientOrIssuer?.notes?.text ?: "")
+            notes = TextFieldValue(clientOrIssuer?.notes?.text ?: ""),
+            companyId1Label = TextFieldValue(clientOrIssuer?.companyId1Label?.text ?: ""),
+            companyId1Number = TextFieldValue(clientOrIssuer?.companyId1Number?.text ?: ""),
+            companyId2Label = TextFieldValue(clientOrIssuer?.companyId2Label?.text ?: ""),
+            companyId2Number = TextFieldValue(clientOrIssuer?.companyId2Number?.text ?: ""),
         )
     }
 
@@ -142,7 +146,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         value: Any,
     ): ClientOrIssuerState {
         var person = clientOrIssuer
-        val companyData = mutableListOf(CompanyDataState(), CompanyDataState())
         when (element) {
             ScreenElement.CLIENT_NAME -> person = person.copy(name = value as TextFieldValue)
             ScreenElement.CLIENT_FIRST_NAME ->         person = person.copy(firstName = value as TextFieldValue)
@@ -153,22 +156,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ScreenElement.CLIENT_CITY -> person = person.copy(city = value as TextFieldValue)
             ScreenElement.CLIENT_PHONE -> person = person.copy(phone = value as TextFieldValue)
             ScreenElement.CLIENT_NOTES -> person = person.copy(notes = value as TextFieldValue)
-            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> {
-                companyData.first().label = value as TextFieldValue
-                person = person.copy(companyData = companyData)
-            }
-            ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> {
-                companyData.first().number = value as TextFieldValue
-                person = person.copy(companyData = companyData)
-            }
-            ScreenElement.CLIENT_IDENTIFICATION2_LABEL ->  {
-                companyData[1].label = value as TextFieldValue
-                person = person.copy(companyData = companyData)
-            }
-            ScreenElement.CLIENT_IDENTIFICATION2_VALUE ->  {
-                companyData[1].number = value as TextFieldValue
-                person = person.copy(companyData = companyData)
-            }
+            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> person = person.copy(companyId1Label = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> person = person.copy(companyId1Number = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> person = person.copy(companyId2Label = value as TextFieldValue)
+            ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> person = person.copy(companyId2Number = value as TextFieldValue)
             else -> null
         }
         return person

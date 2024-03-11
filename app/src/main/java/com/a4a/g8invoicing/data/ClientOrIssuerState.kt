@@ -18,5 +18,8 @@ data class ClientOrIssuerState(
     var phone: TextFieldValue? = null,
     var email: TextFieldValue? = null,
     var notes: TextFieldValue? = null,
-    var companyData: List<CompanyDataState>? = null,
+    var companyId1Label: TextFieldValue? = null,
+    var companyId1Number: TextFieldValue? = null,
+    var companyId2Label: TextFieldValue? = null,
+    var companyId2Number: TextFieldValue? = null,
 )

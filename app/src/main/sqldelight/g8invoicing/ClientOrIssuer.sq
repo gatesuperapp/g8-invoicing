@@ -10,6 +10,10 @@ CREATE TABLE ClientOrIssuer (
   phone TEXT,
   email TEXT,
   notes TEXT,
+  company_id1_label TEXT,
+  company_id1_number TEXT,
+  company_id2_label TEXT,
+  company_id2_number TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -17,13 +21,13 @@ CREATE TABLE ClientOrIssuer (
 );
 
 INSERT INTO ClientOrIssuer (client_or_issuer_id, type, first_name, name, address1, address2, zip_code,
-city, phone, email, notes)
+city, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number)
 VALUES (1,  'issuer', 'issuerAudus', 'Zu', '7 rue pacha',
-'appt 777', '31400','Toulouse', '0789384749', 'audus@rich.fr', 'millionariat en vue'),
+'appt 777', '31400','Toulouse', '0789384749', 'audus@rich.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
  (2, 'client', 'clientHaha', 'Biocoop', '7 rue pacha', 'appt 777', '31400',
-'Toulouse', '0789384749', 'client@', 'millionariat en vue'),
+'Toulouse', '0789384749', 'client@', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
  (3, 'client', 'clientBernadoutteett', 'Delaplandidugg', '7 rue pacha', 'appt 777', '31400',
-'Toulouse', '0789384749', 'client@', 'millionariat en vue')
+'Toulouse', '0789384749', 'client@', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' )
 ;
 
 
@@ -57,8 +61,8 @@ WHERE instr(name, :name);
 
 save:
 INSERT INTO ClientOrIssuer (client_or_issuer_id, type, first_name, name, address1, address2,
-zip_code, city, phone, email, notes)
-VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
+zip_code, city, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number)
+VALUES (?, ?, ?,  ?,?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -71,7 +75,11 @@ SET type = :type,
     city = :city,
     phone = :phone,
     email = :email,
-    notes = :notes
+    notes = :notes,
+    company_id1_label = :company_id1_label,
+    company_id1_number = :company_id1_number,
+    company_id2_label = :company_id2_label,
+    company_id2_number = :company_id2_number
 WHERE
     client_or_issuer_id = :id;
 

@@ -204,16 +204,14 @@ fun ClientOrIssuerAddEditForm(
            val inputList = listOf(
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuer.companyData?.first()?.label ?: TextFieldValue(
-                            stringResource(id = R.string.client_company_identification1)
-                        ),
+                        text = clientOrIssuer.companyId1Label,
                         onValueChange = {
                             onValueChange(ScreenElement.CLIENT_IDENTIFICATION1_LABEL, it)
                         },
 
                     ),
                     inputType = TextInput(
-                        text = clientOrIssuer.companyData?.first()?.number,
+                        text = clientOrIssuer.companyId1Number,
                         placeholder = stringResource(id = R.string.client_company_identification1_input),
                         onValueChange = {
                             onValueChange(ScreenElement.CLIENT_IDENTIFICATION1_VALUE, it)
@@ -223,15 +221,13 @@ fun ClientOrIssuerAddEditForm(
                 ),
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuer.companyData?.get(1)?.label ?: TextFieldValue(
-                            stringResource(id = R.string.client_company_identification2)
-                        ),
+                        text = clientOrIssuer.companyId2Label,
                         onValueChange = {
                             onValueChange(ScreenElement.CLIENT_IDENTIFICATION2_LABEL, it)
                         }
                     ),
                     inputType = TextInput(
-                        text = clientOrIssuer.companyData?.get(1)?.number,
+                        text = clientOrIssuer.companyId2Number,
                         placeholder = stringResource(id = R.string.client_company_identification2_input),
                         onValueChange = {
                             onValueChange(ScreenElement.CLIENT_IDENTIFICATION2_VALUE, it)

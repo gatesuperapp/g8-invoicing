@@ -142,9 +142,9 @@
     <string name="delivery_note_default_issuer_phone">(974) 491–3398</string>
     <string name="delivery_note_default_issuer_email">kristie.goodman@example.com</string>
     <string name="delivery_note_default_issuer_company_notes">Petites notes pour moi-même</string>
-    <string name="delivery_note_default_issuer_company_label1">TVA</string>
+    <string name="delivery_note_default_issuer_company_label1">N° SIRET</string>
     <string name="delivery_note_default_issuer_company_number1">776EYEYI</string>
-    <string name="delivery_note_default_issuer_company_label2">SIRET</string>
+    <string name="delivery_note_default_issuer_company_label2">N° TVA</string>
     <string name="delivery_note_default_issuer_company_number2">64554828928938</string>
     <string name="delivery_note_default_client_firstName">Laura</string>
     <string name="delivery_note_default_client_name">Toun</string>

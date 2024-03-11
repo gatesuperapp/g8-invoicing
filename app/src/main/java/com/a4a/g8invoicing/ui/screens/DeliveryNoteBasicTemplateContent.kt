@@ -343,16 +343,10 @@ private fun fakeIssuer() =
         phone = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_phone)),
         email = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_email)),
         notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_notes)),
-        companyData = listOf(
-            CompanyDataState(
-                label = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
-                number = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_number1))
-            ),
-            CompanyDataState(
-                label = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
-                number = TextFieldValue(stringResource(id = R.string.delivery_note_default_issuer_company_number2))
-            )
-        )
+        companyId1Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
+        companyId1Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number1)),
+        companyId2Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
+        companyId2Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number2)),
     )
 
 @Composable
@@ -368,12 +362,10 @@ private fun fakeClient() =
         phone = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_phone)),
         email = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_email)),
         notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_notes)),
-        companyData = listOf(
-            CompanyDataState(
-                label = TextFieldValue(stringResource(id = R.string.delivery_note_default_client_company_label1)),
-                number = TextFieldValue(stringResource(id = R.string.delivery_note_default_client_company_number1))
-            )
-        )
+        companyId1Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
+        companyId1Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number1)),
+        companyId2Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
+        companyId2Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number2)),
     )
 
 @Composable

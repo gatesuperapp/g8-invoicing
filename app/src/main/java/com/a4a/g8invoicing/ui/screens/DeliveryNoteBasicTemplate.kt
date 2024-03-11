@@ -206,12 +206,20 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text
         )
     }
-    clientOrIssuer.companyData?.forEach() {
+    clientOrIssuer.companyId1Label?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = "N° " + it.label + " : " + it.number
+            text = it.text + " : " + clientOrIssuer.companyId1Number?.text
+        )
+    }
+    clientOrIssuer.companyId2Label?.let {
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier.wrapContentHeight(),
+            style = MaterialTheme.typography.textForDocuments,
+            text = it.text + " : " + clientOrIssuer.companyId2Number?.text
         )
     }
 }

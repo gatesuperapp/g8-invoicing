@@ -10,6 +10,10 @@ CREATE TABLE DocumentClientOrIssuer (
   phone TEXT,
   email TEXT,
   notes TEXT,
+  company_id1_label TEXT,
+  company_id1_number TEXT,
+  company_id2_label TEXT,
+  company_id2_number TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -33,8 +37,8 @@ WHERE name = :name AND first_name =: first_name;
 
 save:
 INSERT INTO DocumentClientOrIssuer (document_client_or_issuer_id, type, first_name, name, address1, address2,
-zip_code, city, phone, email, notes)
-VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
+zip_code, city, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number)
+VALUES (?, ?, ?,  ?,?, ?, ?,  ?, ?, ?, ?, ?, ?, ?,  ?);
 
 update:
 UPDATE DocumentClientOrIssuer
@@ -47,7 +51,11 @@ SET type = :type,
     city = :city,
     phone = :phone,
     email = :email,
-    notes = :notes
+    notes = :notes,
+    company_id1_label = :company_id1_label,
+    company_id1_number = :company_id1_number,
+    company_id2_label = :company_id2_label,
+    company_id2_number = :company_id2_number
 WHERE
     document_client_or_issuer_id = :id;
 

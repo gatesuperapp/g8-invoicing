@@ -23,8 +23,6 @@ class DeliveryNoteLocalDataSource(
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
-    private val linkToCompanyQueries = db.linkClientOrIssuerToCompanyIdentificatorQueries
-    private val companyIdQueries = db.companyIdentificatorQueries
     private val linkDeliveryNoteToDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
     private val documentProductQueries = db.documentProductQueries
 
@@ -75,13 +73,13 @@ class DeliveryNoteLocalDataSource(
         this.document_client_id?.let {
             client = clientOrIssuerQueries.get(it)
                 .executeAsOneOrNull()
-                ?.transformIntoEditable(linkToCompanyQueries, companyIdQueries)
+                ?.transformIntoEditable()
         }
 
         this.document_issuer_id?.let {
             issuer = clientOrIssuerQueries.get(it)
                 .executeAsOneOrNull()
-                ?.transformIntoEditable(linkToCompanyQueries, companyIdQueries)
+                ?.transformIntoEditable()
         }
 
         this.let {
@@ -234,7 +232,11 @@ class DeliveryNoteLocalDataSource(
                 city = it.city?.text,
                 phone = it.phone?.text,
                 email = it.email?.text,
-                notes = it.notes?.text
+                notes = it.notes?.text,
+                company_id1_label = it.companyId1Label?.text,
+                company_id1_number = it.companyId1Number?.text,
+                company_id2_label = it.companyId2Label?.text,
+                company_id2_number = it.companyId2Number?.text,
             )
         }
     }
