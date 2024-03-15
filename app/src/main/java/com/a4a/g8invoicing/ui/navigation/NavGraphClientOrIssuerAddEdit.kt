@@ -22,7 +22,6 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
     ) { backStackEntry ->
         val viewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
         val clientUiState by viewModel.clientUiState
-        val type = backStackEntry.arguments?.getString("type")
         val isNew = backStackEntry.arguments?.getString("itemId") == null
 
         ClientOrIssuerAddEdit(
@@ -39,18 +38,14 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
                 //  we don't have to pass the object as the
                 //  ViewModel is already updated with latest values
                 if (isNew) {
-                    type?.let {
-                        viewModel.saveInLocalDb(it)
-                    }
+                    viewModel.saveInLocalDb("client")
                 } else {
                     viewModel.updateClientInInLocalDb()
                 }
                 goToPreviousScreen(
                     "result",
-                    Pair(type ?: "", viewModel.getLastCreated().toString())
-                ) //TODO REMove ?!
-                // We use it to retrieve newly created client in documents creation
-                // See livedata in DeliveryNoteAdd/Edit or InvoiceAdd/Edit
+                    Pair("client", viewModel.getLastCreated().toString())
+                ) // TODO ?
             },
             onClickBack = {
                 goToPreviousScreen(

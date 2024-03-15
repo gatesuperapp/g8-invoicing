@@ -38,7 +38,9 @@ import java.math.RoundingMode
 fun DataTable(
     tableData: List<DocumentProductState>,
 ) {
-    val column1Weight = .8f // 70%
+    val descriptionColumnWeight = .8f // 70%
+    val quantityColumnWeight = .15f // 70%
+    val taxColumnWeight = .15f // 70%
 
     Row(
         Modifier
@@ -51,15 +53,21 @@ fun DataTable(
     ) {
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_description),
-            weight = column1Weight,
-            true
+            weight = descriptionColumnWeight,
+            alignEnd = false
         )
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_quantity),
+            weight = quantityColumnWeight,
+            alignEnd = true
+        )
+        TableCell(
+            text = stringResource(id = R.string.delivery_note_table_unit),
             alignEnd = true
         )
         TableCell(
             text = stringResource(id = R.string.delivery_note_table_tax_rate),
+            weight = quantityColumnWeight,
             alignEnd = true
         )
         TableCell(
@@ -73,8 +81,13 @@ fun DataTable(
     }
 
     // All the lines of the table.
-    tableData.forEach() {
-        val priceWithoutTax = it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
+    tableData.forEach {
+        var priceWithoutTax = BigDecimal(0)
+        it.priceWithTax?.let {priceWithTax ->
+            priceWithoutTax =  (priceWithTax - priceWithTax * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100))
+
+        }
+
 
         Row(
             Modifier
@@ -86,24 +99,30 @@ fun DataTable(
         ) {
             TableCell(
                 text = it.name.text,
-                weight = column1Weight,
+                weight = descriptionColumnWeight,
                 alignEnd = false,
                 subText = it.description?.text
             )
             TableCell(
-                text = it.quantity.toString() + " " + it.unit?.text.toString(),
+                text = it.quantity.toString() + " ",
+                weight = quantityColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = (it.taxRate).toString() + "%",
+                text = it.unit?.text.toString(),
                 alignEnd = true
             )
             TableCell(
-                text = priceWithoutTax.toString(),
+                text = it.taxRate?.let{ "$it%" }  ?: " - ",
+                weight = taxColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = (priceWithoutTax * it.quantity).toString(),
+                text = priceWithoutTax.toString() + stringResource(id = R.string.currency),
+                alignEnd = true
+            )
+            TableCell(
+                text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP).toString() + stringResource(id = R.string.currency),
                 alignEnd = true
             )
         }
@@ -122,7 +141,7 @@ fun RowScope.TableCell(
         modifier = Modifier
             .rightBorder(1.dp, Color.LightGray)
             .weight(weight)
-            .padding(start = 8.dp, end = 8.dp, top = 4.dp)
+            .padding(start = 2.dp, end = 4.dp, top = 4.dp)
             .fillMaxHeight(),
         horizontalAlignment = if (alignEnd) {
             Alignment.End

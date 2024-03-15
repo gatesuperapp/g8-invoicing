@@ -29,11 +29,11 @@ Process to add a new screen/VM/datasource:
 fun NavGraph(navController: NavHostController) {
     NavHost(
         navController,
-        //startDestination = (Screen.DeliveryNoteList.name),
-        // startDestination = (Screen.ProductList.name),
-        //startDestination = (Screen.DeliveryNoteAddEdit.name),
+         startDestination = (Screen.DeliveryNoteList.name),
+        //startDestination = (Screen.ProductList.name),
+        //   startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
-         startDestination = (Screen.ClientOrIssuerList.name),
+        //startDestination = (Screen.ClientOrIssuerList.name),
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
@@ -101,6 +101,7 @@ fun NavGraph(navController: NavHostController) {
             },
             onClickListItem = {
                 val params = ("?itemId=${it.productId}&type=product")
+                //TODO remove as useless, the start destination is already the product dest..
                 navController.navigate("ProductCreation$params") {
                     // Pop up to the start destination of the graph to
                     // avoid building up a large stack of destinations

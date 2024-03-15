@@ -28,6 +28,7 @@
     <string name="appbar_send"> Envoyer</string>
     <string name="appbar_search"> Recherche</string>
     <string name="appbar_save"> Sauvegarder</string>
+    <string name="appbar_export">Envoyer</string>
     <string name="drawer_delivery_notes">Bons de livraison</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
     <string name="drawer_products">Items</string>
@@ -110,7 +111,7 @@
     <string name="copy">Copie de</string>
     <string name="product_name">Nom <sup>*</sup></string>
     <string name="product_name_input">Betteraves</string>
-    <string name="product_description">Description</string>
+    <string name="product_description">Libellé</string>
     <string name="product_unit">Unité</string>
     <string name="product_unit_input">kg</string>
     <string name="product_description_input">Rose Lutz</string>

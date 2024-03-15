@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -31,6 +33,7 @@ fun DeliveryNoteBottomSheetDocumentProductList(
         modifier = Modifier
             .fillMaxHeight(0.5f)
             .background(Color.White)
+           // .verticalScroll(rememberScrollState())
     ) {
         // Header: display "back" button
         Row(

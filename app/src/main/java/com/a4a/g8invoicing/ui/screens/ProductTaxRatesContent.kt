@@ -28,7 +28,7 @@ import java.math.BigDecimal
 @Composable
 fun ProductTaxRatesContent(
     taxRates: List<BigDecimal>,
-    currentTaxRate: BigDecimal,
+    currentTaxRate: BigDecimal?,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     isDisplayedInBottomSheet: Boolean = false
 ) {
@@ -65,7 +65,9 @@ fun ProductTaxRatesContent(
 
             taxRatesIncludingNoTax.forEach { taxRate ->
 
-                val isCurrentTaxRate = taxRate.compareTo(chosenOption) == 0
+                val isCurrentTaxRate = if(currentTaxRate == null) {
+                    taxRatesIncludingNoTax == BigDecimal(0)
+                } else taxRate.compareTo(chosenOption) == 0
                 //We use compareTo() because if we use taxRate == chosenOption it compares 20 with 20.0 and returns false
 
                 Row(

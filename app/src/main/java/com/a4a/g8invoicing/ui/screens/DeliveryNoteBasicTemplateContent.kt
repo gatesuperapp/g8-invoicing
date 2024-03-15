@@ -261,7 +261,7 @@ fun DeliveryNoteBasicTemplateContent(
                     modifier = Modifier
                         .padding(bottom = 3.dp, end = 3.dp),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = uiState.documentPrices?.totalPriceWithoutTax.toString() + stringResource(id = R.string.currency)
+                    text = (uiState.documentPrices?.totalPriceWithoutTax?.toString() ?: " - ") + stringResource(id = R.string.currency)
                 )
                 uiState.documentPrices?.totalAmountsOfEachTax?.forEach {
                     Text(
@@ -276,7 +276,7 @@ fun DeliveryNoteBasicTemplateContent(
                     modifier = Modifier
                         .padding(end = 3.dp),
                     style = MaterialTheme.typography.textForDocumentsImportant,
-                    text = uiState.documentPrices?.totalPriceWithTax.toString() + stringResource(id = R.string.currency)
+                    text = (uiState.documentPrices?.totalPriceWithTax?.toString()  ?: " - ")  + stringResource(id = R.string.currency)
                 )
             }
         }

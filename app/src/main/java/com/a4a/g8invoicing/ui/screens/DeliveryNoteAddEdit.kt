@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.ClientOrIssuerState
@@ -34,11 +36,10 @@ import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionComponents
-import com.a4a.g8invoicing.ui.navigation.actionDone
+import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionStyle
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
@@ -55,7 +56,7 @@ fun DeliveryNoteAddEdit(
     taxRates: List<BigDecimal>,
     products: MutableList<ProductState>,
     isNewDeliveryNote: Boolean,
-    onClickDone: (Boolean) -> Unit,
+    onClickShare: () -> Unit,
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onProductClick: (ProductState) -> Unit,
@@ -93,7 +94,7 @@ fun DeliveryNoteAddEdit(
         // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
         // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-           // hideBottomSheet(scope, scaffoldState, keyboardController)
+           hideBottomSheet(scope, scaffoldState)
         } else {
             onClickBack()
         }
@@ -125,7 +126,7 @@ fun DeliveryNoteAddEdit(
                 deliveryNote = deliveryNote,
                 datePickerState = datePickerState,
                 onDismissBottomSheet = {
-                 //   hideBottomSheet(scope, scaffoldState, keyboardController)
+                    hideBottomSheet(scope, scaffoldState)
                 },
                 clients = clients,
                 issuers = issuers,
@@ -144,12 +145,15 @@ fun DeliveryNoteAddEdit(
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
-                onSelectTaxRate = onSelectTaxRate
+                onSelectTaxRate = onSelectTaxRate,
+                localFocusManager =  LocalFocusManager.current
             )
         },
         sheetShadowElevation = 30.dp
     )
     {
+        val context = LocalContext.current
+
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
         Scaffold(
@@ -157,10 +161,9 @@ fun DeliveryNoteAddEdit(
                 DeliveryNoteAddEditTopBar(
                     isNewDeliveryNote = isNewDeliveryNote,
                     navController = navController,
-                    onClickDone = { isNewDeliveryNote ->
-                        onClickDone(isNewDeliveryNote)
+                    onClickShare = {
                     },
-                    onClickBackArrow = onClickBack
+                    onClickBack = onClickBack
                 )
             },
             bottomBar = {
@@ -169,7 +172,11 @@ fun DeliveryNoteAddEdit(
                         expandBottomSheet(scope, scaffoldState)
                     },
                     onClickStyle = {
-                        expandBottomSheet(scope, scaffoldState)
+                        Toast.makeText(
+                            context,
+                            "Bientôt disponible pour les abonné·e·s :)",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 )
             }
@@ -184,6 +191,7 @@ fun DeliveryNoteAddEdit(
                     .padding(20.dp) // Adds 20dp to inner padding
             ) {
                 var selectedItem: ScreenElement? by remember { mutableStateOf(null) }
+
 
                 DeliveryNoteBasicTemplate(
                     uiState = deliveryNote,
@@ -213,6 +221,33 @@ fun DeliveryNoteAddEdit(
                     },
                     selectedItem
                 )
+
+
+                /*val widthValue = 320.dp
+
+                ComposePagerSnapHelper(
+                    width = widthValue
+                ) { listState ->
+                    LazyRow(
+                        state = listState,
+                    ) {
+                        items(count = 2) { item ->
+                            Card(
+                                modifier = Modifier
+                                    .width(widthValue)
+                                    .height(350.dp)
+                                    .padding(
+                                        start = if (item == 0) 16.dp else 16.dp,
+                                        top = 16.dp, bottom = 16.dp,
+                                        end = if (item == 4) 16.dp else 8.dp
+                                    ),
+                            ) {
+                                //Put text or whatever here
+
+                            }
+                        }
+                    }
+                }*/
             }
         }
     }
@@ -227,14 +262,14 @@ private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetS
 private fun hideBottomSheet(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    keyboardController: SoftwareKeyboardController?,
+  //  keyboardController: SoftwareKeyboardController?,
 ) {
     scope.launch {
-        keyboardController?.let {// If the keyboard was open, must hide it
+   /*     keyboardController?.let {// If the keyboard was open, must hide it
             it.hide()
             delay(200L) // Small delay because it's janky without it,
             // added here because we can't access bottomsheet ".animate" (it's not public)
-        }
+        }*/
         scaffoldState.bottomSheetState.hide()
     }
 }
@@ -243,16 +278,18 @@ private fun hideBottomSheet(
 private fun DeliveryNoteAddEditTopBar(
     isNewDeliveryNote: Boolean,
     navController: NavController,
-    onClickDone: (Boolean) -> Unit,
-    onClickBackArrow: () -> Unit,
+    onClickShare: () -> Unit,
+    onClickBack: () -> Unit,
 ) {
     TopBar(
         title = null,
-        actionDone(
-            onClick = { onClickDone(isNewDeliveryNote) }
+        actionExport(
+            onClick = {  }
         ),
         navController = navController,
-        onClickBackArrow = onClickBackArrow
+        onClickBackArrow = {
+            onClickBack()
+        }
     )
 }
 

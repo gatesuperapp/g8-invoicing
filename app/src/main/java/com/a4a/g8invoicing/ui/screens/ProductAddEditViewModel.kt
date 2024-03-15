@@ -91,8 +91,8 @@ class ProductAddEditViewModel @Inject constructor(
             productId = product?.productId,
             name = product?.name ?: TextFieldValue(),
             description = product?.description,
-            priceWithTax = product?.priceWithTax ?: BigDecimal(0),
-            taxRate = product?.taxRate ?: BigDecimal(0),
+            priceWithTax = product?.priceWithTax,
+            taxRate = product?.taxRate,
             unit = product?.unit
         )
     }
@@ -105,8 +105,8 @@ class ProductAddEditViewModel @Inject constructor(
             name = documentProduct?.name ?: TextFieldValue(""),
             quantity = documentProduct?.quantity ?: BigDecimal(0),
             description = documentProduct?.description,
-            priceWithTax = documentProduct?.priceWithTax ?: BigDecimal(0),
-            taxRate = documentProduct?.taxRate ?: BigDecimal(0),
+            priceWithTax = documentProduct?.priceWithTax ,
+            taxRate = documentProduct?.taxRate,
             unit = documentProduct?.unit
         )
     }
@@ -115,11 +115,11 @@ class ProductAddEditViewModel @Inject constructor(
     fun updateTaxRate(taxRate: BigDecimal?, type: ProductType) {
         if (type == ProductType.PRODUCT) {
             _productUiState.value = _productUiState.value.copy(
-                taxRate = taxRate ?: BigDecimal(0)
+                taxRate = taxRate
             )
         } else {
             _documentProductUiState.value = _documentProductUiState.value.copy(
-                taxRate = taxRate ?: BigDecimal(0)
+                taxRate = taxRate
             )
         }
     }

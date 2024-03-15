@@ -11,7 +11,7 @@ data class ProductState(
     var productId: Int? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var description: TextFieldValue? = null,
-    var priceWithTax: BigDecimal = BigDecimal(0),
-    var taxRate: BigDecimal = BigDecimal(0),
+    var priceWithTax: BigDecimal? = null,
+    var taxRate: BigDecimal? = null,
     var unit: TextFieldValue? = null,
 )

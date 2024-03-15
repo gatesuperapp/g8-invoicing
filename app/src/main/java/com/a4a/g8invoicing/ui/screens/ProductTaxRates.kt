@@ -24,7 +24,7 @@ import java.math.BigDecimal
 fun ProductTaxRates(
     navController: NavController,
     taxRates: List<BigDecimal>,
-    currentTaxRate: BigDecimal,
+    currentTaxRate: BigDecimal?,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     onClickBack: () -> Unit,
 ) {

@@ -1,7 +1,6 @@
 package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -48,7 +47,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         val documentProductUiState by productAddEditViewModel.documentProductUiState
 
 
-        // If the previous screen was Add/edit page
+/*        // If the previous screen was Add/edit page
         // (accessed after user clicks "Add new" in the bottom sheet)
         // we retrieve the new client/issuer to display it in the document
         val arguments = navController.currentBackStackEntry
@@ -71,7 +70,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
                 else -> {}
             }
-        }
+        }*/
 
         // Get result from "Add new" screen, to know if it's
         // a client or issuer that has been added
@@ -79,22 +78,17 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             navController = navController,
             deliveryNote = deliveryNoteUiState,
             isNewDeliveryNote = backStackEntry.arguments?.getString("itemId") == null,
-            onClickDone = { isNewClient ->
-          /*      if (isNewClient) {
-                    deliveryNoteViewModel.saveDeliveryNoteInLocalDb()
-                } else {
-                    deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
-                }*/
+            onClickShare = {},
+            onClickBack = {
+                deliveryNoteViewModel.saveOrUpdateDeliveryNoteInLocalDb()
                 onClickBack()
             },
-            onClickBack = onClickBack,
             clients = clientsUiState.clientsOrIssuers.toMutableList(),
             issuers = issuersUiState.clientsOrIssuers.toMutableList(),
             taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
             products = productListUiState.products.toMutableList(), // The list of products to display when choosing to add a product
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
-                deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
 
             },
             onDocumentProductClick = {

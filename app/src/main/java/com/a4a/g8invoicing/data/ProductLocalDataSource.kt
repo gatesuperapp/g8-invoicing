@@ -72,8 +72,8 @@ class ProductLocalDataSource(
                     name = documentProduct.name.text,
                     quantity = documentProduct.quantity.toDouble(),
                     description = documentProduct.description?.text,
-                    final_price = documentProduct.priceWithTax.toDouble(),
-                    tax_rate = documentProduct.taxRate.toDouble(),
+                    final_price = documentProduct.priceWithTax?.toDouble(),
+                    tax_rate = documentProduct.taxRate?.toDouble(),
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong()
                 )
@@ -134,8 +134,8 @@ class ProductLocalDataSource(
                         name = documentProduct.name.text,
                         quantity = documentProduct.quantity.toDouble(),
                         description = documentProduct.description?.text,
-                        price_with_tax = documentProduct.priceWithTax.toDouble(),
-                        tax_rate = documentProduct.taxRate.toDouble(),
+                        price_with_tax = documentProduct.priceWithTax?.toDouble(),
+                        tax_rate = documentProduct.taxRate?.toDouble(),
                         unit = documentProduct.unit?.text
                     )
                 }
@@ -162,11 +162,10 @@ fun Product.transformIntoEditableProduct(taxQueries: TaxRateQueries): ProductSta
         productId = this.product_id.toInt(),
         name = TextFieldValue(this.name),
         description = TextFieldValue(this.description ?: ""),
-        priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)
-            ?: BigDecimal(0),
+        priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
         taxRate = this.product_tax_id?.let {
             taxQueries.getTaxRate(it)
-        }?.executeAsOneOrNull()?.toBigDecimal() ?: BigDecimal(0),
+        }?.executeAsOneOrNull()?.toBigDecimal(),
         unit = TextFieldValue(this.unit ?: "")
     )
 }
@@ -176,10 +175,8 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
         id = this.document_product_id.toInt(),
         name = TextFieldValue(this.name),
         description = TextFieldValue(this.description ?: ""),
-        priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP)
-            ?: BigDecimal(0),
-        taxRate = this.tax_rate?.toBigDecimal()?.setScale(0, RoundingMode.HALF_UP)
-            ?: BigDecimal(0),
+        priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
+        taxRate = this.tax_rate?.toBigDecimal()?.setScale(0, RoundingMode.HALF_UP),
         quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)
             .stripTrailingZeros(),
         unit = TextFieldValue(this.unit ?: ""),

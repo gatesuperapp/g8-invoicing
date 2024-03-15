@@ -23,7 +23,8 @@ class DeliveryNoteLocalDataSource(
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
-    private val linkDeliveryNoteToDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
+    private val deliveryNoteProductQueries =
+        db.deliveryNoteProductQueries
     private val documentProductQueries = db.documentProductQueries
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -39,23 +40,54 @@ class DeliveryNoteLocalDataSource(
             }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
+/*
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
             .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map { deliveryNote ->
-                        fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
-                            .map {
-                                deliveryNote.transformIntoEditableNote(it)
-                            }
+            .map { query ->
+                query.executeAsList()
+                    .map { it.transformIntoEditableNote(listOf(DocumentProductState())) }
+            }
+    }
+*/
+
+           @OptIn(ExperimentalCoroutinesApi::class)
+        override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+            return deliveryNoteQueries.getAllDeliveryNotes()
+                .asFlow()
+                .flatMapMerge { query ->
+                    combine(
+                        query.executeAsList().map { deliveryNote ->
+                            fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
+                                .map {
+                                    deliveryNote.transformIntoEditableNote(it)
+                                }
+                        }
+                    ) {
+                        it.asList()
                     }
-                ) {
+                }
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
+        return deliveryNoteProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+            .asFlow()
+            .flatMapLatest { query ->
+                combine(
+                    query.executeAsList().map {
+                        documentProductQueries.getDocumentProduct(it.document_product_id)
+                            .asFlow()
+                            .map {
+                                it.executeAsOne().transformIntoEditableDocumentProduct()
+                            }
+                    }) {
                     it.asList()
                 }
             }
     }
+
 
     // Used when duplicating a document (we don't need a flow)
     override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
@@ -97,30 +129,14 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
-        return linkDeliveryNoteToDocumentProductQueries.getDeliveryNoteProduct(deliveryNoteId)
-            .asFlow()
-            .flatMapLatest { query ->
-                combine(
-                    query.executeAsList().map {
-                        documentProductQueries.getDocumentProduct(it.document_product_id)
-                            .asFlow()
-                            .map {
-                                it.executeAsOne().transformIntoEditableDocumentProduct()
-                            }
-                    }) {
-                    it.asList()
-                }
-            }
-    }
 
     // Used when duplicating a document (we don't need a flow)
     private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState> {
         val documentProducts: MutableList<DocumentProductState> = mutableListOf()
 
         val identifiers =
-            linkDeliveryNoteToDocumentProductQueries.getDeliveryNoteProduct(deliveryNoteId).executeAsList()
+            deliveryNoteProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+                .executeAsList()
         identifiers.forEach {
             documentProductQueries.getDocumentProduct(it.document_product_id).executeAsOneOrNull()
                 ?.let { documentProduct ->
@@ -205,13 +221,13 @@ class DeliveryNoteLocalDataSource(
 
     override suspend fun deleteDeliveryNoteProduct(documentProductId: Long) {
         return withContext(Dispatchers.IO) {
-            linkDeliveryNoteToDocumentProductQueries.deleteDeliveryNoteProduct(documentProductId)
+            deliveryNoteProductQueries.deleteProductLinkedToDeliveryNote(documentProductId)
         }
     }
 
     override suspend fun addDeliveryNoteProduct(deliveryNoteId: Long, documentProductId: Long) {
         return withContext(Dispatchers.IO) {
-            linkDeliveryNoteToDocumentProductQueries.saveDeliveryNoteProduct(
+            deliveryNoteProductQueries.saveProductLinkedToDeliveryNote(
                 id = null,
                 delivery_note_id = deliveryNoteId,
                 document_product_id = documentProductId
@@ -243,22 +259,26 @@ class DeliveryNoteLocalDataSource(
 }
 
 fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
-    val totalPriceWithoutTax = products.sumOf {
-        (it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)) * (it.quantity)
+    val totalPriceWithoutTax = products.filter { it.priceWithTax != null }.sumOf {
+        (it.priceWithTax!! - it.priceWithTax!! * (it.taxRate
+            ?: BigDecimal(0)) / BigDecimal(100)) * (it.quantity)
     }.setScale(2, RoundingMode.HALF_UP)
 
 // Calculate the total amount of each tax
     val groupedItems = products.groupBy {
         it.taxRate
     }
-    val taxes = groupedItems.keys.distinct() // ex: taxes= [20, 10]
+    val taxes = groupedItems.keys.filterNotNull().distinct().toMutableList() // ex: taxes= [10, 20]
 
-    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [7.2, 2.4]
+    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
     groupedItems.values.forEach { documentProduct ->
-        val listOfAmounts = documentProduct.map {
-            val priceWithoutTax = it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
+        val listOfAmounts = documentProduct.filter { it.priceWithTax != null }.map {
+            val priceWithoutTax =
+                it.priceWithTax!! - it.priceWithTax!! * (it.taxRate ?: BigDecimal(0)) / BigDecimal(
+                    100
+                )
 
-            priceWithoutTax * it.quantity * it.taxRate / BigDecimal(100)
+            priceWithoutTax * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
         }
         val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
         amounts.add(

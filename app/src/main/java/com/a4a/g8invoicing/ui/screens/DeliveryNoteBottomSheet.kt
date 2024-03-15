@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,6 +37,7 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -45,6 +49,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.textSmall
 import com.a4a.g8invoicing.ui.theme.textTitle
+import icons.IconDone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -77,6 +82,7 @@ fun DeliveryNoteBottomSheet(
     onClickDoneForm: (TypeOfBottomSheetForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    localFocusManager: FocusManager,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -106,23 +112,39 @@ fun DeliveryNoteBottomSheet(
                             .height(50.dp)
                             .width(70.dp)
                             .clickable {
+                                // Hides keyboard if it was opened
                                 if (keyboard.name == "Opened") {
                                     keyboardController?.hide()
-                                } else {
+                                } else { // Hides bottom sheet
                                     onDismissBottomSheet()
                                 }
                             }) {
-                        Icon(
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(30.dp)
-                                .align(alignment = Alignment.CenterEnd),
-                            imageVector = IconArrowDropDown,
-                            contentDescription = "Close"
-                        )
+                        if (keyboard.name == "Opened") {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(20.dp)
+                                    .align(alignment = Alignment.CenterEnd),
+                                imageVector = IconDone,
+                                contentDescription = "Close keyboard"
+                            )
+                        } else { // Hides bottom sheet
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(30.dp)
+                                    .align(alignment = Alignment.CenterEnd),
+                                imageVector = IconArrowDropDown,
+                                contentDescription = "Close bottom sheet"
+                            )
+                        }
                     }
                 }
-                Row {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
                     DeliveryNoteBottomSheetContent(
                         deliveryNote = deliveryNote,
                         onValueChange = onValueChange,
@@ -130,7 +152,8 @@ fun DeliveryNoteBottomSheet(
                             keyboardController?.hide()
                             slideOtherComponent.value = it
                         },
-                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                        localFocusManager = localFocusManager
                     )
                 }
             }
@@ -384,7 +407,7 @@ fun SlideUpTheForm(
                 )
             } else {
                 if (!isTaxSelectionVisible) {
-                    DocumentProductForm(
+                    DocumentProductAddEditForm(
                         documentProduct = documentProduct,
                         bottomFormOnValueChange = bottomFormOnValueChange,
                         placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
@@ -393,8 +416,9 @@ fun SlideUpTheForm(
                         }
                     )
                 } else {
-                    OpenTaxSelection(taxRates,
-                        documentProduct.taxRate,
+                    OpenTaxSelection(
+                        taxRates = taxRates,
+                        currentTaxRate = documentProduct.taxRate,
                         onSelectTaxRate = {
                             isTaxSelectionVisible = false
                             onSelectTaxRate(it)
@@ -409,7 +433,7 @@ fun SlideUpTheForm(
 @Composable
 fun OpenTaxSelection(
     taxRates: List<BigDecimal>,
-    currentTaxRate: BigDecimal,
+    currentTaxRate: BigDecimal?,
     onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
     ProductTaxRatesContent(

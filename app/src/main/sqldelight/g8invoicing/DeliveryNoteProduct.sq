@@ -13,16 +13,16 @@ VALUES (1, 1, 1),
 (2, 1, 2),
 (3, 2, 1);
 
-getDeliveryNoteProduct:
+getProductsLinkedToDeliveryNote:
 SELECT *
 FROM DeliveryNoteProduct
 WHERE delivery_note_id = :delivery_note_id;
 
-saveDeliveryNoteProduct:
+saveProductLinkedToDeliveryNote:
 INSERT
 INTO DeliveryNoteProduct (id, delivery_note_id, document_product_id)
 VALUES (?, ?, ?);
 
-deleteDeliveryNoteProduct:
+deleteProductLinkedToDeliveryNote:
 DELETE FROM DeliveryNoteProduct
 WHERE document_product_id = :document_product_id;

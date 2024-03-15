@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,10 +30,10 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-// It's a bit of a duplicate of ProductAddEditForm, but here we must use "DoucmentProductState"
+// It's a bit of a duplicate of ProductAddEditForm, but here we must use "DocumentProductState"
 // instead of "ProductState"
 @Composable
-fun DocumentProductForm(
+fun DocumentProductAddEditForm(
     documentProduct: DocumentProductState,
     bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -42,6 +44,7 @@ fun DocumentProductForm(
     Column(
         modifier = Modifier
             .fillMaxHeight(0.7f)
+            .verticalScroll(rememberScrollState())
             .fillMaxWidth()
             .imePadding()
             .padding(top = 30.dp)
@@ -50,7 +53,6 @@ fun DocumentProductForm(
                     localFocusManager.clearFocus()
                 })
             }
-
     ) {
         Column(
             modifier = Modifier
@@ -65,12 +67,16 @@ fun DocumentProductForm(
             verticalArrangement = Arrangement.spacedBy(10.dp)
 
         ) {
-            var priceWithoutTax: BigDecimal
-            documentProduct.let {
-                priceWithoutTax =
-                    it.priceWithTax - it.priceWithTax * it.taxRate / BigDecimal(100)
-            }
+            var priceWithoutTax: BigDecimal? = null
 
+            documentProduct.let {productState ->
+                productState.taxRate?.let {taxRate ->
+                    productState.priceWithTax?.let { priceWithTax ->
+                        priceWithoutTax = priceWithTax - priceWithTax * taxRate / BigDecimal(100)
+                    }
+
+                }
+            }
             // Create the list with all fields
             val inputList = listOfNotNull(
                 FormInput(
@@ -87,7 +93,7 @@ fun DocumentProductForm(
                 FormInput(
                     label = stringResource(id = R.string.document_product_quantity),
                     inputType = DecimalInput(
-                        text = documentProduct.quantity.setScale(2, RoundingMode.HALF_UP)
+                        text = documentProduct.quantity
                             .toString(),
                         placeholder = stringResource(id = R.string.document_product_quantity_input),
                         onValueChange = {
@@ -113,7 +119,7 @@ fun DocumentProductForm(
                         id = R.string.product_price
                     ),
                     inputType = DecimalInput(
-                        text = documentProduct.priceWithTax.setScale(2, RoundingMode.HALF_UP)
+                        text = (documentProduct.priceWithTax?.setScale(2, RoundingMode.HALF_UP) ?: "")
                             .toString(),
                         taxRate = documentProduct.taxRate,
                         placeholder = stringResource(id = R.string.product_price_input),
@@ -123,10 +129,11 @@ fun DocumentProductForm(
                         keyboardType = KeyboardType.Decimal
                     ),
                     inputType2 = DecimalInput(
-                        text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
+                        text = (priceWithoutTax?.setScale(2, RoundingMode.HALF_UP) ?: "")
                             .toString(),
-                        placeholder = (BigDecimal(3) + BigDecimal(3) * documentProduct.taxRate
-                                / BigDecimal(100)).toString(),
+                        placeholder = documentProduct.taxRate?.let {
+                            (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
+                        } ?: "",
                         keyboardType = KeyboardType.Decimal
                     ),
                     pageElement = ScreenElement.DOCUMENT_PRODUCT_PRICE
@@ -135,7 +142,7 @@ fun DocumentProductForm(
                     label = stringResource(id = R.string.product_tax),
                     inputType = ForwardElement(
                         text = documentProduct.taxRate.let { taxRate ->
-                            if (taxRate == BigDecimal(0)) {
+                            if (taxRate == null) {
                                 "-"
                             } else {
                                 "$taxRate%"

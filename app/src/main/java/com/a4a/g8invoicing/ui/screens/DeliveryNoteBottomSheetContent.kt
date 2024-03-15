@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -19,9 +21,8 @@ fun DeliveryNoteBottomSheetContent(
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
+    localFocusManager: FocusManager
 ) {
-    val localFocusManager = LocalFocusManager.current
-
     val inputList = listOfNotNull(
         FormInput(
             label = stringResource(id = R.string.delivery_note_number_short),

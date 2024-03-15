@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.icons.IconBrush
 import com.a4a.g8invoicing.ui.shared.icons.IconComponents
+import com.a4a.g8invoicing.ui.shared.icons.IconExport
 import com.ninetyninepercent.funfactu.icons.IconApps
 import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
 import com.ninetyninepercent.funfactu.icons.IconDuplicate
@@ -91,6 +92,15 @@ fun actionDone(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDone,
         description = R.string.appbar_save,
+        isInDropDownMenu = false,
+        onClick = onClick
+    )
+
+@Composable
+fun actionExport(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconExport,
+        description = R.string.appbar_export,
         isInDropDownMenu = false,
         onClick = onClick
     )

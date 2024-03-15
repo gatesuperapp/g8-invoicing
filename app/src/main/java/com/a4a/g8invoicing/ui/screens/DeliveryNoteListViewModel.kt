@@ -40,9 +40,10 @@ class DeliveryNoteListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.fetchAllDeliveryNotes().collect {
+                    println("yaaaa" + it)
                    _deliveryNotesUiState.update { deliveryNotesUiState ->
                         deliveryNotesUiState.copy(
-                            deliveryNoteItems = it
+                            deliveryNoteStates = it
                         )
                     }
                 }

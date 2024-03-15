@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.a4a.g8invoicing.R
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
 fun TopBar(
     @StringRes title: Int? = null,
     appBarAction: AppBarAction? = null,
+    iconSize: Dp  = 24.dp,
     navController: NavController,
     onClickBackArrow: () -> Unit
 ) {
@@ -39,7 +42,8 @@ fun TopBar(
         },
         actions = {
             TopBarActionView(
-                appBarAction
+                appBarAction,
+                iconSize
             )
         },
         navigationIcon = {

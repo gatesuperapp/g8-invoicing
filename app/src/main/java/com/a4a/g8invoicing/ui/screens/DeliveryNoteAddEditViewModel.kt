@@ -7,7 +7,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSource
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -50,6 +49,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.fetchDeliveryNoteFlow(id).collect {
+                    println("yooooa" + it)
                     it?.let {
                         _deliveryNoteUiState.value = it
                     }
@@ -60,23 +60,13 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDeliveryNoteInLocalDb() {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
-            try {
-                deliveryNoteDataSource.saveDeliveryNote(deliveryNoteUiState.value)
-            } catch (e: Exception) {
-                println("Saving deliveryNotes failed with exception: ${e.localizedMessage}")
-            }
-        }
-    }
-
-
-    fun updateDeliveryNoteInLocalDb() {
+    fun saveOrUpdateDeliveryNoteInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
+                id?.let {
+                    deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
+                } ?: deliveryNoteDataSource.saveDeliveryNote(deliveryNoteUiState.value)
 
             } catch (e: Exception) {
                 println("Saving deliveryNotes failed with exception: ${e.localizedMessage}")
