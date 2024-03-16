@@ -4,13 +4,14 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.CompanyDataState
+import com.a4a.g8invoicing.ui.states.ProductState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -45,11 +46,12 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun setClientUiState(client: ClientOrIssuerState) {
-        _clientUiState.value = client
+    fun clearClientUiState() {
+        _clientUiState.value = ClientOrIssuerState()
     }
-    fun setIssuerUiState(issuer: ClientOrIssuerState) {
-        _issuerUiState.value = issuer
+
+    fun clearIssuerUiState() {
+        _clientUiState.value = ClientOrIssuerState()
     }
 
     private fun fetchFromLocalDb(id: Long) {
@@ -73,11 +75,13 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         )
     }
 
-    fun saveInLocalDb(type: String) {
+    fun saveInLocalDb(type: ClientOrIssuerType) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                dataSource.saveClientOrIssuer(clientUiState.value, type)
+                if (type == ClientOrIssuerType.CLIENT) {
+                    dataSource.saveClientOrIssuer(clientUiState.value, type.name.lowercase())
+                } else dataSource.saveClientOrIssuer(issuerUiState.value, type.name.lowercase())
             } catch (e: Exception) {
                 println("Saving clients failed with exception: ${e.localizedMessage}")
             }
@@ -95,25 +99,33 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateClientOrIssuerState(pageElement: ScreenElement, value: Any) {
-        _clientUiState.value = updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
+    fun updateClientOrIssuerState(
+        pageElement: ScreenElement,
+        value: Any,
+        type: ClientOrIssuerType,
+    ) {
+        if (type == ClientOrIssuerType.CLIENT) {
+            _clientUiState.value =
+                updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
+        } else _issuerUiState.value =
+            updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
     }
 
     fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
         val text = when (pageElement) {
-            ScreenElement.CLIENT_NAME -> clientUiState.value.name.text
-            ScreenElement.CLIENT_FIRST_NAME -> clientUiState.value.firstName?.text
-            ScreenElement.CLIENT_EMAIL -> clientUiState.value.email?.text
-            ScreenElement.CLIENT_ADDRESS1 -> clientUiState.value.address1?.text
-            ScreenElement.CLIENT_ADDRESS2 -> clientUiState.value.address2?.text
-            ScreenElement.CLIENT_ZIP -> clientUiState.value.zipCode?.text
-            ScreenElement.CLIENT_CITY -> clientUiState.value.city?.text
-            ScreenElement.CLIENT_PHONE -> clientUiState.value.phone?.text
-            ScreenElement.CLIENT_NOTES -> clientUiState.value.notes?.text
-/*            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> clientUiState.value.companyData?.first()?.label?.text
-            ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> clientUiState.value.companyData?.first()?.number?.text
-            ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> clientUiState.value.companyData?.get(1)?.label?.text
-            ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
+            ScreenElement.CLIENT_OR_ISSUER_NAME -> clientUiState.value.name.text
+            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> clientUiState.value.firstName?.text
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL -> clientUiState.value.email?.text
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 -> clientUiState.value.address1?.text
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS2 -> clientUiState.value.address2?.text
+            ScreenElement.CLIENT_OR_ISSUER_ZIP -> clientUiState.value.zipCode?.text
+            ScreenElement.CLIENT_OR_ISSUER_CITY -> clientUiState.value.city?.text
+            ScreenElement.CLIENT_OR_ISSUER_PHONE -> clientUiState.value.phone?.text
+            ScreenElement.CLIENT_OR_ISSUER_NOTES -> clientUiState.value.notes?.text
+            /*            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> clientUiState.value.companyData?.first()?.label?.text
+                        ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> clientUiState.value.companyData?.first()?.number?.text
+                        ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> clientUiState.value.companyData?.get(1)?.label?.text
+                        ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
             else -> null
         }
         _clientUiState.value = updateClientOrIssuerUiState(
@@ -147,19 +159,45 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     ): ClientOrIssuerState {
         var person = clientOrIssuer
         when (element) {
-            ScreenElement.CLIENT_NAME -> person = person.copy(name = value as TextFieldValue)
-            ScreenElement.CLIENT_FIRST_NAME ->         person = person.copy(firstName = value as TextFieldValue)
-            ScreenElement.CLIENT_EMAIL ->     person = person.copy(email = value as TextFieldValue)
-            ScreenElement.CLIENT_ADDRESS1 -> person = person.copy(address1 = value as TextFieldValue)
-            ScreenElement.CLIENT_ADDRESS2 -> person = person.copy(address2 = value as TextFieldValue)
-            ScreenElement.CLIENT_ZIP -> person = person.copy(zipCode = value as TextFieldValue)
-            ScreenElement.CLIENT_CITY -> person = person.copy(city = value as TextFieldValue)
-            ScreenElement.CLIENT_PHONE -> person = person.copy(phone = value as TextFieldValue)
-            ScreenElement.CLIENT_NOTES -> person = person.copy(notes = value as TextFieldValue)
-            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> person = person.copy(companyId1Label = value as TextFieldValue)
-            ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> person = person.copy(companyId1Number = value as TextFieldValue)
-            ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> person = person.copy(companyId2Label = value as TextFieldValue)
-            ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> person = person.copy(companyId2Number = value as TextFieldValue)
+            ScreenElement.CLIENT_OR_ISSUER_NAME -> person =
+                person.copy(name = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> person =
+                person.copy(firstName = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL -> person =
+                person.copy(email = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 -> person =
+                person.copy(address1 = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS2 -> person =
+                person.copy(address2 = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP -> person =
+                person.copy(zipCode = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY -> person =
+                person.copy(city = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_PHONE -> person =
+                person.copy(phone = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_NOTES -> person =
+                person.copy(notes = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL -> person =
+                person.copy(companyId1Label = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> person =
+                person.copy(companyId1Number = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL -> person =
+                person.copy(companyId2Label = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person =
+                person.copy(companyId2Number = value as TextFieldValue)
+
             else -> null
         }
         return person

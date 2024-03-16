@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListViewModel
+import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.DeliveryNoteAddEdit
 import com.a4a.g8invoicing.ui.screens.DeliveryNoteAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
@@ -30,14 +31,15 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         val deliveryNoteViewModel: DeliveryNoteAddEditViewModel = hiltViewModel()
         val deliveryNoteUiState by deliveryNoteViewModel.deliveryNoteUiState
 
-        val clientOrIssuerViewModel: ClientOrIssuerListViewModel = hiltViewModel()
-        val clientsUiState by clientOrIssuerViewModel.clientsUiState
+        val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = hiltViewModel()
+        val clientListUiState by clientOrIssuerListViewModel.clientsUiState
             .collectAsStateWithLifecycle()
-        val issuersUiState by clientOrIssuerViewModel.issuersUiState
+        val issuerListUiState by clientOrIssuerListViewModel.issuersUiState
             .collectAsStateWithLifecycle()
 
         val clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
-        val clientOrIssuer = clientOrIssuerAddEditViewModel.clientUiState
+        val clientUiState by clientOrIssuerAddEditViewModel.clientUiState
+        val issuerUiState by clientOrIssuerAddEditViewModel.issuerUiState
 
         val productListViewModel: ProductListViewModel = hiltViewModel()
         val productListUiState by productListViewModel.productsUiState
@@ -83,8 +85,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 deliveryNoteViewModel.saveOrUpdateDeliveryNoteInLocalDb()
                 onClickBack()
             },
-            clients = clientsUiState.clientsOrIssuers.toMutableList(),
-            issuers = issuersUiState.clientsOrIssuers.toMutableList(),
+            clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
+            issuerList = issuerListUiState.clientsOrIssuerList.toMutableList(),
+            clientUiState = clientUiState,
+            issuerUiState = issuerUiState,
             taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
             products = productListUiState.products.toMutableList(), // The list of products to display when choosing to add a product
             onValueChange = { pageElement, value ->
@@ -105,7 +109,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             placeCursorAtTheEndOfText = { pageElement ->
                 deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
             },
-            bottomFormOnValueChange = { pageElement, value ->
+            bottomFormOnValueChange = { pageElement, value, type ->
                 if(pageElement.name.contains("PRODUCT") ) {
                     productAddEditViewModel.updateProductState(
                         pageElement,
@@ -113,28 +117,30 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         ProductType.DOCUMENT_PRODUCT
                     )
                 } else {
-                  /*  clientOrIssuerAddEditViewModel.updateClientOrIssuerState(
-                        pageElement,
-                        value,
-                        P
-                    )*/
+                    type?.let {
+                        clientOrIssuerAddEditViewModel.updateClientOrIssuerState(
+                            pageElement,
+                            value,
+                            it
+                        )
+                    }
                 }
-
             },
             bottomFormPlaceCursor = { pageElement ->
                 productAddEditViewModel.updateCursor(pageElement, ProductType.DOCUMENT_PRODUCT)
             },
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {
-                    TypeOfBottomSheetForm.ADD_CLIENT -> TODO()
+                    // User can create client or issuer from bottom sheet (but not edit)
                     TypeOfBottomSheetForm.NEW_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.saveInLocalDb("client")
-                        deliveryNoteViewModel.updateDeliveryNoteState(ScreenElement.DOCUMENT_CLIENT, clientOrIssuer)
+                        clientOrIssuerAddEditViewModel.saveInLocalDb(ClientOrIssuerType.CLIENT)
+                        deliveryNoteViewModel.updateDeliveryNoteState(ScreenElement.DOCUMENT_CLIENT, clientUiState)
+                        clientOrIssuerAddEditViewModel.clearClientUiState()
                     }
-                    TypeOfBottomSheetForm.ADD_ISSUER -> TODO()
                     TypeOfBottomSheetForm.NEW_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.saveInLocalDb("issuer")
-                        deliveryNoteViewModel.updateDeliveryNoteState(ScreenElement.DOCUMENT_ISSUER, clientOrIssuer)
+                        clientOrIssuerAddEditViewModel.saveInLocalDb(ClientOrIssuerType.ISSUER)
+                        deliveryNoteViewModel.updateDeliveryNoteState(ScreenElement.DOCUMENT_ISSUER, clientUiState)
+                        clientOrIssuerAddEditViewModel.clearIssuerUiState()
                     }
                     TypeOfBottomSheetForm.ADD_PRODUCT -> {
                         deliveryNoteViewModel.saveDocumentProductInLocalDbAndInDeliveryNote(documentProductUiState)
@@ -146,6 +152,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         productAddEditViewModel.setProductUiState()
                         productAddEditViewModel.saveInLocalDb(ProductType.PRODUCT)
                         deliveryNoteViewModel.saveDocumentProductInLocalDbAndInDeliveryNote(documentProductUiState)
+                        productAddEditViewModel.clearProductUiState()
+                        productAddEditViewModel.clearDocumentProductUiState()
                     }
                 }
             },

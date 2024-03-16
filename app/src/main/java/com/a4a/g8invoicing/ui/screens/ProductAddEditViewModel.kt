@@ -80,6 +80,10 @@ class ProductAddEditViewModel @Inject constructor(
         )
     }
 
+    fun clearProductUiState() { // Used when sliding the form in documents
+        _productUiState.value = ProductState()
+    }
+
     fun clearDocumentProductUiState() { // Used when sliding the form in documents
         _documentProductUiState.value = DocumentProductState()
     }

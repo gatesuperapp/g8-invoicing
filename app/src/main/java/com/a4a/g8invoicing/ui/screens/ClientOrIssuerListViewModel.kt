@@ -47,7 +47,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
                     .collect { clientsOrIssuers ->
                         _clientsUiState.update {
                             it.copy(
-                                clientsOrIssuers = clientsOrIssuers.sortedWith(
+                                clientsOrIssuerList = clientsOrIssuers.sortedWith(
                                     compareBy(String.CASE_INSENSITIVE_ORDER, { it.name.text })
                                 )
                             )
@@ -67,7 +67,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
                     .collect { clientsOrIssuers ->
                         _issuersUiState.update {
                             it.copy(
-                                clientsOrIssuers = clientsOrIssuers.sortedBy { it.name.text })
+                                clientsOrIssuerList = clientsOrIssuers.sortedBy { it.name.text })
                         }
                     }
             } catch (e: Exception) {

@@ -81,7 +81,7 @@ fun ClientOrIssuerList(
             // No need to have pull to refresh because it's a flow,
             // thus the list is updated when anything changes in db
             ClientOrIssuerListContent(
-                clientsOrIssuers = uiState.clientsOrIssuers,
+                clientsOrIssuers = uiState.clientsOrIssuerList,
                 onItemClick = onClickListItem,
                 addToSelectedList = {
                     selectedItems.add(it)

@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEdit
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditViewModel
+import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
 
 fun NavGraphBuilder.clientOrIssuerAddEdit(
     navController: NavController,
@@ -29,7 +30,7 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
             clientOrIssuer = clientUiState,
             isNew = backStackEntry.arguments?.getString("itemId") == null,
             onValueChange = { pageElement, value ->
-                viewModel.updateClientOrIssuerState(pageElement, value)
+                viewModel.updateClientOrIssuerState(pageElement, value, ClientOrIssuerType.CLIENT)
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 viewModel.updateCursorOfClientOrIssuerState(pageElement)
@@ -38,7 +39,7 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
                 //  we don't have to pass the object as the
                 //  ViewModel is already updated with latest values
                 if (isNew) {
-                    viewModel.saveInLocalDb("client")
+                    viewModel.saveInLocalDb(ClientOrIssuerType.CLIENT)
                 } else {
                     viewModel.updateClientInInLocalDb()
                 }

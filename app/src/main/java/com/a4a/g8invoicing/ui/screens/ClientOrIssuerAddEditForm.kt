@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.data.ClientOrIssuerState
@@ -29,7 +28,7 @@ import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 
 @Composable
 fun ClientOrIssuerAddEditForm(
-    clientOrIssuer: ClientOrIssuerState,
+    clientOrIssuerUiState: ClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isDisplayedInBottomSheet: Boolean = false,
@@ -80,35 +79,35 @@ fun ClientOrIssuerAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.client_name),
                     inputType = TextInput(
-                        text = clientOrIssuer.name,
+                        text = clientOrIssuerUiState.name,
                         placeholder = stringResource(id = R.string.client_name_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_NAME, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_NAME, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_NAME
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_NAME
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_first_name),
                     inputType = TextInput(
-                        text = clientOrIssuer.firstName,
+                        text = clientOrIssuerUiState.firstName,
                         placeholder = stringResource(id = R.string.client_first_name_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_FIRST_NAME, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_FIRST_NAME
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_email),
                     inputType = TextInput(
-                        text = clientOrIssuer.email,
+                        text = clientOrIssuerUiState.email,
                         placeholder = stringResource(id = R.string.client_email_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_EMAIL, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_EMAIL
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_EMAIL
                 ),
 
                 )
@@ -132,57 +131,57 @@ fun ClientOrIssuerAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.client_address1),
                     inputType = TextInput(
-                        text = clientOrIssuer.address1,
+                        text = clientOrIssuerUiState.address1,
                         placeholder = stringResource(id = R.string.client_address1_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_ADDRESS1, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS1, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_ADDRESS1
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS1
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_address2),
                     inputType = TextInput(
-                        text = clientOrIssuer.address2,
+                        text = clientOrIssuerUiState.address2,
                         placeholder = stringResource(id = R.string.client_address2_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_ADDRESS2, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS2, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_ADDRESS2
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS2
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_zip_code),
                     inputType = TextInput(
-                        text = clientOrIssuer.zipCode,
+                        text = clientOrIssuerUiState.zipCode,
                         placeholder = stringResource(id = R.string.client_zip_code_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_ZIP, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_ZIP, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_ZIP
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_ZIP
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_city),
                     inputType = TextInput(
-                        text = clientOrIssuer.city,
+                        text = clientOrIssuerUiState.city,
                         placeholder = stringResource(id = R.string.client_city_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_CITY, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_CITY, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_CITY
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_CITY
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_phone),
                     inputType = TextInput(
-                        text = clientOrIssuer.phone,
+                        text = clientOrIssuerUiState.phone,
                         placeholder = stringResource(id = R.string.client_phone_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_PHONE, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_PHONE, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_PHONE
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_PHONE
                 ))
 
             // Create the UI with list items
@@ -204,36 +203,36 @@ fun ClientOrIssuerAddEditForm(
            val inputList = listOf(
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuer.companyId1Label,
+                        text = clientOrIssuerUiState.companyId1Label,
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_IDENTIFICATION1_LABEL, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL, it)
                         },
 
                     ),
                     inputType = TextInput(
-                        text = clientOrIssuer.companyId1Number,
+                        text = clientOrIssuerUiState.companyId1Number,
                         placeholder = stringResource(id = R.string.client_company_identification1_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_IDENTIFICATION1_VALUE, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_IDENTIFICATION1
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1
                 ),
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuer.companyId2Label,
+                        text = clientOrIssuerUiState.companyId2Label,
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_IDENTIFICATION2_LABEL, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL, it)
                         }
                     ),
                     inputType = TextInput(
-                        text = clientOrIssuer.companyId2Number,
+                        text = clientOrIssuerUiState.companyId2Number,
                         placeholder = stringResource(id = R.string.client_company_identification2_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_IDENTIFICATION2_VALUE, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_IDENTIFICATION2
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
                 )
             )
 
@@ -257,13 +256,13 @@ fun ClientOrIssuerAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.client_notes),
                     inputType = TextInput(
-                        text = clientOrIssuer.notes,
+                        text = clientOrIssuerUiState.notes,
                         placeholder = stringResource(id = R.string.client_notes_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_NOTES, it)
+                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_NOTES, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_NOTES
+                    pageElement = ScreenElement.CLIENT_OR_ISSUER_NOTES
                 ))
 
             // Create the UI with list items

@@ -27,7 +27,7 @@ import java.math.BigDecimal
 
 @Composable
 fun ProductTaxRatesContent(
-    taxRates: List<BigDecimal>,
+    taxRates: List<BigDecimal>?,
     currentTaxRate: BigDecimal?,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     isDisplayedInBottomSheet: Boolean = false
@@ -60,10 +60,10 @@ fun ProductTaxRatesContent(
                 )
         ) {
             // Adds the no tax ("-") choice to the list
-            val taxRatesIncludingNoTax = taxRates.toMutableList()
-            taxRatesIncludingNoTax.add(0, BigDecimal(0))
+            val taxRatesIncludingNoTax = taxRates?.toMutableList()
+            taxRatesIncludingNoTax?.add(0, BigDecimal(0))
 
-            taxRatesIncludingNoTax.forEach { taxRate ->
+            taxRatesIncludingNoTax?.forEach { taxRate ->
 
                 val isCurrentTaxRate = if(currentTaxRate == null) {
                     taxRatesIncludingNoTax == BigDecimal(0)
