@@ -35,7 +35,7 @@ import java.math.RoundingMode
 // It would give a thicker border in the table middle, we don't want that
 
 @Composable
-fun DataTable(
+fun DeliveryNoteBasicTemplateDataTable(
     tableData: List<DocumentProductState>,
 ) {
     val descriptionColumnWeight = .8f // 70%

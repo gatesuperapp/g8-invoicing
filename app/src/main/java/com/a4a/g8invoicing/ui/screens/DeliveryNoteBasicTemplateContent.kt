@@ -6,284 +6,136 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.CompanyDataState
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
-import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
-import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateContent(
     uiState: DeliveryNoteState,
-    onClickDeliveryNoteNumber: () -> Unit,
-    onClickDate: () -> Unit,
-    onClickIssuer: () -> Unit,
-    onClickClient: () -> Unit,
-    onClickOrderNumber: () -> Unit,
-    onClickDocumentProducts: () -> Unit,
-    selectedItem: ScreenElement?,
+    onClickElement: (ScreenElement) -> Unit,
+    screenWidth: Dp,
+    productArray: MutableList<ProductListWithPage>,
+    footerArray: MutableList<FooterRows>,
+    isFirstPage: Boolean = false,
+    onPageOverflow: () -> Unit,
+    selectedItem: ScreenElement? = null,
 ) {
-    Column(
+    val pagePadding = 20.dp
+    var pageHeightDp by remember {
+        mutableStateOf(0.dp)
+    }
+    var pageContentHeightDp by remember {
+        mutableStateOf(0.dp)
+    }
+    val localDensity = LocalDensity.current
+
+    Box(
         modifier = Modifier
-            .background(Color.White)
-            .fillMaxSize()
-            .padding(20.dp)
+            .width(screenWidth)
+            .padding(
+                start = pagePadding,
+                top = pagePadding,
+                bottom = pagePadding,
+                end = pagePadding
+            )
+            .background(Color.LightGray)
+            .aspectRatio(1f / 1.414f)
+            .onGloballyPositioned { coordinates ->
+                pageHeightDp = with(localDensity) { coordinates.size.height.toDp() }
+            }
     ) {
-        Row(
-            Modifier
+
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
+                .padding(
+                    start = 20.dp,
+                    top = 20.dp,
+                    bottom = 20.dp,
+                    end = 20.dp
+                )
+                .background(Color.White)
+                .onGloballyPositioned { coordinates ->
+                    pageContentHeightDp = with(localDensity) { coordinates.size.height.toDp() }
+
+                }
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    modifier = Modifier
-                        .getBorder(ScreenElement.DOCUMENT_NUMBER, selectedItem)
-                        .customCombinedClickable(
-                            onClick = {
-                                onClickDeliveryNoteNumber()
-                            },
-                            onLongClick = {
-                            }
-                        ),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.textForDocuments,
-                    text = stringResource(id = R.string.delivery_note_number) + " " + (uiState.number?.text
-                        ?: stringResource(id = R.string.delivery_note_default_number))
-                )
+            if (pageContentHeightDp != 0.dp && (pageContentHeightDp > pageHeightDp - 42.dp)) {
+                pageContentHeightDp = 0.dp
+                onPageOverflow()
+            }
 
-                Spacer(
-                    modifier = Modifier
-                        .padding(bottom = 6.dp)
-                )
-
-                Text(
-                    modifier = Modifier
-                        .padding(bottom = 12.dp)
-                        .getBorder(ScreenElement.DOCUMENT_DATE, selectedItem)
-                        .customCombinedClickable(
-                            onClick = {
-                                onClickDate()
-                            },
-                            onLongClick = {
-                            }
-                        ),
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.textForDocuments,
-                    text = stringResource(id = R.string.delivery_note_date) + " " + (uiState.deliveryDate
-                        ?: stringResource(id = R.string.delivery_note_default_date))
+            if (isFirstPage) {
+                DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
+                DeliveryNoteBasicTemplateDocNumber(
+                    uiState.orderNumber,
+                    onClickElement,
+                    selectedItem
                 )
             }
-        }
-        Row(
-            Modifier
-                .fillMaxWidth()
-        ) {
-            Column(
+
+            Spacer(
                 modifier = Modifier
-                    .getBorder(ScreenElement.DOCUMENT_ISSUER, selectedItem)
+                    .padding(bottom = 6.dp)
+            )
+
+            Column(
+                Modifier
+                    .getBorder(ScreenElement.DOCUMENT_PRODUCTS, selectedItem)
                     .customCombinedClickable(
                         onClick = {
-                            onClickIssuer()
+                            onClickElement(ScreenElement.DOCUMENT_PRODUCTS)
                         },
                         onLongClick = {
                         }
                     )
-                    .padding(top = 10.dp)
-                    .weight(1f)
-                    .fillMaxWidth(0.3f)
+                    .fillMaxWidth()
             ) {
-                BuildClientOrIssuerInTemplate(uiState.issuer ?: fakeIssuer())
+                // The table with all line items
+                DeliveryNoteBasicTemplateDataTable(
+                    productArray.map { it.documentProduct } ?: fakeDocumentProducts()
+                )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(0.5f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(bottom = 2.dp),
-                    style = MaterialTheme.typography.textForDocumentsSecondary,
-                    text = stringResource(id = R.string.delivery_note_recipient)
-                )
+            DeliveryNoteBasicTemplateFooter(uiState, footerArray)
 
-                Column(
-                    modifier = Modifier
-                        .getBorder(ScreenElement.DOCUMENT_CLIENT, selectedItem)
-                        .customCombinedClickable(
-                            onClick = {
-                                onClickClient()
-                            },
-                            onLongClick = {
-                            }
-                        )
-                        .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            SolidColor(Color.LightGray),
-                            shape = RoundedCornerShape(15.dp)
-                        )
-                        .padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    BuildClientOrIssuerInTemplate(uiState.client ?: fakeClient())
-                }
-            }
-        }
-        Spacer(
-            modifier = Modifier
-                .padding(top = 20.dp)
-        )
-        Row(
-            Modifier
-                .getBorder(ScreenElement.DOCUMENT_ORDER_NUMBER, selectedItem)
-                .customCombinedClickable(
-                    onClick = {
-                        onClickOrderNumber()
-                    },
-                    onLongClick = {
-                    }
-                )
-
-        ) {
-            Text(
-                style = MaterialTheme.typography.textForDocumentsImportant,
-                text = stringResource(id = R.string.delivery_note_order_number) + " : "
-            )
-            Text(
-                style = MaterialTheme.typography.textForDocumentsImportant,
-                text = uiState.orderNumber?.text   ?: stringResource(id = R.string.delivery_note_default_order_number)
-            )
-        }
-
-        Spacer(
-            modifier = Modifier
-                .padding(bottom = 6.dp)
-        )
-
-        Column(
-            Modifier
-                .getBorder(ScreenElement.DOCUMENT_PRODUCTS, selectedItem)
-                .customCombinedClickable(
-                    onClick = {
-                        onClickDocumentProducts()
-                    },
-                    onLongClick = {
-                    }
-                )
-                .fillMaxWidth()
-        ) {
-            // The table with all line items
-            DataTable(uiState.documentProducts ?: fakeDocumentProducts())
-        }
-
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 10.dp)
-        ) {
-            Spacer(
-                modifier = Modifier
-                    .weight(1f)
-            )
-            Column(
-                horizontalAlignment = Alignment.End,
-                modifier = Modifier.padding(
-                    end = 8.dp
-                )
-            ) {
-                // Will display the following:
-                // Total HT
-                // TVA 20% :
-                // TVA 5% :
-                // Total TTC :
-                Text(
-                    modifier = Modifier
-                        .padding(bottom = 3.dp),
-                    style = MaterialTheme.typography.textForDocuments,
-                    text = stringResource(id = R.string.delivery_note_total_without_tax) + " "
-                )
-                uiState.documentPrices?.totalAmountsOfEachTax?.forEach() {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
-                    )
-                }
-                Text(
-                    style = MaterialTheme.typography.textForDocumentsImportant,
-                    text = stringResource(id = R.string.delivery_note_total_with_tax) + " "
-                )
-            }
-            Column(
-                horizontalAlignment = Alignment.End
-            ) {
-                // Will display the values as follows:
-                // Total HT : 12€
-                // TVA 20% : 1€
-                // TVA 5% : 1€
-                // Total TTC : 14€
-                Text(
-                    modifier = Modifier
-                        .padding(bottom = 3.dp, end = 3.dp),
-                    style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentPrices?.totalPriceWithoutTax?.toString() ?: " - ") + stringResource(id = R.string.currency)
-                )
-                uiState.documentPrices?.totalAmountsOfEachTax?.forEach {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp, end = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = it.second.toString() + stringResource(id = R.string.currency)
-                    )
-                }
-
-                Text(
-                    modifier = Modifier
-                        .padding(end = 3.dp),
-                    style = MaterialTheme.typography.textForDocumentsImportant,
-                    text = (uiState.documentPrices?.totalPriceWithTax?.toString()  ?: " - ")  + stringResource(id = R.string.currency)
-                )
-            }
         }
     }
 }
 
-private fun Modifier.getBorder(item: ScreenElement, selectedItem: ScreenElement?) = then(
+fun Modifier.getBorder(item: ScreenElement, selectedItem: ScreenElement?) = then(
     border(
         if (item == selectedItem) {
             BorderStroke(1.dp, ColorGreenPaidCompl)
@@ -296,7 +148,7 @@ private fun Modifier.getBorder(item: ScreenElement, selectedItem: ScreenElement?
 
 // Remove the indicator on click
 @OptIn(ExperimentalFoundationApi::class)
-private fun Modifier.customCombinedClickable(
+fun Modifier.customCombinedClickable(
     enabled: Boolean = true,
     onClickLabel: String? = null,
     role: Role? = null,
@@ -329,44 +181,6 @@ private fun Modifier.customCombinedClickable(
     )
 }
 
-@Composable
-private fun fakeIssuer() =
-    ClientOrIssuerState(
-        // Fill with dummy values to show how it looks
-        id = null,
-        firstName = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_firstName)),
-        name = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_name)),
-        address1 = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_address1)),
-        address2 = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_address2)),
-        zipCode = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_zipCode)),
-        city = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_city)),
-        phone = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_phone)),
-        email = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_issuer_email)),
-        notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_notes)),
-        companyId1Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number1)),
-        companyId2Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number2)),
-    )
-
-@Composable
-private fun fakeClient() =
-    ClientOrIssuerState(
-        id = null,
-        firstName = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_firstName)),
-        name = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_name)),
-        address1 = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_address1)),
-        address2 = null,
-        zipCode = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_zipCode)),
-        city = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_city)),
-        phone = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_phone)),
-        email = TextFieldValue(text =  stringResource(id = R.string.delivery_note_default_client_email)),
-        notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_notes)),
-        companyId1Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number1)),
-        companyId2Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number2)),
-    )
 
 @Composable
 private fun fakeDocumentProducts() =

@@ -1,8 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -10,53 +9,62 @@ import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.data.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
-import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 
 
+data class ProductListWithPage(
+    var documentProduct: DocumentProductState,
+    var page: Int,
+)
+
+data class FooterRows(
+    var rowNumber: Int,
+    var page: Int,
+)
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DeliveryNoteBasicTemplate(
     uiState: DeliveryNoteState,
-    onClickDeliveryNoteNumber: () -> Unit,
-    onClickDate: () -> Unit,
-    onClickIssuer: () -> Unit,
-    onClickClient: () -> Unit,
-    onClickOrderNumber: () -> Unit,
-    onClickDocumentProducts: () -> Unit,
-    selectedItem: ScreenElement?,
+    onClickElement: (ScreenElement) -> Unit,
 ) {
     var zoom by remember { mutableStateOf(1f) }
     var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
@@ -65,95 +73,67 @@ fun DeliveryNoteBasicTemplate(
 
     var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
 
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
 
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f / 1.414f)
-            .pointerInput(Unit) {
-                customTransformGestures(
-                    pass = PointerEventPass.Initial,
-                    onDoubleTouch = { // Disable clicking 2 items in 1 time
-                        clickEnabled = false
-                    },
-                    onGesture = {
-                            centroid,
-                            pan,
-                            gestureZoom,
-                            _,
-                            pointerInput: PointerInputChange,
-                            changes: List<PointerInputChange>,
-                        ->
+    var numberOfPages by remember { mutableStateOf(1) }
+    var maxPageForNewProduct by remember { mutableStateOf(1) }
+    val pagerState = rememberPagerState { numberOfPages }
 
-                        zoom = (zoom * gestureZoom).coerceIn(
-                            1f,
-                            3f
-                        )  // Zoom limits: min 100%, max 200%
+    val productArray = remember {
+        mutableStateListOf(
+            ProductListWithPage(DocumentProductState(), 1)
+        )
+    }
+    productArray.clear()
+    uiState.documentProducts?.forEach {
+        productArray.add(ProductListWithPage(it, 1))
+    }
 
-                        var newOffsetX = animatableOffsetX.value + pan.x.times(zoom)
-                        var newOffsetY = offsetY + pan.y.times(zoom)
+    val footerArray = remember {
+        mutableStateListOf(
+            FooterRows(1, 1),
+            FooterRows(2, 1),
+            FooterRows(3, 1),
+        )
+    }
 
-                        val maxX = (size.width * (zoom - 1) / 2f)
-                        val maxY = (size.height * (zoom - 1) / 2f)
+    Column {
+        HorizontalPager(
+            state = pagerState
+        ) { index ->
 
-                        if (zoom > 1f) {
-                            newOffsetX = newOffsetX.coerceIn(
-                                -maxX,
-                                maxX
-                            ) // coercein will limit drag in bounds
-                            newOffsetY = newOffsetY.coerceIn(-maxY, maxY)
-                        }
+            Column {
+                Text("page n°" + (index + 1) + "/" + numberOfPages)
+                Text("maxPageForNewProduct" + maxPageForNewProduct)
 
-                        animatableOffsetX = Animatable(newOffsetX)
-                        offsetY = newOffsetY
-
-                        // 🔥Consume touch when multiple fingers down
-                        // This prevents click and long click if your finger touches a
-                        // button while pinch gesture is being invoked
-                        val size = changes.size
-                        if (size > 1) {
-                            changes.forEach { it.consume() }
-                        }
-                    },
-                    onGestureEnd = {
-                        // When no zoom only, do an animation to bring
-                        // back to center when dragged along X axis
-                        if (zoom == 1f) {
-                            coroutineScope.launch {
-                                animatableOffsetX.animateTo(
-                                    0f, animationSpec = spring(
-                                        //dampingRatio = 0.4f,
-                                        stiffness = Spring.StiffnessLow
-                                    )
-                                )
-                            }
+                DeliveryNoteBasicTemplateContent(
+                    uiState = uiState,
+                    onClickElement = onClickElement,
+                    screenWidth = screenWidth,
+                    productArray = productArray.filter { it.page == (index + 1) }.toMutableList(),
+                    footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
+                    isFirstPage = (index == 0),
+                    onPageOverflow = {
+                        val lastProductPage = productArray.last().page
+                        if( footerArray.first().page != lastProductPage) {
+                            productArray.last().page = (index + 1) + 1
+                            maxPageForNewProduct += 1
+                        } else {
+                            val footerRowToMove = footerArray.last { it.page == lastProductPage }
+                            footerRowToMove.page = (index + 1) + 1
+                           // if(footerArray.map { it.page }.distinct().isEmpty()) {
+                                numberOfPages += 1
+                         //   }
                         }
                     }
                 )
             }
-            .graphicsLayer {
-                translationX = animatableOffsetX.value
-                if (zoom > 1f) { // Y translation disabled when no zoom
-                    translationY = offsetY
-                }
-                scaleX = zoom
-                scaleY = zoom
-            }
-
-    ) {
-        DeliveryNoteBasicTemplateContent(
-            uiState,
-            onClickDeliveryNoteNumber,
-            onClickDate,
-            onClickIssuer,
-            onClickClient,
-            onClickOrderNumber,
-            onClickDocumentProducts,
-            selectedItem
-        )
+        }
     }
 }
+
 
 @Composable
 fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
@@ -201,7 +181,9 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
     clientOrIssuer.email?.let {
         Text(
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 3.dp).wrapContentHeight(),
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
             text = it.text
         )

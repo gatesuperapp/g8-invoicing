@@ -13,7 +13,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import com.a4a.g8invoicing.ui.screens.PersonType
 
 /*
 Process to add a new screen/VM/datasource:
@@ -31,7 +30,7 @@ fun NavGraph(navController: NavHostController) {
         navController,
          startDestination = (Screen.DeliveryNoteList.name),
         //startDestination = (Screen.ProductList.name),
-        //   startDestination = (Screen.DeliveryNoteAddEdit.name),
+        // startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
         //startDestination = (Screen.ClientOrIssuerList.name),
         enterTransition = { EnterTransition.None },
@@ -51,7 +50,7 @@ fun NavGraph(navController: NavHostController) {
                 navigateBackWithResult(navController, key, result)
             }
         )
-        deliveryNotesList(
+        deliveryNoteList(
             navController = navController,
             onClickCategory = {
                 navController.navigateAndReplaceStartDestination(it)
