@@ -17,7 +17,7 @@ CREATE TABLE Product (
 );
 
 INSERT INTO Product (product_id, name, description, final_price, product_additional_price_id,  product_tax_id, unit)
-VALUES (1, 'Carottes', 'vichou', 10, 8.9, 1, "kg"),
+VALUES (1, 'Carottes', 'vichou', 10, 8.9, 3, "kg"),
 (2, 'zz', 'vichou', 3, 1,  1, "kg"),
 (3, 'azeaz', 'vichou', 2, 1, 2, "kg"),
 (4, 'aaaa', 'vichou', 2, 1, 2, "kg")

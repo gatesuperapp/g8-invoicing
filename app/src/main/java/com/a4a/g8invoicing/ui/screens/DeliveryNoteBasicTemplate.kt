@@ -10,17 +10,12 @@ import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -50,13 +45,13 @@ import kotlin.math.PI
 import kotlin.math.abs
 
 
-data class ProductListWithPage(
+data class ProductWithPage(
     var documentProduct: DocumentProductState,
     var page: Int,
 )
 
-data class FooterRows(
-    var rowNumber: Int,
+data class FooterRow(
+    var rowDescription: FooterRowName,
     var page: Int,
 )
 
@@ -78,24 +73,17 @@ fun DeliveryNoteBasicTemplate(
     val screenWidth = configuration.screenWidthDp.dp
 
     var numberOfPages by remember { mutableStateOf(1) }
-    var maxPageForNewProduct by remember { mutableStateOf(1) }
     val pagerState = rememberPagerState { numberOfPages }
 
-    val productArray = remember {
-        mutableStateListOf(
-            ProductListWithPage(DocumentProductState(), 1)
-        )
-    }
-    productArray.clear()
-    uiState.documentProducts?.forEach {
-        productArray.add(ProductListWithPage(it, 1))
+    val productArray = uiState.documentProducts?.map {
+        ProductWithPage(it, 1)
     }
 
     val footerArray = remember {
         mutableStateListOf(
-            FooterRows(1, 1),
-            FooterRows(2, 1),
-            FooterRows(3, 1),
+            FooterRow(FooterRowName.TOTAL_WITHOUT_TAX, 1),
+            FooterRow(FooterRowName.TAXES, 1),
+            FooterRow(FooterRowName.TOTAL_WITH_TAX, 1),
         )
     }
 
@@ -106,26 +94,30 @@ fun DeliveryNoteBasicTemplate(
 
             Column {
                 Text("page n°" + (index + 1) + "/" + numberOfPages)
-                Text("maxPageForNewProduct" + maxPageForNewProduct)
 
                 DeliveryNoteBasicTemplateContent(
                     uiState = uiState,
                     onClickElement = onClickElement,
                     screenWidth = screenWidth,
-                    productArray = productArray.filter { it.page == (index + 1) }.toMutableList(),
+                    productArray = productArray?.filter { it.page == (index + 1) },
                     footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
-                    isFirstPage = (index == 0),
+                    index = index,
+                    numberOfPages = numberOfPages,
                     onPageOverflow = {
-                        val lastProductPage = productArray.last().page
-                        if( footerArray.first().page != lastProductPage) {
-                            productArray.last().page = (index + 1) + 1
-                            maxPageForNewProduct += 1
+                        val pageOfTheLastProduct = productArray?.last()?.page
+                        val pageOfTheFirstFooterRow = footerArray.first().page
+
+                        if (pageOfTheLastProduct != pageOfTheFirstFooterRow) {
+                            productArray?.last() { it.page != pageOfTheFirstFooterRow }?.page =
+                                (index + 1) + 1
                         } else {
-                            val footerRowToMove = footerArray.last { it.page == lastProductPage }
+                            val footerRowToMove =
+                                footerArray.last { it.page == pageOfTheLastProduct }
                             footerRowToMove.page = (index + 1) + 1
-                           // if(footerArray.map { it.page }.distinct().isEmpty()) {
+                            if ((index + 1) == numberOfPages) {
+                                // = if all the footer rows are on the same page
                                 numberOfPages += 1
-                         //   }
+                            }
                         }
                     }
                 )
@@ -134,6 +126,9 @@ fun DeliveryNoteBasicTemplate(
     }
 }
 
+enum class FooterRowName {
+    TOTAL_WITHOUT_TAX, TAXES, TOTAL_WITH_TAX
+}
 
 @Composable
 fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {

@@ -22,7 +22,12 @@ VALUES (1, 'Carottes',1, 'vichou', 5, 20,  'kg', 1),
 (4, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
 (5, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
 (6, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
-(7, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ;
+(7, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
+(8, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
+(9, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
+(10, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
+(11, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ,
+(12, 'Tomates', 1.5,'vichou', 15, 20,  'kg', 1) ;
 
 getDocumentProduct:
 SELECT *

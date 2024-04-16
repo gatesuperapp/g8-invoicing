@@ -49,7 +49,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.fetchDeliveryNoteFlow(id).collect {
-                    println("yooooa" + it)
                     it?.let {
                         _deliveryNoteUiState.value = it
                     }

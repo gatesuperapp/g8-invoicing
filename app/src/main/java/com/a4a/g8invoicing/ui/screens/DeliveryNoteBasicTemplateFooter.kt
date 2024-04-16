@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
@@ -21,7 +20,7 @@ import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 @Composable
 fun DeliveryNoteBasicTemplateFooter(
     uiState: DeliveryNoteState,
-    footerArray: MutableList<FooterRows>,
+    footerArray: List<FooterRow>,
 ) {
     Row(
         Modifier
@@ -44,7 +43,7 @@ fun DeliveryNoteBasicTemplateFooter(
             // TVA 5% :
             // Total TTC :
 
-            if (footerArray.any { it.rowNumber == 1 }) { // Handle the page on which it's displayed
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX }) { // Handle the page on which it's displayed
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp),
@@ -52,7 +51,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     text = stringResource(id = R.string.delivery_note_total_without_tax) + " "
                 )
             }
-            if (footerArray.any { it.rowNumber == 2 }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TAXES }) {
                 uiState.documentPrices?.totalAmountsOfEachTax?.forEach() {
                     Text(
                         modifier = Modifier
@@ -62,7 +61,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     )
                 }
             }
-            if (footerArray.any { it.rowNumber == 3 }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsImportant,
                     text = stringResource(id = R.string.delivery_note_total_with_tax) + " "
@@ -77,7 +76,7 @@ fun DeliveryNoteBasicTemplateFooter(
             // TVA 20% : 1€
             // TVA 5% : 1€
             // Total TTC : 14€
-            if (footerArray.any { it.rowNumber == 1 }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp, end = 3.dp),
@@ -86,7 +85,7 @@ fun DeliveryNoteBasicTemplateFooter(
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
-            if (footerArray.any { it.rowNumber == 2 }) {
+            if (footerArray.any { it.rowDescription ==  FooterRowName.TAXES }) {
                 uiState.documentPrices?.totalAmountsOfEachTax?.forEach {
                     Text(
                         modifier = Modifier
@@ -96,7 +95,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     )
                 }
             }
-            if (footerArray.any { it.rowNumber == 3 }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX }) {
                 Text(
                     modifier = Modifier
                         .padding(end = 3.dp),

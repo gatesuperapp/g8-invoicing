@@ -8,7 +8,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
@@ -38,7 +38,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
-import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import com.a4a.g8invoicing.ui.theme.textForDocuments
 import java.math.BigDecimal
 
 @Composable
@@ -46,9 +46,10 @@ fun DeliveryNoteBasicTemplateContent(
     uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
-    productArray: MutableList<ProductListWithPage>,
-    footerArray: MutableList<FooterRows>,
-    isFirstPage: Boolean = false,
+    productArray: List<ProductWithPage>?,
+    footerArray: List<FooterRow>,
+    index: Int,
+    numberOfPages: Int,
     onPageOverflow: () -> Unit,
     selectedItem: ScreenElement? = null,
 ) {
@@ -70,7 +71,7 @@ fun DeliveryNoteBasicTemplateContent(
                 bottom = pagePadding,
                 end = pagePadding
             )
-            .background(Color.LightGray)
+            .background(Color.White)
             .aspectRatio(1f / 1.414f)
             .onGloballyPositioned { coordinates ->
                 pageHeightDp = with(localDensity) { coordinates.size.height.toDp() }
@@ -92,12 +93,14 @@ fun DeliveryNoteBasicTemplateContent(
 
                 }
         ) {
-            if (pageContentHeightDp != 0.dp && (pageContentHeightDp > pageHeightDp - 42.dp)) {
+            val paddingTopAndBottom = 42.dp
+
+            if (pageContentHeightDp != 0.dp && (pageContentHeightDp > pageHeightDp - paddingTopAndBottom)) {
                 pageContentHeightDp = 0.dp
                 onPageOverflow()
             }
 
-            if (isFirstPage) {
+            if (index == 0) {
                 DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
                 DeliveryNoteBasicTemplateDocNumber(
                     uiState.orderNumber,
@@ -125,13 +128,28 @@ fun DeliveryNoteBasicTemplateContent(
             ) {
                 // The table with all line items
                 DeliveryNoteBasicTemplateDataTable(
-                    productArray.map { it.documentProduct } ?: fakeDocumentProducts()
+                    productArray?.map { it.documentProduct } ?: fakeDocumentProducts()
                 )
             }
 
             DeliveryNoteBasicTemplateFooter(uiState, footerArray)
-
         }
+        DeliveryNoteBasicTemplatePageNumbering(index, numberOfPages)
+    }
+}
+
+@Composable
+fun DeliveryNoteBasicTemplatePageNumbering(index: Int, numberOfPages: Int) {
+    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = 10.dp, end = 10.dp)) {
+        Text(
+            style = MaterialTheme.typography.textForDocuments,
+            modifier = Modifier.align(Alignment.BottomEnd),
+            text = if (numberOfPages == 1) {
+                ""
+            } else {
+                "" + (index + 1) + "/" + numberOfPages
+            }
+        )
     }
 }
 
