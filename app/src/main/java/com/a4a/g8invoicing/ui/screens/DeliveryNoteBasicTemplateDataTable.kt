@@ -88,7 +88,6 @@ fun DeliveryNoteBasicTemplateDataTable(
 
         }
 
-
         Row(
             Modifier
                 .fillMaxWidth()
@@ -150,12 +149,14 @@ fun RowScope.TableCell(
 
         Text(
             text = text,
-            style = MaterialTheme.typography.textForDocumentsVerySmall
+            style = MaterialTheme.typography.textForDocumentsVerySmall,
+            maxLines = 1
         )
         subText?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.textForDocumentsVerySmallAndItalic
+                style = MaterialTheme.typography.textForDocumentsVerySmallAndItalic,
+                maxLines = 1
             )
         }
         Spacer(Modifier.padding(2.dp))

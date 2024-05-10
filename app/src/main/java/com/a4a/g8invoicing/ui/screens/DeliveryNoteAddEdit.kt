@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
@@ -39,6 +38,7 @@ import com.a4a.g8invoicing.ui.navigation.actionComponents
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionStyle
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -87,12 +87,10 @@ fun DeliveryNoteAddEdit(
         val keyboardController = LocalSoftwareKeyboardController.current
         if (!scaffoldState.bottomSheetState.isVisible) {
             keyboardController?.hide()
-        }
-        println("ssss" + scaffoldState.bottomSheetState.currentValue)*/
+        }*/
 
     // Handling native navigation back action
     BackHandler {
-        println("ssssAA" + scaffoldState.bottomSheetState.currentValue)
         // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
         // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {

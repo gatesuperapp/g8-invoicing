@@ -1,19 +1,17 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.KeyboardOpt
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 
 @Composable
 fun DeliveryNoteBottomSheetContent(
@@ -50,7 +48,7 @@ fun DeliveryNoteBottomSheetContent(
                 text = deliveryNote.issuer?.let {
                     it.name.text + " " + it.firstName?.text
                 }
-                    ?: (stringResource(id = R.string.delivery_note_default_issuer_firstName) + " " + stringResource(id = R.string.delivery_note_default_issuer_name)),
+                    ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_ISSUER
         ),
@@ -60,7 +58,7 @@ fun DeliveryNoteBottomSheetContent(
                 text = deliveryNote.client?.let {
                     it.name.text + " " + it.firstName?.text
                 }
-                    ?: (stringResource(id = R.string.delivery_note_default_client_firstName) + " " + stringResource(id = R.string.delivery_note_default_client_name)),
+                    ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_CLIENT
         ),

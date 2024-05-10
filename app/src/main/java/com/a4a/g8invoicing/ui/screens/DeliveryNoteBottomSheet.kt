@@ -262,9 +262,9 @@ fun SlideInNextComponent(
         DeliveryNoteBottomSheetDocumentProductList(
             list = params.first() as List<DocumentProductState>? ?: emptyList(),
             onClickBack = onClickBack,
-            onClickChooseProduct = { isProductListVisible = true },
-            onDocumentProductClick = {
-                //onDocumentProductClick(it)
+            onClickChooseButton = { isProductListVisible = true },
+            onClickDocumentProduct = {
+                onDocumentProductClick(it)
                 typeOfCreation = TypeOfBottomSheetForm.EDIT_DOCUMENT_PRODUCT
                 isDocumentFormVisible = true
                 /*CoroutineScope(Dispatchers.IO).launch {
@@ -272,7 +272,7 @@ fun SlideInNextComponent(
                     isProductListVisible = false
                 }*/
             },
-            onClickDeleteDocumentProduct = onClickDeleteDocumentProduct
+            onClickDelete = onClickDeleteDocumentProduct
         )
 
         if (isProductListVisible) {

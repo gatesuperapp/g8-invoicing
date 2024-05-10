@@ -50,7 +50,6 @@ fun DeliveryNoteBasicTemplateContent(
     footerArray: List<FooterRow>,
     index: Int,
     numberOfPages: Int,
-    onPageOverflow: () -> Unit,
     selectedItem: ScreenElement? = null,
 ) {
     val pagePadding = 20.dp
@@ -93,20 +92,15 @@ fun DeliveryNoteBasicTemplateContent(
 
                 }
         ) {
-            val paddingTopAndBottom = 42.dp
-
-            if (pageContentHeightDp != 0.dp && (pageContentHeightDp > pageHeightDp - paddingTopAndBottom)) {
-                pageContentHeightDp = 0.dp
-                onPageOverflow()
-            }
-
             if (index == 0) {
                 DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
-                DeliveryNoteBasicTemplateDocNumber(
-                    uiState.orderNumber,
-                    onClickElement,
-                    selectedItem
-                )
+                uiState.orderNumber?.text?.let {
+                    DeliveryNoteBasicTemplateOrderNumber(
+                        it,
+                        onClickElement,
+                        selectedItem
+                    )
+                }
             }
 
             Spacer(
@@ -126,10 +120,10 @@ fun DeliveryNoteBasicTemplateContent(
                     )
                     .fillMaxWidth()
             ) {
-                // The table with all line items
-                DeliveryNoteBasicTemplateDataTable(
-                    productArray?.map { it.documentProduct } ?: fakeDocumentProducts()
-                )
+                val documentProducts = productArray?.map { it.documentProduct }
+                if (!documentProducts.isNullOrEmpty()) {
+                    documentProducts?.let { DeliveryNoteBasicTemplateDataTable(it) }
+                }
             }
 
             DeliveryNoteBasicTemplateFooter(uiState, footerArray)
@@ -140,7 +134,11 @@ fun DeliveryNoteBasicTemplateContent(
 
 @Composable
 fun DeliveryNoteBasicTemplatePageNumbering(index: Int, numberOfPages: Int) {
-    Box(modifier = Modifier.fillMaxSize().padding(top = 10.dp, bottom = 10.dp, end = 10.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 10.dp, bottom = 10.dp, end = 10.dp)
+    ) {
         Text(
             style = MaterialTheme.typography.textForDocuments,
             modifier = Modifier.align(Alignment.BottomEnd),

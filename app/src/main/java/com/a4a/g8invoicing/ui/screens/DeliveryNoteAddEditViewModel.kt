@@ -34,13 +34,22 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     private var deleteJob: Job? = null
 
     // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
-    private val id: String? = savedStateHandle["itemId"]
+    private var id: String? = savedStateHandle["itemId"]
     private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteState())
     val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
 
     init {
+        var newDocumentId: Long? = null
+        if (id == null) {
+            newDocumentId = deliveryNoteDataSource.saveDeliveryNote()
+            newDocumentId?.let {
+                linkToFakeProduct(deliveryNoteDataSource, viewModelScope, it)
+            }
+        }
         id?.let {
             fetchDeliveryNoteFromLocalDb(it.toLong())
+        } ?: newDocumentId?.let {
+            fetchDeliveryNoteFromLocalDb(it)
         }
     }
 
@@ -54,26 +63,25 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                println("Fetching deliveryNotes failed with exception: ${e.localizedMessage}")
+                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun saveOrUpdateDeliveryNoteInLocalDb() {
-        updateJob?.cancel()
-        updateJob = viewModelScope.launch {
+    fun updateDeliveryNoteInLocalDb() {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
             try {
                 id?.let {
                     deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
-                } ?: deliveryNoteDataSource.saveDeliveryNote(deliveryNoteUiState.value)
-
+                }
             } catch (e: Exception) {
-                println("Saving deliveryNotes failed with exception: ${e.localizedMessage}")
+                println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun saveDocumentProductInLocalDbAndInDeliveryNote(documentProduct: DocumentProductState) {
+    fun saveDocumentProductInLocalDb(documentProduct: DocumentProductState) {
         _deliveryNoteUiState.value.deliveryNoteId?.let {
             saveDocumentProductInDbAndLinkToDeliveryNote(
                 documentProduct = documentProduct,
@@ -85,28 +93,29 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun removeDocumentProductFromDeliveryNote(documentProductId: Int) {
-        // Update the Ui State
-        val newList = _deliveryNoteUiState.value.documentProducts?.toMutableList()
-            ?.filter { it.id != documentProductId }
-        newList?.let {
-            updateDeliveryNoteState(ScreenElement.DOCUMENT_PRODUCTS, it)
-        }
-
-        // Update the db
-        updateJob?.cancel()
-        updateJob = viewModelScope.launch {
+    fun removeDocumentProductFromLocalDb(documentProductId: Int) {
+        deleteJob?.cancel()
+        deleteJob = viewModelScope.launch {
             try {
+                _deliveryNoteUiState.value.deliveryNoteId?.let {
+                    deliveryNoteDataSource.deleteDeliveryNoteProduct(
+                        it.toLong(),
+                        documentProductId.toLong()
+                    )
+                }
                 documentProductDataSource.deleteDocumentProduct(documentProductId.toLong())
-                deliveryNoteUiState.value.deliveryNoteId?.toLong()?.let {
-                    deliveryNoteDataSource.deleteDeliveryNoteProduct(documentProductId.toLong())
+
+                // This is used to re-fetch the document when there's a remove/adding in the document's
+                // product list (even if it's a flow, it's not updated automatically
+                // as it's a list inside an object (?))
+                _deliveryNoteUiState.value.deliveryNoteId?.toLong()?.let {
+                    fetchDeliveryNoteFromLocalDb(it)
                 }
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
         }
     }
-
 
     fun updateDeliveryNoteState(pageElement: ScreenElement, value: Any) {
         _deliveryNoteUiState.value =
@@ -196,3 +205,21 @@ fun saveDocumentProductInDbAndLinkToDeliveryNote(
         }
     }
 }
+
+fun linkToFakeProduct(
+    deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+    viewModelScope: CoroutineScope,
+    deliveryNoteId: Long,
+) {
+    viewModelScope.launch {
+        try {
+                deliveryNoteDataSource.addDeliveryNoteProduct(
+                    deliveryNoteId,
+                    1
+                )
+        } catch (e: Exception) {
+            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
+        }
+    }
+}
+

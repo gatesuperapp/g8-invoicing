@@ -112,7 +112,8 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.number?.text.toString().padStart(4, '0') ?: "",
+                        text = deliveryNote.number?.text?.toIntOrNull()?.let { String.format("%04d", it) }
+                            ?: "XXX",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
@@ -121,10 +122,11 @@ fun DeliveryNoteListItem(
                 }
                 Row(
                     modifier = Modifier
-                      //  .fillMaxWidth()
+                    //  .fillMaxWidth()
                 ) {
                     Text(
-                        text = deliveryNote.client?.name?.text + " " + deliveryNote.client?.firstName?.text
+                        text = (deliveryNote.client?.name?.text
+                            ?: " - ") + " " + (deliveryNote.client?.firstName?.text ?: "")
                     )
                 }
             }
@@ -147,7 +149,9 @@ fun DeliveryNoteListItem(
                 Row(
                 ) {
                     Text(
-                        text = deliveryNote.documentPrices?.totalPriceWithTax.toString() + stringResource(id = R.string.currency),
+                        text = deliveryNote.documentPrices?.totalPriceWithTax.toString() + stringResource(
+                            id = R.string.currency
+                        ),
                     )
                 }
             }

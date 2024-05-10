@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -25,9 +23,9 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 fun DeliveryNoteBottomSheetDocumentProductList(
     list: List<DocumentProductState>,
     onClickBack: () -> Unit,
-    onClickChooseProduct: () -> Unit, // Add a new product to the document (product list)
-    onDocumentProductClick: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
-    onClickDeleteDocumentProduct: (Int) -> Unit, // Delete a document product
+    onClickChooseButton: () -> Unit, // Add a new product to the document (product list)
+    onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
+    onClickDelete: (Int) -> Unit, // Delete a document product
 ) {
     Column(
         modifier = Modifier
@@ -49,7 +47,7 @@ fun DeliveryNoteBottomSheetDocumentProductList(
             }
         }
         ButtonAddOrChoose( // Choosing a product to add to the document
-            onClickChooseProduct,
+            onClickChooseButton,
             hasBorder = false,
             hasBackground = true,
             stringResource(id = R.string.delivery_note_bottom_sheet_document_product_add)
@@ -60,8 +58,8 @@ fun DeliveryNoteBottomSheetDocumentProductList(
         // Display the existing list
         DocumentProductListContent(
             documentProducts = list,
-            onItemClick = onDocumentProductClick,
-            onClickDeleteDocumentProduct = onClickDeleteDocumentProduct
+            onItemClick = onClickDocumentProduct,
+            onClickDeleteDocumentProduct = onClickDelete
         )
     }
 }

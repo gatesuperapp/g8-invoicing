@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -35,46 +34,56 @@ class DeliveryNoteLocalDataSource(
                 val deliveryNote = query.executeAsOne()
                 fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
                     .map {
-                        deliveryNote.transformIntoEditableNote(it)
+                        val l = it.filterNot { it.name == TextFieldValue("FAKE") }
+                        // Ugly but only way i've found for the flow to return something
+                        // even when there's no product added to the document..
+                        // I wanted to use flow.onStart { emit(initialValue) } but couldn't
+                        // find a solution as a Query is expected
+                        deliveryNote.transformIntoEditableNote(l)
                     }
             }
     }
 
 
-/*
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
-        return deliveryNoteQueries.getAllDeliveryNotes()
-            .asFlow()
-            .map { query ->
-                query.executeAsList()
-                    .map { it.transformIntoEditableNote(listOf(DocumentProductState())) }
-            }
-    }
-*/
-
-           @OptIn(ExperimentalCoroutinesApi::class)
+    /*
         override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
             return deliveryNoteQueries.getAllDeliveryNotes()
                 .asFlow()
-                .flatMapMerge { query ->
-                    combine(
-                        query.executeAsList().map { deliveryNote ->
-                            fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
-                                .map {
-                                    deliveryNote.transformIntoEditableNote(it)
-                                }
-                        }
-                    ) {
-                        it.asList()
-                    }
+                .map { query ->
+                    query.executeAsList()
+                        .map { it.transformIntoEditableNote(listOf(DocumentProductState())) }
                 }
         }
+    */
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+        return deliveryNoteQueries.getAllDeliveryNotes()
+            .asFlow()
+            .flatMapMerge { query ->
+                combine(
+                    query.executeAsList().map { deliveryNote ->
+                        fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
+                            .map {
+                                val l = it.filterNot { it.name == TextFieldValue("FAKE") }
+                                // Ugly but only way i've found for the flow to return something
+                                // even when there's no product added to the document..
+                                // I wanted to use flow.onStart { emit(initialValue) } but couldn't
+                                // find a solution as a Query is expected
+                                deliveryNote.transformIntoEditableNote(l)
+                            }
+                    }
+                ) {
+                    it.asList()
+                }
+            }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
         return deliveryNoteProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
             .asFlow()
-            .flatMapLatest { query ->
+            .flatMapMerge { query ->
                 combine(
                     query.executeAsList().map {
                         documentProductQueries.getDocumentProduct(it.document_product_id)
@@ -82,7 +91,8 @@ class DeliveryNoteLocalDataSource(
                             .map {
                                 it.executeAsOne().transformIntoEditableDocumentProduct()
                             }
-                    }) {
+                    })
+                {
                     it.asList()
                 }
             }
@@ -98,7 +108,6 @@ class DeliveryNoteLocalDataSource(
     }
 
     private fun DeliveryNote.transformIntoEditableNote(documentProducts: List<DocumentProductState>): DeliveryNoteState {
-        // It's a suspend function so we can observe changes on DocumentProducts
         var client: ClientOrIssuerState? = null
         var issuer: ClientOrIssuerState? = null
 
@@ -118,7 +127,7 @@ class DeliveryNoteLocalDataSource(
             // Adding every fields except documentProducts & prices
             return DeliveryNoteState(
                 deliveryNoteId = it.delivery_note_id.toInt(),
-                number = TextFieldValue(text = it.number),
+                number = TextFieldValue(text = it.number ?: ""),
                 deliveryDate = it.delivery_date,
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
                 issuer = issuer,
@@ -128,7 +137,6 @@ class DeliveryNoteLocalDataSource(
             )
         }
     }
-
 
     // Used when duplicating a document (we don't need a flow)
     private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState> {
@@ -146,22 +154,30 @@ class DeliveryNoteLocalDataSource(
         return documentProducts
     }
 
-    override suspend fun saveDeliveryNote(deliveryNote: DeliveryNoteState) {
+    override fun saveDeliveryNote(): Long? {
+        deliveryNoteQueries.saveDeliveryNote(
+            delivery_note_id = null,
+            number = null,
+            delivery_date = "",
+            order_number = "",
+            document_issuer_id = getExistingIssuerId(),
+            document_client_id = null,
+            currency = null
+        )
+        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+    }
+
+    override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
-                getExistingIssuerOrSaveNewIssuer(deliveryNote)
-
-                deliveryNoteQueries.saveDeliveryNote(
-                    delivery_note_id = null,
+                deliveryNoteQueries.updateDeliveryNote(
+                    delivery_note_id = deliveryNote.deliveryNoteId?.toLong() ?: 0,
                     number = deliveryNote.number?.text ?: "",
                     delivery_date = deliveryNote.deliveryDate.toString(),
-                    order_number = deliveryNote.orderNumber?.text,
-                    document_issuer_id = deliveryNote.issuer?.id?.toLong()
-                        ?: deliveryNote.issuer?.email?.let {
-                            clientOrIssuerQueries.getIdByMail(it.text)
-                                .executeAsOneOrNull()
-                        },
                     document_client_id = deliveryNote.client?.id?.toLong(),
+                    document_issuer_id = deliveryNote.issuer?.id?.toLong()
+                        ?: deliveryNote.issuer?.let { saveNewIssuerAndGetId(it) },
+                    order_number = deliveryNote.orderNumber?.text,
                     currency = deliveryNote.currency?.text
                 )
             } catch (cause: Throwable) {
@@ -190,38 +206,15 @@ class DeliveryNoteLocalDataSource(
         return deliveryNoteId
     }
 
-    override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
-        return withContext(Dispatchers.IO) {
-            try {
-                getExistingIssuerOrSaveNewIssuer(deliveryNote)
-
-                deliveryNoteQueries.updateDeliveryNote(
-                    delivery_note_id = deliveryNote.deliveryNoteId?.toLong() ?: 0,
-                    number = deliveryNote.number?.text ?: "",
-                    delivery_date = deliveryNote.deliveryDate.toString(),
-                    document_client_id = deliveryNote.client?.id?.toLong(),
-                    document_issuer_id = deliveryNote.issuer?.id?.toLong()
-                        ?: deliveryNote.issuer?.email?.let {
-                            clientOrIssuerQueries.getIdByMail(it.text)
-                                .executeAsOneOrNull()
-                        },
-                    order_number = deliveryNote.orderNumber?.text,
-                    currency = deliveryNote.currency?.text
-                )
-            } catch (cause: Throwable) {
-            }
-        }
-    }
-
     override suspend fun deleteDeliveryNote(id: Long) {
         return withContext(Dispatchers.IO) {
             deliveryNoteQueries.deleteDeliveryNote(id)
         }
     }
 
-    override suspend fun deleteDeliveryNoteProduct(documentProductId: Long) {
+    override suspend fun deleteDeliveryNoteProduct(id: Long, documentProductId: Long) {
         return withContext(Dispatchers.IO) {
-            deliveryNoteProductQueries.deleteProductLinkedToDeliveryNote(documentProductId)
+            deliveryNoteProductQueries.deleteProductLinkedToDeliveryNote(id, documentProductId)
         }
     }
 
@@ -235,26 +228,30 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    private fun getExistingIssuerOrSaveNewIssuer(deliveryNote: DeliveryNoteState) {
-        deliveryNote.issuer?.id ?: deliveryNote.issuer?.let {
-            clientOrIssuerQueries.save(
-                client_or_issuer_id = null,
-                type = "issuer",
-                first_name = it.firstName?.text,
-                name = it.name.text,
-                address1 = it.address1?.text,
-                address2 = it.address2?.text,
-                zip_code = it.zipCode?.text,
-                city = it.city?.text,
-                phone = it.phone?.text,
-                email = it.email?.text,
-                notes = it.notes?.text,
-                company_id1_label = it.companyId1Label?.text,
-                company_id1_number = it.companyId1Number?.text,
-                company_id2_label = it.companyId2Label?.text,
-                company_id2_number = it.companyId2Number?.text,
-            )
-        }
+    private fun saveNewIssuerAndGetId(issuer: ClientOrIssuerState): Long {
+        clientOrIssuerQueries.save(
+            client_or_issuer_id = null,
+            type = "issuer",
+            first_name = issuer.firstName?.text,
+            name = issuer.name.text,
+            address1 = issuer.address1?.text,
+            address2 = issuer.address2?.text,
+            zip_code = issuer.zipCode?.text,
+            city = issuer.city?.text,
+            phone = issuer.phone?.text,
+            email = issuer.email?.text,
+            notes = issuer.notes?.text,
+            company_id1_label = issuer.companyId1Label?.text,
+            company_id1_number = issuer.companyId1Number?.text,
+            company_id2_label = issuer.companyId2Label?.text,
+            company_id2_number = issuer.companyId2Number?.text,
+        )
+
+        return clientOrIssuerQueries.getLastInsertedRowId().executeAsOne()
+    }
+
+    private fun getExistingIssuerId(): Long? {
+        return clientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
     }
 }
 

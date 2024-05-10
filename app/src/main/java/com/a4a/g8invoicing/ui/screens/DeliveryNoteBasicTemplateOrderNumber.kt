@@ -8,16 +8,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 
 @Composable
-fun DeliveryNoteBasicTemplateDocNumber(
-    orderNumber: TextFieldValue?,
+fun DeliveryNoteBasicTemplateOrderNumber(
+    orderNumber: String,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
@@ -43,7 +41,7 @@ fun DeliveryNoteBasicTemplateDocNumber(
         )
         Text(
             style = MaterialTheme.typography.textForDocumentsImportant,
-            text = orderNumber?.text
+            text = orderNumber
                 ?: stringResource(id = R.string.delivery_note_default_order_number)
         )
     }

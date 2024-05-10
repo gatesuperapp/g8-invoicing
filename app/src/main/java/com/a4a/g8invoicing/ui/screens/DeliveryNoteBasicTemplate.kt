@@ -79,21 +79,40 @@ fun DeliveryNoteBasicTemplate(
         ProductWithPage(it, 1)
     }
 
-    val footerArray = remember {
-        mutableStateListOf(
+    val footerArray = mutableStateListOf(
             FooterRow(FooterRowName.TOTAL_WITHOUT_TAX, 1),
             FooterRow(FooterRowName.TAXES, 1),
             FooterRow(FooterRowName.TOTAL_WITH_TAX, 1),
         )
-    }
 
     Column {
         HorizontalPager(
             state = pagerState
         ) { index ->
-
             Column {
-                Text("page n°" + (index + 1) + "/" + numberOfPages)
+                var numberOfProducts = uiState.documentProducts?.size ?: 0
+
+                if (numberOfProducts == 10) {
+                    numberOfPages = 2
+                    val footerRowToMove = footerArray.last()
+                    footerRowToMove.page = (index + 1) + 1
+                } else if (numberOfProducts == 11) {
+                    numberOfPages = 2
+                    val footerRowsToMove =
+                        footerArray.slice(footerArray.lastIndex - 1..footerArray.lastIndex)
+                    footerRowsToMove.forEach { it.page = 2 }
+                } else if (numberOfProducts == 12) {
+                    numberOfPages = 2
+                    footerArray.forEach { it.page = 2 }
+                } else if (numberOfProducts > 12 && numberOfProducts < 30) {
+                    numberOfPages = 2
+                    footerArray.forEach { it.page = 2 }
+                    productArray?.let { productArray ->
+                        val productsToMoveToNextPage =
+                            productArray.slice(12..productArray.lastIndex)
+                        productsToMoveToNextPage.forEach { it.page = 2 }
+                    }
+                }
 
                 DeliveryNoteBasicTemplateContent(
                     uiState = uiState,
@@ -102,24 +121,7 @@ fun DeliveryNoteBasicTemplate(
                     productArray = productArray?.filter { it.page == (index + 1) },
                     footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
                     index = index,
-                    numberOfPages = numberOfPages,
-                    onPageOverflow = {
-                        val pageOfTheLastProduct = productArray?.last()?.page
-                        val pageOfTheFirstFooterRow = footerArray.first().page
-
-                        if (pageOfTheLastProduct != pageOfTheFirstFooterRow) {
-                            productArray?.last() { it.page != pageOfTheFirstFooterRow }?.page =
-                                (index + 1) + 1
-                        } else {
-                            val footerRowToMove =
-                                footerArray.last { it.page == pageOfTheLastProduct }
-                            footerRowToMove.page = (index + 1) + 1
-                            if ((index + 1) == numberOfPages) {
-                                // = if all the footer rows are on the same page
-                                numberOfPages += 1
-                            }
-                        }
-                    }
+                    numberOfPages = numberOfPages
                 )
             }
         }
@@ -131,7 +133,7 @@ enum class FooterRowName {
 }
 
 @Composable
-fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
+fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState?) {
     Text(
         modifier = Modifier
             .padding(bottom = 2.dp)
@@ -139,9 +141,9 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
         textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.textForDocumentsImportant,
-        text = (clientOrIssuer.firstName?.text ?: "") + " " + clientOrIssuer.name.text
+        text = (clientOrIssuer?.firstName?.text ?: "") + " " + (clientOrIssuer?.name?.text ?: "")
     )
-    clientOrIssuer.address1?.let {
+    clientOrIssuer?.address1?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
@@ -149,7 +151,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text
         )
     }
-    clientOrIssuer.address2?.let {
+    clientOrIssuer?.address2?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
@@ -157,7 +159,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text
         )
     }
-    clientOrIssuer.zipCode?.let {
+    clientOrIssuer?.zipCode?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
@@ -165,7 +167,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text + " " + clientOrIssuer.city?.text
         )
     }
-    clientOrIssuer.phone?.let {
+    clientOrIssuer?.phone?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
@@ -173,7 +175,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text
         )
     }
-    clientOrIssuer.email?.let {
+    clientOrIssuer?.email?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier
@@ -183,7 +185,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text
         )
     }
-    clientOrIssuer.companyId1Label?.let {
+    clientOrIssuer?.companyId1Label?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
@@ -191,7 +193,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState) {
             text = it.text + " : " + clientOrIssuer.companyId1Number?.text
         )
     }
-    clientOrIssuer.companyId2Label?.let {
+    clientOrIssuer?.companyId2Label?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),

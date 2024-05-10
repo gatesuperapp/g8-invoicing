@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+
 /**/
 @Composable
 fun DeliveryNoteListContent(

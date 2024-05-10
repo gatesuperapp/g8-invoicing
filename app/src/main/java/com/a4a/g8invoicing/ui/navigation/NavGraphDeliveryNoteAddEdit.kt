@@ -1,6 +1,11 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -46,8 +51,19 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             .collectAsStateWithLifecycle()
 
         val productAddEditViewModel: ProductAddEditViewModel = hiltViewModel()
-        val documentProductUiState by productAddEditViewModel.documentProductUiState
+        val documentProduct by productAddEditViewModel.documentProductUiState
 
+        val triggerRecomposition = remember { mutableStateOf(0) }
+        println(" COOO" + triggerRecomposition)
+        println(" COOO deliveryNoteUiState = " + deliveryNoteUiState.documentProducts)
+
+        Text(
+            text = " COOO" + triggerRecomposition.value,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            // maxLines = 1,
+            //overflow = TextOverflow.Ellipsis
+        )
 
 /*        // If the previous screen was Add/edit page
         // (accessed after user clicks "Add new" in the bottom sheet)
@@ -82,7 +98,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             isNewDeliveryNote = backStackEntry.arguments?.getString("itemId") == null,
             onClickShare = {},
             onClickBack = {
-                deliveryNoteViewModel.saveOrUpdateDeliveryNoteInLocalDb()
+                deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
                 onClickBack()
             },
             clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
@@ -90,21 +106,21 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             clientUiState = clientUiState,
             issuerUiState = issuerUiState,
             taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
-            products = productListUiState.products.toMutableList(), // The list of products to display when choosing to add a product
+            products = productListUiState.products.toMutableList(), // The list of products to display when adding a product
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
 
             },
-            onDocumentProductClick = {
+            onDocumentProductClick = {// Edit a document product
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
             onProductClick = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(it)
             },
-            documentProductUiState = documentProductUiState, // Used when choosing a product or creating new product from the bottom sheet
+            documentProductUiState = documentProduct, // Used when choosing a product or creating new product from the bottom sheet
             onClickDeleteDocumentProduct = {
-                deliveryNoteViewModel.removeDocumentProductFromDeliveryNote(it)
+                deliveryNoteViewModel.removeDocumentProductFromLocalDb(it)
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
@@ -143,7 +159,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         clientOrIssuerAddEditViewModel.clearIssuerUiState()
                     }
                     TypeOfBottomSheetForm.ADD_PRODUCT -> {
-                        deliveryNoteViewModel.saveDocumentProductInLocalDbAndInDeliveryNote(documentProductUiState)
+                        deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                     }
                     TypeOfBottomSheetForm.EDIT_DOCUMENT_PRODUCT -> {
                         productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
@@ -151,7 +167,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     TypeOfBottomSheetForm.NEW_PRODUCT -> {
                         productAddEditViewModel.setProductUiState()
                         productAddEditViewModel.saveInLocalDb(ProductType.PRODUCT)
-                        deliveryNoteViewModel.saveDocumentProductInLocalDbAndInDeliveryNote(documentProductUiState)
+                        deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                         productAddEditViewModel.clearProductUiState()
                         productAddEditViewModel.clearDocumentProductUiState()
                     }

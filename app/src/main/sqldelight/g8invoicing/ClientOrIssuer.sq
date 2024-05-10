@@ -89,3 +89,8 @@ WHERE client_or_issuer_id = :id;
 
 getLastInsertedRowId:
 SELECT last_insert_rowid();
+
+getLastInsertedIssuer:
+SELECT last_insert_rowid()
+FROM ClientOrIssuer
+WHERE type = 'issuer';

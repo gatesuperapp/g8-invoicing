@@ -184,9 +184,12 @@
     <string name="delivery_note_modal_product_tva_back">Retour</string>
     <string name="delivery_note_modal_product_tva_title">TVA</string>
     <string name="account_label">Mon compte</string>
-    <string name="account_project_info">The Gate (G8) est une application open-source, conçue pour les paysan·ne·s mais qui peut convenir à tout type d\'entreprise.\n\n L\'objectif de fournir une solution de facturation simple, sécurisée et qui vous fait gagner du temps.\n\n Inscrivez-vous pour soutenir le projet et bénéficier des prochaines fonctionnalités :
-        export de données, templates de documents, application de bureau et + encore ! \n
+    <string name="account_project_info">The Gate (G8) est une application open source, conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\n L\'objectif est de fournir une solution simple, pratique et respectueuse des données personnelles.\n\n La majorité des bénéfices sera reversée à des projets de protection de la faune sauvage. Inscrivez-vous pour soutenir le projet et bénéficier des prochaines fonctionnalités :
+        export de données, templates de documents et + encore ! \n
         &#128522;
     </string>
     <string name="account_button_create"> Créer mon compte </string>
+    <string name="alert_dialog_delete"> Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible. </string>
+    <string name="alert_dialog_delete_confirm"> Oui </string>
+    <string name="alert_dialog_delete_cancel"> Non </string>
 </resources>

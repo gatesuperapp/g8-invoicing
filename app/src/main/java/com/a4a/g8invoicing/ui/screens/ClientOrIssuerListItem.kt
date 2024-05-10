@@ -119,9 +119,7 @@ fun ClientOrIssuerListItem(
                     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-
                     val clientName = clientOrIssuer.name.text + " " + (clientOrIssuer.firstName?.text ?: "")
-
                     Text(
                         text = clientName,
                         fontSize = 16.sp,

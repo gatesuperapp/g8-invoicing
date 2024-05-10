@@ -49,7 +49,7 @@ class ProductAddEditViewModel @Inject constructor(
     }
 
     // Used when sliding the bottom form from documents
-    // Editing an already selected document product
+    // Editing a document product
     fun setDocumentProductUiState(documentProduct: DocumentProductState) {
         _documentProductUiState.value = documentProduct
     }

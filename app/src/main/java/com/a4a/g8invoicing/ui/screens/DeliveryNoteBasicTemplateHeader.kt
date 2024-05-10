@@ -133,7 +133,7 @@ fun DeliveryNoteBasicTemplateHeader(
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BuildClientOrIssuerInTemplate(uiState.client ?: fakeClient())
+                BuildClientOrIssuerInTemplate(uiState.client)
             }
         }
     }

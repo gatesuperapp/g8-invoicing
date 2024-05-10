@@ -13,10 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.SharedBottomBar
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 
 @Composable
@@ -38,6 +39,9 @@ fun DeliveryNoteList(
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
 
+    // On delete document
+    val openAlertDialog = remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopBar(
@@ -53,6 +57,7 @@ fun DeliveryNoteList(
                 navController = navController,
                 selectedMode = selectedMode.value,
                 onClickDelete = {
+                    //openAlertDialog.value = true
                     onClickDelete(selectedItems.toList())
                     selectedItems.clear()
                     selectedMode.value = false
@@ -95,6 +100,20 @@ fun DeliveryNoteList(
                 },
                 keyToUnselectAll = keyToResetCheckboxes.value
             )
+        }
+
+        when {
+            openAlertDialog.value -> {
+                AlertDialogDeleteDocument(
+                    onDismissRequest = { openAlertDialog.value = false },
+                    onConfirmation = {
+                        openAlertDialog.value = false
+                        onClickDelete(selectedItems.toList())
+                        selectedItems.clear()
+                        selectedMode.value = false
+                    }
+                )
+            }
         }
     }
 }
