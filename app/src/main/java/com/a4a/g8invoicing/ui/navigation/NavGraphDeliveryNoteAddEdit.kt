@@ -54,8 +54,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         val documentProduct by productAddEditViewModel.documentProductUiState
 
         val triggerRecomposition = remember { mutableStateOf(0) }
-        println(" COOO" + triggerRecomposition)
-        println(" COOO deliveryNoteUiState = " + deliveryNoteUiState.documentProducts)
 
         Text(
             text = " COOO" + triggerRecomposition.value,
