@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -107,14 +108,14 @@ fun DeliveryNoteBasicTemplate(
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
 
-    var numberOfPages by remember { mutableStateOf(1) }
-    var firstCompositionForThisNumberOfProducts by remember { mutableStateOf(true) }
+    var numberOfPages = 1
+
+    var firstCompositionForThisNumberOfItems by remember { mutableStateOf(true) }
     val pagerState = rememberPagerState { numberOfPages }
 
     val productArray = uiState.documentProducts?.map {
         ProductWithPage(it, 1)
     }
-
     val footerArray = mutableStateListOf(
         FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPages),
         FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPages),
@@ -122,6 +123,40 @@ fun DeliveryNoteBasicTemplate(
     val taxRates = uiState.documentProducts?.map { it.taxRate }?.distinct()
     taxRates?.forEach {
         footerArray.add(FooterRow(FooterRowName.TAXES.name + it.toString(), numberOfPages))
+    }
+
+    val arrayOfProductsAndFooterRows: MutableList<Any> =
+        productArray?.toMutableList() ?: mutableListOf()
+    footerArray.forEach { arrayOfProductsAndFooterRows.add(it) }
+
+    val numberOfItems = arrayOfProductsAndFooterRows.size
+
+    var maxItemsOnFirstPage = 10
+    var maxItemsOnOtherPages = 20
+    var limitsArray = mutableListOf<Int>()
+
+    numberOfPages = calculateNumberOfPages(
+        numberOfItems,
+        maxItemsOnFirstPage,
+        maxItemsOnOtherPages
+    )
+    println("numberOfPages = " + numberOfPages)
+    println("limitsArray" + limitsArray.toList())
+    limitsArray = calculateLimits(
+        numberOfPages,
+        maxItemsOnFirstPage,
+        maxItemsOnOtherPages
+    )
+
+    if (numberOfPages > 1) {
+        for (i in 2..numberOfPages) {
+            val itemsToMoveToNextPage =
+                arrayOfProductsAndFooterRows.slice(limitsArray[i - 2]..arrayOfProductsAndFooterRows.lastIndex)
+            itemsToMoveToNextPage.filterIsInstance<FooterRow>()
+                .forEach { it.page = i }
+            itemsToMoveToNextPage.filterIsInstance<ProductWithPage>()
+                .forEach { it.page = i }
+        }
     }
 
 
@@ -137,131 +172,84 @@ fun DeliveryNoteBasicTemplate(
             state = pagerState
         ) { index ->
             Column {
-                val numberOfProducts = uiState.documentProducts?.size ?: 0
-                val arrayOfProductsAndFooterRows: MutableList<Any> = productArray?.toMutableList() ?: mutableListOf()
-                footerArray.forEach { arrayOfProductsAndFooterRows.add(it) }
 
-                var maxItemsOnFirstPage = 10
-                var maxItemsOnOtherPages = 19
-                var limitsArray = mutableListOf<Int>()
+                /* if (numberOfProducts in 10..11) {
+                     numberOfPages = 2
+                     val footerRowsToMove =
+                         footerArray.slice(footerArray.lastIndex - (numberOfProducts - 10)..footerArray.lastIndex)
+                     footerRowsToMove.forEach { it.page = 2 }
+                 } else if (numberOfProducts in 12..28) {
+                     numberOfPages = 2
+                     footerArray.forEach { it.page = 2 }
+                     productArray?.let { productArray ->
+                         val productsToMoveToNextPage =
+                             productArray.slice(12..productArray.lastIndex)
+                         productsToMoveToNextPage.forEach { it.page = 2 }
+                     }
+                 } else if (numberOfProducts in 29..30) {
+                     productArray?.let { productArray ->
+                         val productsToMoveToNextPage =
+                             productArray.slice(12..productArray.lastIndex)
+                         productsToMoveToNextPage.forEach { it.page = 2 }
+                     }
+                     footerArray.forEach { it.page = 2 }
+                     numberOfPages = 3
+                     val footerRowsToMove =
+                         footerArray.slice(footerArray.lastIndex - (numberOfProducts - 29)..footerArray.lastIndex)
+                     footerRowsToMove.forEach { it.page = 3 }
 
+                 } else if (numberOfProducts in 31..47) {
+                     numberOfPages = 3
+                     footerArray.forEach { it.page = 3 }
+                     productArray?.let { productArray ->
+                         val productsToMoveToPage2 =
+                             productArray.slice(12..productArray.lastIndex)
+                         productsToMoveToPage2.forEach { it.page = 2 }
+                         val productsToMoveToPage3 =
+                             productArray.slice(31..productArray.lastIndex)
+                         productsToMoveToPage3.forEach { it.page = 3 }
+                     }
+                 } else if (numberOfProducts in 48..49) {
+                     productArray?.let { productArray ->
+                         val productsToMoveToPage2 =
+                             productArray.slice(12..productArray.lastIndex)
+                         productsToMoveToPage2.forEach { it.page = 2 }
+                         val productsToMoveToPage3 =
+                             productArray.slice(31..productArray.lastIndex)
+                         productsToMoveToPage3.forEach { it.page = 3 }
+                     }
+                     footerArray.forEach { it.page = 3 }
+                     numberOfPages = 4
+                     val footerRowsToMove =
+                         footerArray.slice(footerArray.lastIndex - (numberOfProducts - 48)..footerArray.lastIndex)
+                     footerRowsToMove.forEach { it.page = 4 }
 
-                if (firstCompositionForThisNumberOfProducts) {
-                    numberOfPages = calculateNumberOfPages(
-                        arrayOfProductsAndFooterRows.size,
-                        maxItemsOnFirstPage,
-                        maxItemsOnOtherPages
-                    )
-                    println("numberOfPages = " + numberOfPages)
-                    println("limitsArray" + limitsArray.toList())
-                    limitsArray = calculateLimits(
-                        numberOfPages,
-                        maxItemsOnFirstPage,
-                        maxItemsOnOtherPages
-                    )
-                }
+                 } else if (numberOfProducts in 50..66) {
+                     numberOfPages = 4
+                     footerArray.forEach { it.page = 4 }
+                     productArray?.let { productArray ->
+                         val productsToMoveToPage2 =
+                             productArray.slice(12..productArray.lastIndex)
+                         productsToMoveToPage2.forEach { it.page = 2 }
+                         val productsToMoveToPage3 =
+                             productArray.slice(31..productArray.lastIndex)
+                         productsToMoveToPage3.forEach { it.page = 3 }
+                         val productsToMoveToPage4 =
+                             productArray.slice(50..productArray.lastIndex)
+                         productsToMoveToPage4.forEach { it.page = 4 }
+                     }
+                 }*/
 
-                if (numberOfPages > 1) {
-                    // We place the products according to the limits
-                    for (i in 2..numberOfPages) {
-                        val itemsToMoveToNextPage =
-                            arrayOfProductsAndFooterRows.slice(limitsArray[i - 2]..arrayOfProductsAndFooterRows.lastIndex)
-                        itemsToMoveToNextPage.filterIsInstance<FooterRow>().forEach { it.page = numberOfPages }
-                        itemsToMoveToNextPage.filterIsInstance<ProductWithPage>().forEach { it.page = numberOfPages }
-                    }
-                }
-                /*// If only footer rows must be moved, move them
-                if (numberOfPages == 2 && numberOfProducts < maxItemsOnFirstPage + 3
-                    || numberOfPages > 2 && numberOfProducts < maxItemsOnOtherPages + 3
-                ) {
-                    val footerRowsToMove =
-                        footerArray.slice((footerArray.lastIndex - (numberOfProducts - (limitsArray.last() - 1)))..footerArray.lastIndex)
-                    footerRowsToMove.forEach { it.page = numberOfPages }
-                    val otherFooterRows =
-                        footerArray.slice((0..<footerArray.lastIndex - (numberOfProducts - (limitsArray.last() - 1))))
-                    otherFooterRows.forEach { it.page = numberOfPages - 1 }
-                } else { // else all footer rows on last page
-                    footerArray.forEach { it.page = numberOfPages }
-                }*/
-
-
+                DeliveryNoteBasicTemplateContent(
+                    uiState = uiState,
+                    onClickElement = onClickElement,
+                    screenWidth = screenWidth,
+                    productArray = productArray?.filter { it.page == (index + 1) },
+                    footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
+                    index = index,
+                    numberOfPages = numberOfPages
+                )
             }
-            /* if (numberOfProducts in 10..11) {
-                 numberOfPages = 2
-                 val footerRowsToMove =
-                     footerArray.slice(footerArray.lastIndex - (numberOfProducts - 10)..footerArray.lastIndex)
-                 footerRowsToMove.forEach { it.page = 2 }
-             } else if (numberOfProducts in 12..28) {
-                 numberOfPages = 2
-                 footerArray.forEach { it.page = 2 }
-                 productArray?.let { productArray ->
-                     val productsToMoveToNextPage =
-                         productArray.slice(12..productArray.lastIndex)
-                     productsToMoveToNextPage.forEach { it.page = 2 }
-                 }
-             } else if (numberOfProducts in 29..30) {
-                 productArray?.let { productArray ->
-                     val productsToMoveToNextPage =
-                         productArray.slice(12..productArray.lastIndex)
-                     productsToMoveToNextPage.forEach { it.page = 2 }
-                 }
-                 footerArray.forEach { it.page = 2 }
-                 numberOfPages = 3
-                 val footerRowsToMove =
-                     footerArray.slice(footerArray.lastIndex - (numberOfProducts - 29)..footerArray.lastIndex)
-                 footerRowsToMove.forEach { it.page = 3 }
-
-             } else if (numberOfProducts in 31..47) {
-                 numberOfPages = 3
-                 footerArray.forEach { it.page = 3 }
-                 productArray?.let { productArray ->
-                     val productsToMoveToPage2 =
-                         productArray.slice(12..productArray.lastIndex)
-                     productsToMoveToPage2.forEach { it.page = 2 }
-                     val productsToMoveToPage3 =
-                         productArray.slice(31..productArray.lastIndex)
-                     productsToMoveToPage3.forEach { it.page = 3 }
-                 }
-             } else if (numberOfProducts in 48..49) {
-                 productArray?.let { productArray ->
-                     val productsToMoveToPage2 =
-                         productArray.slice(12..productArray.lastIndex)
-                     productsToMoveToPage2.forEach { it.page = 2 }
-                     val productsToMoveToPage3 =
-                         productArray.slice(31..productArray.lastIndex)
-                     productsToMoveToPage3.forEach { it.page = 3 }
-                 }
-                 footerArray.forEach { it.page = 3 }
-                 numberOfPages = 4
-                 val footerRowsToMove =
-                     footerArray.slice(footerArray.lastIndex - (numberOfProducts - 48)..footerArray.lastIndex)
-                 footerRowsToMove.forEach { it.page = 4 }
-
-             } else if (numberOfProducts in 50..66) {
-                 numberOfPages = 4
-                 footerArray.forEach { it.page = 4 }
-                 productArray?.let { productArray ->
-                     val productsToMoveToPage2 =
-                         productArray.slice(12..productArray.lastIndex)
-                     productsToMoveToPage2.forEach { it.page = 2 }
-                     val productsToMoveToPage3 =
-                         productArray.slice(31..productArray.lastIndex)
-                     productsToMoveToPage3.forEach { it.page = 3 }
-                     val productsToMoveToPage4 =
-                         productArray.slice(50..productArray.lastIndex)
-                     productsToMoveToPage4.forEach { it.page = 4 }
-                 }
-             }*/
-
-            DeliveryNoteBasicTemplateContent(
-                uiState = uiState,
-                onClickElement = onClickElement,
-                screenWidth = screenWidth,
-                productArray = productArray?.filter { it.page == (index + 1) },
-                footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
-                index = index,
-                numberOfPages = numberOfPages
-            )
         }
     }
 }
