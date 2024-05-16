@@ -43,7 +43,7 @@ fun DeliveryNoteBasicTemplateFooter(
             // TVA 5% :
             // Total TTC :
 
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX }) { // Handle the page on which it's displayed
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) { // Handle the page on which it's displayed
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp),
@@ -51,7 +51,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     text = stringResource(id = R.string.delivery_note_total_without_tax) + " "
                 )
             }
-            if (footerArray.any { it.rowDescription == FooterRowName.TAXES }) {
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES.name) }) {
                 uiState.documentPrices?.totalAmountsOfEachTax?.forEach() {
                     Text(
                         modifier = Modifier
@@ -61,7 +61,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     )
                 }
             }
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsImportant,
                     text = stringResource(id = R.string.delivery_note_total_with_tax) + " "
@@ -76,7 +76,7 @@ fun DeliveryNoteBasicTemplateFooter(
             // TVA 20% : 1€
             // TVA 5% : 1€
             // Total TTC : 14€
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp, end = 3.dp),
@@ -85,7 +85,7 @@ fun DeliveryNoteBasicTemplateFooter(
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
-            if (footerArray.any { it.rowDescription ==  FooterRowName.TAXES }) {
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES.name) }) {
                 uiState.documentPrices?.totalAmountsOfEachTax?.forEach {
                     Text(
                         modifier = Modifier
@@ -95,7 +95,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     )
                 }
             }
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX }) {
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(end = 3.dp),
