@@ -53,16 +53,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         val productAddEditViewModel: ProductAddEditViewModel = hiltViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState
 
-        val triggerRecomposition = remember { mutableStateOf(0) }
-
-        Text(
-            text = " COOO" + triggerRecomposition.value,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            // maxLines = 1,
-            //overflow = TextOverflow.Ellipsis
-        )
-
 /*        // If the previous screen was Add/edit page
         // (accessed after user clicks "Add new" in the bottom sheet)
         // we retrieve the new client/issuer to display it in the document
@@ -166,13 +156,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         productAddEditViewModel.setProductUiState()
                         productAddEditViewModel.saveInLocalDb(ProductType.PRODUCT)
                         deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
-                        productAddEditViewModel.clearProductUiState()
-                        productAddEditViewModel.clearDocumentProductUiState()
                     }
                 }
             },
             onClickCancelForm = {
-                productAddEditViewModel.clearDocumentProductUiState()
             },
             onSelectTaxRate = { productAddEditViewModel.updateTaxRate(it, ProductType.DOCUMENT_PRODUCT) }
         )

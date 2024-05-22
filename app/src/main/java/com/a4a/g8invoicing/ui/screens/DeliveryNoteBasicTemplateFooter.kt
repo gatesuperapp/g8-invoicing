@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateFooter(
@@ -51,8 +52,28 @@ fun DeliveryNoteBasicTemplateFooter(
                     text = stringResource(id = R.string.delivery_note_total_without_tax) + " "
                 )
             }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.forEach() {
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_5.name) }) {
+                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(5) }?.let {
+                    Text(
+                        modifier = Modifier
+                            .padding(bottom = 3.dp),
+                        style = MaterialTheme.typography.textForDocuments,
+                        text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
+                    )
+                }
+            }
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_10.name) }) {
+                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(10) }?.let {
+                    Text(
+                        modifier = Modifier
+                            .padding(bottom = 3.dp),
+                        style = MaterialTheme.typography.textForDocuments,
+                        text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
+                    )
+                }
+            }
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_20.name) }) {
+                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(20) }?.let {
                     Text(
                         modifier = Modifier
                             .padding(bottom = 3.dp),
@@ -85,8 +106,8 @@ fun DeliveryNoteBasicTemplateFooter(
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.forEach {
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_5.name) }) {
+                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(5) }?.let {
                     Text(
                         modifier = Modifier
                             .padding(bottom = 3.dp, end = 3.dp),
@@ -95,6 +116,27 @@ fun DeliveryNoteBasicTemplateFooter(
                     )
                 }
             }
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_10.name) }) {
+                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(10) }?.let {
+                    Text(
+                        modifier = Modifier
+                            .padding(bottom = 3.dp, end = 3.dp),
+                        style = MaterialTheme.typography.textForDocuments,
+                        text = it.second.toString() + stringResource(id = R.string.currency)
+                    )
+                }
+            }
+            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_20.name) }) {
+                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(20) }?.let {
+                    Text(
+                        modifier = Modifier
+                            .padding(bottom = 3.dp, end = 3.dp),
+                        style = MaterialTheme.typography.textForDocuments,
+                        text = it.second.toString() + stringResource(id = R.string.currency)
+                    )
+                }
+            }
+
             if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     modifier = Modifier

@@ -87,7 +87,6 @@ fun calculateLimits(
             arrayOfLimits.add((maxItemsOnFirstPage) + maxItemsOnOtherPages * i)
         }
     }
-    println("arrayOfLimits" + arrayOfLimits.toList())
     return arrayOfLimits
 }
 
@@ -117,13 +116,14 @@ fun DeliveryNoteBasicTemplate(
         ProductWithPage(it, 1)
     }
     val footerArray = mutableStateListOf(
-        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPages),
-        FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPages),
+        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPages)
     )
-    val taxRates = uiState.documentProducts?.map { it.taxRate }?.distinct()
+
+    val taxRates = uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
-        footerArray.add(FooterRow(FooterRowName.TAXES.name + it.toString(), numberOfPages))
+        footerArray.add(FooterRow("TAXES_" + it.toString(), numberOfPages))
     }
+    footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPages))
 
     val arrayOfProductsAndFooterRows: MutableList<Any> =
         productArray?.toMutableList() ?: mutableListOf()
@@ -131,8 +131,8 @@ fun DeliveryNoteBasicTemplate(
 
     val numberOfItems = arrayOfProductsAndFooterRows.size
 
-    var maxItemsOnFirstPage = 10
-    var maxItemsOnOtherPages = 20
+    val maxItemsOnFirstPage = 11
+    val maxItemsOnOtherPages = 20
     var limitsArray = mutableListOf<Int>()
 
     numberOfPages = calculateNumberOfPages(
@@ -140,8 +140,6 @@ fun DeliveryNoteBasicTemplate(
         maxItemsOnFirstPage,
         maxItemsOnOtherPages
     )
-    println("numberOfPages = " + numberOfPages)
-    println("limitsArray" + limitsArray.toList())
     limitsArray = calculateLimits(
         numberOfPages,
         maxItemsOnFirstPage,
@@ -159,87 +157,11 @@ fun DeliveryNoteBasicTemplate(
         }
     }
 
-
     Column {
-        Text(
-            text = " nb pdts = " + uiState.documentProducts?.size,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            // maxLines = 1,
-            //overflow = TextOverflow.Ellipsis
-        )
         HorizontalPager(
             state = pagerState
         ) { index ->
             Column {
-
-                /* if (numberOfProducts in 10..11) {
-                     numberOfPages = 2
-                     val footerRowsToMove =
-                         footerArray.slice(footerArray.lastIndex - (numberOfProducts - 10)..footerArray.lastIndex)
-                     footerRowsToMove.forEach { it.page = 2 }
-                 } else if (numberOfProducts in 12..28) {
-                     numberOfPages = 2
-                     footerArray.forEach { it.page = 2 }
-                     productArray?.let { productArray ->
-                         val productsToMoveToNextPage =
-                             productArray.slice(12..productArray.lastIndex)
-                         productsToMoveToNextPage.forEach { it.page = 2 }
-                     }
-                 } else if (numberOfProducts in 29..30) {
-                     productArray?.let { productArray ->
-                         val productsToMoveToNextPage =
-                             productArray.slice(12..productArray.lastIndex)
-                         productsToMoveToNextPage.forEach { it.page = 2 }
-                     }
-                     footerArray.forEach { it.page = 2 }
-                     numberOfPages = 3
-                     val footerRowsToMove =
-                         footerArray.slice(footerArray.lastIndex - (numberOfProducts - 29)..footerArray.lastIndex)
-                     footerRowsToMove.forEach { it.page = 3 }
-
-                 } else if (numberOfProducts in 31..47) {
-                     numberOfPages = 3
-                     footerArray.forEach { it.page = 3 }
-                     productArray?.let { productArray ->
-                         val productsToMoveToPage2 =
-                             productArray.slice(12..productArray.lastIndex)
-                         productsToMoveToPage2.forEach { it.page = 2 }
-                         val productsToMoveToPage3 =
-                             productArray.slice(31..productArray.lastIndex)
-                         productsToMoveToPage3.forEach { it.page = 3 }
-                     }
-                 } else if (numberOfProducts in 48..49) {
-                     productArray?.let { productArray ->
-                         val productsToMoveToPage2 =
-                             productArray.slice(12..productArray.lastIndex)
-                         productsToMoveToPage2.forEach { it.page = 2 }
-                         val productsToMoveToPage3 =
-                             productArray.slice(31..productArray.lastIndex)
-                         productsToMoveToPage3.forEach { it.page = 3 }
-                     }
-                     footerArray.forEach { it.page = 3 }
-                     numberOfPages = 4
-                     val footerRowsToMove =
-                         footerArray.slice(footerArray.lastIndex - (numberOfProducts - 48)..footerArray.lastIndex)
-                     footerRowsToMove.forEach { it.page = 4 }
-
-                 } else if (numberOfProducts in 50..66) {
-                     numberOfPages = 4
-                     footerArray.forEach { it.page = 4 }
-                     productArray?.let { productArray ->
-                         val productsToMoveToPage2 =
-                             productArray.slice(12..productArray.lastIndex)
-                         productsToMoveToPage2.forEach { it.page = 2 }
-                         val productsToMoveToPage3 =
-                             productArray.slice(31..productArray.lastIndex)
-                         productsToMoveToPage3.forEach { it.page = 3 }
-                         val productsToMoveToPage4 =
-                             productArray.slice(50..productArray.lastIndex)
-                         productsToMoveToPage4.forEach { it.page = 4 }
-                     }
-                 }*/
-
                 DeliveryNoteBasicTemplateContent(
                     uiState = uiState,
                     onClickElement = onClickElement,
@@ -256,7 +178,7 @@ fun DeliveryNoteBasicTemplate(
 
 
 enum class FooterRowName {
-    TOTAL_WITHOUT_TAX, TAXES, TOTAL_WITH_TAX
+    TOTAL_WITHOUT_TAX, TAXES_20, TAXES_10, TAXES_5, TOTAL_WITH_TAX
 }
 
 @Composable
