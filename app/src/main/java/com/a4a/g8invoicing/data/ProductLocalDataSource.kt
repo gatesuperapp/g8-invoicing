@@ -12,7 +12,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
 import java.math.RoundingMode
 
 // Product is a simple product: name, description, price
@@ -63,43 +62,32 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun saveDocumentProduct(documentProduct: DocumentProductState): Int? {
-        var documentProductId: Int? = null
-        withContext(Dispatchers.IO) {
-            try {
-                documentProductQueries.saveDocumentProduct(
-                    document_product_id = null,
-                    name = documentProduct.name.text,
-                    quantity = documentProduct.quantity.toDouble(),
-                    description = documentProduct.description?.text,
-                    final_price = documentProduct.priceWithTax?.toDouble(),
-                    tax_rate = documentProduct.taxRate?.toDouble(),
-                    unit = documentProduct.unit?.text,
-                    product_id = documentProduct.productId?.toLong()
-                )
-                documentProductId =
-                    documentProductQueries.lastInsertRowId().executeAsOneOrNull()?.toInt()
 
-            } catch (cause: Throwable) {
-            }
-        }
-        return documentProductId
-    }
-
-    override suspend fun duplicateProduct(product: ProductState) {
+    override suspend fun duplicateProducts(products: List<ProductState>) {
         return withContext(Dispatchers.IO) {
             try {
-                productQueries.saveProduct(
-                    product_id = null,
-                    name = product.name.text,
-                    description = product.description?.text,
-                    final_price = product.priceWithTax?.toDouble(),
-                    product_tax_id = product.taxRate?.let {
-                        taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
-                    },
-                    product_additional_price_id = 1, // TODO change when adding several prices / product
-                    unit = product.unit?.text
-                )
+                products.forEach { selectedProduct ->
+                    selectedProduct.productId?.let {
+                        var product = fetchProduct(it.toLong())
+                        //TODO: get the string outta here
+                        product =
+                            product?.copy(name = TextFieldValue("${product.name.text} - Copie"))
+
+                        product?.let {
+                            productQueries.saveProduct(
+                                product_id = null,
+                                name = it.name.text,
+                                description = it.description?.text,
+                                final_price = it.priceWithTax?.toDouble(),
+                                product_tax_id = it.taxRate?.let {
+                                    taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
+                                },
+                                product_additional_price_id = 1, // TODO change when adding several prices / product
+                                unit = it.unit?.text
+                            )
+                        }
+                    }
+                }
             } catch (cause: Throwable) {
             }
         }

@@ -29,9 +29,8 @@ fun DeliveryNoteList(
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
-    onClickBack: () -> Unit,
-
-    ) {
+    onClickBack: () -> Unit
+) {
     // Main list to handle actions with selected items
     val selectedItems = mutableListOf<DeliveryNoteState>()
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected

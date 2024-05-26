@@ -154,7 +154,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
                     TypeOfBottomSheetForm.NEW_PRODUCT -> {
                         productAddEditViewModel.setProductUiState()
-                        productAddEditViewModel.saveInLocalDb(ProductType.PRODUCT)
+                        productAddEditViewModel.saveInLocalDb()
                         deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                     }
                 }

@@ -1,6 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.ui.text.input.TextFieldValue
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -40,7 +40,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.fetchAllDeliveryNotes().collect {
-                   _deliveryNotesUiState.update { deliveryNotesUiState ->
+                    _deliveryNotesUiState.update { deliveryNotesUiState ->
                         deliveryNotesUiState.copy(
                             deliveryNoteStates = it
                         )
@@ -56,9 +56,18 @@ class DeliveryNoteListViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                selectedDeliveryNotes.forEach {
-                    it.deliveryNoteId?.let {
-                        deliveryNoteDataSource.deleteDeliveryNote(it.toLong())
+                selectedDeliveryNotes.forEach { deliveryNote ->
+                    deliveryNote.deliveryNoteId?.let {id ->
+                        deliveryNoteDataSource.deleteDeliveryNote(id.toLong())
+
+                        deliveryNote.documentProducts?.forEach { documentProduct ->
+                            documentProduct.id?.let {
+                                removeDocumentProductFromLocalDb(
+                                    id.toLong(),
+                                    it.toLong()
+                                )
+                            }
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -67,40 +76,26 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
+    fun removeDocumentProductFromLocalDb(deliveryNoteId: Long, documentProductId: Long) {
+        deleteJob?.cancel()
+        deleteJob = viewModelScope.launch {
+            try {
+                deliveryNoteDataSource.deleteDeliveryNoteProduct(
+                    deliveryNoteId,
+                    documentProductId
+                )
+                documentProductDataSource.deleteDocumentProduct(documentProductId)
+            } catch (e: Exception) {
+                println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+            }
+        }
+    }
+
     fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                selectedDeliveryNotes.forEach { selectedDeliveryNote ->
-                    selectedDeliveryNote.deliveryNoteId?.let { noteId ->
-                        var deliveryNote = deliveryNoteDataSource.fetchDeliveryNote(
-                            noteId.toLong()
-                        )
-
-                        //TODO: get the string outta here
-                        selectedDeliveryNote.number?.let {
-                            deliveryNote = deliveryNote?.copy(
-                                number = TextFieldValue("${it.text} - X")
-                            )
-                        }
-
-                        deliveryNote?.let {
-                            val deliveryNoteId = deliveryNoteDataSource.duplicateDeliveryNote(it)
-
-                            deliveryNoteId?.let { id ->
-                                it.documentProducts?.forEach { documentProduct ->
-                                    saveDocumentProductInDbAndLinkToDeliveryNote(
-                                        documentProduct = documentProduct,
-                                        deliveryNoteDataSource = deliveryNoteDataSource,
-                                        documentProductDataSource = documentProductDataSource,
-                                        viewModelScope = viewModelScope,
-                                        deliveryNoteId = id
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                deliveryNoteDataSource.duplicateDeliveryNotes(selectedDeliveryNotes)
             } catch (e: Exception) {
                 println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }

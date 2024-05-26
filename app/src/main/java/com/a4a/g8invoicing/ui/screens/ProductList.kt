@@ -47,8 +47,6 @@ fun ProductList(
                 onClickBackArrow = onClickBack
             )
         },
-        //   private val _uiState = MutableStateFlow(ProductsUiState())
-        // val uiState: StateFlow<ProductsUiState> = _uiState.asStateFlow()
         bottomBar = {
             SharedBottomBar(
                 navController = navController,

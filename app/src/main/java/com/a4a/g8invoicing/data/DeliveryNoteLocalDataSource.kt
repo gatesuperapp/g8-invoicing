@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -10,6 +11,7 @@ import g8invoicing.DeliveryNote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
@@ -45,37 +47,71 @@ class DeliveryNoteLocalDataSource(
     }
 
 
-    /*
+    /*      override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+              return deliveryNoteQueries.getAllDeliveryNotes()
+                  .asFlow()
+                  .map { query ->
+                      query.executeAsList()
+                          .map { it.transformIntoEditableNote(listOf(DocumentProductState())) }
+                  }
+          }*/
+
+    /*    @OptIn(ExperimentalCoroutinesApi::class)
         override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
             return deliveryNoteQueries.getAllDeliveryNotes()
                 .asFlow()
-                .map { query ->
-                    query.executeAsList()
-                        .map { it.transformIntoEditableNote(listOf(DocumentProductState())) }
+                .flatMapMerge { query ->
+                    combine(
+                        query.executeAsList().map { deliveryNote ->
+                            fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
+                                .map {
+                                    val l = it.filterNot { it.name == TextFieldValue("FAKE") }
+                                    // Ugly but only way i've found for the flow to return something
+                                    // even when there's no product added to the document..
+                                    // I wanted to use flow.onStart { emit(initialValue) } but couldn't
+                                    // find a solution as a Query is expected
+                                    deliveryNote.transformIntoEditableNote(l)
+                                }
+                        }
+                    ) {
+                        it.asList()
+                    }
                 }
-        }
-    */
+        }*/
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
             .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map { deliveryNote ->
-                        fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
-                            .map {
-                                val l = it.filterNot { it.name == TextFieldValue("FAKE") }
-                                // Ugly but only way i've found for the flow to return something
-                                // even when there's no product added to the document..
-                                // I wanted to use flow.onStart { emit(initialValue) } but couldn't
-                                // find a solution as a Query is expected
-                                deliveryNote.transformIntoEditableNote(l)
-                            }
+            .map {
+                it.executeAsList()
+                    .map { deliveryNote ->
+                        val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
+                            .filterNot { it.name == TextFieldValue("FAKE") }
+
+                        Log.d("TAG", "deliveryNote" + deliveryNote.delivery_note_id)
+                        Log.d("TAG", "Innn" + products)
+
+                        deliveryNote.transformIntoEditableNote(
+                            products
+                        )
                     }
-                ) {
-                    it.asList()
-                }
+
+                /* val d = it.executeAsList()
+                 d.map {
+                     val documentProducts = fetchDocumentProducts(it.delivery_note_id)
+                         .filterNot { it.name == TextFieldValue("FAKE") }
+                     it.transformIntoEditableNote(documentProducts)
+                 }*/
+            }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState> {
+        return deliveryNoteProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+            .executeAsList().map {
+                documentProductQueries.getDocumentProduct(it.document_product_id)
+                    .executeAsOne().transformIntoEditableDocumentProduct()
             }
     }
 
@@ -139,20 +175,21 @@ class DeliveryNoteLocalDataSource(
     }
 
     // Used when duplicating a document (we don't need a flow)
-    private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState> {
-        val documentProducts: MutableList<DocumentProductState> = mutableListOf()
+    /*    private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState> {
+            val documentProducts: MutableList<DocumentProductState> = mutableListOf()
 
-        val identifiers =
-            deliveryNoteProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
-                .executeAsList()
-        identifiers.forEach {
-            documentProductQueries.getDocumentProduct(it.document_product_id).executeAsOneOrNull()
-                ?.let { documentProduct ->
-                    documentProducts += documentProduct.transformIntoEditableDocumentProduct()
-                }
-        }
-        return documentProducts
-    }
+            val identifiers =
+                deliveryNoteProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+                    .executeAsList()
+            identifiers.forEach {
+                documentProductQueries.getDocumentProduct(it.document_product_id).executeAsOneOrNull()
+                    ?.let { documentProduct ->
+                        documentProducts += documentProduct.transformIntoEditableDocumentProduct()
+                    }
+            }
+            return documentProducts
+        }*/
+
 
     override fun saveDeliveryNote(): Long? {
         deliveryNoteQueries.saveDeliveryNote(
@@ -164,8 +201,10 @@ class DeliveryNoteLocalDataSource(
             document_client_id = null,
             currency = null
         )
-        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+        return deliveryNoteQueries.lastInsertRowId().executeAsOneOrNull()
     }
+
+
 
     override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
@@ -185,25 +224,65 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun duplicateDeliveryNote(deliveryNote: DeliveryNoteState): Long? {
+    override suspend fun duplicateDeliveryNotes(deliveryNotes: List<DeliveryNoteState>): Long? {
         var deliveryNoteId: Long? = null
         withContext(Dispatchers.IO) {
             try {
-                deliveryNoteQueries.saveDeliveryNote(
-                    delivery_note_id = null,
-                    number = deliveryNote.number?.text ?: " - ",
-                    delivery_date = deliveryNote.deliveryDate,
-                    order_number = deliveryNote.orderNumber?.text,
-                    document_issuer_id = deliveryNote.issuer?.id?.toLong(),
-                    document_client_id = deliveryNote.client?.id?.toLong(),
-                    currency = deliveryNote.currency?.text
-                )
-                deliveryNoteId = documentProductQueries.lastInsertRowId().executeAsOneOrNull()
+                deliveryNotes.forEach {
+                    deliveryNoteQueries.saveDeliveryNote(
+                        delivery_note_id = null,
+                        number = "XXX",
+                        delivery_date = it.deliveryDate,
+                        order_number = it.orderNumber?.text,
+                        document_issuer_id = it.issuer?.id?.toLong(),
+                        document_client_id = it.client?.id?.toLong(),
+                        currency = it.currency?.text
+                    )
+                    deliveryNoteQueries.lastInsertRowId().executeAsOneOrNull()?.let { id ->
+                        // Link to fake product
+                        addDeliveryNoteProduct(
+                            id,
+                            1
+                        )
+
+                        it.documentProducts?.forEach { documentProduct ->
+                            saveDocumentProductInDbAndLinkToDeliveryNote(
+                                documentProduct = documentProduct,
+                                deliveryNoteId = id
+                            )
+                        }
+                    }
+                }
+
 
             } catch (cause: Throwable) {
             }
         }
         return deliveryNoteId
+    }
+    override suspend fun saveDocumentProductInDbAndLinkToDeliveryNote(
+        documentProduct: DocumentProductState,
+        deliveryNoteId: Long?,
+    ) {
+        documentProductQueries.saveDocumentProduct(
+            document_product_id = null,
+            name = documentProduct.name.text,
+            quantity = documentProduct.quantity.toDouble(),
+            description = documentProduct.description?.text,
+            final_price = documentProduct.priceWithTax?.toDouble(),
+            tax_rate = documentProduct.taxRate?.toDouble(),
+            unit = documentProduct.unit?.text,
+            product_id = documentProduct.productId?.toLong()
+        )
+
+        deliveryNoteId?.let {deliveryNoteId ->
+            documentProductQueries.lastInsertRowId().executeAsOneOrNull()?.toInt()?.let { id ->
+                addDeliveryNoteProduct(
+                    deliveryNoteId,
+                    id.toLong()
+                )
+            }
+        }
     }
 
     override suspend fun deleteDeliveryNote(id: Long) {

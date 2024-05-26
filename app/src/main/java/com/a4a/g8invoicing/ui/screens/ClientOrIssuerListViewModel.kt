@@ -99,21 +99,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                selectedItems.forEach { selectedClientOrIssuer ->
-                    selectedClientOrIssuer.id?.let {
-                        var clientOrIssuer =
-                            clientOrIssuerDataSource.fetchClientOrIssuer(it.toLong())
-                        //TODO: get the string outta here
-                        clientOrIssuer = if (!clientOrIssuer?.firstName?.text.isNullOrEmpty()) {
-                            clientOrIssuer?.copy(firstName = TextFieldValue("${selectedClientOrIssuer.firstName?.text} - Copie"))
-                        } else {
-                            clientOrIssuer?.copy(name = TextFieldValue("${selectedClientOrIssuer.name.text} - Copie"))
-                        }
-                        clientOrIssuer?.let { client ->
-                            clientOrIssuerDataSource.duplicateClientOrIssuer(client)
-                        }
-                    }
-                }
+                clientOrIssuerDataSource.duplicateClientsOrIssuers(selectedItems)
             } catch (e: Exception) {
                 println("Duplicating clients failed with exception: ${e.localizedMessage}")
             }
@@ -122,7 +108,6 @@ class ClientOrIssuerListViewModel @Inject constructor(
 }
 
 data class Message(val id: Long, val message: String)
-
 
 enum class PersonType {
     Client, Issuer

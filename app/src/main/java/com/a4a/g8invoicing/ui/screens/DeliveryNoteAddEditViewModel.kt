@@ -69,8 +69,8 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     }
 
     fun updateDeliveryNoteInLocalDb() {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
             try {
                 id?.let {
                     deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
@@ -82,14 +82,19 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     }
 
     fun saveDocumentProductInLocalDb(documentProduct: DocumentProductState) {
-        _deliveryNoteUiState.value.deliveryNoteId?.let {
-            saveDocumentProductInDbAndLinkToDeliveryNote(
-                documentProduct = documentProduct,
-                deliveryNoteDataSource = deliveryNoteDataSource,
-                documentProductDataSource = documentProductDataSource,
-                viewModelScope = viewModelScope,
-                deliveryNoteId = it.toLong()
-            )
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            try {
+
+                _deliveryNoteUiState.value.deliveryNoteId?.let {
+                    deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDeliveryNote(
+                        documentProduct = documentProduct,
+                        deliveryNoteId = it.toLong()
+                    )
+                }
+            } catch (e: Exception) {
+                println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+            }
         }
     }
 
@@ -183,29 +188,6 @@ fun updateDeliveryNoteUiState(
 }
 
 
-fun saveDocumentProductInDbAndLinkToDeliveryNote(
-    documentProduct: DocumentProductState,
-    deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
-    documentProductDataSource: ProductLocalDataSourceInterface,
-    viewModelScope: CoroutineScope,
-    deliveryNoteId: Long,
-) {
-    viewModelScope.launch {
-        try {
-            val documentProductId =
-                documentProductDataSource.saveDocumentProduct(documentProduct)
-            documentProductId?.let { id ->
-                deliveryNoteDataSource.addDeliveryNoteProduct(
-                    deliveryNoteId,
-                    id.toLong()
-                )
-            }
-        } catch (e: Exception) {
-            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
-        }
-    }
-}
-
 fun linkToFakeProduct(
     deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
     viewModelScope: CoroutineScope,
@@ -213,10 +195,10 @@ fun linkToFakeProduct(
 ) {
     viewModelScope.launch {
         try {
-                deliveryNoteDataSource.addDeliveryNoteProduct(
-                    deliveryNoteId,
-                    1
-                )
+            deliveryNoteDataSource.addDeliveryNoteProduct(
+                deliveryNoteId,
+                1
+            )
         } catch (e: Exception) {
             println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }

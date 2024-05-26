@@ -52,15 +52,11 @@ class ProductListViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                selectedProducts.first().productId?.let {
-                        productDataSource.deleteProduct(it.toLong())
-                    }
-
-               /* selectedProducts.forEach { selectedProduct ->
+                selectedProducts.forEach { selectedProduct ->
                     selectedProduct.productId?.let {
                         productDataSource.deleteProduct(it.toLong())
                     }
-                }*/
+                }
             } catch (e: Exception) {
                 println("Deleting products failed with exception: ${e.localizedMessage}")
             }
@@ -71,20 +67,7 @@ class ProductListViewModel @Inject constructor(
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                selectedProducts.forEach { selectedProduct ->
-                    selectedProduct.productId?.let {
-                        var product = productDataSource.fetchProduct(it.toLong())
-
-                        //TODO: get the string outta here
-                        product = product?.copy(name = TextFieldValue("${selectedProduct.name.text} - Copie"))
-
-                        product?.let {
-                            productDataSource.duplicateProduct(it)
-                        }
-                    }
-
-
-                }
+                productDataSource.duplicateProducts(selectedProducts)
             } catch (e: Exception) {
                 println("Duplicating products failed with exception: ${e.localizedMessage}")
             }

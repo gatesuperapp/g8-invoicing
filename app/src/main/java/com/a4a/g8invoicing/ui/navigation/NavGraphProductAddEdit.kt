@@ -38,7 +38,7 @@ fun NavGraphBuilder.productAddEdit(
             },
             onClickDone = {
                 if (isNew) {
-                    viewModel.saveInLocalDb(ProductType.PRODUCT)
+                    viewModel.saveInLocalDb()
                 } else {
                     viewModel.updateInLocalDb(ProductType.PRODUCT)
                 }

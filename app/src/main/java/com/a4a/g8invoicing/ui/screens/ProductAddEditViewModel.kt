@@ -109,7 +109,7 @@ class ProductAddEditViewModel @Inject constructor(
             name = documentProduct?.name ?: TextFieldValue(""),
             quantity = documentProduct?.quantity ?: BigDecimal(0),
             description = documentProduct?.description,
-            priceWithTax = documentProduct?.priceWithTax ,
+            priceWithTax = documentProduct?.priceWithTax,
             taxRate = documentProduct?.taxRate,
             unit = documentProduct?.unit
         )
@@ -140,15 +140,11 @@ class ProductAddEditViewModel @Inject constructor(
         return taxRates
     }
 
-    fun saveInLocalDb(type: ProductType) {
+    fun saveInLocalDb() {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                if (type == ProductType.PRODUCT) {
-                    dataSource.saveProduct(productUiState.value)
-                } else {
-                    dataSource.saveDocumentProduct(documentProductUiState.value)
-                }
+                dataSource.saveProduct(productUiState.value)
             } catch (e: Exception) {
                 println("Saving products failed with exception: ${e.localizedMessage}")
             }

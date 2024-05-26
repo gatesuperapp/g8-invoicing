@@ -52,6 +52,5 @@ deleteDeliveryNote:
 DELETE FROM DeliveryNote
 WHERE delivery_note_id = :id;
 
-getLastInsertedRowId:
+lastInsertRowId:
 SELECT last_insert_rowid();
-

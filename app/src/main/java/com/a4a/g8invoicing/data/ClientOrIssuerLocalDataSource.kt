@@ -98,52 +98,65 @@ class ClientOrIssuerLocalDataSource(
         return documentClientOrIssuerId
     }
 
-    override suspend fun duplicateClientOrIssuer(client: ClientOrIssuerState) {
+    override suspend fun duplicateClientsOrIssuers(clientsOrIssuers: List<ClientOrIssuerState>) {
         return withContext(Dispatchers.IO) {
             try {
-                clientOrIssuerQueries.save(
-                    client_or_issuer_id = null,
-                    type = "client",
-                    client.firstName?.text,
-                    client.name.text,
-                    client.address1?.text,
-                    client.address2?.text,
-                    client.zipCode?.text,
-                    client.city?.text,
-                    client.phone?.text,
-                    client.email?.text,
-                    client.notes?.text,
-                    client.companyId1Label?.text,
-                    client.companyId1Number?.text,
-                    client.companyId2Label?.text,
-                    client.companyId2Number?.text,
-                )
+                clientsOrIssuers.forEach { selectedClientOrIssuer ->
+                    selectedClientOrIssuer.id?.let {
+                        var clientOrIssuer = fetchClientOrIssuer(it.toLong())
+                        //TODO: get the string outta here
+                        clientOrIssuer = if (!clientOrIssuer?.firstName?.text.isNullOrEmpty()) {
+                            clientOrIssuer?.copy(firstName = TextFieldValue("${selectedClientOrIssuer.firstName?.text} - Copie"))
+                        } else {
+                            clientOrIssuer?.copy(name = TextFieldValue("${selectedClientOrIssuer.name.text} - Copie"))
+                        }
+                        clientOrIssuer?.let { client ->
+                            clientOrIssuerQueries.save(
+                                client_or_issuer_id = null,
+                                type = "client",
+                                client.firstName?.text,
+                                client.name.text,
+                                client.address1?.text,
+                                client.address2?.text,
+                                client.zipCode?.text,
+                                client.city?.text,
+                                client.phone?.text,
+                                client.email?.text,
+                                client.notes?.text,
+                                client.companyId1Label?.text,
+                                client.companyId1Number?.text,
+                                client.companyId2Label?.text,
+                                client.companyId2Number?.text,
+                            )
+                        }
+                    }
+                }
             } catch (cause: Throwable) {
             }
         }
     }
 
-    override suspend fun updateClientOrIssuer(client: ClientOrIssuerState) {
+    override suspend fun updateClientOrIssuer(clientOrIssuer: ClientOrIssuerState) {
         return withContext(Dispatchers.IO) {
             try {
 
-                client.id?.let {
+                clientOrIssuer.id?.let {
                     clientOrIssuerQueries.update(
                         id = it.toLong(),
                         type = "client",
-                        first_name = client.firstName?.text,
-                        name = client.name.text,
-                        address1 = client.address1?.text,
-                        address2 = client.address2?.text,
-                        zip_code = client.zipCode?.text,
-                        city = client.city?.text,
-                        phone = client.phone?.text,
-                        email = client.email?.text,
-                        notes = client.notes?.text,
-                        company_id1_label = client.companyId1Label?.text,
-                        company_id1_number = client.companyId1Number?.text,
-                        company_id2_label = client.companyId2Label?.text,
-                        company_id2_number = client.companyId2Number?.text,
+                        first_name = clientOrIssuer.firstName?.text,
+                        name = clientOrIssuer.name.text,
+                        address1 = clientOrIssuer.address1?.text,
+                        address2 = clientOrIssuer.address2?.text,
+                        zip_code = clientOrIssuer.zipCode?.text,
+                        city = clientOrIssuer.city?.text,
+                        phone = clientOrIssuer.phone?.text,
+                        email = clientOrIssuer.email?.text,
+                        notes = clientOrIssuer.notes?.text,
+                        company_id1_label = clientOrIssuer.companyId1Label?.text,
+                        company_id1_number = clientOrIssuer.companyId1Number?.text,
+                        company_id2_label = clientOrIssuer.companyId2Label?.text,
+                        company_id2_number = clientOrIssuer.companyId2Number?.text,
                     )
                 }
             } catch (cause: Throwable) {
@@ -262,7 +275,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         notes = TextFieldValue(text = clientOrIssuer.notes ?: ""),
         companyId1Label = TextFieldValue(text = "N° SIRET"),
         companyId1Number = TextFieldValue(text = clientOrIssuer.company_id1_number ?: ""),
-        companyId2Label = TextFieldValue(text =  "N° TVA"),
+        companyId2Label = TextFieldValue(text = "N° TVA"),
         companyId2Number = TextFieldValue(text = clientOrIssuer.company_id2_number ?: ""),
     )
 }

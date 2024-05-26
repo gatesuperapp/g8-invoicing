@@ -15,9 +15,9 @@ interface ClientOrIssuerLocalDataSourceInterface {
     fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>>
     suspend fun saveClientOrIssuer(clientOrIssuer: ClientOrIssuerState, type: String)
     suspend fun saveDocumentClientOrIssuer(clientOrIssuer: ClientOrIssuerState, type: String): Int?
-    suspend fun duplicateClientOrIssuer(client: ClientOrIssuerState)
-    suspend fun updateClientOrIssuer(client: ClientOrIssuerState)
-    suspend fun updateDocumentClientOrIssuer(client: ClientOrIssuerState)
+    suspend fun duplicateClientsOrIssuers(clientsOrIssuers: List<ClientOrIssuerState>)
+    suspend fun updateClientOrIssuer(clientOrIssuer: ClientOrIssuerState)
+    suspend fun updateDocumentClientOrIssuer(clientOrIssuer: ClientOrIssuerState)
     suspend fun deleteClientOrIssuer(id: Long)
     suspend fun deleteDocumentClientOrIssuer(id: Long)
     suspend fun getLastCreatedClientOrIssuerId(): Long?
