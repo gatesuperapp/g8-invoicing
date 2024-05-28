@@ -21,7 +21,6 @@ fun NavGraphBuilder.deliveryNoteList(
         val viewModel: DeliveryNoteListViewModel = hiltViewModel()
         val deliveryNotesUiState by viewModel.deliveryNotesUiState
             .collectAsStateWithLifecycle()
-        Log.d("TAG", "Innn")
 
         DeliveryNoteList(
             navController = navController,

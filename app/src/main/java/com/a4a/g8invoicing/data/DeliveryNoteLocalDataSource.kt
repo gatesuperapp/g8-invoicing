@@ -89,9 +89,6 @@ class DeliveryNoteLocalDataSource(
                         val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
                             .filterNot { it.name == TextFieldValue("FAKE") }
 
-                        Log.d("TAG", "deliveryNote" + deliveryNote.delivery_note_id)
-                        Log.d("TAG", "Innn" + products)
-
                         deliveryNote.transformIntoEditableNote(
                             products
                         )
