@@ -237,7 +237,7 @@ fun SlideInNextComponent(
             pageElement = pageElement,
             onClickBack = onClickBack,
             onClientOrIssuerClick =  onClientOrIssuerClick, // Will select the chosen item
-            onClickNewClientOrIssuer = { // Open the bottom sheet form
+            onClickNewClientOrIssuer = { // Opens the bottom sheet form
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     TypeOfBottomSheetForm.NEW_CLIENT
                 } else TypeOfBottomSheetForm.NEW_ISSUER
@@ -304,7 +304,7 @@ fun SlideInNextComponent(
         }
     }
     if (isDocumentFormVisible) {
-        SlideUpTheForm(
+        FormModalBottomSheet(
             typeOfCreation = typeOfCreation,
             clientUiState = clientUiState,
             issuerUiState = issuerUiState,
@@ -327,7 +327,7 @@ fun SlideInNextComponent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SlideUpTheForm(
+fun FormModalBottomSheet(
     typeOfCreation: TypeOfBottomSheetForm?,
     clientUiState: ClientOrIssuerState,
     issuerUiState: ClientOrIssuerState,

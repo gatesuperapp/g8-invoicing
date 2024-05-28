@@ -7,6 +7,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.icons.IconBrush
 import com.a4a.g8invoicing.ui.shared.icons.IconComponents
 import com.a4a.g8invoicing.ui.shared.icons.IconExport
+import com.a4a.g8invoicing.ui.shared.icons.IconText
 import com.ninetyninepercent.funfactu.icons.IconApps
 import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
 import com.ninetyninepercent.funfactu.icons.IconDuplicate
@@ -127,7 +128,7 @@ fun actionTag(onClick: () -> Unit) =
 @Composable
 fun actionComponents(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconComponents,
+        icon = IconText,
         label = R.string.appbar_text_label,
         description = R.string.appbar_components,
         isInDropDownMenu = false,

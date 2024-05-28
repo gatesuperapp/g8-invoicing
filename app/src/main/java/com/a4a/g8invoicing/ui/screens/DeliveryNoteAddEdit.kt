@@ -260,7 +260,7 @@ private fun DeliveryNoteAddEditBottomBar(
     BottomBarEdition(
         actions = arrayOf(
             actionComponents(onClickComponents),
-            actionStyle(onClickStyle)
+            //actionStyle(onClickStyle)
         )
     )
 }

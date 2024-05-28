@@ -108,7 +108,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             _clientUiState.value =
                 updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
         } else _issuerUiState.value =
-            updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
+            updateClientOrIssuerUiState(_issuerUiState.value, pageElement, value)
     }
 
     fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
