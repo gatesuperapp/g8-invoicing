@@ -11,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 
 @Composable
@@ -40,7 +41,7 @@ fun DeliveryNoteBasicTemplateOrderNumber(
             text = stringResource(id = R.string.delivery_note_order_number) + " : "
         )
         Text(
-            style = MaterialTheme.typography.textForDocumentsImportant,
+            style = MaterialTheme.typography.textForDocuments,
             text = orderNumber
                 ?: stringResource(id = R.string.delivery_note_default_order_number)
         )

@@ -60,6 +60,7 @@ fun DeliveryNoteAddEdit(
     isNewDeliveryNote: Boolean,
     onClickShare: () -> Unit,
     onClickBack: () -> Unit,
+    onClickExport: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
@@ -165,7 +166,10 @@ fun DeliveryNoteAddEdit(
                     navController = navController,
                     onClickShare = {
                     },
-                    onClickBack = onClickBack
+                    onClickBack = onClickBack,
+                    onClickExport = {
+                        ExportPdf()
+                    }
                 )
             },
             bottomBar = {
@@ -239,11 +243,12 @@ private fun DeliveryNoteAddEditTopBar(
     navController: NavController,
     onClickShare: () -> Unit,
     onClickBack: () -> Unit,
+    onClickExport: @Composable () -> Unit,
 ) {
     TopBar(
         title = null,
         actionExport(
-            onClick = { }
+            onClick = onClickExport
         ),
         navController = navController,
         onClickBackArrow = {

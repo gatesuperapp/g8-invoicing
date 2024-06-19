@@ -139,6 +139,7 @@ fun RowScope.TableCell(
     Column(
         modifier = Modifier
             .rightBorder(1.dp, Color.LightGray)
+            .leftBorder(1.dp, Color.LightGray)
             .weight(weight)
             .padding(start = 2.dp, end = 4.dp, top = 4.dp)
             .fillMaxHeight(),

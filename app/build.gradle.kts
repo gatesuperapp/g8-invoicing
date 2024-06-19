@@ -45,11 +45,20 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.6"
     }
+
     packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
+        resources.excludes.addAll(
+            listOf(
+                "META-INF/LICENSE.md",
+                "META-INF/NOTICE.md",
+                "META-INF/LICENSE-notice.md",
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "META-INF/native-image/reflect-config.json",
+                "META-INF/native-image/resource-config.json"
+            )
+        )
     }
+
     kapt {
         correctErrorTypes = true
     }
@@ -65,7 +74,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-util")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation ("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui-text-google-fonts:1.6.7")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.7")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.7")
@@ -78,9 +87,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // hilt
-    implementation ("com.google.dagger:hilt-android:2.49")
-    kapt ("com.google.dagger:hilt-compiler:2.49")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("com.google.dagger:hilt-android:2.49")
+    kapt("com.google.dagger:hilt-compiler:2.49")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     //SQLDelight
     implementation("app.cash.sqldelight:android-driver:2.0.0")
@@ -95,5 +104,8 @@ dependencies {
     // retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+
+    // iText (create PDF)
+    implementation("com.itextpdf:itext7-core:8.0.4")
 
 }

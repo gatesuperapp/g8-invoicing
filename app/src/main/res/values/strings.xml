@@ -28,7 +28,7 @@
     <string name="appbar_send"> Envoyer</string>
     <string name="appbar_search"> Recherche</string>
     <string name="appbar_save"> Sauvegarder</string>
-    <string name="appbar_export">Envoyer</string>
+    <string name="appbar_export">Exporter</string>
     <string name="drawer_delivery_notes">Bons de livraison</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
     <string name="drawer_products">Items</string>
@@ -111,7 +111,7 @@
     <string name="copy">Copie de</string>
     <string name="product_name">Nom <sup>*</sup></string>
     <string name="product_name_input">Betteraves</string>
-    <string name="product_description">Libellé</string>
+    <string name="product_description">Description</string>
     <string name="product_unit">Unité</string>
     <string name="product_unit_input">kg</string>
     <string name="product_description_input">Rose Lutz</string>
@@ -166,7 +166,7 @@
     <string name="delivery_note_total_with_tax">Total TTC :</string>
     <string name="delivery_note_tax">TVA</string>
     <string name="delivery_note_recipient">Adressé à</string>
-    <string name="delivery_note_table_description">Description</string>
+    <string name="delivery_note_table_description">Désignation</string>
     <string name="delivery_note_table_quantity">Qté</string>
     <string name="delivery_note_table_unit">Unité</string>
     <string name="delivery_note_table_unit_price_without_tax">PU HT</string>
@@ -192,4 +192,8 @@
     <string name="alert_dialog_delete"> Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible. </string>
     <string name="alert_dialog_delete_confirm"> Oui </string>
     <string name="alert_dialog_delete_cancel"> Non </string>
+    <string name="export_ongoing">Export en cours...</string>
+    <string name="export_ready">Prêt à être partagé</string>
+    <string name="export_ready_subtitle">Enregistré dans l\'appareil ()</string>
+    <string name="export_close">Terminer</string>
 </resources>

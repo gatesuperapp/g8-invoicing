@@ -35,7 +35,8 @@ data class AppBarAction(
     @StringRes val description: Int,
     val isInDropDownMenu: Boolean,
     val alignmentLeft: Boolean = false,
-    val onClick: () -> Unit,
+    val onClick: () -> Unit = {},
+    val onClickOpenModal: @Composable () -> Unit = {}
 )
 
 @Composable
@@ -98,12 +99,12 @@ fun actionDone(onClick: () -> Unit) =
     )
 
 @Composable
-fun actionExport(onClick: () -> Unit) =
+fun actionExport(onClick: @Composable () -> Unit) =
     AppBarAction(
         icon = IconExport,
         description = R.string.appbar_export,
         isInDropDownMenu = false,
-        onClick = onClick
+        onClickOpenModal = onClick
     )
 
 @Composable

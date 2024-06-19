@@ -44,7 +44,7 @@ fun DeliveryNoteBasicTemplateFooter(
             // TVA 5% :
             // Total TTC :
 
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) { // Handle the page on which it's displayed
+            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp),
@@ -52,34 +52,25 @@ fun DeliveryNoteBasicTemplateFooter(
                     text = stringResource(id = R.string.delivery_note_total_without_tax) + " "
                 )
             }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_5.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(5) }?.let {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
-                    )
+            if (footerArray.any { it.rowDescription.contains("TAXES") }) {
+                val taxes = footerArray
+                    .filter { it.rowDescription.contains("TAXES") }
+                    .map { it.rowDescription }.toMutableList()
+
+                var taxesAmount = listOf<Int>()
+                taxes.forEach {
+                    taxesAmount += it.removePrefix("TAXES_").toInt()
                 }
-            }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_10.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(10) }?.let {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
-                    )
-                }
-            }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_20.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(20) }?.let {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
-                    )
+
+                taxesAmount.forEach { tax ->
+                    uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
+                        Text(
+                            modifier = Modifier
+                                .padding(bottom = 3.dp),
+                            style = MaterialTheme.typography.textForDocuments,
+                            text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
+                        )
+                    }
                 }
             }
             if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
@@ -106,37 +97,27 @@ fun DeliveryNoteBasicTemplateFooter(
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_5.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(5) }?.let {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp, end = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = it.second.toString() + stringResource(id = R.string.currency)
-                    )
-                }
-            }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_10.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(10) }?.let {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp, end = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = it.second.toString() + stringResource(id = R.string.currency)
-                    )
-                }
-            }
-            if (footerArray.any { it.rowDescription.contains(FooterRowName.TAXES_20.name) }) {
-                uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(20) }?.let {
-                    Text(
-                        modifier = Modifier
-                            .padding(bottom = 3.dp, end = 3.dp),
-                        style = MaterialTheme.typography.textForDocuments,
-                        text = it.second.toString() + stringResource(id = R.string.currency)
-                    )
-                }
-            }
+            if (footerArray.any { it.rowDescription.contains("TAXES") }) {
+                val taxes = footerArray
+                    .filter { it.rowDescription.contains("TAXES") }
+                    .map { it.rowDescription }.toMutableList()
 
+                var taxesAmount = listOf<Int>()
+                taxes.forEach {
+                    taxesAmount += it.removePrefix("TAXES_").toInt()
+                }
+
+                taxesAmount.forEach { tax ->
+                    uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
+                        Text(
+                            modifier = Modifier
+                                .padding(bottom = 3.dp, end = 3.dp),
+                            style = MaterialTheme.typography.textForDocuments,
+                            text = it.second.toString() + stringResource(id = R.string.currency)
+                        )
+                    }
+                }
+            }
             if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     modifier = Modifier

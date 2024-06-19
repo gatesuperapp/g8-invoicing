@@ -92,7 +92,7 @@ fun DeliveryNoteBasicTemplateContent(
 
                 }
         ) {
-            if (index == 0) {
+            if (index == 0 && uiState.orderNumber != null) {
                 DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
                 uiState.orderNumber?.text?.let {
                     DeliveryNoteBasicTemplateOrderNumber(
