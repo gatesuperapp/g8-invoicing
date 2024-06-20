@@ -11,7 +11,7 @@ import com.a4a.g8invoicing.ui.navigation.actionNew
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 
 @Composable
-fun SharedBottomBar(
+fun BottomBar(
     navController: NavController,
     selectedMode: Boolean = false,
     onClickDuplicate: () -> Unit = {},

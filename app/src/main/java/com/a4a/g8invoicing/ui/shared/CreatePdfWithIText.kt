@@ -27,10 +27,10 @@ import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-fun CreatePdfWithIText(context: Context) {
+fun createPdfWithIText(context: Context) {
     createNewDirectoryInFiles(context)
 
-    val writer = PdfWriter(context.filesDir.absolutePath + "AFFF.pdf")
+    val writer = PdfWriter(context.filesDir.absolutePath + "/g8/" + "BL.pdf")
     val pdfDocument = PdfDocument(writer)
 
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
@@ -352,8 +352,8 @@ fun addPageNumbersAfterPdfIsCreated(context: Context) {
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
 
     val pdfDoc = PdfDocument(
-        PdfReader(context.filesDir.absolutePath + "AFFF.pdf"),
-        PdfWriter(context.filesDir.absolutePath + "AFEF.pdf")
+        PdfReader(context.filesDir.absolutePath +"/g8/" +  "BL.pdf"),
+        PdfWriter(context.filesDir.absolutePath +"/g8/" +  "BL.pdf")
     )
     val doc = Document(pdfDoc)
 

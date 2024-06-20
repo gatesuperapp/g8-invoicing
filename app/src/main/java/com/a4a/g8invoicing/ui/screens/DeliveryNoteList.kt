@@ -16,7 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.SharedBottomBar
+import com.a4a.g8invoicing.ui.shared.BottomBar
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 
@@ -52,7 +52,7 @@ fun DeliveryNoteList(
         //   private val _uiState = MutableStateFlow(DeliveryNotesUiState())
         // val uiState: StateFlow<DeliveryNotesUiState> = _uiState.asStateFlow()
         bottomBar = {
-            SharedBottomBar(
+            BottomBar(
                 navController = navController,
                 selectedMode = selectedMode.value,
                 onClickDelete = {

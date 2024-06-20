@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
-import com.a4a.g8invoicing.ui.shared.SharedBottomBar
+import com.a4a.g8invoicing.ui.shared.BottomBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -86,7 +86,7 @@ fun Account(
         //   private val _uiState = MutableStateFlow(ClientsUiState())
         // val uiState: StateFlow<ClientsUiState> = _uiState.asStateFlow()
         bottomBar = {
-            SharedBottomBar(
+            BottomBar(
                 navController = navController,
                 onClickCategory = onClickCategory
             )

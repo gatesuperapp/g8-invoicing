@@ -21,7 +21,7 @@ import icons.IconNew
 /**
  * Contains:
  * + a data class with the properties of an action button
- * + a list of all action buttons.
+ * + methods for all action buttons.
  *
  * Action buttons can be clicked by user in app bars.
  *
@@ -99,12 +99,12 @@ fun actionDone(onClick: () -> Unit) =
     )
 
 @Composable
-fun actionExport(onClick: @Composable () -> Unit) =
+fun actionExport(onClick: () -> Unit) =
     AppBarAction(
         icon = IconExport,
         description = R.string.appbar_export,
         isInDropDownMenu = false,
-        onClickOpenModal = onClick
+        onClick = onClick
     )
 
 @Composable

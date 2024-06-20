@@ -3,9 +3,12 @@ package com.a4a.g8invoicing.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
@@ -21,13 +24,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -156,6 +164,10 @@ fun DeliveryNoteAddEdit(
     )
     {
         val context = LocalContext.current
+        var showPopup by rememberSaveable {
+            mutableStateOf(false)
+        }
+
 
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
@@ -168,7 +180,7 @@ fun DeliveryNoteAddEdit(
                     },
                     onClickBack = onClickBack,
                     onClickExport = {
-                        ExportPdf()
+                        showPopup = true
                     }
                 )
             },
@@ -187,6 +199,17 @@ fun DeliveryNoteAddEdit(
                 )
             }
         ) { innerPadding ->
+            if (showPopup) {
+                PopupBox(onDismissRequest = { showPopup = false }) {
+                    Box(
+                        modifier = Modifier
+                            .width(50.dp)
+                            .height(50.dp)
+                            .background(Color.Green)
+                    )
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .background(Color.LightGray.copy(alpha = 0.4f))
@@ -243,7 +266,7 @@ private fun DeliveryNoteAddEditTopBar(
     navController: NavController,
     onClickShare: () -> Unit,
     onClickBack: () -> Unit,
-    onClickExport: @Composable () -> Unit,
+    onClickExport: () -> Unit,
 ) {
     TopBar(
         title = null,
@@ -251,9 +274,7 @@ private fun DeliveryNoteAddEditTopBar(
             onClick = onClickExport
         ),
         navController = navController,
-        onClickBackArrow = {
-            onClickBack()
-        }
+        onClickBackArrow = onClickBack
     )
 }
 
@@ -268,4 +289,31 @@ private fun DeliveryNoteAddEditBottomBar(
             //actionStyle(onClickStyle)
         )
     )
+}
+
+
+@Composable
+fun PopupBox(
+    onDismissRequest: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    // full screen background
+    Dialog(
+        onDismissRequest = {},
+        DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Blue)
+                .zIndex(10F),
+            contentAlignment = Alignment.Center
+        ) {
+
+            ExportPdf(onDismissRequest)
+
+        }
+    }
 }

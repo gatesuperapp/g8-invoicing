@@ -192,8 +192,11 @@
     <string name="alert_dialog_delete"> Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible. </string>
     <string name="alert_dialog_delete_confirm"> Oui </string>
     <string name="alert_dialog_delete_cancel"> Non </string>
-    <string name="export_ongoing">Export en cours...</string>
-    <string name="export_ready">Prêt à être partagé</string>
-    <string name="export_ready_subtitle">Enregistré dans l\'appareil ()</string>
+    <string name="export_ongoing">Export en cours…</string>
+    <string name="export_done">Export réussi :)</string>
+    <string name="export_error">Échec de l\'export.</string>
+    <string name="export_done_file_location">Enregistré dans l\'appareil (files/g8)</string>
+    <string name="export_done_open_file">Ouvrir</string>
+    <string name="export_done_send_file">Envoyer</string>
     <string name="export_close">Terminer</string>
 </resources>

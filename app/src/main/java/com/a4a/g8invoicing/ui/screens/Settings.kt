@@ -24,7 +24,7 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ForwardInputCreatorGoForward
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.SharedBottomBar
+import com.a4a.g8invoicing.ui.shared.BottomBar
 
 @Composable
 fun Settings(
@@ -44,7 +44,7 @@ fun Settings(
         //   private val _uiState = MutableStateFlow(ClientsUiState())
         // val uiState: StateFlow<ClientsUiState> = _uiState.asStateFlow()
         bottomBar = {
-            SharedBottomBar(
+            BottomBar(
                 navController = navController,
                 onClickCategory = onClickCategory
             )
