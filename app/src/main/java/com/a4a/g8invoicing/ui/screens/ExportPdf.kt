@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -37,6 +38,7 @@ import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.icons.IconVisibility
 import kotlinx.coroutines.delay
 import java.io.File
@@ -106,8 +108,8 @@ fun ExportPdf(
 */
                     val uri = getFileUri(context)
                     val intent = Intent(Intent.ACTION_VIEW)
-                   // intent.setType("application/pdf")
-                   // val mydir = Uri.parse("file://$location")
+                    // intent.setType("application/pdf")
+                    // val mydir = Uri.parse("file://$location")
                     intent.setDataAndType(uri, "application/*") // or use */*
                     startActivity(context, intent, null)
                 },
@@ -135,8 +137,12 @@ fun ProgressBar(
     var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(true) {
-        //createPdfWithIText(context)
-        delay(2000)
+        try {
+            createPdfWithIText(context)
+        } catch (e: Exception) {
+            Log.e("xxx", "Error: ${e.message}")
+        }
+       // delay(2000)
         loading = false
         loadingIsOver()
     }
@@ -156,26 +162,10 @@ enum class ExportStatus {
     ONGOING, DONE, ERROR
 }
 
-fun getFileUri(context: Context, fileName: String? = ""): Uri? {
-    var uri: Uri? = null
-    val file = File(context.filesDir.absolutePath + "/g8/" + fileName)
-    try {
-        uri = FileProvider.getUriForFile(
-            context,
-            context.applicationContext.packageName + ".provider",
-            file
-        )
-    } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
-    return uri
-}
 
 @Composable
 fun Share(context: Context) {
-
     val uri = getFileUri(context, "BL.pdf")
-
     Button(onClick = {
         uri?.let {
             ShareCompat.IntentBuilder(context)
@@ -188,6 +178,50 @@ fun Share(context: Context) {
         // startActivity(context, share, null)
     }) {
         Icon(imageVector = Icons.Default.Share, contentDescription = null)
-        Text(stringResource(R.string.export_done_send_file), modifier = Modifier.padding(start = 8.dp))
+        Text(
+            stringResource(R.string.export_done_send_file),
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
+}
+
+fun getFileUri(context: Context, fileName: String? = ""): Uri? {
+    var uri: Uri? = null
+    val file = File(getFilePath("BL.pdf"))
+
+    try {
+        uri = FileProvider.getUriForFile(
+            context,
+            context.applicationContext.packageName + ".provider",
+            file
+        )
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return uri
+}
+
+fun getFilePath(fileName: String? = ""): String {
+    var path = ""
+    createNewDirectory()?.let {
+        path = it.absolutePath + "/" + fileName
+    }
+    return path
+}
+
+fun createNewDirectory(): File? {
+    val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
+    val directory = File(folder,"g8")
+    if (directory.exists() && directory.isDirectory) {
+        println("Directory exists.")
+    } else {
+        val result = directory.mkdir()
+        if (result) {
+            Log.e(ContentValues.TAG, "Directory created successfully: ${directory.absolutePath}")
+        } else {
+            Log.e(ContentValues.TAG, "Failed to create directory.")
+            return null
+        }
+    }
+    return directory
 }

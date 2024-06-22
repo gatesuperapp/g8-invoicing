@@ -1,10 +1,15 @@
 package com.a4a.g8invoicing.ui.shared
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Environment
+import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.app.ActivityCompat
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.screens.getFilePath
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -28,9 +33,8 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 fun createPdfWithIText(context: Context) {
-    createNewDirectoryInFiles(context)
 
-    val writer = PdfWriter(context.filesDir.absolutePath + "/g8/" + "BL.pdf")
+    val writer = PdfWriter(getFilePath("BL.pdf"))
     val pdfDocument = PdfDocument(writer)
 
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
@@ -48,15 +52,17 @@ fun createPdfWithIText(context: Context) {
     document.add(createFooter(context, dmMedium))
     document.close()
 
-    addPageNumbersAfterPdfIsCreated(context)
-
+    //if document exist & i()
+    val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/g8/BL.pdf"
+    val file = File(filePath)
+    if (file.exists() && file.isFile) {
+        try {
+            addPageNumbersAfterPdfIsCreated(context)
+        } catch (e: Exception) {
+            Log.e("xxx", "Error: ${e.message}")
+        }
+    }
     Toast.makeText(context, "PDF created", Toast.LENGTH_SHORT).show()
-}
-
-fun createNewDirectoryInFiles(context: Context) {
-    val folder = context.filesDir.absolutePath
-    val f = File(folder, "g8")
-    f.mkdir()
 }
 
 fun createTitle(font: PdfFont): Paragraph {
@@ -279,7 +285,7 @@ fun Table.addCustomCell(
     text: String? = null,
     paragraph: Paragraph? = null,
     alignment: TextAlignment = TextAlignment.RIGHT,
-    isBold: Boolean = false
+    isBold: Boolean = false,
 ): Table {
     val paddingLeft = if (alignment == TextAlignment.LEFT) {
         6f
@@ -352,8 +358,8 @@ fun addPageNumbersAfterPdfIsCreated(context: Context) {
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
 
     val pdfDoc = PdfDocument(
-        PdfReader(context.filesDir.absolutePath +"/g8/" +  "BL.pdf"),
-        PdfWriter(context.filesDir.absolutePath +"/g8/" +  "BL.pdf")
+        PdfReader(getFilePath("BL.pdf")),
+        PdfWriter(getFilePath("BLz.pdf"))
     )
     val doc = Document(pdfDoc)
 
@@ -371,3 +377,4 @@ fun addPageNumbersAfterPdfIsCreated(context: Context) {
     }
     doc.close()
 }
+
