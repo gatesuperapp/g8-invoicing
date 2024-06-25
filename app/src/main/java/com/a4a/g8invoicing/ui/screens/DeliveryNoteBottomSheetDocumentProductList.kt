@@ -50,7 +50,7 @@ fun DeliveryNoteBottomSheetDocumentProductList(
             onClickChooseButton,
             hasBorder = false,
             hasBackground = true,
-            stringResource(id = R.string.delivery_note_bottom_sheet_document_product_add)
+            stringResource(id = R.string.document_bottom_sheet_document_product_add)
         )
 
         Spacer(modifier = Modifier.weight(1F))

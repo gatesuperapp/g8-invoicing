@@ -13,14 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateFooter(
-    uiState: DeliveryNoteState,
+    uiState: DeliveryNote,
     footerArray: List<FooterRow>,
 ) {
     Row(
@@ -49,7 +49,7 @@ fun DeliveryNoteBasicTemplateFooter(
                     modifier = Modifier
                         .padding(bottom = 3.dp),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = stringResource(id = R.string.delivery_note_total_without_tax) + " "
+                    text = stringResource(id = R.string.document_total_without_tax) + " "
                 )
             }
             if (footerArray.any { it.rowDescription.contains("TAXES") }) {
@@ -68,7 +68,7 @@ fun DeliveryNoteBasicTemplateFooter(
                             modifier = Modifier
                                 .padding(bottom = 3.dp),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(id = R.string.delivery_note_tax) + " " + it.first.toString() + "% : "
+                            text = stringResource(id = R.string.document_tax) + " " + it.first.toString() + "% : "
                         )
                     }
                 }
@@ -76,7 +76,7 @@ fun DeliveryNoteBasicTemplateFooter(
             if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsImportant,
-                    text = stringResource(id = R.string.delivery_note_total_with_tax) + " "
+                    text = stringResource(id = R.string.document_total_with_tax) + " "
                 )
             }
         }

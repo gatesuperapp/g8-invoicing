@@ -1,9 +1,8 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
@@ -52,7 +51,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
+    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNote>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
@@ -91,7 +90,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
-    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
+    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNote>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {

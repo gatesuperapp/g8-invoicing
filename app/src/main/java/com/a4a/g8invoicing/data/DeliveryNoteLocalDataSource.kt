@@ -1,17 +1,15 @@
 package com.a4a.g8invoicing.data
 
-import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
@@ -29,7 +27,7 @@ class DeliveryNoteLocalDataSource(
     private val documentProductQueries = db.documentProductQueries
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
+    override fun fetchDeliveryNoteFlow(id: Long): Flow<com.a4a.g8invoicing.ui.states.DeliveryNote?> {
         return deliveryNoteQueries.getDeliveryNote(id)
             .asFlow()
             .flatMapMerge { query ->
@@ -80,7 +78,7 @@ class DeliveryNoteLocalDataSource(
         }*/
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+    override fun fetchAllDeliveryNotes(): Flow<List<com.a4a.g8invoicing.ui.states.DeliveryNote>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
             .asFlow()
             .map {
@@ -133,14 +131,14 @@ class DeliveryNoteLocalDataSource(
 
 
     // Used when duplicating a document (we don't need a flow)
-    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
+    override fun fetchDeliveryNote(id: Long): com.a4a.g8invoicing.ui.states.DeliveryNote? {
         return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
             ?.let {
                 it.transformIntoEditableNote(fetchDocumentProducts(it.delivery_note_id))
             }
     }
 
-    private fun DeliveryNote.transformIntoEditableNote(documentProducts: List<DocumentProductState>): DeliveryNoteState {
+    private fun DeliveryNote.transformIntoEditableNote(documentProducts: List<DocumentProductState>): com.a4a.g8invoicing.ui.states.DeliveryNote {
         var client: ClientOrIssuerState? = null
         var issuer: ClientOrIssuerState? = null
 
@@ -158,7 +156,7 @@ class DeliveryNoteLocalDataSource(
 
         this.let {
             // Adding every fields except documentProducts & prices
-            return DeliveryNoteState(
+            return com.a4a.g8invoicing.ui.states.DeliveryNote(
                 deliveryNoteId = it.delivery_note_id.toInt(),
                 number = TextFieldValue(text = it.number ?: ""),
                 deliveryDate = it.delivery_date,
@@ -203,7 +201,7 @@ class DeliveryNoteLocalDataSource(
 
 
 
-    override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
+    override suspend fun updateDeliveryNote(deliveryNote: com.a4a.g8invoicing.ui.states.DeliveryNote) {
         return withContext(Dispatchers.IO) {
             try {
                 deliveryNoteQueries.updateDeliveryNote(
@@ -221,7 +219,7 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun duplicateDeliveryNotes(deliveryNotes: List<DeliveryNoteState>): Long? {
+    override suspend fun duplicateDeliveryNotes(deliveryNotes: List<com.a4a.g8invoicing.ui.states.DeliveryNote>): Long? {
         var deliveryNoteId: Long? = null
         withContext(Dispatchers.IO) {
             try {

@@ -6,15 +6,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 
 /**/
 @Composable
 fun DeliveryNoteListContent(
-    deliveryNotes: List<DeliveryNoteState>,
+    deliveryNotes: List<DeliveryNote>,
     onItemClick: (Int) -> Unit = {},
-    addDeliveryNoteToSelectedList: (DeliveryNoteState) -> Unit = {},
-    removeDeliveryNoteFromSelectedList: (DeliveryNoteState) -> Unit = {},
+    addDeliveryNoteToSelectedList: (DeliveryNote) -> Unit = {},
+    removeDeliveryNoteFromSelectedList: (DeliveryNote) -> Unit = {},
     keyToUnselectAll: Boolean,
 ) {
     LazyColumn {

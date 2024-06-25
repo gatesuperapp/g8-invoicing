@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
 import com.a4a.g8invoicing.ui.theme.textForDocuments
@@ -43,7 +43,7 @@ import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateContent(
-    uiState: DeliveryNoteState,
+    uiState: DeliveryNote,
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<ProductWithPage>?,
@@ -203,12 +203,12 @@ private fun fakeDocumentProducts() =
     listOf(
         DocumentProductState(
             id = 1,
-            name = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_name)),
-            description = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_description)),
+            name = TextFieldValue(stringResource(id = R.string.document_default_document_product_name)),
+            description = TextFieldValue(stringResource(id = R.string.document_default_document_product_description)),
             priceWithTax = BigDecimal(4),
             taxRate = BigDecimal(20),
             quantity = BigDecimal(2),
-            unit = TextFieldValue(stringResource(id = R.string.delivery_note_default_document_product_unit)),
+            unit = TextFieldValue(stringResource(id = R.string.document_default_document_product_unit)),
             productId = 1
         )
     )

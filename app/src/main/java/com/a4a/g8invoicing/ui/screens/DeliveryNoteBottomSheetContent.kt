@@ -11,11 +11,11 @@ import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.KeyboardOpt
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 
 @Composable
 fun DeliveryNoteBottomSheetContent(
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DeliveryNote,
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -23,11 +23,11 @@ fun DeliveryNoteBottomSheetContent(
 ) {
     val inputList = listOfNotNull(
         FormInput(
-            label = stringResource(id = R.string.delivery_note_number_short),
+            label = stringResource(id = R.string.document_number_short),
             inputType = TextInput(
                 text = deliveryNote.number
-                    ?: TextFieldValue(stringResource(id = R.string.delivery_note_default_number)),
-                placeholder = stringResource(id = R.string.delivery_note_default_number), //unused
+                    ?: TextFieldValue(stringResource(id = R.string.document_default_number)),
+                placeholder = stringResource(id = R.string.document_default_number), //unused
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_NUMBER, it)
                 },
@@ -35,15 +35,15 @@ fun DeliveryNoteBottomSheetContent(
             pageElement = ScreenElement.DOCUMENT_NUMBER
         ),
         FormInput(
-            label = stringResource(id = R.string.delivery_note_date),
+            label = stringResource(id = R.string.document_date),
             inputType = ForwardElement(
                 text = deliveryNote.deliveryDate
-                    ?: stringResource(id = R.string.delivery_note_default_date)
+                    ?: stringResource(id = R.string.document_default_date)
             ),
             pageElement = ScreenElement.DOCUMENT_DATE
         ),
         FormInput(
-            label = stringResource(id = R.string.delivery_note_issuer),
+            label = stringResource(id = R.string.document_issuer),
             inputType = ForwardElement(
                 text = deliveryNote.issuer?.let {
                     it.name.text + " " + it.firstName?.text
@@ -53,7 +53,7 @@ fun DeliveryNoteBottomSheetContent(
             pageElement = ScreenElement.DOCUMENT_ISSUER
         ),
         FormInput(
-            label = stringResource(id = R.string.delivery_note_client),
+            label = stringResource(id = R.string.document_client),
             inputType = ForwardElement(
                 text = deliveryNote.client?.let {
                     it.name.text + " " + it.firstName?.text
@@ -63,11 +63,11 @@ fun DeliveryNoteBottomSheetContent(
             pageElement = ScreenElement.DOCUMENT_CLIENT
         ),
         FormInput(
-            label = stringResource(id = R.string.delivery_note_order_number),
+            label = stringResource(id = R.string.document_order_number),
             inputType = TextInput(
                 text = deliveryNote.orderNumber
-                    ?: TextFieldValue(stringResource(id = R.string.delivery_note_default_order_number)),
-                placeholder = stringResource(id = R.string.delivery_note_default_order_number), //unused
+                    ?: TextFieldValue(stringResource(id = R.string.document_default_order_number)),
+                placeholder = stringResource(id = R.string.document_default_order_number), //unused
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_ORDER_NUMBER, it)
                 },
@@ -75,7 +75,7 @@ fun DeliveryNoteBottomSheetContent(
             pageElement = ScreenElement.DOCUMENT_ORDER_NUMBER
         ),
         FormInput(
-            label = stringResource(id = R.string.delivery_note_line_items),
+            label = stringResource(id = R.string.document_line_items),
             inputType = ForwardElement(
                 text = ""
             ),

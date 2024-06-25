@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.a4a.g8invoicing.data.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveryNoteBottomSheet(
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DeliveryNote,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
@@ -370,8 +370,8 @@ fun FormModalBottomSheet(
                             },
                         style = MaterialTheme.typography.textSmall,
                         text = if (!isTaxSelectionVisible) {
-                            stringResource(id = R.string.delivery_note_modal_product_cancel)
-                        } else stringResource(id = R.string.delivery_note_modal_product_tva_back)
+                            stringResource(id = R.string.document_modal_product_cancel)
+                        } else stringResource(id = R.string.document_modal_product_tva_back)
                     )
                     Text(
                         modifier = Modifier
@@ -379,11 +379,11 @@ fun FormModalBottomSheet(
                             .align(Alignment.TopCenter),
                         style = MaterialTheme.typography.textTitle,
                         text = when (typeOfCreation) {
-                            TypeOfBottomSheetForm.NEW_ISSUER -> stringResource(id = R.string.delivery_note_modal_new_issuer)
-                            TypeOfBottomSheetForm.NEW_CLIENT -> stringResource(id = R.string.delivery_note_modal_new_client)
-                            TypeOfBottomSheetForm.EDIT_DOCUMENT_PRODUCT -> stringResource(id = R.string.delivery_note_modal_edit_product)
-                            TypeOfBottomSheetForm.ADD_PRODUCT -> stringResource(id = R.string.delivery_note_modal_add_product)
-                            TypeOfBottomSheetForm.NEW_PRODUCT -> stringResource(id = R.string.delivery_note_modal_new_product)
+                            TypeOfBottomSheetForm.NEW_ISSUER -> stringResource(id = R.string.document_modal_new_issuer)
+                            TypeOfBottomSheetForm.NEW_CLIENT -> stringResource(id = R.string.document_modal_new_client)
+                            TypeOfBottomSheetForm.EDIT_DOCUMENT_PRODUCT -> stringResource(id = R.string.document_modal_edit_product)
+                            TypeOfBottomSheetForm.ADD_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
+                            TypeOfBottomSheetForm.NEW_PRODUCT -> stringResource(id = R.string.document_modal_new_product)
                             else -> ""
                         }
                     )
@@ -394,7 +394,7 @@ fun FormModalBottomSheet(
                             .clickable { onClickDone() },
                         style = MaterialTheme.typography.textSmall,
                         text = if (!isTaxSelectionVisible) {
-                            stringResource(id = R.string.delivery_note_modal_product_save)
+                            stringResource(id = R.string.document_modal_product_save)
                         } else ""
                     )
                 }

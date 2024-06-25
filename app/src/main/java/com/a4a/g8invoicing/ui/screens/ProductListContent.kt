@@ -32,7 +32,7 @@ fun ProductListContent(
                     onClickNew,
                     hasBorder = true,
                     hasBackground = false,
-                    stringResource(id = R.string.delivery_note_bottom_sheet_list_add_new)
+                    stringResource(id = R.string.document_bottom_sheet_list_add_new)
                 )
             }
         }

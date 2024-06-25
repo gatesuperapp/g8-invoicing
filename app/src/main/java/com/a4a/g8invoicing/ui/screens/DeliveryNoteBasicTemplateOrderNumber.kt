@@ -38,12 +38,12 @@ fun DeliveryNoteBasicTemplateOrderNumber(
     ) {
         Text(
             style = MaterialTheme.typography.textForDocumentsImportant,
-            text = stringResource(id = R.string.delivery_note_order_number) + " : "
+            text = stringResource(id = R.string.document_order_number) + " : "
         )
         Text(
             style = MaterialTheme.typography.textForDocuments,
             text = orderNumber
-                ?: stringResource(id = R.string.delivery_note_default_order_number)
+                ?: stringResource(id = R.string.document_default_order_number)
         )
     }
 }

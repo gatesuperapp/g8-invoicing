@@ -29,12 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 
 
 @Composable
 fun DeliveryNoteListItem(
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DeliveryNote,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,

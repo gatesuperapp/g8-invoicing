@@ -17,7 +17,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,12 +33,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
@@ -93,7 +91,7 @@ fun calculateLimits(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DeliveryNoteBasicTemplate(
-    uiState: DeliveryNoteState,
+    uiState: DeliveryNote,
     onClickElement: (ScreenElement) -> Unit,
 ) {
     var zoom by remember { mutableStateOf(1f) }

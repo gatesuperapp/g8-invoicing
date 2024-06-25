@@ -1,11 +1,12 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.app.PendingIntent.getActivity
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Environment
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -15,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -36,12 +35,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
-import com.a4a.g8invoicing.ui.shared.icons.IconVisibility
-import kotlinx.coroutines.delay
-import java.io.File
+import com.a4a.g8invoicing.ui.shared.fileNameAfterNumbering
+import com.a4a.g8invoicing.ui.shared.getFileUri
+import com.ninetyninepercent.funfactu.icons.IconMail
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -74,13 +75,13 @@ fun ExportPdf(
         }
         Text(
             modifier = Modifier
-                .padding(bottom = 40.dp),
+                .padding(bottom = 30.dp),
             text = if (isExportOngoing == ExportStatus.ONGOING) stringResource(R.string.export_ongoing)
             else if (isExportOngoing == ExportStatus.DONE)
                 stringResource(R.string.export_done)
             else
                 stringResource(R.string.export_error),
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.headlineSmall,
             color = Color.White
         )
         ProgressBar(
@@ -92,37 +93,14 @@ fun ExportPdf(
 
         if (isExportOngoing == ExportStatus.DONE) {
             Text(
+                modifier = Modifier
+                    .padding(bottom = 50.dp),
                 text = stringResource(R.string.export_done_file_location),
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = Color.White
             )
 
-            Button(
-                onClick = {
-/*
-    val share = Intent()
-    share.setAction(Intent.ACTION_SEND)
-    share.setType("application/pdf")
-    share.putExtra(Intent.EXTRA_STREAM, uri)
-    share.setPackage("com.whatsapp")
-*/
-                    val uri = getFileUri(context)
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    // intent.setType("application/pdf")
-                    // val mydir = Uri.parse("file://$location")
-                    intent.setDataAndType(uri, "application/*") // or use */*
-                    startActivity(context, intent, null)
-                },
-                modifier = Modifier
-                    .padding(bottom = 10.dp),
-            ) {
-                Icon(imageVector = IconVisibility, contentDescription = null)
-                Text(
-                    stringResource(R.string.export_done_open_file),
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-
+            Send(context)
             Share(context)
         }
 
@@ -137,14 +115,18 @@ fun ProgressBar(
     var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(true) {
-        try {
-            createPdfWithIText(context)
-        } catch (e: Exception) {
-            Log.e("xxx", "Error: ${e.message}")
+        val job: Job = launch(context = Dispatchers.Default) {
+            try {
+                createPdfWithIText(context)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
         }
-       // delay(2000)
+        job.join()
         loading = false
         loadingIsOver()
+
+
     }
 
     if (!loading) {
@@ -164,64 +146,80 @@ enum class ExportStatus {
 
 
 @Composable
-fun Share(context: Context) {
-    val uri = getFileUri(context, "BL.pdf")
+fun Send(context: Context) {
     Button(onClick = {
-        uri?.let {
-            ShareCompat.IntentBuilder(context)
-                .setType("application/pdf")
-                .addStream(uri)
-                .setChooserTitle("Share image")
-                .setSubject("Shared image")
-                .startChooser()
+        try {
+            val uri = getFileUri(context, fileNameAfterNumbering)
+            uri?.let {
+                composeEmail(context = context)
+                /*ShareCompat.IntentBuilder(context)
+                    .setEmailTo(arrayOf("aude@fk.com"))
+                    .setType("application/pdf")
+                    .addStream(uri)
+                    .startChooser()*/
+
+            } ?: Toast.makeText(
+                context,
+                R.string.export_error_sharing,
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: Exception) {
+            Log.e("xxx", "Error: ${e.message}")
         }
         // startActivity(context, share, null)
     }) {
-        Icon(imageVector = Icons.Default.Share, contentDescription = null)
+        Icon(imageVector = IconMail, contentDescription = null)
         Text(
-            stringResource(R.string.export_done_send_file),
+            stringResource(R.string.export_send_file),
             modifier = Modifier.padding(start = 8.dp)
         )
     }
 }
 
-fun getFileUri(context: Context, fileName: String? = ""): Uri? {
-    var uri: Uri? = null
-    val file = File(getFilePath("BL.pdf"))
-
+fun composeEmail(
+    addresses: Array<String?>? = arrayOf(),
+    documentNumber: String? = "",
+    context: Context,
+) {
     try {
-        uri = FileProvider.getUriForFile(
-            context,
-            context.applicationContext.packageName + ".provider",
-            file
-        )
+        val intent = Intent(Intent.ACTION_SENDTO)
+        intent.setData(Uri.parse("mailto:")) // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("cdcc@gmail.fr"))
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Votre bon de livraison N°BLDJFH")
+        intent.putExtra(Intent.EXTRA_TEXT, "dwdqsdsqdzqdzd sefssf" )
+        startActivity(context, intent, null)
+
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        Log.e("xxx", "Error: ${e.message}")
     }
-    return uri
 }
 
-fun getFilePath(fileName: String? = ""): String {
-    var path = ""
-    createNewDirectory()?.let {
-        path = it.absolutePath + "/" + fileName
-    }
-    return path
-}
-
-fun createNewDirectory(): File? {
-    val folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
-    val directory = File(folder,"g8")
-    if (directory.exists() && directory.isDirectory) {
-        println("Directory exists.")
-    } else {
-        val result = directory.mkdir()
-        if (result) {
-            Log.e(ContentValues.TAG, "Directory created successfully: ${directory.absolutePath}")
-        } else {
-            Log.e(ContentValues.TAG, "Failed to create directory.")
-            return null
+@Composable
+fun Share(context: Context) {
+    Button(onClick = {
+        try {
+            val uri = getFileUri(context, fileNameAfterNumbering)
+            uri?.let {
+                ShareCompat.IntentBuilder(context)
+                    .setType("application/pdf")
+                    .addStream(uri)
+                    .setChooserTitle("Share document")
+                    .setSubject("Shared document")
+                    .startChooser()
+            } ?: Toast.makeText(
+                context,
+                R.string.export_error_sharing,
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: Exception) {
+            Log.e("xxx", "Error: ${e.message}")
         }
+        // startActivity(context, share, null)
+    }) {
+        Icon(imageVector = IconMail, contentDescription = null)
+        Text(
+            stringResource(R.string.export_send_file),
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
-    return directory
 }

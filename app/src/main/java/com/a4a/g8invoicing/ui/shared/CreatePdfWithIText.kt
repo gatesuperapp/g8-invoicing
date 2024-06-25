@@ -1,15 +1,14 @@
 package com.a4a.g8invoicing.ui.shared
 
-import android.Manifest
+import android.content.ContentValues
 import android.content.Context
-import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.screens.getFilePath
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -32,9 +31,11 @@ import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-fun createPdfWithIText(context: Context) {
+const val fileNameBeforeNumbering = "BL1.pdf"
+const val fileNameAfterNumbering = "BL.pdf"
 
-    val writer = PdfWriter(getFilePath("BL.pdf"))
+fun createPdfWithIText(context: Context) {
+    val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     val pdfDocument = PdfDocument(writer)
 
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
@@ -52,16 +53,16 @@ fun createPdfWithIText(context: Context) {
     document.add(createFooter(context, dmMedium))
     document.close()
 
-    //if document exist & i()
-    val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/g8/BL.pdf"
-    val file = File(filePath)
-    if (file.exists() && file.isFile) {
-        try {
-            addPageNumbersAfterPdfIsCreated(context)
-        } catch (e: Exception) {
-            Log.e("xxx", "Error: ${e.message}")
+    getFile(fileNameBeforeNumbering)?.let {
+        if (it.exists() && it.isFile) {
+            try {
+                addPageNumbersAfterPdfIsCreated(context)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
         }
     }
+
     Toast.makeText(context, "PDF created", Toast.LENGTH_SHORT).show()
 }
 
@@ -82,6 +83,7 @@ fun createReference(font: PdfFont): Paragraph {
     return Paragraph(reference)
         .add(referenceNumber)
 }
+
 fun createIssuerAndClientTable(font: PdfFont): Table {
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
@@ -150,12 +152,12 @@ fun createProductsTable(context: Context): Table {
         .setMarginBottom(10f)
 
     productsTable
-        .addCustomCell("Description", alignment = TextAlignment.LEFT, isBold =  true)
-        .addCustomCell("Qté", isBold =  true)
-        .addCustomCell("Unité", isBold =  true)
-        .addCustomCell("TVA", isBold =  true)
-        .addCustomCell("PU HT", isBold =  true)
-        .addCustomCell("Total HT", isBold =  true)
+        .addCustomCell("Description", alignment = TextAlignment.LEFT, isBold = true)
+        .addCustomCell("Qté", isBold = true)
+        .addCustomCell("Unité", isBold = true)
+        .addCustomCell("TVA", isBold = true)
+        .addCustomCell("PU HT", isBold = true)
+        .addCustomCell("Total HT", isBold = true)
 
     var products = listOf(
         DocumentProductState(
@@ -241,7 +243,7 @@ fun createFooter(context: Context, font: PdfFont): Table {
         .setTextAlignment(TextAlignment.RIGHT)
 
     if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
-        footerTable.addCellInFooter(Paragraph(context.getString(R.string.delivery_note_total_without_tax)))
+        footerTable.addCellInFooter(Paragraph(context.getString(R.string.document_total_without_tax)))
 
         val totalWithoutTax = Paragraph(documentPrices.totalPriceWithoutTax?.toString() ?: " - ")
         totalWithoutTax.add(context.getString(R.string.currency))
@@ -262,7 +264,7 @@ fun createFooter(context: Context, font: PdfFont): Table {
         taxesAmount.forEach { tax ->
             documentPrices.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
                 footerTable.addCellInFooter(
-                    Paragraph(context.getString(R.string.delivery_note_tax) + " " + it.first.toString() + "% : ")
+                    Paragraph(context.getString(R.string.document_tax) + " " + it.first.toString() + "% : ")
                 )
                 footerTable.addCellInFooter(Paragraph(it.second.toString() + context.getString(R.string.currency)))
             }
@@ -271,7 +273,7 @@ fun createFooter(context: Context, font: PdfFont): Table {
     if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
         footerTable.addCellInFooter(
             Paragraph(
-                context.getString(R.string.delivery_note_total_with_tax) + " "
+                context.getString(R.string.document_total_with_tax) + " "
             ).setFont(font)
         )
         val totalWithTax = Paragraph(documentPrices.totalPriceWithTax?.toString() ?: " - ")
@@ -281,6 +283,7 @@ fun createFooter(context: Context, font: PdfFont): Table {
 
     return footerTable
 }
+
 fun Table.addCustomCell(
     text: String? = null,
     paragraph: Paragraph? = null,
@@ -299,7 +302,7 @@ fun Table.addCustomCell(
 
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
     val dmMedium = PdfFontFactory.createFont("assets/DMSans-Medium.ttf")
-    val font = if(isBold) dmMedium else dmRegular
+    val font = if (isBold) dmMedium else dmRegular
 
     return this.addCell(
         Cell().add(textToAdd)
@@ -358,8 +361,8 @@ fun addPageNumbersAfterPdfIsCreated(context: Context) {
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
 
     val pdfDoc = PdfDocument(
-        PdfReader(getFilePath("BL.pdf")),
-        PdfWriter(getFilePath("BLz.pdf"))
+        PdfReader(getFilePath(fileNameBeforeNumbering)),
+        PdfWriter(getFilePath(fileNameAfterNumbering))
     )
     val doc = Document(pdfDoc)
 
@@ -375,6 +378,63 @@ fun addPageNumbersAfterPdfIsCreated(context: Context) {
             )
         }
     }
+
+    deleteFile(fileNameBeforeNumbering)
     doc.close()
 }
 
+
+fun getFileUri(context: Context, fileName: String): Uri? {
+    var uri: Uri? = null
+    val file = File(getFilePath(fileName))
+
+    try {
+        uri = FileProvider.getUriForFile(
+            context,
+            context.applicationContext.packageName + ".provider",
+            file
+        )
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return uri
+}
+
+fun getFilePath(fileName: String): String {
+    var path = ""
+    getFile(fileName)?.let {
+        path = it.absolutePath
+    }
+    return path
+}
+
+fun getFile(fileName: String): File? {
+    val folder =
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
+    val directory = File(folder, "g8")
+    if (directory.exists() && directory.isDirectory) {
+        println("Directory exists.")
+    } else {
+        val result = directory.mkdir()
+        if (result) {
+            Log.e(ContentValues.TAG, "Directory created successfully: ${directory.absolutePath}")
+        } else {
+            Log.e(ContentValues.TAG, "Failed to create directory.")
+            return null
+        }
+    }
+    return File("$folder/g8/$fileName")
+}
+
+fun deleteFile(fileName: String) {
+    val folder =
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
+    val file = File("$folder/g8/$fileName")
+    if (file.exists()) {
+        file.delete()
+        Log.e(ContentValues.TAG, "File deleted successfully: ${file.absolutePath}")
+    } else {
+        Log.e(ContentValues.TAG, "Error deleting file. ${file.absolutePath}")
+
+    }
+}

@@ -78,7 +78,7 @@ fun Settings(
             ) {
                 ForwardInputCreatorGoForward(
                     ForwardElement(
-                        text = stringResource(id = R.string.delivery_note_modal_product_cancel)
+                        text = stringResource(id = R.string.document_modal_product_cancel)
                     )
                 )
             }

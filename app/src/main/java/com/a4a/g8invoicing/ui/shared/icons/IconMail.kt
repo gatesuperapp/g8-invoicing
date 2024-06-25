@@ -1,12 +1,11 @@
 package com.ninetyninepercent.funfactu.icons
 
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
 
 
-public val IconMail: ImageVector
+val IconMail: ImageVector
     get() {
         if (_mail != null) {
             return _mail!!

@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 
 @Composable
 fun DeliveryNoteBasicTemplateHeader(
-    uiState: DeliveryNoteState,
+    uiState: DeliveryNote,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
@@ -54,7 +54,7 @@ fun DeliveryNoteBasicTemplateHeader(
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.textForDocuments,
                 text = stringResource(id = R.string.delivery_note_number) + " " + (uiState.number?.text
-                    ?: stringResource(id = R.string.delivery_note_default_number))
+                    ?: stringResource(id = R.string.document_default_number))
             )
 
             Spacer(
@@ -76,8 +76,8 @@ fun DeliveryNoteBasicTemplateHeader(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.textForDocuments,
-                text = stringResource(id = R.string.delivery_note_date) + " " + (uiState.deliveryDate
-                    ?: stringResource(id = R.string.delivery_note_default_date))
+                text = stringResource(id = R.string.document_date) + " " + (uiState.deliveryDate
+                    ?: stringResource(id = R.string.document_default_date))
             )
         }
     }
@@ -111,7 +111,7 @@ fun DeliveryNoteBasicTemplateHeader(
                 modifier = Modifier
                     .padding(bottom = 2.dp),
                 style = MaterialTheme.typography.textForDocumentsSecondary,
-                text = stringResource(id = R.string.delivery_note_recipient)
+                text = stringResource(id = R.string.document_recipient)
             )
 
             Column(
@@ -143,19 +143,19 @@ fun DeliveryNoteBasicTemplateHeader(
 private fun fakeClient() =
     ClientOrIssuerState(
         id = null,
-        firstName = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_firstName)),
-        name = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_name)),
-        address1 = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_address1)),
+        firstName = TextFieldValue(text = stringResource(id = R.string.document_default_client_firstName)),
+        name = TextFieldValue(text = stringResource(id = R.string.document_default_client_name)),
+        address1 = TextFieldValue(text = stringResource(id = R.string.document_default_client_address1)),
         address2 = null,
-        zipCode = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_zipCode)),
-        city = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_city)),
-        phone = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_phone)),
-        email = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_email)),
-        notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_client_notes)),
-        companyId1Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number1)),
-        companyId2Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number2)),
+        zipCode = TextFieldValue(text = stringResource(id = R.string.document_default_client_zipCode)),
+        city = TextFieldValue(text = stringResource(id = R.string.document_default_client_city)),
+        phone = TextFieldValue(text = stringResource(id = R.string.document_default_client_phone)),
+        email = TextFieldValue(text = stringResource(id = R.string.document_default_client_email)),
+        notes = TextFieldValue(text = stringResource(id = R.string.document_default_client_notes)),
+        companyId1Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label1)),
+        companyId1Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number1)),
+        companyId2Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label2)),
+        companyId2Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number2)),
     )
 
 @Composable
@@ -163,17 +163,17 @@ private fun fakeIssuer() =
     ClientOrIssuerState(
         // Fill with dummy values to show how it looks
         id = null,
-        firstName = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_firstName)),
-        name = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_name)),
-        address1 = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_address1)),
-        address2 = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_address2)),
-        zipCode = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_zipCode)),
-        city = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_city)),
-        phone = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_phone)),
-        email = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_email)),
-        notes = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_notes)),
-        companyId1Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number1)),
-        companyId2Label = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = stringResource(id = R.string.delivery_note_default_issuer_company_number2)),
+        firstName = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_firstName)),
+        name = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_name)),
+        address1 = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_address1)),
+        address2 = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_address2)),
+        zipCode = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_zipCode)),
+        city = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_city)),
+        phone = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_phone)),
+        email = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_email)),
+        notes = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_notes)),
+        companyId1Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label1)),
+        companyId1Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number1)),
+        companyId2Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label2)),
+        companyId2Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number2)),
     )

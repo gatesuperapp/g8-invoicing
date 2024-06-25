@@ -52,30 +52,30 @@ fun DeliveryNoteBasicTemplateDataTable(
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = stringResource(id = R.string.delivery_note_table_description),
+            text = stringResource(id = R.string.document_table_description),
             weight = descriptionColumnWeight,
             alignEnd = false
         )
         TableCell(
-            text = stringResource(id = R.string.delivery_note_table_quantity),
+            text = stringResource(id = R.string.document_table_quantity),
             weight = quantityColumnWeight,
             alignEnd = true
         )
         TableCell(
-            text = stringResource(id = R.string.delivery_note_table_unit),
+            text = stringResource(id = R.string.document_table_unit),
             alignEnd = true
         )
         TableCell(
-            text = stringResource(id = R.string.delivery_note_table_tax_rate),
+            text = stringResource(id = R.string.document_table_tax_rate),
             weight = quantityColumnWeight,
             alignEnd = true
         )
         TableCell(
-            text = stringResource(id = R.string.delivery_note_table_unit_price_without_tax),
+            text = stringResource(id = R.string.document_table_unit_price_without_tax),
             alignEnd = true
         )
         TableCell(
-            text = stringResource(id = R.string.delivery_note_table_total_price_without_tax),
+            text = stringResource(id = R.string.document_table_total_price_without_tax),
             alignEnd = true
         )
     }

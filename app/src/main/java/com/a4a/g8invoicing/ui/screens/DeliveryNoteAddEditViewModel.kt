@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -35,8 +35,8 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
-    private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteState())
-    val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
+    private val _deliveryNoteUiState = mutableStateOf(DeliveryNote())
+    val deliveryNoteUiState: State<DeliveryNote> = _deliveryNoteUiState
 
     init {
         var newDocumentId: Long? = null
@@ -144,10 +144,10 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 }
 
 fun updateDeliveryNoteUiState(
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DeliveryNote,
     element: ScreenElement,
     value: Any,
-): DeliveryNoteState {
+): DeliveryNote {
     var note = deliveryNote
     when (element) {
         ScreenElement.DOCUMENT_NUMBER -> {

@@ -37,6 +37,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -44,9 +46,8 @@ import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionComponents
 import com.a4a.g8invoicing.ui.navigation.actionExport
-import com.a4a.g8invoicing.ui.navigation.actionStyle
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DeliveryNote
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -58,7 +59,7 @@ import java.util.Locale
 @Composable
 fun DeliveryNoteAddEdit(
     navController: NavController,
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DeliveryNote,
     clientList: MutableList<ClientOrIssuerState>,
     issuerList: MutableList<ClientOrIssuerState>,
     clientUiState: ClientOrIssuerState,
@@ -118,6 +119,7 @@ fun DeliveryNoteAddEdit(
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
     deliveryNote.deliveryDate =
         datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
+            ?: Strings.get(R.string.document_default_date)
 
     BottomSheetScaffold(
         sheetSwipeEnabled = false,
@@ -148,9 +150,9 @@ fun DeliveryNoteAddEdit(
                 documentProductUiState = documentProductUiState,
                 onDocumentProductClick = onDocumentProductClick,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                currentClientId = deliveryNote.client?.id,
-                currentIssuerId = deliveryNote.issuer?.id,
-                currentProductsIds = deliveryNote.documentProducts?.mapNotNull { it.productId },
+                currentClientId = deliveryNote.client.id,
+                currentIssuerId = deliveryNote.issuer.id,
+                currentProductsIds = deliveryNote.documentProducts.mapNotNull { it.productId },
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
@@ -291,7 +293,6 @@ private fun DeliveryNoteAddEditBottomBar(
     )
 }
 
-
 @Composable
 fun PopupBox(
     onDismissRequest: () -> Unit,
@@ -311,9 +312,7 @@ fun PopupBox(
                 .zIndex(10F),
             contentAlignment = Alignment.Center
         ) {
-
             ExportPdf(onDismissRequest)
-
         }
     }
 }
