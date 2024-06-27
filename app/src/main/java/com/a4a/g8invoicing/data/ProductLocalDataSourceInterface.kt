@@ -19,5 +19,5 @@ interface ProductLocalDataSourceInterface {
     suspend fun updateProduct(product: ProductState)
     suspend fun updateDocumentProduct(documentProduct: DocumentProductState)
     suspend fun deleteProduct(id: Long)
-    suspend fun deleteDocumentProduct(id: Long)
+    suspend fun deleteDocumentProducts(ids: List<Long>)
 }

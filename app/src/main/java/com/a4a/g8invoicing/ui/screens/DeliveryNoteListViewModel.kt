@@ -2,7 +2,7 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
@@ -25,9 +25,7 @@ class DeliveryNoteListViewModel @Inject constructor(
     val deliveryNotesUiState: StateFlow<DeliveryNotesUiState> = _deliveryNotesUiState.asStateFlow()
 
     private var fetchJob: Job? = null
-    private var fetchJob1: Job? = null
     private var deleteJob: Job? = null
-    private var saveJob: Job? = null
     private var duplicateJob: Job? = null
 
     init {
@@ -51,46 +49,21 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNote>) {
+    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                selectedDeliveryNotes.forEach { deliveryNote ->
-                    deliveryNote.deliveryNoteId?.let {id ->
-                        deliveryNoteDataSource.deleteDeliveryNote(id.toLong())
-
-                        deliveryNote.documentProducts?.forEach { documentProduct ->
-                            documentProduct.id?.let {
-                                removeDocumentProductFromLocalDb(
-                                    id.toLong(),
-                                    it.toLong()
-                                )
-                            }
-                        }
-                    }
+                deliveryNoteDataSource.deleteDeliveryNotes(selectedDeliveryNotes)
+                selectedDeliveryNotes.flatMap { it.documentProducts.mapNotNull { it.id?.toLong() }}.let {
+                    documentProductDataSource.deleteDocumentProducts(it)
                 }
             } catch (e: Exception) {
-                println("Deleting deliveryNotes failed with exception: ${e.localizedMessage}")
+                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun removeDocumentProductFromLocalDb(deliveryNoteId: Long, documentProductId: Long) {
-        deleteJob?.cancel()
-        deleteJob = viewModelScope.launch {
-            try {
-                deliveryNoteDataSource.deleteDeliveryNoteProduct(
-                    deliveryNoteId,
-                    documentProductId
-                )
-                documentProductDataSource.deleteDocumentProduct(documentProductId)
-            } catch (e: Exception) {
-                println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
-            }
-        }
-    }
-
-    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNote>) {
+    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {

@@ -13,7 +13,7 @@ abstract class Document {
     abstract var documentId: Int
     abstract var documentType: String
     abstract var documentNumber: TextFieldValue // Mandatory to control placing the cursor in the field
-    abstract var deliveryDate: String
+    abstract var documentDate: String
     abstract var orderNumber: TextFieldValue
     abstract var issuer: ClientOrIssuerState
     abstract var client: ClientOrIssuerState

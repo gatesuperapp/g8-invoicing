@@ -16,7 +16,7 @@ data class Invoice(
     override var documentType: String = Strings.get(R.string.invoice),
     override var documentId: Int,
     override var documentNumber: TextFieldValue,
-    override var deliveryDate: String,
+    override var documentDate: String,
     override var orderNumber: TextFieldValue,
     override var issuer: ClientOrIssuerState,
     override var client: ClientOrIssuerState,

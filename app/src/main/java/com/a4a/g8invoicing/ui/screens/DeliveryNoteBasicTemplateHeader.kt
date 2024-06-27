@@ -22,13 +22,13 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 
 @Composable
 fun DeliveryNoteBasicTemplateHeader(
-    uiState: DeliveryNote,
+    uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
@@ -53,8 +53,7 @@ fun DeliveryNoteBasicTemplateHeader(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.textForDocuments,
-                text = stringResource(id = R.string.delivery_note_number) + " " + (uiState.number?.text
-                    ?: stringResource(id = R.string.document_default_number))
+                text = stringResource(id = R.string.delivery_note_number) + " " + uiState.documentNumber.text
             )
 
             Spacer(
@@ -76,8 +75,7 @@ fun DeliveryNoteBasicTemplateHeader(
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.textForDocuments,
-                text = stringResource(id = R.string.document_date) + " " + (uiState.deliveryDate
-                    ?: stringResource(id = R.string.document_default_date))
+                text = stringResource(id = R.string.document_date) + " : " + uiState.documentDate
             )
         }
     }

@@ -79,9 +79,11 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                if (type == ClientOrIssuerType.CLIENT) {
+                if (type == ClientOrIssuerType.CLIENT && !clientUiState.value.name?.text.isNullOrEmpty()) {
                     dataSource.saveClientOrIssuer(clientUiState.value, type.name.lowercase())
-                } else dataSource.saveClientOrIssuer(issuerUiState.value, type.name.lowercase())
+                } else if(!issuerUiState.value.name?.text.isNullOrEmpty())  {
+                    dataSource.saveClientOrIssuer(issuerUiState.value, type.name.lowercase())
+                }
             } catch (e: Exception) {
                 println("Saving clients failed with exception: ${e.localizedMessage}")
             }
@@ -113,7 +115,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
     fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
         val text = when (pageElement) {
-            ScreenElement.CLIENT_OR_ISSUER_NAME -> clientUiState.value.name.text
+            ScreenElement.CLIENT_OR_ISSUER_NAME -> clientUiState.value.name?.text
             ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> clientUiState.value.firstName?.text
             ScreenElement.CLIENT_OR_ISSUER_EMAIL -> clientUiState.value.email?.text
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 -> clientUiState.value.address1?.text

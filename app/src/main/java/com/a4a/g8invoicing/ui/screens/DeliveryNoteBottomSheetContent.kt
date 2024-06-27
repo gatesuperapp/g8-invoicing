@@ -11,11 +11,11 @@ import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.KeyboardOpt
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 
 @Composable
 fun DeliveryNoteBottomSheetContent(
-    deliveryNote: DeliveryNote,
+    deliveryNote: DeliveryNoteState,
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -25,9 +25,9 @@ fun DeliveryNoteBottomSheetContent(
         FormInput(
             label = stringResource(id = R.string.document_number_short),
             inputType = TextInput(
-                text = deliveryNote.number
+                text = deliveryNote.documentNumber
                     ?: TextFieldValue(stringResource(id = R.string.document_default_number)),
-                placeholder = stringResource(id = R.string.document_default_number), //unused
+                placeholder = stringResource(id = R.string.document_default_number),
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_NUMBER, it)
                 },
@@ -37,37 +37,34 @@ fun DeliveryNoteBottomSheetContent(
         FormInput(
             label = stringResource(id = R.string.document_date),
             inputType = ForwardElement(
-                text = deliveryNote.deliveryDate
-                    ?: stringResource(id = R.string.document_default_date)
+                text = deliveryNote.documentDate
             ),
             pageElement = ScreenElement.DOCUMENT_DATE
         ),
         FormInput(
             label = stringResource(id = R.string.document_issuer),
             inputType = ForwardElement(
-                text = deliveryNote.issuer?.let {
-                    it.name.text + " " + it.firstName?.text
-                }
-                    ?: "",
+                text = deliveryNote.issuer.let {
+                    it.name.text + " " + (it.firstName?.text ?: "")
+                } ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_ISSUER
         ),
         FormInput(
             label = stringResource(id = R.string.document_client),
             inputType = ForwardElement(
-                text = deliveryNote.client?.let {
-                    it.name.text + " " + it.firstName?.text
+                text = deliveryNote.client.let {
+                    it.name.text + " " + (it.firstName?.text ?: "")
                 }
-                    ?: "",
+             ,
             ),
             pageElement = ScreenElement.DOCUMENT_CLIENT
         ),
         FormInput(
             label = stringResource(id = R.string.document_order_number),
             inputType = TextInput(
-                text = deliveryNote.orderNumber
-                    ?: TextFieldValue(stringResource(id = R.string.document_default_order_number)),
-                placeholder = stringResource(id = R.string.document_default_order_number), //unused
+                text = deliveryNote.orderNumber,
+                placeholder = stringResource(id = R.string.document_default_order_number),
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_ORDER_NUMBER, it)
                 },

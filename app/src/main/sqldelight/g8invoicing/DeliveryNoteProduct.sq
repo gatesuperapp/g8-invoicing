@@ -27,5 +27,9 @@ DELETE FROM DeliveryNoteProduct
 WHERE  delivery_note_id = :delivery_note_id
 AND document_product_id = :document_product_id;
 
+deleteAllProductsLinkedToADeliveryNote:
+DELETE FROM DeliveryNoteProduct
+WHERE  delivery_note_id = :delivery_note_id;
+
 lastInsertRowId:
 SELECT last_insert_rowid();

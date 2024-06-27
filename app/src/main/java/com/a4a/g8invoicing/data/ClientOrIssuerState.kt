@@ -18,7 +18,7 @@ data class ClientOrIssuerState(
     var phone: TextFieldValue? = null,
     var email: TextFieldValue? = null,
     var notes: TextFieldValue? = null,
-    var companyId1Label: TextFieldValue? =  TextFieldValue("N° SIRET"),
+    var companyId1Label: TextFieldValue? = TextFieldValue("N° SIRET"),
     var companyId1Number: TextFieldValue? = null,
     var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
     var companyId2Number: TextFieldValue? = null,

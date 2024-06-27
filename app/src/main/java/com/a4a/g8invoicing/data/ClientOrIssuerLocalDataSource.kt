@@ -3,6 +3,8 @@ package com.a4a.g8invoicing.data
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.screens.PersonType
 import com.a4a.g8invoicing.ui.states.CompanyDataState
 import g8invoicing.ClientOrIssuer
@@ -273,9 +275,9 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         phone = TextFieldValue(text = clientOrIssuer.phone ?: ""),
         email = TextFieldValue(text = clientOrIssuer.email ?: ""),
         notes = TextFieldValue(text = clientOrIssuer.notes ?: ""),
-        companyId1Label = TextFieldValue(text = "N° SIRET"),
+        companyId1Label = TextFieldValue(text = Strings.get(R.string.document_default_issuer_company_label1)),
         companyId1Number = TextFieldValue(text = clientOrIssuer.company_id1_number ?: ""),
-        companyId2Label = TextFieldValue(text = "N° TVA"),
+        companyId2Label = TextFieldValue(text =  Strings.get(R.string.document_default_issuer_company_label2)),
         companyId2Number = TextFieldValue(text = clientOrIssuer.company_id2_number ?: ""),
     )
 }

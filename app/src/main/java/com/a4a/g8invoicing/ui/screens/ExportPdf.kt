@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.app.PendingIntent.getActivity
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -17,8 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +38,8 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.fileNameAfterNumbering
 import com.a4a.g8invoicing.ui.shared.getFileUri
+import com.a4a.g8invoicing.ui.shared.icons.IconShare
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.ninetyninepercent.funfactu.icons.IconMail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -47,6 +48,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExportPdf(
+    deliveryNote: DeliveryNoteState,
     onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -76,15 +78,16 @@ fun ExportPdf(
         Text(
             modifier = Modifier
                 .padding(bottom = 30.dp),
-            text = if (isExportOngoing == ExportStatus.ONGOING) stringResource(R.string.export_ongoing)
-            else if (isExportOngoing == ExportStatus.DONE)
-                stringResource(R.string.export_done)
-            else
-                stringResource(R.string.export_error),
+            text = when (isExportOngoing) {
+                ExportStatus.ONGOING -> stringResource(R.string.export_ongoing)
+                ExportStatus.DONE -> stringResource(R.string.export_done)
+                else -> stringResource(R.string.export_error)
+            },
             style = MaterialTheme.typography.headlineSmall,
             color = Color.White
         )
-        ProgressBar(
+        ExportDocumentAndShowProgressBar(
+            deliveryNote,
             context,
             loadingIsOver = {
                 isExportOngoing = ExportStatus.DONE
@@ -108,7 +111,8 @@ fun ExportPdf(
 }
 
 @Composable
-fun ProgressBar(
+fun ExportDocumentAndShowProgressBar(
+    deliveryNote: DeliveryNoteState,
     context: Context,
     loadingIsOver: () -> Unit,
 ) {
@@ -117,7 +121,7 @@ fun ProgressBar(
     LaunchedEffect(true) {
         val job: Job = launch(context = Dispatchers.Default) {
             try {
-                createPdfWithIText(context)
+                createPdfWithIText(deliveryNote, context)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -125,15 +129,13 @@ fun ProgressBar(
         job.join()
         loading = false
         loadingIsOver()
-
-
     }
 
     if (!loading) {
         return
     }
 
-    CircularProgressIndicator(
+    LinearProgressIndicator(
         modifier = Modifier.width(64.dp),
         color = MaterialTheme.colorScheme.secondary,
         trackColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -214,11 +216,10 @@ fun Share(context: Context) {
         } catch (e: Exception) {
             Log.e("xxx", "Error: ${e.message}")
         }
-        // startActivity(context, share, null)
     }) {
-        Icon(imageVector = IconMail, contentDescription = null)
+        Icon(imageVector = IconShare, contentDescription = null)
         Text(
-            stringResource(R.string.export_send_file),
+            stringResource(R.string.export_share_file),
             modifier = Modifier.padding(start = 8.dp)
         )
     }

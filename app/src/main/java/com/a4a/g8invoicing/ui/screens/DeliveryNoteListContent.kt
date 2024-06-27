@@ -6,22 +6,22 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 
 /**/
 @Composable
 fun DeliveryNoteListContent(
-    deliveryNotes: List<DeliveryNote>,
+    deliveryNotes: List<DeliveryNoteState>,
     onItemClick: (Int) -> Unit = {},
-    addDeliveryNoteToSelectedList: (DeliveryNote) -> Unit = {},
-    removeDeliveryNoteFromSelectedList: (DeliveryNote) -> Unit = {},
+    addDeliveryNoteToSelectedList: (DeliveryNoteState) -> Unit = {},
+    removeDeliveryNoteFromSelectedList: (DeliveryNoteState) -> Unit = {},
     keyToUnselectAll: Boolean,
 ) {
     LazyColumn {
         items(
             items = deliveryNotes,
             key = {
-                it.deliveryNoteId!! //All items displayed in list have an ID
+                it.documentId
             }
         ) { deliveryNote ->
             /* val dismissDirections = setOf(DismissDirection.EndToStart)
@@ -45,9 +45,7 @@ fun DeliveryNoteListContent(
             DeliveryNoteListItem(
                 deliveryNote = deliveryNote,
                 onItemClick = {
-                    deliveryNote.deliveryNoteId?.let {
-                        onItemClick(it)
-                    }
+                    onItemClick(deliveryNote.documentId)
                 },
                 onItemCheckboxClick = { isChecked ->
                     // Update deliveryNote list

@@ -138,9 +138,11 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun deleteDocumentProduct(id: Long) {
+    override suspend fun deleteDocumentProducts(ids: List<Long>) {
         return withContext(Dispatchers.IO) {
-            documentProductQueries.deleteDocumentProduct(id)
+            ids.forEach {
+                documentProductQueries.deleteDocumentProduct(it)
+            }
         }
     }
 }

@@ -47,7 +47,7 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionComponents
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -59,7 +59,7 @@ import java.util.Locale
 @Composable
 fun DeliveryNoteAddEdit(
     navController: NavController,
-    deliveryNote: DeliveryNote,
+    deliveryNote: DeliveryNoteState,
     clientList: MutableList<ClientOrIssuerState>,
     issuerList: MutableList<ClientOrIssuerState>,
     clientUiState: ClientOrIssuerState,
@@ -117,7 +117,7 @@ fun DeliveryNoteAddEdit(
         initialDisplayMode = DisplayMode.Picker
     )
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
-    deliveryNote.deliveryDate =
+    deliveryNote.documentDate =
         datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
             ?: Strings.get(R.string.document_default_date)
 
@@ -202,7 +202,9 @@ fun DeliveryNoteAddEdit(
             }
         ) { innerPadding ->
             if (showPopup) {
-                PopupBox(onDismissRequest = { showPopup = false }) {
+                ExportPopup(
+                    deliveryNote,
+                    onDismissRequest = { showPopup = false }) {
                     Box(
                         modifier = Modifier
                             .width(50.dp)
@@ -294,7 +296,8 @@ private fun DeliveryNoteAddEditBottomBar(
 }
 
 @Composable
-fun PopupBox(
+fun ExportPopup(
+    deliveryNote: DeliveryNoteState,
     onDismissRequest: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -312,7 +315,7 @@ fun PopupBox(
                 .zIndex(10F),
             contentAlignment = Alignment.Center
         ) {
-            ExportPdf(onDismissRequest)
+            ExportPdf(deliveryNote, onDismissRequest)
         }
     }
 }

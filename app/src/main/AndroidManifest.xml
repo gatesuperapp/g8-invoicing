@@ -9,7 +9,7 @@
         android:maxSdkVersion="29" />
 
     <application
-        android:name=".App"
+        android:name=".G8Invoicing"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:requestLegacyExternalStorage="true"

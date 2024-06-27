@@ -17,22 +17,22 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.BottomBar
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 
 @Composable
 fun DeliveryNoteList(
     navController: NavController,
     deliveryNotesUiState: DeliveryNotesUiState,
-    onClickDelete: (List<DeliveryNote>) -> Unit,
-    onClickDuplicate: (List<DeliveryNote>) -> Unit,
+    onClickDelete: (List<DeliveryNoteState>) -> Unit,
+    onClickDuplicate: (List<DeliveryNoteState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
     onClickBack: () -> Unit
 ) {
     // Main list to handle actions with selected items
-    val selectedItems = mutableListOf<DeliveryNote>()
+    val selectedItems = mutableListOf<DeliveryNoteState>()
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
@@ -118,7 +118,7 @@ fun DeliveryNoteList(
 }
 
 private fun resetSelectedItems(
-    selectedItems: MutableList<DeliveryNote>,
+    selectedItems: MutableList<DeliveryNoteState>,
     selectedMode: MutableState<Boolean>,
     keyToResetCheckboxes: MutableState<Boolean>,
 ) {

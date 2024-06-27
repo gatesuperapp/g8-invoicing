@@ -29,12 +29,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 
 
 @Composable
 fun DeliveryNoteListItem(
-    deliveryNote: DeliveryNote,
+    deliveryNote: DeliveryNoteState,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
@@ -112,7 +112,7 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.number?.text?.toIntOrNull()?.let { String.format("%04d", it) }
+                        text = deliveryNote.documentNumber.text.toIntOrNull()?.let { String.format("%04d", it) }
                             ?: "XXX",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
@@ -125,8 +125,8 @@ fun DeliveryNoteListItem(
                     //  .fillMaxWidth()
                 ) {
                     Text(
-                        text = (deliveryNote.client?.name?.text
-                            ?: " - ") + " " + (deliveryNote.client?.firstName?.text ?: "")
+                        text = (deliveryNote.client.name.text
+                            ?: " - ") + " " + (deliveryNote.client.firstName?.text ?: "")
                     )
                 }
             }
@@ -139,7 +139,7 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.deliveryDate ?: " - ",
+                        text = deliveryNote.documentDate ?: " - ",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
@@ -149,7 +149,7 @@ fun DeliveryNoteListItem(
                 Row(
                 ) {
                     Text(
-                        text = deliveryNote.documentPrices?.totalPriceWithTax.toString() + stringResource(
+                        text = deliveryNote.documentPrices.totalPriceWithTax.toString() + stringResource(
                             id = R.string.currency
                         ),
                     )

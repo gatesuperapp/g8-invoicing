@@ -13,14 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateFooter(
-    uiState: DeliveryNote,
+    uiState: DeliveryNoteState,
     footerArray: List<FooterRow>,
 ) {
     Row(

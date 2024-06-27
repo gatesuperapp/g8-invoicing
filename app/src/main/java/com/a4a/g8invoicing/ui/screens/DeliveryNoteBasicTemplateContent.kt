@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
 import com.a4a.g8invoicing.ui.theme.textForDocuments
@@ -43,7 +44,7 @@ import java.math.BigDecimal
 
 @Composable
 fun DeliveryNoteBasicTemplateContent(
-    uiState: DeliveryNote,
+    uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<ProductWithPage>?,
@@ -53,12 +54,8 @@ fun DeliveryNoteBasicTemplateContent(
     selectedItem: ScreenElement? = null,
 ) {
     val pagePadding = 20.dp
-    var pageHeightDp by remember {
-        mutableStateOf(0.dp)
-    }
-    var pageContentHeightDp by remember {
-        mutableStateOf(0.dp)
-    }
+    var pageHeightDp by remember { mutableStateOf(0.dp) }
+    var pageContentHeightDp by remember { mutableStateOf(0.dp) }
     val localDensity = LocalDensity.current
 
     Box(
@@ -76,7 +73,6 @@ fun DeliveryNoteBasicTemplateContent(
                 pageHeightDp = with(localDensity) { coordinates.size.height.toDp() }
             }
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,17 +85,18 @@ fun DeliveryNoteBasicTemplateContent(
                 .background(Color.White)
                 .onGloballyPositioned { coordinates ->
                     pageContentHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-
                 }
         ) {
-            if (index == 0 && uiState.orderNumber != null) {
+            if (index == 0) {
                 DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
-                uiState.orderNumber?.text?.let {
+                if (uiState.orderNumber.text.isNotEmpty()) {
                     DeliveryNoteBasicTemplateOrderNumber(
-                        it,
+                        uiState.orderNumber.text,
                         onClickElement,
                         selectedItem
                     )
+                } else {
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
 
@@ -122,7 +119,7 @@ fun DeliveryNoteBasicTemplateContent(
             ) {
                 val documentProducts = productArray?.map { it.documentProduct }
                 if (!documentProducts.isNullOrEmpty()) {
-                    documentProducts?.let { DeliveryNoteBasicTemplateDataTable(it) }
+                    documentProducts.let { DeliveryNoteBasicTemplateDataTable(it) }
                 }
             }
 

@@ -6,9 +6,14 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.data.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.screens.FooterRowName
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentPrices
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -33,8 +38,9 @@ import java.math.RoundingMode
 
 const val fileNameBeforeNumbering = "BL1.pdf"
 const val fileNameAfterNumbering = "BL.pdf"
+const val fileName = "BL"
 
-fun createPdfWithIText(context: Context) {
+fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     val pdfDocument = PdfDocument(writer)
 
@@ -45,73 +51,75 @@ fun createPdfWithIText(context: Context) {
         .setFont(dmRegular)
         .setFontSize(12F)
 
-    document.add(createTitle(dmRegular))
-    document.add(createDate())
-    document.add(createIssuerAndClientTable(dmMedium))
-    document.add(createReference(dmMedium))
-    document.add(createProductsTable(context))
+    document.add(createTitle(deliveryNote.documentNumber.text, dmRegular))
+    document.add(createDate(deliveryNote.documentDate))
+    document.add(createIssuerAndClientTable(deliveryNote.issuer, deliveryNote.client, dmMedium))
+    if (deliveryNote.orderNumber.text.isNotEmpty()) {
+        document.add(createReference(deliveryNote.orderNumber.text, dmMedium))
+    }
+    document.add(createProductsTable(deliveryNote.documentProducts, context))
     document.add(createFooter(context, dmMedium))
     document.close()
 
     getFile(fileNameBeforeNumbering)?.let {
         if (it.exists() && it.isFile) {
             try {
-                addPageNumbersAfterPdfIsCreated(context)
+                addPageNumbersAfterPdfIsCreated(deliveryNote.documentNumber.text)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
-
     Toast.makeText(context, "PDF created", Toast.LENGTH_SHORT).show()
 }
 
-fun createTitle(font: PdfFont): Paragraph {
-    return Paragraph("Bon de livraison N° XXX")
+fun createTitle(documentNumber: String, font: PdfFont): Paragraph {
+    return Paragraph(Strings.get(R.string.delivery_note_number) + documentNumber)
         .setFont(font)
         .setFontSize(20F)
         .setMarginBottom(-10F)
 }
 
-fun createDate(): Paragraph {
-    return Paragraph("Date : 08/08/2023").setFontSize(14F)
+fun createDate(date: String): Paragraph {
+    return Paragraph(Strings.get(R.string.document_date) + " : " + date).setFontSize(14F)
 }
 
-fun createReference(font: PdfFont): Paragraph {
-    val reference = Text("Référence : ").setFont(font)
-    val referenceNumber = "ODIHDHGBD"
-    return Paragraph(reference)
-        .add(referenceNumber)
-}
-
-fun createIssuerAndClientTable(font: PdfFont): Table {
+fun createIssuerAndClientTable(
+    issuer: ClientOrIssuerState,
+    client: ClientOrIssuerState,
+    font: PdfFont,
+): Table {
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
         .setMarginBottom(40F)
 
-    val issuerName = Text("Aude Zu").setFont(font)
+    val issuerName = Text(issuer.firstName?.text + issuer.name.text).setFont(font)
     val issuerData = Text(
         "\n" +
-                "7 rue paradise\n" +
-                "32000 Toulouse \n" +
-                "0789837483\n" +
-                "N° SIRET : 9387447XX\n" +
-                "N° TVA : 9387447XX\n"
+                issuer.address1?.text + "\n" +
+                issuer.address2?.text + "\n" +
+                issuer.zipCode?.text + " " + issuer.city?.text + "\n" +
+                issuer.phone?.text + "\n" +
+                issuer.companyId1Label?.text + " : " + issuer.companyId1Number?.text + "\n" +
+                issuer.companyId2Label?.text + " : " + issuer.companyId2Number?.text + "\n"
     )
 
     val issuer = Paragraph(issuerName)
         .add(issuerData)
         .setFixedLeading(16F)
 
-    val clientName = Text("Pooki Bap").setFont(font)
+
+    val clientName = Text(client.firstName?.text + client.name.text).setFont(font)
     val clientData = Text(
         "\n" +
-                "7 rue riton\n" +
-                "32000 Bamaks \n" +
-                "0789837483\n" +
-                "N° SIRET : 9387447XX\n" +
-                "N° TVA : 9387447XX\n"
+                client.address1?.text + "\n" +
+                client.address2?.text + "\n" +
+                client.zipCode?.text + " " + client.city?.text + "\n" +
+                client.phone?.text + "\n" +
+                client.companyId1Label?.text + " : " + client.companyId1Number?.text + "\n" +
+                client.companyId2Label?.text + " : " + client.companyId2Number?.text + "\n"
     )
+
     val client = Paragraph(clientName)
         .add(clientData)
         .setFixedLeading(16F)
@@ -124,7 +132,7 @@ fun createIssuerAndClientTable(font: PdfFont): Table {
         Cell()
             .setBorder(Border.NO_BORDER)
             .add(
-                Paragraph("Adressé à")
+                Paragraph(Strings.get(R.string.document_recipient))
                     .setFontSize(10F)
                     .setFontColor(ColorConstants.DARK_GRAY)
             )
@@ -143,7 +151,13 @@ fun createIssuerAndClientTable(font: PdfFont): Table {
     )
 }
 
-fun createProductsTable(context: Context): Table {
+fun createReference(orderNumber: String, font: PdfFont): Paragraph {
+    val reference = Text(Strings.get(R.string.document_order_number)).setFont(font)
+    return Paragraph(reference)
+        .add(orderNumber)
+}
+
+fun createProductsTable(products: List<DocumentProductState>, context: Context): Table {
     val columnWidth = floatArrayOf(50f, 10f, 10f, 10f, 10f, 10f)
 
     val productsTable = Table(UnitValue.createPercentArray(columnWidth))
@@ -158,31 +172,6 @@ fun createProductsTable(context: Context): Table {
         .addCustomCell("TVA", isBold = true)
         .addCustomCell("PU HT", isBold = true)
         .addCustomCell("Total HT", isBold = true)
-
-    var products = listOf(
-        DocumentProductState(
-            id = 0,
-            name = TextFieldValue("Tomates"),
-            description = TextFieldValue("cerises"),
-            priceWithTax = BigDecimal(13),
-            taxRate = BigDecimal(20),
-            quantity = BigDecimal(2),
-            unit = TextFieldValue("kg"),
-            productId = null
-        )
-    )
-    for (i in 1..20) {
-        products += DocumentProductState(
-            id = 0,
-            name = TextFieldValue("Patates"),
-            description = TextFieldValue("douces"),
-            priceWithTax = BigDecimal(13),
-            taxRate = BigDecimal(10),
-            quantity = BigDecimal(2),
-            unit = TextFieldValue("kg"),
-            productId = null
-        )
-    }
 
     products.forEach {
         val itemName = Text(it.name.text)
@@ -327,42 +316,20 @@ fun Table.addCellInFooter(
     )
 }
 
-
-data class DocumentProductState(
-    var id: Int,
-    var name: TextFieldValue = TextFieldValue(""),
-    var description: TextFieldValue? = null,
-    var priceWithTax: BigDecimal? = null,
-    var taxRate: BigDecimal? = null,
-    var quantity: BigDecimal = BigDecimal(1),
-    var unit: TextFieldValue? = null,
-    var productId: Int? = null,
-)
-
 data class FooterRow(
     var rowDescription: String,
     var page: Int,
 )
 
-enum class FooterRowName {
-    TOTAL_WITHOUT_TAX, TAXES_20, TAXES_10, TAXES_5, TOTAL_WITH_TAX
-}
-
-
-data class DocumentPrices(
-    var totalPriceWithoutTax: BigDecimal? = null,
-    var totalAmountsOfEachTax: MutableList<Pair<BigDecimal, BigDecimal>>? = null, //ex:  [(20.0, 7.2), (10.0, 2.4)]
-    var totalPriceWithTax: BigDecimal? = null,
-)
-
-
 @Throws(Exception::class)
-fun addPageNumbersAfterPdfIsCreated(context: Context) {
+fun addPageNumbersAfterPdfIsCreated(documentNumber: String) {
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
+
+    //checkIfFileNameAlreadyExist()
 
     val pdfDoc = PdfDocument(
         PdfReader(getFilePath(fileNameBeforeNumbering)),
-        PdfWriter(getFilePath(fileNameAfterNumbering))
+        PdfWriter(getFilePath("$fileName$documentNumber.pdf"))
     )
     val doc = Document(pdfDoc)
 
@@ -387,7 +354,6 @@ fun addPageNumbersAfterPdfIsCreated(context: Context) {
 fun getFileUri(context: Context, fileName: String): Uri? {
     var uri: Uri? = null
     val file = File(getFilePath(fileName))
-
     try {
         uri = FileProvider.getUriForFile(
             context,
@@ -435,6 +401,5 @@ fun deleteFile(fileName: String) {
         Log.e(ContentValues.TAG, "File deleted successfully: ${file.absolutePath}")
     } else {
         Log.e(ContentValues.TAG, "Error deleting file. ${file.absolutePath}")
-
     }
 }

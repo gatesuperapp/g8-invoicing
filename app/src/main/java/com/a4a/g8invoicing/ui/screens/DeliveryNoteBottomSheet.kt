@@ -33,7 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.a4a.g8invoicing.data.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveryNoteBottomSheet(
-    deliveryNote: DeliveryNote,
+    deliveryNote: DeliveryNoteState,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
@@ -171,7 +171,7 @@ fun DeliveryNoteBottomSheet(
                         taxRates
                     )
 
-                    ScreenElement.DOCUMENT_DATE -> deliveryNote.deliveryDate
+                    ScreenElement.DOCUMENT_DATE -> deliveryNote.documentDate
                     else -> {}
                 },
                 onClickBack = {

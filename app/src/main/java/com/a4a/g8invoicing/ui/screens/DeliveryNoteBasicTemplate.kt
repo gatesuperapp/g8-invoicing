@@ -37,7 +37,7 @@ import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNote
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
@@ -91,7 +91,7 @@ fun calculateLimits(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DeliveryNoteBasicTemplate(
-    uiState: DeliveryNote,
+    uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
 ) {
     var zoom by remember { mutableStateOf(1f) }
@@ -232,20 +232,20 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState?) {
             text = it.text
         )
     }
-    clientOrIssuer?.companyId1Label?.let {
+    clientOrIssuer?.companyId1Number?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = it.text + " : " + clientOrIssuer.companyId1Number?.text
+            text = clientOrIssuer.companyId1Label?.text + " : " +  it.text
         )
     }
-    clientOrIssuer?.companyId2Label?.let {
+    clientOrIssuer?.companyId2Number?.let {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = it.text + " : " + clientOrIssuer.companyId2Number?.text
+            text = clientOrIssuer.companyId2Label?.text + " : " + it.text
         )
     }
 }
