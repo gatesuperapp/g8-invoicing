@@ -242,19 +242,19 @@ fun ClientOrIssuer.transformIntoEditable(
 
     return ClientOrIssuerState(
         id = clientOrIssuer.client_or_issuer_id.toInt(),
-        firstName = TextFieldValue(text = clientOrIssuer.first_name ?: ""),
+        firstName = clientOrIssuer.first_name?.let { TextFieldValue(text = it)},
         name = TextFieldValue(text = clientOrIssuer.name),
-        address1 = TextFieldValue(text = clientOrIssuer.address1 ?: ""),
-        address2 = TextFieldValue(text = clientOrIssuer.address2 ?: ""),
-        zipCode = TextFieldValue(text = clientOrIssuer.zip_code ?: ""),
-        city = TextFieldValue(text = clientOrIssuer.city ?: ""),
-        phone = TextFieldValue(text = clientOrIssuer.phone ?: ""),
-        email = TextFieldValue(text = clientOrIssuer.email ?: ""),
-        notes = TextFieldValue(text = clientOrIssuer.notes ?: ""),
+        address1 = clientOrIssuer.address1?.let { TextFieldValue(text = it)},
+        address2 = clientOrIssuer.address2?.let { TextFieldValue(text = it)},
+        zipCode = clientOrIssuer.zip_code?.let { TextFieldValue(text = it)},
+        city = clientOrIssuer.city?.let { TextFieldValue(text = it)},
+        phone = clientOrIssuer.phone?.let { TextFieldValue(text = it)},
+        email = clientOrIssuer.email?.let { TextFieldValue(text = it)},
+        notes = clientOrIssuer.notes?.let { TextFieldValue(text = it)},
         companyId1Label = TextFieldValue(text = clientOrIssuer.company_id1_label ?: "N° SIRET"),
-        companyId1Number = TextFieldValue(text = clientOrIssuer.company_id1_number ?: ""),
+        companyId1Number = clientOrIssuer.company_id1_number?.let { TextFieldValue(text = it)},
         companyId2Label = TextFieldValue(text = clientOrIssuer.company_id2_label ?: "N° TVA"),
-        companyId2Number = TextFieldValue(text = clientOrIssuer.company_id2_number ?: ""),
+        companyId2Number = clientOrIssuer.company_id2_number?.let { TextFieldValue(text = it)},
     )
 }
 

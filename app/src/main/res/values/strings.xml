@@ -189,7 +189,7 @@
     </string>
     <string name="account_button_create"> Créer mon compte </string>
     <string name="alert_dialog_delete"> Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible. </string>
-    <string name="alert_dialog_delete_confirm"> Oui </string>
+    <string name="alert_dialog_delete_confirm"> Oui, supprimer</string>
     <string name="alert_dialog_delete_cancel"> Non </string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>

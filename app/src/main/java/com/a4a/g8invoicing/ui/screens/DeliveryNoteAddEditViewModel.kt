@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
@@ -15,6 +16,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import dagger.hilt.android.internal.Contexts.getApplication
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -37,11 +39,10 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     private var id: String? = savedStateHandle["itemId"]
     private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteState())
     val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
-
     init {
         var newDocumentId: Long? = null
         if (id == null) {
-            newDocumentId = deliveryNoteDataSource.saveDeliveryNote()
+            newDocumentId = deliveryNoteDataSource.createNewDeliveryNote()
             newDocumentId?.let {
                 linkToFakeProduct(deliveryNoteDataSource, viewModelScope, it)
             }

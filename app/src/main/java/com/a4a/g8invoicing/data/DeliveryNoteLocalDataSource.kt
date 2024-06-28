@@ -1,10 +1,12 @@
 package com.a4a.g8invoicing.data
 
+import android.widget.Toast
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -172,7 +174,7 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override fun saveDeliveryNote(): Long? {
+    override fun createNewDeliveryNote(): Long? {
         deliveryNoteQueries.saveDeliveryNote(
             delivery_note_id = null,
             number = null,
@@ -267,15 +269,16 @@ class DeliveryNoteLocalDataSource(
     override suspend fun deleteDeliveryNotes(deliveryNotes: List<DeliveryNoteState>) {
         withContext(Dispatchers.IO) {
             try {
-                deliveryNotes.forEach {deliveryNote ->
+                deliveryNotes.forEach { deliveryNote ->
                     deliveryNoteQueries.deleteDeliveryNote(id = deliveryNote.documentId.toLong())
                     deliveryNoteProductQueries.deleteAllProductsLinkedToADeliveryNote(deliveryNote.documentId.toLong())
-                    deliveryNote.documentProducts.filter { it.id != null }.forEach { documentProduct ->
-                        deleteDeliveryNoteProduct(
-                            deliveryNote.documentId.toLong(),
-                            documentProduct.id!!.toLong()
-                        )
-                    }
+                    deliveryNote.documentProducts.filter { it.id != null }
+                        .forEach { documentProduct ->
+                            deleteDeliveryNoteProduct(
+                                deliveryNote.documentId.toLong(),
+                                documentProduct.id!!.toLong()
+                            )
+                        }
                 }
             } catch (cause: Throwable) {
             }
@@ -324,7 +327,13 @@ class DeliveryNoteLocalDataSource(
     }
 
     private fun getExistingIssuerId(): Long? {
-        return clientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
+        var issuerId: Long? = null
+        try {
+            issuerId = clientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
+        } catch (e: Exception) {
+            println("Fetching result failed with exception: ${e.localizedMessage}")
+        }
+        return issuerId
     }
 }
 

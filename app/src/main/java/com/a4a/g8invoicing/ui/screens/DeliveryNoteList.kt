@@ -56,10 +56,7 @@ fun DeliveryNoteList(
                 navController = navController,
                 selectedMode = selectedMode.value,
                 onClickDelete = {
-                    //openAlertDialog.value = true
-                    onClickDelete(selectedItems.toList())
-                    selectedItems.clear()
-                    selectedMode.value = false
+                    openAlertDialog.value = true
                 },
                 onClickDuplicate = {
                     onClickDuplicate(selectedItems.toList())

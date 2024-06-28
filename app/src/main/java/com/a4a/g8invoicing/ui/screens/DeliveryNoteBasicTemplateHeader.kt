@@ -93,11 +93,11 @@ fun DeliveryNoteBasicTemplateHeader(
                     onLongClick = {
                     }
                 )
-                .padding(top = 10.dp)
+                .padding(top = 10.dp, end = 20.dp)
                 .weight(1f)
                 .fillMaxWidth(0.3f)
         ) {
-            BuildClientOrIssuerInTemplate(uiState.issuer ?: fakeIssuer())
+            BuildClientOrIssuerInTemplate(uiState.issuer)
         }
 
         Column(
@@ -136,42 +136,3 @@ fun DeliveryNoteBasicTemplateHeader(
         }
     }
 }
-
-@Composable
-private fun fakeClient() =
-    ClientOrIssuerState(
-        id = null,
-        firstName = TextFieldValue(text = stringResource(id = R.string.document_default_client_firstName)),
-        name = TextFieldValue(text = stringResource(id = R.string.document_default_client_name)),
-        address1 = TextFieldValue(text = stringResource(id = R.string.document_default_client_address1)),
-        address2 = null,
-        zipCode = TextFieldValue(text = stringResource(id = R.string.document_default_client_zipCode)),
-        city = TextFieldValue(text = stringResource(id = R.string.document_default_client_city)),
-        phone = TextFieldValue(text = stringResource(id = R.string.document_default_client_phone)),
-        email = TextFieldValue(text = stringResource(id = R.string.document_default_client_email)),
-        notes = TextFieldValue(text = stringResource(id = R.string.document_default_client_notes)),
-        companyId1Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number1)),
-        companyId2Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number2)),
-    )
-
-@Composable
-private fun fakeIssuer() =
-    ClientOrIssuerState(
-        // Fill with dummy values to show how it looks
-        id = null,
-        firstName = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_firstName)),
-        name = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_name)),
-        address1 = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_address1)),
-        address2 = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_address2)),
-        zipCode = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_zipCode)),
-        city = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_city)),
-        phone = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_phone)),
-        email = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_email)),
-        notes = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_notes)),
-        companyId1Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number1)),
-        companyId2Label = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = stringResource(id = R.string.document_default_issuer_company_number2)),
-    )

@@ -53,16 +53,17 @@ fun DocumentProductListItem(
         Row(
             modifier = Modifier
                 .padding(
-                    start = 30.dp,
+                    start = 20.dp,
                     end = 30.dp,
                     top = 10.dp,
                     bottom = 10.dp
                 ),
-            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(space = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = documentProduct.quantity.toString()
+                text = documentProduct.quantity.toString(),
+                fontWeight = FontWeight.SemiBold
             )
             Text(
                 modifier = Modifier.weight(1F),

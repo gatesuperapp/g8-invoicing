@@ -15,7 +15,7 @@ interface DeliveryNoteLocalDataSourceInterface {
     fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?>
     fun fetchDeliveryNote(id: Long): DeliveryNoteState?
     fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>
-    fun saveDeliveryNote(): Long?
+    fun createNewDeliveryNote(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDeliveryNote(documentProduct: DocumentProductState,  deliveryNoteId: Long?)
     suspend fun duplicateDeliveryNotes(deliveryNotes: List<DeliveryNoteState>): Long?
     suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState)

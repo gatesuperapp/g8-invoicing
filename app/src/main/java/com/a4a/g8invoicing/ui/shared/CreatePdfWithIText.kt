@@ -14,13 +14,16 @@ import com.a4a.g8invoicing.ui.screens.FooterRowName
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.itextpdf.kernel.colors.Color
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
+import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.borders.SolidBorder
@@ -28,13 +31,15 @@ import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
-import com.itextpdf.layout.properties.BorderRadius
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import com.itextpdf.layout.properties.VerticalAlignment
+import com.itextpdf.layout.renderer.CellRenderer
+import com.itextpdf.layout.renderer.DrawContext
 import java.io.File
 import java.math.BigDecimal
 import java.math.RoundingMode
+
 
 const val fileNameBeforeNumbering = "BL1.pdf"
 const val fileNameAfterNumbering = "BL.pdf"
@@ -74,7 +79,7 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
 }
 
 fun createTitle(documentNumber: String, font: PdfFont): Paragraph {
-    return Paragraph(Strings.get(R.string.delivery_note_number) + documentNumber)
+    return Paragraph(Strings.get(R.string.delivery_note_number) + " " + documentNumber)
         .setFont(font)
         .setFontSize(20F)
         .setMarginBottom(-10F)
@@ -92,40 +97,95 @@ fun createIssuerAndClientTable(
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
         .setMarginBottom(40F)
+        .setFixedLayout()
 
-    val issuerName = Text(issuer.firstName?.text + issuer.name.text).setFont(font)
-    val issuerData = Text(
-        "\n" +
-                issuer.address1?.text + "\n" +
-                issuer.address2?.text + "\n" +
-                issuer.zipCode?.text + " " + issuer.city?.text + "\n" +
-                issuer.phone?.text + "\n" +
-                issuer.companyId1Label?.text + " : " + issuer.companyId1Number?.text + "\n" +
-                issuer.companyId2Label?.text + " : " + issuer.companyId2Number?.text + "\n"
-    )
-
-    val issuer = Paragraph(issuerName)
-        .add(issuerData)
+    val issuerFirstName = issuer.firstName?.text?.let { Text("$it ").setFont(font) }
+    val issuerName = Text(issuer.name.text + "\n").setFont(font)
+    val issuerAddress1 = issuer.address1?.text?.let { Text(it + "\n") }
+    val issuerAddress2 = issuer.address2?.text?.let { Text(it + "\n") }
+    val issuerZipCode = issuer.zipCode?.text?.let { Text("$it ") }
+    val issuerCity = issuer.city?.text?.let { Text(it + "\n") }
+    val issuerPhone = issuer.phone?.text?.let { Text(it + "\n") }
+    val issuerCompanyLabel1 = issuer.companyId1Number?.text?.let {
+        Text(issuer.companyId1Label?.text + " : " + it + "\n")
+    }
+    val issuerCompanyLabel2 = issuer.companyId2Number?.text?.let {
+        Text(issuer.companyId2Label?.text + " : " + it + "\n")
+    }
+    val issuer = Paragraph()
         .setFixedLeading(16F)
+        .setPaddingRight(40f)
+    issuerFirstName?.let {
+        issuer.add(it)
+    }
+    issuerName?.let {
+        issuer.add(it)
+    }
+    issuerAddress1?.let {
+        issuer.add(it)
+    }
+    issuerAddress2?.let {
+        issuer.add(it)
+    }
+    issuerZipCode?.let {
+        issuer.add(it)
+    }
+    issuerCity?.let {
+        issuer.add(it)
+    }
+    issuerPhone?.let {
+        issuer.add(it)
+    }
+    issuerCompanyLabel1?.let {
+        issuer.add(it)
+    }
+    issuerCompanyLabel2?.let {
+        issuer.add(it)
+    }
 
-
-    val clientName = Text(client.firstName?.text + client.name.text).setFont(font)
-    val clientData = Text(
-        "\n" +
-                client.address1?.text + "\n" +
-                client.address2?.text + "\n" +
-                client.zipCode?.text + " " + client.city?.text + "\n" +
-                client.phone?.text + "\n" +
-                client.companyId1Label?.text + " : " + client.companyId1Number?.text + "\n" +
-                client.companyId2Label?.text + " : " + client.companyId2Number?.text + "\n"
-    )
-
-    val client = Paragraph(clientName)
-        .add(clientData)
+    val clientFirstName = client.firstName?.text?.let { Text("$it ").setFont(font) }
+    val clientName = Text(client.name.text + "\n").setFont(font)
+    val clientAddress1 = client.address1?.text?.let { Text(it + "\n") }
+    val clientAddress2 = client.address2?.text?.let { Text(it + "\n") }
+    val clientZipCode = client.zipCode?.text?.let { Text("$it ") }
+    val clientCity = client.city?.text?.let { Text(it + "\n") }
+    val clientPhone = client.phone?.text?.let { Text(it + "\n") }
+    val clientCompanyLabel1 = client.companyId1Number?.text?.let {
+        Text(client.companyId1Label?.text + " : " + it + "\n")
+    }
+    val clientCompanyLabel2 = client.companyId2Number?.text?.let {
+        Text(client.companyId2Label?.text + " : " + it + "\n")
+    }
+    val client = Paragraph()
         .setFixedLeading(16F)
         .setPadding(12f)
-        .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 2f))
-        .setBorderRadius(BorderRadius(24f))
+    clientFirstName?.let {
+        client.add(it)
+    }
+    clientName?.let {
+        client.add(it)
+    }
+    clientAddress1?.let {
+        client.add(it)
+    }
+    clientAddress2?.let {
+        client.add(it)
+    }
+    clientZipCode?.let {
+        client.add(it)
+    }
+    clientCity?.let {
+        client.add(it)
+    }
+    clientPhone?.let {
+        client.add(it)
+    }
+    clientCompanyLabel1?.let {
+        client.add(it)
+    }
+    clientCompanyLabel2?.let {
+        client.add(it)
+    }
 
     issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER))
     issuerAndClientTable.addCell(
@@ -143,16 +203,18 @@ fun createIssuerAndClientTable(
             .setBorder(Border.NO_BORDER)
             .add(issuer)
     )
-    return issuerAndClientTable.addCell(
-        Cell()
-            .setBorder(Border.NO_BORDER)
-            .add(client)
-            .setTextAlignment(TextAlignment.CENTER)
-    )
+
+    val cell = Cell()
+        .setBorder(Border.NO_BORDER)
+        .add(client)
+        .setTextAlignment(TextAlignment.CENTER)
+    cell.setNextRenderer(RoundedCellRenderer(cell, ColorConstants.LIGHT_GRAY, false))
+
+    return issuerAndClientTable.addCell(cell)
 }
 
 fun createReference(orderNumber: String, font: PdfFont): Paragraph {
-    val reference = Text(Strings.get(R.string.document_order_number)).setFont(font)
+    val reference = Text(Strings.get(R.string.document_order_number) + " : ").setFont(font)
     return Paragraph(reference)
         .add(orderNumber)
 }
@@ -164,14 +226,15 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         .useAllAvailableWidth()
         .setFontSize(10F)
         .setMarginBottom(10f)
+        .setFixedLayout()
 
     productsTable
-        .addCustomCell("Description", alignment = TextAlignment.LEFT, isBold = true)
-        .addCustomCell("Qté", isBold = true)
-        .addCustomCell("Unité", isBold = true)
-        .addCustomCell("TVA", isBold = true)
-        .addCustomCell("PU HT", isBold = true)
-        .addCustomCell("Total HT", isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_description), alignment = TextAlignment.LEFT, isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_quantity), isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_unit), isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_tax_rate), isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_unit_price_without_tax), isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_total_price_without_tax), isBold = true)
 
     products.forEach {
         val itemName = Text(it.name.text)
@@ -279,14 +342,11 @@ fun Table.addCustomCell(
     alignment: TextAlignment = TextAlignment.RIGHT,
     isBold: Boolean = false,
 ): Table {
-    val paddingLeft = if (alignment == TextAlignment.LEFT) {
-        6f
-    } else 0f
-    val paddingRight = if (alignment == TextAlignment.RIGHT) {
-        6f
-    } else 0f
+    val paddingLeft =   6f
+    val paddingRight = 6f
+
     val textToAdd = if (text != null) {
-        Paragraph(text)
+        Paragraph(text).setFixedLeading(14F)
     } else paragraph
 
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
@@ -401,5 +461,41 @@ fun deleteFile(fileName: String) {
         Log.e(ContentValues.TAG, "File deleted successfully: ${file.absolutePath}")
     } else {
         Log.e(ContentValues.TAG, "Error deleting file. ${file.absolutePath}")
+    }
+}
+
+
+class RoundedCellRenderer(modelElement: Cell, color: Color, isColoredBackground: Boolean) :
+    CellRenderer(modelElement) {
+    private var isColoredBackground: Boolean
+    private var color: Color
+
+    init {
+        modelElement.setBorder(Border.NO_BORDER)
+        this.isColoredBackground = isColoredBackground
+        this.color = color
+    }
+
+    override fun drawBackground(drawContext: DrawContext) {
+        val rect: Rectangle = occupiedAreaBBox
+        val canvas: PdfCanvas = drawContext.canvas
+        canvas
+            .saveState()
+            .roundRectangle(
+                rect.left + 2.5,
+                rect.bottom + 2.5,
+                rect.width - 5.0,
+                rect.height - 5.0,
+                24.0
+            )
+            .setStrokeColor(color)
+            .setLineWidth(1.5f)
+        if (isColoredBackground) {
+            canvas.setFillColor(color)
+                .fillStroke()
+        } else {
+            canvas.stroke()
+        }
+        canvas.restoreState()
     }
 }

@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -88,6 +89,7 @@ fun calculateLimits(
     return arrayOfLimits
 }
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DeliveryNoteBasicTemplate(
@@ -185,7 +187,6 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState?) {
         modifier = Modifier
             .padding(bottom = 2.dp)
             .wrapContentHeight(),
-        textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.textForDocumentsImportant,
         text = (clientOrIssuer?.firstName?.text ?: "") + " " + (clientOrIssuer?.name?.text ?: "")

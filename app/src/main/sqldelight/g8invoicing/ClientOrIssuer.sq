@@ -91,6 +91,8 @@ getLastInsertedRowId:
 SELECT last_insert_rowid();
 
 getLastInsertedIssuer:
-SELECT last_insert_rowid()
+SELECT client_or_issuer_id
 FROM ClientOrIssuer
-WHERE type = 'issuer';
+WHERE type = 'issuer'
+ORDER BY client_or_issuer_id DESC
+LIMIT 1;
