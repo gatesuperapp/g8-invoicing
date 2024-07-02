@@ -1,7 +1,6 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.a4a.g8invoicing.data.ClientOrIssuerState
 import java.math.BigDecimal
 
 // This Client is created to manipulate client data,
@@ -15,8 +14,8 @@ abstract class Document {
     abstract var documentNumber: TextFieldValue // Mandatory to control placing the cursor in the field
     abstract var documentDate: String
     abstract var orderNumber: TextFieldValue
-    abstract var issuer: ClientOrIssuerState
-    abstract var client: ClientOrIssuerState
+    abstract var issuer: DocumentClientOrIssuerState
+    abstract var client: DocumentClientOrIssuerState
     abstract var documentProducts: List<DocumentProductState>
     abstract var documentPrices: DocumentPrices
     abstract var currency: TextFieldValue

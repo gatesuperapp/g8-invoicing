@@ -9,7 +9,7 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.data.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.FooterRowName
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
@@ -90,8 +90,8 @@ fun createDate(date: String): Paragraph {
 }
 
 fun createIssuerAndClientTable(
-    issuer: ClientOrIssuerState,
-    client: ClientOrIssuerState,
+    issuer: DocumentClientOrIssuerState,
+    client: DocumentClientOrIssuerState,
     font: PdfFont,
 ): Table {
     val issuerAndClientTable = Table(2)

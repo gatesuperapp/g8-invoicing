@@ -65,3 +65,10 @@ WHERE document_client_or_issuer_id = :id;
 
 getLastInsertedRowId:
 SELECT last_insert_rowid();
+
+getLastInsertedIssuer:
+SELECT client_or_issuer_id
+FROM ClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY client_or_issuer_id DESC
+LIMIT 1;

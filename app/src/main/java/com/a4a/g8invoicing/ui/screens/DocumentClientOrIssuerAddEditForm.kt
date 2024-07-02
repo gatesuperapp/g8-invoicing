@@ -24,12 +24,11 @@ import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 
 @Composable
-fun ClientOrIssuerAddEditForm(
-    clientOrIssuerUiState: DocumentClientOrIssuerState,
+fun DocumentClientOrIssuerAddEditForm(
+    clientOrIssuerUiState: ClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isDisplayedInBottomSheet: Boolean = false,

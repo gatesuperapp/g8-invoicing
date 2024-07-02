@@ -12,8 +12,8 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 @Composable
 fun DocumentProductListContent(
     documentProducts: List<DocumentProductState>,
-    onItemClick: (DocumentProductState) -> Unit,
-    onClickDeleteDocumentProduct: (Int) -> Unit,
+    onClickItem: (DocumentProductState) -> Unit,
+    onClickDelete: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -29,11 +29,11 @@ fun DocumentProductListContent(
             DocumentProductListItem(
                 documentProduct = documentProduct,
                 onClickDocumentProduct = {
-                    onItemClick(documentProduct)
+                    onClickItem(documentProduct)
                 },
                 onClickDeleteDocumentProduct = {
                     documentProduct.id?.let {
-                        onClickDeleteDocumentProduct(it)
+                        onClickDelete(it)
                     }
                 }
             )

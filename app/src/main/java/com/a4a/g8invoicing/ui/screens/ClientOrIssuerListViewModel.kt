@@ -1,10 +1,9 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
-import com.a4a.g8invoicing.data.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -99,7 +98,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                clientOrIssuerDataSource.duplicateClientsOrIssuers(selectedItems)
+                clientOrIssuerDataSource.duplicateClients(selectedItems)
             } catch (e: Exception) {
                 println("Duplicating clients failed with exception: ${e.localizedMessage}")
             }

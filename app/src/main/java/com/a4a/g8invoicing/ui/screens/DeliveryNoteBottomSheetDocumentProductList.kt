@@ -23,7 +23,8 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 fun DeliveryNoteBottomSheetDocumentProductList(
     list: List<DocumentProductState>,
     onClickBack: () -> Unit,
-    onClickChooseButton: () -> Unit, // Add a new product to the document (product list)
+    onClickNew: () -> Unit, // Add a new product to the document (product list)
+    onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)
     onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
     onClickDelete: (Int) -> Unit, // Delete a document product
 ) {
@@ -46,8 +47,14 @@ fun DeliveryNoteBottomSheetDocumentProductList(
                 )
             }
         }
+        ButtonAddOrChoose(
+            onClickNew,
+            hasBorder = true,
+            hasBackground = false,
+            stringResource(id = R.string.document_bottom_sheet_list_add_new)
+        )
         ButtonAddOrChoose( // Choosing a product to add to the document
-            onClickChooseButton,
+            onClickChooseExisting,
             hasBorder = false,
             hasBackground = true,
             stringResource(id = R.string.document_bottom_sheet_document_product_add)
@@ -58,8 +65,8 @@ fun DeliveryNoteBottomSheetDocumentProductList(
         // Display the existing list
         DocumentProductListContent(
             documentProducts = list,
-            onItemClick = onClickDocumentProduct,
-            onClickDeleteDocumentProduct = onClickDelete
+            onClickItem = onClickDocumentProduct,
+            onClickDelete = onClickDelete
         )
     }
 }

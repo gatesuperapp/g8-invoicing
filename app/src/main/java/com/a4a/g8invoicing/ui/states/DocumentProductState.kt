@@ -3,6 +3,9 @@ package com.a4a.g8invoicing.ui.states
 import androidx.compose.ui.text.input.TextFieldValue
 import java.math.BigDecimal
 
+// The equivalent of ProductState, but used to save the products
+// linked to the documents, so the product is not deleted from the doc
+// when deleted from the product list.
 data class DocumentProductState(
     var id: Int? = null,
     var name: TextFieldValue = TextFieldValue(""),

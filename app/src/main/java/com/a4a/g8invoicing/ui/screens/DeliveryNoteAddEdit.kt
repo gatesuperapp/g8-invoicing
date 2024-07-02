@@ -39,7 +39,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
@@ -47,7 +46,9 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionComponents
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -62,23 +63,23 @@ fun DeliveryNoteAddEdit(
     deliveryNote: DeliveryNoteState,
     clientList: MutableList<ClientOrIssuerState>,
     issuerList: MutableList<ClientOrIssuerState>,
-    clientUiState: ClientOrIssuerState,
-    issuerUiState: ClientOrIssuerState,
+    documentClientUiState: DocumentClientOrIssuerState,
+    documentIssuerUiState: DocumentClientOrIssuerState,
     taxRates: List<BigDecimal>,
     products: MutableList<ProductState>,
     isNewDeliveryNote: Boolean,
-    onClickShare: () -> Unit,
     onClickBack: () -> Unit,
-    onClickExport: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onProductClick: (ProductState) -> Unit,
     documentProductUiState: DocumentProductState,
     onDocumentProductClick: (DocumentProductState) -> Unit,
+    onDocumentClientOrIssuerClick: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
+    onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement) -> Unit,
-    onClickDoneForm: (TypeOfBottomSheetForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
@@ -141,15 +142,17 @@ fun DeliveryNoteAddEdit(
                 },
                 clients = clientList,
                 issuers = issuerList,
-                clientUiState = clientUiState,
-                issuerUiState = issuerUiState,
+                documentClientUiState = documentClientUiState,
+                documentIssuerUiState = documentIssuerUiState,
                 products = products,
                 taxRates = taxRates,
                 onValueChange = onValueChange,
                 onProductClick = onProductClick,
                 documentProductUiState = documentProductUiState,
                 onDocumentProductClick = onDocumentProductClick,
+                onDocumentClientOrIssuerClick = onDocumentClientOrIssuerClick,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
+                onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                 currentClientId = deliveryNote.client.id,
                 currentIssuerId = deliveryNote.issuer.id,
                 currentProductsIds = deliveryNote.documentProducts.mapNotNull { it.productId },

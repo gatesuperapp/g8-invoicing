@@ -30,8 +30,9 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-// It's a bit of a duplicate of ProductAddEditForm, but here we must use "DocumentProductState"
-// instead of "ProductState"
+// It's a bit of a duplicate of ProductAddEditForm (the quantity has been added & there's some styling diff),
+// but needed as in the documents we must use "DocumentProductState" instead of "ProductState"
+// so the product is not deleted from the doc when deleted from the product list.
 @Composable
 fun DocumentProductAddEditForm(
     documentProduct: DocumentProductState,

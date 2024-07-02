@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.app.Application
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
@@ -9,14 +8,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
-import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import dagger.hilt.android.internal.Contexts.getApplication
+import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -26,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DeliveryNoteAddEditViewModel @Inject constructor(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
-    private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
+    private val documentClientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -86,7 +84,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDeliveryNote(
+                deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
                     deliveryNoteId = _deliveryNoteUiState.value.documentId.toLong()
                 )
@@ -112,6 +110,38 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 fetchDeliveryNoteFromLocalDb(_deliveryNoteUiState.value.documentId.toLong())
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: DocumentClientOrIssuerState) {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            try {
+                deliveryNoteDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                    documentClientOrIssuer = documentClientOrIssuer,
+                    deliveryNoteId = _deliveryNoteUiState.value.documentId.toLong()
+                )
+            } catch (e: Exception) {
+                println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun removeDocumentClientOrIssuerFromLocalDb(documentClientOrIssuerId: Int) {
+        deleteJob?.cancel()
+        deleteJob = viewModelScope.launch {
+            try {
+                deliveryNoteDataSource.deleteDocumentClientOrIssuer(
+                    _deliveryNoteUiState.value.documentId.toLong(),
+                    documentClientOrIssuerId.toLong()
+                )
+                documentClientOrIssuerDataSource.deleteDocumentClientOrIssuer(documentClientOrIssuerId.toLong())
+
+                // useless??
+                fetchDeliveryNoteFromLocalDb(_deliveryNoteUiState.value.documentId.toLong())
+            } catch (e: Exception) {
+                println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -153,11 +183,11 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_CLIENT -> {
-            note = note.copy(client = value as ClientOrIssuerState)
+            note = note.copy(client = value as DocumentClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
-            note = note.copy(issuer = value as ClientOrIssuerState)
+            note = note.copy(issuer = value as DocumentClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ORDER_NUMBER -> {

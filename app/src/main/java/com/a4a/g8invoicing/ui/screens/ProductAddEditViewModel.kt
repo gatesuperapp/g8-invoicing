@@ -219,7 +219,7 @@ class ProductAddEditViewModel @Inject constructor(
 private fun updateProductUiState(
     product: ProductState,
     element: ScreenElement,
-    value: Any,
+    value: Any
 ): ProductState {
     var product = product
     when (element) {

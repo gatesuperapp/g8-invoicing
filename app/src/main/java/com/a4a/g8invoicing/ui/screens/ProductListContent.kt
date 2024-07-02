@@ -12,30 +12,17 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductListContent(
     products: List<ProductState>,
     onProductClick: (ProductState) -> Unit = {},
     onClickNew: () -> Unit = {}, // Used only in documents, clicking the "Add new" button
-    displayTopButton: Boolean = false,
     addProductToSelectedList: (ProductState) -> Unit = {},
     removeProductFromSelectedList: (ProductState) -> Unit = {},
+    displayCheckboxes: Boolean = true, // Will not be displayed when the list is opened from a document
     keyToUnselectAll: Boolean = false,
 ) {
     LazyColumn {
-        if (displayTopButton) {
-            // Display "Add new" button on top of the list
-            // when the list is displayed in documents bottom sheet
-            item {
-                ButtonAddOrChoose(
-                    onClickNew,
-                    hasBorder = true,
-                    hasBackground = false,
-                    stringResource(id = R.string.document_bottom_sheet_list_add_new)
-                )
-            }
-        }
         items(
             items = products,
             key = { product ->
@@ -55,9 +42,9 @@ fun ProductListContent(
                         removeProductFromSelectedList(product)
                     }
                 },
+                displayCheckboxes,
                 keyToUnselectAll
             )
-
 
             HorizontalDivider(
                 thickness = 1.dp,

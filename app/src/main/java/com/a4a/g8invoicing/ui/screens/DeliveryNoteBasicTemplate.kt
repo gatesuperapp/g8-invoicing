@@ -36,9 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
-import com.a4a.g8invoicing.data.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
@@ -182,7 +183,7 @@ enum class FooterRowName {
 }
 
 @Composable
-fun BuildClientOrIssuerInTemplate(clientOrIssuer: ClientOrIssuerState?) {
+fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) {
     Text(
         modifier = Modifier
             .padding(bottom = 2.dp)

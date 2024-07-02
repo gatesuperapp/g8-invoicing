@@ -8,15 +8,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 
 @Composable
 fun ClientOrIssuerListContent(
     clientsOrIssuers: List<ClientOrIssuerState>,
     onItemClick: (ClientOrIssuerState) -> Unit = {},
-    onClickNew: () -> Unit = {}, // Used only in documents, clicking the "Add new" button
-    displayTopButton: Boolean = false,
     addToSelectedList: (ClientOrIssuerState) -> Unit = {},
     removeFromSelectedList: (ClientOrIssuerState) -> Unit = {},
     keyToUnselectAll: Boolean = false,
@@ -24,18 +22,6 @@ fun ClientOrIssuerListContent(
     currentClientOrIssuerId: Int? = null,
 ) {
     LazyColumn {
-        if (displayTopButton) {
-            // Display "Add new" button on top of the list
-            // when the list is displayed in documents bottom sheet
-            item {
-                ButtonAddOrChoose(
-                    onClickNew,
-                    hasBorder = true,
-                    hasBackground = false,
-                    stringResource(id = R.string.document_bottom_sheet_list_add_new)
-                )
-            }
-        }
         items(
             items = clientsOrIssuers,
             key = { client ->

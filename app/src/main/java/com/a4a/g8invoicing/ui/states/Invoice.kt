@@ -1,11 +1,8 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.core.content.ContextCompat.getString
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.data.ClientOrIssuerState
-import java.security.AccessController.getContext
 
 
 // This Client is created to manipulate client data,

@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.states
 
-import com.a4a.g8invoicing.data.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.Message
 
 data class ClientsOrIssuerUiState(

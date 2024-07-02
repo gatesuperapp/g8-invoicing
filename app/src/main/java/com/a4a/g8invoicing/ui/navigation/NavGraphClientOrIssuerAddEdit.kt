@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEdit
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.screens.ItemOrDocumentType
 
 fun NavGraphBuilder.clientOrIssuerAddEdit(
     navController: NavController,
@@ -33,15 +34,15 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
                 viewModel.updateClientOrIssuerState(pageElement, value, ClientOrIssuerType.CLIENT)
             },
             placeCursorAtTheEndOfText = { pageElement ->
-                viewModel.updateCursorOfClientOrIssuerState(pageElement)
+                viewModel.updateCursor(pageElement, ItemOrDocumentType.CLIENT_OR_ISSUER)
             },
             onClickDone = {
                 //  we don't have to pass the object as the
                 //  ViewModel is already updated with latest values
                 if (isNew) {
-                    viewModel.saveInLocalDb(ClientOrIssuerType.CLIENT)
+                    viewModel.saveInLocalDb()
                 } else {
-                    viewModel.updateClientInInLocalDb()
+                    viewModel.updateClientOrIssuerInInLocalDb()
                 }
                 goToPreviousScreen(
                     "result",

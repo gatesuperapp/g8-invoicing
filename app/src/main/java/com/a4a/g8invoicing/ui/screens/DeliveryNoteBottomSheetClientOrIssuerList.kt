@@ -11,7 +11,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.a4a.g8invoicing.data.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
@@ -22,7 +22,6 @@ fun DeliveryNoteBottomSheetClientOrIssuerList(
     pageElement: ScreenElement,
     onClickBack: () -> Unit,
     onClientOrIssuerClick: (ClientOrIssuerState) -> Unit,
-    onClickNewClientOrIssuer: () -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
 ) {
@@ -48,8 +47,6 @@ fun DeliveryNoteBottomSheetClientOrIssuerList(
         ClientOrIssuerListContent(
             clientsOrIssuers = list,
             onItemClick = onClientOrIssuerClick,
-            onClickNew = onClickNewClientOrIssuer,
-            displayTopButton = true,  // Display "Add new" button, that will open the Add/Edit screen
             isCheckboxDisplayed = false, // Don't display checkboxes
             currentClientOrIssuerId = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                 currentClientId

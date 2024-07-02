@@ -3,7 +3,6 @@ package com.a4a.g8invoicing.ui.states
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.data.ClientOrIssuerState
 
 
 // This Client is created to manipulate client data,
@@ -16,8 +15,8 @@ data class DeliveryNoteState(
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
     override var documentDate: String = Strings.get(R.string.document_default_date),
     override var orderNumber: TextFieldValue = TextFieldValue(),
-    override var issuer: ClientOrIssuerState = ClientOrIssuerState(),
-    override var client: ClientOrIssuerState = ClientOrIssuerState(),
+    override var issuer: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
+    override var client: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
     override var documentProducts: List<DocumentProductState> = listOf(),
     override var documentPrices: DocumentPrices = DocumentPrices(),
     override var currency: TextFieldValue = TextFieldValue(),

@@ -36,13 +36,12 @@ fun ProductListItem(
     product: ProductState,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
-    keyToResetCheckboxes: Boolean
+    displayCheckboxes: Boolean,
+    keyToResetCheckboxes: Boolean,
 ) {
 
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
-
-
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -97,14 +96,16 @@ fun ProductListItem(
                 horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    checked = checkedState.value,
-                    onCheckedChange =
-                    {
-                        checkedState.value = it
-                        onItemCheckboxClick(it)
-                    },
-                )
+                if (displayCheckboxes) {
+                    Checkbox(
+                        checked = checkedState.value,
+                        onCheckedChange =
+                        {
+                            checkedState.value = it
+                            onItemCheckboxClick(it)
+                        },
+                    )
+                }
                 Text(
                     modifier = Modifier.weight(1F),
                     text = product.name.text,

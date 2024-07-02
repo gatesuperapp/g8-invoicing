@@ -1,4 +1,4 @@
-CREATE TABLE DeliveryNoteProduct (
+CREATE TABLE LinkDeliveryNoteToDocumentProduct (
   id INTEGER PRIMARY KEY NOT NULL,
   delivery_note_id INTEGER NOT NULL,
   document_product_id INTEGER NOT NULL,
@@ -8,27 +8,27 @@ CREATE TABLE DeliveryNoteProduct (
           ON DELETE CASCADE
 );
 
-INSERT INTO DeliveryNoteProduct (id, delivery_note_id, document_product_id)
+INSERT INTO LinkDeliveryNoteToDocumentProduct (id, delivery_note_id, document_product_id)
 VALUES (1, 1, 1),
 (2, 1, 2);
 
 getProductsLinkedToDeliveryNote:
 SELECT *
-FROM DeliveryNoteProduct
+FROM LinkDeliveryNoteToDocumentProduct
 WHERE delivery_note_id = :delivery_note_id;
 
 saveProductLinkedToDeliveryNote:
 INSERT
-INTO DeliveryNoteProduct (id, delivery_note_id, document_product_id)
+INTO LinkDeliveryNoteToDocumentProduct (id, delivery_note_id, document_product_id)
 VALUES (?, ?, ?);
 
 deleteProductLinkedToDeliveryNote:
-DELETE FROM DeliveryNoteProduct
+DELETE FROM LinkDeliveryNoteToDocumentProduct
 WHERE  delivery_note_id = :delivery_note_id
 AND document_product_id = :document_product_id;
 
 deleteAllProductsLinkedToADeliveryNote:
-DELETE FROM DeliveryNoteProduct
+DELETE FROM LinkDeliveryNoteToDocumentProduct
 WHERE  delivery_note_id = :delivery_note_id;
 
 lastInsertRowId:

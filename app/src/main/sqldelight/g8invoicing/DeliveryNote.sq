@@ -3,21 +3,14 @@ CREATE TABLE DeliveryNote (
   number TEXT,
   delivery_date TEXT,
   order_number TEXT,
-  document_issuer_id INTEGER,
-  document_client_id INTEGER,
   currency TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
-  deleted_at REAL DEFAULT (datetime('now', 'localtime')),
+  deleted_at REAL DEFAULT (datetime('now', 'localtime')));
 
-    FOREIGN KEY(document_client_id)
-          REFERENCES TaxRate(product_tax_id)
-          ON DELETE CASCADE
-);
-
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, document_issuer_id, document_client_id, currency)
-VALUES (1, "001", '01/01/2023', 'ONXFHGG11', 1, 2, "€");
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
+VALUES (1, "001", '01/01/2023', 'ONXFHGG11',  "€");
 
 
 getDeliveryNote:
@@ -34,16 +27,14 @@ SELECT delivery_note_id
 FROM DeliveryNote;
 
 saveDeliveryNote:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, document_issuer_id, document_client_id, currency)
-VALUES (?,  ?,  ?, ?, ?, ?, ?);
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
+VALUES (?,  ?,  ?, ?, ?);
 
 updateDeliveryNote:
 UPDATE DeliveryNote
 SET number = :number,
     delivery_date = :delivery_date,
     order_number = :order_number,
-    document_issuer_id = :document_issuer_id,
-    document_client_id = :document_client_id,
     currency =: currency
 WHERE
     delivery_note_id = :delivery_note_id;
