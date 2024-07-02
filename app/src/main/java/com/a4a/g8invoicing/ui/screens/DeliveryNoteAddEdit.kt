@@ -154,7 +154,7 @@ fun DeliveryNoteAddEdit(
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                 onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                 currentClientId = deliveryNote.client.id,
-                currentIssuerId = deliveryNote.issuer.id,
+                currentIssuerId = deliveryNote.documentIssuer.id,
                 currentProductsIds = deliveryNote.documentProducts.mapNotNull { it.productId },
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 bottomFormOnValueChange = bottomFormOnValueChange,

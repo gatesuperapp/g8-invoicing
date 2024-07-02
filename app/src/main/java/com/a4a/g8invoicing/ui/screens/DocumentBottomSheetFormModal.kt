@@ -36,8 +36,8 @@ import java.math.BigDecimal
 @Composable
 fun DocumentBottomSheetFormModal(
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
-    clientUiState: DocumentClientOrIssuerState,
-    issuerUiState: DocumentClientOrIssuerState,
+    documentClientUiState: DocumentClientOrIssuerState,
+    documentIssuerUiState: DocumentClientOrIssuerState,
     documentProduct: DocumentProductState,
     taxRates: List<BigDecimal>?,
     onClickCancel: () -> Unit,
@@ -109,19 +109,19 @@ fun DocumentBottomSheetFormModal(
                 }
             }
             if (typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_CLIENT || typeOfCreation == DocumentBottomSheetTypeOfForm.ADD_CLIENT) {
-                ClientOrIssuerAddEditForm(
-                    clientOrIssuerUiState = clientUiState,
+                DocumentClientOrIssuerAddEditForm(
+                    documentClientOrIssuerState = documentClientUiState,
                     onValueChange = { screenElement, value ->
-                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.CLIENT)
+                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
                     },
                     placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
                     isDisplayedInBottomSheet = true
                 )
             } else if (typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_ISSUER || typeOfCreation == DocumentBottomSheetTypeOfForm.ADD_ISSUER) {
-                ClientOrIssuerAddEditForm(
-                    clientOrIssuerUiState = issuerUiState,
+                DocumentClientOrIssuerAddEditForm(
+                    documentClientOrIssuerState = documentIssuerUiState,
                     onValueChange = { screenElement, value ->
-                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.ISSUER)
+                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
                     },
                     placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
                     isDisplayedInBottomSheet = true

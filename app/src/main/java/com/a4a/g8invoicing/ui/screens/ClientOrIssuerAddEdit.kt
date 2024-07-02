@@ -8,6 +8,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionDone
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 
 @Composable
 fun ClientOrIssuerAddEdit(

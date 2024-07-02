@@ -147,8 +147,8 @@ fun DocumentBottomSheetSlideInNextComponent(
     if (isDocumentFormVisible) {
         DocumentBottomSheetFormModal(
             typeOfCreation = typeOfCreation,
-            clientUiState = clientUiState,
-            issuerUiState = issuerUiState,
+            documentClientUiState = clientUiState,
+            documentIssuerUiState = issuerUiState,
             documentProduct = documentProductUiState,
             taxRates = params?.get(2) as List<BigDecimal>?,
             bottomFormOnValueChange = bottomFormOnValueChange,

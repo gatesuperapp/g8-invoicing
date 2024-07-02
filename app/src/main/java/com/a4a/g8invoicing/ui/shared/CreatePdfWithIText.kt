@@ -58,7 +58,7 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
 
     document.add(createTitle(deliveryNote.documentNumber.text, dmRegular))
     document.add(createDate(deliveryNote.documentDate))
-    document.add(createIssuerAndClientTable(deliveryNote.issuer, deliveryNote.client, dmMedium))
+    document.add(createIssuerAndClientTable(deliveryNote.documentIssuer, deliveryNote.client, dmMedium))
     if (deliveryNote.orderNumber.text.isNotEmpty()) {
         document.add(createReference(deliveryNote.orderNumber.text, dmMedium))
     }

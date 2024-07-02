@@ -38,7 +38,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             .collectAsStateWithLifecycle()
 
         val clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
-        val documentClientUiState by clientOrIssuerAddEditViewModel.documentClientOrIssuerUiState
+        val documentClientUiState by clientOrIssuerAddEditViewModel.documentClientUiState
         val documentIssuerUiState by clientOrIssuerAddEditViewModel.documentIssuerUiState
 
         val productListViewModel: ProductListViewModel = hiltViewModel()
@@ -79,7 +79,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             navController = navController,
             deliveryNote = deliveryNoteUiState,
             isNewDeliveryNote = backStackEntry.arguments?.getString("itemId") == null,
-            onClickShare = {},
             onClickBack = {
                 deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
                 onClickBack()
@@ -107,6 +106,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             documentProductUiState = documentProduct, // Used when choosing a product or creating new product from the bottom sheet
             onClickDeleteDocumentProduct = {
                 deliveryNoteViewModel.removeDocumentProductFromLocalDb(it)
+            },
+            onClickDeleteDocumentClientOrIssuer = {
+                deliveryNoteViewModel.removeDocumentClientOrIssuerFromLocalDb(it)
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
@@ -182,8 +184,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     it,
                     ProductType.DOCUMENT_PRODUCT
                 )
-            },
-            onClickExport = {}
+            }
         )
     }
 }

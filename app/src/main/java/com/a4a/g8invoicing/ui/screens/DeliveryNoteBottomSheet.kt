@@ -179,7 +179,6 @@ fun DeliveryNoteBottomSheet(
                 datePickerState = datePickerState,
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId,
-                currentProductsIds = currentProductsIds,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 productPlaceCursorAtTheEndOfText = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,

@@ -63,12 +63,13 @@ delete:
 DELETE FROM DocumentClientOrIssuer
 WHERE document_client_or_issuer_id = :id;
 
-getLastInsertedRowId:
+lastInsertedRowId:
 SELECT last_insert_rowid();
 
 getLastInsertedIssuer:
-SELECT client_or_issuer_id
+SELECT *
 FROM ClientOrIssuer
 WHERE type = 'issuer'
 ORDER BY client_or_issuer_id DESC
 LIMIT 1;
+

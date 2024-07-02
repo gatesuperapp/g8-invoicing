@@ -44,7 +44,7 @@ fun DeliveryNoteBottomSheetContent(
         FormInput(
             label = stringResource(id = R.string.document_issuer),
             inputType = ForwardElement(
-                text = deliveryNote.issuer.let {
+                text = deliveryNote.documentIssuer.let {
                     it.name.text + " " + (it.firstName?.text ?: "")
                 } ?: "",
             ),

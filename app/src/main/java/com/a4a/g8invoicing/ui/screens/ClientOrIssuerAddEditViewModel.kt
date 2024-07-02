@@ -29,15 +29,18 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     private val id: String? = savedStateHandle["itemId"]
     private val type: String? = savedStateHandle["type"]
 
-    private val _clientOrIssuerUiState = mutableStateOf(ClientOrIssuerState())
-    val clientUiState: State<ClientOrIssuerState> = _clientOrIssuerUiState
+    private val _clientUiState = mutableStateOf(ClientOrIssuerState())
+    val clientUiState: State<ClientOrIssuerState> = _clientUiState
 
     private val _issuerUiState = mutableStateOf(ClientOrIssuerState())
     val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
-    private val _documentClientOrIssuerUiState = mutableStateOf(DocumentClientOrIssuerState())
-    val documentClientOrIssuerUiState: State<DocumentClientOrIssuerState> =
-        _documentClientOrIssuerUiState
+    private val _documentClientUiState = mutableStateOf(DocumentClientOrIssuerState())
+    val documentClientUiState: State<DocumentClientOrIssuerState> = _documentClientUiState
+
+    private val _documentIssuerUiState = mutableStateOf(DocumentClientOrIssuerState())
+    val documentIssuerUiState: State<DocumentClientOrIssuerState> = _documentIssuerUiState
+
 
     init {
         // When coming from the navigation (NavGraph) we must get the savedStateHandle and init
@@ -53,13 +56,13 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     // Used when sliding the bottom form from documents
     // Editing a document client or issuer
     fun setDocumentClientOrIssuerUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
-        _documentClientOrIssuerUiState.value = documentClientOrIssuer
+        _documentClientUiState.value = documentClientOrIssuer
     }
 
     // Used when sliding the bottom form from documents
     // Choosing a client or issuer
     fun setDocumentClientOrIssuerUiStateWithSelected(clientOrIssuer: ClientOrIssuerState) {
-        _documentClientOrIssuerUiState.value = DocumentClientOrIssuerState(
+        _documentClientUiState.value = DocumentClientOrIssuerState(
             id = null,
             name = clientOrIssuer.name,
             type = clientOrIssuer.type,
@@ -79,38 +82,38 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     }
 
     fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
-        _clientOrIssuerUiState.value = ClientOrIssuerState(
+        _clientUiState.value = ClientOrIssuerState(
             id = null,
             type = type,
-            firstName = _clientOrIssuerUiState.value.firstName,
-            name = _clientOrIssuerUiState.value.name,
-            address1 = _clientOrIssuerUiState.value.address1,
-            address2 = _clientOrIssuerUiState.value.address2,
-            zipCode = _clientOrIssuerUiState.value.zipCode,
-            city = _clientOrIssuerUiState.value.city,
-            phone = _clientOrIssuerUiState.value.phone,
-            email = _clientOrIssuerUiState.value.email,
-            notes = _clientOrIssuerUiState.value.notes,
-            companyId1Label = _clientOrIssuerUiState.value.companyId1Label,
-            companyId1Number = _clientOrIssuerUiState.value.companyId1Number,
-            companyId2Label = _clientOrIssuerUiState.value.companyId2Label,
-            companyId2Number = _clientOrIssuerUiState.value.companyId2Number
+            firstName = _clientUiState.value.firstName,
+            name = _clientUiState.value.name,
+            address1 = _clientUiState.value.address1,
+            address2 = _clientUiState.value.address2,
+            zipCode = _clientUiState.value.zipCode,
+            city = _clientUiState.value.city,
+            phone = _clientUiState.value.phone,
+            email = _clientUiState.value.email,
+            notes = _clientUiState.value.notes,
+            companyId1Label = _clientUiState.value.companyId1Label,
+            companyId1Number = _clientUiState.value.companyId1Number,
+            companyId2Label = _clientUiState.value.companyId2Label,
+            companyId2Number = _clientUiState.value.companyId2Number
         )
     }
 
 
     fun clearClientUiState() {
-        _clientOrIssuerUiState.value = ClientOrIssuerState()
+        _clientUiState.value = ClientOrIssuerState()
     }
 
     fun clearIssuerUiState() {
-        _clientOrIssuerUiState.value = ClientOrIssuerState()
+        _clientUiState.value = ClientOrIssuerState()
     }
 
     private fun fetchFromLocalDb(id: Long) {
         val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
 
-        _clientOrIssuerUiState.value = _clientOrIssuerUiState.value.copy(
+        _clientUiState.value = _clientUiState.value.copy(
             id = clientOrIssuer?.id,
             firstName = TextFieldValue(clientOrIssuer?.firstName?.text ?: ""),
             name = TextFieldValue(clientOrIssuer?.name?.text ?: ""),
@@ -155,11 +158,27 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         value: Any,
         type: ClientOrIssuerType,
     ) {
-        if (type == ClientOrIssuerType.CLIENT) {
-            _clientOrIssuerUiState.value =
-                updateClientOrIssuerUiState(_clientOrIssuerUiState.value, pageElement, value)
-        } else _issuerUiState.value =
-            updateClientOrIssuerUiState(_issuerUiState.value, pageElement, value)
+        when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value =
+                updateClientOrIssuerUiState(_clientUiState.value, pageElement, value)
+
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value =
+                updateClientOrIssuerUiState(_issuerUiState.value, pageElement, value)
+
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value =
+                updateDocumentClientOrIssuerUiState(
+                    _documentClientUiState.value,
+                    pageElement,
+                    value
+                )
+
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value =
+                updateDocumentClientOrIssuerUiState(
+                    _documentIssuerUiState.value,
+                    pageElement,
+                    value
+                )
+        }
     }
 
     fun updateCursor(pageElement: ScreenElement, type: ItemOrDocumentType) {
@@ -170,7 +189,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
+    private fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.CLIENT_OR_ISSUER_NAME -> clientUiState.value.name.text
             ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> clientUiState.value.firstName?.text
@@ -187,33 +206,33 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                         ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
             else -> null
         }
-        _clientOrIssuerUiState.value = updateClientOrIssuerUiState(
-            _clientOrIssuerUiState.value, pageElement, TextFieldValue(
+        _clientUiState.value = updateClientOrIssuerUiState(
+            _clientUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
             )
         )
     }
 
-    fun updateCursorOfDocumentClientOrIssuerState(pageElement: ScreenElement) {
+    private fun updateCursorOfDocumentClientOrIssuerState(pageElement: ScreenElement) {
         val text = when (pageElement) {
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> documentClientOrIssuerUiState.value.name.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> documentClientOrIssuerUiState.value.firstName?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL -> documentClientOrIssuerUiState.value.email?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1 -> documentClientOrIssuerUiState.value.address1?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2 -> documentClientOrIssuerUiState.value.address2?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP -> documentClientOrIssuerUiState.value.zipCode?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY -> documentClientOrIssuerUiState.value.city?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> documentClientOrIssuerUiState.value.phone?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES -> documentClientOrIssuerUiState.value.notes?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> documentClientUiState.value.name.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> documentClientUiState.value.firstName?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL -> documentClientUiState.value.email?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1 -> documentClientUiState.value.address1?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2 -> documentClientUiState.value.address2?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP -> documentClientUiState.value.zipCode?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY -> documentClientUiState.value.city?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> documentClientUiState.value.phone?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES -> documentClientUiState.value.notes?.text
             /*            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> clientUiState.value.companyData?.first()?.label?.text
                         ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> clientUiState.value.companyData?.first()?.number?.text
                         ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> clientUiState.value.companyData?.get(1)?.label?.text
                         ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
             else -> null
         }
-        _documentClientOrIssuerUiState.value = updateDocumentClientOrIssuerUiState(
-            _documentClientOrIssuerUiState.value, pageElement, TextFieldValue(
+        _documentClientUiState.value = updateDocumentClientOrIssuerUiState(
+            _documentClientUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
             )
@@ -340,7 +359,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 }
 
 enum class ClientOrIssuerType {
-    CLIENT, ISSUER
+    CLIENT, ISSUER, DOCUMENT_CLIENT, DOCUMENT_ISSUER
 }
 
 enum class ItemOrDocumentType {

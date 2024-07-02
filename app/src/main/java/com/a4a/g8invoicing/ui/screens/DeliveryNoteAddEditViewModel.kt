@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
@@ -14,9 +16,11 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,18 +41,20 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     private var id: String? = savedStateHandle["itemId"]
     private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteState())
     val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
+
     init {
-        var newDocumentId: Long? = null
-        if (id == null) {
-            newDocumentId = deliveryNoteDataSource.createNewDeliveryNote()
-            newDocumentId?.let {
-                linkToFakeProduct(deliveryNoteDataSource, viewModelScope, it)
-            }
-        }
         id?.let {
             fetchDeliveryNoteFromLocalDb(it.toLong())
-        } ?: newDocumentId?.let {
-            fetchDeliveryNoteFromLocalDb(it)
+        } ?: {
+            viewModelScope.launch(context = Dispatchers.Default) {
+                try {
+                    deliveryNoteDataSource.createNewDeliveryNote()?.let {
+                        fetchDeliveryNoteFromLocalDb(it)
+                    }
+                } catch (e: Exception) {
+                    Log.e(ContentValues.TAG, "Error: ${e.message}")
+                }
+            }
         }
     }
 
@@ -86,7 +92,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    deliveryNoteId = _deliveryNoteUiState.value.documentId.toLong()
+                    deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
                 println("Saving documentProduct failed with exception: ${e.localizedMessage}")
@@ -136,7 +142,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     _deliveryNoteUiState.value.documentId.toLong(),
                     documentClientOrIssuerId.toLong()
                 )
-                documentClientOrIssuerDataSource.deleteDocumentClientOrIssuer(documentClientOrIssuerId.toLong())
+                documentClientOrIssuerDataSource.deleteDocumentClientOrIssuer(
+                    documentClientOrIssuerId.toLong()
+                )
 
                 // useless??
                 fetchDeliveryNoteFromLocalDb(_deliveryNoteUiState.value.documentId.toLong())
@@ -187,7 +195,7 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
-            note = note.copy(issuer = value as DocumentClientOrIssuerState)
+            note = note.copy(documentIssuer = value as DocumentClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ORDER_NUMBER -> {
@@ -210,22 +218,3 @@ fun updateDeliveryNoteUiState(
     }
     return note
 }
-
-
-fun linkToFakeProduct(
-    deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
-    viewModelScope: CoroutineScope,
-    deliveryNoteId: Long,
-) {
-    viewModelScope.launch {
-        try {
-            deliveryNoteDataSource.addDeliveryNoteProduct(
-                deliveryNoteId,
-                1
-            )
-        } catch (e: Exception) {
-            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
-        }
-    }
-}
-

@@ -29,7 +29,7 @@ import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 
 @Composable
 fun ClientOrIssuerAddEditForm(
-    clientOrIssuerUiState: DocumentClientOrIssuerState,
+    clientOrIssuerUiState: ClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isDisplayedInBottomSheet: Boolean = false,

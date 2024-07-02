@@ -15,7 +15,7 @@ data class Invoice(
     override var documentNumber: TextFieldValue,
     override var documentDate: String,
     override var orderNumber: TextFieldValue,
-    override var issuer: ClientOrIssuerState,
+    override var documentIssuer: ClientOrIssuerState,
     override var client: ClientOrIssuerState,
     override var documentProducts: List<DocumentProductState>,
     override var documentPrices: DocumentPrices,

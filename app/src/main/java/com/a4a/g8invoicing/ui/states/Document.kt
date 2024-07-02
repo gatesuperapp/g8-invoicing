@@ -9,13 +9,13 @@ import java.math.BigDecimal
 // and to change properties values (var instead of val)
 
 abstract class Document {
-    abstract var documentId: Int
+    abstract var documentId: Int?
     abstract var documentType: String
     abstract var documentNumber: TextFieldValue // Mandatory to control placing the cursor in the field
     abstract var documentDate: String
     abstract var orderNumber: TextFieldValue
-    abstract var issuer: DocumentClientOrIssuerState
-    abstract var client: DocumentClientOrIssuerState
+    abstract var documentIssuer: DocumentClientOrIssuerState
+    abstract var documentClient: DocumentClientOrIssuerState
     abstract var documentProducts: List<DocumentProductState>
     abstract var documentPrices: DocumentPrices
     abstract var currency: TextFieldValue

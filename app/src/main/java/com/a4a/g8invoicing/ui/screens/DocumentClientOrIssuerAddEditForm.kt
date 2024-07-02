@@ -19,16 +19,16 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 
 @Composable
 fun DocumentClientOrIssuerAddEditForm(
-    clientOrIssuerUiState: ClientOrIssuerState,
+    documentClientOrIssuerState: DocumentClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isDisplayedInBottomSheet: Boolean = false,
@@ -57,7 +57,6 @@ fun DocumentClientOrIssuerAddEditForm(
         modifier.then(
             Modifier
                 .padding(top = 80.dp)
-
         )
 
     Column(
@@ -78,35 +77,35 @@ fun DocumentClientOrIssuerAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.client_name),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.name,
+                        text = documentClientOrIssuerState.name,
                         placeholder = stringResource(id = R.string.client_name_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_NAME, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_NAME
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_first_name),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.firstName,
+                        text = documentClientOrIssuerState.firstName,
                         placeholder = stringResource(id = R.string.client_first_name_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_email),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.email,
+                        text = documentClientOrIssuerState.email,
                         placeholder = stringResource(id = R.string.client_email_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_EMAIL
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL
                 ),
 
                 )
@@ -130,57 +129,57 @@ fun DocumentClientOrIssuerAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.client_address1),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.address1,
+                        text = documentClientOrIssuerState.address1,
                         placeholder = stringResource(id = R.string.client_address1_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS1, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS1
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_address2),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.address2,
+                        text = documentClientOrIssuerState.address2,
                         placeholder = stringResource(id = R.string.client_address2_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS2, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS2
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_zip_code),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.zipCode,
+                        text = documentClientOrIssuerState.zipCode,
                         placeholder = stringResource(id = R.string.client_zip_code_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_ZIP, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_ZIP
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_city),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.city,
+                        text = documentClientOrIssuerState.city,
                         placeholder = stringResource(id = R.string.client_city_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_CITY, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_CITY
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_phone),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.phone,
+                        text = documentClientOrIssuerState.phone,
                         placeholder = stringResource(id = R.string.client_phone_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_PHONE, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_PHONE
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE
                 ))
 
             // Create the UI with list items
@@ -202,36 +201,36 @@ fun DocumentClientOrIssuerAddEditForm(
             val inputList = listOf(
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuerUiState.companyId1Label,
+                        text = documentClientOrIssuerState.companyId1Label,
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL, it)
                         },
 
                         ),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.companyId1Number,
+                        text = documentClientOrIssuerState.companyId1Number,
                         placeholder = stringResource(id = R.string.client_company_identification1_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1
                 ),
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuerUiState.companyId2Label,
+                        text = documentClientOrIssuerState.companyId2Label,
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL, it)
                         }
                     ),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.companyId2Number,
+                        text = documentClientOrIssuerState.companyId2Number,
                         placeholder = stringResource(id = R.string.client_company_identification2_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
                 )
             )
 
@@ -255,13 +254,13 @@ fun DocumentClientOrIssuerAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.client_notes),
                     inputType = TextInput(
-                        text = clientOrIssuerUiState.notes,
+                        text = documentClientOrIssuerState.notes,
                         placeholder = stringResource(id = R.string.client_notes_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_NOTES, it)
+                            onValueChange(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES, it)
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_NOTES
+                    pageElement = ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
                 ))
 
             // Create the UI with list items

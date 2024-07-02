@@ -95,7 +95,7 @@ fun DeliveryNoteBasicTemplateHeader(
                 .weight(1f)
                 .fillMaxWidth(0.3f)
         ) {
-            BuildClientOrIssuerInTemplate(uiState.issuer)
+            BuildClientOrIssuerInTemplate(uiState.documentIssuer)
         }
 
         Column(

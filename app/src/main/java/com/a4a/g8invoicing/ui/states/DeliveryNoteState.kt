@@ -11,12 +11,12 @@ import com.a4a.g8invoicing.Strings
 // and to change properties values (var instead of val)
 data class DeliveryNoteState(
     override var documentType: String = Strings.get(R.string.delivery_note),
-    override var documentId: Int = 0,
+    override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
     override var documentDate: String = Strings.get(R.string.document_default_date),
     override var orderNumber: TextFieldValue = TextFieldValue(),
-    override var issuer: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
-    override var client: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
+    override var documentIssuer: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
+    override var documentClient: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
     override var documentProducts: List<DocumentProductState> = listOf(),
     override var documentPrices: DocumentPrices = DocumentPrices(),
     override var currency: TextFieldValue = TextFieldValue(),

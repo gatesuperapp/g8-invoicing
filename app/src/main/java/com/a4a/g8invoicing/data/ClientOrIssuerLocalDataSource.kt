@@ -71,28 +71,27 @@ class ClientOrIssuerLocalDataSource(
     }
 
     override suspend fun saveDocumentClientOrIssuer(
-        clientOrIssuer: DocumentClientOrIssuerState,
-        type: String,
+        documentClientOrIssuer: DocumentClientOrIssuerState,
     ): Int? {
         var documentClientOrIssuerId: Int? = null
         withContext(Dispatchers.IO) {
             try {
                 documentClientOrIssuerQueries.save(
                     document_client_or_issuer_id = null,
-                    type = type,
-                    clientOrIssuer.firstName?.text,
-                    clientOrIssuer.name.text,
-                    clientOrIssuer.address1?.text,
-                    clientOrIssuer.address2?.text,
-                    clientOrIssuer.zipCode?.text,
-                    clientOrIssuer.city?.text,
-                    clientOrIssuer.phone?.text,
-                    clientOrIssuer.email?.text,
-                    clientOrIssuer.notes?.text,
-                    clientOrIssuer.companyId1Label?.text,
-                    clientOrIssuer.companyId1Number?.text,
-                    clientOrIssuer.companyId2Label?.text,
-                    clientOrIssuer.companyId2Number?.text,
+                    type = documentClientOrIssuer.type.name.lowercase(),
+                    documentClientOrIssuer.firstName?.text,
+                    documentClientOrIssuer.name.text,
+                    documentClientOrIssuer.address1?.text,
+                    documentClientOrIssuer.address2?.text,
+                    documentClientOrIssuer.zipCode?.text,
+                    documentClientOrIssuer.city?.text,
+                    documentClientOrIssuer.phone?.text,
+                    documentClientOrIssuer.email?.text,
+                    documentClientOrIssuer.notes?.text,
+                    documentClientOrIssuer.companyId1Label?.text,
+                    documentClientOrIssuer.companyId1Number?.text,
+                    documentClientOrIssuer.companyId2Label?.text,
+                    documentClientOrIssuer.companyId2Number?.text,
                 )
                 documentClientOrIssuerId =
                     documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -288,5 +287,27 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         companyId1Number = TextFieldValue(text = clientOrIssuer.company_id1_number ?: ""),
         companyId2Label = TextFieldValue(text = Strings.get(R.string.document_default_issuer_company_label2)),
         companyId2Number = TextFieldValue(text = clientOrIssuer.company_id2_number ?: ""),
+    )
+}
+
+fun ClientOrIssuer.transformIntoDocumentClientOrIssuer(
+): DocumentClientOrIssuerState {
+    val clientOrIssuer = this
+
+    return DocumentClientOrIssuerState(
+        id = clientOrIssuer.client_or_issuer_id.toInt(),
+        firstName = clientOrIssuer.first_name?.let { TextFieldValue(text = it) },
+        name = TextFieldValue(text = clientOrIssuer.name),
+        address1 = clientOrIssuer.address1?.let { TextFieldValue(text = it) },
+        address2 = clientOrIssuer.address2?.let { TextFieldValue(text = it) },
+        zipCode = clientOrIssuer.zip_code?.let { TextFieldValue(text = it) },
+        city = clientOrIssuer.city?.let { TextFieldValue(text = it) },
+        phone = clientOrIssuer.phone?.let { TextFieldValue(text = it) },
+        email = clientOrIssuer.email?.let { TextFieldValue(text = it) },
+        notes = clientOrIssuer.notes?.let { TextFieldValue(text = it) },
+        companyId1Label = TextFieldValue(text = clientOrIssuer.company_id1_label ?: "N° SIRET"),
+        companyId1Number = clientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
+        companyId2Label = TextFieldValue(text = clientOrIssuer.company_id2_label ?: "N° TVA"),
+        companyId2Number = clientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
     )
 }
