@@ -58,11 +58,19 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
 
     document.add(createTitle(deliveryNote.documentNumber.text, dmRegular))
     document.add(createDate(deliveryNote.documentDate))
-    document.add(createIssuerAndClientTable(deliveryNote.documentIssuer, deliveryNote.client, dmMedium))
+    document.add(
+        createIssuerAndClientTable(
+            deliveryNote.documentIssuer,
+            deliveryNote.documentClient,
+            dmMedium
+        )
+    )
     if (deliveryNote.orderNumber.text.isNotEmpty()) {
         document.add(createReference(deliveryNote.orderNumber.text, dmMedium))
     }
-    document.add(createProductsTable(deliveryNote.documentProducts, context))
+    deliveryNote.documentProducts?.let {
+        document.add(createProductsTable(it, context))
+    }
     document.add(createFooter(context, dmMedium))
     document.close()
 
@@ -90,8 +98,8 @@ fun createDate(date: String): Paragraph {
 }
 
 fun createIssuerAndClientTable(
-    issuer: DocumentClientOrIssuerState,
-    client: DocumentClientOrIssuerState,
+    issuer: DocumentClientOrIssuerState?,
+    client: DocumentClientOrIssuerState?,
     font: PdfFont,
 ): Table {
     val issuerAndClientTable = Table(2)
@@ -99,17 +107,17 @@ fun createIssuerAndClientTable(
         .setMarginBottom(40F)
         .setFixedLayout()
 
-    val issuerFirstName = issuer.firstName?.text?.let { Text("$it ").setFont(font) }
-    val issuerName = Text(issuer.name.text + "\n").setFont(font)
-    val issuerAddress1 = issuer.address1?.text?.let { Text(it + "\n") }
-    val issuerAddress2 = issuer.address2?.text?.let { Text(it + "\n") }
-    val issuerZipCode = issuer.zipCode?.text?.let { Text("$it ") }
-    val issuerCity = issuer.city?.text?.let { Text(it + "\n") }
-    val issuerPhone = issuer.phone?.text?.let { Text(it + "\n") }
-    val issuerCompanyLabel1 = issuer.companyId1Number?.text?.let {
+    val issuerFirstName = issuer?.firstName?.text?.let { Text("$it ").setFont(font) }
+    val issuerName = Text(issuer?.name?.text + "\n").setFont(font)
+    val issuerAddress1 = issuer?.address1?.text?.let { Text(it + "\n") }
+    val issuerAddress2 = issuer?.address2?.text?.let { Text(it + "\n") }
+    val issuerZipCode = issuer?.zipCode?.text?.let { Text("$it ") }
+    val issuerCity = issuer?.city?.text?.let { Text(it + "\n") }
+    val issuerPhone = issuer?.phone?.text?.let { Text(it + "\n") }
+    val issuerCompanyLabel1 = issuer?.companyId1Number?.text?.let {
         Text(issuer.companyId1Label?.text + " : " + it + "\n")
     }
-    val issuerCompanyLabel2 = issuer.companyId2Number?.text?.let {
+    val issuerCompanyLabel2 = issuer?.companyId2Number?.text?.let {
         Text(issuer.companyId2Label?.text + " : " + it + "\n")
     }
     val issuer = Paragraph()
@@ -143,17 +151,17 @@ fun createIssuerAndClientTable(
         issuer.add(it)
     }
 
-    val clientFirstName = client.firstName?.text?.let { Text("$it ").setFont(font) }
-    val clientName = Text(client.name.text + "\n").setFont(font)
-    val clientAddress1 = client.address1?.text?.let { Text(it + "\n") }
-    val clientAddress2 = client.address2?.text?.let { Text(it + "\n") }
-    val clientZipCode = client.zipCode?.text?.let { Text("$it ") }
-    val clientCity = client.city?.text?.let { Text(it + "\n") }
-    val clientPhone = client.phone?.text?.let { Text(it + "\n") }
-    val clientCompanyLabel1 = client.companyId1Number?.text?.let {
+    val clientFirstName = client?.firstName?.text?.let { Text("$it ").setFont(font) }
+    val clientName = Text(client?.name?.text + "\n").setFont(font)
+    val clientAddress1 = client?.address1?.text?.let { Text(it + "\n") }
+    val clientAddress2 = client?.address2?.text?.let { Text(it + "\n") }
+    val clientZipCode = client?.zipCode?.text?.let { Text("$it ") }
+    val clientCity = client?.city?.text?.let { Text(it + "\n") }
+    val clientPhone = client?.phone?.text?.let { Text(it + "\n") }
+    val clientCompanyLabel1 = client?.companyId1Number?.text?.let {
         Text(client.companyId1Label?.text + " : " + it + "\n")
     }
-    val clientCompanyLabel2 = client.companyId2Number?.text?.let {
+    val clientCompanyLabel2 = client?.companyId2Number?.text?.let {
         Text(client.companyId2Label?.text + " : " + it + "\n")
     }
     val client = Paragraph()
@@ -229,7 +237,11 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         .setFixedLayout()
 
     productsTable
-        .addCustomCell(Strings.get(R.string.document_table_description), alignment = TextAlignment.LEFT, isBold = true)
+        .addCustomCell(
+            Strings.get(R.string.document_table_description),
+            alignment = TextAlignment.LEFT,
+            isBold = true
+        )
         .addCustomCell(Strings.get(R.string.document_table_quantity), isBold = true)
         .addCustomCell(Strings.get(R.string.document_table_unit), isBold = true)
         .addCustomCell(Strings.get(R.string.document_table_tax_rate), isBold = true)
@@ -342,7 +354,7 @@ fun Table.addCustomCell(
     alignment: TextAlignment = TextAlignment.RIGHT,
     isBold: Boolean = false,
 ): Table {
-    val paddingLeft =   6f
+    val paddingLeft = 6f
     val paddingRight = 6f
 
     val textToAdd = if (text != null) {

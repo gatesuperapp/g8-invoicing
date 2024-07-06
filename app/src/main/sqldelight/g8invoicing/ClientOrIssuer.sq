@@ -87,7 +87,17 @@ delete:
 DELETE FROM ClientOrIssuer
 WHERE client_or_issuer_id = :id;
 
-getLastInsertedRowId:
-SELECT last_insert_rowid();
+getLastInsertedIssuer:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY client_or_issuer_id DESC
+LIMIT 1;
 
+getLastInsertedClientId:
+SELECT client_or_issuer_id
+FROM ClientOrIssuer
+WHERE type = 'client'
+ORDER BY client_or_issuer_id DESC
+LIMIT 1;
 

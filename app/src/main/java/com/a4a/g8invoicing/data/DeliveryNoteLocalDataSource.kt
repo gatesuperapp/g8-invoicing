@@ -5,18 +5,21 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.ClientOrIssuer
 import g8invoicing.DeliveryNote
+import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -26,56 +29,77 @@ class DeliveryNoteLocalDataSource(
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
-
-    // private val deliveryNoteDocumentClientOrIssuerQueries = db.link
     private val documentProductQueries = db.documentProductQueries
     private val deliveryNoteDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
     private val deliveryNoteDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun fetchDeliveryNoteFlow(id: Long): Flow<com.a4a.g8invoicing.ui.states.DeliveryNoteState?> {
-        return deliveryNoteQueries.getDeliveryNote(id)
-            .asFlow()
-            .flatMapMerge { query ->
-                val deliveryNote = query.executeAsOne()
-                fetchDocumentProductsFlow(deliveryNote.delivery_note_id)
-                    .map {
-                        val l = it.filterNot { it.name == TextFieldValue("FAKE") }
-                        // Adding a fake product is ugly but it's the only way i found for
-                        // the flow to return something even when there's
-                        // no product added to the document..
-                        // I wanted to use flow.onStart { emit(initialValue) } but couldn't
-                        // make it work as a Query is expected
-                        deliveryNote.transformIntoEditableNote(l)
-                    }
-            }
+    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
+        val deliveryNoteId = deliveryNoteQueries.getDeliveryNoteId(id).executeAsOne()
+        val deliveryNoteFlow = deliveryNoteQueries.getDeliveryNote(id).asFlow().map { query ->
+            query.executeAsOne()
+        }
+
+        val documentProductFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
+        val clientAndIssuerFlow = fetchClientOrIssuerFlow(deliveryNoteId).onStart { emit(emptyList()) }
+
+        val combinedFlow = combine(
+            deliveryNoteFlow,
+            documentProductFlow,
+            clientAndIssuerFlow
+        ) { value1, value2, value3 ->
+            value1.transformIntoEditableNote(
+                documentProducts = value2,
+                documentClientAndIssuer = value3,
+            )
+        }
+        return combinedFlow
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    override fun fetchAllDeliveryNotes(): Flow<List<com.a4a.g8invoicing.ui.states.DeliveryNoteState>> {
+
+    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
             .asFlow()
             .map {
                 it.executeAsList()
                     .map { deliveryNote ->
                         val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
-                            .filterNot { it.name == TextFieldValue("FAKE") }
+                        val clientAndIssuer = fetchClientAndIssuer(deliveryNote.delivery_note_id)
 
                         deliveryNote.transformIntoEditableNote(
-                            products
+                            products,
+                            clientAndIssuer
                         )
                     }
             }
     }
 
-    private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState> {
-        return deliveryNoteDocumentProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
-            .executeAsList().map {
+    private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState>? {
+        val listOfIds =
+            deliveryNoteDocumentProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+                .executeAsList()
+        return if (listOfIds.isNotEmpty()) {
+            listOfIds.map {
                 documentProductQueries.getDocumentProduct(it.document_product_id)
                     .executeAsOne().transformIntoEditableDocumentProduct()
             }
+        } else null
+    }
+
+    private fun fetchClientAndIssuer(deliveryNoteId: Long): List<DocumentClientOrIssuerState>? {
+        val listOfIds =
+            deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
+                deliveryNoteId
+            ).executeAsList()
+
+        return if (listOfIds.isNotEmpty()) {
+            listOfIds.map {
+                documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                    .executeAsOne()
+                    .transformIntoEditable()
+            }
+        } else null
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -97,42 +121,54 @@ class DeliveryNoteLocalDataSource(
             }
     }
 
-
-    // Used when duplicating a document (we don't need a flow)
-    override fun fetchDeliveryNote(id: Long): com.a4a.g8invoicing.ui.states.DeliveryNoteState? {
-        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
-            ?.let {
-                it.transformIntoEditableNote(fetchDocumentProducts(it.delivery_note_id))
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun fetchClientOrIssuerFlow(deliveryNoteId: Long): Flow<List<DocumentClientOrIssuerState>> {
+        return deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
+            deliveryNoteId
+        )
+            .asFlow()
+            .flatMapMerge { query ->
+                combine(
+                    query.executeAsList().map {
+                        documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                            .asFlow()
+                            .map {
+                                it.executeAsOne().transformIntoEditable()
+                            }
+                    })
+                {
+                    it.asList()
+                }
             }
     }
 
-    private fun DeliveryNote.transformIntoEditableNote(documentProducts: List<DocumentProductState>): DeliveryNoteState {
-        var client: DocumentClientOrIssuerState? = null
-        var issuer: DocumentClientOrIssuerState? = null
 
-        /*        this.document_client_id?.let {
-                    client = documentClientOrIssuerQueries.get(it)
-                        .executeAsOneOrNull()
-                        ?.transformIntoEditable()
-                }
+    // Used when duplicating a document (we don't need a flow)
+    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
+        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
+            ?.let {
+                it.transformIntoEditableNote(
+                    fetchDocumentProducts(it.delivery_note_id),
+                    fetchClientAndIssuer(it.delivery_note_id)
+                )
+            }
+    }
 
-                this.document_issuer_id?.let {
-                    issuer = documentClientOrIssuerQueries.get(it)
-                        .executeAsOneOrNull()
-                        ?.transformIntoEditable()
-                }*/
+    private fun DeliveryNote.transformIntoEditableNote(
+        documentProducts: List<DocumentProductState>? = null,
+        documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
+    ): DeliveryNoteState {
 
         this.let {
-            // Adding every fields except documentProducts & prices
             return DeliveryNoteState(
                 documentId = it.delivery_note_id.toInt(),
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
-                documentIssuer = issuer ?: DocumentClientOrIssuerState(),
-                documentClient = client ?: DocumentClientOrIssuerState(),
+                documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
+                documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
-                documentPrices = calculateDocumentPrices(documentProducts),
+                documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency))
             )
         }
@@ -141,12 +177,12 @@ class DeliveryNoteLocalDataSource(
     override suspend fun createNewDeliveryNote(): Long? {
         saveDeliveryNoteInfoInAllTables(
             DeliveryNoteState(
-                documentIssuer = getExistingIssuer()?.transformIntoDocumentClientOrIssuer()
+                documentIssuer = getExistingIssuer()?.transformIntoEditable()
                     ?: DocumentClientOrIssuerState(),
             )
         )
 
-        return deliveryNoteQueries.lastInsertRowId().executeAsOneOrNull()
+        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
     }
 
     override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
@@ -154,11 +190,8 @@ class DeliveryNoteLocalDataSource(
             try {
                 deliveryNoteQueries.updateDeliveryNote(
                     delivery_note_id = deliveryNote.documentId?.toLong() ?: 0,
-                    number = deliveryNote.documentNumber.text ?: "",
-                    delivery_date = deliveryNote.documentDate.toString(),
-                    /*                    document_client_id = deliveryNote.client.id?.toLong(),
-                                        document_issuer_id = deliveryNote.issuer.id?.toLong()
-                                            ?: saveNewIssuerAndGetId(deliveryNote.issuer),*/
+                    number = deliveryNote.documentNumber.text,
+                    delivery_date = deliveryNote.documentDate,
                     order_number = deliveryNote.orderNumber.text,
                     currency = deliveryNote.currency.text
                 )
@@ -209,7 +242,7 @@ class DeliveryNoteLocalDataSource(
                 )
 
                 deliveryNoteId?.let { deliveryNoteId ->
-                    documentProductQueries.lastInsertRowId().executeAsOneOrNull()?.toInt()
+                    documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
                         ?.let { id ->
                             addDocumentProduct(
                                 deliveryNoteId,
@@ -230,7 +263,10 @@ class DeliveryNoteLocalDataSource(
             try {
                 documentClientOrIssuerQueries.save(
                     document_client_or_issuer_id = null,
-                    type = documentClientOrIssuer.type.name.lowercase(),
+                    type = if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
+                        documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
+                    )
+                        ClientOrIssuerType.ISSUER.name.lowercase() else ClientOrIssuerType.CLIENT.name.lowercase(),
                     first_name = documentClientOrIssuer.firstName?.text,
                     name = documentClientOrIssuer.name.text,
                     address1 = documentClientOrIssuer.address1?.text,
@@ -247,7 +283,7 @@ class DeliveryNoteLocalDataSource(
                 )
 
                 deliveryNoteId?.let { deliveryNoteId ->
-                    documentClientOrIssuerQueries.lastInsertedRowId().executeAsOneOrNull()?.toInt()
+                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId().executeAsOneOrNull()?.toInt()
                         ?.let { id ->
                             addDocumentClientOrIssuer(
                                 deliveryNoteId,
@@ -269,13 +305,29 @@ class DeliveryNoteLocalDataSource(
                     deliveryNoteDocumentProductQueries.deleteAllProductsLinkedToADeliveryNote(
                         deliveryNote.documentId!!.toLong()
                     )
-                    deliveryNote.documentProducts.filter { it.id != null }
-                        .forEach { documentProduct ->
+                    deliveryNoteDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToADeliveryNote(
+                        deliveryNote.documentId!!.toLong()
+                    )
+                    deliveryNote.documentClient?.id?.let {
+                        deleteDocumentClientOrIssuer(
+                            deliveryNote.documentId!!.toLong(),
+                            it.toLong()
+                        )
+                    }
+                    deliveryNote.documentIssuer?.id?.let {
+                        deleteDocumentClientOrIssuer(
+                            deliveryNote.documentId!!.toLong(),
+                            it.toLong()
+                        )
+                    }
+                    deliveryNote.documentProducts?.filter { it.id != null }?.let {
+                        it.forEach { documentProduct ->
                             deleteDeliveryNoteProduct(
                                 deliveryNote.documentId!!.toLong(),
                                 documentProduct.id!!.toLong()
                             )
                         }
+                    }
                 }
             } catch (cause: Throwable) {
             }
@@ -319,8 +371,8 @@ class DeliveryNoteLocalDataSource(
         )
     }
 
-    private fun getExistingIssuer(): ClientOrIssuer? {
-        var issuer: ClientOrIssuer? = null
+    private fun getExistingIssuer(): DocumentClientOrIssuer? {
+        var issuer: DocumentClientOrIssuer? = null
         try {
             issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
@@ -338,31 +390,30 @@ class DeliveryNoteLocalDataSource(
             currency = deliveryNote.currency.text
         )
 
-        deliveryNoteQueries.lastInsertRowId().executeAsOneOrNull()?.let { id ->
-            // Link to fake product
-            addDocumentProduct(
-                id,
-                1
-            )
+        deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { deliveryNoteId ->
             // Link all products
-            deliveryNote.documentProducts.forEach { documentProduct ->
+            deliveryNote.documentProducts?.forEach { documentProduct ->
                 saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    deliveryNoteId = id
+                    deliveryNoteId = deliveryNoteId
                 )
             }
 
             // Link client
-            saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                documentClientOrIssuer = deliveryNote.documentClient,
-                deliveryNoteId = id
-            )
+            deliveryNote.documentClient?.let {
+                saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                    documentClientOrIssuer = it,
+                    deliveryNoteId = deliveryNoteId
+                )
+            }
 
             // Link issuer
-            saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                documentClientOrIssuer = deliveryNote.documentIssuer,
-                deliveryNoteId = id
-            )
+            deliveryNote.documentIssuer?.let {
+                saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                    documentClientOrIssuer = it,
+                    deliveryNoteId = deliveryNoteId
+                )
+            }
         }
     }
 }

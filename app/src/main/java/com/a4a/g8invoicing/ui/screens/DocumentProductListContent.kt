@@ -17,7 +17,10 @@ fun DocumentProductListContent(
 ) {
     LazyColumn(
         modifier = Modifier
-            .padding(bottom = 20.dp)
+            .padding(
+                top = 20.dp,
+                bottom = 10.dp
+            )
             .fillMaxSize()
     ) {
         items(

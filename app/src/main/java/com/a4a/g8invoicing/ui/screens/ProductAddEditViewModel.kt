@@ -140,7 +140,7 @@ class ProductAddEditViewModel @Inject constructor(
         return taxRates
     }
 
-    fun saveInLocalDb() {
+    fun saveProductInLocalDb() {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {

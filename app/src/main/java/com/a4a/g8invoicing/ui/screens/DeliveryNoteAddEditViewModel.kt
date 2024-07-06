@@ -43,20 +43,19 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
 
     init {
-        id?.let {
-            fetchDeliveryNoteFromLocalDb(it.toLong())
-        } ?: {
-            viewModelScope.launch(context = Dispatchers.Default) {
-                try {
-                    deliveryNoteDataSource.createNewDeliveryNote()?.let {
-                        fetchDeliveryNoteFromLocalDb(it)
-                    }
-                } catch (e: Exception) {
-                    Log.e(ContentValues.TAG, "Error: ${e.message}")
+        viewModelScope.launch(context = Dispatchers.Default) {
+            try {
+                id?.let {
+                    fetchDeliveryNoteFromLocalDb(it.toLong())
+                } ?: deliveryNoteDataSource.createNewDeliveryNote()?.let {
+                    fetchDeliveryNoteFromLocalDb(it)
                 }
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
+
 
     private fun fetchDeliveryNoteFromLocalDb(id: Long) {
         fetchJob?.cancel()
@@ -104,16 +103,21 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.deleteDeliveryNoteProduct(
-                    _deliveryNoteUiState.value.documentId.toLong(),
-                    documentProductId.toLong()
-                )
+                _deliveryNoteUiState.value.documentId?.let {
+                    deliveryNoteDataSource.deleteDeliveryNoteProduct(
+                        it.toLong(),
+                        documentProductId.toLong()
+                    )
+                }
+
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
 
                 // This is used to re-fetch the document when there's a remove/adding in the document's
                 // product list (even if it's a flow, it's not updated automatically
-                // as it's a list inside an object (?))
-                fetchDeliveryNoteFromLocalDb(_deliveryNoteUiState.value.documentId.toLong())
+                // (?) as it's a list inside an object (?))
+                _deliveryNoteUiState.value.documentId?.let {
+                    fetchDeliveryNoteFromLocalDb(it.toLong())
+                }
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
@@ -126,7 +130,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
-                    deliveryNoteId = _deliveryNoteUiState.value.documentId.toLong()
+                    deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
                 println("Saving documentProduct failed with exception: ${e.localizedMessage}")
@@ -138,16 +142,22 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.deleteDocumentClientOrIssuer(
-                    _deliveryNoteUiState.value.documentId.toLong(),
-                    documentClientOrIssuerId.toLong()
-                )
+                _deliveryNoteUiState.value.documentId?.let {
+                    deliveryNoteDataSource.deleteDocumentClientOrIssuer(
+                        it.toLong(),
+                        documentClientOrIssuerId.toLong()
+                    )
+                }
+
                 documentClientOrIssuerDataSource.deleteDocumentClientOrIssuer(
                     documentClientOrIssuerId.toLong()
                 )
 
                 // useless??
-                fetchDeliveryNoteFromLocalDb(_deliveryNoteUiState.value.documentId.toLong())
+                _deliveryNoteUiState.value.documentId?.let {
+                    fetchDeliveryNoteFromLocalDb(it.toLong())
+                }
+
             } catch (e: Exception) {
                 println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
             }
@@ -191,7 +201,7 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_CLIENT -> {
-            note = note.copy(client = value as DocumentClientOrIssuerState)
+            note = note.copy(documentClient = value as DocumentClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
@@ -218,3 +228,7 @@ fun updateDeliveryNoteUiState(
     }
     return note
 }
+
+
+
+

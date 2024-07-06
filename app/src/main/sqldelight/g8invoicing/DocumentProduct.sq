@@ -15,7 +15,7 @@ CREATE TABLE DocumentProduct (
 );
 
 INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, product_id)
-VALUES (1, 'FAKE',1, '', 5, 20,  'kg', 1),
+VALUES (1, 'aaa',1, '', 5, 20,  'kg', 1),
  (2, 'aa',1, '', 5, 20,  'kg', 1);
 
 getDocumentProduct:
@@ -47,5 +47,8 @@ deleteDocumentProduct:
 DELETE FROM DocumentProduct
 WHERE document_product_id = :id;
 
-lastInsertRowId:
-SELECT last_insert_rowid();
+getLastInsertedRowId:
+SELECT document_product_id
+FROM DocumentProduct
+ORDER BY document_product_id DESC
+LIMIT 1;

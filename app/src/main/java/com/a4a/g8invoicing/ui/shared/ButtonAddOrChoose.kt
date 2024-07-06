@@ -32,8 +32,7 @@ fun ButtonAddOrChoose(
         .padding(
             start = 20.dp,
             end = 20.dp,
-            top = 20.dp,
-            bottom = 20.dp
+            top = 10.dp,
         )
         .fillMaxWidth()
 

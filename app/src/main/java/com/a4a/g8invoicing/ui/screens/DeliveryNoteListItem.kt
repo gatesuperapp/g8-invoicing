@@ -87,7 +87,7 @@ fun DeliveryNoteListItem(
                     bottom = 14.dp
                 )
         ) {
-            // Retriggers remember calculation when key changes
+            // Re-triggers remember calculation when key changes
             val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
             Column(
@@ -120,14 +120,13 @@ fun DeliveryNoteListItem(
                         //overflow = TextOverflow.Ellipsis
                     )
                 }
-                Row(
-                    modifier = Modifier
-                    //  .fillMaxWidth()
-                ) {
-                    Text(
-                        text = (deliveryNote.client.name.text
-                            ?: " - ") + " " + (deliveryNote.client.firstName?.text ?: "")
-                    )
+                deliveryNote.documentClient?.let {
+                    Row() {
+                        Text(
+                            text = (it.name.text) +
+                                    " " + (it.firstName?.text ?: "")
+                        )
+                    }
                 }
             }
 
@@ -139,7 +138,7 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.documentDate ?: " - ",
+                        text = deliveryNote.documentDate,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
@@ -149,7 +148,7 @@ fun DeliveryNoteListItem(
                 Row(
                 ) {
                     Text(
-                        text = deliveryNote.documentPrices.totalPriceWithTax.toString() + stringResource(
+                        text = (deliveryNote.documentPrices?.let {it.totalPriceWithTax.toString()} ?: "") + stringResource(
                             id = R.string.currency
                         ),
                     )

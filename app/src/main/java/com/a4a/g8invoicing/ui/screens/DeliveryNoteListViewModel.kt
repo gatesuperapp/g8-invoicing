@@ -18,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DeliveryNoteListViewModel @Inject constructor(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
-    private val documentProductDataSource: ProductLocalDataSourceInterface,
 ) : ViewModel() {
 
     private val _deliveryNotesUiState = MutableStateFlow(DeliveryNotesUiState())
@@ -54,9 +53,6 @@ class DeliveryNoteListViewModel @Inject constructor(
         deleteJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.deleteDeliveryNotes(selectedDeliveryNotes)
-                selectedDeliveryNotes.flatMap { it.documentProducts.mapNotNull { it.id?.toLong() }}.let {
-                    documentProductDataSource.deleteDocumentProducts(it)
-                }
             } catch (e: Exception) {
                 println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }

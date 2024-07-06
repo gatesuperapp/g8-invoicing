@@ -18,6 +18,11 @@ SELECT *
 FROM DeliveryNote
 WHERE delivery_note_id = :id;
 
+getDeliveryNoteId:
+SELECT delivery_note_id
+FROM DeliveryNote
+WHERE delivery_note_id = :id;
+
 getAllDeliveryNotes:
 SELECT *
 FROM DeliveryNote;
@@ -43,5 +48,9 @@ deleteDeliveryNote:
 DELETE FROM DeliveryNote
 WHERE delivery_note_id = :id;
 
-lastInsertRowId:
-SELECT last_insert_rowid();
+getLastInsertedRowId:
+SELECT delivery_note_id
+FROM DeliveryNote
+ORDER BY delivery_note_id DESC
+LIMIT 1;
+

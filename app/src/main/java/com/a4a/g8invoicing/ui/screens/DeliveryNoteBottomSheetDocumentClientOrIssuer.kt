@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Icon
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
@@ -22,7 +20,7 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
 fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
-    item: DocumentClientOrIssuerState,
+    item: DocumentClientOrIssuerState?,
     onClickBack: () -> Unit,
     onClickNewButton: () -> Unit,
     onClickChooseButton: () -> Unit,
@@ -33,7 +31,7 @@ fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
         modifier = Modifier
             .fillMaxHeight(0.5f)
             .background(Color.White)
-           // .verticalScroll(rememberScrollState())
+        // .verticalScroll(rememberScrollState())
     ) {
         // Header: display "back" button
         Row(
@@ -48,26 +46,27 @@ fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
                 )
             }
         }
-        ButtonAddOrChoose(
-            onClickNewButton,
-            hasBorder = true,
-            hasBackground = false,
-            stringResource(id = R.string.document_bottom_sheet_list_add_new)
-        )
-        ButtonAddOrChoose( // Choosing a product to add to the document
-            onClickChooseButton,
-            hasBorder = false,
-            hasBackground = true,
-            stringResource(id = R.string.document_bottom_sheet_document_product_add)
-        )
 
-        Spacer(modifier = Modifier.weight(1F))
-
-        // Display the existing list
-        DocumentClientOrIssuerContent(
-            item = item,
-            onClickItem = onClickItem,
-            onClickDelete = onClickDelete
-        )
+        if (item == null) {
+            ButtonAddOrChoose(
+                onClickNewButton,
+                hasBorder = true,
+                hasBackground = false,
+                stringResource(id = R.string.document_bottom_sheet_list_add_new)
+            )
+            ButtonAddOrChoose( // Choosing a product to add to the document
+                onClickChooseButton,
+                hasBorder = false,
+                hasBackground = true,
+                stringResource(id = R.string.document_bottom_sheet_document_product_add)
+            )
+        } else {
+            // Display the existing item
+            DocumentClientOrIssuerContent(
+                item = item,
+                onClickItem = onClickItem,
+                onClickDelete = onClickDelete
+            )
+        }
     }
 }

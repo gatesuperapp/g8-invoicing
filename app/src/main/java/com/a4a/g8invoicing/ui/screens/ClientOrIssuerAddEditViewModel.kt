@@ -29,16 +29,16 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     private val id: String? = savedStateHandle["itemId"]
     private val type: String? = savedStateHandle["type"]
 
-    private val _clientUiState = mutableStateOf(ClientOrIssuerState())
+    private val _clientUiState = mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.CLIENT))
     val clientUiState: State<ClientOrIssuerState> = _clientUiState
 
-    private val _issuerUiState = mutableStateOf(ClientOrIssuerState())
-    val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
+    private val _issuerUiState = mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.ISSUER))
+    private val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
-    private val _documentClientUiState = mutableStateOf(DocumentClientOrIssuerState())
+    private val _documentClientUiState = mutableStateOf(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
     val documentClientUiState: State<DocumentClientOrIssuerState> = _documentClientUiState
 
-    private val _documentIssuerUiState = mutableStateOf(DocumentClientOrIssuerState())
+    private val _documentIssuerUiState = mutableStateOf(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
     val documentIssuerUiState: State<DocumentClientOrIssuerState> = _documentIssuerUiState
 
 
@@ -56,13 +56,35 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     // Used when sliding the bottom form from documents
     // Editing a document client or issuer
     fun setDocumentClientOrIssuerUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
-        _documentClientUiState.value = documentClientOrIssuer
+        if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
+            _documentClientUiState.value = documentClientOrIssuer
+        else {
+            _documentIssuerUiState.value = documentClientOrIssuer
+        }
     }
 
     // Used when sliding the bottom form from documents
     // Choosing a client or issuer
     fun setDocumentClientOrIssuerUiStateWithSelected(clientOrIssuer: ClientOrIssuerState) {
-        _documentClientUiState.value = DocumentClientOrIssuerState(
+        if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
+            _documentClientUiState.value = DocumentClientOrIssuerState(
+                id = null,
+                name = clientOrIssuer.name,
+                type = clientOrIssuer.type,
+                firstName = clientOrIssuer.firstName,
+                address1 = clientOrIssuer.address1,
+                address2 = clientOrIssuer.address2,
+                zipCode = clientOrIssuer.zipCode,
+                city = clientOrIssuer.city,
+                phone = clientOrIssuer.phone,
+                email = clientOrIssuer.email,
+                notes = clientOrIssuer.notes,
+                companyId1Label = clientOrIssuer.companyId1Label,
+                companyId1Number = clientOrIssuer.companyId1Number,
+                companyId2Label = clientOrIssuer.companyId2Label,
+                companyId2Number = clientOrIssuer.companyId2Number
+            )
+        } else _documentIssuerUiState.value = DocumentClientOrIssuerState(
             id = null,
             name = clientOrIssuer.name,
             type = clientOrIssuer.type,
@@ -82,7 +104,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     }
 
     fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
-        _clientUiState.value = ClientOrIssuerState(
+        val clientOrIssuer = ClientOrIssuerState(
             id = null,
             type = type,
             firstName = _clientUiState.value.firstName,
@@ -99,6 +121,9 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             companyId2Label = _clientUiState.value.companyId2Label,
             companyId2Number = _clientUiState.value.companyId2Number
         )
+        if (type == ClientOrIssuerType.CLIENT)
+            _clientUiState.value = clientOrIssuer
+        else _clientUiState.value = clientOrIssuer
     }
 
 
@@ -131,22 +156,42 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         )
     }
 
-    fun saveInLocalDb() {
+    fun saveClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                dataSource.saveClientOrIssuer(clientUiState.value)
+                dataSource.saveClientOrIssuer(
+                    if (type == ClientOrIssuerType.CLIENT) clientUiState.value
+                    else issuerUiState.value
+                )
             } catch (e: Exception) {
                 println("Saving clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun updateClientOrIssuerInInLocalDb() {
+    fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                dataSource.updateClientOrIssuer(clientUiState.value)
+                when (type) {
+                    ClientOrIssuerType.CLIENT -> {
+                        dataSource.updateClientOrIssuer(clientUiState.value)
+                    }
+
+                    ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                        dataSource.updateDocumentClientOrIssuer(documentClientUiState.value)
+                    }
+
+                    ClientOrIssuerType.ISSUER -> {
+                        dataSource.updateClientOrIssuer(issuerUiState.value)
+                    }
+
+                    ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                        dataSource.updateDocumentClientOrIssuer(documentIssuerUiState.value)
+                    }
+                }
+
             } catch (e: Exception) {
                 println("Updating clients failed with exception: ${e.localizedMessage}")
             }
@@ -239,13 +284,12 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         )
     }
 
-    fun getLastCreated(): Long? {
+    fun getLastCreatedClientId(): Long? {
         var lastClientId: Long? = null
         runBlocking {
             val getLastItemIdJob = launch {
                 try {
-                    lastClientId = dataSource.getLastCreatedClientOrIssuerId()
-                    println("clientDataSource.getLastCreatedClient() = " + dataSource.getLastCreatedClientOrIssuerId())
+                    lastClientId = dataSource.getLastCreatedClientId()
                 } catch (e: Exception) {
                     println("Getting last client failed with exception: ${e.localizedMessage}")
                 }

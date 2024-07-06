@@ -6,9 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
@@ -22,7 +20,6 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -65,15 +62,15 @@ fun DeliveryNoteAddEdit(
     issuerList: MutableList<ClientOrIssuerState>,
     documentClientUiState: DocumentClientOrIssuerState,
     documentIssuerUiState: DocumentClientOrIssuerState,
+    documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
     products: MutableList<ProductState>,
-    isNewDeliveryNote: Boolean,
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
-    onProductClick: (ProductState) -> Unit,
-    documentProductUiState: DocumentProductState,
-    onDocumentProductClick: (DocumentProductState) -> Unit,
-    onDocumentClientOrIssuerClick: (DocumentClientOrIssuerState) -> Unit,
+    onClickProduct: (ProductState) -> Unit,
+    onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentProduct: (DocumentProductState) -> Unit,
+    onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -144,18 +141,18 @@ fun DeliveryNoteAddEdit(
                 issuers = issuerList,
                 documentClientUiState = documentClientUiState,
                 documentIssuerUiState = documentIssuerUiState,
+                documentProductUiState = documentProductUiState,
                 products = products,
                 taxRates = taxRates,
                 onValueChange = onValueChange,
-                onProductClick = onProductClick,
-                documentProductUiState = documentProductUiState,
-                onDocumentProductClick = onDocumentProductClick,
-                onDocumentClientOrIssuerClick = onDocumentClientOrIssuerClick,
+                onClickProduct = onClickProduct,
+                onClickClientOrIssuer = onClickClientOrIssuer,
+                onClickDocumentProduct = onClickDocumentProduct,
+                onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                 onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                currentClientId = deliveryNote.client.id,
-                currentIssuerId = deliveryNote.documentIssuer.id,
-                currentProductsIds = deliveryNote.documentProducts.mapNotNull { it.productId },
+                currentClientId = deliveryNote.documentClient?.id,
+                currentIssuerId = deliveryNote.documentIssuer?.id,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
@@ -179,10 +176,7 @@ fun DeliveryNoteAddEdit(
         Scaffold(
             topBar = {
                 DeliveryNoteAddEditTopBar(
-                    isNewDeliveryNote = isNewDeliveryNote,
                     navController = navController,
-                    onClickShare = {
-                    },
                     onClickBack = onClickBack,
                     onClickExport = {
                         showPopup = true
@@ -205,16 +199,7 @@ fun DeliveryNoteAddEdit(
             }
         ) { innerPadding ->
             if (showPopup) {
-                ExportPopup(
-                    deliveryNote,
-                    onDismissRequest = { showPopup = false }) {
-                    Box(
-                        modifier = Modifier
-                            .width(50.dp)
-                            .height(50.dp)
-                            .background(Color.Green)
-                    )
-                }
+                ExportPopup(deliveryNote, onDismissRequest = { showPopup = false })
             }
 
             Column(
@@ -225,7 +210,6 @@ fun DeliveryNoteAddEdit(
                         innerPadding
                     )
             ) {
-                var selectedItem: ScreenElement? by remember { mutableStateOf(null) }
 
                 DeliveryNoteBasicTemplate(
                     uiState = deliveryNote,
@@ -269,9 +253,7 @@ private fun hideBottomSheet(
 
 @Composable
 private fun DeliveryNoteAddEditTopBar(
-    isNewDeliveryNote: Boolean,
     navController: NavController,
-    onClickShare: () -> Unit,
     onClickBack: () -> Unit,
     onClickExport: () -> Unit,
 ) {
@@ -293,7 +275,6 @@ private fun DeliveryNoteAddEditBottomBar(
     BottomBarEdition(
         actions = arrayOf(
             actionComponents(onClickComponents),
-            //actionStyle(onClickStyle)
         )
     )
 }
@@ -302,7 +283,6 @@ private fun DeliveryNoteAddEditBottomBar(
 fun ExportPopup(
     deliveryNote: DeliveryNoteState,
     onDismissRequest: () -> Unit,
-    content: @Composable () -> Unit,
 ) {
     // full screen background
     Dialog(

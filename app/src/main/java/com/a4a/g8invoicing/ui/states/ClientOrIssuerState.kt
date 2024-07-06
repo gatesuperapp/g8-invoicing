@@ -10,7 +10,7 @@ import com.a4a.g8invoicing.ui.states.CompanyDataState
 // and to change properties values (var instead of val)
 data class ClientOrIssuerState(
     var id: Int? = null,
-    var type: ClientOrIssuerType = ClientOrIssuerType.CLIENT,
+    var type: ClientOrIssuerType? = null,
     var firstName: TextFieldValue? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var address1: TextFieldValue? = null,

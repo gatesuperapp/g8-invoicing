@@ -52,17 +52,17 @@ fun DeliveryNoteBottomSheet(
     issuers: MutableList<ClientOrIssuerState>,
     documentClientUiState: DocumentClientOrIssuerState,
     documentIssuerUiState: DocumentClientOrIssuerState,
+    documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
-    onProductClick: (ProductState) -> Unit,
-    documentProductUiState: DocumentProductState,
-    onDocumentProductClick: (DocumentProductState) -> Unit,
-    onDocumentClientOrIssuerClick: (DocumentClientOrIssuerState) -> Unit,
+    onClickProduct: (ProductState) -> Unit,
+    onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentProduct: (DocumentProductState) -> Unit,
+    onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
-    currentProductsIds: List<Int>? = null,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement) -> Unit,
@@ -148,32 +148,32 @@ fun DeliveryNoteBottomSheet(
             DocumentBottomSheetSlideInNextComponent(
                 pageElement = slideOtherComponent.value,
                 parameters = when (slideOtherComponent.value) {
-                    ScreenElement.DOCUMENT_ISSUER -> issuers
-                    ScreenElement.DOCUMENT_CLIENT -> clients
-                    ScreenElement.DOCUMENT_PRODUCTS -> listOf(
-                        deliveryNote.documentProducts,
-                        products,
-                        taxRates
+                    ScreenElement.DOCUMENT_ISSUER -> Pair(
+                        deliveryNote.documentIssuer,
+                        issuers
                     )
-
+                    ScreenElement.DOCUMENT_CLIENT -> Pair(
+                        deliveryNote.documentClient,
+                        clients
+                    )
+                    ScreenElement.DOCUMENT_PRODUCTS -> Pair(
+                        deliveryNote.documentProducts,
+                        products
+                    )
                     ScreenElement.DOCUMENT_DATE -> deliveryNote.documentDate
                     else -> {}
                 },
                 onClickBack = {
                     slideOtherComponent.value = null
                 },
-                clientUiState = documentClientUiState,
-                issuerUiState = documentIssuerUiState,
-                onClientOrIssuerClick = {
-                    // Select it, display it in the document
-                    //  & go back to previous screen
-                    onValueChange(slideOtherComponent.value!!, it)
-                    slideOtherComponent.value = null
-                },
-                onProductClick = onProductClick,
+                documentClientUiState = documentClientUiState,
+                documentIssuerUiState = documentIssuerUiState,
                 documentProductUiState = documentProductUiState,
-                onDocumentProductClick = onDocumentProductClick,
-                onDocumentClientOrIssuerClick = onDocumentClientOrIssuerClick,
+                taxRates = taxRates,
+                onClickClientOrIssuer = onClickClientOrIssuer,
+                onClickProduct = onClickProduct,
+                onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                onClickDocumentProduct = onClickDocumentProduct,
                 onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                 onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                 datePickerState = datePickerState,

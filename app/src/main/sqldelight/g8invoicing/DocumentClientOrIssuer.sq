@@ -19,6 +19,10 @@ CREATE TABLE DocumentClientOrIssuer (
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
   deleted_at REAL DEFAULT (datetime('now', 'localtime'))
 );
+INSERT INTO DocumentClientOrIssuer (document_client_or_issuer_id, type, first_name, name, address1, address2, zip_code, city)
+VALUES (1, 'client','Client', 'Super', '5 rue djj', '',  '32444', 'Tolosa'),
+ (2, 'issuer','Emetteur', 'Genial', '5 rue djj', '',  '32444', 'Tolosa');
+
 
 get:
 SELECT *
@@ -63,13 +67,23 @@ delete:
 DELETE FROM DocumentClientOrIssuer
 WHERE document_client_or_issuer_id = :id;
 
-lastInsertedRowId:
-SELECT last_insert_rowid();
+getLastInsertedClientOrIssuerId:
+SELECT document_client_or_issuer_id
+FROM DocumentClientOrIssuer
+ORDER BY document_client_or_issuer_id DESC
+LIMIT 1;
 
 getLastInsertedIssuer:
 SELECT *
-FROM ClientOrIssuer
+FROM DocumentClientOrIssuer
 WHERE type = 'issuer'
-ORDER BY client_or_issuer_id DESC
+ORDER BY document_client_or_issuer_id DESC
+LIMIT 1;
+
+getLastInsertedClientId:
+SELECT document_client_or_issuer_id
+FROM DocumentClientOrIssuer
+WHERE type = 'client'
+ORDER BY document_client_or_issuer_id DESC
 LIMIT 1;
 

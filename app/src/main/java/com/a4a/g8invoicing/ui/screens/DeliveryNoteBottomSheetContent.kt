@@ -19,14 +19,13 @@ fun DeliveryNoteBottomSheetContent(
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    localFocusManager: FocusManager
+    localFocusManager: FocusManager,
 ) {
     val inputList = listOfNotNull(
         FormInput(
             label = stringResource(id = R.string.document_number_short),
             inputType = TextInput(
-                text = deliveryNote.documentNumber
-                    ?: TextFieldValue(stringResource(id = R.string.document_default_number)),
+                text = deliveryNote.documentNumber,
                 placeholder = stringResource(id = R.string.document_default_number),
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_NUMBER, it)
@@ -44,7 +43,7 @@ fun DeliveryNoteBottomSheetContent(
         FormInput(
             label = stringResource(id = R.string.document_issuer),
             inputType = ForwardElement(
-                text = deliveryNote.documentIssuer.let {
+                text = deliveryNote.documentIssuer?.let {
                     it.name.text + " " + (it.firstName?.text ?: "")
                 } ?: "",
             ),
@@ -53,10 +52,9 @@ fun DeliveryNoteBottomSheetContent(
         FormInput(
             label = stringResource(id = R.string.document_client),
             inputType = ForwardElement(
-                text = deliveryNote.client.let {
+                text = deliveryNote.documentClient?.let {
                     it.name.text + " " + (it.firstName?.text ?: "")
-                }
-             ,
+                } ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_CLIENT
         ),

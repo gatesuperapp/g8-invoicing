@@ -16,7 +16,6 @@ import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductListViewModel
 import com.a4a.g8invoicing.ui.screens.ProductType
 import com.a4a.g8invoicing.ui.screens.DocumentBottomSheetTypeOfForm
-import com.a4a.g8invoicing.ui.shared.ScreenElement
 
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
@@ -78,7 +77,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         DeliveryNoteAddEdit(
             navController = navController,
             deliveryNote = deliveryNoteUiState,
-            isNewDeliveryNote = backStackEntry.arguments?.getString("itemId") == null,
             onClickBack = {
                 deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
                 onClickBack()
@@ -87,23 +85,26 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             issuerList = issuerListUiState.clientsOrIssuerList.toMutableList(),
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
+            documentProductUiState = documentProduct, // Used when choosing a product or creating new product from the bottom sheet
             taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
             products = productListUiState.products.toMutableList(), // The list of products to display when adding a product
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
-
             },
-            onDocumentProductClick = {// Edit a document product
-                productAddEditViewModel.setDocumentProductUiState(it)
-            },
-            onDocumentClientOrIssuerClick = {// Edit a document product
-                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
-            },
-            onProductClick = {
+            onClickProduct = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(it)
             },
-            documentProductUiState = documentProduct, // Used when choosing a product or creating new product from the bottom sheet
+            onClickClientOrIssuer = {
+                // Initialize documentProductUiState to display it in the bottomSheet form
+                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)
+            },
+            onClickDocumentProduct = {// Edit a document product
+                productAddEditViewModel.setDocumentProductUiState(it)
+            },
+            onClickDocumentClientOrIssuer = {// Edit a document product
+                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
+            },
             onClickDeleteDocumentProduct = {
                 deliveryNoteViewModel.removeDocumentProductFromLocalDb(it)
             },
@@ -135,28 +136,17 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {
-                    DocumentBottomSheetTypeOfForm.ADD_CLIENT ->
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
-
-                    DocumentBottomSheetTypeOfForm.ADD_ISSUER ->
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
-
-                    // User can create client or issuer from bottom sheet (but not edit)
-                    DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.saveInLocalDb()
-                        deliveryNoteViewModel.updateDeliveryNoteState(
-                            ScreenElement.DOCUMENT_CLIENT,
+                    // ADD = choose from existing list
+                    DocumentBottomSheetTypeOfForm.ADD_CLIENT -> {
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                             documentClientUiState
                         )
                         clientOrIssuerAddEditViewModel.clearClientUiState()
                     }
 
-                    DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.ISSUER)
-                        clientOrIssuerAddEditViewModel.saveInLocalDb()
-                        deliveryNoteViewModel.updateDeliveryNoteState(
-                            ScreenElement.DOCUMENT_ISSUER,
-                            documentClientUiState
+                    DocumentBottomSheetTypeOfForm.ADD_ISSUER -> {
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                            documentIssuerUiState
                         )
                         clientOrIssuerAddEditViewModel.clearIssuerUiState()
                     }
@@ -164,16 +154,38 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> {
                         deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                     }
+                    // NEW = create new
+                    DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
+                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.CLIENT)
+                        clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
+                    }
 
-                    DocumentBottomSheetTypeOfForm.EDIT_ITEM -> {
-                        productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                    DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
+                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.ISSUER)
+                        clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.ISSUER)
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
                         productAddEditViewModel.setProductUiState()
-                        productAddEditViewModel.saveInLocalDb()
+                        productAddEditViewModel.saveProductInLocalDb()
                         deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                     }
+                    // EDIT = edit the chosen item (will only impact the document, doesn't change
+                    // the initial object)
+                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
+                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT)
+                    }
+
+                    DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
+                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER)
+                    }
+
+                    DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
+                        productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                    }
+
 
                 }
             },

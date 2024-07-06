@@ -25,13 +25,14 @@ fun DocumentBottomSheetSlideInNextComponent(
     pageElement: ScreenElement?,
     parameters: Any?,
     onClickBack: () -> Unit,
-    clientUiState: DocumentClientOrIssuerState,
-    issuerUiState: DocumentClientOrIssuerState,
-    onClientOrIssuerClick: (ClientOrIssuerState) -> Unit,
-    onProductClick: (ProductState) -> Unit,
+    documentClientUiState: DocumentClientOrIssuerState,
+    documentIssuerUiState: DocumentClientOrIssuerState,
     documentProductUiState: DocumentProductState,
-    onDocumentProductClick: (DocumentProductState) -> Unit,
-    onDocumentClientOrIssuerClick: (DocumentClientOrIssuerState) -> Unit,
+    taxRates: List<BigDecimal>,
+    onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickProduct: (ProductState) -> Unit,
+    onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
+    onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
     datePickerState: DatePickerState,
@@ -45,64 +46,71 @@ fun DocumentBottomSheetSlideInNextComponent(
 ) {
     var isProductListVisible by remember { mutableStateOf(false) }
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
-    var typeOfCreation: DocumentBottomSheetTypeOfForm by remember { mutableStateOf(DocumentBottomSheetTypeOfForm.ADD_PRODUCT) }
+    var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
+        mutableStateOf(
+            DocumentBottomSheetTypeOfForm.ADD_PRODUCT
+        )
+    }
     var isDocumentFormVisible by remember { mutableStateOf(false) }
-    var params: List<List<Any>?>? = null
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
-        parameters?.let {it ->
-            val item = it as DocumentClientOrIssuerState
-            DeliveryNoteBottomSheetDocumentClientOrIssuer(
-                item =  item,
-                onClickBack = onClickBack,
-                onClickNewButton = {
+        val params = parameters as Pair<DocumentClientOrIssuerState?, List<ClientOrIssuerState>>
+        DeliveryNoteBottomSheetDocumentClientOrIssuer(
+            item = params.first,
+            onClickBack = onClickBack,
+            onClickNewButton = {
+                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                    DocumentBottomSheetTypeOfForm.NEW_CLIENT
+                } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
+                isDocumentFormVisible = true
+            },
+            onClickChooseButton = { isClientOrIssuerListVisible = true },
+            onClickItem = {
+                onClickDocumentClientOrIssuer(it)
+                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
+                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else  DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
+                isDocumentFormVisible = true
+            },
+            onClickDelete = onClickDeleteDocumentClientOrIssuer
+        )
+
+        if (isClientOrIssuerListVisible) {
+            DeliveryNoteBottomSheetClientOrIssuerList(
+                list = params.second,
+                pageElement = pageElement,
+                onClickBack = { isClientOrIssuerListVisible = false },
+                onClientOrIssuerClick = {
+                    onClickClientOrIssuer(it) // Update the AddEditViewModel with the chosen item
+                    // so we open bottom document form with data
                     typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
-                        DocumentBottomSheetTypeOfForm.NEW_CLIENT
-                    } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
+                        DocumentBottomSheetTypeOfForm.ADD_CLIENT
+                    } else DocumentBottomSheetTypeOfForm.ADD_ISSUER
                     isDocumentFormVisible = true
+                    CoroutineScope(Dispatchers.IO).launch {
+                        delay(TimeUnit.MILLISECONDS.toMillis(500))
+                        // Waits for the bottom form to be opened,
+                        // so previous screen change is in background
+                        isClientOrIssuerListVisible = false
+                    }
                 },
-                onClickChooseButton = { isClientOrIssuerListVisible = true },
-                onClickItem = {
-                    onDocumentClientOrIssuerClick(it)
-                    typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_ITEM
-                    isDocumentFormVisible = true
-                },
-                onClickDelete = onClickDeleteDocumentClientOrIssuer
+                currentClientId = currentClientId,
+                currentIssuerId = currentIssuerId
             )
-
-            if (isClientOrIssuerListVisible) {
-                DeliveryNoteBottomSheetClientOrIssuerList(
-                    list = parameters.let { it as List<ClientOrIssuerState> } ,
-                    pageElement = pageElement,
-                    onClickBack = onClickBack,
-                    onClientOrIssuerClick =  {
-                        onClientOrIssuerClick(it)
-                        typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
-                            DocumentBottomSheetTypeOfForm.ADD_CLIENT
-                        } else DocumentBottomSheetTypeOfForm.ADD_ISSUER
-                        isDocumentFormVisible = true
-                    },
-                    currentClientId = currentClientId,
-                    currentIssuerId = currentIssuerId
-                )
-            }
         }
-
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DATE) {
         DeliveryNoteBottomSheetDatePicker(
-            initialDate = parameters?.let { it as String } ?: "",
+            initialDate = parameters.let { it as String },
             datePickerState = datePickerState,
             onClickBack = onClickBack,
         )
     }
 
     if (pageElement == ScreenElement.DOCUMENT_PRODUCTS) {
-        params = parameters as List<List<Any>?>
-
+        val params = parameters as Pair<List<DocumentProductState>?, List<ProductState>?>
         DeliveryNoteBottomSheetDocumentProductList(
-            list = params.first() as List<DocumentProductState>? ?: emptyList(),
+            list = params.first ?: emptyList(),
             onClickBack = onClickBack,
             onClickNew = {
                 typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
@@ -111,11 +119,11 @@ fun DocumentBottomSheetSlideInNextComponent(
                     delay(TimeUnit.MILLISECONDS.toMillis(500))
                     isProductListVisible = false
                 }
-            } ,
+            },
             onClickChooseExisting = { isProductListVisible = true },
             onClickDocumentProduct = {
-                onDocumentProductClick(it)
-                typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_ITEM
+                onClickDocumentProduct(it)
+                typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
                 isDocumentFormVisible = true
                 /*CoroutineScope(Dispatchers.IO).launch {
                     delay(TimeUnit.MILLISECONDS.toMillis(500))
@@ -127,10 +135,10 @@ fun DocumentBottomSheetSlideInNextComponent(
 
         if (isProductListVisible) {
             DeliveryNoteBottomSheetProductList(
-                list = params[1] as List<ProductState>? ?: emptyList(),
+                list = params.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
-                    onProductClick(it) // Update the ProductAddEditViewModel with the chosen product
+                    onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
                     // so we open bottom document form with the chosen product
                     typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_PRODUCT
                     isDocumentFormVisible = true
@@ -144,13 +152,14 @@ fun DocumentBottomSheetSlideInNextComponent(
             )
         }
     }
+
     if (isDocumentFormVisible) {
         DocumentBottomSheetFormModal(
             typeOfCreation = typeOfCreation,
-            documentClientUiState = clientUiState,
-            documentIssuerUiState = issuerUiState,
+            documentClientUiState = documentClientUiState,
+            documentIssuerUiState = documentIssuerUiState,
             documentProduct = documentProductUiState,
-            taxRates = params?.get(2) as List<BigDecimal>?,
+            taxRates = taxRates,
             bottomFormOnValueChange = bottomFormOnValueChange,
             productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
             onClickCancel = { // Re-initialize
@@ -164,4 +173,5 @@ fun DocumentBottomSheetSlideInNextComponent(
             onSelectTaxRate = onSelectTaxRate
         )
     }
+
 }

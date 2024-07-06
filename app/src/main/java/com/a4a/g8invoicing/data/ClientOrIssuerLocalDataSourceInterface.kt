@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.data
 
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.PersonType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
@@ -23,6 +22,5 @@ interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun updateDocumentClientOrIssuer(documentClientOrIssuer: DocumentClientOrIssuerState)
     suspend fun deleteClientOrIssuer(id: Long)
     suspend fun deleteDocumentClientOrIssuer(id: Long)
-    suspend fun getLastCreatedClientOrIssuerId(): Long?
-    suspend fun getLastCreatedDocumentClientOrIssuerId(): Long?
+    suspend fun getLastCreatedClientId(): Long?
 }

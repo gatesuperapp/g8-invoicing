@@ -50,7 +50,7 @@ class ClientOrIssuerLocalDataSource(
             try {
                 clientOrIssuerQueries.save(
                     client_or_issuer_id = null,
-                    type = clientOrIssuer.type.name.lowercase(),
+                    type = clientOrIssuer.type?.name?.lowercase(),
                     clientOrIssuer.firstName?.text,
                     clientOrIssuer.name.text,
                     clientOrIssuer.address1?.text,
@@ -78,7 +78,10 @@ class ClientOrIssuerLocalDataSource(
             try {
                 documentClientOrIssuerQueries.save(
                     document_client_or_issuer_id = null,
-                    type = documentClientOrIssuer.type.name.lowercase(),
+                    type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                        documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT )
+                        ClientOrIssuerType.CLIENT.name.lowercase()
+                    else ClientOrIssuerType.ISSUER.name.lowercase(),
                     documentClientOrIssuer.firstName?.text,
                     documentClientOrIssuer.name.text,
                     documentClientOrIssuer.address1?.text,
@@ -94,7 +97,7 @@ class ClientOrIssuerLocalDataSource(
                     documentClientOrIssuer.companyId2Number?.text,
                 )
                 documentClientOrIssuerId =
-                    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId().executeAsOneOrNull()
                         ?.toInt()
 
             } catch (cause: Throwable) {
@@ -150,7 +153,7 @@ class ClientOrIssuerLocalDataSource(
                 clientOrIssuer.id?.let {
                     clientOrIssuerQueries.update(
                         id = it.toLong(),
-                        type = clientOrIssuer.type.name.lowercase(),
+                        type = clientOrIssuer.type?.name?.lowercase(),
                         first_name = clientOrIssuer.firstName?.text,
                         name = clientOrIssuer.name.text,
                         address1 = clientOrIssuer.address1?.text,
@@ -179,7 +182,10 @@ class ClientOrIssuerLocalDataSource(
                 documentClientOrIssuer.id?.let {
                     documentClientOrIssuerQueries.update(
                         id = it.toLong(),
-                        type = documentClientOrIssuer.type.name.lowercase(),
+                        type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT )
+                            ClientOrIssuerType.CLIENT.name.lowercase()
+                        else ClientOrIssuerType.ISSUER.name.lowercase(),
                         first_name = documentClientOrIssuer.firstName?.text,
                         name = documentClientOrIssuer.name.text,
                         address1 = documentClientOrIssuer.address1?.text,
@@ -218,29 +224,16 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    override suspend fun getLastCreatedClientOrIssuerId(): Long? {
+    override suspend fun getLastCreatedClientId(): Long? {
         var lastInserted: Long? = null
         withContext(Dispatchers.IO) {
             try {
-                lastInserted = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                lastInserted = clientOrIssuerQueries.getLastInsertedClientId().executeAsOneOrNull()
             } catch (cause: Throwable) {
             }
         }
         return lastInserted
     }
-
-    override suspend fun getLastCreatedDocumentClientOrIssuerId(): Long? {
-        var lastInserted: Long? = null
-        withContext(Dispatchers.IO) {
-            try {
-                lastInserted =
-                    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-            } catch (cause: Throwable) {
-            }
-        }
-        return lastInserted
-    }
-
 }
 
 fun ClientOrIssuer.transformIntoEditable(
@@ -249,6 +242,9 @@ fun ClientOrIssuer.transformIntoEditable(
 
     return ClientOrIssuerState(
         id = clientOrIssuer.client_or_issuer_id.toInt(),
+        type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
+            ClientOrIssuerType.CLIENT
+        else ClientOrIssuerType.ISSUER,
         firstName = clientOrIssuer.first_name?.let { TextFieldValue(text = it) },
         name = TextFieldValue(text = clientOrIssuer.name),
         address1 = clientOrIssuer.address1?.let { TextFieldValue(text = it) },
@@ -272,8 +268,8 @@ fun DocumentClientOrIssuer.transformIntoEditable(
     return DocumentClientOrIssuerState(
         id = clientOrIssuer.document_client_or_issuer_id.toInt(),
         type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
-            ClientOrIssuerType.CLIENT
-        else ClientOrIssuerType.ISSUER,
+            ClientOrIssuerType.DOCUMENT_CLIENT
+        else ClientOrIssuerType.DOCUMENT_ISSUER,
         firstName = TextFieldValue(text = clientOrIssuer.first_name ?: ""),
         name = TextFieldValue(text = clientOrIssuer.name),
         address1 = TextFieldValue(text = clientOrIssuer.address1 ?: ""),

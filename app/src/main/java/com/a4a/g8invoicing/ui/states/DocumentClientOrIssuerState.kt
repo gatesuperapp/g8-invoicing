@@ -8,7 +8,7 @@ import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
 // when deleted from the client/issuer list.
 data class DocumentClientOrIssuerState(
     var id: Int? = null,
-    var type: ClientOrIssuerType = ClientOrIssuerType.CLIENT,
+    var type: ClientOrIssuerType? = null,
     var firstName: TextFieldValue? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var address1: TextFieldValue? = null,

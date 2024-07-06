@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEdit
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditViewModel
+import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.ItemOrDocumentType
 
 fun NavGraphBuilder.clientOrIssuerAddEdit(
@@ -30,7 +31,9 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
             clientOrIssuer = clientUiState,
             isNew = backStackEntry.arguments?.getString("itemId") == null,
             onValueChange = { pageElement, value ->
-                viewModel.updateClientOrIssuerState(pageElement, value, clientUiState.type)
+                clientUiState.type?.let {
+                    viewModel.updateClientOrIssuerState(pageElement, value, it)
+                }
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 viewModel.updateCursor(pageElement, ItemOrDocumentType.CLIENT_OR_ISSUER)
@@ -39,13 +42,13 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
                 //  we don't have to pass the object as the
                 //  ViewModel is already updated with latest values
                 if (isNew) {
-                    viewModel.saveInLocalDb()
+                    viewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
                 } else {
-                    viewModel.updateClientOrIssuerInInLocalDb()
+                    viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
                 }
                 goToPreviousScreen(
                     "result",
-                    Pair("client", viewModel.getLastCreated().toString())
+                    Pair("client", viewModel.getLastCreatedClientId().toString())
                 ) // TODO ?
             },
             onClickBack = {

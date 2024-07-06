@@ -21,7 +21,7 @@ fun DeliveryNoteListContent(
         items(
             items = deliveryNotes,
             key = {
-                it.documentId
+                it.documentId!!
             }
         ) { deliveryNote ->
             /* val dismissDirections = setOf(DismissDirection.EndToStart)
@@ -45,7 +45,9 @@ fun DeliveryNoteListContent(
             DeliveryNoteListItem(
                 deliveryNote = deliveryNote,
                 onItemClick = {
-                    onItemClick(deliveryNote.documentId)
+                    deliveryNote.documentId?.let {
+                        onItemClick(it)
+                    }
                 },
                 onItemCheckboxClick = { isChecked ->
                     // Update deliveryNote list

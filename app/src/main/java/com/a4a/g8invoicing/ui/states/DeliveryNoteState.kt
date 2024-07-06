@@ -15,10 +15,10 @@ data class DeliveryNoteState(
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
     override var documentDate: String = Strings.get(R.string.document_default_date),
     override var orderNumber: TextFieldValue = TextFieldValue(),
-    override var documentIssuer: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
-    override var documentClient: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
-    override var documentProducts: List<DocumentProductState> = listOf(),
-    override var documentPrices: DocumentPrices = DocumentPrices(),
+    override var documentIssuer: DocumentClientOrIssuerState? = null,
+    override var documentClient: DocumentClientOrIssuerState? = null,
+    override var documentProducts: List<DocumentProductState>? = null,
+    override var documentPrices: DocumentPrices? = null,
     override var currency: TextFieldValue = TextFieldValue(),
 ): Document()
 

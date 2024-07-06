@@ -39,7 +39,7 @@ fun DocumentBottomSheetFormModal(
     documentClientUiState: DocumentClientOrIssuerState,
     documentIssuerUiState: DocumentClientOrIssuerState,
     documentProduct: DocumentProductState,
-    taxRates: List<BigDecimal>?,
+    taxRates: List<BigDecimal>,
     onClickCancel: () -> Unit,
     onClickDone: () -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
@@ -90,7 +90,7 @@ fun DocumentBottomSheetFormModal(
                             DocumentBottomSheetTypeOfForm.ADD_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
                             DocumentBottomSheetTypeOfForm.NEW_CLIENT -> stringResource(id = R.string.document_modal_new_client)
                             DocumentBottomSheetTypeOfForm.ADD_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
-                            DocumentBottomSheetTypeOfForm.EDIT_ITEM -> stringResource(id = R.string.document_modal_edit_product)
+                            DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> stringResource(id = R.string.document_modal_edit_product)
                             DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
                             DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> stringResource(id = R.string.document_modal_new_product)
                             else -> ""

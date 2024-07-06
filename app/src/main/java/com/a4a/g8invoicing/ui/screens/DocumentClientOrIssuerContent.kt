@@ -36,9 +36,9 @@ fun DocumentClientOrIssuerContent(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .padding(
+                top = 20.dp,
                 start = 20.dp,
-                end = 20.dp,
-                bottom = 14.dp,
+                end = 20.dp
             )
             .clip(RoundedCornerShape(5.dp))
             .background(ColorLightGrey)
@@ -63,7 +63,7 @@ fun DocumentClientOrIssuerContent(
         ) {
             Text(
                 modifier = Modifier.weight(1F),
-                text = item.firstName?.text + item.name.text,
+                text = (item.firstName?.text ?: "") + item.name.text,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
             )

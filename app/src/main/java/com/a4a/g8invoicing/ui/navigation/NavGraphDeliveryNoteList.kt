@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
