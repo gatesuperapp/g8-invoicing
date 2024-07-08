@@ -10,7 +10,6 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import g8invoicing.ClientOrIssuer
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
@@ -41,12 +40,12 @@ class DeliveryNoteLocalDataSource(
             query.executeAsOne()
         }
 
-        val documentProductFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
+        val productFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
         val clientAndIssuerFlow = fetchClientOrIssuerFlow(deliveryNoteId).onStart { emit(emptyList()) }
 
         val combinedFlow = combine(
             deliveryNoteFlow,
-            documentProductFlow,
+            productFlow,
             clientAndIssuerFlow
         ) { value1, value2, value3 ->
             value1.transformIntoEditableNote(

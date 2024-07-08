@@ -86,13 +86,15 @@ fun DocumentBottomSheetFormModal(
                             .align(Alignment.TopCenter),
                         style = MaterialTheme.typography.textTitle,
                         text = when (typeOfCreation) {
-                            DocumentBottomSheetTypeOfForm.NEW_ISSUER -> stringResource(id = R.string.document_modal_new_issuer)
-                            DocumentBottomSheetTypeOfForm.ADD_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
                             DocumentBottomSheetTypeOfForm.NEW_CLIENT -> stringResource(id = R.string.document_modal_new_client)
-                            DocumentBottomSheetTypeOfForm.ADD_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
-                            DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> stringResource(id = R.string.document_modal_edit_product)
-                            DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
+                            DocumentBottomSheetTypeOfForm.NEW_ISSUER -> stringResource(id = R.string.document_modal_new_issuer)
                             DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> stringResource(id = R.string.document_modal_new_product)
+                            DocumentBottomSheetTypeOfForm.ADD_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
+                            DocumentBottomSheetTypeOfForm.ADD_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
+                            DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
+                            DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
+                            DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
+                            DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> stringResource(id = R.string.document_modal_edit_product)
                             else -> ""
                         }
                     )
@@ -108,7 +110,7 @@ fun DocumentBottomSheetFormModal(
                     )
                 }
             }
-            if (typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_CLIENT || typeOfCreation == DocumentBottomSheetTypeOfForm.ADD_CLIENT) {
+            if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)) {
                 DocumentClientOrIssuerAddEditForm(
                     documentClientOrIssuerState = documentClientUiState,
                     onValueChange = { screenElement, value ->
@@ -117,7 +119,7 @@ fun DocumentBottomSheetFormModal(
                     placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
                     isDisplayedInBottomSheet = true
                 )
-            } else if (typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_ISSUER || typeOfCreation == DocumentBottomSheetTypeOfForm.ADD_ISSUER) {
+            } else if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.ISSUER.name)) {
                 DocumentClientOrIssuerAddEditForm(
                     documentClientOrIssuerState = documentIssuerUiState,
                     onValueChange = { screenElement, value ->

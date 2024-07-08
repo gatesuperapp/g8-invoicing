@@ -210,7 +210,6 @@ fun DeliveryNoteAddEdit(
                         innerPadding
                     )
             ) {
-
                 DeliveryNoteBasicTemplate(
                     uiState = deliveryNote,
                     onClickElement = {

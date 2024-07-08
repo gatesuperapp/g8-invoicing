@@ -79,7 +79,8 @@ class ClientOrIssuerLocalDataSource(
                 documentClientOrIssuerQueries.save(
                     document_client_or_issuer_id = null,
                     type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                        documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT )
+                        documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+                    )
                         ClientOrIssuerType.CLIENT.name.lowercase()
                     else ClientOrIssuerType.ISSUER.name.lowercase(),
                     documentClientOrIssuer.firstName?.text,
@@ -97,7 +98,8 @@ class ClientOrIssuerLocalDataSource(
                     documentClientOrIssuer.companyId2Number?.text,
                 )
                 documentClientOrIssuerId =
-                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId().executeAsOneOrNull()
+                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
+                        .executeAsOneOrNull()
                         ?.toInt()
 
             } catch (cause: Throwable) {
@@ -145,7 +147,7 @@ class ClientOrIssuerLocalDataSource(
     }
 
     override suspend fun updateClientOrIssuer(
-        clientOrIssuer: ClientOrIssuerState
+        clientOrIssuer: ClientOrIssuerState,
     ) {
         return withContext(Dispatchers.IO) {
             try {
@@ -175,7 +177,7 @@ class ClientOrIssuerLocalDataSource(
     }
 
     override suspend fun updateDocumentClientOrIssuer(
-        documentClientOrIssuer: DocumentClientOrIssuerState
+        documentClientOrIssuer: DocumentClientOrIssuerState,
     ) {
         return withContext(Dispatchers.IO) {
             try {
@@ -183,7 +185,8 @@ class ClientOrIssuerLocalDataSource(
                     documentClientOrIssuerQueries.update(
                         id = it.toLong(),
                         type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT )
+                            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+                        )
                             ClientOrIssuerType.CLIENT.name.lowercase()
                         else ClientOrIssuerType.ISSUER.name.lowercase(),
                         first_name = documentClientOrIssuer.firstName?.text,
@@ -254,35 +257,59 @@ fun ClientOrIssuer.transformIntoEditable(
         phone = clientOrIssuer.phone?.let { TextFieldValue(text = it) },
         email = clientOrIssuer.email?.let { TextFieldValue(text = it) },
         notes = clientOrIssuer.notes?.let { TextFieldValue(text = it) },
-        companyId1Label = TextFieldValue(text = clientOrIssuer.company_id1_label ?: "N° SIRET"),
+        companyId1Label = clientOrIssuer.company_id1_number?.let {
+            clientOrIssuer.company_id1_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
         companyId1Number = clientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
-        companyId2Label = TextFieldValue(text = clientOrIssuer.company_id2_label ?: "N° TVA"),
+        companyId2Label = clientOrIssuer.company_id1_number?.let {
+            clientOrIssuer.company_id2_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
         companyId2Number = clientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
     )
 }
 
 fun DocumentClientOrIssuer.transformIntoEditable(
 ): DocumentClientOrIssuerState {
-    val clientOrIssuer = this
+    val documentClientOrIssuer = this
 
     return DocumentClientOrIssuerState(
-        id = clientOrIssuer.document_client_or_issuer_id.toInt(),
-        type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
+        id = documentClientOrIssuer.document_client_or_issuer_id.toInt(),
+        type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
             ClientOrIssuerType.DOCUMENT_CLIENT
         else ClientOrIssuerType.DOCUMENT_ISSUER,
-        firstName = TextFieldValue(text = clientOrIssuer.first_name ?: ""),
-        name = TextFieldValue(text = clientOrIssuer.name),
-        address1 = TextFieldValue(text = clientOrIssuer.address1 ?: ""),
-        address2 = TextFieldValue(text = clientOrIssuer.address2 ?: ""),
-        zipCode = TextFieldValue(text = clientOrIssuer.zip_code ?: ""),
-        city = TextFieldValue(text = clientOrIssuer.city ?: ""),
-        phone = TextFieldValue(text = clientOrIssuer.phone ?: ""),
-        email = TextFieldValue(text = clientOrIssuer.email ?: ""),
-        notes = TextFieldValue(text = clientOrIssuer.notes ?: ""),
-        companyId1Label = TextFieldValue(text = Strings.get(R.string.document_default_issuer_company_label1)),
-        companyId1Number = TextFieldValue(text = clientOrIssuer.company_id1_number ?: ""),
-        companyId2Label = TextFieldValue(text = Strings.get(R.string.document_default_issuer_company_label2)),
-        companyId2Number = TextFieldValue(text = clientOrIssuer.company_id2_number ?: ""),
+        firstName = documentClientOrIssuer.first_name?.let { TextFieldValue(text = it) },
+        name = TextFieldValue(text = documentClientOrIssuer.name),
+        address1 = documentClientOrIssuer.address1?.let { TextFieldValue(text = it) },
+        address2 = documentClientOrIssuer.address2?.let { TextFieldValue(text = it) },
+        zipCode = documentClientOrIssuer.zip_code?.let { TextFieldValue(text = it) },
+        city = documentClientOrIssuer.city?.let { TextFieldValue(text = it) },
+        phone = documentClientOrIssuer.phone?.let { TextFieldValue(text = it) },
+        email = documentClientOrIssuer.email?.let { TextFieldValue(text = it) },
+        notes = documentClientOrIssuer.notes?.let { TextFieldValue(text = it) },
+        companyId1Label = documentClientOrIssuer.company_id1_number?.let {
+            documentClientOrIssuer.company_id1_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId1Number = documentClientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
+        companyId2Label = documentClientOrIssuer.company_id1_number?.let {
+            documentClientOrIssuer.company_id2_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId2Number = documentClientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
     )
 }
 

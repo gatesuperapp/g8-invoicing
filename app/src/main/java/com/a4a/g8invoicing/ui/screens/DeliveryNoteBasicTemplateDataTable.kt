@@ -38,9 +38,9 @@ import java.math.RoundingMode
 fun DeliveryNoteBasicTemplateDataTable(
     tableData: List<DocumentProductState>,
 ) {
-    val descriptionColumnWeight = .8f // 70%
-    val quantityColumnWeight = .15f // 70%
-    val taxColumnWeight = .15f // 70%
+    val descriptionColumnWeight = .8f
+    val quantityColumnWeight = .15f
+    val taxColumnWeight = .15f
 
     Row(
         Modifier
@@ -93,7 +93,7 @@ fun DeliveryNoteBasicTemplateDataTable(
                 .fillMaxWidth()
                 .leftBorder(1.dp, Color.LightGray)
                 .bottomBorder(1.dp, Color.LightGray)
-                .height(IntrinsicSize.Min),
+                .height(IntrinsicSize.Min),// without it we can't add fillMaxHeight to columns
             horizontalArrangement = Arrangement.End
         ) {
             TableCell(
@@ -124,6 +124,8 @@ fun DeliveryNoteBasicTemplateDataTable(
                 text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP).toString() + stringResource(id = R.string.currency),
                 alignEnd = true
             )
+
+            Spacer(Modifier.padding(bottom = 2.dp))
         }
     }
 }
@@ -132,7 +134,7 @@ fun DeliveryNoteBasicTemplateDataTable(
 @Composable
 fun RowScope.TableCell(
     text: String,
-    weight: Float = .22f, // Width of all the cells except the "description" one
+    weight: Float = .22f, // Width of all the cells except the first row ones
     alignEnd: Boolean,
     subText: String? = null,
 ) {

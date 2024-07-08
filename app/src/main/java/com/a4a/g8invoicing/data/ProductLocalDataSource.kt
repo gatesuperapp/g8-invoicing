@@ -100,7 +100,7 @@ class ProductLocalDataSource(
                     productQueries.updateProduct(
                         product_id = it,
                         name = product.name.text,
-                        description = product.description?.text ?: "",
+                        description = product.description?.text,
                         final_price = product.priceWithTax?.toDouble(),
                         product_tax_id = product.taxRate?.let {
                             taxQueries.getTaxRateId(it.toDouble()).executeAsOneOrNull()
@@ -151,7 +151,7 @@ fun Product.transformIntoEditableProduct(taxQueries: TaxRateQueries): ProductSta
     return ProductState(
         productId = this.product_id.toInt(),
         name = TextFieldValue(this.name),
-        description = TextFieldValue(this.description ?: ""),
+        description = this.description?.let { TextFieldValue() },
         priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
         taxRate = this.product_tax_id?.let {
             taxQueries.getTaxRate(it)
@@ -164,7 +164,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
     return DocumentProductState(
         id = this.document_product_id.toInt(),
         name = TextFieldValue(this.name),
-        description = TextFieldValue(this.description ?: ""),
+        description = this.description?.let { TextFieldValue() },
         priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
         taxRate = this.tax_rate?.toBigDecimal()?.setScale(0, RoundingMode.HALF_UP),
         quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)

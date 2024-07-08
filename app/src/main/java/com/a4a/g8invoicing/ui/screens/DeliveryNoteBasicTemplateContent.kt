@@ -119,7 +119,7 @@ fun DeliveryNoteBasicTemplateContent(
             ) {
                 val documentProducts = productArray?.map { it.documentProduct }
                 if (!documentProducts.isNullOrEmpty()) {
-                    documentProducts.let { DeliveryNoteBasicTemplateDataTable(it) }
+                    DeliveryNoteBasicTemplateDataTable(documentProducts)
                 }
             }
 
