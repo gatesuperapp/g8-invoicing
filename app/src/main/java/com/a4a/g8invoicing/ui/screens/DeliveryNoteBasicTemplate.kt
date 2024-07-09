@@ -120,7 +120,8 @@ fun DeliveryNoteBasicTemplate(
         FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPages)
     )
 
-    val taxRates = uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
+    val taxRates =
+        uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
         footerArray.add(FooterRow("TAXES_" + it.toString(), numberOfPages))
     }
@@ -190,7 +191,9 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) 
             .wrapContentHeight(),
         fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.textForDocumentsImportant,
-        text = (clientOrIssuer?.firstName?.text ?: "") + " " + (clientOrIssuer?.name?.text ?: "")
+        text = (clientOrIssuer?.firstName.let {
+            (it?.text ?: "") + " "
+        }) + (clientOrIssuer?.name?.text ?: "")
     )
     clientOrIssuer?.address1?.let {
         Text(
@@ -239,7 +242,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) 
             textAlign = TextAlign.Center,
             modifier = Modifier.wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = clientOrIssuer.companyId1Label?.text + " : " +  it.text
+            text = clientOrIssuer.companyId1Label?.text + " : " + it.text
         )
     }
     clientOrIssuer?.companyId2Number?.let {

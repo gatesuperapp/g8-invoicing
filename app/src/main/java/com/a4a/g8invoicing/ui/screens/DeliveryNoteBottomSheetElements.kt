@@ -31,8 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
@@ -43,7 +41,7 @@ import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryNoteBottomSheet(
+fun DeliveryNoteBottomSheetElements(
     deliveryNote: DeliveryNoteState,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
@@ -52,14 +50,9 @@ fun DeliveryNoteBottomSheet(
     issuers: MutableList<ClientOrIssuerState>,
     documentClientUiState: DocumentClientOrIssuerState,
     documentIssuerUiState: DocumentClientOrIssuerState,
-    documentProductUiState: DocumentProductState,
-    products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
-    onClickProduct: (ProductState) -> Unit,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
-    onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
-    onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -132,7 +125,7 @@ fun DeliveryNoteBottomSheet(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    DeliveryNoteBottomSheetContent(
+                    DeliveryNoteBottomSheetElementsContent(
                         deliveryNote = deliveryNote,
                         onValueChange = onValueChange,
                         onClickForward = {
@@ -145,7 +138,7 @@ fun DeliveryNoteBottomSheet(
                 }
             }
 
-            DocumentBottomSheetSlideInNextComponent(
+            DocumentBottomSheetElementsAfterSlide(
                 pageElement = slideOtherComponent.value,
                 parameters = when (slideOtherComponent.value) {
                     ScreenElement.DOCUMENT_ISSUER -> Pair(
@@ -156,10 +149,6 @@ fun DeliveryNoteBottomSheet(
                         deliveryNote.documentClient,
                         clients
                     )
-                    ScreenElement.DOCUMENT_PRODUCTS -> Pair(
-                        deliveryNote.documentProducts,
-                        products
-                    )
                     ScreenElement.DOCUMENT_DATE -> deliveryNote.documentDate
                     else -> {}
                 },
@@ -168,19 +157,15 @@ fun DeliveryNoteBottomSheet(
                 },
                 documentClientUiState = documentClientUiState,
                 documentIssuerUiState = documentIssuerUiState,
-                documentProductUiState = documentProductUiState,
                 taxRates = taxRates,
                 onClickClientOrIssuer = onClickClientOrIssuer,
-                onClickProduct = onClickProduct,
                 onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
-                onClickDocumentProduct = onClickDocumentProduct,
-                onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                 onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                 datePickerState = datePickerState,
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId,
                 bottomFormOnValueChange = bottomFormOnValueChange,
-                productPlaceCursorAtTheEndOfText = bottomFormPlaceCursor,
+                placeCursorAtTheEndOfText = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate

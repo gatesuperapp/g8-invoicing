@@ -7,12 +7,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
@@ -22,7 +24,6 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 @Composable
 fun DeliveryNoteBottomSheetDocumentProductList(
     list: List<DocumentProductState>,
-    onClickBack: () -> Unit,
     onClickNew: () -> Unit, // Add a new product to the document (product list)
     onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)
     onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
@@ -31,22 +32,12 @@ fun DeliveryNoteBottomSheetDocumentProductList(
     Column(
         modifier = Modifier
             .fillMaxHeight(0.5f)
-            .background(Color.White)
            // .verticalScroll(rememberScrollState())
     ) {
         // Header: display "back" button
-        Row(
-            Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            IconButton(onClick = onClickBack) {
-                Icon(
-                    imageVector = IconArrowBack,
-                    contentDescription = "Validate"
-                )
-            }
-        }
+
+        Spacer(modifier = Modifier.height(50.dp))
+
         ButtonAddOrChoose(
             onClickNew,
             hasBorder = true,

@@ -106,6 +106,10 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
 
     // iText (create PDF)
-    implementation("com.itextpdf:itext7-core:8.0.4")
+    implementation("com.itextpdf:itext7-core:7.2.6")
+
+    // fixing "android Missing class org.slf4j.impl.StaticLoggerBinder"
+    implementation("org.slf4j:slf4j-api:2.0.13")
+    implementation("org.slf4j:slf4j-simple:2.0.13")
 
 }

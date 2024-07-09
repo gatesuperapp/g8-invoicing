@@ -10,8 +10,6 @@ import androidx.compose.runtime.setValue
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.states.ProductState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -21,30 +19,25 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DocumentBottomSheetSlideInNextComponent(
+fun DocumentBottomSheetElementsAfterSlide(
     pageElement: ScreenElement?,
     parameters: Any?,
     onClickBack: () -> Unit,
     documentClientUiState: DocumentClientOrIssuerState,
     documentIssuerUiState: DocumentClientOrIssuerState,
-    documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
-    onClickProduct: (ProductState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
-    onClickDocumentProduct: (DocumentProductState) -> Unit,
-    onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
     datePickerState: DatePickerState,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
-    productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
+    placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
-    var isProductListVisible by remember { mutableStateOf(false) }
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
         mutableStateOf(
@@ -68,7 +61,7 @@ fun DocumentBottomSheetSlideInNextComponent(
             onClickItem = {
                 onClickDocumentClientOrIssuer(it)
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
-                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else  DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
+                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else  DocumentBottomSheetTypeOfForm.EDIT_ISSUER
                 isDocumentFormVisible = true
             },
             onClickDelete = onClickDeleteDocumentClientOrIssuer
@@ -107,61 +100,16 @@ fun DocumentBottomSheetSlideInNextComponent(
         )
     }
 
-    if (pageElement == ScreenElement.DOCUMENT_PRODUCTS) {
-        val params = parameters as Pair<List<DocumentProductState>?, List<ProductState>?>
-        DeliveryNoteBottomSheetDocumentProductList(
-            list = params.first ?: emptyList(),
-            onClickBack = onClickBack,
-            onClickNew = {
-                typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
-                isDocumentFormVisible = true
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(TimeUnit.MILLISECONDS.toMillis(500))
-                    isProductListVisible = false
-                }
-            },
-            onClickChooseExisting = { isProductListVisible = true },
-            onClickDocumentProduct = {
-                onClickDocumentProduct(it)
-                typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
-                isDocumentFormVisible = true
-                /*CoroutineScope(Dispatchers.IO).launch {
-                    delay(TimeUnit.MILLISECONDS.toMillis(500))
-                    isProductListVisible = false
-                }*/
-            },
-            onClickDelete = onClickDeleteDocumentProduct
-        )
 
-        if (isProductListVisible) {
-            DeliveryNoteBottomSheetProductList(
-                list = params.second ?: emptyList(),
-                onClickBack = { isProductListVisible = false },
-                onProductClick = {
-                    onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
-                    // so we open bottom document form with the chosen product
-                    typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_PRODUCT
-                    isDocumentFormVisible = true
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(TimeUnit.MILLISECONDS.toMillis(500))
-                        // Waits for the bottom form to be opened,
-                        // so previous screen change is in background
-                        isProductListVisible = false
-                    }
-                }
-            )
-        }
-    }
 
     if (isDocumentFormVisible) {
         DocumentBottomSheetFormModal(
             typeOfCreation = typeOfCreation,
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
-            documentProduct = documentProductUiState,
             taxRates = taxRates,
             bottomFormOnValueChange = bottomFormOnValueChange,
-            productPlaceCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
             onClickCancel = { // Re-initialize
                 isDocumentFormVisible = false
                 onClickCancelForm()

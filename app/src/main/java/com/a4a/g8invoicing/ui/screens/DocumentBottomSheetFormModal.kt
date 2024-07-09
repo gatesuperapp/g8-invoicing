@@ -36,14 +36,14 @@ import java.math.BigDecimal
 @Composable
 fun DocumentBottomSheetFormModal(
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
-    documentClientUiState: DocumentClientOrIssuerState,
-    documentIssuerUiState: DocumentClientOrIssuerState,
-    documentProduct: DocumentProductState,
+    documentClientUiState: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
+    documentIssuerUiState: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
+    documentProduct: DocumentProductState = DocumentProductState(),
     taxRates: List<BigDecimal>,
     onClickCancel: () -> Unit,
     onClickDone: () -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
-    productPlaceCursorAtTheEndOfText: (ScreenElement) -> Unit,
+    placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -116,7 +116,7 @@ fun DocumentBottomSheetFormModal(
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
                     },
-                    placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     isDisplayedInBottomSheet = true
                 )
             } else if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.ISSUER.name)) {
@@ -125,7 +125,7 @@ fun DocumentBottomSheetFormModal(
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
                     },
-                    placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     isDisplayedInBottomSheet = true
                 )
             } else {
@@ -135,7 +135,7 @@ fun DocumentBottomSheetFormModal(
                         bottomFormOnValueChange = { screenElement, value ->
                             bottomFormOnValueChange(screenElement, value, null)
                         },
-                        placeCursorAtTheEndOfText = productPlaceCursorAtTheEndOfText,
+                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                         onClickForward = {
                             isTaxSelectionVisible = true
                         }

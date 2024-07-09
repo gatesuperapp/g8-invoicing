@@ -20,6 +20,7 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -40,8 +41,9 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
 import com.a4a.g8invoicing.ui.navigation.TopBar
-import com.a4a.g8invoicing.ui.navigation.actionComponents
+import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.navigation.actionExport
+import com.a4a.g8invoicing.ui.navigation.actionItems
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -88,6 +90,7 @@ fun DeliveryNoteAddEdit(
             skipHiddenState = false
         )
     )
+    val bottomSheetType = remember { mutableStateOf(BottomSheetType.ITEMS) }
     val scope = rememberCoroutineScope()
 
     /*    // Keyboard: if it was open and the user swipes down the bottom sheet:
@@ -131,36 +134,54 @@ fun DeliveryNoteAddEdit(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
-            DeliveryNoteBottomSheet(
-                deliveryNote = deliveryNote,
-                datePickerState = datePickerState,
-                onDismissBottomSheet = {
-                    hideBottomSheet(scope, scaffoldState)
-                },
-                clients = clientList,
-                issuers = issuerList,
-                documentClientUiState = documentClientUiState,
-                documentIssuerUiState = documentIssuerUiState,
-                documentProductUiState = documentProductUiState,
-                products = products,
-                taxRates = taxRates,
-                onValueChange = onValueChange,
-                onClickProduct = onClickProduct,
-                onClickClientOrIssuer = onClickClientOrIssuer,
-                onClickDocumentProduct = onClickDocumentProduct,
-                onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
-                onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                currentClientId = deliveryNote.documentClient?.id,
-                currentIssuerId = deliveryNote.documentIssuer?.id,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                bottomFormOnValueChange = bottomFormOnValueChange,
-                bottomFormPlaceCursor = bottomFormPlaceCursor,
-                onClickDoneForm = onClickDoneForm,
-                onClickCancelForm = onClickCancelForm,
-                onSelectTaxRate = onSelectTaxRate,
-                localFocusManager = LocalFocusManager.current
-            )
+            if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
+                DeliveryNoteBottomSheetElements(
+                    deliveryNote = deliveryNote,
+                    datePickerState = datePickerState,
+                    onDismissBottomSheet = {
+                        hideBottomSheet(scope, scaffoldState)
+                    },
+                    clients = clientList,
+                    issuers = issuerList,
+                    documentClientUiState = documentClientUiState,
+                    documentIssuerUiState = documentIssuerUiState,
+                    taxRates = taxRates,
+                    onValueChange = onValueChange,
+                    onClickClientOrIssuer = onClickClientOrIssuer,
+                    onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+                    currentClientId = deliveryNote.documentClient?.id,
+                    currentIssuerId = deliveryNote.documentIssuer?.id,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    bottomFormOnValueChange = bottomFormOnValueChange,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
+                    onClickDoneForm = onClickDoneForm,
+                    onClickCancelForm = onClickCancelForm,
+                    onSelectTaxRate = onSelectTaxRate,
+                    localFocusManager = LocalFocusManager.current
+                )
+            } else {
+                DeliveryNoteBottomSheetItems(
+                    deliveryNote = deliveryNote,
+                    onDismissBottomSheet = {
+                        hideBottomSheet(scope, scaffoldState)
+                    },
+                    documentProductUiState = documentProductUiState,
+                    products = products,
+                    taxRates = taxRates,
+                    onValueChange = onValueChange,
+                    onClickProduct = onClickProduct,
+                    onClickDocumentProduct = onClickDocumentProduct,
+                    onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    bottomFormOnValueChange = bottomFormOnValueChange,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
+                    onClickDoneForm = onClickDoneForm,
+                    onClickCancelForm = onClickCancelForm,
+                    onSelectTaxRate = onSelectTaxRate,
+                    localFocusManager = LocalFocusManager.current
+                )
+            }
         },
         sheetShadowElevation = 30.dp
     )
@@ -185,13 +206,19 @@ fun DeliveryNoteAddEdit(
             },
             bottomBar = {
                 DeliveryNoteAddEditBottomBar(
-                    onClickComponents = {
+                    onClickElements = {
+                        bottomSheetType.value = BottomSheetType.ELEMENTS
+                        expandBottomSheet(scope, scaffoldState)
+                    },
+                    onClickItems = {
+                        bottomSheetType.value = BottomSheetType.ITEMS
                         expandBottomSheet(scope, scaffoldState)
                     },
                     onClickStyle = {
+                        bottomSheetType.value = BottomSheetType.STYLE
                         Toast.makeText(
                             context,
-                            "Bientôt disponible pour les abonné·e·s :)",
+                            "Bientôt disponible :)",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -268,12 +295,14 @@ private fun DeliveryNoteAddEditTopBar(
 
 @Composable
 private fun DeliveryNoteAddEditBottomBar(
-    onClickComponents: () -> Unit,
+    onClickElements: () -> Unit,
+    onClickItems: () -> Unit,
     onClickStyle: () -> Unit,
 ) {
     BottomBarEdition(
         actions = arrayOf(
-            actionComponents(onClickComponents),
+            actionTextElements(onClickElements),
+            actionItems(onClickItems)
         )
     )
 }
@@ -300,4 +329,8 @@ fun ExportPopup(
             ExportPdf(deliveryNote, onDismissRequest)
         }
     }
+}
+
+enum class BottomSheetType {
+    ELEMENTS, ITEMS, IMAGES, STYLE
 }

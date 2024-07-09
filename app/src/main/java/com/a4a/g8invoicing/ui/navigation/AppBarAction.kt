@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.icons.IconBrush
-import com.a4a.g8invoicing.ui.shared.icons.IconComponents
 import com.a4a.g8invoicing.ui.shared.icons.IconExport
+import com.a4a.g8invoicing.ui.shared.icons.IconList
 import com.a4a.g8invoicing.ui.shared.icons.IconText
 import com.ninetyninepercent.funfactu.icons.IconApps
 import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
@@ -127,11 +127,22 @@ fun actionTag(onClick: () -> Unit) =
     )
 
 @Composable
-fun actionComponents(onClick: () -> Unit) =
+fun actionTextElements(onClick: () -> Unit) =
     AppBarAction(
         icon = IconText,
         label = R.string.appbar_text_label,
         description = R.string.appbar_components,
+        isInDropDownMenu = false,
+        alignmentLeft = false,
+        onClick = onClick
+    )
+
+@Composable
+fun actionItems(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconList,
+        label = R.string.appbar_list_label,
+        description = R.string.appbar_list,
         isInDropDownMenu = false,
         alignmentLeft = false,
         onClick = onClick
