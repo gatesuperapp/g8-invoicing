@@ -2,15 +2,12 @@ package com.a4a.g8invoicing.ui.navigation
 
 
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.ui.screens.Account
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
 import com.a4a.g8invoicing.ui.states.AuthUiEvent
-import kotlinx.coroutines.flow.collect
 
 fun NavGraphBuilder.account(
     navController: NavController,

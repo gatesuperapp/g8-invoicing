@@ -35,8 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
-import com.a4a.g8invoicing.ui.shared.fileNameAfterNumbering
 import com.a4a.g8invoicing.ui.shared.getFileUri
 import com.a4a.g8invoicing.ui.shared.icons.IconShare
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -53,6 +54,7 @@ fun ExportPdf(
 ) {
     val context = LocalContext.current
     var isExportOngoing by remember { mutableStateOf(ExportStatus.ONGOING) }
+    val finalFileName = "${deliveryNote.documentNumber.text}.pdf"
 
     Column(
         modifier = Modifier
@@ -103,8 +105,8 @@ fun ExportPdf(
                 color = Color.White
             )
 
-            Send(context)
-            Share(context)
+            Send(context, deliveryNote, finalFileName)
+            Share(context, finalFileName)
         }
 
     }
@@ -148,18 +150,18 @@ enum class ExportStatus {
 
 
 @Composable
-fun Send(context: Context) {
+fun Send(context: Context, deliveryNote: DeliveryNoteState, finalFileName: String) {
     Button(onClick = {
         try {
-            val uri = getFileUri(context, fileNameAfterNumbering)
+            val uri = getFileUri(context, finalFileName)
             uri?.let {
-                composeEmail(context = context)
-                /*ShareCompat.IntentBuilder(context)
-                    .setEmailTo(arrayOf("aude@fk.com"))
-                    .setType("application/pdf")
-                    .addStream(uri)
-                    .startChooser()*/
-
+                composeEmail(
+                    address = deliveryNote.documentClient?.email?.text,
+                    documentNumber = deliveryNote.documentNumber.text,
+                    documentType = deliveryNote.documentType,
+                    attachedDocumentUri = it,
+                    context = context
+                )
             } ?: Toast.makeText(
                 context,
                 R.string.export_error_sharing,
@@ -179,16 +181,31 @@ fun Send(context: Context) {
 }
 
 fun composeEmail(
-    addresses: Array<String?>? = arrayOf(),
-    documentNumber: String? = "",
+    address: String? = null,
+    documentNumber: String? = null,
+    documentType: DocumentType? = null,
+    attachedDocumentUri: Uri? = null,
     context: Context,
 ) {
+    var type = when (documentType) {
+        DocumentType.INVOICE -> Strings.get(R.string.export_email_subject_invoice)
+        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.export_email_subject_delivery_note)
+        else -> null
+    }
+
     try {
-        val intent = Intent(Intent.ACTION_SENDTO)
-        intent.setData(Uri.parse("mailto:")) // only email apps should handle this
-        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("cdcc@gmail.fr"))
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Votre bon de livraison N°BLDJFH")
-        intent.putExtra(Intent.EXTRA_TEXT, "dwdqsdsqdzqdzd sefssf" )
+        val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
+        intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
+        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("address@fkf.fr"))
+        attachedDocumentUri?.let {
+            intent.putExtra(
+                Intent.EXTRA_SUBJECT,
+                Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"
+            )
+            intent.putExtra(Intent.EXTRA_TEXT, Strings.get(R.string.export_send_file_content))
+         //   intent.putExtra(Intent.EXTRA_STREAM, it)
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(listOf(it)))
+        }
         startActivity(context, intent, null)
 
     } catch (e: Exception) {
@@ -197,10 +214,10 @@ fun composeEmail(
 }
 
 @Composable
-fun Share(context: Context) {
+fun Share(context: Context, finalFileName: String) {
     Button(onClick = {
         try {
-            val uri = getFileUri(context, fileNameAfterNumbering)
+            val uri = getFileUri(context, finalFileName)
             uri?.let {
                 ShareCompat.IntentBuilder(context)
                     .setType("application/pdf")

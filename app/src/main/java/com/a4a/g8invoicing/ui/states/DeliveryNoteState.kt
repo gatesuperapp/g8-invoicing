@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.ui.states
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.shared.DocumentType
 
 
 // This Client is created to manipulate client data,
@@ -10,7 +11,7 @@ import com.a4a.g8invoicing.Strings
 // it allows to not specify the client id (that will be auto-incremented)
 // and to change properties values (var instead of val)
 data class DeliveryNoteState(
-    override var documentType: String = Strings.get(R.string.delivery_note),
+    override var documentType: DocumentType = DocumentType.DELIVERY_NOTE,
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
     override var documentDate: String = Strings.get(R.string.document_default_date),

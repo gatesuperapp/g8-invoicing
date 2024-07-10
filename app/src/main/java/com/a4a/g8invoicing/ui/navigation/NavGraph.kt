@@ -17,7 +17,7 @@ import androidx.navigation.navArgument
 /*
 Process to add a new screen/VM/datasource:
 1. Adding screen to navgraph
-- Add the screen name to the Screen enum class (bottom of this file)
+- Add the screen name to the Screen enum class
 - Add the extension (fun NavGraphBuilder.newScreen)
 - call extension from NavHost
 2. Annotate the VM with hilt stuff
@@ -28,7 +28,7 @@ Process to add a new screen/VM/datasource:
 fun NavGraph(navController: NavHostController) {
     NavHost(
         navController,
-         startDestination = (Screen.DeliveryNoteList.name),
+        startDestination = (Screen.DeliveryNoteList.name),
         //startDestination = (Screen.ProductList.name),
         //  startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
@@ -36,6 +36,15 @@ fun NavGraph(navController: NavHostController) {
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
+        about(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            }
+        )
         account(
             navController = navController,
             onClickCategory = {
@@ -43,7 +52,8 @@ fun NavGraph(navController: NavHostController) {
             },
             onClickBack = {
                 navigateBack(navController)
-            })
+            }
+        )
         clientOrIssuerAddEdit(
             navController = navController,
             goToPreviousScreen = { key, result ->
@@ -64,7 +74,8 @@ fun NavGraph(navController: NavHostController) {
             },
             onClickBack = {
                 navigateBack(navController)
-            })
+            }
+        )
         clientOrIssuerList(
             navController = navController,
             onClickCategory = {

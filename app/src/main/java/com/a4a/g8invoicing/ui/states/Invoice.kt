@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.ui.states
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.shared.DocumentType
 
 
 // This Client is created to manipulate client data,
@@ -10,7 +11,7 @@ import com.a4a.g8invoicing.Strings
 // it allows to not specify the client id (that will be auto-incremented)
 // and to change properties values (var instead of val)
 data class Invoice(
-    override var documentType: String = Strings.get(R.string.invoice),
+    override var documentType: DocumentType = DocumentType.INVOICE,
     override var documentId: Int?,
     override var documentNumber: TextFieldValue,
     override var documentDate: String,

@@ -41,11 +41,11 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 
-const val fileNameBeforeNumbering = "BL1.pdf"
-const val fileNameAfterNumbering = "BL.pdf"
-const val fileName = "BL"
-
 fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
+    val fileNameBeforeNumbering = "${deliveryNote.documentNumber.text}_temp.pdf"
+    val finalFileName = "${deliveryNote.documentNumber.text}.pdf"
+
+
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     val pdfDocument = PdfDocument(writer)
 
@@ -77,7 +77,7 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
     getFile(fileNameBeforeNumbering)?.let {
         if (it.exists() && it.isFile) {
             try {
-                addPageNumbersAfterPdfIsCreated(deliveryNote.documentNumber.text)
+                addPageNumberingAndSaveFile(fileNameBeforeNumbering, finalFileName)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -267,11 +267,11 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
 
         }
         productsTable.addCustomCell(
-            text = priceWithoutTax.toString() + context.getString(R.string.currency)
+            text = priceWithoutTax.toString() + Strings.get(R.string.currency)
         )
         productsTable.addCustomCell(
             text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
-                .toString() + context.getString(R.string.currency)
+                .toString() + Strings.get(R.string.currency)
         )
     }
     return productsTable
@@ -307,10 +307,10 @@ fun createFooter(context: Context, font: PdfFont): Table {
         .setTextAlignment(TextAlignment.RIGHT)
 
     if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
-        footerTable.addCellInFooter(Paragraph(context.getString(R.string.document_total_without_tax)))
+        footerTable.addCellInFooter(Paragraph(Strings.get(R.string.document_total_without_tax)))
 
         val totalWithoutTax = Paragraph(documentPrices.totalPriceWithoutTax?.toString() ?: " - ")
-        totalWithoutTax.add(context.getString(R.string.currency))
+        totalWithoutTax.add(Strings.get(R.string.currency))
         footerTable.addCellInFooter(totalWithoutTax)
 
     }
@@ -328,20 +328,20 @@ fun createFooter(context: Context, font: PdfFont): Table {
         taxesAmount.forEach { tax ->
             documentPrices.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
                 footerTable.addCellInFooter(
-                    Paragraph(context.getString(R.string.document_tax) + " " + it.first.toString() + "% : ")
+                    Paragraph(Strings.get(R.string.document_tax) + " " + it.first.toString() + "% : ")
                 )
-                footerTable.addCellInFooter(Paragraph(it.second.toString() + context.getString(R.string.currency)))
+                footerTable.addCellInFooter(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
             }
         }
     }
     if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
         footerTable.addCellInFooter(
             Paragraph(
-                context.getString(R.string.document_total_with_tax) + " "
+                Strings.get((R.string.document_total_with_tax)) + " "
             ).setFont(font)
         )
         val totalWithTax = Paragraph(documentPrices.totalPriceWithTax?.toString() ?: " - ")
-        totalWithTax.add(context.getString(R.string.currency))
+        totalWithTax.add(Strings.get(R.string.currency))
         footerTable.addCellInFooter(totalWithTax.setFont(font))
     }
 
@@ -394,14 +394,12 @@ data class FooterRow(
 )
 
 @Throws(Exception::class)
-fun addPageNumbersAfterPdfIsCreated(documentNumber: String) {
+fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String) {
     val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
 
-    //checkIfFileNameAlreadyExist()
-
     val pdfDoc = PdfDocument(
-        PdfReader(getFilePath(fileNameBeforeNumbering)),
-        PdfWriter(getFilePath("$fileName$documentNumber.pdf"))
+        PdfReader(getFilePath(previousFileName)),
+        PdfWriter(getFilePath(finalFileName))
     )
     val doc = Document(pdfDoc)
 
@@ -418,7 +416,7 @@ fun addPageNumbersAfterPdfIsCreated(documentNumber: String) {
         }
     }
 
-    deleteFile(fileNameBeforeNumbering)
+    deleteFile(previousFileName)
     doc.close()
 }
 

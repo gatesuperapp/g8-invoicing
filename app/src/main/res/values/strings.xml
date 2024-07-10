@@ -191,10 +191,15 @@
         export de données, templates de documents et + encore ! \n
         &#128522;
     </string>
-    <string name="account_button_create"> Créer mon compte </string>
-    <string name="alert_dialog_delete"> Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible. </string>
-    <string name="alert_dialog_delete_confirm"> Oui, supprimer</string>
-    <string name="alert_dialog_delete_cancel"> Non </string>
+    <string name="about">The Gate (G8) est une application open source, conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\nL\'objectif est de fournir une solution simple, pratique et respectueuse des données personnelles.\n\nDe nouvelles fonctionnalités seront publiées rapidement : factures, transformation de plusieurs bons de livraison en facture, enregistrement des paiements, ajout d\'images et + &#128522;\n
+        \nPour des questions, retours de bugs, propositions d\'idées ou simplement discuter :
+    </string>
+    <string name="account_button_create">Créer mon compte</string>
+    <string name="about_button_contact">Écrire à contact@the-gate.app</string>
+    <string name="about_contact_email">contact@the-gate.app</string>
+    <string name="alert_dialog_delete">Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible.</string>
+    <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
+    <string name="alert_dialog_delete_cancel">Non</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l\'export.</string>
@@ -202,8 +207,11 @@
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n
         Veuillez trouver votre document ci-joint.\n
-        Bien cordialement\n</string>
+        Cordialement\n\n</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
     <string name="export_error_sharing">Erreur. Veuillez passer directement par le dossier "téléchargements". </string>
+    <string name="export_email_subject">Votre</string>
+    <string name="export_email_subject_invoice">facture</string>
+    <string name="export_email_subject_delivery_note">bon de livraison</string>
 </resources>

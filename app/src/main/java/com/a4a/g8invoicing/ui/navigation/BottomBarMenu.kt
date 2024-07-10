@@ -48,7 +48,8 @@ fun BottomBarMenu(
         Category.DeliveryNotes,
         Category.Clients,
         Category.Products,
-        Category.MyAccount,
+       // Category.MyAccount,
+        Category.About,
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -103,9 +104,8 @@ sealed class Category(val route: String, @StringRes val resourceId: Int, val ico
     data object Products : Category(Screen.ProductList.name, R.string.appbar_products, null, null)
     data object Invoices : Category(Screen.InvoiceList.name, R.string.appbar_invoices, null, null)
     data object DeliveryNotes : Category(Screen.DeliveryNoteList.name, R.string.appbar_delivery_notes, null, null)
-    data object MyAccount : Category(Screen.Account.name, R.string.appbar_account, IconAccount, "My Account")
-
-    //data object About : Category(Screen.About.name, R.string.appbar_about, null)
+    data object MyAccount : Category(Screen.Account.name, R.string.appbar_account, null, null)
+    data object About : Category(Screen.About.name, R.string.appbar_about, null, null)
 
 }
 
