@@ -43,7 +43,7 @@ fun DeliveryNoteBottomSheetElementsContent(
             label = stringResource(id = R.string.document_issuer),
             inputType = ForwardElement(
                 text = deliveryNote.documentIssuer?.let {
-                    it.name.text + " " + (it.firstName?.text ?: "")
+                    (it.firstName?.let { it.text + " " } ?: "") + it.name.text
                 } ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_ISSUER
@@ -52,7 +52,7 @@ fun DeliveryNoteBottomSheetElementsContent(
             label = stringResource(id = R.string.document_client),
             inputType = ForwardElement(
                 text = deliveryNote.documentClient?.let {
-                    it.name.text + " " + (it.firstName?.text ?: "")
+                    (it.firstName?.let { it.text + " " } ?: "") + it.name.text
                 } ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_CLIENT

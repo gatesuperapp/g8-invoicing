@@ -13,7 +13,8 @@ import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 @Composable
 fun BottomBar(
     navController: NavController,
-    selectedMode: Boolean = false,
+    isButtonNewDisplayed: Boolean = true,
+    isListItemSelected: Boolean = false,
     onClickDuplicate: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickUnselectAll: () -> Unit = {},
@@ -22,17 +23,17 @@ fun BottomBar(
 ) {
     BottomBarAction(
         navController,
-        appBarActions = if (!selectedMode) {
-            // no client selected
-            arrayOf(
-                actionNew(
-                    onClick = { onClickNew() }
-                ),
+        appBarActions = if (!isListItemSelected) {
+            if(isButtonNewDisplayed) {
+                arrayOf(
+                    actionNew(onClick = { onClickNew() }),
+                    actionCategories()
+                )
+            } else  arrayOf(
                 actionCategories()
             )
         } else {
             arrayOf(
-                // TODO add tags
                 actionUnselectAll(
                     onClick = { onClickUnselectAll() }
                 ),

@@ -63,7 +63,7 @@ fun DocumentClientOrIssuerContent(
         ) {
             Text(
                 modifier = Modifier.weight(1F),
-                text = (item.firstName?.text ?: "") + item.name.text,
+                text = (item.firstName?.let { it.text + " " } ?: "") + item.name.text,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
             )

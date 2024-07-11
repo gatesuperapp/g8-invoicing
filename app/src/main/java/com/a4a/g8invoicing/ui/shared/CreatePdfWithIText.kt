@@ -71,7 +71,9 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
     deliveryNote.documentProducts?.let {
         document.add(createProductsTable(it, context))
     }
-    document.add(createFooter(context, dmMedium))
+    deliveryNote.documentPrices?.let {
+        document.add(createFooter(dmMedium, it))
+    }
     document.close()
 
     getFile(fileNameBeforeNumbering)?.let {
@@ -258,7 +260,7 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         productsTable.addCustomCell(paragraph = item, alignment = TextAlignment.LEFT)
         productsTable.addCustomCell(text = it.quantity.toString())
         productsTable.addCustomCell(text = it.unit?.text)
-        productsTable.addCustomCell(text = it.taxRate.toString())
+        productsTable.addCustomCell(text = it.taxRate?.let{ "$it%" }  ?: " - ")
 
         var priceWithoutTax = BigDecimal(0)
         it.priceWithTax?.let { priceWithTax ->
@@ -277,7 +279,7 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
     return productsTable
 }
 
-fun createFooter(context: Context, font: PdfFont): Table {
+fun createFooter(font: PdfFont, documentPrices: DocumentPrices): Table {
     val footerArray = listOf(
         FooterRow(
             rowDescription = "TOTAL_WITHOUT_TAX", page = 1
@@ -291,14 +293,6 @@ fun createFooter(context: Context, font: PdfFont): Table {
         FooterRow(
             rowDescription = "TOTAL_WITH_TAX", page = 1
         ),
-    )
-    val documentPrices = DocumentPrices(
-        totalPriceWithoutTax = BigDecimal(4),
-        totalAmountsOfEachTax = mutableListOf(
-            Pair(BigDecimal(20), BigDecimal(1)),
-            Pair(BigDecimal(10), BigDecimal(1))
-        ),
-        totalPriceWithTax = BigDecimal(40)
     )
 
     val footerColumnsWidth = floatArrayOf(90f, 10f)

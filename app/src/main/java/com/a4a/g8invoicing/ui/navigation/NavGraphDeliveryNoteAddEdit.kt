@@ -185,8 +185,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
                         productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
                     }
-
-
                 }
             },
             onClickCancelForm = {

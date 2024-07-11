@@ -1,10 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.R.attr.label
-import android.R.attr.text
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.BottomBar
-
 
 @Composable
 fun About(
@@ -39,7 +32,6 @@ fun About(
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
 ) {
-
     val context = LocalContext.current
 
     Scaffold(
@@ -54,12 +46,12 @@ fun About(
         // val uiState: StateFlow<ClientsUiState> = _uiState.asStateFlow()
         bottomBar = {
             BottomBar(
+                isButtonNewDisplayed = false,
                 navController = navController,
                 onClickCategory = onClickCategory
             )
         }
     ) { padding ->
-        var showCreateAccountForm by remember { mutableStateOf(false) }
 
         Column(
             modifier = Modifier
@@ -70,11 +62,13 @@ fun About(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                modifier = Modifier.padding(40.dp),
+                modifier = Modifier.padding(top = 40.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
                 text = stringResource(id = R.string.about)
             )
 
-            Button(onClick = {
+            Button(elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 6.dp
+            ), onClick = {
                 composeEmail(
                     context = context,
                     address = Strings.get(R.string.about_contact_email)
@@ -85,10 +79,4 @@ fun About(
         }
     }
 }
-
-/*fun Context.copyToClipboard(text: CharSequence) {
-    val clipboard = getSystemService(this, ClipboardManager::class.java)
-    clipboard?.setPrimaryClip(ClipData.newPlainText("", text))
-}*/
-
 

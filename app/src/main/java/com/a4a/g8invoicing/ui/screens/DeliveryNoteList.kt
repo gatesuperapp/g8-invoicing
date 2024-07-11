@@ -54,7 +54,7 @@ fun DeliveryNoteList(
         bottomBar = {
             BottomBar(
                 navController = navController,
-                selectedMode = selectedMode.value,
+                isListItemSelected = selectedMode.value,
                 onClickDelete = {
                     openAlertDialog.value = true
                 },

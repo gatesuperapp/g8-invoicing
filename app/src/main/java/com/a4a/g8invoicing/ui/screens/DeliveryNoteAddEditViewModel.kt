@@ -154,9 +154,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 )
 
                 // useless??
-                _deliveryNoteUiState.value.documentId?.let {
+              /*  _deliveryNoteUiState.value.documentId?.let {
                     fetchDeliveryNoteFromLocalDb(it.toLong())
-                }
+                }*/
 
             } catch (e: Exception) {
                 println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")

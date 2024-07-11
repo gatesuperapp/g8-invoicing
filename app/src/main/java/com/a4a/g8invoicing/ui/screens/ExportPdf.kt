@@ -196,7 +196,7 @@ fun composeEmail(
     try {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
         intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
-        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("address@fkf.fr"))
+        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
         attachedDocumentUri?.let {
             intent.putExtra(
                 Intent.EXTRA_SUBJECT,

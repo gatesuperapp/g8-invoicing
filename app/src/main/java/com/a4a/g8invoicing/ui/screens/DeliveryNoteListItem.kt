@@ -123,8 +123,7 @@ fun DeliveryNoteListItem(
                 deliveryNote.documentClient?.let {
                     Row() {
                         Text(
-                            text = (it.name.text) +
-                                    " " + (it.firstName?.text ?: "")
+                            text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text
                         )
                     }
                 }
