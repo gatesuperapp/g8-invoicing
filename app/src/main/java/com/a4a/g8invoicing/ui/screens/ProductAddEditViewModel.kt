@@ -13,7 +13,12 @@ import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -37,6 +42,9 @@ class ProductAddEditViewModel @Inject constructor(
 
     private val _documentProductUiState = mutableStateOf(DocumentProductState())
     val documentProductUiState: State<DocumentProductState> = _documentProductUiState
+
+/*    private val _documentProductUiState = mutableStateOf(DocumentProductState())
+    val documentProductUiState: State<DocumentProductState> = _documentProductUiState*/
 
     init {
         // We initialize only if coming from the navigation (NavGraph)
@@ -101,19 +109,6 @@ class ProductAddEditViewModel @Inject constructor(
         )
     }
 
-    private fun fetchDocumentProductFromLocalDb(id: Long) {
-        val documentProduct = dataSource.fetchDocumentProduct(id)
-
-        _documentProductUiState.value = _documentProductUiState.value.copy(
-            productId = documentProduct?.productId,
-            name = documentProduct?.name ?: TextFieldValue(""),
-            quantity = documentProduct?.quantity ?: BigDecimal(0),
-            description = documentProduct?.description,
-            priceWithTax = documentProduct?.priceWithTax,
-            taxRate = documentProduct?.taxRate,
-            unit = documentProduct?.unit
-        )
-    }
 
     // When user chooses a new tax rate
     fun updateTaxRate(taxRate: BigDecimal?, type: ProductType) {

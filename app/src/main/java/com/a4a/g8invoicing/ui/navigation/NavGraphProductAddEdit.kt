@@ -21,7 +21,7 @@ fun NavGraphBuilder.productAddEdit(
             navArgument("itemId") { nullable = true },
             navArgument("type") { nullable = true },
         )
-    ) {backStackEntry ->
+    ) { backStackEntry ->
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
         val productUiState by viewModel.productUiState
         val isNew = backStackEntry.arguments?.getString("itemId") == null

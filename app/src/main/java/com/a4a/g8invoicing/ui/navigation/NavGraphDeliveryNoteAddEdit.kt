@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,6 +17,8 @@ import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.screens.ProductListViewModel
 import com.a4a.g8invoicing.ui.screens.ProductType
 import com.a4a.g8invoicing.ui.screens.DocumentBottomSheetTypeOfForm
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
@@ -28,7 +31,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         )
     ) { backStackEntry ->
         val deliveryNoteViewModel: DeliveryNoteAddEditViewModel = hiltViewModel()
-        val deliveryNoteUiState by deliveryNoteViewModel.deliveryNoteUiState
+        val deliveryNoteUiState by deliveryNoteViewModel.deliveryNoteUiState.collectAsState()
 
         val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = hiltViewModel()
         val clientListUiState by clientOrIssuerListViewModel.clientsUiState
@@ -78,7 +81,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             navController = navController,
             deliveryNote = deliveryNoteUiState,
             onClickBack = {
-                deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
+                //deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
                 onClickBack()
             },
             clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
@@ -112,7 +115,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 deliveryNoteViewModel.removeDocumentClientOrIssuerFromLocalDb(it)
             },
             placeCursorAtTheEndOfText = { pageElement ->
-                deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
+               // deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
             },
             bottomFormOnValueChange = { pageElement, value, type ->
                 if (pageElement.name.contains("PRODUCT")) {

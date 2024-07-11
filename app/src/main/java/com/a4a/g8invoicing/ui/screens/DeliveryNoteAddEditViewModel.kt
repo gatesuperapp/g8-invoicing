@@ -21,7 +21,12 @@ import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,10 +44,17 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
-    private val _deliveryNoteUiState = mutableStateOf(DeliveryNoteState())
-    val deliveryNoteUiState: State<DeliveryNoteState> = _deliveryNoteUiState
+
+    private val _deliveryNoteUiState = MutableStateFlow(DeliveryNoteState())
+    val deliveryNoteUiState: StateFlow<DeliveryNoteState> = _deliveryNoteUiState
 
     init {
+        viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _deliveryNoteUiState.debounce(1300)
+                .collect(::updateDeliveryNoteInLocalDb)
+        }
+
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
                 id?.let {
@@ -72,16 +84,23 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateDeliveryNoteInLocalDb() {
+    private suspend fun updateDeliveryNoteInLocalDb(deliveryNote: DeliveryNoteState) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
                 id?.let {
-                    deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
+                    deliveryNoteDataSource.updateDeliveryNote(deliveryNote)
                 }
             } catch (e: Exception) {
                 println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        GlobalScope.launch {
+            updateDeliveryNoteInLocalDb(_deliveryNoteUiState.value)
         }
     }
 
@@ -154,9 +173,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 )
 
                 // useless??
-              /*  _deliveryNoteUiState.value.documentId?.let {
+                _deliveryNoteUiState.value.documentId?.let {
                     fetchDeliveryNoteFromLocalDb(it.toLong())
-                }*/
+                }
 
             } catch (e: Exception) {
                 println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
