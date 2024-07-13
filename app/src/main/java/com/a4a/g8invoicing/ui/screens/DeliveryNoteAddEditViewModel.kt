@@ -52,7 +52,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         viewModelScope.launch {
             @OptIn(FlowPreview::class)
             _deliveryNoteUiState.debounce(1300)
-                .collect(::updateDeliveryNoteInLocalDb)
+                .collect { updateDeliveryNoteInLocalDb() }
         }
 
         viewModelScope.launch(context = Dispatchers.Default) {
@@ -68,15 +68,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-
     private fun fetchDeliveryNoteFromLocalDb(id: Long) {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.fetchDeliveryNoteFlow(id).collect {
-                    it?.let {
-                        _deliveryNoteUiState.value = it
-                    }
+                deliveryNoteDataSource.fetchDeliveryNote(id)?.let {
+                    _deliveryNoteUiState.value = it
                 }
             } catch (e: Exception) {
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
@@ -84,12 +81,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateDeliveryNoteInLocalDb(deliveryNote: DeliveryNoteState) {
+    private suspend fun updateDeliveryNoteInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
                 id?.let {
-                    deliveryNoteDataSource.updateDeliveryNote(deliveryNote)
+                    deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
                 }
             } catch (e: Exception) {
                 println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
@@ -100,7 +97,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         GlobalScope.launch {
-            updateDeliveryNoteInLocalDb(_deliveryNoteUiState.value)
+            updateDeliveryNoteInLocalDb()
         }
     }
 
@@ -108,6 +105,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
+
                 deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
                     deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
@@ -128,20 +126,25 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                         documentProductId.toLong()
                     )
                 }
-
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
-
-                // This is used to re-fetch the document when there's a remove/adding in the document's
-                // product list (even if it's a flow, it's not updated automatically
-                // (?) as it's a list inside an object (?))
-                _deliveryNoteUiState.value.documentId?.let {
-                    fetchDeliveryNoteFromLocalDb(it.toLong())
-                }
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
         }
     }
+
+    fun removeDocumentProductFromUiState(documentProductId: Int) {
+        try {
+            val list = _deliveryNoteUiState.value.documentProducts
+                ?.filterNot { it.id == documentProductId }?.toMutableList()
+            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+                documentProducts = list
+            )
+        } catch (e: Exception) {
+            println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+        }
+    }
+
 
     fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: DocumentClientOrIssuerState) {
         saveJob?.cancel()
@@ -181,6 +184,26 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
             }
         }
+    }
+
+    fun removeDocumentClientOrIssuerFromUiState(type: ClientOrIssuerType) {
+        if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
+            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+                documentClient = null
+            )
+        else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            documentIssuer = null
+        )
+    }
+
+    fun saveDocumentClientOrIssuerInDeliveryNoteUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
+        if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
+            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+                documentClient = documentClientOrIssuer
+            )
+        else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            documentIssuer = documentClientOrIssuer
+        )
     }
 
     fun updateDeliveryNoteState(pageElement: ScreenElement, value: Any) {
@@ -232,7 +255,7 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_PRODUCTS -> {
-            note = note.copy(documentProducts = value as List<DocumentProductState>)
+            note = note.copy(documentProducts = value as MutableList<DocumentProductState>)
             // Recalculate the prices
             note.documentProducts?.let {
                 note = note.copy(documentPrices = calculateDocumentPrices(it))

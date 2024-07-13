@@ -18,7 +18,7 @@ data class DeliveryNoteState(
     override var orderNumber: TextFieldValue = TextFieldValue(),
     override var documentIssuer: DocumentClientOrIssuerState? = null,
     override var documentClient: DocumentClientOrIssuerState? = null,
-    override var documentProducts: List<DocumentProductState>? = null,
+    override var documentProducts: MutableList<DocumentProductState>? = null,
     override var documentPrices: DocumentPrices? = null,
     override var currency: TextFieldValue = TextFieldValue(),
 ): Document()

@@ -31,7 +31,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         )
     ) { backStackEntry ->
         val deliveryNoteViewModel: DeliveryNoteAddEditViewModel = hiltViewModel()
-        val deliveryNoteUiState by deliveryNoteViewModel.deliveryNoteUiState.collectAsState()
+        val deliveryNoteUiState by deliveryNoteViewModel.deliveryNoteUiState.collectAsStateWithLifecycle()
 
         val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = hiltViewModel()
         val clientListUiState by clientOrIssuerListViewModel.clientsUiState
@@ -40,40 +40,15 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             .collectAsStateWithLifecycle()
 
         val clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
-        val documentClientUiState by clientOrIssuerAddEditViewModel.documentClientUiState
-        val documentIssuerUiState by clientOrIssuerAddEditViewModel.documentIssuerUiState
+        val documentClientUiState by clientOrIssuerAddEditViewModel.documentClientUiState.collectAsState()
+        val documentIssuerUiState by clientOrIssuerAddEditViewModel.documentIssuerUiState.collectAsState()
 
         val productListViewModel: ProductListViewModel = hiltViewModel()
         val productListUiState by productListViewModel.productsUiState
             .collectAsStateWithLifecycle()
 
         val productAddEditViewModel: ProductAddEditViewModel = hiltViewModel()
-        val documentProduct by productAddEditViewModel.documentProductUiState
-
-        /*        // If the previous screen was Add/edit page
-                // (accessed after user clicks "Add new" in the bottom sheet)
-                // we retrieve the new client/issuer to display it in the document
-                val arguments = navController.currentBackStackEntry
-                    ?.savedStateHandle
-                    ?.getLiveData<Pair<String, String>>("result")?.observeAsState()
-                val type = arguments?.value?.first
-                val id = arguments?.value?.second
-
-                id?.toLongOrNull()?.let {
-                    when (type) {
-                        "client" -> {
-                            deliveryNoteUiState.client =
-                                clientOrIssuerViewModel.fetchClientOrIssuerFromLocalDb(it)
-                        }
-
-                        "issuer" -> {
-                            deliveryNoteUiState.issuer =
-                                clientOrIssuerViewModel.fetchClientOrIssuerFromLocalDb(it)
-                        }
-
-                        else -> {}
-                    }
-                }*/
+        val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
 
         // Get result from "Add new" screen, to know if it's
         // a client or issuer that has been added
@@ -109,10 +84,12 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
+                deliveryNoteViewModel.removeDocumentProductFromUiState(it)
                 deliveryNoteViewModel.removeDocumentProductFromLocalDb(it)
             },
-            onClickDeleteDocumentClientOrIssuer = {
-                deliveryNoteViewModel.removeDocumentClientOrIssuerFromLocalDb(it)
+            onClickDeleteDocumentClientOrIssuer = { id, type ->
+                deliveryNoteViewModel.removeDocumentClientOrIssuerFromUiState(type)
+                deliveryNoteViewModel.removeDocumentClientOrIssuerFromLocalDb(id)
             },
             placeCursorAtTheEndOfText = { pageElement ->
                // deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
@@ -141,17 +118,15 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 when (typeOfCreation) {
                     // ADD = choose from existing list
                     DocumentBottomSheetTypeOfForm.ADD_CLIENT -> {
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                            documentClientUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearClientUiState()
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(documentClientUiState)
+                       // clientOrIssuerAddEditViewModel.clearClientUiState()
                     }
 
                     DocumentBottomSheetTypeOfForm.ADD_ISSUER -> {
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                            documentIssuerUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearIssuerUiState()
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
+                        deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(documentIssuerUiState)
+                        //clientOrIssuerAddEditViewModel.clearIssuerUiState()
                     }
 
                     DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> {
@@ -159,34 +134,34 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
                     // NEW = create new
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.CLIENT)
+                      //  clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.CLIENT)
                         clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
                         deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.ISSUER)
+                       // clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.ISSUER)
                         clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.ISSUER)
                         deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
-                        productAddEditViewModel.setProductUiState()
+                        //productAddEditViewModel.setProductUiState()
                         productAddEditViewModel.saveProductInLocalDb()
                         deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                     }
                     // EDIT = edit the chosen item (will only impact the document, doesn't change
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT)
+                        //clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT)
                     }
 
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER)
+                        //clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER)
                     }
 
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
-                        productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                        //productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
                     }
                 }
             },

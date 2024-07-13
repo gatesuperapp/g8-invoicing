@@ -74,7 +74,7 @@ fun DeliveryNoteAddEdit(
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
-    onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
+    onClickDeleteDocumentClientOrIssuer: (Int, ClientOrIssuerType)  -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement) -> Unit,
@@ -135,7 +135,7 @@ fun DeliveryNoteAddEdit(
         sheetPeekHeight = 0.dp,
         sheetContent = {
             if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
-                DeliveryNoteBottomSheetElements(
+                DeliveryNoteBottomSheetTextElements(
                     deliveryNote = deliveryNote,
                     datePickerState = datePickerState,
                     onDismissBottomSheet = {
@@ -161,7 +161,7 @@ fun DeliveryNoteAddEdit(
                     localFocusManager = LocalFocusManager.current
                 )
             } else {
-                DeliveryNoteBottomSheetItems(
+                DeliveryNoteBottomSheetProducts(
                     deliveryNote = deliveryNote,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)

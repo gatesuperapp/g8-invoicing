@@ -28,7 +28,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
-    onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
+    onClickDeleteDocumentClientOrIssuer: (Int, ClientOrIssuerType)  -> Unit,
     datePickerState: DatePickerState,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,

@@ -12,7 +12,12 @@ import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -35,14 +40,22 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     private val _issuerUiState = mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.ISSUER))
     private val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
-    private val _documentClientUiState = mutableStateOf(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
-    val documentClientUiState: State<DocumentClientOrIssuerState> = _documentClientUiState
+    private val _documentClientUiState = MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
+    val documentClientUiState: StateFlow<DocumentClientOrIssuerState> = _documentClientUiState
 
-    private val _documentIssuerUiState = mutableStateOf(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
-    val documentIssuerUiState: State<DocumentClientOrIssuerState> = _documentIssuerUiState
+    private val _documentIssuerUiState = MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
+    val documentIssuerUiState: StateFlow<DocumentClientOrIssuerState> = _documentIssuerUiState
 
 
     init {
+        viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _documentClientUiState.debounce(300)
+                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT) }
+            @OptIn(FlowPreview::class)
+            _documentIssuerUiState.debounce(300)
+                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER) }
+        }
         // When coming from the navigation (NavGraph) we must get the savedStateHandle and init
         // -- & it is necessarily a client, as there's no "Issuers" list in the menu
         // When coming from a document (the bottom sheet form), no need to init
@@ -50,6 +63,14 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             id?.let {
                 fetchFromLocalDb(it.toLong())
             }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        GlobalScope.launch {
+            updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT)
+            updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER)
         }
     }
 
@@ -103,7 +124,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         )
     }
 
-    fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
+    /*fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
         val clientOrIssuer = ClientOrIssuerState(
             id = null,
             type = type,
@@ -124,7 +145,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         if (type == ClientOrIssuerType.CLIENT)
             _clientUiState.value = clientOrIssuer
         else _clientUiState.value = clientOrIssuer
-    }
+    }*/
 
 
     fun clearClientUiState() {
@@ -169,6 +190,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             }
         }
     }
+
+
 
     fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
         updateJob?.cancel()

@@ -17,7 +17,7 @@ abstract class Document {
     abstract var orderNumber: TextFieldValue
     abstract var documentIssuer: DocumentClientOrIssuerState?
     abstract var documentClient: DocumentClientOrIssuerState?
-    abstract var documentProducts: List<DocumentProductState>?
+    abstract var documentProducts: MutableList<DocumentProductState>?
     abstract var documentPrices: DocumentPrices?
     abstract var currency: TextFieldValue
 }

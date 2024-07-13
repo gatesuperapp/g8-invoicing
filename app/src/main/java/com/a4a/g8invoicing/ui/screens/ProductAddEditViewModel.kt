@@ -40,13 +40,18 @@ class ProductAddEditViewModel @Inject constructor(
     private val _productUiState = mutableStateOf(ProductState())
     val productUiState: State<ProductState> = _productUiState
 
-    private val _documentProductUiState = mutableStateOf(DocumentProductState())
-    val documentProductUiState: State<DocumentProductState> = _documentProductUiState
+    private val _documentProductUiState = MutableStateFlow(DocumentProductState())
+    val documentProductUiState: StateFlow<DocumentProductState> = _documentProductUiState
 
 /*    private val _documentProductUiState = mutableStateOf(DocumentProductState())
     val documentProductUiState: State<DocumentProductState> = _documentProductUiState*/
 
     init {
+        viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _documentProductUiState.debounce(300)
+                .collect { updateInLocalDb(ProductType.DOCUMENT_PRODUCT) }
+        }
         // We initialize only if coming from the navigation (NavGraph)
         // Not if calling from a document (to open the bottom sheet form)
         if (type == ProductType.PRODUCT.name.lowercase()) {
@@ -55,6 +60,14 @@ class ProductAddEditViewModel @Inject constructor(
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        GlobalScope.launch {
+            updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+        }
+    }
+
 
     // Used when sliding the bottom form from documents
     // Editing a document product

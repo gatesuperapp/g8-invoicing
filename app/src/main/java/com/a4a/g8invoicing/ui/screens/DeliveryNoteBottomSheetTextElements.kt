@@ -41,7 +41,7 @@ import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryNoteBottomSheetElements(
+fun DeliveryNoteBottomSheetTextElements(
     deliveryNote: DeliveryNoteState,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
@@ -53,7 +53,7 @@ fun DeliveryNoteBottomSheetElements(
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
-    onClickDeleteDocumentClientOrIssuer: (Int) -> Unit,
+    onClickDeleteDocumentClientOrIssuer: (Int, ClientOrIssuerType)  -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,

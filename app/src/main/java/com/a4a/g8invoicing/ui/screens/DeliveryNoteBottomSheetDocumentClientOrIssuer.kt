@@ -25,7 +25,7 @@ fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
     onClickNewButton: () -> Unit,
     onClickChooseButton: () -> Unit,
     onClickItem: (DocumentClientOrIssuerState) -> Unit,
-    onClickDelete: (Int) -> Unit,
+    onClickDelete: (Int, ClientOrIssuerType)  -> Unit,
 ) {
     Column(
         modifier = Modifier

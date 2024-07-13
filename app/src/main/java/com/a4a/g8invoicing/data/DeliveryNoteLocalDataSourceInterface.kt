@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface DeliveryNoteLocalDataSourceInterface {
-    fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?>
+   // fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?>
     fun fetchDeliveryNote(id: Long): DeliveryNoteState?
     fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>
     suspend fun createNewDeliveryNote(): Long?

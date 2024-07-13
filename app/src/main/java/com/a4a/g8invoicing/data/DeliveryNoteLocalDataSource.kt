@@ -15,6 +15,7 @@ import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
@@ -34,7 +35,17 @@ class DeliveryNoteLocalDataSource(
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
 
 
-    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
+    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
+        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
+            ?.let {
+                it.transformIntoEditableNote(
+                    fetchDocumentProducts(it.delivery_note_id),
+                    fetchClientAndIssuer(it.delivery_note_id)
+                )
+            }
+    }
+
+/*    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
         val deliveryNoteId = deliveryNoteQueries.getDeliveryNoteId(id).executeAsOne()
         val deliveryNoteFlow = deliveryNoteQueries.getDeliveryNote(id).asFlow().map { query ->
             query.executeAsOne()
@@ -54,7 +65,7 @@ class DeliveryNoteLocalDataSource(
             )
         }
         return combinedFlow
-    }
+    }*/
 
 
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
@@ -74,15 +85,15 @@ class DeliveryNoteLocalDataSource(
             }
     }
 
-    private fun fetchDocumentProducts(deliveryNoteId: Long): List<DocumentProductState>? {
+    private fun fetchDocumentProducts(deliveryNoteId: Long): MutableList<DocumentProductState>? {
         val listOfIds =
-            deliveryNoteDocumentProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+            deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(deliveryNoteId)
                 .executeAsList()
         return if (listOfIds.isNotEmpty()) {
             listOfIds.map {
                 documentProductQueries.getDocumentProduct(it.document_product_id)
                     .executeAsOne().transformIntoEditableDocumentProduct()
-            }
+            }.toMutableList()
         } else null
     }
 
@@ -101,7 +112,7 @@ class DeliveryNoteLocalDataSource(
         } else null
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+/*    @OptIn(ExperimentalCoroutinesApi::class)
     private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
         return deliveryNoteDocumentProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
             .asFlow()
@@ -119,6 +130,8 @@ class DeliveryNoteLocalDataSource(
                 }
             }
     }
+
+
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun fetchClientOrIssuerFlow(deliveryNoteId: Long): Flow<List<DocumentClientOrIssuerState>> {
@@ -140,21 +153,10 @@ class DeliveryNoteLocalDataSource(
                 }
             }
     }
-
-
-    // Used when duplicating a document (we don't need a flow)
-    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
-        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
-            ?.let {
-                it.transformIntoEditableNote(
-                    fetchDocumentProducts(it.delivery_note_id),
-                    fetchClientAndIssuer(it.delivery_note_id)
-                )
-            }
-    }
+    */
 
     private fun DeliveryNote.transformIntoEditableNote(
-        documentProducts: List<DocumentProductState>? = null,
+        documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
     ): DeliveryNoteState {
 

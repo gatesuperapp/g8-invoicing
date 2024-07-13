@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryNoteBottomSheetItems(
+fun DeliveryNoteBottomSheetProducts(
     deliveryNote: DeliveryNoteState,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,

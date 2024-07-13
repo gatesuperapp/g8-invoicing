@@ -12,7 +12,7 @@ INSERT INTO LinkDeliveryNoteToDocumentProduct (id, delivery_note_id, document_pr
 VALUES (1, 1, 1),
 (2, 1, 2);
 
-getProductsLinkedToDeliveryNote:
+getDocumentProductsLinkedToDeliveryNote:
 SELECT *
 FROM LinkDeliveryNoteToDocumentProduct
 WHERE delivery_note_id = :delivery_note_id;
