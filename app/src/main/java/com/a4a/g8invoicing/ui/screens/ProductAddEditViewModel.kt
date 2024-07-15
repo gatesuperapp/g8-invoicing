@@ -16,6 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
@@ -32,6 +33,8 @@ class ProductAddEditViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var saveJob: Job? = null
+    private var updateJob: Job? = null
+    private var autoSaveJob: Job? = null
     private var fetchTaxRatesJob: Job? = null
     private var taxRates: List<BigDecimal> = listOf()
     private val id: String? = savedStateHandle["itemId"]
@@ -47,11 +50,6 @@ class ProductAddEditViewModel @Inject constructor(
     val documentProductUiState: State<DocumentProductState> = _documentProductUiState*/
 
     init {
-        viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentProductUiState.debounce(300)
-                .collect { updateInLocalDb(ProductType.DOCUMENT_PRODUCT) }
-        }
         // We initialize only if coming from the navigation (NavGraph)
         // Not if calling from a document (to open the bottom sheet form)
         if (type == ProductType.PRODUCT.name.lowercase()) {
@@ -66,6 +64,19 @@ class ProductAddEditViewModel @Inject constructor(
         GlobalScope.launch {
             updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
         }
+    }
+
+    fun autoSaveFormInputsInLocalDb() {
+        autoSaveJob?.cancel()
+        autoSaveJob = viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _documentProductUiState.debounce(300)
+                .collect { updateInLocalDb(ProductType.DOCUMENT_PRODUCT) }
+        }
+    }
+
+    fun stopAutoSaveFormInputsInLocalDb() {
+        autoSaveJob?.cancel()
     }
 
 
@@ -103,9 +114,6 @@ class ProductAddEditViewModel @Inject constructor(
 
     fun clearProductUiState() { // Used when sliding the form in documents
         _productUiState.value = ProductState()
-    }
-
-    fun clearDocumentProductUiState() { // Used when sliding the form in documents
         _documentProductUiState.value = DocumentProductState()
     }
 
@@ -160,8 +168,8 @@ class ProductAddEditViewModel @Inject constructor(
     }
 
     fun updateInLocalDb(type: ProductType) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
             try {
                 if (type == ProductType.PRODUCT) {
                     dataSource.updateProduct(productUiState.value)

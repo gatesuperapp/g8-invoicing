@@ -18,7 +18,7 @@ data class Invoice(
     override var orderNumber: TextFieldValue,
     override var documentIssuer: DocumentClientOrIssuerState?,
     override var documentClient: DocumentClientOrIssuerState?,
-    override var documentProducts: MutableList<DocumentProductState>?,
+    override var documentProducts: List<DocumentProductState>?,
     override var documentPrices: DocumentPrices?,
     override var currency: TextFieldValue,
     var dueDate: String = Strings.get(R.string.invoice_due_date)

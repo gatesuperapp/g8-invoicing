@@ -29,33 +29,30 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 ) : ViewModel() {
     private var saveJob: Job? = null
     private var updateJob: Job? = null
+    private var autoSaveJob: Job? = null
 
     // Getting the argument in "ClientAddEdit?itemId={itemId}" with savedStateHandle
     private val id: String? = savedStateHandle["itemId"]
     private val type: String? = savedStateHandle["type"]
 
-    private val _clientUiState = mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.CLIENT))
+    private val _clientUiState =
+        mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.CLIENT))
     val clientUiState: State<ClientOrIssuerState> = _clientUiState
 
-    private val _issuerUiState = mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.ISSUER))
+    private val _issuerUiState =
+        mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.ISSUER))
     private val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
-    private val _documentClientUiState = MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
+    private val _documentClientUiState =
+        MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
     val documentClientUiState: StateFlow<DocumentClientOrIssuerState> = _documentClientUiState
 
-    private val _documentIssuerUiState = MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
+    private val _documentIssuerUiState =
+        MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
     val documentIssuerUiState: StateFlow<DocumentClientOrIssuerState> = _documentIssuerUiState
 
 
     init {
-        viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentClientUiState.debounce(300)
-                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT) }
-            @OptIn(FlowPreview::class)
-            _documentIssuerUiState.debounce(300)
-                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER) }
-        }
         // When coming from the navigation (NavGraph) we must get the savedStateHandle and init
         // -- & it is necessarily a client, as there's no "Issuers" list in the menu
         // When coming from a document (the bottom sheet form), no need to init
@@ -74,6 +71,23 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
+    fun autoSaveFormInputsInLocalDb() {
+        autoSaveJob?.cancel()
+        autoSaveJob = viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _documentClientUiState.debounce(300)
+                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT) }
+            @OptIn(FlowPreview::class)
+            _documentIssuerUiState.debounce(300)
+                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER) }
+        }
+    }
+
+    fun stopAutoSaveFormInputsInLocalDb() {
+        autoSaveJob?.cancel()
+    }
+
+
     // Used when sliding the bottom form from documents
     // Editing a document client or issuer
     fun setDocumentClientOrIssuerUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
@@ -91,7 +105,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             _documentClientUiState.value = DocumentClientOrIssuerState(
                 id = null,
                 name = clientOrIssuer.name,
-                type = clientOrIssuer.type,
+                type = if (clientOrIssuer.type == ClientOrIssuerType.ISSUER) ClientOrIssuerType.DOCUMENT_ISSUER
+                else ClientOrIssuerType.DOCUMENT_CLIENT,
                 firstName = clientOrIssuer.firstName,
                 address1 = clientOrIssuer.address1,
                 address2 = clientOrIssuer.address2,
@@ -124,36 +139,54 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         )
     }
 
-    /*fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
-        val clientOrIssuer = ClientOrIssuerState(
+    fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
+        if (type == ClientOrIssuerType.CLIENT) {
+            _clientUiState.value = ClientOrIssuerState(
+                id = null,
+                type = type,
+                firstName = _documentClientUiState.value.firstName,
+                name = _documentClientUiState.value.name,
+                address1 = _documentClientUiState.value.address1,
+                address2 = _documentClientUiState.value.address2,
+                zipCode = _documentClientUiState.value.zipCode,
+                city = _documentClientUiState.value.city,
+                phone = _documentClientUiState.value.phone,
+                email = _documentClientUiState.value.email,
+                notes = _documentClientUiState.value.notes,
+                companyId1Label = _documentClientUiState.value.companyId1Label,
+                companyId1Number = _documentClientUiState.value.companyId1Number,
+                companyId2Label = _documentClientUiState.value.companyId2Label,
+                companyId2Number = _documentClientUiState.value.companyId2Number
+            )
+        } else _issuerUiState.value = ClientOrIssuerState(
             id = null,
             type = type,
-            firstName = _clientUiState.value.firstName,
-            name = _clientUiState.value.name,
-            address1 = _clientUiState.value.address1,
-            address2 = _clientUiState.value.address2,
-            zipCode = _clientUiState.value.zipCode,
-            city = _clientUiState.value.city,
-            phone = _clientUiState.value.phone,
-            email = _clientUiState.value.email,
-            notes = _clientUiState.value.notes,
-            companyId1Label = _clientUiState.value.companyId1Label,
-            companyId1Number = _clientUiState.value.companyId1Number,
-            companyId2Label = _clientUiState.value.companyId2Label,
-            companyId2Number = _clientUiState.value.companyId2Number
+            firstName = _documentIssuerUiState.value.firstName,
+            name = _documentIssuerUiState.value.name,
+            address1 = _documentIssuerUiState.value.address1,
+            address2 = _documentIssuerUiState.value.address2,
+            zipCode = _documentIssuerUiState.value.zipCode,
+            city = _documentIssuerUiState.value.city,
+            phone = _documentIssuerUiState.value.phone,
+            email = _documentIssuerUiState.value.email,
+            notes = _documentIssuerUiState.value.notes,
+            companyId1Label = _documentIssuerUiState.value.companyId1Label,
+            companyId1Number = _documentIssuerUiState.value.companyId1Number,
+            companyId2Label = _documentIssuerUiState.value.companyId2Label,
+            companyId2Number = _documentIssuerUiState.value.companyId2Number
         )
-        if (type == ClientOrIssuerType.CLIENT)
-            _clientUiState.value = clientOrIssuer
-        else _clientUiState.value = clientOrIssuer
-    }*/
+
+    }
 
 
     fun clearClientUiState() {
         _clientUiState.value = ClientOrIssuerState()
+        _documentClientUiState.value = DocumentClientOrIssuerState()
     }
 
     fun clearIssuerUiState() {
         _clientUiState.value = ClientOrIssuerState()
+        _documentIssuerUiState.value = DocumentClientOrIssuerState()
     }
 
     private fun fetchFromLocalDb(id: Long) {
@@ -182,15 +215,14 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         saveJob = viewModelScope.launch {
             try {
                 dataSource.saveClientOrIssuer(
-                    if (type == ClientOrIssuerType.CLIENT) clientUiState.value
-                    else issuerUiState.value
+                    if (type == ClientOrIssuerType.CLIENT) _clientUiState.value
+                    else _issuerUiState.value
                 )
             } catch (e: Exception) {
                 println("Saving clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
-
 
 
     fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
@@ -233,19 +265,22 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ClientOrIssuerType.ISSUER -> _issuerUiState.value =
                 updateClientOrIssuerUiState(_issuerUiState.value, pageElement, value)
 
-            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value =
-                updateDocumentClientOrIssuerUiState(
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                _documentClientUiState.value = updateDocumentClientOrIssuerUiState(
                     _documentClientUiState.value,
                     pageElement,
                     value
                 )
+            }
 
-            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value =
-                updateDocumentClientOrIssuerUiState(
-                    _documentIssuerUiState.value,
-                    pageElement,
-                    value
-                )
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                _documentIssuerUiState.value =
+                    updateDocumentClientOrIssuerUiState(
+                        _documentIssuerUiState.value,
+                        pageElement,
+                        value
+                    )
+            }
         }
     }
 

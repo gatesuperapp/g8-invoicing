@@ -2,8 +2,6 @@ package com.a4a.g8invoicing.ui.screens
 
 import android.content.ContentValues
 import android.util.Log
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -16,10 +14,8 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
@@ -51,7 +47,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             @OptIn(FlowPreview::class)
-            _deliveryNoteUiState.debounce(1300)
+            _deliveryNoteUiState.debounce(300)
                 .collect { updateDeliveryNoteInLocalDb() }
         }
 
@@ -67,6 +63,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             }
         }
     }
+
 
     private fun fetchDeliveryNoteFromLocalDb(id: Long) {
         fetchJob?.cancel()
@@ -145,6 +142,29 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
+    fun saveDocumentProductInDeliveryNoteUiState(documentProduct: DocumentProductState) {
+        try {
+            val list = _deliveryNoteUiState.value.documentProducts
+            var maxId = 1
+            var newList: List<DocumentProductState> = listOf()
+
+            if (!list.isNullOrEmpty()) {
+                maxId = list.map { it.id }.filterNotNull().max()
+            }
+
+            if (documentProduct.id == null) {
+                documentProduct.id = maxId + 1
+            }
+
+            newList = (list ?: emptyList()) + documentProduct
+
+            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+                documentProducts = newList
+            )
+        } catch (e: Exception) {
+            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
+        }
+    }
 
     fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: DocumentClientOrIssuerState) {
         saveJob?.cancel()
@@ -160,20 +180,16 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun removeDocumentClientOrIssuerFromLocalDb(documentClientOrIssuerId: Int) {
+    fun removeDocumentClientOrIssuerFromLocalDb(type: ClientOrIssuerType) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
                 _deliveryNoteUiState.value.documentId?.let {
                     deliveryNoteDataSource.deleteDocumentClientOrIssuer(
                         it.toLong(),
-                        documentClientOrIssuerId.toLong()
+                        type
                     )
                 }
-
-                documentClientOrIssuerDataSource.deleteDocumentClientOrIssuer(
-                    documentClientOrIssuerId.toLong()
-                )
 
                 // useless??
                 _deliveryNoteUiState.value.documentId?.let {
@@ -206,9 +222,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         )
     }
 
-    fun updateDeliveryNoteState(pageElement: ScreenElement, value: Any) {
+    fun updateDeliveryNoteState(screenElement: ScreenElement, value: Any) {
         _deliveryNoteUiState.value =
-            updateDeliveryNoteUiState(_deliveryNoteUiState.value, pageElement, value)
+            updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
     }
 
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
@@ -254,8 +270,12 @@ fun updateDeliveryNoteUiState(
             note = note.copy(orderNumber = value as TextFieldValue)
         }
 
-        ScreenElement.DOCUMENT_PRODUCTS -> {
-            note = note.copy(documentProducts = value as MutableList<DocumentProductState>)
+        ScreenElement.DOCUMENT_PRODUCT -> {
+            val updatedDocumentProduct = value as DocumentProductState
+            val list = note.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
+            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
+
+            note = note.copy(documentProducts = updatedList)
             // Recalculate the prices
             note.documentProducts?.let {
                 note = note.copy(documentPrices = calculateDocumentPrices(it))

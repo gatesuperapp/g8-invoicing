@@ -17,8 +17,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
@@ -45,28 +48,46 @@ class DeliveryNoteLocalDataSource(
             }
     }
 
-/*    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
-        val deliveryNoteId = deliveryNoteQueries.getDeliveryNoteId(id).executeAsOne()
-        val deliveryNoteFlow = deliveryNoteQueries.getDeliveryNote(id).asFlow().map { query ->
-            query.executeAsOne()
-        }
+    /*    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
+            val deliveryNoteId = deliveryNoteQueries.getDeliveryNoteId(id).executeAsOne()
+            val deliveryNoteFlow = deliveryNoteQueries.getDeliveryNote(id).asFlow().map { query ->
+                query.executeAsOne()
+            }
 
-        val productFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
-        val clientAndIssuerFlow = fetchClientOrIssuerFlow(deliveryNoteId).onStart { emit(emptyList()) }
+            val productFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
+            val clientAndIssuerFlow = fetchClientOrIssuerFlow(deliveryNoteId).onStart { emit(emptyList()) }
 
-        val combinedFlow = combine(
-            deliveryNoteFlow,
-            productFlow,
-            clientAndIssuerFlow
-        ) { value1, value2, value3 ->
-            value1.transformIntoEditableNote(
-                documentProducts = value2,
-                documentClientAndIssuer = value3,
-            )
-        }
-        return combinedFlow
+            val combinedFlow = combine(
+                deliveryNoteFlow,
+                productFlow,
+                clientAndIssuerFlow
+            ) { value1, value2, value3 ->
+                value1.transformIntoEditableNote(
+                    documentProducts = value2,
+                    documentClientAndIssuer = value3,
+                )
+            }
+            return combinedFlow
+        }*/
+
+
+   /* @OptIn(ExperimentalCoroutinesApi::class)
+    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+        return deliveryNoteQueries.getAllDeliveryNotes()
+            .asFlow()
+            .flatMapMerge { query ->
+                combine(
+                    query.executeAsList().map { deliveryNote ->
+                        fetchDocumentProductsFlow(deliveryNote.delivery_note_id).onStart { emit(emptyList()) }
+                            .map {
+                                deliveryNote.transformIntoEditableNote(it.toMutableList())
+                            }
+                    }
+                ) {
+                    it.asList()
+                }
+            }
     }*/
-
 
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
@@ -87,7 +108,9 @@ class DeliveryNoteLocalDataSource(
 
     private fun fetchDocumentProducts(deliveryNoteId: Long): MutableList<DocumentProductState>? {
         val listOfIds =
-            deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(deliveryNoteId)
+            deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
+                deliveryNoteId
+            )
                 .executeAsList()
         return if (listOfIds.isNotEmpty()) {
             listOfIds.map {
@@ -112,9 +135,11 @@ class DeliveryNoteLocalDataSource(
         } else null
     }
 
-/*    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
-        return deliveryNoteDocumentProductQueries.getProductsLinkedToDeliveryNote(deliveryNoteId)
+        return deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
+            deliveryNoteId
+        )
             .asFlow()
             .flatMapMerge { query ->
                 combine(
@@ -130,7 +155,6 @@ class DeliveryNoteLocalDataSource(
                 }
             }
     }
-
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -153,7 +177,7 @@ class DeliveryNoteLocalDataSource(
                 }
             }
     }
-    */
+
 
     private fun DeliveryNote.transformIntoEditableNote(
         documentProducts: MutableList<DocumentProductState>? = null,
@@ -284,7 +308,8 @@ class DeliveryNoteLocalDataSource(
                 )
 
                 deliveryNoteId?.let { deliveryNoteId ->
-                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId().executeAsOneOrNull()?.toInt()
+                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
+                        .executeAsOneOrNull()?.toInt()
                         ?.let { id ->
                             addDocumentClientOrIssuer(
                                 deliveryNoteId,
@@ -309,16 +334,16 @@ class DeliveryNoteLocalDataSource(
                     deliveryNoteDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToADeliveryNote(
                         deliveryNote.documentId!!.toLong()
                     )
-                    deliveryNote.documentClient?.id?.let {
+                    deliveryNote.documentClient?.type?.let {
                         deleteDocumentClientOrIssuer(
                             deliveryNote.documentId!!.toLong(),
-                            it.toLong()
+                            it
                         )
                     }
-                    deliveryNote.documentIssuer?.id?.let {
+                    deliveryNote.documentIssuer?.type?.let {
                         deleteDocumentClientOrIssuer(
                             deliveryNote.documentId!!.toLong(),
-                            it.toLong()
+                            it
                         )
                     }
                     deliveryNote.documentProducts?.filter { it.id != null }?.let {
@@ -346,13 +371,19 @@ class DeliveryNoteLocalDataSource(
 
     override suspend fun deleteDocumentClientOrIssuer(
         deliveryNoteId: Long,
-        documentClientOrIssuerId: Long,
+        type: ClientOrIssuerType,
     ) {
         return withContext(Dispatchers.IO) {
-            deliveryNoteDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(
-                deliveryNoteId,
-                documentClientOrIssuerId
-            )
+            val documentClientOrIssuer =
+                fetchClientAndIssuer(deliveryNoteId)?.firstOrNull { it.type == type }
+
+            documentClientOrIssuer?.id?.let {
+                deliveryNoteDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(
+                    deliveryNoteId,
+                    it.toLong()
+                )
+                documentClientOrIssuerQueries.delete(it.toLong())
+            }
         }
     }
 

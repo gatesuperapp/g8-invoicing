@@ -28,7 +28,7 @@ import icons.IconDelete
 fun DocumentClientOrIssuerContent(
     item: DocumentClientOrIssuerState,
     onClickItem: (DocumentClientOrIssuerState) -> Unit,
-    onClickDelete: (Int, ClientOrIssuerType) -> Unit,
+    onClickDelete: (ClientOrIssuerType) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -72,11 +72,9 @@ fun DocumentClientOrIssuerContent(
                     .size(15.dp)
                     .clickable(
                         onClick = {
-                            item.id?.let {id ->
                                 item.type?.let {type ->
-                                    onClickDelete(id, type)
+                                    onClickDelete(type)
                                 }
-                            }
                         }
                     ),
                 imageVector = IconDelete,

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -44,16 +43,15 @@ import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeliveryNoteBottomSheetProducts(
     deliveryNote: DeliveryNoteState,
     onDismissBottomSheet: () -> Unit,
-    onValueChange: (ScreenElement, Any) -> Unit,
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
     onClickProduct: (ProductState) -> Unit,
+    onClickNewProduct: () -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -140,7 +138,7 @@ fun DeliveryNoteBottomSheetProducts(
                         .verticalScroll(rememberScrollState())
                 ) {
                     keyboardController?.hide()
-                    slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCTS
+                    slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCT
                    /* DeliveryNoteBottomSheetItemsContent(
                         onClickForward = {
                             keyboardController?.hide()
@@ -155,6 +153,7 @@ fun DeliveryNoteBottomSheetProducts(
             DeliveryNoteBottomSheetDocumentProductList(
                 list = params.first ?: emptyList(),
                 onClickNew = {
+                    onClickNewProduct()
                     typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
                     isDocumentFormVisible = true
                     CoroutineScope(Dispatchers.IO).launch {

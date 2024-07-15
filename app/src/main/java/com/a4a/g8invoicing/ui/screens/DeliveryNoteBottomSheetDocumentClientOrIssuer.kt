@@ -25,7 +25,7 @@ fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
     onClickNewButton: () -> Unit,
     onClickChooseButton: () -> Unit,
     onClickItem: (DocumentClientOrIssuerState) -> Unit,
-    onClickDelete: (Int, ClientOrIssuerType)  -> Unit,
+    onClickDelete: (ClientOrIssuerType)  -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -54,7 +54,7 @@ fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
                 hasBackground = false,
                 stringResource(id = R.string.document_bottom_sheet_list_add_new)
             )
-            ButtonAddOrChoose( // Choosing a product to add to the document
+            ButtonAddOrChoose(
                 onClickChooseButton,
                 hasBorder = false,
                 hasBackground = true,

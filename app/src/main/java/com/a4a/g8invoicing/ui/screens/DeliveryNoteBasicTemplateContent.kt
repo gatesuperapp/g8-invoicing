@@ -107,10 +107,10 @@ fun DeliveryNoteBasicTemplateContent(
 
             Column(
                 Modifier
-                    .getBorder(ScreenElement.DOCUMENT_PRODUCTS, selectedItem)
+                    .getBorder(ScreenElement.DOCUMENT_PRODUCT, selectedItem)
                     .customCombinedClickable(
                         onClick = {
-                            onClickElement(ScreenElement.DOCUMENT_PRODUCTS)
+                            onClickElement(ScreenElement.DOCUMENT_PRODUCT)
                         },
                         onLongClick = {
                         }
