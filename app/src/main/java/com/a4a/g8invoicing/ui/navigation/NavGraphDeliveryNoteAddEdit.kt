@@ -54,10 +54,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         DeliveryNoteAddEdit(
             navController = navController,
             deliveryNote = deliveryNoteUiState,
-            onClickBack = {
-                //deliveryNoteViewModel.updateDeliveryNoteInLocalDb()
-                onClickBack()
-            },
+            onClickBack = onClickBack,
             clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
             issuerList = issuerListUiState.clientsOrIssuerList.toMutableList(),
             documentClientUiState = documentClientUiState,
@@ -70,28 +67,18 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickProduct = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
-                productAddEditViewModel.autoSaveFormInputsInLocalDb()
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(it)
-            },
-            onClickNewProduct = {
-                // Initialize documentProductUiState to display it in the bottomSheet form
-                productAddEditViewModel.autoSaveFormInputsInLocalDb()
             },
             onClickClientOrIssuer = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
-                clientOrIssuerAddEditViewModel.autoSaveFormInputsInLocalDb()
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)
-            },
-            onClickNewClientOrIssuer = {
-                // Initialize documentProductUiState to display it in the bottomSheet form
-                clientOrIssuerAddEditViewModel.autoSaveFormInputsInLocalDb()
             },
             onClickDocumentProduct = {// Edit a document product
                 productAddEditViewModel.autoSaveFormInputsInLocalDb()
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
             onClickDocumentClientOrIssuer = {// Edit a document product
-                clientOrIssuerAddEditViewModel.autoSaveFormInputsInLocalDb()
+                clientOrIssuerAddEditViewModel.autoSaveIssuerFormInputsInLocalDb()
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
@@ -129,7 +116,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 when (typeOfCreation) {
                     // ADD = choose from existing list
                     DocumentBottomSheetTypeOfForm.ADD_CLIENT -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                        clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                         deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                             documentClientUiState
                         )
@@ -140,7 +127,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
 
                     DocumentBottomSheetTypeOfForm.ADD_ISSUER -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                         deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                             documentIssuerUiState
                         )
@@ -160,7 +147,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
                     // NEW = create new
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                        clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                         clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.CLIENT)
                         clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
                             ClientOrIssuerType.CLIENT
@@ -175,7 +162,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                         clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.ISSUER)
                         clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
                             ClientOrIssuerType.ISSUER
@@ -202,7 +189,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     // EDIT = edit the chosen item (will only impact the document, doesn't change
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                        clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                         deliveryNoteViewModel.updateDeliveryNoteState(
                             ScreenElement.DOCUMENT_CLIENT,
                             documentClientUiState
@@ -212,7 +199,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
 
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                         deliveryNoteViewModel.updateDeliveryNoteState(
                             ScreenElement.DOCUMENT_ISSUER,
                             documentIssuerUiState

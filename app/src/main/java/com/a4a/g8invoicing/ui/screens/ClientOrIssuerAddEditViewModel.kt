@@ -29,7 +29,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 ) : ViewModel() {
     private var saveJob: Job? = null
     private var updateJob: Job? = null
-    private var autoSaveJob: Job? = null
+    private var autoSaveIssuerJob: Job? = null
+    private var autoSaveClientJob: Job? = null
 
     // Getting the argument in "ClientAddEdit?itemId={itemId}" with savedStateHandle
     private val id: String? = savedStateHandle["itemId"]
@@ -71,20 +72,29 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun autoSaveFormInputsInLocalDb() {
-        autoSaveJob?.cancel()
-        autoSaveJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentClientUiState.debounce(300)
-                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT) }
+    fun autoSaveIssuerFormInputsInLocalDb() {
+        autoSaveIssuerJob?.cancel()
+        autoSaveIssuerJob = viewModelScope.launch {
             @OptIn(FlowPreview::class)
             _documentIssuerUiState.debounce(300)
                 .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER) }
         }
     }
 
-    fun stopAutoSaveFormInputsInLocalDb() {
-        autoSaveJob?.cancel()
+    fun autoSaveClientFormInputsInLocalDb() {
+        autoSaveClientJob?.cancel()
+        autoSaveClientJob = viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _documentClientUiState.debounce(300)
+                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT) }
+        }
+    }
+
+    fun stopAutoSaveIssuerFormInputsInLocalDb() {
+        autoSaveIssuerJob?.cancel()
+    }
+    fun stopAutoSaveClientFormInputsInLocalDb() {
+        autoSaveClientJob?.cancel()
     }
 
 

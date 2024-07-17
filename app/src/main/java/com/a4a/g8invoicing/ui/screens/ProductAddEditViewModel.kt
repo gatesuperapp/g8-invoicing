@@ -59,13 +59,6 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        GlobalScope.launch {
-            updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-        }
-    }
-
     fun autoSaveFormInputsInLocalDb() {
         autoSaveJob?.cancel()
         autoSaveJob = viewModelScope.launch {
@@ -75,10 +68,16 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        GlobalScope.launch {
+            updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+        }
+    }
+
     fun stopAutoSaveFormInputsInLocalDb() {
         autoSaveJob?.cancel()
     }
-
 
     // Used when sliding the bottom form from documents
     // Editing a document product

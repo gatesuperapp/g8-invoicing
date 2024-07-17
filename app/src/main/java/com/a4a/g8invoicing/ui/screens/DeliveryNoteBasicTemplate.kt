@@ -123,7 +123,7 @@ fun DeliveryNoteBasicTemplate(
     val taxRates =
         uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
-        footerArray.add(FooterRow("TAXES_" + it.toString(), numberOfPages))
+        footerArray.add(FooterRow("TAXES_$it", numberOfPages))
     }
     footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPages))
 
@@ -135,14 +135,13 @@ fun DeliveryNoteBasicTemplate(
 
     val maxItemsOnFirstPage = 11
     val maxItemsOnOtherPages = 20
-    var limitsArray = mutableListOf<Int>()
 
     numberOfPages = calculateNumberOfPages(
         numberOfItems,
         maxItemsOnFirstPage,
         maxItemsOnOtherPages
     )
-    limitsArray = calculateLimits(
+    val limitsArray: MutableList<Int> = calculateLimits(
         numberOfPages,
         maxItemsOnFirstPage,
         maxItemsOnOtherPages

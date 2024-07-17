@@ -166,7 +166,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
         name = TextFieldValue(this.name),
         description = this.description?.let { TextFieldValue() },
         priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
-        taxRate = this.tax_rate?.toBigDecimal()?.setScale(0, RoundingMode.HALF_UP),
+        taxRate = this.tax_rate?.toBigDecimal(),
         quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)
             .stripTrailingZeros(),
         unit = TextFieldValue(this.unit ?: ""),

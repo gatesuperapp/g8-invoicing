@@ -104,7 +104,8 @@ fun DeliveryNoteListItem(
 
             Column(
                 modifier = Modifier
-                    .weight(1F),
+                    .weight(1F)
+                    .padding(end = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(space = 6.dp)
             ) {
                 Row(
@@ -112,8 +113,7 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.documentNumber.text.toIntOrNull()?.let { String.format("%04d", it) }
-                            ?: "XXX",
+                        text = deliveryNote.documentNumber.text,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,

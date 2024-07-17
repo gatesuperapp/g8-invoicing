@@ -51,7 +51,6 @@ fun DeliveryNoteBottomSheetProducts(
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
     onClickProduct: (ProductState) -> Unit,
-    onClickNewProduct: () -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -153,7 +152,6 @@ fun DeliveryNoteBottomSheetProducts(
             DeliveryNoteBottomSheetDocumentProductList(
                 list = params.first ?: emptyList(),
                 onClickNew = {
-                    onClickNewProduct()
                     typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
                     isDocumentFormVisible = true
                     CoroutineScope(Dispatchers.IO).launch {

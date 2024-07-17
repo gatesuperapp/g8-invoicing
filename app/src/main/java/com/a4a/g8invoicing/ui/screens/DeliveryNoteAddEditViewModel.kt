@@ -137,6 +137,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
                 documentProducts = list
             )
+            // Recalculate the prices
+            _deliveryNoteUiState.value.documentProducts?.let {
+                _deliveryNoteUiState.value =
+                    _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+            }
+
         } catch (e: Exception) {
             println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
         }
@@ -146,21 +152,25 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         try {
             val list = _deliveryNoteUiState.value.documentProducts
             var maxId = 1
-            var newList: List<DocumentProductState> = listOf()
 
             if (!list.isNullOrEmpty()) {
-                maxId = list.map { it.id }.filterNotNull().max()
+                maxId = list.mapNotNull { it.id }.max()
             }
 
             if (documentProduct.id == null) {
                 documentProduct.id = maxId + 1
             }
 
-            newList = (list ?: emptyList()) + documentProduct
+            val newList: List<DocumentProductState> = (list ?: emptyList()) + documentProduct
 
             _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
                 documentProducts = newList
             )
+            // Recalculate the prices
+            _deliveryNoteUiState.value.documentProducts?.let {
+                _deliveryNoteUiState.value =
+                    _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+            }
         } catch (e: Exception) {
             println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }
@@ -276,10 +286,10 @@ fun updateDeliveryNoteUiState(
             val updatedList = (list ?: emptyList()) + updatedDocumentProduct
 
             note = note.copy(documentProducts = updatedList)
-            // Recalculate the prices
+            /*// Recalculate the prices
             note.documentProducts?.let {
                 note = note.copy(documentPrices = calculateDocumentPrices(it))
-            }
+            }*/
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {

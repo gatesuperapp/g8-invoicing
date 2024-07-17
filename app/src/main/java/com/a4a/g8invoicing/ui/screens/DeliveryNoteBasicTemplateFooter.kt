@@ -17,6 +17,7 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Composable
 fun DeliveryNoteBasicTemplateFooter(
@@ -57,13 +58,15 @@ fun DeliveryNoteBasicTemplateFooter(
                     .filter { it.rowDescription.contains("TAXES") }
                     .map { it.rowDescription }.toMutableList()
 
-                var taxesAmount = listOf<Int>()
+                val taxesAmount = mutableListOf<BigDecimal>()
                 taxes.forEach {
-                    taxesAmount += it.removePrefix("TAXES_").toInt()
+                    taxesAmount += it.removePrefix("TAXES_").toBigDecimal()
                 }
 
                 taxesAmount.forEach { tax ->
-                    uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
+                    uiState.documentPrices?.totalAmountsOfEachTax?.first {
+                        it.first.stripTrailingZeros() == tax.stripTrailingZeros()
+                    }?.let {
                         Text(
                             modifier = Modifier
                                 .padding(bottom = 3.dp),
@@ -102,13 +105,15 @@ fun DeliveryNoteBasicTemplateFooter(
                     .filter { it.rowDescription.contains("TAXES") }
                     .map { it.rowDescription }.toMutableList()
 
-                var taxesAmount = listOf<Int>()
+                val taxesAmount = mutableListOf<BigDecimal>()
                 taxes.forEach {
-                    taxesAmount += it.removePrefix("TAXES_").toInt()
+                    taxesAmount += it.removePrefix("TAXES_").toBigDecimal()
                 }
 
                 taxesAmount.forEach { tax ->
-                    uiState.documentPrices?.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
+                    uiState.documentPrices?.totalAmountsOfEachTax?.first {
+                        it.first.stripTrailingZeros() == tax.stripTrailingZeros()
+                    }?.let {
                         Text(
                             modifier = Modifier
                                 .padding(bottom = 3.dp, end = 3.dp),

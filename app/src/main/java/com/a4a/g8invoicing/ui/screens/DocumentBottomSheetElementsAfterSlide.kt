@@ -27,7 +27,6 @@ fun DocumentBottomSheetElementsAfterSlide(
     documentIssuerUiState: DocumentClientOrIssuerState,
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
-    onClickNewClientOrIssuer: () -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType)  -> Unit,
     datePickerState: DatePickerState,
@@ -53,7 +52,6 @@ fun DocumentBottomSheetElementsAfterSlide(
             item = params.first,
             onClickBack = onClickBack,
             onClickNewButton = {
-                onClickNewClientOrIssuer()
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER

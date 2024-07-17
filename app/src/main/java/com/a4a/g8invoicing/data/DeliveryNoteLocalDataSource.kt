@@ -71,23 +71,23 @@ class DeliveryNoteLocalDataSource(
         }*/
 
 
-   /* @OptIn(ExperimentalCoroutinesApi::class)
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
-        return deliveryNoteQueries.getAllDeliveryNotes()
-            .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map { deliveryNote ->
-                        fetchDocumentProductsFlow(deliveryNote.delivery_note_id).onStart { emit(emptyList()) }
-                            .map {
-                                deliveryNote.transformIntoEditableNote(it.toMutableList())
-                            }
-                    }
-                ) {
-                    it.asList()
-                }
-            }
-    }*/
+    /* @OptIn(ExperimentalCoroutinesApi::class)
+     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
+         return deliveryNoteQueries.getAllDeliveryNotes()
+             .asFlow()
+             .flatMapMerge { query ->
+                 combine(
+                     query.executeAsList().map { deliveryNote ->
+                         fetchDocumentProductsFlow(deliveryNote.delivery_note_id).onStart { emit(emptyList()) }
+                             .map {
+                                 deliveryNote.transformIntoEditableNote(it.toMutableList())
+                             }
+                     }
+                 ) {
+                     it.asList()
+                 }
+             }
+     }*/
 
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
         return deliveryNoteQueries.getAllDeliveryNotes()
@@ -183,7 +183,6 @@ class DeliveryNoteLocalDataSource(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
     ): DeliveryNoteState {
-
         this.let {
             return DeliveryNoteState(
                 documentId = it.delivery_note_id.toInt(),
@@ -453,11 +452,13 @@ class DeliveryNoteLocalDataSource(
 
 fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
     val totalPriceWithoutTax = products.filter { it.priceWithTax != null }.sumOf {
-        (it.priceWithTax!! - it.priceWithTax!! * (it.taxRate
-            ?: BigDecimal(0)) / BigDecimal(100)) * (it.quantity)
+        (it.priceWithTax!! -
+                it.priceWithTax!!
+                * (it.taxRate ?: BigDecimal(0))
+                / BigDecimal(100)) * (it.quantity)
     }.setScale(2, RoundingMode.HALF_UP)
 
-// Calculate the total amount of each tax
+    // Calculate the total amount of each tax
     val groupedItems = products.groupBy {
         it.taxRate
     }
