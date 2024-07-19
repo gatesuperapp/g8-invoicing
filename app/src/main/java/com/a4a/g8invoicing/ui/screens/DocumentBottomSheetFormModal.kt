@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -56,7 +58,9 @@ fun DocumentBottomSheetFormModal(
         sheetState = sheetState,
         dragHandle = null
     ) {
-        Column(modifier = Modifier.padding(bottom = bottomPadding)) {
+        Column(modifier = Modifier
+            .padding(bottom = bottomPadding)
+        ) {
             Row(
                 modifier = Modifier
                     .bottomBorder(1.dp, ColorDarkGray)
@@ -117,8 +121,7 @@ fun DocumentBottomSheetFormModal(
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
                     },
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    isDisplayedInBottomSheet = true
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
                 )
             } else if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.ISSUER.name)) {
                 DocumentClientOrIssuerAddEditForm(
@@ -126,8 +129,7 @@ fun DocumentBottomSheetFormModal(
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
                     },
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    isDisplayedInBottomSheet = true
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
                 )
             } else {
                 if (!isTaxSelectionVisible) {

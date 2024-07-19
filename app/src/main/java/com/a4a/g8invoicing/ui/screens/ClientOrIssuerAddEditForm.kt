@@ -31,39 +31,26 @@ import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 fun ClientOrIssuerAddEditForm(
     clientOrIssuerUiState: ClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
-    placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
-    isDisplayedInBottomSheet: Boolean = false,
+    placeCursorAtTheEndOfText: (ScreenElement) -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
 
-    var modifier = Modifier
-        .verticalScroll(rememberScrollState())
-        .background(ColorBackgroundGrey)
-        .fillMaxSize()
-        .padding(12.dp)
-        .imePadding()
-        .pointerInput(Unit) {
-            detectTapGestures(onTap = {
-                localFocusManager.clearFocus()
-                // So when we click outside of a text input,
-                // the selection is cleared
-            })
-        }
-    modifier = if (isDisplayedInBottomSheet)
-        modifier.then(
-            Modifier
-                .fillMaxHeight(0.7f)
-        )
-    else
-        modifier.then(
-            Modifier
-                .padding(top = 80.dp)
-
-        )
-
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = modifier
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .background(ColorBackgroundGrey)
+            .fillMaxSize()
+            .padding(12.dp)
+            .padding(top = 80.dp)
+            .imePadding()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    localFocusManager.clearFocus()
+                    // So when we click outside of a text input,
+                    // the selection is cleared
+                })
+            }
     ) {
         Column(
             modifier = Modifier

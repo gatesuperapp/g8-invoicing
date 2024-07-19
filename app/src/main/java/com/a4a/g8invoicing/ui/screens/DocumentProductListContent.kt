@@ -21,7 +21,6 @@ fun DocumentProductListContent(
                 top = 20.dp,
                 bottom = 10.dp
             )
-            .fillMaxSize()
     ) {
         items(
             items = documentProducts,

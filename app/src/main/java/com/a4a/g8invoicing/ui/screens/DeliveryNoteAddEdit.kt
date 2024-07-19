@@ -328,7 +328,6 @@ fun ExportPopup(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Blue)
                 .zIndex(10F),
             contentAlignment = Alignment.Center
         ) {

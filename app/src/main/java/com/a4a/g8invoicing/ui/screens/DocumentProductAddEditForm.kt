@@ -5,6 +5,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -27,6 +28,7 @@ import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -44,11 +46,11 @@ fun DocumentProductAddEditForm(
 
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.7f)
             .verticalScroll(rememberScrollState())
-            .fillMaxWidth()
+            .background(ColorBackgroundGrey)
+            .fillMaxSize()
+            .padding(12.dp)
             .imePadding()
-            .padding(top = 30.dp)
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     localFocusManager.clearFocus()

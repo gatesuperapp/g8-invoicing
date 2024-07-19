@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,12 +41,12 @@ fun ProductAddEditForm(
 
     Column( // This column is scrollable and set background
         modifier = Modifier
+            .fillMaxSize()
             .background(Color.LightGray.copy(alpha = 0.4f))
-           // .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState())
             .padding(12.dp)
             .padding(top = 80.dp)
             .imePadding()
-            .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     localFocusManager.clearFocus()

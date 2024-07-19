@@ -32,7 +32,6 @@ fun DeliveryNoteBottomSheetDocumentProductList(
     Column(
         modifier = Modifier
             .fillMaxHeight(0.5f)
-           // .verticalScroll(rememberScrollState())
     ) {
         // Header: display "back" button
 

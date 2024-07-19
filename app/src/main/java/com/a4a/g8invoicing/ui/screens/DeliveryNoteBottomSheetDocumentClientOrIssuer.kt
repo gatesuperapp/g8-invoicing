@@ -32,7 +32,6 @@ fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
         modifier = Modifier
             .fillMaxHeight(0.5f)
             .background(Color.White)
-        // .verticalScroll(rememberScrollState())
     ) {
         // Header: display "back" button
         Row(

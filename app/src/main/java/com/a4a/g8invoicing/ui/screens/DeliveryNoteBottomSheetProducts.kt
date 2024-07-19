@@ -68,8 +68,6 @@ fun DeliveryNoteBottomSheetProducts(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
         // If we don't constrain the parent (=this column) width, components that slide in
         // fill the screen full height
-        modifier = Modifier
-        //  .fillMaxHeight(0.5f)
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -140,14 +138,6 @@ fun DeliveryNoteBottomSheetProducts(
                 ) {
                     keyboardController?.hide()
                     slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCT
-                    /* DeliveryNoteBottomSheetItemsContent(
-                         onClickForward = {
-                             keyboardController?.hide()
-                             slideOtherComponent.value = it
-                         },
-                         placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                         localFocusManager = localFocusManager
-                     )*/
                 }
             }
 
@@ -166,10 +156,6 @@ fun DeliveryNoteBottomSheetProducts(
                     onClickDocumentProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
                     onShowDocumentForm(true)
-                    /*CoroutineScope(Dispatchers.IO).launch {
-                        delay(TimeUnit.MILLISECONDS.toMillis(500))
-                        isProductListVisible = false
-                    }*/
                 },
                 onClickDelete = onClickDeleteDocumentProduct
             )

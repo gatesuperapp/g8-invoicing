@@ -71,8 +71,6 @@ fun DeliveryNoteBottomSheetTextElements(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
         // If we don't constrain the parent (=this column) width, components that slide in
         // fill the screen full height
-        modifier = Modifier
-        //  .fillMaxHeight(0.5f)
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
         val keyboardController = LocalSoftwareKeyboardController.current
