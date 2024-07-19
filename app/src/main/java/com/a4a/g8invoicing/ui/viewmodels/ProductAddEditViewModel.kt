@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.viewmodels
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -11,12 +11,12 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
@@ -45,9 +45,6 @@ class ProductAddEditViewModel @Inject constructor(
 
     private val _documentProductUiState = MutableStateFlow(DocumentProductState())
     val documentProductUiState: StateFlow<DocumentProductState> = _documentProductUiState
-
-/*    private val _documentProductUiState = mutableStateOf(DocumentProductState())
-    val documentProductUiState: State<DocumentProductState> = _documentProductUiState*/
 
     init {
         // We initialize only if coming from the navigation (NavGraph)
@@ -228,6 +225,30 @@ class ProductAddEditViewModel @Inject constructor(
                 selection = TextRange(input?.toString()?.length ?: 0)
             )
         )
+    }
+
+    fun validateInputs(type: ProductType): Boolean {
+        val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
+        when(type) {
+            ProductType.PRODUCT -> {
+                FormInputsValidator.validateName(_productUiState.value.name.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.PRODUCT_NAME, it))
+                }
+                _productUiState.value = _productUiState.value.copy(
+                    errors = listOfErrors
+                )
+            }
+            ProductType.DOCUMENT_PRODUCT -> {
+                FormInputsValidator.validateName(_documentProductUiState.value.name.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_PRODUCT_NAME, it))
+                }
+                _documentProductUiState.value = _documentProductUiState.value.copy(
+                    errors = listOfErrors
+                )
+            }
+        }
+
+        return listOfErrors.isEmpty()
     }
 }
 

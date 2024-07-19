@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import java.math.BigDecimal
 
 // The equivalent of ProductState, but used to save the products
@@ -15,4 +16,5 @@ data class DocumentProductState(
     var quantity: BigDecimal = BigDecimal(1),
     var unit: TextFieldValue? = null,
     var productId: Int? = null,
+    var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

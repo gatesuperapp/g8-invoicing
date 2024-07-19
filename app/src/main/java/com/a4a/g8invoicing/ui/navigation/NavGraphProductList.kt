@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.screens.ProductList
-import com.a4a.g8invoicing.ui.screens.ProductListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 import com.a4a.g8invoicing.ui.states.ProductState
 
 fun NavGraphBuilder.productList(

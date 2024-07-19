@@ -7,9 +7,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEdit
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditViewModel
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.screens.ItemOrDocumentType
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.viewmodels.ItemOrDocumentType
 
 fun NavGraphBuilder.clientOrIssuerAddEdit(
     navController: NavController,
@@ -38,18 +38,18 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
             placeCursorAtTheEndOfText = { pageElement ->
                 viewModel.updateCursor(pageElement, ItemOrDocumentType.CLIENT_OR_ISSUER)
             },
-            onClickDone = { // Used only in "Clients" list (not in the documents)
-                //  we don't have to pass the object as the
-                //  ViewModel is already updated with latest values
-                if (isNew) {
-                    viewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
-                } else {
-                    viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
+            onClickDone = {
+                if(viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
+                    if (isNew) {
+                        viewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
+                    } else {
+                        viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
+                    }
+                    goToPreviousScreen(
+                        "result",
+                        Pair("client", viewModel.getLastCreatedClientId().toString())
+                    )
                 }
-                goToPreviousScreen(
-                    "result",
-                    Pair("client", viewModel.getLastCreatedClientId().toString())
-                ) // TODO ?
             },
             onClickBack = {
                 goToPreviousScreen(

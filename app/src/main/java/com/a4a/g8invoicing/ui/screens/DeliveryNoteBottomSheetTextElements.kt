@@ -35,6 +35,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
 import java.math.BigDecimal
 
@@ -63,6 +64,8 @@ fun DeliveryNoteBottomSheetTextElements(
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     localFocusManager: FocusManager,
+    showDocumentForm: Boolean,
+    onShowDocumentForm: (Boolean) -> Unit
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -168,7 +171,9 @@ fun DeliveryNoteBottomSheetTextElements(
                 placeCursorAtTheEndOfText = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
-                onSelectTaxRate = onSelectTaxRate
+                onSelectTaxRate = onSelectTaxRate,
+                showDocumentForm = showDocumentForm,
+                onShowDocumentForm = onShowDocumentForm
             )
         }
     }

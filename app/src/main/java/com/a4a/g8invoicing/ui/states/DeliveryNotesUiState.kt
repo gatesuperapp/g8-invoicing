@@ -1,6 +1,6 @@
 package com.a4a.g8invoicing.ui.states
 
-import com.a4a.g8invoicing.ui.screens.Message
+import com.a4a.g8invoicing.ui.viewmodels.Message
 
 data class DeliveryNotesUiState(
     val deliveryNoteStates: List<DeliveryNoteState> = listOf(),

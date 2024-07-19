@@ -8,7 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerList
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 
 fun NavGraphBuilder.clientOrIssuerList(
     navController: NavController,

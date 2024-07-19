@@ -170,7 +170,8 @@ fun DocumentProductAddEditForm(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
                 onClickForward = onClickForward,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = documentProduct.errors
             )
         }
     }

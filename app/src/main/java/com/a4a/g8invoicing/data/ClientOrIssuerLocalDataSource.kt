@@ -1,13 +1,10 @@
 package com.a4a.g8invoicing.data
 
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.toLowerCase
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.screens.PersonType
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.viewmodels.PersonType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import g8invoicing.ClientOrIssuer
@@ -16,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.Locale
 
 class ClientOrIssuerLocalDataSource(
     db: Database,

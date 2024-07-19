@@ -35,6 +35,7 @@ fun FormUI(
     localFocusManager: FocusManager,
     onClickForward: (ScreenElement) -> Unit = {},
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
+    errors: MutableList<Pair<ScreenElement, String?>>? = null
 ) {
     // handle focus
     val focusManager = LocalFocusManager.current
@@ -124,6 +125,7 @@ fun FormUI(
                         saveFocusForTheRow(focusStates, item.pageElement)
                     }
                 },
+                errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second
             )
         }
     }
@@ -150,6 +152,7 @@ fun PageElementCreator(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
+    errorMessage: String?
 ) {
 
     RowWithLabelAndInput(
@@ -159,6 +162,7 @@ fun PageElementCreator(
         focusRequester = focusRequester,
         onClickRow = onClickRow,
         onClickForward = onClickForward,
+        errorMessage = errorMessage
     )
 
     if (!isLastInput) {
@@ -174,6 +178,7 @@ fun RowWithLabelAndInput(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
+    errorMessage: String?
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
@@ -186,7 +191,10 @@ fun RowWithLabelAndInput(
                 indication = rememberRipple(color = Color.Black, bounded = true),
                 onClick = {
                     when (formInput.inputType) {
-                        is ForwardElement ->  {  onClickForward(formInput.pageElement) }
+                        is ForwardElement -> {
+                            onClickForward(formInput.pageElement)
+                        }
+
                         else -> onClickRow()
                     }
                 }
@@ -201,7 +209,7 @@ fun RowWithLabelAndInput(
     ) {
         // Label
 
-       when (formInput.label) {
+        when (formInput.label) {
             is String -> Text(
                 modifier = Modifier
                     .fillMaxWidth(0.4f),
@@ -214,6 +222,7 @@ fun RowWithLabelAndInput(
                 keyboardOption = imeAction,
                 formActions = formActions,
                 focusRequester = focusRequester,
+                errorMessage = errorMessage,
                 isEditableLabel = true
             )
         }
@@ -225,8 +234,10 @@ fun RowWithLabelAndInput(
                     keyboardOption = imeAction,
                     formActions = formActions,
                     focusRequester = focusRequester,
+                    errorMessage = errorMessage,
                 )
             }
+
             is DecimalInput -> if (formInput.inputType2 is DecimalInput) {
                 FormInputCreatorDoublePrice(
                     textInput1 = formInput.inputType,

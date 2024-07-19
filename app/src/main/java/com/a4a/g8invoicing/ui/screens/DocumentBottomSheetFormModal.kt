@@ -30,6 +30,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.textSmall
 import com.a4a.g8invoicing.ui.theme.textTitle
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)

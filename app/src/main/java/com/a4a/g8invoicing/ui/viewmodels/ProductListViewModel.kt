@@ -1,6 +1,5 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.viewmodels
 
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.ui.states.ProductState

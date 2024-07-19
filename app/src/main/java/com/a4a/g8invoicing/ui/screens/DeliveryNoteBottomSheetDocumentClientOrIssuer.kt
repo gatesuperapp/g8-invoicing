@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item

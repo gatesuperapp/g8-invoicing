@@ -18,7 +18,7 @@ fun ClientOrIssuerAddEdit(
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickDone: () -> Unit,
-    onClickBack: () -> Unit,
+    onClickBack: () -> Unit
 ) {
     Scaffold(
         topBar = {

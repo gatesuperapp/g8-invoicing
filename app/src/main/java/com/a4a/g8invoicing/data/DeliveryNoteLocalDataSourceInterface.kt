@@ -1,6 +1,6 @@
 package com.a4a.g8invoicing.data
 
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState

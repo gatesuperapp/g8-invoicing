@@ -2,20 +2,23 @@ package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditViewModel
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListViewModel
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.DeliveryNoteAddEdit
-import com.a4a.g8invoicing.ui.screens.DeliveryNoteAddEditViewModel
-import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
-import com.a4a.g8invoicing.ui.screens.ProductListViewModel
-import com.a4a.g8invoicing.ui.screens.ProductType
+import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.screens.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 
@@ -48,6 +51,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
         val productAddEditViewModel: ProductAddEditViewModel = hiltViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
+
+        var showDocumentForm by remember { mutableStateOf(false) }
 
         // Get result from "Add new" screen, to know if it's
         // a client or issuer that has been added
@@ -116,106 +121,134 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 when (typeOfCreation) {
                     // ADD = choose from existing list
                     DocumentBottomSheetTypeOfForm.ADD_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                            documentClientUiState
-                        )
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
-                            documentClientUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearClientUiState()
+                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                documentClientUiState
+                            )
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
+                                documentClientUiState
+                            )
+                            clientOrIssuerAddEditViewModel.clearClientUiState()
+                            showDocumentForm = false
+                        }
                     }
-
-                    DocumentBottomSheetTypeOfForm.ADD_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                            documentIssuerUiState
-                        )
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
-                            documentIssuerUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearIssuerUiState()
-                    }
-
-                    DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
-                        deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(
-                            documentProduct
-                        )
-                        deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
-                        productAddEditViewModel.clearProductUiState()
-                    }
-                    // NEW = create new
+                    // NEW = create new & save in clients list too
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
-                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.CLIENT)
-                        clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
-                            ClientOrIssuerType.CLIENT
-                        )
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
-                            documentClientUiState
-                        )
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                            documentClientUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearClientUiState()
-                    }
-
-                    DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-                        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.ISSUER)
-                        clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
-                            ClientOrIssuerType.ISSUER
-                        )
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
-                            documentIssuerUiState
-                        )
-                        deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                            documentIssuerUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearIssuerUiState()
-                    }
-
-                    DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
-                        productAddEditViewModel.setProductUiState()
-                        productAddEditViewModel.saveProductInLocalDb()
-                        deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(
-                            documentProduct
-                        )
-                        deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
-                        productAddEditViewModel.clearProductUiState()
+                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
+                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
+                                ClientOrIssuerType.CLIENT
+                            )
+                            clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.CLIENT
+                            )
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
+                                documentClientUiState
+                            )
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                documentClientUiState
+                            )
+                            clientOrIssuerAddEditViewModel.clearClientUiState()
+                            showDocumentForm = false
+                        }
                     }
                     // EDIT = edit the chosen item (will only impact the document, doesn't change
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
-                        clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
-                        deliveryNoteViewModel.updateDeliveryNoteState(
-                            ScreenElement.DOCUMENT_CLIENT,
-                            documentClientUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearClientUiState()
-                        //clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT)
+                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
+                            deliveryNoteViewModel.updateDeliveryNoteState(
+                                ScreenElement.DOCUMENT_CLIENT,
+                                documentClientUiState
+                            )
+                            clientOrIssuerAddEditViewModel.clearClientUiState()
+                            showDocumentForm = false
+                        }
+                    }
+
+                    DocumentBottomSheetTypeOfForm.ADD_ISSUER -> {
+                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                documentIssuerUiState
+                            )
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
+                                documentIssuerUiState
+                            )
+                            clientOrIssuerAddEditViewModel.clearIssuerUiState()
+                            showDocumentForm = false
+                        }
+                    }
+
+                    DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
+                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
+                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
+                                ClientOrIssuerType.ISSUER
+                            )
+                            clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.ISSUER
+                            )
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
+                                documentIssuerUiState
+                            )
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                documentIssuerUiState
+                            )
+                            clientOrIssuerAddEditViewModel.clearIssuerUiState()
+                            showDocumentForm = false
+                        }
                     }
 
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
-                        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-                        deliveryNoteViewModel.updateDeliveryNoteState(
-                            ScreenElement.DOCUMENT_ISSUER,
-                            documentIssuerUiState
-                        )
-                        clientOrIssuerAddEditViewModel.clearIssuerUiState()
-                        //clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER)
+                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
+                            deliveryNoteViewModel.updateDeliveryNoteState(
+                                ScreenElement.DOCUMENT_ISSUER,
+                                documentIssuerUiState
+                            )
+                            clientOrIssuerAddEditViewModel.clearIssuerUiState()
+                            showDocumentForm = false
+                        }
+                    }
+
+                    DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> {
+                        if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                            productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                            deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(
+                                documentProduct
+                            )
+                            deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
+                            productAddEditViewModel.clearProductUiState()
+                            showDocumentForm = false
+                        }
+                    }
+
+                    DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
+                        if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                            productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                            productAddEditViewModel.setProductUiState()
+                            productAddEditViewModel.saveProductInLocalDb()
+                            deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(
+                                documentProduct
+                            )
+                            deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
+                            productAddEditViewModel.clearProductUiState()
+                            showDocumentForm = false
+                        }
                     }
 
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
-                        productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
-                        deliveryNoteViewModel.updateDeliveryNoteState(
-                            ScreenElement.DOCUMENT_PRODUCT,
-                            documentProduct
-                        )
-                        productAddEditViewModel.clearProductUiState()
-                        //productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                        if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                            productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
+                            deliveryNoteViewModel.updateDeliveryNoteState(
+                                ScreenElement.DOCUMENT_PRODUCT,
+                                documentProduct
+                            )
+                            productAddEditViewModel.clearProductUiState()
+                            showDocumentForm = false
+                        }
                     }
                 }
             },
@@ -226,6 +259,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     it,
                     ProductType.DOCUMENT_PRODUCT
                 )
+            },
+            showDocumentForm = showDocumentForm,
+            onShowDocumentForm = {
+                showDocumentForm = it
             }
         )
     }

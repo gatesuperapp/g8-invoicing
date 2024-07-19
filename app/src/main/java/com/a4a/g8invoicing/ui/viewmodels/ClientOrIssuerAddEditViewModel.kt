@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.viewmodels
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -93,6 +94,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     fun stopAutoSaveIssuerFormInputsInLocalDb() {
         autoSaveIssuerJob?.cancel()
     }
+
     fun stopAutoSaveClientFormInputsInLocalDb() {
         autoSaveClientJob?.cancel()
     }
@@ -185,9 +187,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             companyId2Label = _documentIssuerUiState.value.companyId2Label,
             companyId2Number = _documentIssuerUiState.value.companyId2Number
         )
-
     }
-
 
     fun clearClientUiState() {
         _clientUiState.value = ClientOrIssuerState()
@@ -467,6 +467,57 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             else -> null
         }
         return person
+    }
+
+    fun validateInputs(type: ClientOrIssuerType): Boolean {
+        val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
+        when(type) {
+            ClientOrIssuerType.CLIENT -> {
+                FormInputsValidator.validateName(_clientUiState.value.name.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
+                }
+                FormInputsValidator.validateEmail(_clientUiState.value.email?.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
+                }
+                _clientUiState.value = _clientUiState.value.copy(
+                    errors = listOfErrors
+                )
+            }
+            ClientOrIssuerType.ISSUER -> {
+                FormInputsValidator.validateName(_issuerUiState.value.name.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
+                }
+                FormInputsValidator.validateEmail(_issuerUiState.value.email?.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
+                }
+                _issuerUiState.value = _issuerUiState.value.copy(
+                    errors = listOfErrors
+                )
+            }
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                FormInputsValidator.validateName(_documentClientUiState.value.name.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
+                }
+                FormInputsValidator.validateEmail(_documentClientUiState.value.email?.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
+                }
+                _documentClientUiState.value = _documentClientUiState.value.copy(
+                    errors = listOfErrors
+                )
+            }
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                FormInputsValidator.validateName(_documentIssuerUiState.value.name.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
+                }
+                FormInputsValidator.validateEmail(_documentIssuerUiState.value.email?.text)?.let {
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
+                }
+                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                    errors = listOfErrors
+                )
+            }
+        }
+        return listOfErrors.isEmpty()
     }
 }
 

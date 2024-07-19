@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.viewmodels
 
 import android.content.ContentValues
 import android.util.Log
@@ -13,6 +13,7 @@ import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
+import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,6 @@ import javax.inject.Inject
 @HiltViewModel
 class DeliveryNoteAddEditViewModel @Inject constructor(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
-    private val documentClientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -251,6 +251,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             )
         )
     }
+
 }
 
 fun updateDeliveryNoteUiState(

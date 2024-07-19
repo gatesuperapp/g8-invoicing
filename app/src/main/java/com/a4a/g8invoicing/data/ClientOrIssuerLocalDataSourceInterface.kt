@@ -1,6 +1,6 @@
 package com.a4a.g8invoicing.data
 
-import com.a4a.g8invoicing.ui.screens.PersonType
+import com.a4a.g8invoicing.ui.viewmodels.PersonType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import kotlinx.coroutines.flow.Flow

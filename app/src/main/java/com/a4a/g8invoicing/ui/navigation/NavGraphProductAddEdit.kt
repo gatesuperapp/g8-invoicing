@@ -6,8 +6,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ProductAddEdit
-import com.a4a.g8invoicing.ui.screens.ProductAddEditViewModel
-import com.a4a.g8invoicing.ui.screens.ProductType
+import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 
 fun NavGraphBuilder.productAddEdit(

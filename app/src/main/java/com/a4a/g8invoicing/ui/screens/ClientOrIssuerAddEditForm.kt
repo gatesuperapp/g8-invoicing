@@ -115,7 +115,8 @@ fun ClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = clientOrIssuerUiState.errors
             )
         }
 
@@ -188,7 +189,8 @@ fun ClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = clientOrIssuerUiState.errors
             )
         }
 
@@ -240,7 +242,8 @@ fun ClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = clientOrIssuerUiState.errors
             )
         }
 
@@ -269,7 +272,8 @@ fun ClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = clientOrIssuerUiState.errors
             )
         }
     }

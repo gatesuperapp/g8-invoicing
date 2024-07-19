@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -28,7 +29,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
-    onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType)  -> Unit,
+    onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     datePickerState: DatePickerState,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -37,6 +38,8 @@ fun DocumentBottomSheetElementsAfterSlide(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    showDocumentForm: Boolean = false,
+    onShowDocumentForm: (Boolean) -> Unit,
 ) {
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
@@ -44,7 +47,6 @@ fun DocumentBottomSheetElementsAfterSlide(
             DocumentBottomSheetTypeOfForm.ADD_PRODUCT
         )
     }
-    var isDocumentFormVisible by remember { mutableStateOf(false) }
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         val params = parameters as Pair<DocumentClientOrIssuerState?, List<ClientOrIssuerState>>
@@ -55,14 +57,14 @@ fun DocumentBottomSheetElementsAfterSlide(
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
-                isDocumentFormVisible = true
+                onShowDocumentForm(true)
             },
             onClickChooseButton = { isClientOrIssuerListVisible = true },
             onClickItem = {
                 onClickDocumentClientOrIssuer(it)
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
-                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else  DocumentBottomSheetTypeOfForm.EDIT_ISSUER
-                isDocumentFormVisible = true
+                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
+                onShowDocumentForm(true)
             },
             onClickDelete = onClickDeleteDocumentClientOrIssuer
         )
@@ -78,7 +80,7 @@ fun DocumentBottomSheetElementsAfterSlide(
                     typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                         DocumentBottomSheetTypeOfForm.ADD_CLIENT
                     } else DocumentBottomSheetTypeOfForm.ADD_ISSUER
-                    isDocumentFormVisible = true
+                    onShowDocumentForm(true)
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
                         // Waits for the bottom form to be opened,
@@ -102,7 +104,7 @@ fun DocumentBottomSheetElementsAfterSlide(
 
 
 
-    if (isDocumentFormVisible) {
+    if (showDocumentForm) {
         DocumentBottomSheetFormModal(
             typeOfCreation = typeOfCreation,
             documentClientUiState = documentClientUiState,
@@ -111,12 +113,11 @@ fun DocumentBottomSheetElementsAfterSlide(
             bottomFormOnValueChange = bottomFormOnValueChange,
             placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
             onClickCancel = { // Re-initialize
-                isDocumentFormVisible = false
                 onClickCancelForm()
+                onShowDocumentForm(false)
             },
             onClickDone = {
                 onClickDoneForm(typeOfCreation)
-                isDocumentFormVisible = false
             },
             onSelectTaxRate = onSelectTaxRate
         )

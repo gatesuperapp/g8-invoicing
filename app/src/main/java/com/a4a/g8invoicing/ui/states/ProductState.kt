@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import java.math.BigDecimal
 
 // This Product is created to manipulate client data,
@@ -14,4 +15,5 @@ data class ProductState(
     var priceWithTax: BigDecimal? = null,
     var taxRate: BigDecimal? = null,
     var unit: TextFieldValue? = null,
+    var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

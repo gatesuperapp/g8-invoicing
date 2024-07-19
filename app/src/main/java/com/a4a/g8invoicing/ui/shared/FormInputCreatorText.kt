@@ -46,6 +46,7 @@ fun FormInputCreatorText(
         }
     ),
     focusRequester: FocusRequester?,
+    errorMessage: String?, // Used for email and name validation
     isEditableLabel: Boolean = false, // Used for editable labels
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -90,6 +91,13 @@ fun FormInputCreatorText(
                     innerTextField,
                     input.placeholder,
                     interactionSource
+                )
+            }
+
+            errorMessage?.let {
+                Text(
+                    color = Color.Red,
+                    text = it
                 )
             }
 

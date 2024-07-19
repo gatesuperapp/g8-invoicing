@@ -34,6 +34,7 @@ import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,6 +61,8 @@ fun DeliveryNoteBottomSheetProducts(
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     localFocusManager: FocusManager,
+    showDocumentForm: Boolean = false,
+    onShowDocumentForm: (Boolean) -> Unit,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -77,7 +80,6 @@ fun DeliveryNoteBottomSheetProducts(
                 DocumentBottomSheetTypeOfForm.ADD_PRODUCT
             )
         }
-        var isDocumentFormVisible by remember { mutableStateOf(false) }
 
         val parameters = Pair(
             deliveryNote.documentProducts,
@@ -138,14 +140,14 @@ fun DeliveryNoteBottomSheetProducts(
                 ) {
                     keyboardController?.hide()
                     slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCT
-                   /* DeliveryNoteBottomSheetItemsContent(
-                        onClickForward = {
-                            keyboardController?.hide()
-                            slideOtherComponent.value = it
-                        },
-                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                        localFocusManager = localFocusManager
-                    )*/
+                    /* DeliveryNoteBottomSheetItemsContent(
+                         onClickForward = {
+                             keyboardController?.hide()
+                             slideOtherComponent.value = it
+                         },
+                         placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                         localFocusManager = localFocusManager
+                     )*/
                 }
             }
 
@@ -153,7 +155,7 @@ fun DeliveryNoteBottomSheetProducts(
                 list = params.first ?: emptyList(),
                 onClickNew = {
                     typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
-                    isDocumentFormVisible = true
+                    onShowDocumentForm(true)
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
                         isProductListVisible = false
@@ -163,7 +165,7 @@ fun DeliveryNoteBottomSheetProducts(
                 onClickDocumentProduct = {
                     onClickDocumentProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
-                    isDocumentFormVisible = true
+                    onShowDocumentForm(true)
                     /*CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
                         isProductListVisible = false
@@ -180,7 +182,7 @@ fun DeliveryNoteBottomSheetProducts(
                         onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
                         // so we open bottom document form with the chosen product
                         typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_PRODUCT
-                        isDocumentFormVisible = true
+                        onShowDocumentForm(true)
                         CoroutineScope(Dispatchers.IO).launch {
                             delay(TimeUnit.MILLISECONDS.toMillis(500))
                             // Waits for the bottom form to be opened,
@@ -191,7 +193,7 @@ fun DeliveryNoteBottomSheetProducts(
                 )
             }
 
-            if (isDocumentFormVisible) {
+            if (showDocumentForm) {
                 DocumentBottomSheetFormModal(
                     typeOfCreation = typeOfCreation,
                     documentProduct = documentProductUiState,
@@ -199,12 +201,11 @@ fun DeliveryNoteBottomSheetProducts(
                     bottomFormOnValueChange = bottomFormOnValueChange,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     onClickCancel = { // Re-initialize
-                        isDocumentFormVisible = false
                         onClickCancelForm()
+                        onShowDocumentForm(false)
                     },
                     onClickDone = {
                         onClickDoneForm(typeOfCreation)
-                        isDocumentFormVisible = false
                     },
                     onSelectTaxRate = onSelectTaxRate
                 )

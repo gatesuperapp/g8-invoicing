@@ -48,6 +48,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -81,6 +82,8 @@ fun DeliveryNoteAddEdit(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    showDocumentForm: Boolean,
+    onShowDocumentForm: (Boolean) -> Unit
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -158,7 +161,9 @@ fun DeliveryNoteAddEdit(
                     onClickDoneForm = onClickDoneForm,
                     onClickCancelForm = onClickCancelForm,
                     onSelectTaxRate = onSelectTaxRate,
-                    localFocusManager = LocalFocusManager.current
+                    localFocusManager = LocalFocusManager.current,
+                    showDocumentForm = showDocumentForm,
+                    onShowDocumentForm = onShowDocumentForm
                 )
             } else {
                 DeliveryNoteBottomSheetProducts(
@@ -178,7 +183,9 @@ fun DeliveryNoteAddEdit(
                     onClickDoneForm = onClickDoneForm,
                     onClickCancelForm = onClickCancelForm,
                     onSelectTaxRate = onSelectTaxRate,
-                    localFocusManager = LocalFocusManager.current
+                    localFocusManager = LocalFocusManager.current,
+                    showDocumentForm = showDocumentForm,
+                    onShowDocumentForm = onShowDocumentForm
                 )
             }
         },

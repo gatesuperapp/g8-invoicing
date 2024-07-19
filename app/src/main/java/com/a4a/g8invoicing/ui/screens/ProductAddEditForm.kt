@@ -148,7 +148,8 @@ fun ProductAddEditForm(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
                 onClickForward = onClickForward,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = product.errors
             )
         }
     }

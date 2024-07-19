@@ -7,7 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.screens.DeliveryNoteList
-import com.a4a.g8invoicing.ui.screens.DeliveryNoteListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteListViewModel
 
 fun NavGraphBuilder.deliveryNoteList(
     navController: NavController,

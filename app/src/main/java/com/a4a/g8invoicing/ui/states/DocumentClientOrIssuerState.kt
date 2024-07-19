@@ -1,7 +1,8 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 
 // The equivalent of ClientOrIssuerState, but used to save the client & issuer
 // linked to the document, so they're not deleted from the doc
@@ -22,4 +23,5 @@ data class DocumentClientOrIssuerState(
     var companyId1Number: TextFieldValue? = null,
     var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
     var companyId2Number: TextFieldValue? = null,
+    var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )
