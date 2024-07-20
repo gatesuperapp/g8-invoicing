@@ -50,8 +50,6 @@ fun DeliveryNoteBottomSheetDocumentProductList(
             stringResource(id = R.string.document_bottom_sheet_document_product_add)
         )
 
-        Spacer(modifier = Modifier.weight(1F))
-
         // Display the existing list
         DocumentProductListContent(
             documentProducts = list,

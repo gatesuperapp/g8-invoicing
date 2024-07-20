@@ -56,7 +56,7 @@ fun DeliveryNoteBottomSheetProducts(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
-    bottomFormPlaceCursor: (ScreenElement) -> Unit,
+    bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
@@ -185,7 +185,7 @@ fun DeliveryNoteBottomSheetProducts(
                     documentProduct = documentProductUiState,
                     taxRates = taxRates,
                     bottomFormOnValueChange = bottomFormOnValueChange,
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
                     onClickCancel = { // Re-initialize
                         onClickCancelForm()
                         onShowDocumentForm(false)

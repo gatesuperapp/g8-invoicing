@@ -49,7 +49,7 @@ fun DocumentProductAddEditForm(
             .verticalScroll(rememberScrollState())
             .background(ColorBackgroundGrey)
             .fillMaxSize()
-            .padding(12.dp)
+            //.padding(12.dp)
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {

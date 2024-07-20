@@ -78,7 +78,7 @@ fun DeliveryNoteAddEdit(
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
-    bottomFormPlaceCursor: (ScreenElement) -> Unit,
+    bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,

@@ -22,7 +22,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.ForwardElement
-import com.a4a.g8invoicing.ui.shared.ForwardInputCreatorGoForward
+import com.a4a.g8invoicing.ui.shared.FormInputCreatorGoForward
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.BottomBar
 
@@ -76,7 +76,7 @@ fun Settings(
                         bottom = 14.dp
                     )
             ) {
-                ForwardInputCreatorGoForward(
+                FormInputCreatorGoForward(
                     ForwardElement(
                         text = stringResource(id = R.string.document_modal_product_cancel)
                     )

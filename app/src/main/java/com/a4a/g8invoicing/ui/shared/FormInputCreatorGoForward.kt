@@ -14,7 +14,7 @@ import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import com.ninetyninepercent.funfactu.icons.IconArrowRight
 
 @Composable
-fun ForwardInputCreatorGoForward(
+fun FormInputCreatorGoForward(
     forwardInput: ForwardElement,
 ) {
     Row(

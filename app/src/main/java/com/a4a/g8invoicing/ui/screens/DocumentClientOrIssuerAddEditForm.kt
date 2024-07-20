@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -30,7 +28,7 @@ import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 fun DocumentClientOrIssuerAddEditForm(
     documentClientOrIssuerState: DocumentClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
-    placeCursorAtTheEndOfText: (ScreenElement) -> Unit
+    bottomFormPlaceCursor: (ScreenElement) -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
 
@@ -99,7 +97,7 @@ fun DocumentClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                placeCursorAtTheEndOfText = bottomFormPlaceCursor,
                 errors = documentClientOrIssuerState.errors
             )
         }
@@ -173,7 +171,7 @@ fun DocumentClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                placeCursorAtTheEndOfText = bottomFormPlaceCursor,
                 errors = documentClientOrIssuerState.errors
             )
         }
@@ -226,7 +224,7 @@ fun DocumentClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                placeCursorAtTheEndOfText = bottomFormPlaceCursor,
                 errors = documentClientOrIssuerState.errors
             )
         }
@@ -256,7 +254,7 @@ fun DocumentClientOrIssuerAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                placeCursorAtTheEndOfText = bottomFormPlaceCursor,
                 errors = documentClientOrIssuerState.errors
             )
         }

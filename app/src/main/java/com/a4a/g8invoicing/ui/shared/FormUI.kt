@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.shared
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -256,7 +255,7 @@ fun RowWithLabelAndInput(
             }
 
             is ForwardElement ->
-                ForwardInputCreatorGoForward(
+                FormInputCreatorGoForward(
                     formInput.inputType
                 )
         }

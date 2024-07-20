@@ -95,7 +95,11 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 deliveryNoteViewModel.removeDocumentClientOrIssuerFromLocalDb(type)
             },
             placeCursorAtTheEndOfText = { pageElement ->
-                // deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
+                if (pageElement == ScreenElement.DOCUMENT_NUMBER ||
+                    pageElement == ScreenElement.DOCUMENT_ORDER_NUMBER
+                ) {
+                    deliveryNoteViewModel.updateTextFieldCursorOfDeliveryNoteState(pageElement)
+                }
             },
             bottomFormOnValueChange = { pageElement, value, type ->
                 if (pageElement.name.contains("PRODUCT")) {
@@ -114,8 +118,20 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
                 }
             },
-            bottomFormPlaceCursor = { pageElement ->
-                productAddEditViewModel.updateCursor(pageElement, ProductType.DOCUMENT_PRODUCT)
+            bottomFormPlaceCursor = { pageElement, clientOrIssuer ->
+                if (pageElement.name.contains(ProductType.DOCUMENT_PRODUCT.name)) {
+                    productAddEditViewModel.updateCursor(pageElement, ProductType.DOCUMENT_PRODUCT)
+                } else if (clientOrIssuer == ClientOrIssuerType.DOCUMENT_ISSUER) {
+                    clientOrIssuerAddEditViewModel.updateCursor(
+                        pageElement,
+                        ClientOrIssuerType.DOCUMENT_ISSUER
+                    )
+                } else if (clientOrIssuer == ClientOrIssuerType.DOCUMENT_CLIENT) {
+                    clientOrIssuerAddEditViewModel.updateCursor(
+                        pageElement,
+                        ClientOrIssuerType.DOCUMENT_CLIENT
+                    )
+                }
             },
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {

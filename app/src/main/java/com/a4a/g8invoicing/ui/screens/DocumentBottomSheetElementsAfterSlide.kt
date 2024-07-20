@@ -34,7 +34,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
-    placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
+    bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
@@ -111,7 +111,7 @@ fun DocumentBottomSheetElementsAfterSlide(
             documentIssuerUiState = documentIssuerUiState,
             taxRates = taxRates,
             bottomFormOnValueChange = bottomFormOnValueChange,
-            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+            bottomFormPlaceCursor = bottomFormPlaceCursor,
             onClickCancel = { // Re-initialize
                 onClickCancelForm()
                 onShowDocumentForm(false)

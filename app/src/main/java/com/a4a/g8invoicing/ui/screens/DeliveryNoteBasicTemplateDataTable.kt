@@ -108,7 +108,7 @@ fun DeliveryNoteBasicTemplateDataTable(
                 alignEnd = true
             )
             TableCell(
-                text = it.unit?.text.toString(),
+                text = if(!it.unit?.text.isNullOrEmpty()) it.unit?.text!!  else " - ",
                 alignEnd = true
             )
             TableCell(

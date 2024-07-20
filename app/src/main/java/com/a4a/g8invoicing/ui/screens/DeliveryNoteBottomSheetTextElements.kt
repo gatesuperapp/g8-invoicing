@@ -54,18 +54,18 @@ fun DeliveryNoteBottomSheetTextElements(
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
-    onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType)  -> Unit,
+    onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
-    bottomFormPlaceCursor: (ScreenElement) -> Unit,
+    bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     localFocusManager: FocusManager,
     showDocumentForm: Boolean,
-    onShowDocumentForm: (Boolean) -> Unit
+    onShowDocumentForm: (Boolean) -> Unit,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -166,7 +166,7 @@ fun DeliveryNoteBottomSheetTextElements(
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId,
                 bottomFormOnValueChange = bottomFormOnValueChange,
-                placeCursorAtTheEndOfText = bottomFormPlaceCursor,
+                bottomFormPlaceCursor = bottomFormPlaceCursor,
                 onClickDoneForm = onClickDoneForm,
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate,

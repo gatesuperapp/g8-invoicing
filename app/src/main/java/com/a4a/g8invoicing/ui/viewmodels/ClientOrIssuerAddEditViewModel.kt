@@ -294,62 +294,152 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateCursor(pageElement: ScreenElement, type: ItemOrDocumentType) {
-        if (type == ItemOrDocumentType.CLIENT_OR_ISSUER) {
-            updateCursorOfClientOrIssuerState(pageElement)
-        } else {
-            updateCursorOfDocumentClientOrIssuerState(pageElement)
+    fun updateCursor(pageElement: ScreenElement, type: ClientOrIssuerType) {
+        when (type) {
+            ClientOrIssuerType.CLIENT -> {
+                val text = updateCursorOfClientOrIssuer(type, pageElement)
+                text?.let {
+                    _clientUiState.value = updateClientOrIssuerUiState(
+                        _clientUiState.value, pageElement, TextFieldValue(
+                            text = it,
+                            selection = TextRange(it.length)
+                        )
+                    )
+                }
+            }
+            ClientOrIssuerType.ISSUER -> {
+                val text = updateCursorOfClientOrIssuer(type, pageElement)
+                text?.let {
+                    _issuerUiState.value = updateClientOrIssuerUiState(
+                        _issuerUiState.value, pageElement, TextFieldValue(
+                            text = it,
+                            selection = TextRange(it.length)
+                        )
+                    )
+                }
+            }
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                val text = updateCursorOfDocumentClientOrIssuer(type, pageElement)
+                text?.let {
+                    _documentClientUiState.value = updateDocumentClientOrIssuerUiState(
+                        _documentClientUiState.value, pageElement, TextFieldValue(
+                            text = it,
+                            selection = TextRange(it.length)
+                        )
+                    )
+                }
+            }
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                val text = updateCursorOfDocumentClientOrIssuer(type, pageElement)
+                text?.let {
+                    _documentIssuerUiState.value = updateDocumentClientOrIssuerUiState(
+                        _documentIssuerUiState.value, pageElement, TextFieldValue(
+                            text = it,
+                            selection = TextRange(it.length)
+                        )
+                    )
+                }
+            }
+            else -> {}
         }
     }
 
-    private fun updateCursorOfClientOrIssuerState(pageElement: ScreenElement) {
+    private fun updateCursorOfClientOrIssuer(
+        type: ClientOrIssuerType,
+        pageElement: ScreenElement,
+    ): String? {
         val text = when (pageElement) {
-            ScreenElement.CLIENT_OR_ISSUER_NAME -> clientUiState.value.name.text
-            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> clientUiState.value.firstName?.text
-            ScreenElement.CLIENT_OR_ISSUER_EMAIL -> clientUiState.value.email?.text
-            ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 -> clientUiState.value.address1?.text
-            ScreenElement.CLIENT_OR_ISSUER_ADDRESS2 -> clientUiState.value.address2?.text
-            ScreenElement.CLIENT_OR_ISSUER_ZIP -> clientUiState.value.zipCode?.text
-            ScreenElement.CLIENT_OR_ISSUER_CITY -> clientUiState.value.city?.text
-            ScreenElement.CLIENT_OR_ISSUER_PHONE -> clientUiState.value.phone?.text
-            ScreenElement.CLIENT_OR_ISSUER_NOTES -> clientUiState.value.notes?.text
-            /*            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> clientUiState.value.companyData?.first()?.label?.text
-                        ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> clientUiState.value.companyData?.first()?.number?.text
-                        ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> clientUiState.value.companyData?.get(1)?.label?.text
-                        ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
+            ScreenElement.CLIENT_OR_ISSUER_NAME ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.name.text
+                else _issuerUiState.value.name.text
+            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.firstName?.text
+                else _issuerUiState.value.firstName?.text
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.email?.text
+                else _issuerUiState.value.email?.text
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.address1?.text
+            else _issuerUiState.value.address1?.text
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS2 ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.address2?.text
+            else _issuerUiState.value.address2?.text
+            ScreenElement.CLIENT_OR_ISSUER_ZIP ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.zipCode?.text
+                else _issuerUiState.value.zipCode?.text
+            ScreenElement.CLIENT_OR_ISSUER_CITY ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.city?.text
+                else _issuerUiState.value.city?.text
+            ScreenElement.CLIENT_OR_ISSUER_PHONE ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.phone?.text
+                else _issuerUiState.value.phone?.text
+            ScreenElement.CLIENT_OR_ISSUER_NOTES ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.notes?.text
+                else _issuerUiState.value.notes?.text
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId1Label?.text
+                else _issuerUiState.value.companyId1Label?.text
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId1Number?.text
+                else _issuerUiState.value.companyId1Number?.text
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId2Label?.text
+                else _issuerUiState.value.companyId2Label?.text
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId2Number?.text
+                else _issuerUiState.value.companyId2Number?.text
             else -> null
         }
-        _clientUiState.value = updateClientOrIssuerUiState(
-            _clientUiState.value, pageElement, TextFieldValue(
-                text = text ?: "",
-                selection = TextRange(text?.length ?: 0)
-            )
-        )
+        return text
     }
 
-    private fun updateCursorOfDocumentClientOrIssuerState(pageElement: ScreenElement) {
+    private fun updateCursorOfDocumentClientOrIssuer(
+        type: ClientOrIssuerType,
+        pageElement: ScreenElement,
+    ): String? {
         val text = when (pageElement) {
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> documentClientUiState.value.name.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> documentClientUiState.value.firstName?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL -> documentClientUiState.value.email?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1 -> documentClientUiState.value.address1?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2 -> documentClientUiState.value.address2?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP -> documentClientUiState.value.zipCode?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY -> documentClientUiState.value.city?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> documentClientUiState.value.phone?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES -> documentClientUiState.value.notes?.text
-            /*            ScreenElement.CLIENT_IDENTIFICATION1_LABEL -> clientUiState.value.companyData?.first()?.label?.text
-                        ScreenElement.CLIENT_IDENTIFICATION1_VALUE -> clientUiState.value.companyData?.first()?.number?.text
-                        ScreenElement.CLIENT_IDENTIFICATION2_LABEL -> clientUiState.value.companyData?.get(1)?.label?.text
-                        ScreenElement.CLIENT_IDENTIFICATION2_VALUE -> clientUiState.value.companyData?.get(1)?.number?.text*/
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.name.text
+                else _documentIssuerUiState.value.name.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.firstName?.text
+                else _documentIssuerUiState.value.firstName?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.email?.text
+                else _documentIssuerUiState.value.email?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1 ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.address1?.text
+                else _documentIssuerUiState.value.address1?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2 ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.address2?.text
+                else _documentIssuerUiState.value.address2?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.zipCode?.text
+                else _documentIssuerUiState.value.zipCode?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.city?.text
+                else _documentIssuerUiState.value.city?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.phone?.text
+                else _documentIssuerUiState.value.phone?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.notes?.text
+                else _documentIssuerUiState.value.notes?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId1Label?.text
+                else _documentIssuerUiState.value.companyId1Label?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId1Number?.text
+                else _documentIssuerUiState.value.companyId1Number?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId2Label?.text
+                else _documentIssuerUiState.value.companyId2Label?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId2Number?.text
+                else _documentIssuerUiState.value.companyId2Number?.text
             else -> null
         }
-        _documentClientUiState.value = updateDocumentClientOrIssuerUiState(
-            _documentClientUiState.value, pageElement, TextFieldValue(
-                text = text ?: "",
-                selection = TextRange(text?.length ?: 0)
-            )
-        )
+        return text
     }
 
     fun getLastCreatedClientId(): Long? {
@@ -471,7 +561,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
     fun validateInputs(type: ClientOrIssuerType): Boolean {
         val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
-        when(type) {
+        when (type) {
             ClientOrIssuerType.CLIENT -> {
                 FormInputsValidator.validateName(_clientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
@@ -483,6 +573,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     errors = listOfErrors
                 )
             }
+
             ClientOrIssuerType.ISSUER -> {
                 FormInputsValidator.validateName(_issuerUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
@@ -494,6 +585,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     errors = listOfErrors
                 )
             }
+
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
                 FormInputsValidator.validateName(_documentClientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
@@ -505,6 +597,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     errors = listOfErrors
                 )
             }
+
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
                 FormInputsValidator.validateName(_documentIssuerUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
@@ -523,8 +616,4 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
 enum class ClientOrIssuerType {
     CLIENT, ISSUER, DOCUMENT_CLIENT, DOCUMENT_ISSUER
-}
-
-enum class ItemOrDocumentType {
-    CLIENT_OR_ISSUER, DOCUMENT_CLIENT_OR_ISSUER
 }

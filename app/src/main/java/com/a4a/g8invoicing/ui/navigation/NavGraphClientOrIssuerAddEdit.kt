@@ -9,7 +9,6 @@ import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEdit
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.viewmodels.ItemOrDocumentType
 
 fun NavGraphBuilder.clientOrIssuerAddEdit(
     navController: NavController,
@@ -36,7 +35,7 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
                 }
             },
             placeCursorAtTheEndOfText = { pageElement ->
-                viewModel.updateCursor(pageElement, ItemOrDocumentType.CLIENT_OR_ISSUER)
+                viewModel.updateCursor(pageElement, ClientOrIssuerType.CLIENT)
             },
             onClickDone = {
                 if(viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
