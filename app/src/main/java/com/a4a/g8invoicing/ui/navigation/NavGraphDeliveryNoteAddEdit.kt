@@ -83,7 +83,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
             onClickDocumentClientOrIssuer = {// Edit a document product
-                clientOrIssuerAddEditViewModel.autoSaveIssuerFormInputsInLocalDb()
+                if (it.type == ClientOrIssuerType.DOCUMENT_ISSUER)
+                    clientOrIssuerAddEditViewModel.autoSaveIssuerFormInputsInLocalDb()
+                else clientOrIssuerAddEditViewModel.autoSaveClientFormInputsInLocalDb()
+
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
