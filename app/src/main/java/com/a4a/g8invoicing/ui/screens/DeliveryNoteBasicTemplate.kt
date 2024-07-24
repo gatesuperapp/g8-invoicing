@@ -185,6 +185,7 @@ enum class FooterRowName {
 @Composable
 fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) {
     Text(
+        textAlign = TextAlign.Center,
         modifier = Modifier
             .padding(bottom = 2.dp)
             .wrapContentHeight(),
