@@ -47,11 +47,12 @@ fun DeliveryNoteBasicTemplateContent(
     uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
-    productArray: List<ProductWithPage>?,
-    footerArray: List<FooterRow>,
+    productArray: List<DocumentProductState>?,
+    footerArray: List<FooterRow>?,
     index: Int,
     numberOfPages: Int,
     selectedItem: ScreenElement? = null,
+    onPageOverflow: () -> Unit,
 ) {
     val pagePadding = 20.dp
     var pageHeightDp by remember { mutableStateOf(0.dp) }
@@ -87,6 +88,10 @@ fun DeliveryNoteBasicTemplateContent(
                     pageContentHeightDp = with(localDensity) { coordinates.size.height.toDp() }
                 }
         ) {
+            if (pageContentHeightDp != 0.dp && (pageContentHeightDp > pageHeightDp - 42.dp)) {
+                pageContentHeightDp = 0.dp
+                onPageOverflow()
+            }
             if (index == 0) {
                 DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
                 if (uiState.orderNumber.text.isNotEmpty()) {
@@ -117,13 +122,14 @@ fun DeliveryNoteBasicTemplateContent(
                     )
                     .fillMaxWidth()
             ) {
-                val documentProducts = productArray?.map { it.documentProduct }
-                if (!documentProducts.isNullOrEmpty()) {
-                    DeliveryNoteBasicTemplateDataTable(documentProducts)
+                if (!productArray.isNullOrEmpty()) {
+                    DeliveryNoteBasicTemplateDataTable(
+                        productArray
+                    )
                 }
             }
 
-            DeliveryNoteBasicTemplateFooter(uiState, footerArray)
+            //DeliveryNoteBasicTemplateFooter(uiState, footerArray)
         }
         DeliveryNoteBasicTemplatePageNumbering(index, numberOfPages)
     }

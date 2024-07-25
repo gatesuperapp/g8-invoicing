@@ -11,14 +11,19 @@ import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,26 +37,22 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import java.math.BigDecimal
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
 
-
-data class ProductWithPage(
-    var documentProduct: DocumentProductState,
-    var page: Int,
-)
 
 data class FooterRow(
     var rowDescription: String,
@@ -96,6 +97,7 @@ fun calculateLimits(
 fun DeliveryNoteBasicTemplate(
     uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
+    incrementDocumentProductPage: (Int) -> Unit,
 ) {
     var zoom by remember { mutableStateOf(1f) }
     var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
@@ -108,59 +110,62 @@ fun DeliveryNoteBasicTemplate(
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
 
-    var numberOfPages = 1
 
-    var firstCompositionForThisNumberOfItems by remember { mutableStateOf(true) }
-    val pagerState = rememberPagerState { numberOfPages }
+    val productArray = uiState.documentProducts
 
-    val productArray = uiState.documentProducts?.map {
-        ProductWithPage(it, 1)
-    }
-    val footerArray = mutableStateListOf(
-        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPages)
+    val numberOfPagesState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { productArray?.last()?.page ?: 1 }
     )
+
+    val footerArray = mutableStateListOf(
+        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPagesState.pageCount)
+    )
+
+    var documentProductIndex by remember { mutableStateOf(0) }
 
     val taxRates =
         uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
-        footerArray.add(FooterRow("TAXES_$it", numberOfPages))
+        footerArray.add(FooterRow("TAXES_$it", numberOfPagesState.pageCount))
     }
-    footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPages))
+    footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPagesState.pageCount))
 
     val arrayOfProductsAndFooterRows: MutableList<Any> =
         productArray?.toMutableList() ?: mutableListOf()
-    footerArray.forEach { arrayOfProductsAndFooterRows.add(it) }
+    // footerArray.forEach { arrayOfProductsAndFooterRows.add(it) }
 
     val numberOfItems = arrayOfProductsAndFooterRows.size
 
     val maxItemsOnFirstPage = 11
     val maxItemsOnOtherPages = 20
 
-    numberOfPages = calculateNumberOfPages(
-        numberOfItems,
-        maxItemsOnFirstPage,
-        maxItemsOnOtherPages
-    )
-    val limitsArray: MutableList<Int> = calculateLimits(
-        numberOfPages,
-        maxItemsOnFirstPage,
-        maxItemsOnOtherPages
-    )
+    /*    numberOfPages = calculateNumberOfPages(
+            numberOfItems,
+            maxItemsOnFirstPage,
+            maxItemsOnOtherPages
+        )
+        val limitsArray: MutableList<Int> = calculateLimits(
+            numberOfPages,
+            maxItemsOnFirstPage,
+            maxItemsOnOtherPages
+        )
 
-    if (numberOfPages > 1) {
-        for (i in 2..numberOfPages) {
-            val itemsToMoveToNextPage =
-                arrayOfProductsAndFooterRows.slice(limitsArray[i - 2]..arrayOfProductsAndFooterRows.lastIndex)
-            itemsToMoveToNextPage.filterIsInstance<FooterRow>()
-                .forEach { it.page = i }
-            itemsToMoveToNextPage.filterIsInstance<ProductWithPage>()
-                .forEach { it.page = i }
+        if (numberOfPages > 1) {
+            for (i in 2..numberOfPages) {
+                val itemsToMoveToNextPage =
+                    arrayOfProductsAndFooterRows.slice(limitsArray[i - 2]..arrayOfProductsAndFooterRows.lastIndex)
+                itemsToMoveToNextPage.filterIsInstance<FooterRow>()
+                    .forEach { it.page = i }
+                itemsToMoveToNextPage.filterIsInstance<ProductWithPage>()
+                    .forEach { it.page = i }
+            }
         }
-    }
+*/
 
     Column {
         HorizontalPager(
-            state = pagerState
+            state = numberOfPagesState
         ) { index ->
             Column {
                 DeliveryNoteBasicTemplateContent(
@@ -170,7 +175,12 @@ fun DeliveryNoteBasicTemplate(
                     productArray = productArray?.filter { it.page == (index + 1) },
                     footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
                     index = index,
-                    numberOfPages = numberOfPages
+                    numberOfPages = numberOfPagesState.pageCount,
+                    onPageOverflow = {
+                        productArray?.last()?.id?.let {
+                            incrementDocumentProductPage(it)
+                        }
+                    }
                 )
             }
         }
@@ -364,4 +374,5 @@ private suspend fun PointerInputScope.customTransformGestures(
         onGestureEnd(pointer)
     }
 }
+
 

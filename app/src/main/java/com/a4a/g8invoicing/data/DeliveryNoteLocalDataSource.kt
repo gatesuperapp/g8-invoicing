@@ -257,6 +257,7 @@ class DeliveryNoteLocalDataSource(
                     final_price = documentProduct.priceWithTax?.toDouble(),
                     tax_rate = documentProduct.taxRate?.toDouble(),
                     unit = documentProduct.unit?.text,
+                    page = documentProduct.page.toLong(),
                     product_id = documentProduct.productId?.toLong()
                 )
 

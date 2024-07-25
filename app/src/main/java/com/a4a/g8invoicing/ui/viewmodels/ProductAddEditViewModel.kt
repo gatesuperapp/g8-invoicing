@@ -34,6 +34,7 @@ class ProductAddEditViewModel @Inject constructor(
 
     private var saveJob: Job? = null
     private var updateJob: Job? = null
+    private var incrementJob: Job? = null
     private var autoSaveJob: Job? = null
     private var fetchTaxRatesJob: Job? = null
     private var taxRates: List<BigDecimal> = listOf()
@@ -84,7 +85,7 @@ class ProductAddEditViewModel @Inject constructor(
 
     // Used when sliding the bottom form from documents
     // Choosing a product
-    fun setDocumentProductUiStateWithProduct(product: ProductState) {
+    fun setDocumentProductUiStateWithProduct(product: ProductState, page: Int) {
         _documentProductUiState.value = DocumentProductState(
             id = null,
             name = product.name,
@@ -93,8 +94,21 @@ class ProductAddEditViewModel @Inject constructor(
             taxRate = product.taxRate,
             quantity = BigDecimal(1),
             unit = product.unit,
-            productId = product.productId
+            productId = product.productId,
+            page = page
         )
+    }
+
+    fun incrementDocumentProductPage(id: Int) {
+        incrementJob?.cancel()
+        incrementJob = viewModelScope.launch {
+            try {
+                dataSource.incrementDocumentProductPage(id.toLong())
+            } catch (e: Exception) {
+                println("Increment page failed with exception: ${e.localizedMessage}")
+            }
+        }
+
     }
 
     fun setProductUiState() {

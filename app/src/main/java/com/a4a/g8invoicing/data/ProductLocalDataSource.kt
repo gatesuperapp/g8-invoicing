@@ -145,6 +145,12 @@ class ProductLocalDataSource(
             }
         }
     }
+
+    override suspend fun incrementDocumentProductPage(id: Long) {
+        return withContext(Dispatchers.IO) {
+            documentProductQueries.incrementDocumentProductPage(id)
+        }
+    }
 }
 
 fun Product.transformIntoEditableProduct(taxQueries: TaxRateQueries): ProductState {
@@ -170,6 +176,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
         quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)
             .stripTrailingZeros(),
         unit = TextFieldValue(this.unit ?: ""),
+        page = this.page.toInt(),
         productId = this.product_id?.toInt()
     )
 }

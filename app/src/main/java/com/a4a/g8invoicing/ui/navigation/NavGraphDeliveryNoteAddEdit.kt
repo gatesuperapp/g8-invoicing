@@ -70,9 +70,11 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
             },
-            onClickProduct = {
+            onClickProduct = {product ->
+                val lastDocumentProductPage =
+                    deliveryNoteUiState.documentProducts?.last()?.page ?: 1
                 // Initialize documentProductUiState to display it in the bottomSheet form
-                productAddEditViewModel.setDocumentProductUiStateWithProduct(it)
+                productAddEditViewModel.setDocumentProductUiStateWithProduct(product, lastDocumentProductPage)
             },
             onClickClientOrIssuer = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
@@ -282,6 +284,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = {
                 showDocumentForm = it
+            },
+            incrementDocumentProductPage = {
+                deliveryNoteViewModel.updateDeliveryNoteStateWithIncrementedValue(it)
+                //productAddEditViewModel.incrementDocumentProductPage(it)
             }
         )
     }

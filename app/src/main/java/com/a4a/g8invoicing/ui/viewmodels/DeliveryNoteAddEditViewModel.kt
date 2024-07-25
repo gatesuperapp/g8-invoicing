@@ -137,11 +137,19 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
                 documentProducts = list
             )
+
+            // If several pages, decrement page of next element
+            _deliveryNoteUiState.value.documentProducts
+                ?.first { it.page == 2 }?.id?.let {
+                    updateDeliveryNoteStateWithDecrementedValue(it)
+                }
+
             // Recalculate the prices
             _deliveryNoteUiState.value.documentProducts?.let {
                 _deliveryNoteUiState.value =
                     _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
             }
+
 
         } catch (e: Exception) {
             println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
@@ -237,6 +245,34 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
     }
 
+    fun updateDeliveryNoteStateWithIncrementedValue(documentProductId: Any) {
+        val documentProduct =
+            _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
+        documentProduct?.let { docProduct ->
+            val updatedDocumentProduct = docProduct.copy(page = docProduct.page + 1)
+            val list =
+                _deliveryNoteUiState.value.documentProducts?.filterNot { it.id == documentProductId }
+                    ?.toMutableList()
+            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
+            _deliveryNoteUiState.value =
+                _deliveryNoteUiState.value.copy(documentProducts = updatedList)
+        }
+    }
+
+    fun updateDeliveryNoteStateWithDecrementedValue(documentProductId: Any) {
+        val documentProduct =
+            _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
+        documentProduct?.let { docProduct ->
+            val updatedDocumentProduct = docProduct.copy(page = docProduct.page - 1)
+            val list =
+                _deliveryNoteUiState.value.documentProducts?.filterNot { it.id == documentProductId }
+                    ?.toMutableList()
+            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
+            _deliveryNoteUiState.value =
+                _deliveryNoteUiState.value.copy(documentProducts = updatedList)
+        }
+    }
+
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> deliveryNoteUiState.value.documentNumber.text
@@ -287,10 +323,6 @@ fun updateDeliveryNoteUiState(
             val updatedList = (list ?: emptyList()) + updatedDocumentProduct
 
             note = note.copy(documentProducts = updatedList)
-            /*// Recalculate the prices
-            note.documentProducts?.let {
-                note = note.copy(documentPrices = calculateDocumentPrices(it))
-            }*/
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {

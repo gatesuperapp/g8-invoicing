@@ -36,7 +36,7 @@ import java.math.RoundingMode
 
 @Composable
 fun DeliveryNoteBasicTemplateDataTable(
-    tableData: List<DocumentProductState>,
+    tableData: List<DocumentProductState>
 ) {
     val descriptionColumnWeight = .8f
     val quantityColumnWeight = .15f

@@ -83,7 +83,8 @@ fun DeliveryNoteAddEdit(
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
-    onShowDocumentForm: (Boolean) -> Unit
+    onShowDocumentForm: (Boolean) -> Unit,
+    incrementDocumentProductPage: (Int) -> Unit
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -255,7 +256,8 @@ fun DeliveryNoteAddEdit(
                                                     ScreenElement.DOCUMENT_CLIENT ->
                                                     ScreenElement.DOCUMENT_ORDER_NUMBER ->
                                                     ScreenElement.DOCUMENT_PRODUCTS ->*/
-                    }
+                    },
+                    incrementDocumentProductPage = incrementDocumentProductPage
                 )
             }
         }

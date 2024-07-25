@@ -6,6 +6,7 @@ CREATE TABLE DocumentProduct (
   final_price REAL,
   tax_rate REAL,
   unit TEXT,
+  page INTEGER NOT NULL,
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
   product_id INTEGER,
@@ -14,9 +15,20 @@ CREATE TABLE DocumentProduct (
             ON DELETE CASCADE
 );
 
-INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, product_id)
-VALUES (1, 'aaa',1, '', 5, 20,  'kg', 1),
- (2, 'aa',1, '', 5, 20,  'kg', 1);
+INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, page, product_id)
+VALUES (1, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (2, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (3, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (4, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (5, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (6, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (7, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (8, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (9, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (10, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (11, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (12, 'aaa',1, '', 5, 20,  'kg', 1, 1),
+ (13, 'aa',1, '', 5, 20,  'kg',1, 1);
 
 getDocumentProduct:
 SELECT *
@@ -29,8 +41,8 @@ FROM DocumentProduct;
 
 saveDocumentProduct:
 INSERT
-INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate,unit, product_id)
-VALUES (?, ?, ?, ?, ?, ?,?,?);
+INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, page, product_id)
+VALUES (?, ?, ?, ?, ?, ?,?,?, ?);
 
 updateDocumentProduct:
 UPDATE DocumentProduct
@@ -52,3 +64,10 @@ SELECT document_product_id
 FROM DocumentProduct
 ORDER BY document_product_id DESC
 LIMIT 1;
+
+incrementDocumentProductPage:
+UPDATE DocumentProduct
+SET page = page + 1,
+quantity = 4
+WHERE
+    document_product_id = :document_product_id;

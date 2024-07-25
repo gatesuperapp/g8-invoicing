@@ -16,5 +16,6 @@ data class DocumentProductState(
     var quantity: BigDecimal = BigDecimal(1),
     var unit: TextFieldValue? = null,
     var productId: Int? = null,
+    var page: Int = 1,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )
