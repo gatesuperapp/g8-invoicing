@@ -71,6 +71,7 @@ fun DeliveryNoteAddEdit(
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onClickProduct: (ProductState) -> Unit,
+    onClickNewOrChooseProduct: () -> Unit,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
@@ -84,7 +85,9 @@ fun DeliveryNoteAddEdit(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
-    incrementDocumentProductPage: (Int) -> Unit
+    incrementDocumentProductPage: (Int) -> Unit,
+    reinitializeMoveDocumentBoolean: () -> Unit,
+    moveDocumentPagerToLastPage: Boolean
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -176,6 +179,7 @@ fun DeliveryNoteAddEdit(
                     products = products,
                     taxRates = taxRates,
                     onClickProduct = onClickProduct,
+                    onClickNewOrChooseProduct = onClickNewOrChooseProduct,
                     onClickDocumentProduct = onClickDocumentProduct,
                     onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
@@ -257,7 +261,9 @@ fun DeliveryNoteAddEdit(
                                                     ScreenElement.DOCUMENT_ORDER_NUMBER ->
                                                     ScreenElement.DOCUMENT_PRODUCTS ->*/
                     },
-                    incrementDocumentProductPage = incrementDocumentProductPage
+                    incrementDocumentProductPage = incrementDocumentProductPage,
+                    moveDocumentPagerToLastPage = moveDocumentPagerToLastPage,
+                    reinitializeMoveDocumentBoolean = reinitializeMoveDocumentBoolean
                 )
             }
         }

@@ -53,6 +53,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
 
         var showDocumentForm by remember { mutableStateOf(false) }
+        var moveDocumentPagerToLastPage by remember { mutableStateOf(false) }
 
         // Get result from "Add new" screen, to know if it's
         // a client or issuer that has been added
@@ -70,11 +71,17 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
             },
-            onClickProduct = {product ->
+            onClickProduct = { product ->
                 val lastDocumentProductPage =
                     deliveryNoteUiState.documentProducts?.last()?.page ?: 1
                 // Initialize documentProductUiState to display it in the bottomSheet form
-                productAddEditViewModel.setDocumentProductUiStateWithProduct(product, lastDocumentProductPage)
+                productAddEditViewModel.setDocumentProductUiStateWithProduct(
+                    product,
+                    lastDocumentProductPage
+                )
+            },
+            onClickNewOrChooseProduct = {
+               // moveDocumentPagerToLastPage = true
             },
             onClickClientOrIssuer = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
@@ -235,6 +242,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
 
                     DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> {
+                        moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
                             deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(
@@ -247,6 +255,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
+                        moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
                             productAddEditViewModel.setProductUiState()
@@ -288,7 +297,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             incrementDocumentProductPage = {
                 deliveryNoteViewModel.updateDeliveryNoteStateWithIncrementedValue(it)
                 //productAddEditViewModel.incrementDocumentProductPage(it)
-            }
+            },
+            moveDocumentPagerToLastPage = moveDocumentPagerToLastPage,
+            reinitializeMoveDocumentBoolean = { moveDocumentPagerToLastPage = false}
         )
     }
 }

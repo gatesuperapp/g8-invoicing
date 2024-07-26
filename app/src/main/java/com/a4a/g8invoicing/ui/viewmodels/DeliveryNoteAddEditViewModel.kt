@@ -139,10 +139,18 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             )
 
             // If several pages, decrement page of next element
-            _deliveryNoteUiState.value.documentProducts
-                ?.first { it.page == 2 }?.id?.let {
-                    updateDeliveryNoteStateWithDecrementedValue(it)
+            val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
+            numberOfPages?.let {numberOfPages ->
+                if(numberOfPages > 1) {
+                    for(i in 2..numberOfPages) {
+                        _deliveryNoteUiState.value.documentProducts
+                            ?.first { it.page == i }?.id?.let {
+                                updateDeliveryNoteStateWithDecrementedValue(it)
+                            }
+                    }
                 }
+            }
+
 
             // Recalculate the prices
             _deliveryNoteUiState.value.documentProducts?.let {

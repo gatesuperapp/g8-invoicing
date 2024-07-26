@@ -11,19 +11,15 @@ import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +33,6 @@ import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
@@ -45,10 +40,8 @@ import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
-import java.math.BigDecimal
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -98,6 +91,8 @@ fun DeliveryNoteBasicTemplate(
     uiState: DeliveryNoteState,
     onClickElement: (ScreenElement) -> Unit,
     incrementDocumentProductPage: (Int) -> Unit,
+    moveDocumentPagerToLastPage: Boolean,
+    reinitializeMoveDocumentBoolean: () -> Unit,
 ) {
     var zoom by remember { mutableStateOf(1f) }
     var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
@@ -113,13 +108,25 @@ fun DeliveryNoteBasicTemplate(
 
     val productArray = uiState.documentProducts
 
-    val numberOfPagesState = rememberPagerState(
-        initialPage = 0,
-        pageCount = { productArray?.last()?.page ?: 1 }
-    )
+    val pageNumber = productArray?.last()?.page ?: 1
+    val pagerState = rememberPagerState { pageNumber }
+
+    println(moveDocumentPagerToLastPage)
+
+    if (moveDocumentPagerToLastPage) {
+        productArray?.last()?.page?.let { maxPageNumber ->
+            if (maxPageNumber > 1) {
+                LaunchedEffect(Unit) {
+                    pagerState.scrollToPage(maxPageNumber, 0f)
+                }
+            }
+        }
+        reinitializeMoveDocumentBoolean()
+    }
+
 
     val footerArray = mutableStateListOf(
-        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, numberOfPagesState.pageCount)
+        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, pagerState.pageCount)
     )
 
     var documentProductIndex by remember { mutableStateOf(0) }
@@ -127,9 +134,9 @@ fun DeliveryNoteBasicTemplate(
     val taxRates =
         uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
-        footerArray.add(FooterRow("TAXES_$it", numberOfPagesState.pageCount))
+        footerArray.add(FooterRow("TAXES_$it", pagerState.pageCount))
     }
-    footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, numberOfPagesState.pageCount))
+    footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, pagerState.pageCount))
 
     val arrayOfProductsAndFooterRows: MutableList<Any> =
         productArray?.toMutableList() ?: mutableListOf()
@@ -161,11 +168,22 @@ fun DeliveryNoteBasicTemplate(
                     .forEach { it.page = i }
             }
         }
+
+    Text(text =  productArray?.last()?.name?.text + "" +  productArray?.last()?.page)
+    Button(
+        onClick = {
+            productArray?.last()?.id?.let {
+                incrementDocumentProductPage(it)
+            }
+        }
+     ) {
+        Text(text = "click")
+    }
 */
 
     Column {
         HorizontalPager(
-            state = numberOfPagesState
+            state = pagerState
         ) { index ->
             Column {
                 DeliveryNoteBasicTemplateContent(
@@ -175,9 +193,9 @@ fun DeliveryNoteBasicTemplate(
                     productArray = productArray?.filter { it.page == (index + 1) },
                     footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
                     index = index,
-                    numberOfPages = numberOfPagesState.pageCount,
+                    numberOfPages = pagerState.pageCount,
                     onPageOverflow = {
-                        productArray?.last()?.id?.let {
+                        productArray?.last {it.page == index + 1}?.id?.let {
                             incrementDocumentProductPage(it)
                         }
                     }
