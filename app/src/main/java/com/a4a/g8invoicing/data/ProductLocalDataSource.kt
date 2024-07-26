@@ -124,7 +124,8 @@ class ProductLocalDataSource(
                         description = documentProduct.description?.text,
                         price_with_tax = documentProduct.priceWithTax?.toDouble(),
                         tax_rate = documentProduct.taxRate?.toDouble(),
-                        unit = documentProduct.unit?.text
+                        unit = documentProduct.unit?.text,
+                        page = documentProduct.page.toLong()
                     )
                 }
             } catch (cause: Throwable) {
@@ -143,12 +144,6 @@ class ProductLocalDataSource(
             ids.forEach {
                 documentProductQueries.deleteDocumentProduct(it)
             }
-        }
-    }
-
-    override suspend fun incrementDocumentProductPage(id: Long) {
-        return withContext(Dispatchers.IO) {
-            documentProductQueries.incrementDocumentProductPage(id)
         }
     }
 }
@@ -170,7 +165,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
     return DocumentProductState(
         id = this.document_product_id.toInt(),
         name = TextFieldValue(this.name),
-        description = this.description?.let { TextFieldValue() },
+        description = this.description?.let { TextFieldValue(it) },
         priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
         taxRate = this.tax_rate?.toBigDecimal(),
         quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)

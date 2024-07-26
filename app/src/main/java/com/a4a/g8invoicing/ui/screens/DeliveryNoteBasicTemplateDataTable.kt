@@ -21,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -85,7 +86,6 @@ fun DeliveryNoteBasicTemplateDataTable(
         var priceWithoutTax = BigDecimal(0)
         it.priceWithTax?.let {priceWithTax ->
             priceWithoutTax =  (priceWithTax - priceWithTax * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100))
-
         }
 
         Row(
@@ -153,13 +153,15 @@ fun RowScope.TableCell(
         Text(
             text = text,
             style = MaterialTheme.typography.textForDocumentsVerySmall,
-            maxLines = 1
+            // have to specify it (in addition to column alignment)
+            // because without it, multilines text aren't aligned
+            textAlign = if(alignEnd) TextAlign.Right else TextAlign.Start,
         )
-        subText?.let {
+        if(!subText.isNullOrEmpty()) {
             Text(
-                text = it,
+                text = subText,
                 style = MaterialTheme.typography.textForDocumentsVerySmallAndItalic,
-                maxLines = 1
+               // maxLines = 1
             )
         }
         Spacer(Modifier.padding(2.dp))

@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.TextRange
@@ -34,7 +35,6 @@ class ProductAddEditViewModel @Inject constructor(
 
     private var saveJob: Job? = null
     private var updateJob: Job? = null
-    private var incrementJob: Job? = null
     private var autoSaveJob: Job? = null
     private var fetchTaxRatesJob: Job? = null
     private var taxRates: List<BigDecimal> = listOf()
@@ -57,12 +57,18 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun autoSaveFormInputsInLocalDb() {
+    fun autoSaveDocumentProductInLocalDb() {
         autoSaveJob?.cancel()
         autoSaveJob = viewModelScope.launch {
+            Log.e("xxx", "Saveddd "+ _documentProductUiState.value)
+
             @OptIn(FlowPreview::class)
-            _documentProductUiState.debounce(300)
-                .collect { updateInLocalDb(ProductType.DOCUMENT_PRODUCT) }
+            _documentProductUiState
+                .debounce(300)
+                .collect {
+                    Log.e("xxx", "Saveddd "+ _documentProductUiState.value)
+                    updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                }
         }
     }
 
@@ -99,17 +105,14 @@ class ProductAddEditViewModel @Inject constructor(
         )
     }
 
-    fun incrementDocumentProductPage(id: Int) {
-        incrementJob?.cancel()
-        incrementJob = viewModelScope.launch {
-            try {
-                dataSource.incrementDocumentProductPage(id.toLong())
-            } catch (e: Exception) {
-                println("Increment page failed with exception: ${e.localizedMessage}")
-            }
-        }
-
+    // Used when sliding the bottom form from documents
+    // New product
+    fun setDocumentProductUiStateWithPage(page: Int) {
+        _documentProductUiState.value = _documentProductUiState.value.copy(
+            page = page
+        )
     }
+
 
     fun setProductUiState() {
         _productUiState.value = ProductState(
@@ -199,6 +202,12 @@ class ProductAddEditViewModel @Inject constructor(
             _documentProductUiState.value =
                 updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
         }
+    }
+
+    fun updateDocumentProductUiStateWithIncrementedPage() {
+        _documentProductUiState.value = _documentProductUiState.value.copy(
+            page = _documentProductUiState.value.page + 1
+        )
     }
 
     fun updateCursor(pageElement: ScreenElement, productType: ProductType) {

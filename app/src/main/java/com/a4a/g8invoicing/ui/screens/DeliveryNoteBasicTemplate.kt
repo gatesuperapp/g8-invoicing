@@ -111,8 +111,6 @@ fun DeliveryNoteBasicTemplate(
     val pageNumber = productArray?.last()?.page ?: 1
     val pagerState = rememberPagerState { pageNumber }
 
-    println(moveDocumentPagerToLastPage)
-
     if (moveDocumentPagerToLastPage) {
         productArray?.last()?.page?.let { maxPageNumber ->
             if (maxPageNumber > 1) {
@@ -213,7 +211,8 @@ enum class FooterRowName {
 @Composable
 fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) {
     Text(
-        textAlign = TextAlign.Center,
+        textAlign = TextAlign.Center, // have to specify it (in addition to column alignment)
+        // because without it, multilines text aren't aligned
         modifier = Modifier
             .padding(bottom = 2.dp)
             .wrapContentHeight(),

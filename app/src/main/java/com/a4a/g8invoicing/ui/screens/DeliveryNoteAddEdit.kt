@@ -71,7 +71,7 @@ fun DeliveryNoteAddEdit(
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onClickProduct: (ProductState) -> Unit,
-    onClickNewOrChooseProduct: () -> Unit,
+    onClickNewProduct: () -> Unit,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
@@ -179,7 +179,7 @@ fun DeliveryNoteAddEdit(
                     products = products,
                     taxRates = taxRates,
                     onClickProduct = onClickProduct,
-                    onClickNewOrChooseProduct = onClickNewOrChooseProduct,
+                    onClickNewProduct = onClickNewProduct,
                     onClickDocumentProduct = onClickDocumentProduct,
                     onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,

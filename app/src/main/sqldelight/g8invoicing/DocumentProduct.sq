@@ -51,7 +51,8 @@ SET name = :name,
     description = :description,
     final_price = :price_with_tax,
     tax_rate = :tax_rate,
-    unit = :unit
+    unit = :unit,
+    page = :page
 WHERE
     document_product_id = :document_product_id;
 
@@ -64,10 +65,3 @@ SELECT document_product_id
 FROM DocumentProduct
 ORDER BY document_product_id DESC
 LIMIT 1;
-
-incrementDocumentProductPage:
-UPDATE DocumentProduct
-SET page = page + 1,
-quantity = 4
-WHERE
-    document_product_id = :document_product_id;

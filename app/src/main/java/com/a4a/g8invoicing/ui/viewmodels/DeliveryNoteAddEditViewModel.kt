@@ -124,6 +124,19 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     )
                 }
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
+
+                // If several pages, decrement page of next element
+                val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
+                numberOfPages?.let {numberOfPages ->
+                    if(numberOfPages > 1) {
+                        for(i in 2..numberOfPages) {
+                            _deliveryNoteUiState.value.documentProducts
+                                ?.first { it.page == i }?.id?.let {
+                                    updateDeliveryNoteStateWithDecrementedValue(it)
+                                }
+                        }
+                    }
+                }
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
@@ -150,7 +163,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     }
                 }
             }
-
 
             // Recalculate the prices
             _deliveryNoteUiState.value.documentProducts?.let {
@@ -200,6 +212,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     documentClientOrIssuer = documentClientOrIssuer,
                     deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
                 )
+
             } catch (e: Exception) {
                 println("Saving documentProduct failed with exception: ${e.localizedMessage}")
             }
@@ -267,7 +280,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateDeliveryNoteStateWithDecrementedValue(documentProductId: Any) {
+    private fun updateDeliveryNoteStateWithDecrementedValue(documentProductId: Any) {
         val documentProduct =
             _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
         documentProduct?.let { docProduct ->
