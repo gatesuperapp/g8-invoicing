@@ -48,11 +48,9 @@ fun DeliveryNoteBasicTemplateContent(
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<DocumentProductState>?,
-    footerArray: List<FooterRow>?,
-    index: Int,
+    footerArray: List<FooterRow>,
     numberOfPages: Int,
     selectedItem: ScreenElement? = null,
-    onPageOverflow: () -> Unit,
 ) {
     val pagePadding = 20.dp
     var pageHeightDp by remember { mutableStateOf(0.dp) }
@@ -69,40 +67,28 @@ fun DeliveryNoteBasicTemplateContent(
                 end = pagePadding
             )
             .background(Color.White)
-            .aspectRatio(1f / 1.414f)
-            .onGloballyPositioned { coordinates ->
-                pageHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-            }
+            //.aspectRatio(1f / 1.414f)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
                     start = 20.dp,
-                    top = 20.dp,
+                    top = 30.dp,
                     bottom = 20.dp,
                     end = 20.dp
                 )
                 .background(Color.White)
-                .onGloballyPositioned { coordinates ->
-                    pageContentHeightDp = with(localDensity) { coordinates.size.height.toDp() }
-                }
         ) {
-            if (pageContentHeightDp != 0.dp && (pageContentHeightDp > pageHeightDp - 42.dp)) {
-                pageContentHeightDp = 0.dp
-                onPageOverflow()
-            }
-            if (index == 0) {
-                DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
-                if (uiState.orderNumber.text.isNotEmpty()) {
-                    DeliveryNoteBasicTemplateOrderNumber(
-                        uiState.orderNumber.text,
-                        onClickElement,
-                        selectedItem
-                    )
-                } else {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
+            DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
+            if (uiState.orderNumber.text.isNotEmpty()) {
+                DeliveryNoteBasicTemplateOrderNumber(
+                    uiState.orderNumber.text,
+                    onClickElement,
+                    selectedItem
+                )
+            } else {
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
             Spacer(
@@ -129,13 +115,12 @@ fun DeliveryNoteBasicTemplateContent(
                 }
             }
 
-            //DeliveryNoteBasicTemplateFooter(uiState, footerArray)
+            DeliveryNoteBasicTemplateFooter(uiState, footerArray)
         }
-        DeliveryNoteBasicTemplatePageNumbering(index, numberOfPages)
     }
 }
 
-@Composable
+/*@Composable
 fun DeliveryNoteBasicTemplatePageNumbering(index: Int, numberOfPages: Int) {
     Box(
         modifier = Modifier
@@ -152,7 +137,7 @@ fun DeliveryNoteBasicTemplatePageNumbering(index: Int, numberOfPages: Int) {
             }
         )
     }
-}
+}*/
 
 fun Modifier.getBorder(item: ScreenElement, selectedItem: ScreenElement?) = then(
     border(

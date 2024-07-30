@@ -22,7 +22,7 @@ fun DeliveryNoteBasicTemplateOrderNumber(
 ) {
     Spacer(
         modifier = Modifier
-            .padding(top = 20.dp)
+            .padding(top = 30.dp)
     )
     Row(
         Modifier

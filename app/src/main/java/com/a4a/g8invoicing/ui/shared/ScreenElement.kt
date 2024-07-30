@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.shared
 
 enum class ScreenElement {
+    DOCUMENT_HEADER,
     DOCUMENT_NUMBER,
     DOCUMENT_DATE,
     DOCUMENT_ISSUER,

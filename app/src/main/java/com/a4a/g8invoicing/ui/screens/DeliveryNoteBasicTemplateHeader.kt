@@ -33,6 +33,13 @@ fun DeliveryNoteBasicTemplateHeader(
     Row(
         Modifier
             .fillMaxWidth()
+            .customCombinedClickable(
+                onClick = {
+                    onClickElement(ScreenElement.DOCUMENT_HEADER)
+                },
+                onLongClick = {
+                }
+            )
     ) {
         Column(
             modifier = Modifier
@@ -91,7 +98,7 @@ fun DeliveryNoteBasicTemplateHeader(
                     onLongClick = {
                     }
                 )
-                .padding(top = 10.dp, end = 20.dp)
+                .padding(end = 20.dp)
                 .weight(1f)
                 .fillMaxWidth(0.3f)
         ) {

@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.DisplayMode
@@ -87,7 +89,7 @@ fun DeliveryNoteAddEdit(
     onShowDocumentForm: (Boolean) -> Unit,
     incrementDocumentProductPage: (Int) -> Unit,
     reinitializeMoveDocumentBoolean: () -> Unit,
-    moveDocumentPagerToLastPage: Boolean
+    moveDocumentPagerToLastPage: Boolean,
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -242,6 +244,7 @@ fun DeliveryNoteAddEdit(
 
             Column(
                 modifier = Modifier
+                    .verticalScroll(rememberScrollState())
                     .background(Color.LightGray.copy(alpha = 0.4f))
                     .fillMaxSize()
                     .padding(
@@ -251,6 +254,17 @@ fun DeliveryNoteAddEdit(
                 DeliveryNoteBasicTemplate(
                     uiState = deliveryNote,
                     onClickElement = {
+                        if (it == ScreenElement.DOCUMENT_HEADER ||
+                            it == ScreenElement.DOCUMENT_NUMBER ||
+                            it == ScreenElement.DOCUMENT_DATE ||
+                            it == ScreenElement.DOCUMENT_ISSUER ||
+                            it == ScreenElement.DOCUMENT_CLIENT ||
+                            it == ScreenElement.DOCUMENT_ORDER_NUMBER
+                        ) {
+                            bottomSheetType.value = BottomSheetType.ELEMENTS
+                        } else {
+                            bottomSheetType.value = BottomSheetType.ITEMS
+                        }
                         expandBottomSheet(scope, scaffoldState)
                         /*                        when(it) {
                                                     ScreenElement.DOCUMENT_NUMBER ->

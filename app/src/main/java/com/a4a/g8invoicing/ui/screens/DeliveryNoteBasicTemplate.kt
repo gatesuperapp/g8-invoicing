@@ -52,7 +52,7 @@ data class FooterRow(
     var page: Int,
 )
 
-fun calculateNumberOfPages(
+/*fun calculateNumberOfPages(
     numberOfItems: Int,
     maxItemsOnFirstPage: Int,
     maxItemsOnOtherPages: Int,
@@ -82,7 +82,7 @@ fun calculateLimits(
         }
     }
     return arrayOfLimits
-}
+}*/
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
@@ -111,7 +111,7 @@ fun DeliveryNoteBasicTemplate(
     val pageNumber = productArray?.last()?.page ?: 1
     val pagerState = rememberPagerState { pageNumber }
 
-    if (moveDocumentPagerToLastPage) {
+/*    if (moveDocumentPagerToLastPage) {
         productArray?.last()?.page?.let { maxPageNumber ->
             if (maxPageNumber > 1) {
                 LaunchedEffect(Unit) {
@@ -120,7 +120,7 @@ fun DeliveryNoteBasicTemplate(
             }
         }
         reinitializeMoveDocumentBoolean()
-    }
+    }*/
 
 
     val footerArray = mutableStateListOf(
@@ -145,61 +145,18 @@ fun DeliveryNoteBasicTemplate(
     val maxItemsOnFirstPage = 11
     val maxItemsOnOtherPages = 20
 
-    /*    numberOfPages = calculateNumberOfPages(
-            numberOfItems,
-            maxItemsOnFirstPage,
-            maxItemsOnOtherPages
-        )
-        val limitsArray: MutableList<Int> = calculateLimits(
-            numberOfPages,
-            maxItemsOnFirstPage,
-            maxItemsOnOtherPages
-        )
-
-        if (numberOfPages > 1) {
-            for (i in 2..numberOfPages) {
-                val itemsToMoveToNextPage =
-                    arrayOfProductsAndFooterRows.slice(limitsArray[i - 2]..arrayOfProductsAndFooterRows.lastIndex)
-                itemsToMoveToNextPage.filterIsInstance<FooterRow>()
-                    .forEach { it.page = i }
-                itemsToMoveToNextPage.filterIsInstance<ProductWithPage>()
-                    .forEach { it.page = i }
-            }
-        }
-
-    Text(text =  productArray?.last()?.name?.text + "" +  productArray?.last()?.page)
-    Button(
-        onClick = {
-            productArray?.last()?.id?.let {
-                incrementDocumentProductPage(it)
-            }
-        }
-     ) {
-        Text(text = "click")
-    }
-*/
 
     Column {
-        HorizontalPager(
-            state = pagerState
-        ) { index ->
-            Column {
-                DeliveryNoteBasicTemplateContent(
-                    uiState = uiState,
-                    onClickElement = onClickElement,
-                    screenWidth = screenWidth,
-                    productArray = productArray?.filter { it.page == (index + 1) },
-                    footerArray = footerArray.filter { it.page == (index + 1) }.toMutableList(),
-                    index = index,
-                    numberOfPages = pagerState.pageCount,
-                    onPageOverflow = {
-                        productArray?.last {it.page == index + 1}?.id?.let {
-                            incrementDocumentProductPage(it)
-                        }
-                    }
-                )
-            }
-        }
+
+        DeliveryNoteBasicTemplateContent(
+            uiState = uiState,
+            onClickElement = onClickElement,
+            screenWidth = screenWidth,
+            productArray = productArray,
+            footerArray = footerArray,
+            numberOfPages = pagerState.pageCount,
+        )
+
     }
 }
 

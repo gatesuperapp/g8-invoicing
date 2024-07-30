@@ -269,7 +269,7 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
 
         }
         productsTable.addCustomCell(
-            text = priceWithoutTax.toString() + Strings.get(R.string.currency)
+            text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP).toString() + Strings.get(R.string.currency)
         )
         productsTable.addCustomCell(
             text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
@@ -320,9 +320,9 @@ fun createFooter(font: PdfFont, documentPrices: DocumentPrices): Table {
         }
 
         taxesAmount.forEach { tax ->
-            documentPrices.totalAmountsOfEachTax?.first { it.first == BigDecimal(tax) }?.let {
+            documentPrices.totalAmountsOfEachTax?.firstOrNull { it.first.stripTrailingZeros() == BigDecimal(tax).stripTrailingZeros() }?.let {
                 footerTable.addCellInFooter(
-                    Paragraph(Strings.get(R.string.document_tax) + " " + it.first.toString() + "% : ")
+                    Paragraph(Strings.get(R.string.document_tax) + " " + it.first.setScale(0, RoundingMode.HALF_UP).toString() + "% : ")
                 )
                 footerTable.addCellInFooter(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
             }
@@ -350,6 +350,7 @@ fun Table.addCustomCell(
 ): Table {
     val paddingLeft = 6f
     val paddingRight = 6f
+    val paddingTop = 4f
 
     val textToAdd = if (text != null) {
         Paragraph(text).setFixedLeading(14F)
@@ -364,6 +365,7 @@ fun Table.addCustomCell(
             .setTextAlignment(alignment)
             .setPaddingLeft(paddingLeft)
             .setPaddingRight(paddingRight)
+            .setPaddingTop(paddingTop)
             .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 1f))
             .setFont(font)
     )

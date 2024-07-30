@@ -112,12 +112,12 @@ fun DeliveryNoteBasicTemplateDataTable(
                 alignEnd = true
             )
             TableCell(
-                text = it.taxRate?.let{ "$it%" }  ?: " - ",
+                text = it.taxRate?.let{ it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }  ?: " - ",
                 weight = taxColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = priceWithoutTax.toString() + stringResource(id = R.string.currency),
+                text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP).toString() + stringResource(id = R.string.currency),
                 alignEnd = true
             )
             TableCell(
@@ -143,7 +143,7 @@ fun RowScope.TableCell(
             .rightBorder(1.dp, Color.LightGray)
             .leftBorder(1.dp, Color.LightGray)
             .weight(weight)
-            .padding(start = 2.dp, end = 4.dp, top = 4.dp)
+            .padding(start = 2.dp, end = 4.dp, top = 2.dp)
             .fillMaxHeight(),
         horizontalAlignment = if (alignEnd) {
             Alignment.End
