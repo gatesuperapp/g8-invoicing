@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

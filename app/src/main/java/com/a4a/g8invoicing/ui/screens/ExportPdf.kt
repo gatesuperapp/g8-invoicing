@@ -40,7 +40,7 @@ import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.getFileUri
 import com.a4a.g8invoicing.ui.shared.icons.IconShare
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.ninetyninepercent.funfactu.icons.IconMail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ExportPdf(
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DocumentState,
     onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -114,7 +114,7 @@ fun ExportPdf(
 
 @Composable
 fun ExportDocumentAndShowProgressBar(
-    deliveryNote: DeliveryNoteState,
+    document: DocumentState,
     context: Context,
     loadingIsOver: () -> Unit,
 ) {
@@ -123,7 +123,7 @@ fun ExportDocumentAndShowProgressBar(
     LaunchedEffect(true) {
         val job: Job = launch(context = Dispatchers.Default) {
             try {
-                createPdfWithIText(deliveryNote, context)
+                createPdfWithIText(document, context)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -150,15 +150,15 @@ enum class ExportStatus {
 
 
 @Composable
-fun Send(context: Context, deliveryNote: DeliveryNoteState, finalFileName: String) {
+fun Send(context: Context, document: DocumentState, finalFileName: String) {
     Button(onClick = {
         try {
             val uri = getFileUri(context, finalFileName)
             uri?.let {
                 composeEmail(
-                    address = deliveryNote.documentClient?.email?.text,
-                    documentNumber = deliveryNote.documentNumber.text,
-                    documentType = deliveryNote.documentType,
+                    address = document.documentClient?.email?.text,
+                    documentNumber = document.documentNumber.text,
+                    documentType = document.documentType,
                     attachedDocumentUri = it,
                     context = context
                 )
@@ -187,7 +187,7 @@ fun composeEmail(
     attachedDocumentUri: Uri? = null,
     context: Context,
 ) {
-    var type = when (documentType) {
+    val type = when (documentType) {
         DocumentType.INVOICE -> Strings.get(R.string.export_email_subject_invoice)
         DocumentType.DELIVERY_NOTE -> Strings.get(R.string.export_email_subject_delivery_note)
         else -> null

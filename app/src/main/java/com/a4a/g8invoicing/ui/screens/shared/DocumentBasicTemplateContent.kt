@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -10,23 +10,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.stringResource
@@ -36,15 +33,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
-import com.a4a.g8invoicing.ui.theme.textForDocuments
 import java.math.BigDecimal
 
+
 @Composable
-fun DeliveryNoteBasicTemplateContent(
-    uiState: DeliveryNoteState,
+fun DocumentBasicTemplateContent(
+    uiState: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<DocumentProductState>?,
@@ -67,6 +65,7 @@ fun DeliveryNoteBasicTemplateContent(
                 end = pagePadding
             )
             .background(Color.White)
+            .heightIn(min = screenWidth * 1.28f)
             //.aspectRatio(1f / 1.414f)
     ) {
         Column(
@@ -80,9 +79,9 @@ fun DeliveryNoteBasicTemplateContent(
                 )
                 .background(Color.White)
         ) {
-            DeliveryNoteBasicTemplateHeader(uiState, onClickElement, selectedItem)
+            DocumentBasicTemplateHeader(uiState, onClickElement, selectedItem)
             if (uiState.orderNumber.text.isNotEmpty()) {
-                DeliveryNoteBasicTemplateOrderNumber(
+                DocumentBasicTemplateOrderNumber(
                     uiState.orderNumber.text,
                     onClickElement,
                     selectedItem
@@ -109,13 +108,17 @@ fun DeliveryNoteBasicTemplateContent(
                     .fillMaxWidth()
             ) {
                 if (!productArray.isNullOrEmpty()) {
-                    DeliveryNoteBasicTemplateDataTable(
+                    DocumentBasicTemplateDataTable(
                         productArray
                     )
                 }
             }
 
-            DeliveryNoteBasicTemplateFooter(uiState, footerArray)
+            DocumentBasicTemplatePrices(uiState, footerArray)
+
+            if(uiState is InvoiceState) {
+                DocumentBasicTemplateFooter(uiState, footerArray)
+            }
         }
     }
 }

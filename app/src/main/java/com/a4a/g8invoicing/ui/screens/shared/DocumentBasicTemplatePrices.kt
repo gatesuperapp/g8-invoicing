@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,15 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Composable
-fun DeliveryNoteBasicTemplateFooter(
-    uiState: DeliveryNoteState,
+fun DocumentBasicTemplatePrices(
+    uiState: DocumentState,
     footerArray: List<FooterRow>,
 ) {
     Row(

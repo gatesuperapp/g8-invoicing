@@ -9,7 +9,7 @@ import java.math.BigDecimal
 // it allows to not specify the client id (that will be auto-incremented)
 // and to change properties values (var instead of val)
 
-abstract class Document {
+abstract class DocumentState {
     abstract var documentId: Int?
     abstract var documentType: DocumentType
     abstract var documentNumber: TextFieldValue // Mandatory to control placing the cursor in the field

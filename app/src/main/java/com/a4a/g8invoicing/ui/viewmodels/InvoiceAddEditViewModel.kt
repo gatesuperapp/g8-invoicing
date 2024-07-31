@@ -7,8 +7,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
-import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
@@ -26,8 +26,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DeliveryNoteAddEditViewModel @Inject constructor(
-    private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+class InvoiceAddEditViewModel @Inject constructor(
+    private val documentDataSource: InvoiceLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -36,25 +36,25 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
 
-    // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
+    // Getting the argument in "InvoiceAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
 
-    private val _deliveryNoteUiState = MutableStateFlow(DeliveryNoteState())
-    val deliveryNoteUiState: StateFlow<DeliveryNoteState> = _deliveryNoteUiState
+    private val _documentUiState = MutableStateFlow(InvoiceState())
+    val documentUiState: StateFlow<InvoiceState> = _documentUiState
 
     init {
         viewModelScope.launch {
             @OptIn(FlowPreview::class)
-            _deliveryNoteUiState.debounce(300)
-                .collect { updateDeliveryNoteInLocalDb() }
+            _documentUiState.debounce(300)
+                .collect { updateInvoiceInLocalDb() }
         }
 
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
                 id?.let {
-                    fetchDeliveryNoteFromLocalDb(it.toLong())
-                } ?: deliveryNoteDataSource.createNewDeliveryNote()?.let {
-                    fetchDeliveryNoteFromLocalDb(it)
+                    fetchInvoiceFromLocalDb(it.toLong())
+                } ?: documentDataSource.createNew()?.let {
+                    fetchInvoiceFromLocalDb(it)
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -63,12 +63,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     }
 
 
-    private fun fetchDeliveryNoteFromLocalDb(id: Long) {
+    private fun fetchInvoiceFromLocalDb(id: Long) {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.fetchDeliveryNote(id)?.let {
-                    _deliveryNoteUiState.value = it
+                documentDataSource.fetch(id)?.let {
+                    _documentUiState.value = it
                 }
             } catch (e: Exception) {
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
@@ -76,12 +76,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateDeliveryNoteInLocalDb() {
+    private suspend fun updateInvoiceInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
                 id?.let {
-                    deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
+                    documentDataSource.update(documentUiState.value)
                 }
             } catch (e: Exception) {
                 println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
@@ -92,7 +92,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         GlobalScope.launch {
-            updateDeliveryNoteInLocalDb()
+            updateInvoiceInLocalDb()
         }
     }
 
@@ -101,9 +101,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         saveJob = viewModelScope.launch {
             try {
 
-                deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
+                documentDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
+                    id = _documentUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
                 println("Saving documentProduct failed with exception: ${e.localizedMessage}")
@@ -115,8 +115,8 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                _deliveryNoteUiState.value.documentId?.let {
-                    deliveryNoteDataSource.deleteDocumentProduct(
+                _documentUiState.value.documentId?.let {
+                    documentDataSource.deleteDocumentProduct(
                         it.toLong(),
                         documentProductId.toLong()
                     )
@@ -124,13 +124,13 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
 
                 // If several pages, decrement page of next element
-                val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
+                val numberOfPages = _documentUiState.value.documentProducts?.last()?.page
                 numberOfPages?.let {numberOfPages ->
                     if(numberOfPages > 1) {
                         for(i in 2..numberOfPages) {
-                            _deliveryNoteUiState.value.documentProducts
+                            _documentUiState.value.documentProducts
                                 ?.first { it.page == i }?.id?.let {
-                                    updateDeliveryNoteStateWithDecrementedValue(it)
+                                    updateInvoiceStateWithDecrementedValue(it)
                                 }
                         }
                     }
@@ -143,29 +143,29 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     fun removeDocumentProductFromUiState(documentProductId: Int) {
         try {
-            val list = _deliveryNoteUiState.value.documentProducts
+            val list = _documentUiState.value.documentProducts
                 ?.filterNot { it.id == documentProductId }?.toMutableList()
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentProducts = list
             )
 
             // If several pages, decrement page of next element
-            val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
+            val numberOfPages = _documentUiState.value.documentProducts?.last()?.page
             numberOfPages?.let {numberOfPages ->
                 if(numberOfPages > 1) {
                     for(i in 2..numberOfPages) {
-                        _deliveryNoteUiState.value.documentProducts
+                        _documentUiState.value.documentProducts
                             ?.first { it.page == i }?.id?.let {
-                                updateDeliveryNoteStateWithDecrementedValue(it)
+                                updateInvoiceStateWithDecrementedValue(it)
                             }
                     }
                 }
             }
 
             // Recalculate the prices
-            _deliveryNoteUiState.value.documentProducts?.let {
-                _deliveryNoteUiState.value =
-                    _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+            _documentUiState.value.documentProducts?.let {
+                _documentUiState.value =
+                    _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
             }
 
 
@@ -174,9 +174,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInDeliveryNoteUiState(documentProduct: DocumentProductState) {
+    fun saveDocumentProductInUiState(documentProduct: DocumentProductState) {
         try {
-            val list = _deliveryNoteUiState.value.documentProducts
+            val list = _documentUiState.value.documentProducts
             var maxId = 1
 
             if (!list.isNullOrEmpty()) {
@@ -189,13 +189,13 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
             val newList: List<DocumentProductState> = (list ?: emptyList()) + documentProduct
 
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentProducts = newList
             )
             // Recalculate the prices
-            _deliveryNoteUiState.value.documentProducts?.let {
-                _deliveryNoteUiState.value =
-                    _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+            _documentUiState.value.documentProducts?.let {
+                _documentUiState.value =
+                    _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
             }
         } catch (e: Exception) {
             println("Saving delivery note product failed with exception: ${e.localizedMessage}")
@@ -206,9 +206,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                documentDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
-                    deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
+                    id = _documentUiState.value.documentId?.toLong()
                 )
 
             } catch (e: Exception) {
@@ -221,86 +221,86 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                _deliveryNoteUiState.value.documentId?.let {
-                    deliveryNoteDataSource.deleteDocumentClientOrIssuer(
+                _documentUiState.value.documentId?.let {
+                    documentDataSource.deleteDocumentClientOrIssuer(
                         it.toLong(),
                         type
                     )
                 }
 
                 // useless??
-                _deliveryNoteUiState.value.documentId?.let {
-                    fetchDeliveryNoteFromLocalDb(it.toLong())
+                _documentUiState.value.documentId?.let {
+                    fetchInvoiceFromLocalDb(it.toLong())
                 }
 
             } catch (e: Exception) {
-                println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
+                println("Deleting invoice client or issuer failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
     fun removeDocumentClientOrIssuerFromUiState(type: ClientOrIssuerType) {
         if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentClient = null
             )
-        else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+        else _documentUiState.value = _documentUiState.value.copy(
             documentIssuer = null
         )
     }
 
-    fun saveDocumentClientOrIssuerInDeliveryNoteUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
+    fun saveDocumentClientOrIssuerInUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
         if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentClient = documentClientOrIssuer
             )
-        else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+        else _documentUiState.value = _documentUiState.value.copy(
             documentIssuer = documentClientOrIssuer
         )
     }
 
-    fun updateDeliveryNoteState(screenElement: ScreenElement, value: Any) {
-        _deliveryNoteUiState.value =
-            updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
+    fun updateUiState(screenElement: ScreenElement, value: Any) {
+        _documentUiState.value =
+            updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
-    fun updateDeliveryNoteStateWithIncrementedValue(documentProductId: Any) {
+    fun updateStateWithIncrementedValue(documentProductId: Any) {
         val documentProduct =
-            _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
+            _documentUiState.value.documentProducts?.first { it.id == documentProductId }
         documentProduct?.let { docProduct ->
             val updatedDocumentProduct = docProduct.copy(page = docProduct.page + 1)
             val list =
-                _deliveryNoteUiState.value.documentProducts?.filterNot { it.id == documentProductId }
+                _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
                     ?.toMutableList()
             val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-            _deliveryNoteUiState.value =
-                _deliveryNoteUiState.value.copy(documentProducts = updatedList)
+            _documentUiState.value =
+                _documentUiState.value.copy(documentProducts = updatedList)
         }
     }
 
-    private fun updateDeliveryNoteStateWithDecrementedValue(documentProductId: Any) {
+    private fun updateInvoiceStateWithDecrementedValue(documentProductId: Any) {
         val documentProduct =
-            _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
+            _documentUiState.value.documentProducts?.first { it.id == documentProductId }
         documentProduct?.let { docProduct ->
             val updatedDocumentProduct = docProduct.copy(page = docProduct.page - 1)
             val list =
-                _deliveryNoteUiState.value.documentProducts?.filterNot { it.id == documentProductId }
+                _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
                     ?.toMutableList()
             val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-            _deliveryNoteUiState.value =
-                _deliveryNoteUiState.value.copy(documentProducts = updatedList)
+            _documentUiState.value =
+                _documentUiState.value.copy(documentProducts = updatedList)
         }
     }
 
-    fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
+    fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
         val text = when (pageElement) {
-            ScreenElement.DOCUMENT_NUMBER -> deliveryNoteUiState.value.documentNumber.text
-            ScreenElement.DOCUMENT_ORDER_NUMBER -> deliveryNoteUiState.value.orderNumber.text
+            ScreenElement.DOCUMENT_NUMBER -> documentUiState.value.documentNumber.text
+            ScreenElement.DOCUMENT_ORDER_NUMBER -> documentUiState.value.orderNumber.text
             else -> null
         }
 
-        _deliveryNoteUiState.value = updateDeliveryNoteUiState(
-            _deliveryNoteUiState.value, pageElement, TextFieldValue(
+        _documentUiState.value = updateInvoiceUiState(
+            _documentUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
             )
@@ -309,12 +309,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
 }
 
-fun updateDeliveryNoteUiState(
-    deliveryNote: DeliveryNoteState,
+fun updateInvoiceUiState(
+    document: InvoiceState,
     element: ScreenElement,
     value: Any,
-): DeliveryNoteState {
-    var note = deliveryNote
+): InvoiceState {
+    var note = document
     when (element) {
         ScreenElement.DOCUMENT_NUMBER -> {
             note = note.copy(documentNumber = value as TextFieldValue)

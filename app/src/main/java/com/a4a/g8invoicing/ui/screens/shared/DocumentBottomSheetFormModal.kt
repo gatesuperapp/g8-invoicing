@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState

@@ -29,7 +29,7 @@ fun DeliveryNoteList(
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
 ) {
     // Main list to handle actions with selected items
     val selectedItems = mutableListOf<DeliveryNoteState>()
@@ -49,8 +49,6 @@ fun DeliveryNoteList(
                 onClickBackArrow = onClickBack
             )
         },
-        //   private val _uiState = MutableStateFlow(DeliveryNotesUiState())
-        // val uiState: StateFlow<DeliveryNotesUiState> = _uiState.asStateFlow()
         bottomBar = {
             BottomBar(
                 navController = navController,

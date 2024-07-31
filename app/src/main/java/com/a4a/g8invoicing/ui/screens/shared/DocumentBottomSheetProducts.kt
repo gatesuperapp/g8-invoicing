@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +33,7 @@ import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +45,8 @@ import java.util.concurrent.TimeUnit
 
 
 @Composable
-fun DeliveryNoteBottomSheetProducts(
-    deliveryNote: DeliveryNoteState,
+fun DocumentBottomSheetProducts(
+    document: DocumentState,
     onDismissBottomSheet: () -> Unit,
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
@@ -81,7 +81,7 @@ fun DeliveryNoteBottomSheetProducts(
         }
 
         val parameters = Pair(
-            deliveryNote.documentProducts,
+            document.documentProducts,
             products
         )
 
@@ -142,7 +142,7 @@ fun DeliveryNoteBottomSheetProducts(
                 }
             }
 
-            DeliveryNoteBottomSheetDocumentProductList(
+            DocumentBottomSheetDocumentProductList(
                 list = params.first ?: emptyList(),
                 onClickNew = {
                     onClickNewProduct()
@@ -164,7 +164,7 @@ fun DeliveryNoteBottomSheetProducts(
             )
 
             if (isProductListVisible) {
-                DeliveryNoteBottomSheetProductList(
+                DocumentBottomSheetProductList(
                     list = params.second ?: emptyList(),
                     onClickBack = { isProductListVisible = false },
                     onProductClick = {

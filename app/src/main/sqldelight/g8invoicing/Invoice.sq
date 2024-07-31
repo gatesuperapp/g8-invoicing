@@ -1,0 +1,58 @@
+CREATE TABLE Invoice (
+  invoice_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  delivery_date TEXT,
+  order_number TEXT,
+  currency TEXT,
+  due_date TEXT,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  deleted_at REAL DEFAULT (datetime('now', 'localtime')));
+
+INSERT INTO Invoice (invoice_id, number, delivery_date, order_number, currency, due_date)
+VALUES (1, "001", '01/01/2023', 'ONXFHGG11',  "€", '01/01/2023');
+
+
+get:
+SELECT *
+FROM Invoice
+WHERE invoice_id = :id;
+
+getId:
+SELECT invoice_id
+FROM Invoice
+WHERE invoice_id = :id;
+
+getAll:
+SELECT *
+FROM Invoice;
+
+getAllIds:
+SELECT invoice_id
+FROM Invoice;
+
+save:
+INSERT INTO Invoice (invoice_id, number, delivery_date, order_number, currency, due_date)
+VALUES (?,  ?,  ?, ?, ?, ?);
+
+update:
+UPDATE Invoice
+SET number = :number,
+    delivery_date = :delivery_date,
+    order_number = :order_number,
+    currency =: currency,
+    due_date =: due_date
+WHERE
+    invoice_id = :invoice_id;
+
+delete:
+DELETE FROM Invoice
+WHERE invoice_id = :id;
+
+getLastInsertedRowId:
+SELECT invoice_id
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+

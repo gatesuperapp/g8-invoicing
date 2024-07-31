@@ -10,10 +10,11 @@ import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
-import com.a4a.g8invoicing.ui.screens.FooterRowName
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.screens.shared.FooterRowName
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.itextpdf.kernel.colors.Color
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
@@ -41,10 +42,10 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 
-fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
-    val fileNameBeforeNumbering = "${deliveryNote.documentNumber.text}_temp.pdf"
-    val finalFileName = "${deliveryNote.documentNumber.text}.pdf"
+fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
 
+    val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
+    val finalFileName = "${inputDocument.documentNumber.text}.pdf"
 
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     val pdfDocument = PdfDocument(writer)
@@ -56,24 +57,30 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
         .setFont(dmRegular)
         .setFontSize(12F)
 
-    document.add(createTitle(deliveryNote.documentNumber.text, dmRegular))
-    document.add(createDate(deliveryNote.documentDate))
+    document.add(createTitle(inputDocument.documentNumber.text, inputDocument.documentType, dmRegular))
+    document.add(createDate(inputDocument.documentDate))
     document.add(
         createIssuerAndClientTable(
-            deliveryNote.documentIssuer,
-            deliveryNote.documentClient,
+            inputDocument.documentIssuer,
+            inputDocument.documentClient,
             dmMedium
         )
     )
-    if (deliveryNote.orderNumber.text.isNotEmpty()) {
-        document.add(createReference(deliveryNote.orderNumber.text, dmMedium))
+    if (inputDocument.orderNumber.text.isNotEmpty()) {
+        document.add(createReference(inputDocument.orderNumber.text, dmMedium))
     }
-    deliveryNote.documentProducts?.let {
+    inputDocument.documentProducts?.let {
         document.add(createProductsTable(it, context))
     }
-    deliveryNote.documentPrices?.let {
-        document.add(createFooter(dmMedium, it))
+    inputDocument.documentPrices?.let {
+        document.add(createTotals(dmMedium, it))
     }
+
+    if(inputDocument is InvoiceState) {
+        document.add(createDueDate(inputDocument.dueDate))
+    }
+
+
     document.close()
 
     getFile(fileNameBeforeNumbering)?.let {
@@ -88,8 +95,14 @@ fun createPdfWithIText(deliveryNote: DeliveryNoteState, context: Context) {
     Toast.makeText(context, "PDF created", Toast.LENGTH_SHORT).show()
 }
 
-fun createTitle(documentNumber: String, font: PdfFont): Paragraph {
-    return Paragraph(Strings.get(R.string.delivery_note_number) + " " + documentNumber)
+fun createTitle(documentNumber: String, documentType: DocumentType? = null, font: PdfFont): Paragraph {
+    val title = when (documentType) {
+        DocumentType.INVOICE -> Strings.get(R.string.invoice_number)
+        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.delivery_note_number)
+        else -> null
+    }
+
+    return Paragraph(Strings.get(R.string.delivery_note_number) + documentNumber)
         .setFont(font)
         .setFontSize(20F)
         .setMarginBottom(-10F)
@@ -279,7 +292,7 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
     return productsTable
 }
 
-fun createFooter(font: PdfFont, documentPrices: DocumentPrices): Table {
+fun createTotals(font: PdfFont, documentPrices: DocumentPrices): Table {
     val footerArray = listOf(
         FooterRow(
             rowDescription = "TOTAL_WITHOUT_TAX", page = 1
@@ -340,6 +353,10 @@ fun createFooter(font: PdfFont, documentPrices: DocumentPrices): Table {
     }
 
     return footerTable
+}
+
+fun createDueDate(date: String): Paragraph {
+    return Paragraph(Strings.get(R.string.invoice_due_date) + " : " + date)
 }
 
 fun Table.addCustomCell(

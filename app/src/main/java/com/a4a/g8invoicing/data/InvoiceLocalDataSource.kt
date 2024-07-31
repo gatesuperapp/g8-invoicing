@@ -6,12 +6,11 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
+import g8invoicing.Invoice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -19,81 +18,37 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.math.RoundingMode
 
-class DeliveryNoteLocalDataSource(
+class InvoiceLocalDataSource(
     db: Database,
-) : DeliveryNoteLocalDataSourceInterface {
-    private val deliveryNoteQueries = db.deliveryNoteQueries
+) : InvoiceLocalDataSourceInterface {
+    private val invoiceQueries = db.invoiceQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentProductQueries = db.documentProductQueries
-    private val deliveryNoteDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
-    private val deliveryNoteDocumentClientOrIssuerQueries =
-        db.linkDeliveryNoteToDocumentClientOrIssuerQueries
+    private val invoiceDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
+    private val invoiceDocumentClientOrIssuerQueries = db.linkInvoiceToDocumentClientOrIssuerQueries
 
 
-    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
-        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
+    override fun fetch(id: Long): InvoiceState? {
+        return invoiceQueries.get(id).executeAsOneOrNull()
             ?.let {
-                it.transformIntoEditableNote(
-                    fetchDocumentProducts(it.delivery_note_id),
-                    fetchClientAndIssuer(it.delivery_note_id)
+                it.transformIntoEditableInvoice(
+                    fetchDocumentProducts(it.invoice_id),
+                    fetchClientAndIssuer(it.invoice_id)
                 )
             }
     }
 
-    /*    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
-            val deliveryNoteId = deliveryNoteQueries.getDeliveryNoteId(id).executeAsOne()
-            val deliveryNoteFlow = deliveryNoteQueries.getDeliveryNote(id).asFlow().map { query ->
-                query.executeAsOne()
-            }
-
-            val productFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
-            val clientAndIssuerFlow = fetchClientOrIssuerFlow(deliveryNoteId).onStart { emit(emptyList()) }
-
-            val combinedFlow = combine(
-                deliveryNoteFlow,
-                productFlow,
-                clientAndIssuerFlow
-            ) { value1, value2, value3 ->
-                value1.transformIntoEditableNote(
-                    documentProducts = value2,
-                    documentClientAndIssuer = value3,
-                )
-            }
-            return combinedFlow
-        }*/
-
-
-    /* @OptIn(ExperimentalCoroutinesApi::class)
-     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
-         return deliveryNoteQueries.getAllDeliveryNotes()
-             .asFlow()
-             .flatMapMerge { query ->
-                 combine(
-                     query.executeAsList().map { deliveryNote ->
-                         fetchDocumentProductsFlow(deliveryNote.delivery_note_id).onStart { emit(emptyList()) }
-                             .map {
-                                 deliveryNote.transformIntoEditableNote(it.toMutableList())
-                             }
-                     }
-                 ) {
-                     it.asList()
-                 }
-             }
-     }*/
-
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
-        return deliveryNoteQueries.getAllDeliveryNotes()
+    override fun fetchAll(): Flow<List<InvoiceState>> {
+        return invoiceQueries.getAll()
             .asFlow()
             .map {
                 it.executeAsList()
-                    .map { deliveryNote ->
-                        val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
-                        val clientAndIssuer = fetchClientAndIssuer(deliveryNote.delivery_note_id)
+                    .map { document ->
+                        val products = fetchDocumentProducts(document.invoice_id)
+                        val clientAndIssuer = fetchClientAndIssuer(document.invoice_id)
 
-                        deliveryNote.transformIntoEditableNote(
+                        document.transformIntoEditableInvoice(
                             products,
                             clientAndIssuer
                         )
@@ -101,10 +56,10 @@ class DeliveryNoteLocalDataSource(
             }
     }
 
-    private fun fetchDocumentProducts(deliveryNoteId: Long): MutableList<DocumentProductState>? {
+    private fun fetchDocumentProducts(id: Long): MutableList<DocumentProductState>? {
         val listOfIds =
-            deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
-                deliveryNoteId
+            invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(
+                id
             )
                 .executeAsList()
         return if (listOfIds.isNotEmpty()) {
@@ -115,10 +70,10 @@ class DeliveryNoteLocalDataSource(
         } else null
     }
 
-    private fun fetchClientAndIssuer(deliveryNoteId: Long): List<DocumentClientOrIssuerState>? {
+    private fun fetchClientAndIssuer(documentId: Long): List<DocumentClientOrIssuerState>? {
         val listOfIds =
-            deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
-                deliveryNoteId
+            invoiceDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
+                documentId
             ).executeAsList()
 
         return if (listOfIds.isNotEmpty()) {
@@ -131,9 +86,9 @@ class DeliveryNoteLocalDataSource(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
-        return deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
-            deliveryNoteId
+    private fun fetchDocumentProductsFlow(documentId: Long): Flow<List<DocumentProductState>> {
+        return invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(
+            documentId
         )
             .asFlow()
             .flatMapMerge { query ->
@@ -153,9 +108,9 @@ class DeliveryNoteLocalDataSource(
 
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchClientOrIssuerFlow(deliveryNoteId: Long): Flow<List<DocumentClientOrIssuerState>> {
-        return deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
-            deliveryNoteId
+    private fun fetchClientOrIssuerFlow(id: Long): Flow<List<DocumentClientOrIssuerState>> {
+        return invoiceDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
+            id
         )
             .asFlow()
             .flatMapMerge { query ->
@@ -174,13 +129,13 @@ class DeliveryNoteLocalDataSource(
     }
 
 
-    private fun DeliveryNote.transformIntoEditableNote(
+    private fun Invoice.transformIntoEditableInvoice(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
-    ): DeliveryNoteState {
+    ): InvoiceState {
         this.let {
-            return DeliveryNoteState(
-                documentId = it.delivery_note_id.toInt(),
+            return InvoiceState(
+                documentId = it.invoice_id.toInt(),
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
@@ -193,38 +148,39 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun createNewDeliveryNote(): Long? {
-        saveDeliveryNoteInfoInAllTables(
-            DeliveryNoteState(
+    override suspend fun createNew(): Long? {
+        saveInvoiceNoteInfoInAllTables(
+            InvoiceState(
                 documentIssuer = getExistingIssuer()?.transformIntoEditable()
                     ?: DocumentClientOrIssuerState(),
             )
         )
 
-        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+        return invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
     }
 
-    override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
+    override suspend fun update(document: InvoiceState) {
         return withContext(Dispatchers.IO) {
             try {
-                deliveryNoteQueries.updateDeliveryNote(
-                    delivery_note_id = deliveryNote.documentId?.toLong() ?: 0,
-                    number = deliveryNote.documentNumber.text,
-                    delivery_date = deliveryNote.documentDate,
-                    order_number = deliveryNote.orderNumber.text,
-                    currency = deliveryNote.currency.text
+                invoiceQueries.update(
+                    invoice_id = document.documentId?.toLong() ?: 0,
+                    number = document.documentNumber.text,
+                    delivery_date = document.documentDate,
+                    order_number = document.orderNumber.text,
+                    currency = document.currency.text,
+                    due_date = document.documentDate,
                 )
             } catch (cause: Throwable) {
             }
         }
     }
 
-    override suspend fun duplicateDeliveryNotes(deliveryNotes: List<DeliveryNoteState>) {
+    override suspend fun duplicate(documents: List<InvoiceState>) {
         withContext(Dispatchers.IO) {
             try {
-                deliveryNotes.forEach {
-                    saveDeliveryNoteInfoInAllTables(
-                        DeliveryNoteState(
+                documents.forEach {
+                    saveInvoiceNoteInfoInAllTables(
+                        InvoiceState(
                             documentType = it.documentType,
                             documentId = it.documentId,
                             documentNumber = TextFieldValue("XXX"),
@@ -234,7 +190,8 @@ class DeliveryNoteLocalDataSource(
                             documentClient = it.documentClient,
                             documentProducts = it.documentProducts,
                             documentPrices = it.documentPrices,
-                            currency = it.currency
+                            currency = it.currency,
+                            dueDate = it.dueDate
                         )
                     )
                 }
@@ -245,7 +202,7 @@ class DeliveryNoteLocalDataSource(
 
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        deliveryNoteId: Long?,
+        documentId: Long?,
     ) {
         withContext(Dispatchers.IO) {
             try {
@@ -261,11 +218,11 @@ class DeliveryNoteLocalDataSource(
                     product_id = documentProduct.productId?.toLong()
                 )
 
-                deliveryNoteId?.let { deliveryNoteId ->
+                documentId?.let { documentId ->
                     documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
                         ?.let { id ->
                             addDocumentProduct(
-                                deliveryNoteId,
+                                documentId,
                                 id.toLong()
                             )
                         }
@@ -277,7 +234,7 @@ class DeliveryNoteLocalDataSource(
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
         documentClientOrIssuer: DocumentClientOrIssuerState,
-        deliveryNoteId: Long?,
+        documentId: Long?,
     ) {
         withContext(Dispatchers.IO) {
             try {
@@ -302,12 +259,12 @@ class DeliveryNoteLocalDataSource(
                     company_id2_number = documentClientOrIssuer.companyId2Number?.text
                 )
 
-                deliveryNoteId?.let { deliveryNoteId ->
+                documentId?.let { documentId ->
                     documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
                         .executeAsOneOrNull()?.toInt()
                         ?.let { id ->
                             addDocumentClientOrIssuer(
-                                deliveryNoteId,
+                                documentId,
                                 id.toLong()
                             )
                         }
@@ -318,33 +275,33 @@ class DeliveryNoteLocalDataSource(
     }
 
 
-    override suspend fun deleteDeliveryNotes(deliveryNotes: List<DeliveryNoteState>) {
+    override suspend fun delete(documents: List<InvoiceState>) {
         withContext(Dispatchers.IO) {
             try {
-                deliveryNotes.filter { it.documentId != null }.forEach { deliveryNote ->
-                    deliveryNoteQueries.deleteDeliveryNote(id = deliveryNote.documentId!!.toLong())
-                    deliveryNoteDocumentProductQueries.deleteAllProductsLinkedToADeliveryNote(
-                        deliveryNote.documentId!!.toLong()
+                documents.filter { it.documentId != null }.forEach { document ->
+                    invoiceQueries.delete(id = document.documentId!!.toLong())
+                    invoiceDocumentProductQueries.deleteAllProductsLinkedToInvoice(
+                        document.documentId!!.toLong()
                     )
-                    deliveryNoteDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToADeliveryNote(
-                        deliveryNote.documentId!!.toLong()
+                    invoiceDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToInvoice(
+                        document.documentId!!.toLong()
                     )
-                    deliveryNote.documentClient?.type?.let {
+                    document.documentClient?.type?.let {
                         deleteDocumentClientOrIssuer(
-                            deliveryNote.documentId!!.toLong(),
+                            document.documentId!!.toLong(),
                             it
                         )
                     }
-                    deliveryNote.documentIssuer?.type?.let {
+                    document.documentIssuer?.type?.let {
                         deleteDocumentClientOrIssuer(
-                            deliveryNote.documentId!!.toLong(),
+                            document.documentId!!.toLong(),
                             it
                         )
                     }
-                    deliveryNote.documentProducts?.filter { it.id != null }?.let {
+                    document.documentProducts?.filter { it.id != null }?.let {
                         it.forEach { documentProduct ->
                             deleteDocumentProduct(
-                                deliveryNote.documentId!!.toLong(),
+                                document.documentId!!.toLong(),
                                 documentProduct.id!!.toLong()
                             )
                         }
@@ -355,26 +312,26 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun deleteDocumentProduct(deliveryNoteId: Long, documentProductId: Long) {
+    override suspend fun deleteDocumentProduct(id: Long, documentProductId: Long) {
         return withContext(Dispatchers.IO) {
-            deliveryNoteDocumentProductQueries.deleteProductLinkedToDeliveryNote(
-                deliveryNoteId,
+            invoiceDocumentProductQueries.deleteProductLinkedToInvoice(
+                id,
                 documentProductId
             )
         }
     }
 
     override suspend fun deleteDocumentClientOrIssuer(
-        deliveryNoteId: Long,
+        id: Long,
         type: ClientOrIssuerType,
     ) {
         return withContext(Dispatchers.IO) {
             val documentClientOrIssuer =
-                fetchClientAndIssuer(deliveryNoteId)?.firstOrNull { it.type == type }
+                fetchClientAndIssuer(id)?.firstOrNull { it.type == type }
 
             documentClientOrIssuer?.id?.let {
-                deliveryNoteDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(
-                    deliveryNoteId,
+                invoiceDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToInvoice(
+                    id,
                     it.toLong()
                 )
                 documentClientOrIssuerQueries.delete(it.toLong())
@@ -382,18 +339,18 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override fun addDocumentProduct(deliveryNoteId: Long, documentProductId: Long) {
-        deliveryNoteDocumentProductQueries.saveProductLinkedToDeliveryNote(
+    override fun addDocumentProduct(documentId: Long, documentProductId: Long) {
+        invoiceDocumentProductQueries.saveProductLinkedToInvoice(
             id = null,
-            delivery_note_id = deliveryNoteId,
+            invoice_id = documentId,
             document_product_id = documentProductId
         )
     }
 
-    private fun addDocumentClientOrIssuer(deliveryNoteId: Long, documentClientOrIssuerId: Long) {
-        deliveryNoteDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
+    private fun addDocumentClientOrIssuer(documentId: Long, documentClientOrIssuerId: Long) {
+        invoiceDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToInvoice(
             id = null,
-            delivery_note_id = deliveryNoteId,
+            invoice_id = documentId,
             document_client_or_issuer_id = documentClientOrIssuerId
         )
     }
@@ -408,81 +365,41 @@ class DeliveryNoteLocalDataSource(
         return issuer
     }
 
-    private suspend fun saveDeliveryNoteInfoInAllTables(deliveryNote: DeliveryNoteState) {
-        deliveryNoteQueries.saveDeliveryNote(
-            delivery_note_id = null,
-            number = deliveryNote.documentNumber.text,
-            delivery_date = deliveryNote.documentDate,
-            order_number = deliveryNote.orderNumber.text,
-            currency = deliveryNote.currency.text
+    private suspend fun saveInvoiceNoteInfoInAllTables(document: InvoiceState) {
+        invoiceQueries.save(
+            invoice_id = null,
+            number = document.documentNumber.text,
+            delivery_date = document.documentDate,
+            order_number = document.orderNumber.text,
+            currency = document.currency.text,
+            due_date = document.dueDate
         )
 
-        deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { deliveryNoteId ->
+        invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
             // Link all products
-            deliveryNote.documentProducts?.forEach { documentProduct ->
+            document.documentProducts?.forEach { documentProduct ->
                 saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    deliveryNoteId = deliveryNoteId
+                    documentId = id
                 )
             }
 
             // Link client
-            deliveryNote.documentClient?.let {
+            document.documentClient?.let {
                 saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = it,
-                    deliveryNoteId = deliveryNoteId
+                    documentId = id
                 )
             }
 
             // Link issuer
-            deliveryNote.documentIssuer?.let {
+            document.documentIssuer?.let {
                 saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = it,
-                    deliveryNoteId = deliveryNoteId
+                    documentId = id
                 )
             }
         }
     }
 }
 
-
-fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
-    val totalPriceWithoutTax = products.filter { it.priceWithTax != null }.sumOf {
-        (it.priceWithTax!! -
-                it.priceWithTax!!
-                * (it.taxRate ?: BigDecimal(0))
-                / BigDecimal(100)) * (it.quantity)
-    }.setScale(2, RoundingMode.HALF_UP)
-
-    // Calculate the total amount of each tax
-    val groupedItems = products.groupBy {
-        it.taxRate
-    }
-    val taxes = groupedItems.keys.filterNotNull().distinct().toMutableList() // ex: taxes= [10, 20]
-
-    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
-    groupedItems.values.forEach { documentProduct ->
-        val listOfAmounts = documentProduct.filter { it.priceWithTax != null }.map {
-            val priceWithoutTax =
-                it.priceWithTax!! - it.priceWithTax!! * (it.taxRate ?: BigDecimal(0)) / BigDecimal(
-                    100
-                )
-
-            priceWithoutTax * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
-        }
-        val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
-        amounts.add(
-            sumOfAmounts
-        )
-    }
-    val amountsPerTaxRate: MutableList<Pair<BigDecimal, BigDecimal>> = mutableListOf()
-    taxes.forEachIndexed { index, key ->
-        amountsPerTaxRate.add(Pair(key, amounts[index]))
-    } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
-
-    return DocumentPrices(
-        totalPriceWithoutTax = totalPriceWithoutTax,
-        totalAmountsOfEachTax = amountsPerTaxRate,
-        totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }
-    )
-}

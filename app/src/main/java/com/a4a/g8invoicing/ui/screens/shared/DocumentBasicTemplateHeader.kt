@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -21,12 +21,14 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 
 @Composable
-fun DeliveryNoteBasicTemplateHeader(
-    uiState: DeliveryNoteState,
+fun DocumentBasicTemplateHeader(
+    uiState: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
@@ -58,7 +60,10 @@ fun DeliveryNoteBasicTemplateHeader(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.textForDocuments,
-                text = stringResource(id = R.string.delivery_note_number) + " " + uiState.documentNumber.text
+                text = stringResource(
+                    id = if (uiState is DeliveryNoteState) R.string.delivery_note_number
+                    else R.string.invoice_number
+                ) + " " + uiState.documentNumber.text
             )
 
             Spacer(

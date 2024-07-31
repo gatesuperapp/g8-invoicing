@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,7 +50,7 @@ fun DocumentBottomSheetElementsAfterSlide(
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         val params = parameters as Pair<DocumentClientOrIssuerState?, List<ClientOrIssuerState>>
-        DeliveryNoteBottomSheetDocumentClientOrIssuer(
+        DocumentBottomSheetDocumentClientOrIssuer(
             item = params.first,
             onClickBack = onClickBack,
             onClickNewButton = {
@@ -70,7 +70,7 @@ fun DocumentBottomSheetElementsAfterSlide(
         )
 
         if (isClientOrIssuerListVisible) {
-            DeliveryNoteBottomSheetClientOrIssuerList(
+            DocumentBottomSheetClientOrIssuerList(
                 list = params.second,
                 pageElement = pageElement,
                 onClickBack = { isClientOrIssuerListVisible = false },
@@ -95,7 +95,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DATE) {
-        DeliveryNoteBottomSheetDatePicker(
+        DocumentBottomSheetDatePicker(
             initialDate = parameters.let { it as String },
             datePickerState = datePickerState,
             onClickBack = onClickBack,

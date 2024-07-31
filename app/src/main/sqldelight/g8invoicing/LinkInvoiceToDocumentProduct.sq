@@ -1,0 +1,43 @@
+CREATE TABLE LinkInvoiceToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  invoice_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(document_product_id)
+          ON DELETE CASCADE
+);
+
+INSERT INTO LinkInvoiceToDocumentProduct (id, invoice_id, document_product_id)
+VALUES (1, 1, 1),
+(2, 1, 2),
+(3, 1, 3),
+(4, 1, 4),
+(5, 1, 5),
+(6, 1, 6),
+(7, 1, 7),
+(8, 1, 8),
+(9, 1, 9),
+(10, 1, 10),
+(11, 1, 11),
+(12, 1, 12),
+(13, 1, 13);
+
+getDocumentProductsLinkedToInvoice:
+SELECT *
+FROM LinkInvoiceToDocumentProduct
+WHERE invoice_id = :invoice_id;
+
+saveProductLinkedToInvoice:
+INSERT
+INTO LinkInvoiceToDocumentProduct (id, invoice_id, document_product_id)
+VALUES (?, ?, ?);
+
+deleteProductLinkedToInvoice:
+DELETE FROM LinkInvoiceToDocumentProduct
+WHERE  invoice_id = :invoice_id
+AND document_product_id = :document_product_id;
+
+deleteAllProductsLinkedToInvoice:
+DELETE FROM LinkInvoiceToDocumentProduct
+WHERE  invoice_id = :invoice_id;

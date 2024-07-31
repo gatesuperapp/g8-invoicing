@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -46,10 +46,11 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
+import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -60,9 +61,9 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryNoteAddEdit(
+fun DocumentAddEdit(
     navController: NavController,
-    deliveryNote: DeliveryNoteState,
+    document: DocumentState,
     clientList: MutableList<ClientOrIssuerState>,
     issuerList: MutableList<ClientOrIssuerState>,
     documentClientUiState: DocumentClientOrIssuerState,
@@ -91,6 +92,8 @@ fun DeliveryNoteAddEdit(
     reinitializeMoveDocumentBoolean: () -> Unit,
     moveDocumentPagerToLastPage: Boolean,
 ) {
+  
+
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -127,7 +130,7 @@ fun DeliveryNoteAddEdit(
         initialDisplayMode = DisplayMode.Picker
     )
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
-    deliveryNote.documentDate =
+    document.documentDate =
         datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
             ?: Strings.get(R.string.document_default_date)
 
@@ -144,8 +147,8 @@ fun DeliveryNoteAddEdit(
         sheetPeekHeight = 0.dp,
         sheetContent = {
             if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
-                DeliveryNoteBottomSheetTextElements(
-                    deliveryNote = deliveryNote,
+                DocumentBottomSheetTextElements(
+                    document = document,
                     datePickerState = datePickerState,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)
@@ -159,8 +162,8 @@ fun DeliveryNoteAddEdit(
                     onClickClientOrIssuer = onClickClientOrIssuer,
                     onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
                     onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    currentClientId = deliveryNote.documentClient?.id,
-                    currentIssuerId = deliveryNote.documentIssuer?.id,
+                    currentClientId = document.documentClient?.id,
+                    currentIssuerId = document.documentIssuer?.id,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     bottomFormOnValueChange = bottomFormOnValueChange,
                     bottomFormPlaceCursor = bottomFormPlaceCursor,
@@ -172,8 +175,8 @@ fun DeliveryNoteAddEdit(
                     onShowDocumentForm = onShowDocumentForm
                 )
             } else {
-                DeliveryNoteBottomSheetProducts(
-                    deliveryNote = deliveryNote,
+                DocumentBottomSheetProducts(
+                    document = document,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)
                     },
@@ -218,7 +221,7 @@ fun DeliveryNoteAddEdit(
                 )
             },
             bottomBar = {
-                DeliveryNoteAddEditBottomBar(
+                DocumentAddEditBottomBar(
                     onClickElements = {
                         bottomSheetType.value = BottomSheetType.ELEMENTS
                         expandBottomSheet(scope, scaffoldState)
@@ -239,7 +242,7 @@ fun DeliveryNoteAddEdit(
             }
         ) { innerPadding ->
             if (showPopup) {
-                ExportPopup(deliveryNote, onDismissRequest = { showPopup = false })
+                ExportPopup(document, onDismissRequest = { showPopup = false })
             }
 
             Column(
@@ -251,8 +254,8 @@ fun DeliveryNoteAddEdit(
                         innerPadding
                     )
             ) {
-                DeliveryNoteBasicTemplate(
-                    uiState = deliveryNote,
+                DocumentBasicTemplate(
+                    uiState = document,
                     onClickElement = {
                         if (it == ScreenElement.DOCUMENT_HEADER ||
                             it == ScreenElement.DOCUMENT_NUMBER ||
@@ -322,7 +325,7 @@ private fun DeliveryNoteAddEditTopBar(
 }
 
 @Composable
-private fun DeliveryNoteAddEditBottomBar(
+private fun DocumentAddEditBottomBar(
     onClickElements: () -> Unit,
     onClickItems: () -> Unit,
     onClickStyle: () -> Unit,
@@ -337,7 +340,7 @@ private fun DeliveryNoteAddEditBottomBar(
 
 @Composable
 fun ExportPopup(
-    deliveryNote: DeliveryNoteState,
+    deliveryNote: DocumentState,
     onDismissRequest: () -> Unit,
 ) {
     // full screen background

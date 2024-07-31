@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.focus.FocusManager
@@ -10,11 +10,11 @@ import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.KeyboardOpt
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentState
 
 @Composable
-fun DeliveryNoteBottomSheetElementsContent(
-    deliveryNote: DeliveryNoteState,
+fun DocumentBottomSheetElementsContent(
+    deliveryNote: DocumentState,
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,

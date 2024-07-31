@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +20,7 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
-fun DeliveryNoteBottomSheetDocumentClientOrIssuer(
+fun DocumentBottomSheetDocumentClientOrIssuer(
     item: DocumentClientOrIssuerState?,
     onClickBack: () -> Unit,
     onClickNewButton: () -> Unit,

@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,15 +11,20 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListContent
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
-fun DeliveryNoteBottomSheetProductList(
-    list: List<ProductState>,
+fun DocumentBottomSheetClientOrIssuerList(
+    list: List<ClientOrIssuerState>,
+    pageElement: ScreenElement,
     onClickBack: () -> Unit,
-    onProductClick: (ProductState) -> Unit, // To select a product
+    onClientOrIssuerClick: (ClientOrIssuerState) -> Unit,
+    currentClientId: Int? = null,
+    currentIssuerId: Int? = null,
 ) {
     Column(
         modifier = Modifier
@@ -40,10 +45,15 @@ fun DeliveryNoteBottomSheetProductList(
             }
         }
         // Display the existing list
-        ProductListContent(
-            products = list,
-            onProductClick = onProductClick,
-            displayCheckboxes = false
+        ClientOrIssuerListContent(
+            clientsOrIssuers = list,
+            onItemClick = onClientOrIssuerClick,
+            isCheckboxDisplayed = false, // Don't display checkboxes
+            currentClientOrIssuerId = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                currentClientId
+            } else {
+                currentIssuerId
+            }  // The current client/issuer should be highlighted in the list
         )
     }
 }

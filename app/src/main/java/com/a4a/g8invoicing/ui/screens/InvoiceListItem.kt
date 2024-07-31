@@ -29,11 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 
 @Composable
-fun DeliveryNoteListItem(
-    deliveryNote: DeliveryNoteState,
+fun InvoiceListItem(
+    document: InvoiceState,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
@@ -112,14 +112,14 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.documentNumber.text,
+                        text = document.documentNumber.text,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
                         //overflow = TextOverflow.Ellipsis
                     )
                 }
-                deliveryNote.documentClient?.let {
+                document.documentClient?.let {
                     Row() {
                         Text(
                             text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text
@@ -136,7 +136,7 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.documentDate,
+                        text = document.documentDate,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
@@ -146,7 +146,7 @@ fun DeliveryNoteListItem(
                 Row(
                 ) {
                     Text(
-                        text = (deliveryNote.documentPrices?.let {it.totalPriceWithTax.toString()} ?: "") + stringResource(
+                        text = (document.documentPrices?.let {it.totalPriceWithTax.toString()} ?: "") + stringResource(
                             id = R.string.currency
                         ),
                     )

@@ -3,8 +3,9 @@ package com.a4a.g8invoicing.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
-import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
-import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
+import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,12 +16,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DeliveryNoteListViewModel @Inject constructor(
-    private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+class InvoiceListViewModel @Inject constructor(
+    private val invoiceDataSource: InvoiceLocalDataSourceInterface,
 ) : ViewModel() {
 
-    private val _deliveryNotesUiState = MutableStateFlow(DeliveryNotesUiState())
-    val deliveryNotesUiState: StateFlow<DeliveryNotesUiState> = _deliveryNotesUiState.asStateFlow()
+    private val _documentsUiState = MutableStateFlow(InvoicesUiState())
+    val documentsUiState: StateFlow<InvoicesUiState> = _documentsUiState.asStateFlow()
 
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
@@ -34,10 +35,10 @@ class DeliveryNoteListViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.fetchAllDeliveryNotes().collect {
-                    _deliveryNotesUiState.update { deliveryNotesUiState ->
-                        deliveryNotesUiState.copy(
-                            deliveryNoteStates = it
+                invoiceDataSource.fetchAll().collect {
+                    _documentsUiState.update { uiState ->
+                        uiState.copy(
+                            documentStates = it
                         )
                     }
                 }
@@ -47,22 +48,22 @@ class DeliveryNoteListViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
+    fun deleteDeliveryNotes(selectedDocuments: List<InvoiceState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.deleteDeliveryNotes(selectedDeliveryNotes)
+                invoiceDataSource.delete(selectedDocuments)
             } catch (e: Exception) {
                 println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }
 
-    fun duplicateDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
+    fun duplicateDeliveryNotes(selectedDocuments: List<InvoiceState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.duplicateDeliveryNotes(selectedDeliveryNotes)
+                invoiceDataSource.duplicate(selectedDocuments)
             } catch (e: Exception) {
                 println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }

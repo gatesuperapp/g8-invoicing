@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.Animatable
@@ -13,12 +13,10 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,57 +36,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.ceil
-
 
 data class FooterRow(
     var rowDescription: String,
     var page: Int,
 )
 
-/*fun calculateNumberOfPages(
-    numberOfItems: Int,
-    maxItemsOnFirstPage: Int,
-    maxItemsOnOtherPages: Int,
-): Int {
-    val numberOfPages: Int = if (numberOfItems <= maxItemsOnFirstPage) {
-        1
-    } else {
-        val remainingProducts = numberOfItems - maxItemsOnFirstPage
-
-        val additionalPages = ceil(remainingProducts.toDouble() / maxItemsOnOtherPages).toInt()
-        1 + additionalPages
-    }
-
-    return numberOfPages
-}
-
-fun calculateLimits(
-    numberOfPages: Int,
-    maxItemsOnFirstPage: Int,
-    maxItemsOnOtherPages: Int,
-): MutableList<Int> {
-    val arrayOfLimits = mutableStateListOf<Int>()
-    arrayOfLimits.add(maxItemsOnFirstPage)
-    if (numberOfPages > 1) {
-        for (i in 1..<(numberOfPages - 1)) {
-            arrayOfLimits.add((maxItemsOnFirstPage) + maxItemsOnOtherPages * i)
-        }
-    }
-    return arrayOfLimits
-}*/
-
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DeliveryNoteBasicTemplate(
-    uiState: DeliveryNoteState,
+fun DocumentBasicTemplate(
+    uiState: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
     incrementDocumentProductPage: (Int) -> Unit,
     moveDocumentPagerToLastPage: Boolean,
@@ -98,35 +62,16 @@ fun DeliveryNoteBasicTemplate(
     var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
     var offsetY by remember { mutableStateOf(0f) }
     val coroutineScope = rememberCoroutineScope()
-
     var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
-
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
-
-
     val productArray = uiState.documentProducts
-
     val pageNumber = productArray?.last()?.page ?: 1
     val pagerState = rememberPagerState { pageNumber }
-
-/*    if (moveDocumentPagerToLastPage) {
-        productArray?.last()?.page?.let { maxPageNumber ->
-            if (maxPageNumber > 1) {
-                LaunchedEffect(Unit) {
-                    pagerState.scrollToPage(maxPageNumber, 0f)
-                }
-            }
-        }
-        reinitializeMoveDocumentBoolean()
-    }*/
-
-
     val footerArray = mutableStateListOf(
         FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, pagerState.pageCount)
     )
-
     var documentProductIndex by remember { mutableStateOf(0) }
 
     val taxRates =
@@ -148,7 +93,7 @@ fun DeliveryNoteBasicTemplate(
 
     Column {
 
-        DeliveryNoteBasicTemplateContent(
+        DocumentBasicTemplateContent(
             uiState = uiState,
             onClickElement = onClickElement,
             screenWidth = screenWidth,

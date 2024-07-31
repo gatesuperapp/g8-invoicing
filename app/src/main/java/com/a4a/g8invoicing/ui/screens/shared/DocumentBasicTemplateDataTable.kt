@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,7 @@ import java.math.RoundingMode
 // It would give a thicker border in the table middle, we don't want that
 
 @Composable
-fun DeliveryNoteBasicTemplateDataTable(
+fun DocumentBasicTemplateDataTable(
     tableData: List<DocumentProductState>
 ) {
     val descriptionColumnWeight = .8f

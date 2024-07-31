@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusManager
@@ -35,6 +34,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
 import java.math.BigDecimal
@@ -42,8 +42,8 @@ import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeliveryNoteBottomSheetTextElements(
-    deliveryNote: DeliveryNoteState,
+fun DocumentBottomSheetTextElements(
+    document: DocumentState,
     datePickerState: DatePickerState,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
@@ -126,8 +126,8 @@ fun DeliveryNoteBottomSheetTextElements(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    DeliveryNoteBottomSheetElementsContent(
-                        deliveryNote = deliveryNote,
+                    DocumentBottomSheetElementsContent(
+                        deliveryNote = document,
                         onValueChange = onValueChange,
                         onClickForward = {
                             keyboardController?.hide()
@@ -143,14 +143,14 @@ fun DeliveryNoteBottomSheetTextElements(
                 pageElement = slideOtherComponent.value,
                 parameters = when (slideOtherComponent.value) {
                     ScreenElement.DOCUMENT_ISSUER -> Pair(
-                        deliveryNote.documentIssuer,
+                        document.documentIssuer,
                         issuers
                     )
                     ScreenElement.DOCUMENT_CLIENT -> Pair(
-                        deliveryNote.documentClient,
+                        document.documentClient,
                         clients
                     )
-                    ScreenElement.DOCUMENT_DATE -> deliveryNote.documentDate
+                    ScreenElement.DOCUMENT_DATE -> document.documentDate
                     else -> {}
                 },
                 onClickBack = {

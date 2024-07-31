@@ -10,6 +10,8 @@ import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSource
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.InvoiceLocalDataSource
+import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
@@ -62,6 +64,12 @@ object AppModule {
     @Singleton
     fun deliveryNoteDataSource(driver: SqlDriver): DeliveryNoteLocalDataSourceInterface {
         return DeliveryNoteLocalDataSource(Database(driver))
+    }
+
+    @Provides
+    @Singleton
+    fun invoiceDataSource(driver: SqlDriver): InvoiceLocalDataSourceInterface {
+        return InvoiceLocalDataSource(Database(driver))
     }
 
     @Provides

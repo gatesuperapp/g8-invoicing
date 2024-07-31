@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 enum class DocumentBottomSheetTypeOfForm {
     NEW_PRODUCT,

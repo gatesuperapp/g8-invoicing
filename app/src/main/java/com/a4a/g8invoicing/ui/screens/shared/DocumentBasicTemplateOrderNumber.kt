@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.screens
+package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +15,7 @@ import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
 
 @Composable
-fun DeliveryNoteBasicTemplateOrderNumber(
+fun DocumentBasicTemplateOrderNumber(
     orderNumber: String,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
