@@ -22,6 +22,6 @@ data class InvoiceState(
     override var documentPrices: DocumentPrices? = null,
     override var currency: TextFieldValue  = TextFieldValue(),
     var dueDate: String = Strings.get(R.string.document_default_due_date),
-    var footerText: String = Strings.get(R.string.document_default_due_date),
+    var footerText: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_footer)),
 ) : DocumentState()
 

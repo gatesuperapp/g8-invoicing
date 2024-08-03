@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
@@ -31,6 +32,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     datePickerState: DatePickerState,
+    dueDatePickerState: DatePickerState?,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
@@ -40,6 +42,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
+    onValueChange: (ScreenElement, Any) -> Unit,
 ) {
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
@@ -98,6 +101,24 @@ fun DocumentBottomSheetElementsAfterSlide(
         DocumentBottomSheetDatePicker(
             initialDate = parameters.let { it as String },
             datePickerState = datePickerState,
+            onClickBack = onClickBack,
+        )
+    }
+
+    if (pageElement == ScreenElement.DOCUMENT_DUE_DATE ) {
+        dueDatePickerState?.let {
+            DocumentBottomSheetDatePicker(
+                initialDate = parameters.let { it as String },
+                datePickerState = it,
+                onClickBack = onClickBack,
+            )
+        }
+    }
+
+    if (pageElement == ScreenElement.DOCUMENT_FOOTER) {
+        DocumentBottomSheetFooter(
+            text = parameters.let { it as TextFieldValue },
+            onValueChange = onValueChange,
             onClickBack = onClickBack,
         )
     }

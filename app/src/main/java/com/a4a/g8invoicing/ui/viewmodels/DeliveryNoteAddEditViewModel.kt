@@ -35,6 +35,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
+    private var autoSaveJob: Job? = null
 
     // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
@@ -43,12 +44,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     val deliveryNoteUiState: StateFlow<DeliveryNoteState> = _deliveryNoteUiState
 
     init {
-        viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _deliveryNoteUiState.debounce(300)
-                .collect { updateDeliveryNoteInLocalDb() }
-        }
-
+        autoSaveInLocalDb()
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
                 id?.let {
@@ -62,6 +58,14 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
+    private fun autoSaveInLocalDb() {
+        autoSaveJob?.cancel()
+        autoSaveJob = viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _deliveryNoteUiState.debounce(300)
+                .collect { updateDeliveryNoteInLocalDb() }
+        }
+    }
 
     private fun fetchDeliveryNoteFromLocalDb(id: Long) {
         fetchJob?.cancel()

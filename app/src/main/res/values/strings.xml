@@ -130,17 +130,21 @@
     <string name="invoice_number">Facture N°</string>
     <string name="document_number_short">N°</string>
     <string name="document_date">Date</string>
+    <string name="document_due_date">Échéance</string>
     <string name="document_issuer">Émetteur</string>
     <string name="document_client">Client</string>
     <string name="document_order_number">Référence</string>
+    <string name="document_footer">Pied de page</string>
     <string name="document_line_items">Items</string>
     <string name="document_default_number">001</string>
     <string name="document_default_date">01/01/2024</string>
     <string name="document_default_due_date">11/01/2024</string>
-    <string name="document_default_additional_info_discount">Escompte pour paiement anticipé : néant</string>
-    <string name="document_default_additional_info_penalties">Taux de pénalités : néant</string>
-    <string name="document_default_additional_info_bank">IBAN : FR76 1027 8073 7000 983764 8377</string>
-    <string name="document_default_order_number">XFGDTSF</string>
+    <string name="document_default_footer">Escompte pour paiement anticipé : néant
+    \n
+        Taux de pénalités : néant
+        \n  \n  \n IBAN : FR76 1027 8073 7000 983764 8377
+    </string>
+     <string name="document_default_order_number">XFGDTSF</string>
     <string name="document_default_issuer_firstName">Ignacio</string>
     <string name="document_default_issuer_name">Cantu</string>
     <string name="document_default_issuer_address1">6 rue de l\'amour</string>

@@ -66,7 +66,7 @@ fun DocumentBasicTemplateContent(
             )
             .background(Color.White)
             .heightIn(min = screenWidth * 1.28f)
-            //.aspectRatio(1f / 1.414f)
+        //.aspectRatio(1f / 1.414f)
     ) {
         Column(
             modifier = Modifier
@@ -116,8 +116,11 @@ fun DocumentBasicTemplateContent(
 
             DocumentBasicTemplatePrices(uiState, footerArray)
 
-            if(uiState is InvoiceState) {
-                DocumentBasicTemplateFooter(uiState, footerArray)
+            if (uiState is InvoiceState) {
+                DocumentBasicTemplateFooter(
+                    uiState,
+                    onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) }
+                )
             }
         }
     }

@@ -51,6 +51,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -125,14 +126,22 @@ fun DocumentAddEdit(
 
     // Date picker & formatter
     val selectedDate = System.currentTimeMillis()
-    val datePickerState = rememberDatePickerState(
+    val documentDatePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate,
+        initialDisplayMode = DisplayMode.Picker
+    )
+    val documentDueDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate,
         initialDisplayMode = DisplayMode.Picker
     )
     val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
     document.documentDate =
-        datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
+        documentDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
             ?: Strings.get(R.string.document_default_date)
+    if(document is InvoiceState) {
+        document.dueDate = documentDueDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
+            ?: Strings.get(R.string.document_default_date)
+    }
 
     BottomSheetScaffold(
         sheetSwipeEnabled = false,
@@ -149,7 +158,8 @@ fun DocumentAddEdit(
             if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
                 DocumentBottomSheetTextElements(
                     document = document,
-                    datePickerState = datePickerState,
+                    datePickerState = documentDatePickerState,
+                    dueDatePickerState = documentDueDatePickerState,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)
                     },
@@ -262,6 +272,7 @@ fun DocumentAddEdit(
                             it == ScreenElement.DOCUMENT_DATE ||
                             it == ScreenElement.DOCUMENT_ISSUER ||
                             it == ScreenElement.DOCUMENT_CLIENT ||
+                            it == ScreenElement.DOCUMENT_FOOTER ||
                             it == ScreenElement.DOCUMENT_ORDER_NUMBER
                         ) {
                             bottomSheetType.value = BottomSheetType.ELEMENTS

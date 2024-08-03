@@ -143,13 +143,15 @@ class InvoiceLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
                 documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(Strings.get(R.string.currency))
+                currency = TextFieldValue(Strings.get(R.string.currency)),
+                dueDate = it.due_date ?: "",
+                footerText = TextFieldValue(text = it.footer ?: "")
             )
         }
     }
 
     override suspend fun createNew(): Long? {
-        saveInvoiceNoteInfoInAllTables(
+        saveInvoiceInfoInAllTables(
             InvoiceState(
                 documentIssuer = getExistingIssuer()?.transformIntoEditable()
                     ?: DocumentClientOrIssuerState(),
@@ -168,7 +170,8 @@ class InvoiceLocalDataSource(
                     delivery_date = document.documentDate,
                     order_number = document.orderNumber.text,
                     currency = document.currency.text,
-                    due_date = document.documentDate,
+                    due_date = document.dueDate,
+                    footer = document.footerText.text
                 )
             } catch (cause: Throwable) {
             }
@@ -179,7 +182,7 @@ class InvoiceLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 documents.forEach {
-                    saveInvoiceNoteInfoInAllTables(
+                    saveInvoiceInfoInAllTables(
                         InvoiceState(
                             documentType = it.documentType,
                             documentId = it.documentId,
@@ -191,7 +194,8 @@ class InvoiceLocalDataSource(
                             documentProducts = it.documentProducts,
                             documentPrices = it.documentPrices,
                             currency = it.currency,
-                            dueDate = it.dueDate
+                            dueDate = it.dueDate,
+                            footerText = it.footerText
                         )
                     )
                 }
@@ -365,14 +369,15 @@ class InvoiceLocalDataSource(
         return issuer
     }
 
-    private suspend fun saveInvoiceNoteInfoInAllTables(document: InvoiceState) {
+    private suspend fun saveInvoiceInfoInAllTables(document: InvoiceState) {
         invoiceQueries.save(
             invoice_id = null,
             number = document.documentNumber.text,
             delivery_date = document.documentDate,
             order_number = document.orderNumber.text,
             currency = document.currency.text,
-            due_date = document.dueDate
+            due_date = document.dueDate,
+            footer = document.footerText.text
         )
 
         invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->

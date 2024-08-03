@@ -60,8 +60,6 @@ class ProductAddEditViewModel @Inject constructor(
     fun autoSaveDocumentProductInLocalDb() {
         autoSaveJob?.cancel()
         autoSaveJob = viewModelScope.launch {
-            Log.e("xxx", "Saveddd "+ _documentProductUiState.value)
-
             @OptIn(FlowPreview::class)
             _documentProductUiState
                 .debounce(300)

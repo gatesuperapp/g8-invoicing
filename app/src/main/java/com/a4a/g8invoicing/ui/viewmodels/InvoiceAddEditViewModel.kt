@@ -35,6 +35,7 @@ class InvoiceAddEditViewModel @Inject constructor(
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
+    private var autoSaveJob: Job? = null
 
     // Getting the argument in "InvoiceAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
@@ -43,11 +44,7 @@ class InvoiceAddEditViewModel @Inject constructor(
     val documentUiState: StateFlow<InvoiceState> = _documentUiState
 
     init {
-        viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentUiState.debounce(300)
-                .collect { updateInvoiceInLocalDb() }
-        }
+        autoSaveInLocalDb()
 
         viewModelScope.launch(context = Dispatchers.Default) {
             try {
@@ -59,6 +56,15 @@ class InvoiceAddEditViewModel @Inject constructor(
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
+        }
+    }
+
+    private fun autoSaveInLocalDb() {
+        autoSaveJob?.cancel()
+        autoSaveJob = viewModelScope.launch {
+            @OptIn(FlowPreview::class)
+            _documentUiState.debounce(300)
+                .collect { updateInvoiceInLocalDb() }
         }
     }
 
@@ -314,43 +320,51 @@ fun updateInvoiceUiState(
     element: ScreenElement,
     value: Any,
 ): InvoiceState {
-    var note = document
+    var doc = document
     when (element) {
         ScreenElement.DOCUMENT_NUMBER -> {
-            note = note.copy(documentNumber = value as TextFieldValue)
+            doc = doc.copy(documentNumber = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_DATE -> {
-            note = note.copy(documentDate = value as String)
+            doc = doc.copy(documentDate = value as String)
         }
 
         ScreenElement.DOCUMENT_CLIENT -> {
-            note = note.copy(documentClient = value as DocumentClientOrIssuerState)
+            doc = doc.copy(documentClient = value as DocumentClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
-            note = note.copy(documentIssuer = value as DocumentClientOrIssuerState)
+            doc = doc.copy(documentIssuer = value as DocumentClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ORDER_NUMBER -> {
-            note = note.copy(orderNumber = value as TextFieldValue)
+            doc = doc.copy(orderNumber = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_PRODUCT -> {
             val updatedDocumentProduct = value as DocumentProductState
-            val list = note.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
+            val list = doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
             val updatedList = (list ?: emptyList()) + updatedDocumentProduct
 
-            note = note.copy(documentProducts = updatedList)
+            doc = doc.copy(documentProducts = updatedList)
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {
-            note = note.copy(currency = value as TextFieldValue)
+            doc = doc.copy(currency = value as TextFieldValue)
+        }
+
+        ScreenElement.DOCUMENT_DUE_DATE -> {
+            doc = doc.copy(dueDate = value as String)
+        }
+
+        ScreenElement.DOCUMENT_FOOTER -> {
+            doc = doc.copy(footerText = value as TextFieldValue)
         }
 
         else -> {}
     }
-    return note
+    return doc
 }
 
 

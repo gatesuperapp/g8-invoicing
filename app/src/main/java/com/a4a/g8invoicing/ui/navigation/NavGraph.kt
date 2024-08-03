@@ -28,7 +28,8 @@ Process to add a new screen/VM/datasource:
 fun NavGraph(navController: NavHostController) {
     NavHost(
         navController,
-        startDestination = (Screen.DeliveryNoteList.name),
+       // startDestination = (Screen.DeliveryNoteList.name),
+        startDestination = (Screen.InvoiceList.name),
         //startDestination = (Screen.ProductList.name),
         //  startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),

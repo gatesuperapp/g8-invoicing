@@ -285,6 +285,7 @@ class DecimalInput(
 
 class ForwardElement(
     val text: String,
+    val isMultiline: Boolean = true
 )
 
 /*

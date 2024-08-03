@@ -35,6 +35,7 @@ import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
 import java.math.BigDecimal
@@ -45,6 +46,7 @@ import java.math.BigDecimal
 fun DocumentBottomSheetTextElements(
     document: DocumentState,
     datePickerState: DatePickerState,
+    dueDatePickerState: DatePickerState? = null,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
@@ -127,7 +129,7 @@ fun DocumentBottomSheetTextElements(
                         .verticalScroll(rememberScrollState())
                 ) {
                     DocumentBottomSheetElementsContent(
-                        deliveryNote = document,
+                        document = document,
                         onValueChange = onValueChange,
                         onClickForward = {
                             keyboardController?.hide()
@@ -151,6 +153,8 @@ fun DocumentBottomSheetTextElements(
                         clients
                     )
                     ScreenElement.DOCUMENT_DATE -> document.documentDate
+                    ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
+                    ScreenElement.DOCUMENT_FOOTER -> (document as InvoiceState).footerText
                     else -> {}
                 },
                 onClickBack = {
@@ -163,6 +167,7 @@ fun DocumentBottomSheetTextElements(
                 onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
                 onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                 datePickerState = datePickerState,
+                dueDatePickerState = dueDatePickerState,
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId,
                 bottomFormOnValueChange = bottomFormOnValueChange,
@@ -171,7 +176,8 @@ fun DocumentBottomSheetTextElements(
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate,
                 showDocumentForm = showDocumentForm,
-                onShowDocumentForm = onShowDocumentForm
+                onShowDocumentForm = onShowDocumentForm,
+                onValueChange = onValueChange
             )
         }
     }

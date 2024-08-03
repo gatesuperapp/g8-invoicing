@@ -5,6 +5,7 @@ CREATE TABLE Invoice (
   order_number TEXT,
   currency TEXT,
   due_date TEXT,
+  footer TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -33,8 +34,8 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, delivery_date, order_number, currency, due_date)
-VALUES (?,  ?,  ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, delivery_date, order_number, currency, due_date, footer)
+VALUES (?,  ?,  ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
@@ -42,7 +43,8 @@ SET number = :number,
     delivery_date = :delivery_date,
     order_number = :order_number,
     currency =: currency,
-    due_date =: due_date
+    due_date =: due_date,
+    footer  =: footer
 WHERE
     invoice_id = :invoice_id;
 

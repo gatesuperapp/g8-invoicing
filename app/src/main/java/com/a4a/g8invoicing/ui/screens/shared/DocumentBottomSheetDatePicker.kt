@@ -27,7 +27,7 @@ fun DocumentBottomSheetDatePicker(
     onClickBack: () -> Unit
 ) {
     // As soon as the user selects a new date, the new value is updated through datePickerState:
-    // see "rememberDatePickerState" in DeliveryNoteAddEdit
+    // see "rememberDatePickerState" in DocumentAddEdit
     Column(
         modifier = Modifier
             .background(Color.White)
