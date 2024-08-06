@@ -39,7 +39,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import kotlin.math.PI
 import kotlin.math.abs
 
@@ -119,7 +119,7 @@ fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) 
             .padding(bottom = 2.dp)
             .wrapContentHeight(),
         fontWeight = FontWeight.Bold,
-        style = MaterialTheme.typography.textForDocumentsImportant,
+        style = MaterialTheme.typography.textForDocumentsBold,
         text = (clientOrIssuer?.firstName.let {
             (it?.text ?: "") + " "
         }) + (clientOrIssuer?.name?.text ?: "")

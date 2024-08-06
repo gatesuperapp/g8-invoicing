@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.textForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
 fun DocumentBasicTemplateOrderNumber(
@@ -37,7 +37,7 @@ fun DocumentBasicTemplateOrderNumber(
 
     ) {
         Text(
-            style = MaterialTheme.typography.textForDocumentsImportant,
+            style = MaterialTheme.typography.textForDocumentsBold,
             text = stringResource(id = R.string.document_order_number) + " : "
         )
         Text(

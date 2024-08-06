@@ -64,9 +64,10 @@ fun DocumentBottomSheetFooter(
         ) {
             BasicTextField(
                 modifier = Modifier
+                    .fillMaxSize()
                     .background(ColorBackgroundGrey)
                     .padding(30.dp)
-                    .fillMaxSize(),
+                    ,
                 value = text,
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_FOOTER, it)

@@ -50,34 +50,35 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     val pdfDocument = PdfDocument(writer)
 
-    val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
-    val dmMedium = PdfFontFactory.createFont("assets/DMSans-Medium.ttf")
+    val fontRegular = PdfFontFactory.createFont("assets/WorkSans-Regular.otf")
+    val fontMedium = PdfFontFactory.createFont("assets/WorkSans-Medium.otf")
 
     val document = Document(pdfDocument, PageSize.A4)
-        .setFont(dmRegular)
+        .setFont(fontRegular)
         .setFontSize(12F)
 
-    document.add(createTitle(inputDocument.documentNumber.text, inputDocument.documentType, dmRegular))
+    document.add(createTitle(inputDocument.documentNumber.text, inputDocument.documentType, fontRegular))
     document.add(createDate(inputDocument.documentDate))
     document.add(
         createIssuerAndClientTable(
             inputDocument.documentIssuer,
             inputDocument.documentClient,
-            dmMedium
+            fontMedium
         )
     )
     if (inputDocument.orderNumber.text.isNotEmpty()) {
-        document.add(createReference(inputDocument.orderNumber.text, dmMedium))
+        document.add(createReference(inputDocument.orderNumber.text, fontMedium))
     }
     inputDocument.documentProducts?.let {
         document.add(createProductsTable(it, context))
     }
     inputDocument.documentPrices?.let {
-        document.add(createTotals(dmMedium, it))
+        document.add(createTotals(fontMedium, it))
     }
 
     if(inputDocument is InvoiceState) {
-        document.add(createDueDate(inputDocument.dueDate))
+        document.add(createDueDate(fontMedium, inputDocument.dueDate))
+        document.add(createFooter(inputDocument.footerText.text))
     }
 
 
@@ -102,10 +103,10 @@ fun createTitle(documentNumber: String, documentType: DocumentType? = null, font
         else -> null
     }
 
-    return Paragraph(Strings.get(R.string.delivery_note_number) + documentNumber)
+    return Paragraph(title + documentNumber)
         .setFont(font)
         .setFontSize(20F)
-        .setMarginBottom(-10F)
+        .setMarginBottom(-6F)
 }
 
 fun createDate(date: String): Paragraph {
@@ -273,7 +274,7 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         productsTable.addCustomCell(paragraph = item, alignment = TextAlignment.LEFT)
         productsTable.addCustomCell(text = it.quantity.toString())
         productsTable.addCustomCell(text = it.unit?.text)
-        productsTable.addCustomCell(text = it.taxRate?.let{ "$it%" }  ?: " - ")
+        productsTable.addCustomCell(text = it.taxRate?.let{ it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }  ?: " - ")
 
         var priceWithoutTax = BigDecimal(0)
         it.priceWithTax?.let { priceWithTax ->
@@ -295,16 +296,16 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
 fun createTotals(font: PdfFont, documentPrices: DocumentPrices): Table {
     val footerArray = listOf(
         FooterRow(
-            rowDescription = "TOTAL_WITHOUT_TAX", page = 1
+            rowDescription = "TOTAL_WITHOUT_TAX"
         ),
         FooterRow(
-            rowDescription = "TAXES_10", page = 1
+            rowDescription = "TAXES_10"
         ),
         FooterRow(
-            rowDescription = "TAXES_20", page = 1
+            rowDescription = "TAXES_20"
         ),
         FooterRow(
-            rowDescription = "TOTAL_WITH_TAX", page = 1
+            rowDescription = "TOTAL_WITH_TAX"
         ),
     )
 
@@ -312,6 +313,7 @@ fun createTotals(font: PdfFont, documentPrices: DocumentPrices): Table {
     val footerTable = Table(UnitValue.createPercentArray(footerColumnsWidth))
         .useAllAvailableWidth()
         .setTextAlignment(TextAlignment.RIGHT)
+        .setPaddingBottom(8f)
 
     if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
         footerTable.addCellInFooter(Paragraph(Strings.get(R.string.document_total_without_tax)))
@@ -355,8 +357,18 @@ fun createTotals(font: PdfFont, documentPrices: DocumentPrices): Table {
     return footerTable
 }
 
-fun createDueDate(date: String): Paragraph {
-    return Paragraph(Strings.get(R.string.invoice_due_date) + " : " + date)
+fun createDueDate(font: PdfFont, date: String): Paragraph {
+    return Paragraph(Strings.get(R.string.invoice_pdf_due_date) + " : " + date)
+        .setFixedLeading(16F)
+        .setPaddingTop(12f)
+        .setTextAlignment(TextAlignment.CENTER)
+        .setFont(font)
+}
+
+fun createFooter(text: String): Paragraph {
+    return Paragraph(text)
+        .setFixedLeading(16F)
+        .setTextAlignment(TextAlignment.CENTER)
 }
 
 fun Table.addCustomCell(
@@ -373,9 +385,9 @@ fun Table.addCustomCell(
         Paragraph(text).setFixedLeading(14F)
     } else paragraph
 
-    val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
-    val dmMedium = PdfFontFactory.createFont("assets/DMSans-Medium.ttf")
-    val font = if (isBold) dmMedium else dmRegular
+    val fontRegular = PdfFontFactory.createFont("assets/WorkSans-Regular.otf")
+    val fontMedium = PdfFontFactory.createFont("assets/WorkSans-Medium.otf")
+    val font = if (isBold) fontMedium else fontRegular
 
     return this.addCell(
         Cell().add(textToAdd)
@@ -403,12 +415,11 @@ fun Table.addCellInFooter(
 
 data class FooterRow(
     var rowDescription: String,
-    var page: Int,
 )
 
 @Throws(Exception::class)
 fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String) {
-    val dmRegular = PdfFontFactory.createFont("assets/DMSans-Regular.ttf")
+    val fontRegular = PdfFontFactory.createFont("assets/WorkSans-Regular.otf")
 
     val pdfDoc = PdfDocument(
         PdfReader(getFilePath(previousFileName)),
@@ -422,7 +433,7 @@ fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String)
         for (i in 1..numberOfPages) {
             doc.showTextAligned(
                 Paragraph(String.format("%s/%s", i, numberOfPages))
-                    .setFont(dmRegular)
+                    .setFont(fontRegular)
                     .setFontSize(12F),
                 570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
             )

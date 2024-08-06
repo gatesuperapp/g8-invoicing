@@ -28,6 +28,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
 import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallAndItalic
+import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallBold
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -55,29 +56,35 @@ fun DocumentBasicTemplateDataTable(
         TableCell(
             text = stringResource(id = R.string.document_table_description),
             weight = descriptionColumnWeight,
-            alignEnd = false
+            alignEnd = false,
+            isBold = true
         )
         TableCell(
             text = stringResource(id = R.string.document_table_quantity),
             weight = quantityColumnWeight,
-            alignEnd = true
+            alignEnd = true,
+            isBold = true
         )
         TableCell(
             text = stringResource(id = R.string.document_table_unit),
-            alignEnd = true
+            alignEnd = true,
+            isBold = true
         )
         TableCell(
             text = stringResource(id = R.string.document_table_tax_rate),
             weight = quantityColumnWeight,
-            alignEnd = true
+            alignEnd = true,
+            isBold = true
         )
         TableCell(
             text = stringResource(id = R.string.document_table_unit_price_without_tax),
-            alignEnd = true
+            alignEnd = true,
+            isBold = true
         )
         TableCell(
             text = stringResource(id = R.string.document_table_total_price_without_tax),
-            alignEnd = true
+            alignEnd = true,
+            isBold = true
         )
     }
 
@@ -137,6 +144,7 @@ fun RowScope.TableCell(
     weight: Float = .22f, // Width of all the cells except the first row ones
     alignEnd: Boolean,
     subText: String? = null,
+    isBold: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -152,7 +160,8 @@ fun RowScope.TableCell(
 
         Text(
             text = text,
-            style = MaterialTheme.typography.textForDocumentsVerySmall,
+            style = if(isBold) MaterialTheme.typography.textForDocumentsVerySmallBold
+            else MaterialTheme.typography.textForDocumentsVerySmall,
             // have to specify it (in addition to column alignment)
             // because without it, multilines text aren't aligned
             textAlign = if(alignEnd) TextAlign.Right else TextAlign.Start,

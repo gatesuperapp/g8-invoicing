@@ -64,7 +64,6 @@ class ProductAddEditViewModel @Inject constructor(
             _documentProductUiState
                 .debounce(300)
                 .collect {
-                    Log.e("xxx", "Saveddd "+ _documentProductUiState.value)
                     updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
                 }
         }

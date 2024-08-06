@@ -2,10 +2,7 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,8 +15,8 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.theme.textForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
+import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallBold
 
 @Composable
 fun DocumentBasicTemplateFooter(
@@ -41,7 +38,7 @@ fun DocumentBasicTemplateFooter(
     ) {
         Row {
             Text(
-                style = MaterialTheme.typography.textForDocumentsImportant,
+                style = MaterialTheme.typography.textForDocumentsVerySmallBold,
                 text = Strings.get(R.string.invoice_pdf_due_date) + " : " + uiState.dueDate
             )
         }
@@ -50,7 +47,7 @@ fun DocumentBasicTemplateFooter(
                 modifier = Modifier
                     .padding(bottom = 12.dp),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.textForDocuments,
+                style = MaterialTheme.typography.textForDocumentsVerySmall,
                 text = uiState.footerText.text
             )
         }

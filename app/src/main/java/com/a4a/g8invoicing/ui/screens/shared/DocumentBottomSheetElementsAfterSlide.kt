@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -16,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
@@ -105,7 +108,7 @@ fun DocumentBottomSheetElementsAfterSlide(
         )
     }
 
-    if (pageElement == ScreenElement.DOCUMENT_DUE_DATE ) {
+    if (pageElement == ScreenElement.DOCUMENT_DUE_DATE) {
         dueDatePickerState?.let {
             DocumentBottomSheetDatePicker(
                 initialDate = parameters.let { it as String },

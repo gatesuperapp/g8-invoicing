@@ -31,7 +31,7 @@ val documentsFont = FontFamily(
     Font(
         googleFont = GoogleFont("Work Sans"),
         fontProvider = provider,
-        //weight = FontWeight.SemiBold
+        weight = FontWeight.SemiBold
     )
 )
 
@@ -110,7 +110,7 @@ val Typography.textForDocuments: TextStyle
             )
     }
 
-val Typography.textForDocumentsImportant: TextStyle
+val Typography.textForDocumentsBold: TextStyle
     @Composable
     get() {
         return TextStyle(
@@ -143,7 +143,20 @@ val Typography.textForDocumentsVerySmall: TextStyle
     get() {
         return TextStyle(
             fontFamily = documentsFont,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Normal,
+            fontSize = 6.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }
+
+val Typography.textForDocumentsVerySmallBold: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = documentsFont,
+            fontWeight = FontWeight.Bold,
             fontSize = 6.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,

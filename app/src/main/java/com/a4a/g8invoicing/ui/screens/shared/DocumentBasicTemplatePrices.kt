@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentState
-import com.a4a.g8invoicing.ui.theme.textForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsImportant
+import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
+import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallBold
 import java.math.BigDecimal
 
 @Composable
@@ -48,7 +48,7 @@ fun DocumentBasicTemplatePrices(
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp),
-                    style = MaterialTheme.typography.textForDocuments,
+                    style = MaterialTheme.typography.textForDocumentsVerySmall,
                     text = stringResource(id = R.string.document_total_without_tax) + " "
                 )
             }
@@ -69,7 +69,7 @@ fun DocumentBasicTemplatePrices(
                         Text(
                             modifier = Modifier
                                 .padding(bottom = 3.dp),
-                            style = MaterialTheme.typography.textForDocuments,
+                            style = MaterialTheme.typography.textForDocumentsVerySmall,
                             text = stringResource(id = R.string.document_tax) + " " + it.first.toString() + "% : "
                         )
                     }
@@ -77,7 +77,7 @@ fun DocumentBasicTemplatePrices(
             }
             if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
-                    style = MaterialTheme.typography.textForDocumentsImportant,
+                    style = MaterialTheme.typography.textForDocumentsVerySmallBold,
                     text = stringResource(id = R.string.document_total_with_tax) + " "
                 )
             }
@@ -94,7 +94,7 @@ fun DocumentBasicTemplatePrices(
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp, end = 3.dp),
-                    style = MaterialTheme.typography.textForDocuments,
+                    style = MaterialTheme.typography.textForDocumentsVerySmall,
                     text = (uiState.documentPrices?.totalPriceWithoutTax?.toString()
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
@@ -116,7 +116,7 @@ fun DocumentBasicTemplatePrices(
                         Text(
                             modifier = Modifier
                                 .padding(bottom = 3.dp, end = 3.dp),
-                            style = MaterialTheme.typography.textForDocuments,
+                            style = MaterialTheme.typography.textForDocumentsVerySmall,
                             text = it.second.toString() + stringResource(id = R.string.currency)
                         )
                     }
@@ -126,7 +126,7 @@ fun DocumentBasicTemplatePrices(
                 Text(
                     modifier = Modifier
                         .padding(end = 3.dp),
-                    style = MaterialTheme.typography.textForDocumentsImportant,
+                    style = MaterialTheme.typography.textForDocumentsVerySmallBold,
                     text = (uiState.documentPrices?.totalPriceWithTax?.toString()
                         ?: " - ") + stringResource(id = R.string.currency)
                 )

@@ -24,6 +24,7 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 
 @Composable
@@ -58,8 +59,7 @@ fun DocumentBasicTemplateHeader(
                         }
                     ),
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.textForDocuments,
+                style = MaterialTheme.typography.textForDocumentsBold,
                 text = stringResource(
                     id = if (uiState is DeliveryNoteState) R.string.delivery_note_number
                     else R.string.invoice_number

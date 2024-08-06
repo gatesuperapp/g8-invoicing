@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -141,50 +142,52 @@ fun DocumentBottomSheetTextElements(
                 }
             }
 
-            DocumentBottomSheetElementsAfterSlide(
-                pageElement = slideOtherComponent.value,
-                parameters = when (slideOtherComponent.value) {
-                    ScreenElement.DOCUMENT_ISSUER -> Pair(
-                        document.documentIssuer,
-                        issuers
-                    )
-                    ScreenElement.DOCUMENT_CLIENT -> Pair(
-                        document.documentClient,
-                        clients
-                    )
-                    ScreenElement.DOCUMENT_DATE -> document.documentDate
-                    ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
-                    ScreenElement.DOCUMENT_FOOTER -> (document as InvoiceState).footerText
-                    else -> {}
-                },
-                onClickBack = {
-                    slideOtherComponent.value = null
-                },
-                documentClientUiState = documentClientUiState,
-                documentIssuerUiState = documentIssuerUiState,
-                taxRates = taxRates,
-                onClickClientOrIssuer = onClickClientOrIssuer,
-                onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
-                onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                datePickerState = datePickerState,
-                dueDatePickerState = dueDatePickerState,
-                currentClientId = currentClientId,
-                currentIssuerId = currentIssuerId,
-                bottomFormOnValueChange = bottomFormOnValueChange,
-                bottomFormPlaceCursor = bottomFormPlaceCursor,
-                onClickDoneForm = onClickDoneForm,
-                onClickCancelForm = onClickCancelForm,
-                onSelectTaxRate = onSelectTaxRate,
-                showDocumentForm = showDocumentForm,
-                onShowDocumentForm = onShowDocumentForm,
-                onValueChange = onValueChange
-            )
+            Surface() // disable click on background component
+            {
+                DocumentBottomSheetElementsAfterSlide(
+                    pageElement = slideOtherComponent.value,
+                    parameters = when (slideOtherComponent.value) {
+                        ScreenElement.DOCUMENT_ISSUER -> Pair(
+                            document.documentIssuer,
+                            issuers
+                        )
+
+                        ScreenElement.DOCUMENT_CLIENT -> Pair(
+                            document.documentClient,
+                            clients
+                        )
+
+                        ScreenElement.DOCUMENT_DATE -> document.documentDate
+                        ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
+                        ScreenElement.DOCUMENT_FOOTER -> (document as InvoiceState).footerText
+                        else -> {}
+                    },
+                    onClickBack = {
+                        slideOtherComponent.value = null
+                    },
+                    documentClientUiState = documentClientUiState,
+                    documentIssuerUiState = documentIssuerUiState,
+                    taxRates = taxRates,
+                    onClickClientOrIssuer = onClickClientOrIssuer,
+                    onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+                    datePickerState = datePickerState,
+                    dueDatePickerState = dueDatePickerState,
+                    currentClientId = currentClientId,
+                    currentIssuerId = currentIssuerId,
+                    bottomFormOnValueChange = bottomFormOnValueChange,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
+                    onClickDoneForm = onClickDoneForm,
+                    onClickCancelForm = onClickCancelForm,
+                    onSelectTaxRate = onSelectTaxRate,
+                    showDocumentForm = showDocumentForm,
+                    onShowDocumentForm = onShowDocumentForm,
+                    onValueChange = onValueChange
+                )
+            }
         }
     }
 }
-
-
-
 
 
 //TODO animation: slide elements from right to left on open, and left to right on close
