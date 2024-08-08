@@ -21,7 +21,7 @@ import java.math.BigDecimal
 @Composable
 fun DocumentBasicTemplatePrices(
     uiState: DocumentState,
-    footerArray: List<FooterRow>,
+    footerArray: List<String>,
 ) {
     Row(
         Modifier
@@ -44,7 +44,7 @@ fun DocumentBasicTemplatePrices(
             // TVA 5% :
             // Total TTC :
 
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
+            if (footerArray.any { it == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp),
@@ -52,10 +52,10 @@ fun DocumentBasicTemplatePrices(
                     text = stringResource(id = R.string.document_total_without_tax) + " "
                 )
             }
-            if (footerArray.any { it.rowDescription.contains("TAXES") }) {
+            if (footerArray.any { it.contains("TAXES") }) {
                 val taxes = footerArray
-                    .filter { it.rowDescription.contains("TAXES") }
-                    .map { it.rowDescription }.toMutableList()
+                    .filter { it.contains("TAXES") }
+                    .map { it }.toMutableList()
 
                 val taxesAmount = mutableListOf<BigDecimal>()
                 taxes.forEach {
@@ -75,7 +75,7 @@ fun DocumentBasicTemplatePrices(
                     }
                 }
             }
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
+            if (footerArray.any { it == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsVerySmallBold,
                     text = stringResource(id = R.string.document_total_with_tax) + " "
@@ -90,7 +90,7 @@ fun DocumentBasicTemplatePrices(
             // TVA 20% : 1€
             // TVA 5% : 1€
             // Total TTC : 14€
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
+            if (footerArray.any { it == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = 3.dp, end = 3.dp),
@@ -99,10 +99,10 @@ fun DocumentBasicTemplatePrices(
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
-            if (footerArray.any { it.rowDescription.contains("TAXES") }) {
+            if (footerArray.any { it.contains("TAXES") }) {
                 val taxes = footerArray
-                    .filter { it.rowDescription.contains("TAXES") }
-                    .map { it.rowDescription }.toMutableList()
+                    .filter { it.contains("TAXES") }
+                    .map { it }.toMutableList()
 
                 val taxesAmount = mutableListOf<BigDecimal>()
                 taxes.forEach {
@@ -122,7 +122,7 @@ fun DocumentBasicTemplatePrices(
                     }
                 }
             }
-            if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
+            if (footerArray.any { it == FooterRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(end = 3.dp),

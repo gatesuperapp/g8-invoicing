@@ -128,19 +128,6 @@ class InvoiceAddEditViewModel @Inject constructor(
                     )
                 }
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
-
-                // If several pages, decrement page of next element
-                val numberOfPages = _documentUiState.value.documentProducts?.last()?.page
-                numberOfPages?.let {numberOfPages ->
-                    if(numberOfPages > 1) {
-                        for(i in 2..numberOfPages) {
-                            _documentUiState.value.documentProducts
-                                ?.first { it.page == i }?.id?.let {
-                                    updateInvoiceStateWithDecrementedValue(it)
-                                }
-                        }
-                    }
-                }
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
@@ -154,19 +141,6 @@ class InvoiceAddEditViewModel @Inject constructor(
             _documentUiState.value = _documentUiState.value.copy(
                 documentProducts = list
             )
-
-            // If several pages, decrement page of next element
-            val numberOfPages = _documentUiState.value.documentProducts?.last()?.page
-            numberOfPages?.let {numberOfPages ->
-                if(numberOfPages > 1) {
-                    for(i in 2..numberOfPages) {
-                        _documentUiState.value.documentProducts
-                            ?.first { it.page == i }?.id?.let {
-                                updateInvoiceStateWithDecrementedValue(it)
-                            }
-                    }
-                }
-            }
 
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
@@ -270,7 +244,7 @@ class InvoiceAddEditViewModel @Inject constructor(
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
-    fun updateStateWithIncrementedValue(documentProductId: Any) {
+/*    fun updateStateWithIncrementedValue(documentProductId: Any) {
         val documentProduct =
             _documentUiState.value.documentProducts?.first { it.id == documentProductId }
         documentProduct?.let { docProduct ->
@@ -296,12 +270,12 @@ class InvoiceAddEditViewModel @Inject constructor(
             _documentUiState.value =
                 _documentUiState.value.copy(documentProducts = updatedList)
         }
-    }
+    }*/
 
     fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> documentUiState.value.documentNumber.text
-            ScreenElement.DOCUMENT_ORDER_NUMBER -> documentUiState.value.orderNumber.text
+            ScreenElement.DOCUMENT_ORDER_NUMBER -> documentUiState.value.orderNumber?.text
             else -> null
         }
 

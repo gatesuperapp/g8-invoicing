@@ -46,8 +46,7 @@ fun DocumentBasicTemplateContent(
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<DocumentProductState>?,
-    footerArray: List<FooterRow>,
-    numberOfPages: Int,
+    footerArray: List<String>,
     selectedItem: ScreenElement? = null,
 ) {
     val pagePadding = 20.dp
@@ -80,15 +79,14 @@ fun DocumentBasicTemplateContent(
                 .background(Color.White)
         ) {
             DocumentBasicTemplateHeader(uiState, onClickElement, selectedItem)
-            if (uiState.orderNumber.text.isNotEmpty()) {
-                DocumentBasicTemplateOrderNumber(
-                    uiState.orderNumber.text,
-                    onClickElement,
-                    selectedItem
-                )
-            } else {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
+            uiState.orderNumber?.let {
+                if(it.text.isNotEmpty())
+                    DocumentBasicTemplateOrderNumber(
+                        it.text,
+                        onClickElement,
+                        selectedItem
+                    )
+            } ?: Spacer(modifier = Modifier.height(20.dp))
 
             Spacer(
                 modifier = Modifier
@@ -97,7 +95,7 @@ fun DocumentBasicTemplateContent(
 
             Column(
                 Modifier
-                    .getBorder(ScreenElement.DOCUMENT_PRODUCT, selectedItem)
+                    .getBorder(ScreenElement.DOCUMENT_PRODUCT, selectedItem) // for selection
                     .customCombinedClickable(
                         onClick = {
                             onClickElement(ScreenElement.DOCUMENT_PRODUCT)

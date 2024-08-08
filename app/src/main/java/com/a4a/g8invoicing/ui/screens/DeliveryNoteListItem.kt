@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
 fun DeliveryNoteListItem(
@@ -114,7 +116,6 @@ fun DeliveryNoteListItem(
                     Text(
                         text = deliveryNote.documentNumber.text,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
                         //overflow = TextOverflow.Ellipsis
                     )
@@ -137,8 +138,6 @@ fun DeliveryNoteListItem(
                 ) {
                     Text(
                         text = deliveryNote.documentDate,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
                         //overflow = TextOverflow.Ellipsis
                     )

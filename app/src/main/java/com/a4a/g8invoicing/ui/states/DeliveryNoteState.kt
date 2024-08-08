@@ -15,7 +15,7 @@ data class DeliveryNoteState(
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
     override var documentDate: String = Strings.get(R.string.document_default_date),
-    override var orderNumber: TextFieldValue = TextFieldValue(),
+    override var orderNumber: TextFieldValue? = TextFieldValue(),
     override var documentIssuer: DocumentClientOrIssuerState? = null,
     override var documentClient: DocumentClientOrIssuerState? = null,
     override var documentProducts: List<DocumentProductState>? = null,

@@ -23,6 +23,7 @@
     <string name="appbar_mark_as_paid"> Basculer à "payée"</string>
     <string name="appbar_more"> Autres options</string>
     <string name="appbar_delete"> Supprimer </string>
+    <string name="appbar_convert"> Convertir </string>
     <string name="appbar_unselect_all"> Désélectionner </string>
     <string name="appbar_select_all"> Sélectionner tout </string>
     <string name="appbar_edit"> Modifier la facture</string>
@@ -224,4 +225,5 @@
     <string name="export_email_subject">Votre</string>
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
+    <string name="delivery_note_acronym">BL</string>
 </resources>

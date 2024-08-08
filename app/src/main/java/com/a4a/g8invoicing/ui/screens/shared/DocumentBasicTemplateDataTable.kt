@@ -38,12 +38,42 @@ import java.math.RoundingMode
 
 @Composable
 fun DocumentBasicTemplateDataTable(
-    tableData: List<DocumentProductState>
+    tableData: List<DocumentProductState>,
 ) {
     val descriptionColumnWeight = .8f
     val quantityColumnWeight = .15f
     val taxColumnWeight = .15f
+    val linkedNoteColumnWeight = .100f
 
+    TitleRows(descriptionColumnWeight, quantityColumnWeight)
+
+    val linkedDeliveryNotes = getLinkedDeliveryNotes(tableData)
+
+    if (linkedDeliveryNotes.isNotEmpty()) {
+        linkedDeliveryNotes.forEach {docNumberAndDate ->
+            LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
+            DocumentProductsRows(
+                tableData.filter { it.linkedDocNumber == docNumberAndDate.first },
+                descriptionColumnWeight,
+                quantityColumnWeight,
+                taxColumnWeight
+            )
+        }
+    } else {
+        DocumentProductsRows(
+            tableData,
+            descriptionColumnWeight,
+            quantityColumnWeight,
+            taxColumnWeight
+        )
+    }
+}
+
+@Composable
+fun TitleRows(
+    descriptionColumnWeight: Float,
+    quantityColumnWeight: Float,
+) {
     Row(
         Modifier
             .topBorder(1.dp, Color.LightGray)
@@ -87,12 +117,60 @@ fun DocumentBasicTemplateDataTable(
             isBold = true
         )
     }
+}
 
-    // All the lines of the table.
+fun getLinkedDeliveryNotes(tableData: List<DocumentProductState>): MutableList<Pair<String?, String?>> {
+    val linkedDeliveryNotes: MutableList<Pair<String?, String?>> = mutableListOf()
+
+    if (tableData.any { !it.linkedDocNumber.isNullOrEmpty() }) {
+        tableData.map { it.linkedDocNumber }.distinct().forEach { docNumber ->
+            linkedDeliveryNotes.add(
+                Pair(
+                    docNumber,
+                    tableData.firstOrNull { it.linkedDocNumber == docNumber }?.linkedDate
+                )
+            )
+        }
+    }
+    return linkedDeliveryNotes
+}
+
+@Composable
+fun LinkedDeliveryNoteRow(
+    linkedNoteColumnWeight: Float,
+    docNumberAndDate: Pair<String?, String?>
+) {
+    Row(
+        Modifier
+            .topBorder(1.dp, Color.LightGray)
+            .leftBorder(1.dp, Color.LightGray)
+            .bottomBorder(1.dp, Color.LightGray)
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min), // without it we can't add fillMaxHeight to columns
+        horizontalArrangement = Arrangement.End
+    ) {
+        TableCell(
+            text = docNumberAndDate.first + docNumberAndDate.second,
+            weight = linkedNoteColumnWeight,
+            alignEnd = false,
+            isBold = true
+        )
+    }
+}
+
+
+@Composable
+fun DocumentProductsRows(
+    tableData: List<DocumentProductState>,
+    descriptionColumnWeight: Float,
+    quantityColumnWeight: Float,
+    taxColumnWeight: Float,
+) {
     tableData.forEach {
         var priceWithoutTax = BigDecimal(0)
-        it.priceWithTax?.let {priceWithTax ->
-            priceWithoutTax =  (priceWithTax - priceWithTax * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100))
+        it.priceWithTax?.let { priceWithTax ->
+            priceWithoutTax =
+                (priceWithTax - priceWithTax * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100))
         }
 
         Row(
@@ -115,20 +193,23 @@ fun DocumentBasicTemplateDataTable(
                 alignEnd = true
             )
             TableCell(
-                text = if(!it.unit?.text.isNullOrEmpty()) it.unit?.text!!  else " - ",
+                text = if (!it.unit?.text.isNullOrEmpty()) it.unit?.text!! else " - ",
                 alignEnd = true
             )
             TableCell(
-                text = it.taxRate?.let{ it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }  ?: " - ",
+                text = it.taxRate?.let { it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }
+                    ?: " - ",
                 weight = taxColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP).toString() + stringResource(id = R.string.currency),
+                text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
+                    .toString() + stringResource(id = R.string.currency),
                 alignEnd = true
             )
             TableCell(
-                text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP).toString() + stringResource(id = R.string.currency),
+                text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
+                    .toString() + stringResource(id = R.string.currency),
                 alignEnd = true
             )
 
@@ -144,7 +225,7 @@ fun RowScope.TableCell(
     weight: Float = .22f, // Width of all the cells except the first row ones
     alignEnd: Boolean,
     subText: String? = null,
-    isBold: Boolean = false
+    isBold: Boolean = false,
 ) {
     Column(
         modifier = Modifier
@@ -160,17 +241,17 @@ fun RowScope.TableCell(
 
         Text(
             text = text,
-            style = if(isBold) MaterialTheme.typography.textForDocumentsVerySmallBold
+            style = if (isBold) MaterialTheme.typography.textForDocumentsVerySmallBold
             else MaterialTheme.typography.textForDocumentsVerySmall,
             // have to specify it (in addition to column alignment)
             // because without it, multilines text aren't aligned
-            textAlign = if(alignEnd) TextAlign.Right else TextAlign.Start,
+            textAlign = if (alignEnd) TextAlign.Right else TextAlign.Start,
         )
-        if(!subText.isNullOrEmpty()) {
+        if (!subText.isNullOrEmpty()) {
             Text(
                 text = subText,
                 style = MaterialTheme.typography.textForDocumentsVerySmallAndItalic,
-               // maxLines = 1
+                // maxLines = 1
             )
         }
         Spacer(Modifier.padding(2.dp))

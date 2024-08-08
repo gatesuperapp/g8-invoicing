@@ -10,6 +10,7 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,7 @@ class DeliveryNoteLocalDataSource(
     db: Database,
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
+    private val invoiceQueries = db.invoiceQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentProductQueries = db.documentProductQueries
     private val deliveryNoteDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
@@ -211,7 +213,7 @@ class DeliveryNoteLocalDataSource(
                     delivery_note_id = deliveryNote.documentId?.toLong() ?: 0,
                     number = deliveryNote.documentNumber.text,
                     delivery_date = deliveryNote.documentDate,
-                    order_number = deliveryNote.orderNumber.text,
+                    order_number = deliveryNote.orderNumber?.text,
                     currency = deliveryNote.currency.text
                 )
             } catch (cause: Throwable) {
@@ -257,7 +259,6 @@ class DeliveryNoteLocalDataSource(
                     final_price = documentProduct.priceWithTax?.toDouble(),
                     tax_rate = documentProduct.taxRate?.toDouble(),
                     unit = documentProduct.unit?.text,
-                    page = documentProduct.page.toLong(),
                     product_id = documentProduct.productId?.toLong()
                 )
 
@@ -413,34 +414,39 @@ class DeliveryNoteLocalDataSource(
             delivery_note_id = null,
             number = deliveryNote.documentNumber.text,
             delivery_date = deliveryNote.documentDate,
-            order_number = deliveryNote.orderNumber.text,
+            order_number = deliveryNote.orderNumber?.text,
             currency = deliveryNote.currency.text
         )
 
         deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { deliveryNoteId ->
-            // Link all products
-            deliveryNote.documentProducts?.forEach { documentProduct ->
-                saveDocumentProductInDbAndLinkToDocument(
-                    documentProduct = documentProduct,
-                    deliveryNoteId = deliveryNoteId
-                )
-            }
+            saveAndLinkOtherElements(deliveryNote, deliveryNoteId)
+        }
+    }
 
-            // Link client
-            deliveryNote.documentClient?.let {
-                saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                    documentClientOrIssuer = it,
-                    deliveryNoteId = deliveryNoteId
-                )
-            }
 
-            // Link issuer
-            deliveryNote.documentIssuer?.let {
-                saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                    documentClientOrIssuer = it,
-                    deliveryNoteId = deliveryNoteId
-                )
-            }
+    private suspend fun saveAndLinkOtherElements(deliveryNote: DeliveryNoteState, deliveryNoteId: Long) {
+        // Link all products
+        deliveryNote.documentProducts?.forEach { documentProduct ->
+            saveDocumentProductInDbAndLinkToDocument(
+                documentProduct = documentProduct,
+                deliveryNoteId = deliveryNoteId
+            )
+        }
+
+        // Link client
+        deliveryNote.documentClient?.let {
+            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                documentClientOrIssuer = it,
+                deliveryNoteId = deliveryNoteId
+            )
+        }
+
+        // Link issuer
+        deliveryNote.documentIssuer?.let {
+            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                documentClientOrIssuer = it,
+                deliveryNoteId = deliveryNoteId
+            )
         }
     }
 }

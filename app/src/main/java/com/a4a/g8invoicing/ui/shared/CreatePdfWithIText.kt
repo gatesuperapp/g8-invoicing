@@ -42,6 +42,10 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 
+const val helvetica = "assets/helvetica.ttf"
+const val helveticaBold = "assets/helvetica.ttf"
+
+//const val pdfFontBold = "assets/helveticabold.ttf"
 fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
 
     val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
@@ -50,33 +54,42 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     val pdfDocument = PdfDocument(writer)
 
-    val fontRegular = PdfFontFactory.createFont("assets/WorkSans-Regular.otf")
-    val fontMedium = PdfFontFactory.createFont("assets/WorkSans-Medium.otf")
+    val fontRegular = PdfFontFactory.createFont(helvetica)
+    val fontMedium = PdfFontFactory.createFont(helveticaBold)
 
     val document = Document(pdfDocument, PageSize.A4)
         .setFont(fontRegular)
         .setFontSize(12F)
 
-    document.add(createTitle(inputDocument.documentNumber.text, inputDocument.documentType, fontRegular))
+    document.add(
+        createTitle(
+            inputDocument.documentNumber.text,
+            inputDocument.documentType,
+            fontRegular
+        )
+    )
     document.add(createDate(inputDocument.documentDate))
     document.add(
         createIssuerAndClientTable(
             inputDocument.documentIssuer,
             inputDocument.documentClient,
-            fontMedium
+            fontMedium,
+            inputDocument.documentType
         )
     )
-    if (inputDocument.orderNumber.text.isNotEmpty()) {
-        document.add(createReference(inputDocument.orderNumber.text, fontMedium))
+    inputDocument.orderNumber?.let {
+        if (it.text.isNotEmpty()) {
+            document.add(createReference(it.text, fontMedium))
+        }
     }
     inputDocument.documentProducts?.let {
         document.add(createProductsTable(it, context))
     }
     inputDocument.documentPrices?.let {
-        document.add(createTotals(fontMedium, it))
+        document.add(createPrices(fontMedium, it))
     }
 
-    if(inputDocument is InvoiceState) {
+    if (inputDocument is InvoiceState) {
         document.add(createDueDate(fontMedium, inputDocument.dueDate))
         document.add(createFooter(inputDocument.footerText.text))
     }
@@ -96,7 +109,11 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     Toast.makeText(context, "PDF created", Toast.LENGTH_SHORT).show()
 }
 
-fun createTitle(documentNumber: String, documentType: DocumentType? = null, font: PdfFont): Paragraph {
+fun createTitle(
+    documentNumber: String,
+    documentType: DocumentType? = null,
+    font: PdfFont,
+): Paragraph {
     val title = when (documentType) {
         DocumentType.INVOICE -> Strings.get(R.string.invoice_number)
         DocumentType.DELIVERY_NOTE -> Strings.get(R.string.delivery_note_number)
@@ -117,6 +134,7 @@ fun createIssuerAndClientTable(
     issuer: DocumentClientOrIssuerState?,
     client: DocumentClientOrIssuerState?,
     font: PdfFont,
+    documentType: DocumentType,
 ): Table {
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
@@ -216,7 +234,13 @@ fun createIssuerAndClientTable(
         Cell()
             .setBorder(Border.NO_BORDER)
             .add(
-                Paragraph(Strings.get(R.string.document_recipient))
+                Paragraph(
+                    when (documentType) {
+                        DocumentType.INVOICE -> Strings.get(R.string.document_recipient)
+                        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.document_recipient)
+                        else -> null
+                    }
+                )
                     .setFontSize(10F)
                     .setFontColor(ColorConstants.DARK_GRAY)
             )
@@ -248,7 +272,7 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
 
     val productsTable = Table(UnitValue.createPercentArray(columnWidth))
         .useAllAvailableWidth()
-        .setFontSize(10F)
+        .setFontSize(11F)
         .setMarginBottom(10f)
         .setFixedLayout()
 
@@ -274,7 +298,9 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         productsTable.addCustomCell(paragraph = item, alignment = TextAlignment.LEFT)
         productsTable.addCustomCell(text = it.quantity.toString())
         productsTable.addCustomCell(text = it.unit?.text)
-        productsTable.addCustomCell(text = it.taxRate?.let{ it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }  ?: " - ")
+        productsTable.addCustomCell(text = it.taxRate?.let {
+            it.setScale(0, RoundingMode.HALF_UP).toString() + "%"
+        } ?: " - ")
 
         var priceWithoutTax = BigDecimal(0)
         it.priceWithTax?.let { priceWithTax ->
@@ -283,7 +309,8 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
 
         }
         productsTable.addCustomCell(
-            text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP).toString() + Strings.get(R.string.currency)
+            text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
+                .toString() + Strings.get(R.string.currency)
         )
         productsTable.addCustomCell(
             text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
@@ -293,18 +320,18 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
     return productsTable
 }
 
-fun createTotals(font: PdfFont, documentPrices: DocumentPrices): Table {
+fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
     val footerArray = listOf(
-        FooterRow(
+        PriceRow(
             rowDescription = "TOTAL_WITHOUT_TAX"
         ),
-        FooterRow(
+        PriceRow(
             rowDescription = "TAXES_10"
         ),
-        FooterRow(
+        PriceRow(
             rowDescription = "TAXES_20"
         ),
-        FooterRow(
+        PriceRow(
             rowDescription = "TOTAL_WITH_TAX"
         ),
     )
@@ -335,9 +362,18 @@ fun createTotals(font: PdfFont, documentPrices: DocumentPrices): Table {
         }
 
         taxesAmount.forEach { tax ->
-            documentPrices.totalAmountsOfEachTax?.firstOrNull { it.first.stripTrailingZeros() == BigDecimal(tax).stripTrailingZeros() }?.let {
+            documentPrices.totalAmountsOfEachTax?.firstOrNull {
+                it.first.stripTrailingZeros() == BigDecimal(
+                    tax
+                ).stripTrailingZeros()
+            }?.let {
                 footerTable.addCellInFooter(
-                    Paragraph(Strings.get(R.string.document_tax) + " " + it.first.setScale(0, RoundingMode.HALF_UP).toString() + "% : ")
+                    Paragraph(
+                        Strings.get(R.string.document_tax) + " " + it.first.setScale(
+                            0,
+                            RoundingMode.HALF_UP
+                        ).toString() + "% : "
+                    )
                 )
                 footerTable.addCellInFooter(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
             }
@@ -385,9 +421,9 @@ fun Table.addCustomCell(
         Paragraph(text).setFixedLeading(14F)
     } else paragraph
 
-    val fontRegular = PdfFontFactory.createFont("assets/WorkSans-Regular.otf")
-    val fontMedium = PdfFontFactory.createFont("assets/WorkSans-Medium.otf")
-    val font = if (isBold) fontMedium else fontRegular
+    val fontRegular = PdfFontFactory.createFont(helvetica)
+    val fontBold = PdfFontFactory.createFont(helveticaBold)
+    val font = if (isBold) fontBold else fontRegular
 
     return this.addCell(
         Cell().add(textToAdd)
@@ -409,17 +445,17 @@ fun Table.addCellInFooter(
             .setFontSize(10F)
             .setBorder(Border.NO_BORDER)
             .setPaddingTop(-4f)
-            .setPaddingBottom(0f)
+            .setPaddingBottom(6f)
     )
 }
 
-data class FooterRow(
+data class PriceRow(
     var rowDescription: String,
 )
 
 @Throws(Exception::class)
 fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String) {
-    val fontRegular = PdfFontFactory.createFont("assets/WorkSans-Regular.otf")
+    val fontRegular = PdfFontFactory.createFont(helvetica)
 
     val pdfDoc = PdfDocument(
         PdfReader(getFilePath(previousFileName)),

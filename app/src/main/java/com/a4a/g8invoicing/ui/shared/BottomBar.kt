@@ -5,6 +5,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.ui.navigation.BottomBarAction
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.actionCategories
+import com.a4a.g8invoicing.ui.navigation.actionConvert
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionNew
@@ -20,6 +21,8 @@ fun BottomBar(
     onClickUnselectAll: () -> Unit = {},
     onClickNew: () -> Unit = {},
     onClickCategory: (Category) -> Unit = {},
+    onClickConvert:() -> Unit = {},
+    isConvertible:Boolean = false
 ) {
     BottomBarAction(
         navController,
@@ -31,6 +34,21 @@ fun BottomBar(
                 )
             } else  arrayOf(
                 actionCategories()
+            )
+        } else if (isConvertible) {
+            arrayOf(
+                actionUnselectAll(
+                    onClick = { onClickUnselectAll() }
+                ),
+                actionDuplicate(
+                    onClick = { onClickDuplicate() }
+                ),
+                actionDelete(
+                    onClick = { onClickDelete() }
+                ),
+                actionConvert (
+                    onClick = { onClickConvert() }
+                )
             )
         } else {
             arrayOf(

@@ -6,7 +6,6 @@ CREATE TABLE DocumentProduct (
   final_price REAL,
   tax_rate REAL,
   unit TEXT,
-  page INTEGER NOT NULL,
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
   product_id INTEGER,
@@ -15,20 +14,20 @@ CREATE TABLE DocumentProduct (
             ON DELETE CASCADE
 );
 
-INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, page, product_id)
-VALUES (1, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (2, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (3, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (4, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (5, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (6, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (7, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (8, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (9, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (10, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (11, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (12, 'aaa',1, '', 5, 20,  'kg', 1, 1),
- (13, 'aa',1, '', 5, 20,  'kg',1, 1);
+INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, product_id)
+VALUES (1, 'aaa',1, '', 5, 20,  'kg',  1),
+ (2, 'aaa',1, '', 5, 20,  'kg',  1),
+ (3, 'aaa',1, '', 5, 20,  'kg',  1),
+ (4, 'aaa',1, '', 5, 20,  'kg',  1),
+ (5, 'aaa',1, '', 5, 20,  'kg',  1),
+ (6, 'aaa',1, '', 5, 20,  'kg',  1),
+ (7, 'aaa',1, '', 5, 20,  'kg',  1),
+ (8, 'aaa',1, '', 5, 20,  'kg',  1),
+ (9, 'aaa',1, '', 5, 20,  'kg',  1),
+ (10, 'aaa',1, '', 5, 20,  'kg',  1),
+ (11, 'aaa',1, '', 5, 20,  'kg',  1),
+ (12, 'aaa',1, '', 5, 20,  'kg',  1),
+ (13, 'aa',1, '', 5, 20,  'kg', 1);
 
 getDocumentProduct:
 SELECT *
@@ -41,8 +40,8 @@ FROM DocumentProduct;
 
 saveDocumentProduct:
 INSERT
-INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, page, product_id)
-VALUES (?, ?, ?, ?, ?, ?,?,?, ?);
+INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, product_id)
+VALUES (?, ?, ?, ?, ?, ?,?, ?);
 
 updateDocumentProduct:
 UPDATE DocumentProduct
@@ -51,8 +50,7 @@ SET name = :name,
     description = :description,
     final_price = :price_with_tax,
     tax_rate = :tax_rate,
-    unit = :unit,
-    page = :page
+    unit = :unit
 WHERE
     document_product_id = :document_product_id;
 

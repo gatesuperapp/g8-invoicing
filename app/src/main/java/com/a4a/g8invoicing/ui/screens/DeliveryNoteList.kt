@@ -26,6 +26,7 @@ fun DeliveryNoteList(
     deliveryNotesUiState: DeliveryNotesUiState,
     onClickDelete: (List<DeliveryNoteState>) -> Unit,
     onClickDuplicate: (List<DeliveryNoteState>) -> Unit,
+    onClickConvert: (List<DeliveryNoteState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -60,11 +61,16 @@ fun DeliveryNoteList(
                     onClickDuplicate(selectedItems.toList())
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
+                onClickConvert = {
+                    onClickConvert(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
                 onClickUnselectAll = {
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
                 onClickNew = { onClickNew() },
-                onClickCategory = onClickCategory
+                onClickCategory = onClickCategory,
+                isConvertible = true
             )
         }
     ) { padding ->

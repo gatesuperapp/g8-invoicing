@@ -1,14 +1,18 @@
 package com.a4a.g8invoicing.data
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.Invoice
 import kotlinx.coroutines.Dispatchers
@@ -18,6 +22,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class InvoiceLocalDataSource(
     db: Database,
@@ -26,6 +33,10 @@ class InvoiceLocalDataSource(
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentProductQueries = db.documentProductQueries
     private val invoiceDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
+    private val invoiceDocumentProductAdditionalInfoQueries =
+        db.linkInvoiceDocumentProductToDeliveryNoteQueries
+    private val invoiceDocumentProductLinkQueries =
+        db.linkInvoiceDocumentProductToDeliveryNoteQueries
     private val invoiceDocumentClientOrIssuerQueries = db.linkInvoiceToDocumentClientOrIssuerQueries
 
 
@@ -57,15 +68,19 @@ class InvoiceLocalDataSource(
     }
 
     private fun fetchDocumentProducts(id: Long): MutableList<DocumentProductState>? {
-        val listOfIds =
-            invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(
-                id
-            )
-                .executeAsList()
+        val listOfIds = invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(id)
+            .executeAsList()
         return if (listOfIds.isNotEmpty()) {
             listOfIds.map {
+                val additionalInfo = invoiceDocumentProductLinkQueries
+                    .getInfoLinkedToDocumentProduct(it.document_product_id)
+                    .executeAsOneOrNull()
                 documentProductQueries.getDocumentProduct(it.document_product_id)
-                    .executeAsOne().transformIntoEditableDocumentProduct()
+                    .executeAsOne()
+                    .transformIntoEditableDocumentProduct(
+                        additionalInfo?.date,
+                        additionalInfo?.delivery_note_number
+                    )
             }.toMutableList()
         } else null
     }
@@ -137,7 +152,7 @@ class InvoiceLocalDataSource(
             return InvoiceState(
                 documentId = it.invoice_id.toInt(),
                 documentNumber = TextFieldValue(text = it.number ?: ""),
-                documentDate = it.delivery_date ?: "",
+                documentDate = it.issuing_date ?: "",
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
@@ -151,14 +166,37 @@ class InvoiceLocalDataSource(
     }
 
     override suspend fun createNew(): Long? {
-        saveInvoiceInfoInAllTables(
-            InvoiceState(
-                documentIssuer = getExistingIssuer()?.transformIntoEditable()
-                    ?: DocumentClientOrIssuerState(),
-            )
+        val issuer = getExistingIssuer()?.transformIntoEditable()
+            ?: DocumentClientOrIssuerState()
+        val footer = TextFieldValue(getExistingFooter() ?: "")
+        saveInfoInInvoiceTable(
+            InvoiceState(documentIssuer = issuer, footerText = footer)
         )
-
+        saveInfoInOtherTables(
+            InvoiceState(documentIssuer = issuer)
+        )
         return invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+    }
+
+    override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
+        withContext(Dispatchers.IO) {
+            try {
+                saveInfoInInvoiceTable(
+                    InvoiceState(
+                        orderNumber = deliveryNotes.firstOrNull { it.orderNumber != null }?.orderNumber,
+                        documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                        documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
+                        footerText = TextFieldValue(getExistingFooter() ?: "")
+                    )
+                )
+                deliveryNotes.forEach {
+                    saveInfoInOtherTables(
+                        it
+                    )
+                }
+            } catch (cause: Throwable) {
+            }
+        }
     }
 
     override suspend fun update(document: InvoiceState) {
@@ -167,8 +205,8 @@ class InvoiceLocalDataSource(
                 invoiceQueries.update(
                     invoice_id = document.documentId?.toLong() ?: 0,
                     number = document.documentNumber.text,
-                    delivery_date = document.documentDate,
-                    order_number = document.orderNumber.text,
+                    issuing_date = document.documentDate,
+                    order_number = document.orderNumber?.text,
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     footer = document.footerText.text
@@ -182,22 +220,22 @@ class InvoiceLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 documents.forEach {
-                    saveInvoiceInfoInAllTables(
-                        InvoiceState(
-                            documentType = it.documentType,
-                            documentId = it.documentId,
-                            documentNumber = TextFieldValue("XXX"),
-                            documentDate = it.documentDate,
-                            orderNumber = it.orderNumber,
-                            documentIssuer = it.documentIssuer,
-                            documentClient = it.documentClient,
-                            documentProducts = it.documentProducts,
-                            documentPrices = it.documentPrices,
-                            currency = it.currency,
-                            dueDate = it.dueDate,
-                            footerText = it.footerText
-                        )
+                    val invoice = InvoiceState(
+                        documentType = it.documentType,
+                        documentId = it.documentId,
+                        documentNumber = TextFieldValue("XXX"),
+                        documentDate = it.documentDate,
+                        orderNumber = it.orderNumber,
+                        documentIssuer = it.documentIssuer,
+                        documentClient = it.documentClient,
+                        documentProducts = it.documentProducts,
+                        documentPrices = it.documentPrices,
+                        currency = it.currency,
+                        dueDate = it.dueDate,
+                        footerText = it.footerText
                     )
+                    saveInfoInInvoiceTable(invoice)
+                    saveInfoInOtherTables(invoice)
                 }
             } catch (cause: Throwable) {
             }
@@ -207,6 +245,8 @@ class InvoiceLocalDataSource(
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
         documentId: Long?,
+        deliveryNoteDate: String?,
+        deliveryNoteNumber: String?,
     ) {
         withContext(Dispatchers.IO) {
             try {
@@ -218,17 +258,23 @@ class InvoiceLocalDataSource(
                     final_price = documentProduct.priceWithTax?.toDouble(),
                     tax_rate = documentProduct.taxRate?.toDouble(),
                     unit = documentProduct.unit?.text,
-                    page = documentProduct.page.toLong(),
                     product_id = documentProduct.productId?.toLong()
                 )
 
                 documentId?.let { documentId ->
                     documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
                         ?.let { id ->
-                            addDocumentProduct(
+                            linkDocumentProductToDocument(
                                 documentId,
                                 id.toLong()
                             )
+                            if (!deliveryNoteDate.isNullOrEmpty()) {
+                                linkDocumentProductToAdditionalInfo(
+                                    id.toLong(),
+                                    deliveryNoteNumber,
+                                    deliveryNoteDate,
+                                )
+                            }
                         }
                 }
             } catch (cause: Throwable) {
@@ -267,7 +313,7 @@ class InvoiceLocalDataSource(
                     documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
                         .executeAsOneOrNull()?.toInt()
                         ?.let { id ->
-                            addDocumentClientOrIssuer(
+                            linkDocumentClientOrIssuerToDocument(
                                 documentId,
                                 id.toLong()
                             )
@@ -343,7 +389,7 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override fun addDocumentProduct(documentId: Long, documentProductId: Long) {
+    override fun linkDocumentProductToDocument(documentId: Long, documentProductId: Long) {
         invoiceDocumentProductQueries.saveProductLinkedToInvoice(
             id = null,
             invoice_id = documentId,
@@ -351,7 +397,22 @@ class InvoiceLocalDataSource(
         )
     }
 
-    private fun addDocumentClientOrIssuer(documentId: Long, documentClientOrIssuerId: Long) {
+    override fun linkDocumentProductToAdditionalInfo(
+        documentProductId: Long,
+        deliveryNoteNumber: String?,
+        deliveryNoteDate: String,
+    ) {
+        invoiceDocumentProductAdditionalInfoQueries.saveInfoLinkedToDocumentProduct(
+            document_product_id = documentProductId,
+            delivery_note_number = deliveryNoteNumber,
+            date = deliveryNoteDate
+        )
+    }
+
+    private fun linkDocumentClientOrIssuerToDocument(
+        documentId: Long,
+        documentClientOrIssuerId: Long,
+    ) {
         invoiceDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToInvoice(
             id = null,
             invoice_id = documentId,
@@ -369,23 +430,37 @@ class InvoiceLocalDataSource(
         return issuer
     }
 
-    private suspend fun saveInvoiceInfoInAllTables(document: InvoiceState) {
+    private fun getExistingFooter(): String? {
+        var footer: String? = null
+        try {
+            footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull().toString()
+        } catch (e: Exception) {
+            println("Fetching result failed with exception: ${e.localizedMessage}")
+        }
+        return footer
+    }
+
+    private fun saveInfoInInvoiceTable(document: InvoiceState) {
         invoiceQueries.save(
             invoice_id = null,
             number = document.documentNumber.text,
-            delivery_date = document.documentDate,
-            order_number = document.orderNumber.text,
+            issuing_date = document.documentDate,
+            order_number = document.orderNumber?.text,
             currency = document.currency.text,
             due_date = document.dueDate,
             footer = document.footerText.text
         )
+    }
 
+    private suspend fun saveInfoInOtherTables(document: DocumentState) {
         invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
             // Link all products
             document.documentProducts?.forEach { documentProduct ->
                 saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    documentId = id
+                    documentId = id,
+                    deliveryNoteDate = if (document is DeliveryNoteState) document.documentDate else null,
+                    deliveryNoteNumber = if (document is DeliveryNoteState) document.documentNumber.text else null
                 )
             }
 

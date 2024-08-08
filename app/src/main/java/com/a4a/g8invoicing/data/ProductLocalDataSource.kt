@@ -124,8 +124,7 @@ class ProductLocalDataSource(
                         description = documentProduct.description?.text,
                         price_with_tax = documentProduct.priceWithTax?.toDouble(),
                         tax_rate = documentProduct.taxRate?.toDouble(),
-                        unit = documentProduct.unit?.text,
-                        page = documentProduct.page.toLong()
+                        unit = documentProduct.unit?.text
                     )
                 }
             } catch (cause: Throwable) {
@@ -161,7 +160,7 @@ fun Product.transformIntoEditableProduct(taxQueries: TaxRateQueries): ProductSta
     )
 }
 
-fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState {
+fun DocumentProduct.transformIntoEditableDocumentProduct(linkedDate: String? = null, linkedDocNumber: String?= null): DocumentProductState {
     return DocumentProductState(
         id = this.document_product_id.toInt(),
         name = TextFieldValue(this.name),
@@ -171,8 +170,10 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(): DocumentProductState
         quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)
             .stripTrailingZeros(),
         unit = TextFieldValue(this.unit ?: ""),
-        page = this.page.toInt(),
-        productId = this.product_id?.toInt()
+        productId = this.product_id?.toInt(),
+        linkedDate = linkedDate,
+        linkedDocNumber = linkedDocNumber
+
     )
 }
 

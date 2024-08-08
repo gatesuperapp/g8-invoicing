@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
 fun ClientOrIssuerListItem(
@@ -123,15 +125,16 @@ fun ClientOrIssuerListItem(
                     Text(
                         text = clientName,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                        style = MaterialTheme.typography.titleSmall
+                        )
                 }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - "
+                        text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }

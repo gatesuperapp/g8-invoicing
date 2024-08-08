@@ -72,19 +72,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
             },
             onClickProduct = { product ->
-                val lastDocumentProductPage =
-                    deliveryNoteUiState.documentProducts?.last()?.page ?: 1
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(
                     product,
-                    lastDocumentProductPage
-                )
-            },
-            onClickNewProduct = {
-                val lastDocumentProductPage =
-                    deliveryNoteUiState.documentProducts?.last()?.page ?: 1
-                productAddEditViewModel.setDocumentProductUiStateWithPage(
-                    lastDocumentProductPage
                 )
             },
             onClickClientOrIssuer = {
@@ -300,13 +290,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onShowDocumentForm = {
                 showDocumentForm = it
             },
-            incrementDocumentProductPage = {
-                deliveryNoteViewModel.updateDeliveryNoteStateWithIncrementedValue(it)
-                productAddEditViewModel.updateDocumentProductUiStateWithIncrementedPage()
-          //      productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-            },
-            moveDocumentPagerToLastPage = moveDocumentPagerToLastPage,
-            reinitializeMoveDocumentBoolean = { moveDocumentPagerToLastPage = false }
         )
     }
 }

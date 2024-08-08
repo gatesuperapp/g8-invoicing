@@ -5,13 +5,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.shared.helveticaBold
+
 
 val provider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
@@ -20,78 +22,75 @@ val provider = GoogleFont.Provider(
 )
 
 val uiFont = FontFamily(
-    Font(
-        googleFont = GoogleFont("DM Sans"),
-        fontProvider = provider,
-        //weight = FontWeight.SemiBold
-    )
+    Font(R.font.dmsansregular),
+)
+val uiFontBold = FontFamily(
+    Font(R.font.dmsansmedium),
 )
 
-val documentsFont = FontFamily(
-    Font(
-        googleFont = GoogleFont("Work Sans"),
-        fontProvider = provider,
-        weight = FontWeight.SemiBold
-    )
+val pdfFont = FontFamily(
+    Font(R.font.helvetica),
 )
 
+val pdfFontBold = FontFamily(
+    Font(R.font.helveticabold),
+)
 
 private val defaultTypography = Typography()
 val customTypography = Typography(
     displayLarge = defaultTypography.displayLarge.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+    //    fontWeight = FontWeight.SemiBold
     ),
     displayMedium = defaultTypography.displayMedium.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+     //   fontWeight = FontWeight.SemiBold
     ),
     displaySmall = defaultTypography.displaySmall.merge(
         fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+     //   fontWeight = FontWeight.SemiBold
     ),
 
     headlineLarge = defaultTypography.headlineLarge.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+    //    fontWeight = FontWeight.SemiBold
     ),
     headlineMedium = defaultTypography.headlineMedium.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+    //    fontWeight = FontWeight.SemiBold
     ),
     headlineSmall = defaultTypography.headlineSmall.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+    //    fontWeight = FontWeight.SemiBold
     ),
 
     titleLarge = defaultTypography.titleLarge.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+    //    fontWeight = FontWeight.SemiBold
     ),
     titleMedium = defaultTypography.titleMedium.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
     ),
     titleSmall = defaultTypography.titleSmall.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+   //     fontWeight = FontWeight.SemiBold
     ),
 
-    bodyLarge = defaultTypography.bodyLarge.merge(fontFamily = uiFont),
+    bodyLarge = defaultTypography.bodyLarge.merge(fontFamily = uiFontBold),
     bodyMedium = defaultTypography.bodyMedium.merge(fontFamily = uiFont),
     bodySmall = defaultTypography.bodySmall.merge(fontFamily = uiFont),
 
     labelLarge = defaultTypography.labelLarge.merge(
-        fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+        fontFamily = uiFontBold,
+   //     fontWeight = FontWeight.SemiBold
     ),
     labelMedium = defaultTypography.labelMedium.merge(
         fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+    //    fontWeight = FontWeight.SemiBold
     ),
     labelSmall = defaultTypography.labelSmall.merge(
         fontFamily = uiFont,
-        fontWeight = FontWeight.SemiBold
+    //    fontWeight = FontWeight.SemiBold
     )
 
 )
@@ -100,8 +99,33 @@ val Typography.textForDocuments: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.Normal,
+            fontFamily = pdfFont,
+            fontSize = 7.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            ),
+
+            )
+    }
+
+val Typography.titleForDocuments: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = pdfFont,
+            fontSize = 12.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            ),
+
+            )
+    }
+
+val Typography.subTitleForDocuments: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = pdfFont,
             fontSize = 8.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
@@ -110,13 +134,13 @@ val Typography.textForDocuments: TextStyle
             )
     }
 
+
 val Typography.textForDocumentsBold: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 8.sp,
+            fontFamily = pdfFontBold,
+            fontSize = 6.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             ),
@@ -129,9 +153,8 @@ val Typography.textForDocumentsSecondary: TextStyle
     get() {
         return TextStyle(
             color = Color.DarkGray,
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.Normal,
-            fontSize = 8.sp,
+            fontFamily = pdfFont,
+            fontSize = 6.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
@@ -142,9 +165,8 @@ val Typography.textForDocumentsVerySmall: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.Normal,
-            fontSize = 6.sp,
+            fontFamily = pdfFont,
+            fontSize = 5.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
@@ -155,9 +177,8 @@ val Typography.textForDocumentsVerySmallBold: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 6.sp,
+            fontFamily = pdfFontBold,
+            fontSize = 5.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
@@ -168,9 +189,8 @@ val Typography.textForDocumentsVerySmallAndItalic: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.Normal,
-            fontSize = 6.sp,
+            fontFamily = pdfFont,
+            fontSize = 5.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             ),
@@ -183,8 +203,7 @@ val Typography.textSmall: TextStyle
     get() {
         return TextStyle(
             fontFamily = uiFont,
-            fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
+            fontSize = 10.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
@@ -196,8 +215,7 @@ val Typography.textTitle: TextStyle
     get() {
         return TextStyle(
             fontFamily = uiFont,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
@@ -210,7 +228,6 @@ val Typography.textFormBlock: TextStyle
         return TextStyle(
             color = ColorDarkGrayTransp,
             fontFamily = uiFont,
-            fontWeight = FontWeight.SemiBold,
             fontSize = 20.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
@@ -222,9 +239,8 @@ val Typography.textForFormLabelVerySmall: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = documentsFont,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 10.sp,
+            fontFamily = uiFont,
+            fontSize = 9.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )

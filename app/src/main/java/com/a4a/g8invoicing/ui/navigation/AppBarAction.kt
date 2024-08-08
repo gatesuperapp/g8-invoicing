@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.shared.icons.IconArrowForward
 import com.a4a.g8invoicing.ui.shared.icons.IconBrush
 import com.a4a.g8invoicing.ui.shared.icons.IconExport
 import com.a4a.g8invoicing.ui.shared.icons.IconList
@@ -85,6 +86,15 @@ fun actionDelete(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDelete,
         description = R.string.appbar_delete,
+        isInDropDownMenu = true,
+        onClick = onClick
+    )
+
+@Composable
+fun actionConvert(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconArrowForward,
+        description = R.string.appbar_convert,
         isInDropDownMenu = true,
         onClick = onClick
     )

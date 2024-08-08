@@ -127,7 +127,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 }
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
 
-                // If several pages, decrement page of next element
+               /* // If several pages, decrement page of next element
                 val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
                 numberOfPages?.let {numberOfPages ->
                     if(numberOfPages > 1) {
@@ -138,7 +138,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                                 }
                         }
                     }
-                }
+                }*/
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
@@ -153,7 +153,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 documentProducts = list
             )
 
-            // If several pages, decrement page of next element
+           /* // If several pages, decrement page of next element
             val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
             numberOfPages?.let {numberOfPages ->
                 if(numberOfPages > 1) {
@@ -164,7 +164,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                             }
                     }
                 }
-            }
+            }*/
 
             // Recalculate the prices
             _deliveryNoteUiState.value.documentProducts?.let {
@@ -268,7 +268,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
     }
 
-    fun updateDeliveryNoteStateWithIncrementedValue(documentProductId: Any) {
+    /*fun updateDeliveryNoteStateWithIncrementedValue(documentProductId: Any) {
         val documentProduct =
             _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
         documentProduct?.let { docProduct ->
@@ -294,12 +294,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             _deliveryNoteUiState.value =
                 _deliveryNoteUiState.value.copy(documentProducts = updatedList)
         }
-    }
+    }*/
 
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> deliveryNoteUiState.value.documentNumber.text
-            ScreenElement.DOCUMENT_ORDER_NUMBER -> deliveryNoteUiState.value.orderNumber.text
+            ScreenElement.DOCUMENT_ORDER_NUMBER -> deliveryNoteUiState.value.orderNumber?.text
             else -> null
         }
 

@@ -2,6 +2,8 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -25,12 +27,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
@@ -40,13 +43,10 @@ import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
 
-data class FooterRow(
-    var rowDescription: String,
-    var page: Int,
-)
 
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalFoundationApi::class)
@@ -54,9 +54,6 @@ data class FooterRow(
 fun DocumentBasicTemplate(
     uiState: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
-    incrementDocumentProductPage: (Int) -> Unit,
-    moveDocumentPagerToLastPage: Boolean,
-    reinitializeMoveDocumentBoolean: () -> Unit,
 ) {
     var zoom by remember { mutableStateOf(1f) }
     var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
@@ -67,31 +64,91 @@ fun DocumentBasicTemplate(
     val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
     val productArray = uiState.documentProducts
-    val pageNumber = productArray?.last()?.page ?: 1
-    val pagerState = rememberPagerState { pageNumber }
-    val footerArray = mutableStateListOf(
-        FooterRow(FooterRowName.TOTAL_WITHOUT_TAX.name, pagerState.pageCount)
-    )
-    var documentProductIndex by remember { mutableStateOf(0) }
-
-    val taxRates =
-        uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
+/*    val pageNumber = productArray?.last()?.page ?: 1
+    val pagerState = rememberPagerState { pageNumber }*/
+    val footerArray = mutableStateListOf(FooterRowName.TOTAL_WITHOUT_TAX.name)
+    val taxRates = uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
-        footerArray.add(FooterRow("TAXES_$it", pagerState.pageCount))
+        footerArray.add("TAXES_$it")
     }
-    footerArray.add(FooterRow(FooterRowName.TOTAL_WITH_TAX.name, pagerState.pageCount))
+    footerArray.add(FooterRowName.TOTAL_WITH_TAX.name)
 
     val arrayOfProductsAndFooterRows: MutableList<Any> =
         productArray?.toMutableList() ?: mutableListOf()
     // footerArray.forEach { arrayOfProductsAndFooterRows.add(it) }
 
-    val numberOfItems = arrayOfProductsAndFooterRows.size
+    Column(
+        Modifier
+            .pointerInput(Unit) {
+                customTransformGestures(
+                    pass = PointerEventPass.Initial,
+                    onDoubleTouch = { // Disable clicking 2 items in 1 time
+                        clickEnabled = false
+                    },
+                    onGesture = {
+                            centroid,
+                            pan,
+                            gestureZoom,
+                            _,
+                            pointerInput: PointerInputChange,
+                            changes: List<PointerInputChange>,
+                        ->
 
-    val maxItemsOnFirstPage = 11
-    val maxItemsOnOtherPages = 20
+                        zoom = (zoom * gestureZoom).coerceIn(
+                            1f,
+                            3f
+                        )  // Zoom limits: min 100%, max 200%
 
+                        var newOffsetX = animatableOffsetX.value + pan.x.times(zoom)
+                        var newOffsetY = offsetY + pan.y.times(zoom)
 
-    Column {
+                        val maxX = (size.width * (zoom - 1) / 2f)
+                        val maxY = (size.height * (zoom - 1) / 2f)
+
+                        if (zoom > 1f) {
+                            newOffsetX = newOffsetX.coerceIn(
+                                -maxX,
+                                maxX
+                            ) // coercein will limit drag in bounds
+                            newOffsetY = newOffsetY.coerceIn(-maxY, maxY)
+                        }
+
+                        animatableOffsetX = Animatable(newOffsetX)
+                        offsetY = newOffsetY
+
+                        // 🔥Consume touch when multiple fingers down
+                        // This prevents click and long click if your finger touches a
+                        // button while pinch gesture is being invoked
+                        val size = changes.size
+                        if (size > 1) {
+                            changes.forEach { it.consume() }
+                        }
+                    },
+                    onGestureEnd = {
+                        // When no zoom only, do an animation to bring
+                        // back to center when dragged along X axis
+                        if (zoom == 1f) {
+                            coroutineScope.launch {
+                                animatableOffsetX.animateTo(
+                                    0f, animationSpec = spring(
+                                        //dampingRatio = 0.4f,
+                                        stiffness = Spring.StiffnessLow
+                                    )
+                                )
+                            }
+                        }
+                    }
+                )
+            }
+            .graphicsLayer {
+                translationX = animatableOffsetX.value
+                if (zoom > 1f) { // Y translation disabled when no zoom
+                    translationY = offsetY
+                }
+                scaleX = zoom
+                scaleY = zoom
+            }
+    ) {
 
         DocumentBasicTemplateContent(
             uiState = uiState,
@@ -99,7 +156,7 @@ fun DocumentBasicTemplate(
             screenWidth = screenWidth,
             productArray = productArray,
             footerArray = footerArray,
-            numberOfPages = pagerState.pageCount,
+            //numberOfPages = pagerState.pageCount,
         )
 
     }
@@ -111,14 +168,13 @@ enum class FooterRowName {
 }
 
 @Composable
-fun BuildClientOrIssuerInTemplate(clientOrIssuer: DocumentClientOrIssuerState?) {
+fun DocumentBasicTemplateClientOrIssuer(clientOrIssuer: DocumentClientOrIssuerState?) {
     Text(
         textAlign = TextAlign.Center, // have to specify it (in addition to column alignment)
         // because without it, multilines text aren't aligned
         modifier = Modifier
             .padding(bottom = 2.dp)
             .wrapContentHeight(),
-        fontWeight = FontWeight.Bold,
         style = MaterialTheme.typography.textForDocumentsBold,
         text = (clientOrIssuer?.firstName.let {
             (it?.text ?: "") + " "

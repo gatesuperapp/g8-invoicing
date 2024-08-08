@@ -1,9 +1,15 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -17,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class DeliveryNoteListViewModel @Inject constructor(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+    private val invoiceDataSource: InvoiceLocalDataSourceInterface,
 ) : ViewModel() {
 
     private val _deliveryNotesUiState = MutableStateFlow(DeliveryNotesUiState())
@@ -25,6 +32,7 @@ class DeliveryNoteListViewModel @Inject constructor(
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
     private var duplicateJob: Job? = null
+    private var convertJob: Job? = null
 
     init {
         fetchDeliveryNotes()
@@ -63,6 +71,17 @@ class DeliveryNoteListViewModel @Inject constructor(
         duplicateJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.duplicateDeliveryNotes(selectedDeliveryNotes)
+            } catch (e: Exception) {
+                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun convertDeliveryNotes(selectedDeliveryNotes: List<DeliveryNoteState>) {
+        convertJob?.cancel()
+        convertJob = viewModelScope.launch {
+            try {
+                invoiceDataSource.convertDeliveryNotesToInvoice(selectedDeliveryNotes)
             } catch (e: Exception) {
                 println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }

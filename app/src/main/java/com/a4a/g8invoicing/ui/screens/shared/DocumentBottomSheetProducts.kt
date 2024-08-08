@@ -52,7 +52,6 @@ fun DocumentBottomSheetProducts(
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
     onClickProduct: (ProductState) -> Unit,
-    onClickNewProduct: () -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -145,7 +144,6 @@ fun DocumentBottomSheetProducts(
             DocumentBottomSheetDocumentProductList(
                 list = params.first ?: emptyList(),
                 onClickNew = {
-                    onClickNewProduct()
                     typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
                     onShowDocumentForm(true)
                     CoroutineScope(Dispatchers.IO).launch {

@@ -57,7 +57,6 @@ fun BottomBarEditionView(
                                 Text(
                                     text = stringResource(id = it),
                                     fontSize = 10.sp,
-                                    fontWeight = FontWeight.Normal,
                                     color = ColorButtonBar
                                 )
                             }

@@ -75,7 +75,6 @@ fun DocumentAddEdit(
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onClickProduct: (ProductState) -> Unit,
-    onClickNewProduct: () -> Unit,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
@@ -89,9 +88,6 @@ fun DocumentAddEdit(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
-    incrementDocumentProductPage: (Int) -> Unit,
-    reinitializeMoveDocumentBoolean: () -> Unit,
-    moveDocumentPagerToLastPage: Boolean,
 ) {
   
 
@@ -194,7 +190,6 @@ fun DocumentAddEdit(
                     products = products,
                     taxRates = taxRates,
                     onClickProduct = onClickProduct,
-                    onClickNewProduct = onClickNewProduct,
                     onClickDocumentProduct = onClickDocumentProduct,
                     onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
@@ -289,9 +284,6 @@ fun DocumentAddEdit(
                                                     ScreenElement.DOCUMENT_ORDER_NUMBER ->
                                                     ScreenElement.DOCUMENT_PRODUCTS ->*/
                     },
-                    incrementDocumentProductPage = incrementDocumentProductPage,
-                    moveDocumentPagerToLastPage = moveDocumentPagerToLastPage,
-                    reinitializeMoveDocumentBoolean = reinitializeMoveDocumentBoolean
                 )
             }
         }

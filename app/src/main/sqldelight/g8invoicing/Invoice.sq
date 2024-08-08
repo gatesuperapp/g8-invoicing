@@ -1,7 +1,7 @@
 CREATE TABLE Invoice (
   invoice_id INTEGER PRIMARY KEY NOT NULL,
   number TEXT,
-  delivery_date TEXT,
+  issuing_date TEXT,
   order_number TEXT,
   currency TEXT,
   due_date TEXT,
@@ -11,7 +11,7 @@ CREATE TABLE Invoice (
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
   deleted_at REAL DEFAULT (datetime('now', 'localtime')));
 
-INSERT INTO Invoice (invoice_id, number, delivery_date, order_number, currency, due_date)
+INSERT INTO Invoice (invoice_id, number, issuing_date, order_number, currency, due_date)
 VALUES (1, "001", '01/01/2023', 'ONXFHGG11',  "€", '01/01/2023');
 
 
@@ -34,13 +34,13 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, delivery_date, order_number, currency, due_date, footer)
+INSERT INTO Invoice (invoice_id, number, issuing_date, order_number, currency, due_date, footer)
 VALUES (?,  ?,  ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
 SET number = :number,
-    delivery_date = :delivery_date,
+    issuing_date = :issuing_date,
     order_number = :order_number,
     currency =: currency,
     due_date =: due_date,
@@ -54,6 +54,12 @@ WHERE invoice_id = :id;
 
 getLastInsertedRowId:
 SELECT invoice_id
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+getLastInsertedInvoiceFooter:
+SELECT footer
 FROM Invoice
 ORDER BY invoice_id DESC
 LIMIT 1;

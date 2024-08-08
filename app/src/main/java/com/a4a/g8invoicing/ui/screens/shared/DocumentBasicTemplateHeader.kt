@@ -22,10 +22,10 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
-import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.theme.subTitleForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
+import com.a4a.g8invoicing.ui.theme.titleForDocuments
 
 @Composable
 fun DocumentBasicTemplateHeader(
@@ -58,8 +58,8 @@ fun DocumentBasicTemplateHeader(
                         onLongClick = {
                         }
                     ),
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.textForDocumentsBold,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleForDocuments,
                 text = stringResource(
                     id = if (uiState is DeliveryNoteState) R.string.delivery_note_number
                     else R.string.invoice_number
@@ -82,9 +82,8 @@ fun DocumentBasicTemplateHeader(
                         onLongClick = {
                         }
                     ),
-                fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.textForDocuments,
+                style = MaterialTheme.typography.subTitleForDocuments,
                 text = stringResource(id = R.string.document_date) + " : " + uiState.documentDate
             )
         }
@@ -107,7 +106,7 @@ fun DocumentBasicTemplateHeader(
                 .weight(1f)
                 .fillMaxWidth(0.3f)
         ) {
-            BuildClientOrIssuerInTemplate(uiState.documentIssuer)
+            DocumentBasicTemplateClientOrIssuer(uiState.documentIssuer)
         }
 
         Column(
@@ -141,7 +140,7 @@ fun DocumentBasicTemplateHeader(
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BuildClientOrIssuerInTemplate(uiState.documentClient)
+                DocumentBasicTemplateClientOrIssuer(uiState.documentClient)
             }
         }
     }

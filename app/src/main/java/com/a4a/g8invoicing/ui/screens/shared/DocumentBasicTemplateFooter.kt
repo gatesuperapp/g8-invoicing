@@ -36,7 +36,10 @@ fun DocumentBasicTemplateFooter(
                 }
             )
     ) {
-        Row {
+        Row(
+            modifier = Modifier
+                .padding(bottom = 6.dp)
+        ) {
             Text(
                 style = MaterialTheme.typography.textForDocumentsVerySmallBold,
                 text = Strings.get(R.string.invoice_pdf_due_date) + " : " + uiState.dueDate

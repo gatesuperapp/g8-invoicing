@@ -87,28 +87,20 @@ class ProductAddEditViewModel @Inject constructor(
     }
 
     // Used when sliding the bottom form from documents
-    // Choosing a product
-    fun setDocumentProductUiStateWithProduct(product: ProductState, page: Int) {
-        _documentProductUiState.value = DocumentProductState(
-            id = null,
-            name = product.name,
-            description = product.description,
-            priceWithTax = product.priceWithTax,
-            taxRate = product.taxRate,
-            quantity = BigDecimal(1),
-            unit = product.unit,
-            productId = product.productId,
-            page = page
-        )
-    }
+       // Choosing a product
+       fun setDocumentProductUiStateWithProduct(product: ProductState) {
+           _documentProductUiState.value = DocumentProductState(
+               id = null,
+               name = product.name,
+               description = product.description,
+               priceWithTax = product.priceWithTax,
+               taxRate = product.taxRate,
+               quantity = BigDecimal(1),
+               unit = product.unit,
+               productId = product.productId,
+           )
+       }
 
-    // Used when sliding the bottom form from documents
-    // New product
-    fun setDocumentProductUiStateWithPage(page: Int) {
-        _documentProductUiState.value = _documentProductUiState.value.copy(
-            page = page
-        )
-    }
 
 
     fun setProductUiState() {
@@ -201,11 +193,11 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateDocumentProductUiStateWithIncrementedPage() {
+/*    fun updateDocumentProductUiStateWithIncrementedPage() {
         _documentProductUiState.value = _documentProductUiState.value.copy(
             page = _documentProductUiState.value.page + 1
         )
-    }
+    }*/
 
     fun updateCursor(pageElement: ScreenElement, productType: ProductType) {
         if (productType == ProductType.PRODUCT) {

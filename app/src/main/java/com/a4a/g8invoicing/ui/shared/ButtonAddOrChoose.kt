@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.shared.icons.IconPlus
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
+import com.a4a.g8invoicing.ui.theme.textSmall
 
 @Composable
 fun ButtonAddOrChoose(
@@ -70,7 +73,7 @@ fun ButtonAddOrChoose(
             modifier = Modifier.padding(top = 20.dp, bottom = 20.dp),
             text = buttonText,
             fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
+            style = MaterialTheme.typography.textSmall,
         )
     }
 }

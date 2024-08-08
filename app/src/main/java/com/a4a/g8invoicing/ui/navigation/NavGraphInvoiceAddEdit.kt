@@ -73,18 +73,9 @@ fun NavGraphBuilder.invoiceAddEdit(
             },
             onClickProduct = { product ->
                 val lastDocumentProductPage =
-                    uiState.documentProducts?.last()?.page ?: 1
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(
                     product,
-                    lastDocumentProductPage
-                )
-            },
-            onClickNewProduct = {
-                val lastDocumentProductPage =
-                    uiState.documentProducts?.last()?.page ?: 1
-                productAddEditViewModel.setDocumentProductUiStateWithPage(
-                    lastDocumentProductPage
                 )
             },
             onClickClientOrIssuer = {
@@ -300,13 +291,6 @@ fun NavGraphBuilder.invoiceAddEdit(
             onShowDocumentForm = {
                 showDocumentForm = it
             },
-            incrementDocumentProductPage = {
-                invoiceViewModel.updateStateWithIncrementedValue(it)
-                productAddEditViewModel.updateDocumentProductUiStateWithIncrementedPage()
-          //      productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-            },
-            moveDocumentPagerToLastPage = moveDocumentPagerToLastPage,
-            reinitializeMoveDocumentBoolean = { moveDocumentPagerToLastPage = false }
         )
     }
 }

@@ -21,11 +21,13 @@ fun NavGraphBuilder.deliveryNoteList(
         val deliveryNotesUiState by viewModel.deliveryNotesUiState
             .collectAsStateWithLifecycle()
 
+
         DeliveryNoteList(
             navController = navController,
             deliveryNotesUiState = deliveryNotesUiState,
             onClickDelete = viewModel::deleteDeliveryNotes,
             onClickDuplicate = viewModel::duplicateDeliveryNotes,
+            onClickConvert = viewModel::convertDeliveryNotes,
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
