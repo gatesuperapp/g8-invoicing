@@ -2,9 +2,12 @@ package com.a4a.g8invoicing.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -23,8 +26,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.theme.MainBackground
 import icons.IconAccount
 import icons.IconMoreThreeDots
@@ -48,7 +54,7 @@ fun BottomBarMenu(
         Category.DeliveryNotes,
         Category.Clients,
         Category.Products,
-       // Category.MyAccount,
+        // Category.MyAccount,
         Category.About,
     )
 
@@ -96,14 +102,21 @@ fun BottomBarMenu(
     }
 }
 
-sealed class Category(val route: String, @StringRes val resourceId: Int, val icon: ImageVector?, val iconDescription: String?) {
+sealed class Category(
+    val route: String,
+    @StringRes val resourceId: Int,
+    val icon: ImageVector?,
+    val iconDescription: String?,
+) {
     //object Home : Category(Screen.HomeScreen.name, R.string.home)
     data object Clients :
         Category(Screen.ClientOrIssuerList.name, R.string.appbar_client_list, null, null)
 
     data object Products : Category(Screen.ProductList.name, R.string.appbar_products, null, null)
     data object Invoices : Category(Screen.InvoiceList.name, R.string.appbar_invoices, null, null)
-    data object DeliveryNotes : Category(Screen.DeliveryNoteList.name, R.string.appbar_delivery_notes, null, null)
+    data object DeliveryNotes :
+        Category(Screen.DeliveryNoteList.name, R.string.appbar_delivery_notes, null, null)
+
     data object MyAccount : Category(Screen.Account.name, R.string.appbar_account, null, null)
     data object About : Category(Screen.About.name, R.string.appbar_about, null, null)
 
@@ -121,17 +134,25 @@ fun MoreOptionsDropdownMenu(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
-    IconButton(
+    Button(
+        contentPadding = PaddingValues(0.dp),
         onClick = {
             isExpanded = true
         },
     ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            imageVector = IconMoreThreeDots,
-            contentDescription = stringResource(R.string.appbar_more)
-        )
-
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = IconMoreThreeDots,
+                contentDescription = stringResource(R.string.appbar_more)
+            )
+            Text(
+                text = Strings.get(R.string.appbar_more_label),
+                fontSize = 10.sp,
+            )
+        }
         DropdownMenu(
             modifier = Modifier
                 .background(Color.White),

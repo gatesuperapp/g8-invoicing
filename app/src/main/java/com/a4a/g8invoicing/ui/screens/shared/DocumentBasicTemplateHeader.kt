@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -111,7 +112,8 @@ fun DocumentBasicTemplateHeader(
 
         Column(
             modifier = Modifier
-                .fillMaxWidth(0.5f),
+                .fillMaxWidth(0.5f)
+                .padding(bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

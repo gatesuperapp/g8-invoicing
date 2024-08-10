@@ -20,10 +20,6 @@ fun DocumentBasicTemplateOrderNumber(
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
-    Spacer(
-        modifier = Modifier
-            .padding(top = 30.dp)
-    )
     Row(
         Modifier
             .getBorder(ScreenElement.DOCUMENT_ORDER_NUMBER, selectedItem)

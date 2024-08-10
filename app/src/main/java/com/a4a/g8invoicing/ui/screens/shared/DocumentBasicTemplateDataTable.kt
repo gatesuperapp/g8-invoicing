@@ -36,6 +36,7 @@ import java.math.RoundingMode
 // and apply it to the rows, borders would be doubled (except on top, left and right)
 // It would give a thicker border in the table middle, we don't want that
 
+val borderWidth = 0.7.dp
 @Composable
 fun DocumentBasicTemplateDataTable(
     tableData: List<DocumentProductState>,
@@ -76,9 +77,7 @@ fun TitleRows(
 ) {
     Row(
         Modifier
-            .topBorder(1.dp, Color.LightGray)
-            .leftBorder(1.dp, Color.LightGray)
-            .bottomBorder(1.dp, Color.LightGray)
+            .topBorder(borderWidth, Color.LightGray)
             .fillMaxWidth()
             .height(IntrinsicSize.Min), // without it we can't add fillMaxHeight to columns
         horizontalArrangement = Arrangement.End
@@ -142,15 +141,11 @@ fun LinkedDeliveryNoteRow(
 ) {
     Row(
         Modifier
-            .topBorder(1.dp, Color.LightGray)
-            .leftBorder(1.dp, Color.LightGray)
-            .bottomBorder(1.dp, Color.LightGray)
-            .fillMaxWidth()
-            .height(IntrinsicSize.Min), // without it we can't add fillMaxHeight to columns
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = docNumberAndDate.first + docNumberAndDate.second,
+            text = docNumberAndDate.first + " - " + docNumberAndDate.second,
             weight = linkedNoteColumnWeight,
             alignEnd = false,
             isBold = true
@@ -176,8 +171,6 @@ fun DocumentProductsRows(
         Row(
             Modifier
                 .fillMaxWidth()
-                .leftBorder(1.dp, Color.LightGray)
-                .bottomBorder(1.dp, Color.LightGray)
                 .height(IntrinsicSize.Min),// without it we can't add fillMaxHeight to columns
             horizontalArrangement = Arrangement.End
         ) {
@@ -229,8 +222,9 @@ fun RowScope.TableCell(
 ) {
     Column(
         modifier = Modifier
-            .rightBorder(1.dp, Color.LightGray)
-            .leftBorder(1.dp, Color.LightGray)
+            .bottomBorder(borderWidth, Color.LightGray)
+            .rightBorder(borderWidth, Color.LightGray)
+            .leftBorder(borderWidth, Color.LightGray)
             .weight(weight)
             .padding(start = 2.dp, end = 4.dp, top = 2.dp)
             .fillMaxHeight(),

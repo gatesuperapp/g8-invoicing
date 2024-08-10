@@ -45,6 +45,7 @@ fun actionCategories() =
     AppBarAction(
         icon = IconApps,
         description = R.string.appbar_categories,
+        label = R.string.appbar_menu_label,
         isInDropDownMenu = false,
         alignmentLeft = true,
         onClick = {
@@ -58,6 +59,7 @@ fun actionNew(onClick: () -> Unit) =
     AppBarAction(
         icon = IconNew,
         description = R.string.appbar_new,
+        label = R.string.appbar_new_label,
         isInDropDownMenu = false,
         onClick = onClick
     )
@@ -77,6 +79,7 @@ fun actionDuplicate(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDuplicate,
         description = R.string.appbar_duplicate,
+        label = R.string.appbar_duplicate_label,
         isInDropDownMenu = false,
         onClick = onClick
     )
@@ -95,7 +98,8 @@ fun actionConvert(onClick: () -> Unit) =
     AppBarAction(
         icon = IconArrowForward,
         description = R.string.appbar_convert,
-        isInDropDownMenu = true,
+        label = R.string.appbar_convert_label,
+        isInDropDownMenu = false,
         onClick = onClick
     )
 
@@ -122,6 +126,7 @@ fun actionUnselectAll(onClick: () -> Unit) =
     AppBarAction(
         icon = IconCheckboxUnselect,
         description = R.string.appbar_unselect_all,
+        label = R.string.appbar_unselect_all_label,
         isInDropDownMenu = false,
         alignmentLeft = true,
         onClick = onClick

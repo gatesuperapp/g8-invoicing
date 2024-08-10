@@ -88,7 +88,7 @@ fun DocumentBasicTemplatePrices(
             // Will display the values as follows:
             // Total HT : 12€
             // TVA 20% : 1€
-            // TVA 5% : 1€
+             // TVA 5% : 1€
             // Total TTC : 14€
             if (footerArray.any { it == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
