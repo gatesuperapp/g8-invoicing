@@ -76,9 +76,10 @@ val customTypography = Typography(
    //     fontWeight = FontWeight.SemiBold
     ),
 
-    bodyLarge = defaultTypography.bodyLarge.merge(fontFamily = uiFontBold),
+    bodyLarge = defaultTypography.bodyLarge.merge(fontFamily = uiFont),
     bodyMedium = defaultTypography.bodyMedium.merge(fontFamily = uiFont),
-    bodySmall = defaultTypography.bodySmall.merge(fontFamily = uiFont),
+    bodySmall = defaultTypography.bodySmall.merge(
+        fontFamily = uiFont),
 
     labelLarge = defaultTypography.labelLarge.merge(
         fontFamily = uiFontBold,
@@ -198,42 +199,6 @@ val Typography.textForDocumentsVerySmallAndItalic: TextStyle
         )
     }
 
-val Typography.textSmall: TextStyle
-    @Composable
-    get() {
-        return TextStyle(
-            fontFamily = uiFont,
-            fontSize = 10.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
-        )
-    }
-
-val Typography.textTitle: TextStyle
-    @Composable
-    get() {
-        return TextStyle(
-            fontFamily = uiFont,
-            fontSize = 14.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
-        )
-    }
-
-val Typography.textFormBlock: TextStyle
-    @Composable
-    get() {
-        return TextStyle(
-            color = ColorDarkGrayTransp,
-            fontFamily = uiFont,
-            fontSize = 20.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
-        )
-    }
 
 val Typography.textForFormLabelVerySmall: TextStyle
     @Composable

@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -216,6 +217,7 @@ fun DocumentAddEdit(
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
         Scaffold(
+            modifier = Modifier.background(Color.LightGray.copy(alpha = 0.4f)),
             topBar = {
                 DeliveryNoteAddEditTopBar(
                     navController = navController,

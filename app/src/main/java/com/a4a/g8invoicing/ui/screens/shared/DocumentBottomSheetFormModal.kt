@@ -29,8 +29,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
-import com.a4a.g8invoicing.ui.theme.textSmall
-import com.a4a.g8invoicing.ui.theme.textTitle
+
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import java.math.BigDecimal
 
@@ -79,7 +78,6 @@ fun DocumentBottomSheetFormModal(
                                     isTaxSelectionVisible = false
                                 } else onClickCancel()
                             },
-                        style = MaterialTheme.typography.textSmall,
                         text = if (!isTaxSelectionVisible) {
                             stringResource(id = R.string.document_modal_product_cancel)
                         } else stringResource(id = R.string.document_modal_product_tva_back)
@@ -88,7 +86,7 @@ fun DocumentBottomSheetFormModal(
                         modifier = Modifier
                             .padding(bottom = 20.dp)
                             .align(Alignment.TopCenter),
-                        style = MaterialTheme.typography.textTitle,
+                        style = MaterialTheme.typography.titleMedium,
                         text = when (typeOfCreation) {
                             DocumentBottomSheetTypeOfForm.NEW_CLIENT -> stringResource(id = R.string.document_modal_new_client)
                             DocumentBottomSheetTypeOfForm.NEW_ISSUER -> stringResource(id = R.string.document_modal_new_issuer)
@@ -107,7 +105,6 @@ fun DocumentBottomSheetFormModal(
                             .padding(top = 20.dp)
                             .align(Alignment.TopEnd)
                             .clickable { onClickDone() },
-                        style = MaterialTheme.typography.textSmall,
                         text = if (!isTaxSelectionVisible) {
                             stringResource(id = R.string.document_modal_product_save)
                         } else ""

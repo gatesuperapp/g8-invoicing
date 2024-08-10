@@ -125,6 +125,7 @@ fun ClientOrIssuerListItem(
                     Text(
                         text = clientName,
                         fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.titleSmall
                         )
                 }
@@ -134,7 +135,6 @@ fun ClientOrIssuerListItem(
                 ) {
                     Text(
                         text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
-                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }

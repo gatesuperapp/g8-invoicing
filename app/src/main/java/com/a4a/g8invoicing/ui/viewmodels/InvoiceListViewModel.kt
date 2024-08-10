@@ -2,7 +2,6 @@ package com.a4a.g8invoicing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
@@ -28,10 +27,10 @@ class InvoiceListViewModel @Inject constructor(
     private var duplicateJob: Job? = null
 
     init {
-        fetchDeliveryNotes()
+        fetch()
     }
 
-    private fun fetchDeliveryNotes() {
+    private fun fetch() {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
@@ -48,7 +47,7 @@ class InvoiceListViewModel @Inject constructor(
         }
     }
 
-    fun deleteDeliveryNotes(selectedDocuments: List<InvoiceState>) {
+    fun delete(selectedDocuments: List<InvoiceState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
@@ -59,7 +58,7 @@ class InvoiceListViewModel @Inject constructor(
         }
     }
 
-    fun duplicateDeliveryNotes(selectedDocuments: List<InvoiceState>) {
+    fun duplicate(selectedDocuments: List<InvoiceState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {

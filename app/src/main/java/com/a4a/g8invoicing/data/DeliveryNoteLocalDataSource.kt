@@ -323,6 +323,10 @@ class DeliveryNoteLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 deliveryNotes.filter { it.documentId != null }.forEach { deliveryNote ->
+                    deliveryNote.documentProducts?.mapNotNull { it.id }?.forEach {
+                        documentProductQueries.deleteDocumentProduct(it.toLong())
+                    }
+
                     deliveryNoteQueries.deleteDeliveryNote(id = deliveryNote.documentId!!.toLong())
                     deliveryNoteDocumentProductQueries.deleteAllProductsLinkedToADeliveryNote(
                         deliveryNote.documentId!!.toLong()

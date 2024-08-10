@@ -115,6 +115,7 @@ fun DeliveryNoteListItem(
                 ) {
                     Text(
                         text = deliveryNote.documentNumber.text,
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
                         // maxLines = 1,
                         //overflow = TextOverflow.Ellipsis
@@ -138,6 +139,8 @@ fun DeliveryNoteListItem(
                 ) {
                     Text(
                         text = deliveryNote.documentDate,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,
                         //overflow = TextOverflow.Ellipsis
                     )

@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.data
 
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -22,9 +20,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class InvoiceLocalDataSource(
     db: Database,
@@ -329,6 +324,10 @@ class InvoiceLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 documents.filter { it.documentId != null }.forEach { document ->
+                    document.documentProducts?.mapNotNull { it.id }?.forEach {
+                        documentProductQueries.deleteDocumentProduct(it.toLong())
+                        invoiceDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(it.toLong())
+                    }
                     invoiceQueries.delete(id = document.documentId!!.toLong())
                     invoiceDocumentProductQueries.deleteAllProductsLinkedToInvoice(
                         document.documentId!!.toLong()
@@ -362,12 +361,13 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override suspend fun deleteDocumentProduct(id: Long, documentProductId: Long) {
+    override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         return withContext(Dispatchers.IO) {
             invoiceDocumentProductQueries.deleteProductLinkedToInvoice(
-                id,
+                documentId,
                 documentProductId
             )
+            invoiceDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(documentProductId)
         }
     }
 

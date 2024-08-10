@@ -24,8 +24,8 @@ fun NavGraphBuilder.invoiceList(
         InvoiceList(
             navController = navController,
             documentsUiState = invoicesUiState,
-            onClickDelete = viewModel::deleteDeliveryNotes,
-            onClickDuplicate = viewModel::duplicateDeliveryNotes,
+            onClickDelete = viewModel::delete,
+            onClickDuplicate = viewModel::duplicate,
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,

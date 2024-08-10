@@ -36,7 +36,7 @@ fun TopBar(
             title?.let {
                 Text(
                     text = stringResource(id = it),
-                    style = MaterialTheme.typography.titleSmall
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
         },

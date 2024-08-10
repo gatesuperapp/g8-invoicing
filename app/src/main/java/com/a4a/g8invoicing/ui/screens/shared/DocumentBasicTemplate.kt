@@ -49,7 +49,6 @@ import kotlin.math.abs
 
 
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DocumentBasicTemplate(
     uiState: DocumentState,
@@ -72,10 +71,6 @@ fun DocumentBasicTemplate(
         footerArray.add("TAXES_$it")
     }
     footerArray.add(FooterRowName.TOTAL_WITH_TAX.name)
-
-    val arrayOfProductsAndFooterRows: MutableList<Any> =
-        productArray?.toMutableList() ?: mutableListOf()
-    // footerArray.forEach { arrayOfProductsAndFooterRows.add(it) }
 
     Column(
         Modifier
