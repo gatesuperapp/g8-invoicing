@@ -39,7 +39,7 @@ import java.math.RoundingMode
 val borderWidth = 0.7.dp
 @Composable
 fun DocumentBasicTemplateDataTable(
-    tableData: List<DocumentProductState>,
+    products: List<DocumentProductState>,
 ) {
     val descriptionColumnWeight = .8f
     val quantityColumnWeight = .15f
@@ -48,13 +48,13 @@ fun DocumentBasicTemplateDataTable(
 
     TitleRows(descriptionColumnWeight, quantityColumnWeight)
 
-    val linkedDeliveryNotes = getLinkedDeliveryNotes(tableData)
+    val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
 
     if (linkedDeliveryNotes.isNotEmpty()) {
         linkedDeliveryNotes.forEach {docNumberAndDate ->
             LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
             DocumentProductsRows(
-                tableData.filter { it.linkedDocNumber == docNumberAndDate.first },
+                products.filter { it.linkedDocNumber == docNumberAndDate.first },
                 descriptionColumnWeight,
                 quantityColumnWeight,
                 taxColumnWeight
@@ -62,7 +62,7 @@ fun DocumentBasicTemplateDataTable(
         }
     } else {
         DocumentProductsRows(
-            tableData,
+            products,
             descriptionColumnWeight,
             quantityColumnWeight,
             taxColumnWeight
@@ -118,15 +118,15 @@ fun TitleRows(
     }
 }
 
-fun getLinkedDeliveryNotes(tableData: List<DocumentProductState>): MutableList<Pair<String?, String?>> {
+fun getLinkedDeliveryNotes(products: List<DocumentProductState>): MutableList<Pair<String?, String?>> {
     val linkedDeliveryNotes: MutableList<Pair<String?, String?>> = mutableListOf()
 
-    if (tableData.any { !it.linkedDocNumber.isNullOrEmpty() }) {
-        tableData.map { it.linkedDocNumber }.distinct().forEach { docNumber ->
+    if (products.any { !it.linkedDocNumber.isNullOrEmpty() }) {
+        products.map { it.linkedDocNumber }.distinct().forEach { docNumber ->
             linkedDeliveryNotes.add(
                 Pair(
                     docNumber,
-                    tableData.firstOrNull { it.linkedDocNumber == docNumber }?.linkedDate
+                    products.firstOrNull { it.linkedDocNumber == docNumber }?.linkedDate
                 )
             )
         }

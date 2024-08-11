@@ -9,8 +9,11 @@ import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.screens.shared.DocumentProductsRows
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.FooterRowName
+import com.a4a.g8invoicing.ui.screens.shared.LinkedDeliveryNoteRow
+import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -83,7 +86,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
         }
     }
     inputDocument.documentProducts?.let {
-        document.add(createProductsTable(it, context))
+        document.add(createProductsTable(it))
     }
     inputDocument.documentPrices?.let {
         document.add(createPrices(fontBold, it))
@@ -103,7 +106,11 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
                 addPageNumberingAndSaveFile(fileNameBeforeNumbering, finalFileName)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
-                Toast.makeText(context, "Erreur ${e.message}, vérifiez votre espace disponible.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Erreur ${e.message}, vérifiez votre espace disponible.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             Toast.makeText(context, "PDF créé", Toast.LENGTH_SHORT).show()
         }
@@ -268,9 +275,8 @@ fun createReference(orderNumber: String, font: PdfFont): Paragraph {
         .add(orderNumber)
 }
 
-fun createProductsTable(products: List<DocumentProductState>, context: Context): Table {
+fun createProductsTable(products: List<DocumentProductState>): Table {
     val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
-
     val productsTable = Table(UnitValue.createPercentArray(columnWidth))
         .useAllAvailableWidth()
         .setMarginBottom(10f)
@@ -288,12 +294,33 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         .addCustomCell(Strings.get(R.string.document_table_unit_price_without_tax), isBold = true)
         .addCustomCell(Strings.get(R.string.document_table_total_price_without_tax), isBold = true)
 
-    products.forEach {
-        Log.e(
-            ContentValues.TAG,
-            "GGGG: id = " + it.id
-        )
+    val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
 
+    if (linkedDeliveryNotes.isNotEmpty()) {
+        linkedDeliveryNotes.forEach { docNumberAndDate ->
+            addDeliveryNoteRow(productsTable, docNumberAndDate)
+            addProductsToTable(
+                products.filter { it.linkedDocNumber == docNumberAndDate.first },
+                productsTable
+            )
+        }
+    } else {
+        addProductsToTable(products, productsTable)
+    }
+    return productsTable
+}
+
+fun addDeliveryNoteRow(productsTable: Table, docNumberAndDate: Pair<String?, String?>) {
+    productsTable.addCustomCell(
+        text = docNumberAndDate.first + " - " + docNumberAndDate.second,
+        alignment = TextAlignment.LEFT,
+        isBold = true,
+        isSpan = true
+    )
+}
+
+fun addProductsToTable(products: List<DocumentProductState>, productsTable: Table) {
+    products.forEach {
         val itemName = Text(it.name.text)
         val itemDescription = Text(it.description?.text).setItalic()
         val item = Paragraph(itemName)
@@ -322,7 +349,6 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
                 .toString() + Strings.get(R.string.currency)
         )
     }
-    return productsTable
 }
 
 fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
@@ -417,6 +443,7 @@ fun Table.addCustomCell(
     paragraph: Paragraph? = null,
     alignment: TextAlignment = TextAlignment.RIGHT,
     isBold: Boolean = false,
+    isSpan: Boolean = false, //Used to merge cells
 ): Table {
     val paddingLeft = 6f
     val paddingRight = 6f
@@ -428,16 +455,17 @@ fun Table.addCustomCell(
 
     val fontRegular = PdfFontFactory.createFont(helvetica)
     val fontBold = PdfFontFactory.createFont(helveticaBold)
-    val font = if (isBold) fontBold else fontRegular
+
+    val colSpan = if (isSpan) 6 else 1
 
     return this.addCell(
-        Cell().add(textToAdd)
+        Cell(1, colSpan).add(textToAdd)
             .setTextAlignment(alignment)
             .setPaddingLeft(paddingLeft)
             .setPaddingRight(paddingRight)
             .setPaddingTop(paddingTop)
             .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 1f))
-            .setFont(font)
+            .setFont(if (isBold) fontBold else fontRegular)
     )
 }
 
