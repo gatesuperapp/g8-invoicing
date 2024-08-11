@@ -1,13 +1,16 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,12 +22,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.BottomBar
+import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 
 @Composable
 fun About(
@@ -62,7 +69,12 @@ fun About(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                modifier = Modifier.padding(top = 40.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
+                modifier = Modifier.padding(
+                    top = 40.dp,
+                    start = 40.dp,
+                    end = 40.dp,
+                    bottom = 20.dp
+                ),
                 text = stringResource(id = R.string.about)
             )
 
@@ -76,7 +88,51 @@ fun About(
             }) {
                 Text(stringResource(id = R.string.about_button_contact))
             }
+
+            TermsOfService()
+
         }
     }
+}
+
+@Composable
+fun TermsOfService() {
+    val annotatedString = buildAnnotatedString {
+        append(Strings.get(R.string.about_terms_of_service_header) + " ")
+
+        pushStringAnnotation(tag = "terms", annotation = "https://the-gate.fr/conditions-generales")
+        withStyle(style = SpanStyle(color = ColorBlueLink)) {
+            append(Strings.get(R.string.about_terms_of_service) + " ")
+        }
+        pop()
+
+        append(Strings.get(R.string.about_terms_of_service_header_2) + " ")
+
+        pushStringAnnotation(
+            tag = "policy",
+            annotation = "https://the-gate.fr/politique-confidentialite"
+        )
+        withStyle(style = SpanStyle(color = ColorBlueLink)) {
+            append(Strings.get(R.string.about_privacy))
+        }
+
+        pop()
+    }
+
+    ClickableText(
+        modifier = Modifier.padding(top = 40.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
+        text = annotatedString,
+        style = MaterialTheme.typography.bodyLarge,
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(tag = "policy", start = offset, end = offset)
+                .firstOrNull()?.let {
+                Log.d("policy URL", it.item)
+            }
+
+            annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
+                .firstOrNull()?.let {
+                Log.d("terms URL", it.item)
+            }
+        })
 }
 

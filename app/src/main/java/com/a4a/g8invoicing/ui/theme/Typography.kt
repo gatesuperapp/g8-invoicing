@@ -77,7 +77,7 @@ val customTypography = Typography(
     ),
 
     bodyLarge = defaultTypography.bodyLarge.merge(fontFamily = uiFont),
-    bodyMedium = defaultTypography.bodyMedium.merge(fontFamily = uiFont),
+    bodyMedium = defaultTypography.bodyMedium.merge(fontFamily = uiFont), // THE ONE THAT IS USED BY DEFAULT
     bodySmall = defaultTypography.bodySmall.merge(
         fontFamily = uiFont
     ),

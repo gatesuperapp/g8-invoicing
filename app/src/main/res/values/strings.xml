@@ -204,13 +204,17 @@
     <string name="document_modal_product_tva_back">Retour</string>
     <string name="document_modal_product_tva_title">TVA</string>
     <string name="account_label">Mon compte</string>
-    <string name="account_project_info">The Gate (G8) est une application open source, conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\n L\'objectif est de fournir une solution simple, pratique et respectueuse des données personnelles.\n\n La majorité des bénéfices sera reversée à des projets de protection de la faune sauvage. Inscrivez-vous pour soutenir le projet et bénéficier des prochaines fonctionnalités :
-        export de données, templates de documents et + encore ! \n
-        &#128522;
+    <string name="account_project_info">Vous souhaitez accéder à la version pro à 4€/mois ?
+        Créez un compte et on vous dit tout par mail !
     </string>
-    <string name="about">The Gate (G8) est une application open source, conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\nL\'objectif est de fournir une solution simple, pratique et respectueuse des données personnelles.\n\nDe nouvelles fonctionnalités seront publiées rapidement : factures, transformation de bons de livraison en facture, enregistrement des paiements, ajout d\'images et + &#128522;\n
-        \nPour des questions, retours de bugs, propositions d\'idées ou simplement discuter :
+    <string name="about">
+        The Gate (G8) est une application conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\nL\'objectif est de fournir un outil pratique et respectueux des données personnelles. De nouvelles fonctionnalités seront ajoutées régulièrement :
+        enregistrement des paiements, ajout de logos, templates de documents et + &#128522; !\n\nPour des questions, retours de bugs, propositions d\'idées ou simplement dire coucouc :
     </string>
+    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez nos</string>
+    <string name="about_terms_of_service">conditions d\'utilisation</string>
+    <string name="about_terms_of_service_header_2">et notre</string>
+    <string name="about_privacy">politique de confidentialité.</string>
     <string name="account_button_create">Créer mon compte</string>
     <string name="about_button_contact">Écrire à contact@the-gate.app</string>
     <string name="about_contact_email">contact@the-gate.app</string>
