@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -15,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +41,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
+import com.itextpdf.layout.element.Text
 import java.math.BigDecimal
 
 
@@ -50,9 +55,6 @@ fun DocumentBasicTemplateContent(
     selectedItem: ScreenElement? = null,
 ) {
     val pagePadding = 20.dp
-    var pageHeightDp by remember { mutableStateOf(0.dp) }
-    var pageContentHeightDp by remember { mutableStateOf(0.dp) }
-    val localDensity = LocalDensity.current
 
     Box(
         modifier = Modifier
@@ -78,6 +80,7 @@ fun DocumentBasicTemplateContent(
                 )
                 .background(Color.White)
         ) {
+
             DocumentBasicTemplateHeader(uiState, onClickElement, selectedItem)
             uiState.orderNumber?.let {
                 if(it.text.isNotEmpty())
@@ -189,18 +192,3 @@ fun Modifier.customCombinedClickable(
     )
 }
 
-
-@Composable
-private fun fakeDocumentProducts() =
-    listOf(
-        DocumentProductState(
-            id = 1,
-            name = TextFieldValue(stringResource(id = R.string.document_default_document_product_name)),
-            description = TextFieldValue(stringResource(id = R.string.document_default_document_product_description)),
-            priceWithTax = BigDecimal(4),
-            taxRate = BigDecimal(20),
-            quantity = BigDecimal(2),
-            unit = TextFieldValue(stringResource(id = R.string.document_default_document_product_unit)),
-            productId = 1
-        )
-    )

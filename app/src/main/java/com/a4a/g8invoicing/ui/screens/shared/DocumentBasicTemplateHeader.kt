@@ -103,7 +103,7 @@ fun DocumentBasicTemplateHeader(
                     onLongClick = {
                     }
                 )
-                .padding(end = 20.dp)
+                .padding(end = 20.dp, bottom = 20.dp)
                 .weight(1f)
                 .fillMaxWidth(0.3f)
         ) {

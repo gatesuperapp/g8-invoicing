@@ -1,10 +1,13 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -12,10 +15,13 @@ import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,8 +31,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -46,6 +55,8 @@ import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.absoluteValue
+import kotlin.math.max
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -54,95 +65,23 @@ fun DocumentBasicTemplate(
     uiState: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
 ) {
-    var zoom by remember { mutableStateOf(1f) }
-    var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
-    var offsetY by remember { mutableStateOf(0f) }
-    val coroutineScope = rememberCoroutineScope()
-    var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
+
     val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
     val screenWidth = configuration.screenWidthDp.dp
     val productArray = uiState.documentProducts
-/*    val pageNumber = productArray?.last()?.page ?: 1
-    val pagerState = rememberPagerState { pageNumber }*/
+    /*    val pageNumber = productArray?.last()?.page ?: 1
+        val pagerState = rememberPagerState { pageNumber }*/
     val footerArray = mutableStateListOf(FooterRowName.TOTAL_WITHOUT_TAX.name)
-    val taxRates = uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
+    val taxRates =
+        uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
         footerArray.add("TAXES_$it")
     }
     footerArray.add(FooterRowName.TOTAL_WITH_TAX.name)
 
+
     Column(
-        Modifier
-            .pointerInput(Unit) {
-                customTransformGestures(
-                    pass = PointerEventPass.Initial,
-                    onDoubleTouch = { // Disable clicking 2 items in 1 time
-                        clickEnabled = false
-                    },
-                    onGesture = {
-                            centroid,
-                            pan,
-                            gestureZoom,
-                            _,
-                            pointerInput: PointerInputChange,
-                            changes: List<PointerInputChange>,
-                        ->
 
-                        zoom = (zoom * gestureZoom).coerceIn(
-                            1f,
-                            3f
-                        )  // Zoom limits: min 100%, max 200%
-
-                        var newOffsetX = animatableOffsetX.value + pan.x.times(zoom)
-                        var newOffsetY = offsetY + pan.y.times(zoom)
-
-                        val maxX = (size.width * (zoom - 1) / 2f)
-                        val maxY = (size.height * (zoom - 1) / 2f)
-
-                        if (zoom > 1f) {
-                            newOffsetX = newOffsetX.coerceIn(
-                                -maxX,
-                                maxX
-                            ) // coercein will limit drag in bounds
-                            newOffsetY = newOffsetY.coerceIn(-maxY, maxY)
-                        }
-
-                        animatableOffsetX = Animatable(newOffsetX)
-                        offsetY = newOffsetY
-
-                        // 🔥Consume touch when multiple fingers down
-                        // This prevents click and long click if your finger touches a
-                        // button while pinch gesture is being invoked
-                        val size = changes.size
-                        if (size > 1) {
-                            changes.forEach { it.consume() }
-                        }
-                    },
-                    onGestureEnd = {
-                        // When no zoom only, do an animation to bring
-                        // back to center when dragged along X axis
-                        if (zoom == 1f) {
-                            coroutineScope.launch {
-                                animatableOffsetX.animateTo(
-                                    0f, animationSpec = spring(
-                                        //dampingRatio = 0.4f,
-                                        stiffness = Spring.StiffnessLow
-                                    )
-                                )
-                            }
-                        }
-                    }
-                )
-            }
-            .graphicsLayer {
-                translationX = animatableOffsetX.value
-                if (zoom > 1f) { // Y translation disabled when no zoom
-                    translationY = offsetY
-                }
-                scaleX = zoom
-                scaleY = zoom
-            }
     ) {
 
         DocumentBasicTemplateContent(

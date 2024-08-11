@@ -43,7 +43,7 @@ import java.math.RoundingMode
 
 
 const val helvetica = "assets/helvetica.ttf"
-const val helveticaBold = "assets/helvetica.ttf"
+const val helveticaBold = "assets/helveticabold.ttf"
 
 //const val pdfFontBold = "assets/helveticabold.ttf"
 fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
@@ -55,11 +55,11 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     val pdfDocument = PdfDocument(writer)
 
     val fontRegular = PdfFontFactory.createFont(helvetica)
-    val fontMedium = PdfFontFactory.createFont(helveticaBold)
+    val fontBold = PdfFontFactory.createFont(helveticaBold)
 
     val document = Document(pdfDocument, PageSize.A4)
         .setFont(fontRegular)
-        .setFontSize(12F)
+        .setFontSize(10F)
 
     document.add(
         createTitle(
@@ -73,24 +73,24 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
         createIssuerAndClientTable(
             inputDocument.documentIssuer,
             inputDocument.documentClient,
-            fontMedium,
+            fontBold,
             inputDocument.documentType
         )
     )
     inputDocument.orderNumber?.let {
         if (it.text.isNotEmpty()) {
-            document.add(createReference(it.text, fontMedium))
+            document.add(createReference(it.text, fontBold))
         }
     }
     inputDocument.documentProducts?.let {
         document.add(createProductsTable(it, context))
     }
     inputDocument.documentPrices?.let {
-        document.add(createPrices(fontMedium, it))
+        document.add(createPrices(fontBold, it))
     }
 
     if (inputDocument is InvoiceState) {
-        document.add(createDueDate(fontMedium, inputDocument.dueDate))
+        document.add(createDueDate(fontBold, inputDocument.dueDate))
         document.add(createFooter(inputDocument.footerText.text))
     }
 
@@ -103,10 +103,12 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
                 addPageNumberingAndSaveFile(fileNameBeforeNumbering, finalFileName)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
+                Toast.makeText(context, "Erreur ${e.message}, vérifiez votre espace disponible.", Toast.LENGTH_SHORT).show()
             }
+            Toast.makeText(context, "PDF créé", Toast.LENGTH_SHORT).show()
         }
     }
-    Toast.makeText(context, "PDF created", Toast.LENGTH_SHORT).show()
+
 }
 
 fun createTitle(
@@ -241,7 +243,6 @@ fun createIssuerAndClientTable(
                         else -> null
                     }
                 )
-                    .setFontSize(10F)
                     .setFontColor(ColorConstants.DARK_GRAY)
             )
             .setTextAlignment(TextAlignment.CENTER)
@@ -268,11 +269,10 @@ fun createReference(orderNumber: String, font: PdfFont): Paragraph {
 }
 
 fun createProductsTable(products: List<DocumentProductState>, context: Context): Table {
-    val columnWidth = floatArrayOf(50f, 10f, 10f, 10f, 10f, 10f)
+    val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
 
     val productsTable = Table(UnitValue.createPercentArray(columnWidth))
         .useAllAvailableWidth()
-        .setFontSize(11F)
         .setMarginBottom(10f)
         .setFixedLayout()
 
@@ -289,6 +289,11 @@ fun createProductsTable(products: List<DocumentProductState>, context: Context):
         .addCustomCell(Strings.get(R.string.document_table_total_price_without_tax), isBold = true)
 
     products.forEach {
+        Log.e(
+            ContentValues.TAG,
+            "GGGG: id = " + it.id
+        )
+
         val itemName = Text(it.name.text)
         val itemDescription = Text(it.description?.text).setItalic()
         val item = Paragraph(itemName)
@@ -442,7 +447,6 @@ fun Table.addCellInFooter(
     return this.addCell(
         Cell().add(paragraph)
             .setTextAlignment(TextAlignment.RIGHT)
-            .setFontSize(10F)
             .setBorder(Border.NO_BORDER)
             .setPaddingTop(-4f)
             .setPaddingBottom(6f)
@@ -469,8 +473,7 @@ fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String)
         for (i in 1..numberOfPages) {
             doc.showTextAligned(
                 Paragraph(String.format("%s/%s", i, numberOfPages))
-                    .setFont(fontRegular)
-                    .setFontSize(12F),
+                    .setFont(fontRegular),
                 570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
             )
         }

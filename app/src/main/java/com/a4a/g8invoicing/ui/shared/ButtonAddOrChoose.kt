@@ -60,14 +60,18 @@ fun ButtonAddOrChoose(
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    top = 20.dp,
-                    bottom = 20.dp
+                    top = 10.dp,
+                    bottom = 10.dp
                 ),
             imageVector = IconPlus,
             contentDescription = "Add new"
         )
         Text(
-            modifier = Modifier.padding(top = 20.dp, bottom = 20.dp),
+            modifier = Modifier
+                .padding(
+                    top = 10.dp,
+                    bottom = 10.dp
+                ),
             text = buttonText,
         )
     }

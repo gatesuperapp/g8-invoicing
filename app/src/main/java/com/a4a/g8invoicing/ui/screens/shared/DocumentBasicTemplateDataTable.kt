@@ -21,14 +21,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
-import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallAndItalic
-import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallBold
+import com.a4a.g8invoicing.ui.theme.textForDocuments
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -235,8 +235,8 @@ fun RowScope.TableCell(
 
         Text(
             text = text,
-            style = if (isBold) MaterialTheme.typography.textForDocumentsVerySmallBold
-            else MaterialTheme.typography.textForDocumentsVerySmall,
+            style = if (isBold) MaterialTheme.typography.textForDocumentsBold
+            else MaterialTheme.typography.textForDocuments,
             // have to specify it (in addition to column alignment)
             // because without it, multilines text aren't aligned
             textAlign = if (alignEnd) TextAlign.Right else TextAlign.Start,
@@ -244,7 +244,8 @@ fun RowScope.TableCell(
         if (!subText.isNullOrEmpty()) {
             Text(
                 text = subText,
-                style = MaterialTheme.typography.textForDocumentsVerySmallAndItalic,
+                style = MaterialTheme.typography.textForDocuments,
+                fontStyle = FontStyle.Italic
                 // maxLines = 1
             )
         }

@@ -130,7 +130,7 @@
     <string name="delivery_note">Bon de livraison</string>
     <string name="invoice">Facture</string>
     <string name="invoice_due_date">Échéance</string>
-    <string name="invoice_pdf_due_date">Date d\'échéance</string>
+    <string name="invoice_pdf_due_date">Date limite de paiement</string>
     <string name="invoice_pending">En attente</string>
     <string name="invoice_late">En retard</string>
     <string name="delivery_note_number">Bon de livraison N°</string>

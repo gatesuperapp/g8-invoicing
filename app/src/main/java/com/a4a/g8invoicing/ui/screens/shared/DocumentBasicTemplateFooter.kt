@@ -15,8 +15,8 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmall
-import com.a4a.g8invoicing.ui.theme.textForDocumentsVerySmallBold
+import com.a4a.g8invoicing.ui.theme.textForDocuments
+import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
 fun DocumentBasicTemplateFooter(
@@ -41,7 +41,7 @@ fun DocumentBasicTemplateFooter(
                 .padding(bottom = 6.dp)
         ) {
             Text(
-                style = MaterialTheme.typography.textForDocumentsVerySmallBold,
+                style = MaterialTheme.typography.textForDocumentsBold,
                 text = Strings.get(R.string.invoice_pdf_due_date) + " : " + uiState.dueDate
             )
         }
@@ -50,7 +50,7 @@ fun DocumentBasicTemplateFooter(
                 modifier = Modifier
                     .padding(bottom = 12.dp),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.textForDocumentsVerySmall,
+                style = MaterialTheme.typography.textForDocuments,
                 text = uiState.footerText.text
             )
         }
