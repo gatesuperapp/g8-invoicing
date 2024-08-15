@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -119,6 +120,9 @@ fun TermsOfService() {
         pop()
     }
 
+
+    val uriHandler = LocalUriHandler.current
+
     ClickableText(
         modifier = Modifier.padding(top = 40.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
         text = annotatedString,
@@ -126,12 +130,12 @@ fun TermsOfService() {
         onClick = { offset ->
             annotatedString.getStringAnnotations(tag = "policy", start = offset, end = offset)
                 .firstOrNull()?.let {
-                Log.d("policy URL", it.item)
+                    uriHandler.openUri(it.item)
             }
 
             annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
                 .firstOrNull()?.let {
-                Log.d("terms URL", it.item)
+                    uriHandler.openUri(it.item)
             }
         })
 }

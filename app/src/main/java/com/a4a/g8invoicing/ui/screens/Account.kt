@@ -24,6 +24,7 @@ import com.a4a.g8invoicing.ui.shared.BottomBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.ui.states.AuthState
 
@@ -106,11 +107,11 @@ fun Account(
             if (showText && !userAuthorized) {
                 Text(
                     modifier = Modifier.padding(40.dp),
-                    text = stringResource(id = R.string.account_project_info)
+                    text =Strings.get(R.string.account_project_info)
                 )
 
                 Button(onClick = { showCreateAccountForm = true }) {
-                    Text(stringResource(id = R.string.account_button_create))
+                    Text(Strings.get(R.string.account_button_create))
                 }
             }
 
@@ -129,7 +130,7 @@ fun Account(
             }
 
             if (userAuthorized) {
-                Text("Bomboclatttt! Bienvenue parmi les membres du G8.")
+                Text(Strings.get(R.string.account_creation_success))
             }
         }
     }

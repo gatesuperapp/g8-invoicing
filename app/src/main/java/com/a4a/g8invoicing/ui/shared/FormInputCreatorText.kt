@@ -31,10 +31,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
-import com.a4a.g8invoicing.ui.theme.textForFormLabelVerySmall
+import com.a4a.g8invoicing.ui.theme.textVerySmall
 import icons.IconEdit
 
 @Composable
@@ -112,7 +111,7 @@ fun FormInputCreatorText(
                     )
                     Text(
                         color = ColorGreyo,
-                        style = MaterialTheme.typography.textForFormLabelVerySmall,
+                        style = MaterialTheme.typography.textVerySmall,
                         text = stringResource(id = R.string.form_label_edit)
                     )
                 }

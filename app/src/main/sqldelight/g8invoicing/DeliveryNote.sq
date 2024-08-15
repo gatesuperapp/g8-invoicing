@@ -23,6 +23,12 @@ SELECT delivery_note_id
 FROM DeliveryNote
 WHERE delivery_note_id = :id;
 
+getLastDeliveryNoteNumber:
+SELECT number
+FROM DeliveryNote
+ORDER BY delivery_note_id DESC
+LIMIT 1;
+
 getAllDeliveryNotes:
 SELECT *
 FROM DeliveryNote;

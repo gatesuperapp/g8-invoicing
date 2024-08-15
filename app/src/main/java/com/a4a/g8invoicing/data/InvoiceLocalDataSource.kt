@@ -34,6 +34,24 @@ class InvoiceLocalDataSource(
         db.linkInvoiceDocumentProductToDeliveryNoteQueries
     private val invoiceDocumentClientOrIssuerQueries = db.linkInvoiceToDocumentClientOrIssuerQueries
 
+    override suspend fun createNew(): Long? {
+        val issuer = getExistingIssuer()?.transformIntoEditable()
+            ?: DocumentClientOrIssuerState()
+        saveInfoInInvoiceTable(
+            InvoiceState(
+                documentNumber = TextFieldValue(getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)),
+                documentIssuer = issuer,
+                footerText = TextFieldValue(getExistingFooter() ?: ""))
+        )
+        saveInfoInOtherTables(
+            InvoiceState(documentIssuer = issuer)
+        )
+        return invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+    }
+
+    private fun getLastDocumentNumber(): String? {
+        return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+    }
 
     override fun fetch(id: Long): InvoiceState? {
         return invoiceQueries.get(id).executeAsOneOrNull()
@@ -160,19 +178,6 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override suspend fun createNew(): Long? {
-        val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: DocumentClientOrIssuerState()
-        val footer = TextFieldValue(getExistingFooter() ?: "")
-        saveInfoInInvoiceTable(
-            InvoiceState(documentIssuer = issuer, footerText = footer)
-        )
-        saveInfoInOtherTables(
-            InvoiceState(documentIssuer = issuer)
-        )
-        return invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
-    }
-
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
         withContext(Dispatchers.IO) {
             try {
@@ -218,7 +223,7 @@ class InvoiceLocalDataSource(
                     val invoice = InvoiceState(
                         documentType = it.documentType,
                         documentId = it.documentId,
-                        documentNumber = TextFieldValue("XXX"),
+                        documentNumber = TextFieldValue(getLastDocumentNumber() ?: "XXX"),
                         documentDate = it.documentDate,
                         orderNumber = it.orderNumber,
                         documentIssuer = it.documentIssuer,

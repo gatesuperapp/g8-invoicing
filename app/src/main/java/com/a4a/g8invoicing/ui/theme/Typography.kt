@@ -7,12 +7,9 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.shared.helveticaBold
 
 
 val provider = GoogleFont.Provider(
@@ -76,8 +73,10 @@ val customTypography = Typography(
         //     fontWeight = FontWeight.SemiBold
     ),
 
-    bodyLarge = defaultTypography.bodyLarge.merge(fontFamily = uiFont),
-    bodyMedium = defaultTypography.bodyMedium.merge(fontFamily = uiFont), // THE ONE THAT IS USED BY DEFAULT
+    bodyLarge = defaultTypography.bodyLarge.merge(// THE DEFAULT ONE
+        fontFamily = uiFont
+    ),
+    bodyMedium = defaultTypography.bodyMedium.merge(fontFamily = uiFont),
     bodySmall = defaultTypography.bodySmall.merge(
         fontFamily = uiFont
     ),
@@ -97,7 +96,19 @@ val customTypography = Typography(
 
 )
 
-val Typography.textForFormLabelVerySmall: TextStyle
+val Typography.textSmall: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFont,
+            fontSize = 10.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }
+
+val Typography.textVerySmall: TextStyle
     @Composable
     get() {
         return TextStyle(

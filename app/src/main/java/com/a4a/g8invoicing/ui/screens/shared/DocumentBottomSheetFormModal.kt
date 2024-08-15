@@ -29,6 +29,8 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.textVerySmall
 
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import java.math.BigDecimal
@@ -101,6 +103,7 @@ fun DocumentBottomSheetFormModal(
                         }
                     )
                     Text(
+                        style = MaterialTheme.typography.textSmall,
                         modifier = Modifier
                             .padding(top = 20.dp)
                             .align(Alignment.TopEnd)

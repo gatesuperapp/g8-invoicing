@@ -112,4 +112,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.13")
     implementation("org.slf4j:slf4j-simple:2.0.13")
 
+    // Auth info storage
+    implementation("androidx.security:security-crypto:1.0.0")
+    implementation("org.mindrot:jbcrypt:0.4")
+
 }

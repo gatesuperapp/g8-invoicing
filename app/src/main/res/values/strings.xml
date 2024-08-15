@@ -204,14 +204,15 @@
     <string name="document_modal_product_tva_back">Retour</string>
     <string name="document_modal_product_tva_title">TVA</string>
     <string name="account_label">Mon compte</string>
-    <string name="account_project_info">Vous souhaitez accéder à la version pro à 4€/mois ?
-        Créez un compte et on vous dit tout par mail !
+    <string name="account_project_info">
+        Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
     </string>
+    <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
     <string name="about">
-        The Gate (G8) est une application conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\nL\'objectif est de fournir un outil pratique et respectueux des données personnelles. De nouvelles fonctionnalités seront ajoutées régulièrement :
-        enregistrement des paiements, ajout de logos, templates de documents et + &#128522; !\n\nPour des questions, retours de bugs, propositions d\'idées ou simplement dire coucouc :
+        The Gate (G8) est une application conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\n De nouvelles fonctionnalités seront bientôt disponibles pour les abonnés :
+         enregistrement des paiements, ajout d\'images, templates de documents et + &#128522;. L\'objectif ultime est de créer une super-app, avec notamment une marketplace pour la vente de produits locaux. !\n\nPour des questions, retours de bugs, propositions d\'idées ou simplement dire coucouc :
     </string>
-    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez nos</string>
+    <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez nos</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et notre</string>
     <string name="about_privacy">politique de confidentialité.</string>

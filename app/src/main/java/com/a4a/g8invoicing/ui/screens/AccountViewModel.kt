@@ -1,21 +1,20 @@
 package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.data.auth.AuthRepositoryInterface
+import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.ui.states.AuthState
 import com.a4a.g8invoicing.ui.states.AuthUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.auth.AuthRepository
-import com.a4a.g8invoicing.data.auth.AuthRepositoryInterface
-import com.a4a.g8invoicing.data.auth.AuthResult
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class AccountViewModel @Inject constructor(
@@ -30,6 +29,15 @@ class AccountViewModel @Inject constructor(
 
     init {
         authenticate()
+    }
+
+    private fun authenticate() {
+        viewModelScope.launch {
+            state = state.copy(isLoading = true)
+            val result = repository.authenticate()
+            resultChannel.send(result)
+            state = state.copy(isLoading = false)
+        }
     }
 
     fun fetchResult() {
@@ -55,7 +63,7 @@ class AccountViewModel @Inject constructor(
             }
 
             is AuthUiEvent.SignIn -> {
-                signIn()
+                signInApiCall()
             }
 
             is AuthUiEvent.SignUpUsernameChanged -> {
@@ -84,7 +92,7 @@ class AccountViewModel @Inject constructor(
         }
     }
 
-    private fun signIn() {
+    private fun signInApiCall() {
         viewModelScope.launch {
             state = state.copy(isLoading = true)
             val result = repository.signIn(
@@ -95,13 +103,6 @@ class AccountViewModel @Inject constructor(
             state = state.copy(isLoading = false)
         }
     }
-
-    private fun authenticate() {
-        viewModelScope.launch {
-            state = state.copy(isLoading = true)
-            val result = repository.authenticate()
-            resultChannel.send(result)
-            state = state.copy(isLoading = false)
-        }
-    }
 }
+
+

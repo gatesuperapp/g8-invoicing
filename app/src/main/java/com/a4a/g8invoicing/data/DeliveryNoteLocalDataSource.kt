@@ -10,7 +10,6 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +32,18 @@ class DeliveryNoteLocalDataSource(
     private val deliveryNoteDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
     private val deliveryNoteDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
+
+    override suspend fun createNewDeliveryNote(): Long? {
+        saveDeliveryNoteInfoInAllTables(
+            DeliveryNoteState(
+                documentNumber = TextFieldValue(getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)),
+                documentIssuer = getExistingIssuer()?.transformIntoEditable()
+                    ?: DocumentClientOrIssuerState(),
+            )
+        )
+
+        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+    }
 
 
     override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
@@ -195,17 +206,6 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun createNewDeliveryNote(): Long? {
-        saveDeliveryNoteInfoInAllTables(
-            DeliveryNoteState(
-                documentIssuer = getExistingIssuer()?.transformIntoEditable()
-                    ?: DocumentClientOrIssuerState(),
-            )
-        )
-
-        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
-    }
-
     override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
@@ -229,7 +229,7 @@ class DeliveryNoteLocalDataSource(
                         DeliveryNoteState(
                             documentType = it.documentType,
                             documentId = it.documentId,
-                            documentNumber = TextFieldValue("XXX"),
+                            documentNumber = TextFieldValue(getLastDocumentNumber() ?: "XXX"),
                             documentDate = it.documentDate,
                             orderNumber = it.orderNumber,
                             documentIssuer = it.documentIssuer,
@@ -243,6 +243,10 @@ class DeliveryNoteLocalDataSource(
             } catch (cause: Throwable) {
             }
         }
+    }
+
+    private fun getLastDocumentNumber(): String? {
+        return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
     }
 
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
