@@ -144,7 +144,7 @@
     <string name="document_footer">Pied de page</string>
     <string name="document_line_items">Items</string>
     <string name="document_default_number">001</string>
-    <string name="document_default_date">01/01/2024</string>
+    <string name="document_default_date">01/jj</string>
     <string name="document_default_due_date">11/01/2024</string>
     <string name="document_default_footer">Escompte pour paiement anticipé : néant
     \n
@@ -206,6 +206,8 @@
     <string name="account_label">Mon compte</string>
     <string name="account_project_info">
         Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
+        Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
+        Vous souhaitez vous abonner pour 4€ par mois ? \n\Créez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
     <string name="about">

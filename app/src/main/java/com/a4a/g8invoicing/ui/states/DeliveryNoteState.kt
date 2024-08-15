@@ -4,6 +4,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.DocumentType
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 // This Client is created to manipulate client data,
@@ -14,7 +17,7 @@ data class DeliveryNoteState(
     override var documentType: DocumentType = DocumentType.DELIVERY_NOTE,
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(),
-    override var documentDate: String = Strings.get(R.string.document_default_date),
+    override var documentDate: String = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT).format(Date()),
     override var orderNumber: TextFieldValue? = TextFieldValue(),
     override var documentIssuer: DocumentClientOrIssuerState? = null,
     override var documentClient: DocumentClientOrIssuerState? = null,
