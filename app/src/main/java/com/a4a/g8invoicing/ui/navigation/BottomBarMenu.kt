@@ -54,7 +54,7 @@ fun BottomBarMenu(
         Category.DeliveryNotes,
         Category.Clients,
         Category.Products,
-        Category.MyAccount,
+        //Category.MyAccount,
         Category.About,
     )
 

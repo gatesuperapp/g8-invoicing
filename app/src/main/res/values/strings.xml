@@ -206,14 +206,21 @@
     <string name="account_label">Mon compte</string>
     <string name="account_project_info">
         Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
-        Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
-        Vous souhaitez vous abonner pour 4€ par mois ? \n\Créez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
     <string name="about">
-        The Gate (G8) est une application conçue pour les petit·e·s producteur·ice·s mais pouvant convenir à tout type d\'entreprise ou d\'association.\n\n De nouvelles fonctionnalités seront bientôt disponibles pour les abonnés :
-         enregistrement des paiements, ajout d\'images, templates de documents et + &#128522;. L\'objectif ultime est de créer une super-app, avec notamment une marketplace pour la vente de produits locaux. !\n\nPour des questions, retours de bugs, propositions d\'idées ou simplement dire coucouc :
+        The Gate (G8) est une application mobile pratique et engagée :\n
+        &#8226; Conçue pour les paysan·ne·s, adaptée à toute organisation de petite taille \n
+        &#8226; Fonctionne hors-ligne \n
+        &#8226; Aucune publicité, aucun tracker \n
+        &#8226; Code 100% open-source\n
+        &#8226; Défend le logiciel libre, l\'agriculture bio et la protection de la faune sauvage.\n\nVous pouvez adhérer au G8 selon vos moyens et bénéficier d\'avantages :
+        décider des prochaines fonctionnalités (enregistrement des paiements, ajout d\'images, modèles de documents, etc),
+        bénéficier du support par chat et vocal si besoin, discuter avec les autres membres, assister à des sessions live,
+        être alerté·e en avance des nouveautés, et + encore !
     </string>
+    <string name="about2">
+    Pour des questions d\'assistance, retours de bugs, propositions d\'idées ou simplement dire coucouc :</string>
     <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez nos</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et notre</string>
@@ -221,6 +228,8 @@
     <string name="account_button_create">Créer mon compte</string>
     <string name="about_button_contact">Écrire à contact@the-gate.app</string>
     <string name="about_contact_email">contact@the-gate.app</string>
+    <string name="about_donate">Devenir membre du G8 &#x1F381;</string>
+    <string name="about_donate_link">https://the-gate.fr/contribution</string>
     <string name="alert_dialog_delete">Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="alert_dialog_delete_cancel">Non</string>
