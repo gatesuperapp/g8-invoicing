@@ -95,8 +95,8 @@ dependencies {
     implementation("app.cash.sqldelight:android-driver:2.0.0")
     implementation("app.cash.sqldelight:coroutines-extensions-jvm:2.0.0")
 
-    // Leak Canary (memory leaks)
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")
+/*    // Leak Canary (memory leaks)
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")*/
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.1.1")

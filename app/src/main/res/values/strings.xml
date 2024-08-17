@@ -212,24 +212,21 @@
         The Gate (G8) est une application mobile pratique et engagée :\n
         &#8226; Conçue pour les paysan·ne·s, adaptée à toute organisation de petite taille \n
         &#8226; Fonctionne hors-ligne \n
-        &#8226; Aucune publicité, aucun tracker \n
-        &#8226; Code 100% open-source\n
-        &#8226; Défend le logiciel libre, l\'agriculture bio et la protection de la faune sauvage.\n\nVous pouvez adhérer au G8 selon vos moyens et bénéficier d\'avantages :
-        décider des prochaines fonctionnalités (enregistrement des paiements, ajout d\'images, modèles de documents, etc),
-        bénéficier du support par chat et vocal si besoin, discuter avec les autres membres, assister à des sessions live,
-        être alerté·e en avance des nouveautés, et + encore !
+        &#8226; Ni pub ni traceur \n
+        &#8226; Logiciel libre et open-source\n\nLe G8 vit grâce à sa communauté &#x1F917;
+        Vous pouvez vous abonner pour soutenir le projet...et bénéficier d\'avantages réservés !
     </string>
     <string name="about2">
-    Pour des questions d\'assistance, retours de bugs, propositions d\'idées ou simplement dire coucouc :</string>
+    Pour l\'assistance par mail ou toute information :</string>
     <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez nos</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et notre</string>
     <string name="about_privacy">politique de confidentialité.</string>
     <string name="account_button_create">Créer mon compte</string>
-    <string name="about_button_contact">Écrire à contact@the-gate.app</string>
+    <string name="about_button_contact">contact@the-gate.app</string>
     <string name="about_contact_email">contact@the-gate.app</string>
-    <string name="about_donate">Devenir membre du G8 &#x1F381;</string>
-    <string name="about_donate_link">https://the-gate.fr/contribution</string>
+    <string name="about_donate">En savoir plus</string>
+    <string name="about_donate_link">https://the-gate.fr/abonnement</string>
     <string name="alert_dialog_delete">Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="alert_dialog_delete_cancel">Non</string>

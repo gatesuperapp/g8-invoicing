@@ -438,7 +438,7 @@ class InvoiceLocalDataSource(
     private fun getExistingFooter(): String? {
         var footer: String? = null
         try {
-            footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull().toString()
+            footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull()?.footer
         } catch (e: Exception) {
             println("Fetching result failed with exception: ${e.localizedMessage}")
         }

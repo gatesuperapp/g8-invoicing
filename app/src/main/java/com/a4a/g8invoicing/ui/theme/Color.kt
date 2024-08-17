@@ -17,6 +17,8 @@ val ColorLoudGrey = Color(0xFFe9ecef)
 val ColorBlueGrey = Color(0xFFFCFDFF)
 val ColorHoneydew = Color(0xFFEFF8E2)
 val ColorOranga = Color(0xFFFDA67E)
+val ColorRedGift = Color(0xFFBB800F)
+val ColorGoldGift = Color(0xFFF8D51B)
 
 val ColorGreenPaid = Color(0xFFE1F7C8)
 val ColorGreenPaidCompl = Color(0xFFc3dea5)
