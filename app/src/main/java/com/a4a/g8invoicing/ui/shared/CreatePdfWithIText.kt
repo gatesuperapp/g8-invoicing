@@ -45,19 +45,16 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 
-val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
-val fontBold: PdfFont = PdfFontFactory.createFont("assets/helveticabold.ttf")
-
-
-//const val pdfFontBold = "assets/helveticabold.ttf"
-fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
-
+fun createPdfWithIText(inputDocument: DocumentState) {
     val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
-    val finalFileName = "${inputDocument.documentNumber.text}.pdf"
+
 
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     writer.isFullCompression
     val pdfDocument = PdfDocument(writer)
+
+    val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
+    val fontBold: PdfFont = PdfFontFactory.createFont("assets/helveticabold.ttf")
 
     val document = Document(pdfDocument, PageSize.A4)
         .setFont(fontRegular)
@@ -85,7 +82,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
         }
     }
     inputDocument.documentProducts?.let {
-        document.add(createProductsTable(it))
+        document.add(createProductsTable(it, fontBold = fontBold, fontRegular = fontRegular))
     }
     inputDocument.documentPrices?.let {
         document.add(createPrices(fontBold, it))
@@ -96,25 +93,28 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
         document.add(createFooter(inputDocument.footerText.text))
     }
 
-
     document.close()
 
-    getFile(fileNameBeforeNumbering)?.let {
-        if (it.exists() && it.isFile) {
-            try {
-                addPageNumberingAndSaveFile(fileNameBeforeNumbering, finalFileName)
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
-                Toast.makeText(
-                    context,
-                    "Erreur ${e.message}, vérifiez votre espace disponible.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-            Toast.makeText(context, "PDF créé", Toast.LENGTH_SHORT).show()
-        }
-    }
+    writer.isCloseStream
+    writer.close()
+    pdfDocument.close()
 
+    addPageNumbering(inputDocument, fileNameBeforeNumbering)
+}
+
+fun addPageNumbering(inputDocument: DocumentState, fileNameBeforeNumbering: String) {
+    val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
+
+    val finalFileName = "${inputDocument.documentNumber.text}.pdf"
+     getFile(fileNameBeforeNumbering)?.let {
+     if (it.exists() && it.isFile) {
+         try {
+             addPageNumberingAndSaveFile(fileNameBeforeNumbering, finalFileName, fontRegular)
+         } catch (e: Exception) {
+             Log.e(ContentValues.TAG, "Error: ${e.message}")
+         }
+     }
+ }
 }
 
 private fun createTitle(
@@ -274,7 +274,7 @@ private fun createReference(orderNumber: String, font: PdfFont): Paragraph {
         .add(orderNumber)
 }
 
-private fun createProductsTable(products: List<DocumentProductState>): Table {
+private fun createProductsTable(products: List<DocumentProductState>, fontRegular: PdfFont, fontBold: PdfFont): Table {
     val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
     val productsTable = Table(UnitValue.createPercentArray(columnWidth))
         .useAllAvailableWidth()
@@ -282,43 +282,40 @@ private fun createProductsTable(products: List<DocumentProductState>): Table {
         .setFixedLayout()
 
     productsTable
-        .addCustomCell(
-            Strings.get(R.string.document_table_description),
-            alignment = TextAlignment.LEFT,
-            isBold = true
-        )
-        .addCustomCell(Strings.get(R.string.document_table_quantity), isBold = true)
-        .addCustomCell(Strings.get(R.string.document_table_unit), isBold = true)
-        .addCustomCell(Strings.get(R.string.document_table_tax_rate), isBold = true)
-        .addCustomCell(Strings.get(R.string.document_table_unit_price_without_tax), isBold = true)
-        .addCustomCell(Strings.get(R.string.document_table_total_price_without_tax), isBold = true)
+        .addCustomCell(Strings.get(R.string.document_table_description), alignment = TextAlignment.LEFT, isBold = true, fontBold = fontBold, fontRegular = fontRegular)
+        .addCustomCell(Strings.get(R.string.document_table_quantity), isBold = true, fontBold = fontBold, fontRegular = fontRegular)
+        .addCustomCell(Strings.get(R.string.document_table_unit), isBold = true, fontBold = fontBold, fontRegular = fontRegular)
+        .addCustomCell(Strings.get(R.string.document_table_tax_rate), isBold = true, fontBold = fontBold, fontRegular = fontRegular)
+        .addCustomCell(Strings.get(R.string.document_table_unit_price_without_tax), isBold = true, fontBold = fontBold, fontRegular = fontRegular)
+        .addCustomCell(Strings.get(R.string.document_table_total_price_without_tax), isBold = true, fontBold = fontBold, fontRegular = fontRegular)
 
     val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
 
     if (linkedDeliveryNotes.isNotEmpty()) {
         linkedDeliveryNotes.forEach { docNumberAndDate ->
-            addDeliveryNoteRow(productsTable, docNumberAndDate)
+            addDeliveryNoteRow(productsTable, docNumberAndDate, fontBold = fontBold, fontRegular = fontRegular)
             addProductsToTable(
                 products.filter { it.linkedDocNumber == docNumberAndDate.first },
-                productsTable
+                productsTable, fontBold = fontBold, fontRegular = fontRegular
             )
         }
     } else {
-        addProductsToTable(products, productsTable)
+        addProductsToTable(products, productsTable, fontBold = fontBold, fontRegular = fontRegular)
     }
     return productsTable
 }
 
-private fun addDeliveryNoteRow(productsTable: Table, docNumberAndDate: Pair<String?, String?>) {
+private fun addDeliveryNoteRow(productsTable: Table, docNumberAndDate: Pair<String?, String?>, fontRegular: PdfFont, fontBold: PdfFont) {
     productsTable.addCustomCell(
-        text = docNumberAndDate.first + " - " + docNumberAndDate.second,
+        text = docNumberAndDate.first + " - " + docNumberAndDate.second?.substringBefore(" "),
         alignment = TextAlignment.LEFT,
         isBold = true,
-        isSpan = true
+        isSpan = true,
+        fontBold = fontBold, fontRegular = fontRegular
     )
 }
 
-private fun addProductsToTable(products: List<DocumentProductState>, productsTable: Table) {
+private fun addProductsToTable(products: List<DocumentProductState>, productsTable: Table, fontRegular: PdfFont, fontBold: PdfFont) {
     products.forEach {
         val itemName = Text(it.name.text)
         val itemDescription = Text(it.description?.text).setItalic()
@@ -326,12 +323,12 @@ private fun addProductsToTable(products: List<DocumentProductState>, productsTab
             .add("\n")
             .add(itemDescription)
             .setFixedLeading(14F)
-        productsTable.addCustomCell(paragraph = item, alignment = TextAlignment.LEFT)
-        productsTable.addCustomCell(text = it.quantity.toString())
-        productsTable.addCustomCell(text = it.unit?.text)
+        productsTable.addCustomCell(paragraph = item, alignment = TextAlignment.LEFT, fontBold = fontBold, fontRegular = fontRegular)
+        productsTable.addCustomCell(text = it.quantity.toString(), fontBold = fontBold, fontRegular = fontRegular)
+        productsTable.addCustomCell(text = it.unit?.text, fontBold = fontBold, fontRegular = fontRegular)
         productsTable.addCustomCell(text = it.taxRate?.let {
             it.setScale(0, RoundingMode.HALF_UP).toString() + "%"
-        } ?: " - ")
+        } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
         var priceWithoutTax = BigDecimal(0)
         it.priceWithTax?.let { priceWithTax ->
@@ -341,11 +338,11 @@ private fun addProductsToTable(products: List<DocumentProductState>, productsTab
         }
         productsTable.addCustomCell(
             text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
-                .toString() + Strings.get(R.string.currency)
+                .toString() + Strings.get(R.string.currency), fontBold = fontBold, fontRegular = fontRegular
         )
         productsTable.addCustomCell(
             text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
-                .toString() + Strings.get(R.string.currency)
+                .toString() + Strings.get(R.string.currency), fontBold = fontBold, fontRegular = fontRegular
         )
     }
 }
@@ -442,7 +439,9 @@ private fun Table.addCustomCell(
     paragraph: Paragraph? = null,
     alignment: TextAlignment = TextAlignment.RIGHT,
     isBold: Boolean = false,
-    isSpan: Boolean = false, //Used to merge cells
+    isSpan: Boolean = false, //Used to merge cells,
+    fontBold: PdfFont,
+    fontRegular: PdfFont
 ): Table {
     val paddingLeft = 6f
     val paddingRight = 6f
@@ -482,7 +481,7 @@ data class PriceRow(
 )
 
 @Throws(Exception::class)
-private fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String) {
+private fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String, fontRegular: PdfFont) {
 
     val pdfDoc = PdfDocument(
         PdfReader(getFilePath(previousFileName)),
@@ -504,9 +503,24 @@ private fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName:
 
     deleteFile(previousFileName)
     doc.close()
+    pdfDoc.close()
 }
 
 
+fun getFileUri(context: Context, fileName: String): Uri? {
+    var uri: Uri? = null
+    val file = File(getFilePath(fileName))
+    try {
+        uri = FileProvider.getUriForFile(
+            context,
+            context.applicationContext.packageName + ".provider",
+            file
+        )
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return uri
+}
 
 fun getFilePath(fileName: String): String {
     var path = ""
