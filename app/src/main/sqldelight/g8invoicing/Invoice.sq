@@ -12,7 +12,7 @@ CREATE TABLE Invoice (
   deleted_at REAL DEFAULT (datetime('now', 'localtime')));
 
 INSERT INTO Invoice (invoice_id, number, issuing_date, order_number, currency, due_date)
-VALUES (1, "001", '01/01/2023', 'ONXFHGG11',  "€", '01/01/2023');
+VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€", '01/01/2023 12:00:00');
 
 get:
 SELECT *

@@ -45,8 +45,9 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 
-const val helvetica = "assets/helvetica.ttf"
-const val helveticaBold = "assets/helveticabold.ttf"
+val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
+val fontBold: PdfFont = PdfFontFactory.createFont("assets/helveticabold.ttf")
+
 
 //const val pdfFontBold = "assets/helveticabold.ttf"
 fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
@@ -55,10 +56,8 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     val finalFileName = "${inputDocument.documentNumber.text}.pdf"
 
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
+    writer.isFullCompression
     val pdfDocument = PdfDocument(writer)
-
-    val fontRegular = PdfFontFactory.createFont(helvetica)
-    val fontBold = PdfFontFactory.createFont(helveticaBold)
 
     val document = Document(pdfDocument, PageSize.A4)
         .setFont(fontRegular)
@@ -71,7 +70,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
             fontRegular
         )
     )
-    document.add(createDate(inputDocument.documentDate))
+    document.add(createDate(inputDocument.documentDate.substringBefore(" ")))
     document.add(
         createIssuerAndClientTable(
             inputDocument.documentIssuer,
@@ -93,7 +92,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     }
 
     if (inputDocument is InvoiceState) {
-        document.add(createDueDate(fontBold, inputDocument.dueDate))
+        document.add(createDueDate(fontBold, inputDocument.dueDate.substringBefore(" ")))
         document.add(createFooter(inputDocument.footerText.text))
     }
 
@@ -118,7 +117,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
 
 }
 
-fun createTitle(
+private fun createTitle(
     documentNumber: String,
     documentType: DocumentType? = null,
     font: PdfFont,
@@ -135,11 +134,11 @@ fun createTitle(
         .setMarginBottom(-6F)
 }
 
-fun createDate(date: String): Paragraph {
+private fun createDate(date: String): Paragraph {
     return Paragraph(Strings.get(R.string.document_date) + " : " + date).setFontSize(14F)
 }
 
-fun createIssuerAndClientTable(
+private fun createIssuerAndClientTable(
     issuer: DocumentClientOrIssuerState?,
     client: DocumentClientOrIssuerState?,
     font: PdfFont,
@@ -269,13 +268,13 @@ fun createIssuerAndClientTable(
     return issuerAndClientTable.addCell(cell)
 }
 
-fun createReference(orderNumber: String, font: PdfFont): Paragraph {
+private fun createReference(orderNumber: String, font: PdfFont): Paragraph {
     val reference = Text(Strings.get(R.string.document_order_number) + " : ").setFont(font)
     return Paragraph(reference)
         .add(orderNumber)
 }
 
-fun createProductsTable(products: List<DocumentProductState>): Table {
+private fun createProductsTable(products: List<DocumentProductState>): Table {
     val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
     val productsTable = Table(UnitValue.createPercentArray(columnWidth))
         .useAllAvailableWidth()
@@ -310,7 +309,7 @@ fun createProductsTable(products: List<DocumentProductState>): Table {
     return productsTable
 }
 
-fun addDeliveryNoteRow(productsTable: Table, docNumberAndDate: Pair<String?, String?>) {
+private fun addDeliveryNoteRow(productsTable: Table, docNumberAndDate: Pair<String?, String?>) {
     productsTable.addCustomCell(
         text = docNumberAndDate.first + " - " + docNumberAndDate.second,
         alignment = TextAlignment.LEFT,
@@ -319,7 +318,7 @@ fun addDeliveryNoteRow(productsTable: Table, docNumberAndDate: Pair<String?, Str
     )
 }
 
-fun addProductsToTable(products: List<DocumentProductState>, productsTable: Table) {
+private fun addProductsToTable(products: List<DocumentProductState>, productsTable: Table) {
     products.forEach {
         val itemName = Text(it.name.text)
         val itemDescription = Text(it.description?.text).setItalic()
@@ -351,7 +350,7 @@ fun addProductsToTable(products: List<DocumentProductState>, productsTable: Tabl
     }
 }
 
-fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
+private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
     val footerArray = listOf(
         PriceRow(
             rowDescription = "TOTAL_WITHOUT_TAX"
@@ -424,7 +423,7 @@ fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
     return footerTable
 }
 
-fun createDueDate(font: PdfFont, date: String): Paragraph {
+private fun createDueDate(font: PdfFont, date: String): Paragraph {
     return Paragraph(Strings.get(R.string.invoice_pdf_due_date) + " : " + date)
         .setFixedLeading(16F)
         .setPaddingTop(12f)
@@ -432,13 +431,13 @@ fun createDueDate(font: PdfFont, date: String): Paragraph {
         .setFont(font)
 }
 
-fun createFooter(text: String): Paragraph {
+private fun createFooter(text: String): Paragraph {
     return Paragraph(text)
         .setFixedLeading(16F)
         .setTextAlignment(TextAlignment.CENTER)
 }
 
-fun Table.addCustomCell(
+private fun Table.addCustomCell(
     text: String? = null,
     paragraph: Paragraph? = null,
     alignment: TextAlignment = TextAlignment.RIGHT,
@@ -453,9 +452,6 @@ fun Table.addCustomCell(
         Paragraph(text).setFixedLeading(14F)
     } else paragraph
 
-    val fontRegular = PdfFontFactory.createFont(helvetica)
-    val fontBold = PdfFontFactory.createFont(helveticaBold)
-
     val colSpan = if (isSpan) 6 else 1
 
     return this.addCell(
@@ -469,7 +465,7 @@ fun Table.addCustomCell(
     )
 }
 
-fun Table.addCellInFooter(
+private fun Table.addCellInFooter(
     paragraph: Paragraph? = null,
 ): Table {
     return this.addCell(
@@ -486,8 +482,7 @@ data class PriceRow(
 )
 
 @Throws(Exception::class)
-fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String) {
-    val fontRegular = PdfFontFactory.createFont(helvetica)
+private fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String) {
 
     val pdfDoc = PdfDocument(
         PdfReader(getFilePath(previousFileName)),
@@ -512,20 +507,6 @@ fun addPageNumberingAndSaveFile(previousFileName: String, finalFileName: String)
 }
 
 
-fun getFileUri(context: Context, fileName: String): Uri? {
-    var uri: Uri? = null
-    val file = File(getFilePath(fileName))
-    try {
-        uri = FileProvider.getUriForFile(
-            context,
-            context.applicationContext.packageName + ".provider",
-            file
-        )
-    } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
-    return uri
-}
 
 fun getFilePath(fileName: String): String {
     var path = ""
@@ -553,7 +534,7 @@ fun getFile(fileName: String): File? {
     return File("$folder/g8/$fileName")
 }
 
-fun deleteFile(fileName: String) {
+private fun deleteFile(fileName: String) {
     val folder =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     val file = File("$folder/g8/$fileName")

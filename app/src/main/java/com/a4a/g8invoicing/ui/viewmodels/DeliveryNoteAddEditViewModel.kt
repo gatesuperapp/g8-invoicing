@@ -32,6 +32,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private var fetchJob: Job? = null
+    private var createNewJob: Job? = null
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
@@ -45,16 +46,14 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     init {
         autoSaveInLocalDb()
-        viewModelScope.launch(context = Dispatchers.Default) {
-            try {
-                id?.let {
-                    fetchDeliveryNoteFromLocalDb(it.toLong())
-                } ?: deliveryNoteDataSource.createNewDeliveryNote()?.let {
-                    fetchDeliveryNoteFromLocalDb(it)
-                }
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+        try {
+            id?.let {
+                fetchDeliveryNoteFromLocalDb(it.toLong())
+            } ?: createNewDeliveryNote()?.let {
+                fetchDeliveryNoteFromLocalDb(it)
             }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -78,6 +77,19 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
+    }
+
+    private fun createNewDeliveryNote(): Long? {
+        var deliveryNoteId: Long? = null
+        createNewJob?.cancel()
+        createNewJob = viewModelScope.launch {
+            try {
+                deliveryNoteId = deliveryNoteDataSource.createNewDeliveryNote()
+            } catch (e: Exception) {
+                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+            }
+        }
+        return deliveryNoteId
     }
 
     private suspend fun updateDeliveryNoteInLocalDb() {
@@ -127,18 +139,18 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 }
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
 
-               /* // If several pages, decrement page of next element
-                val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
-                numberOfPages?.let {numberOfPages ->
-                    if(numberOfPages > 1) {
-                        for(i in 2..numberOfPages) {
-                            _deliveryNoteUiState.value.documentProducts
-                                ?.first { it.page == i }?.id?.let {
-                                    updateDeliveryNoteStateWithDecrementedValue(it)
-                                }
-                        }
-                    }
-                }*/
+                /* // If several pages, decrement page of next element
+                 val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
+                 numberOfPages?.let {numberOfPages ->
+                     if(numberOfPages > 1) {
+                         for(i in 2..numberOfPages) {
+                             _deliveryNoteUiState.value.documentProducts
+                                 ?.first { it.page == i }?.id?.let {
+                                     updateDeliveryNoteStateWithDecrementedValue(it)
+                                 }
+                         }
+                     }
+                 }*/
             } catch (e: Exception) {
                 println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
@@ -153,18 +165,18 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 documentProducts = list
             )
 
-           /* // If several pages, decrement page of next element
-            val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
-            numberOfPages?.let {numberOfPages ->
-                if(numberOfPages > 1) {
-                    for(i in 2..numberOfPages) {
-                        _deliveryNoteUiState.value.documentProducts
-                            ?.first { it.page == i }?.id?.let {
-                                updateDeliveryNoteStateWithDecrementedValue(it)
-                            }
-                    }
-                }
-            }*/
+            /* // If several pages, decrement page of next element
+             val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
+             numberOfPages?.let {numberOfPages ->
+                 if(numberOfPages > 1) {
+                     for(i in 2..numberOfPages) {
+                         _deliveryNoteUiState.value.documentProducts
+                             ?.first { it.page == i }?.id?.let {
+                                 updateDeliveryNoteStateWithDecrementedValue(it)
+                             }
+                     }
+                 }
+             }*/
 
             // Recalculate the prices
             _deliveryNoteUiState.value.documentProducts?.let {

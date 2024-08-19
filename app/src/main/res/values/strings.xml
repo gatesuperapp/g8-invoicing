@@ -139,12 +139,12 @@
     <string name="document_date">Date</string>
     <string name="document_due_date">Échéance</string>
     <string name="document_issuer">Émetteur</string>
-    <string name="document_client">Client</string>
+    <string name="document_client">Client</string>x
     <string name="document_order_number">Référence</string>
     <string name="document_footer">Pied de page</string>
     <string name="document_line_items">Items</string>
     <string name="document_default_number">001</string>
-    <string name="document_default_date">01/jj</string>
+    <string name="document_default_date">-</string>
     <string name="document_default_due_date">11/01/2024</string>
     <string name="document_default_footer">Escompte pour paiement anticipé : néant
     \n
@@ -210,14 +210,14 @@
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
     <string name="about">
         The Gate (G8) est une application mobile pratique et engagée :\n
-        &#8226; Conçue pour les paysan·ne·s, adaptée à toute organisation de petite taille \n
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
+        &#8226; Conçue pour les paysan·ne·s en priorité \n
         &#8226; Logiciel libre et open-source\n\nLe G8 vit grâce à sa communauté &#x1F917;
         Vous pouvez vous abonner pour soutenir le projet...et bénéficier d\'avantages réservés !
     </string>
     <string name="about2">
-    Pour l\'assistance par mail ou toute information :</string>
+    Pour l\'assistance par mail ou toute autre demande :</string>
     <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez nos</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et notre</string>

@@ -85,7 +85,7 @@ fun DocumentBasicTemplateHeader(
                     ),
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.subTitleForDocuments,
-                text = stringResource(id = R.string.document_date) + " : " + uiState.documentDate
+                text = stringResource(id = R.string.document_date) + " : " + uiState.documentDate.substringBefore(" ")
             )
         }
     }

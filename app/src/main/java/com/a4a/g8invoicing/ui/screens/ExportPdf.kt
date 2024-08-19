@@ -34,17 +34,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
-import com.a4a.g8invoicing.ui.shared.getFileUri
+import com.a4a.g8invoicing.ui.shared.getFilePath
 import com.a4a.g8invoicing.ui.shared.icons.IconShare
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.ninetyninepercent.funfactu.icons.IconMail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import java.io.File
 
 
 @Composable
@@ -240,4 +242,19 @@ fun Share(context: Context, finalFileName: String) {
             modifier = Modifier.padding(start = 8.dp)
         )
     }
+}
+
+fun getFileUri(context: Context, fileName: String): Uri? {
+    var uri: Uri? = null
+    val file = File(getFilePath(fileName))
+    try {
+        uri = FileProvider.getUriForFile(
+            context,
+            context.applicationContext.packageName + ".provider",
+            file
+        )
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return uri
 }

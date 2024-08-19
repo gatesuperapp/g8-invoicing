@@ -32,6 +32,7 @@ class InvoiceAddEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private var fetchJob: Job? = null
+    private var createNewJob: Job? = null
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
@@ -45,18 +46,15 @@ class InvoiceAddEditViewModel @Inject constructor(
 
     init {
         autoSaveInLocalDb()
-
-        viewModelScope.launch(context = Dispatchers.Default) {
             try {
                 id?.let {
                     fetchInvoiceFromLocalDb(it.toLong())
-                } ?: documentDataSource.createNew()?.let {
+                } ?: createNewInvoice()?.let {
                     fetchInvoiceFromLocalDb(it)
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
-        }
     }
 
     private fun autoSaveInLocalDb() {
@@ -80,6 +78,19 @@ class InvoiceAddEditViewModel @Inject constructor(
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
+    }
+
+    private fun createNewInvoice(): Long? {
+        var documentId: Long? = null
+        createNewJob?.cancel()
+        createNewJob = viewModelScope.launch {
+            try {
+                documentId = documentDataSource.createNew()
+            } catch (e: Exception) {
+                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+            }
+        }
+        return documentId
     }
 
     private suspend fun updateInvoiceInLocalDb() {
@@ -286,7 +297,6 @@ class InvoiceAddEditViewModel @Inject constructor(
             )
         )
     }
-
 }
 
 fun updateInvoiceUiState(

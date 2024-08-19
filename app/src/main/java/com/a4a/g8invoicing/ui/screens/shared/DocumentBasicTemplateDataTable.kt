@@ -145,7 +145,7 @@ fun LinkedDeliveryNoteRow(
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = docNumberAndDate.first + " - " + docNumberAndDate.second,
+            text = docNumberAndDate.first + " - " + docNumberAndDate.second?.substringBefore(" "),
             weight = linkedNoteColumnWeight,
             alignEnd = false,
             isBold = true

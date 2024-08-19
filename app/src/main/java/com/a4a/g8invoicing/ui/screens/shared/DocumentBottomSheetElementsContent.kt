@@ -36,7 +36,7 @@ fun DocumentBottomSheetElementsContent(
         FormInput(
             label = stringResource(id = R.string.document_date),
             inputType = ForwardElement(
-                text = document.documentDate
+                text = document.documentDate.substringBefore(" ")
             ),
             pageElement = ScreenElement.DOCUMENT_DATE
         ),
@@ -77,7 +77,7 @@ fun DocumentBottomSheetElementsContent(
                 FormInput(
                     label = stringResource(id = R.string.document_due_date),
                     inputType = ForwardElement(
-                        text = document.dueDate
+                        text = document.dueDate.substringBefore(" ")
                     ),
                     pageElement = ScreenElement.DOCUMENT_DUE_DATE
                 )

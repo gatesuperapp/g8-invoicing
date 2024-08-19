@@ -42,7 +42,7 @@ fun DocumentBasicTemplateFooter(
         ) {
             Text(
                 style = MaterialTheme.typography.textForDocumentsBold,
-                text = Strings.get(R.string.invoice_pdf_due_date) + " : " + uiState.dueDate
+                text = Strings.get(R.string.invoice_pdf_due_date) + " : " + uiState.dueDate.substringBefore(" ")
             )
         }
         Row {

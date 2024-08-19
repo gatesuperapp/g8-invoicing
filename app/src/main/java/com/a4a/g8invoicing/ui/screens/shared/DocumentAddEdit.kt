@@ -49,7 +49,6 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
-import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -80,6 +79,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.PI
@@ -114,8 +114,6 @@ fun DocumentAddEdit(
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
 ) {
-
-
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -144,25 +142,53 @@ fun DocumentAddEdit(
             onClickBack()
         }
     }
+    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ROOT)
+    val calendar: Calendar = Calendar.getInstance()
+    formatter.timeZone = calendar.timeZone
 
     // Date picker & formatter
-    val selectedDate = System.currentTimeMillis()
-    val documentDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate,
+    val currentDocumentDate = formatter.parse(document.documentDate)?.time
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = currentDocumentDate,
         initialDisplayMode = DisplayMode.Picker
     )
-    val documentDueDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = selectedDate,
+    val dueDatePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = currentDocumentDate,
         initialDisplayMode = DisplayMode.Picker
     )
-    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT)
-    document.documentDate =
-        documentDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
-            ?: Strings.get(R.string.document_default_date)
+
+    var documentDate by remember {
+        mutableStateOf(datePickerState.selectedDateMillis?.let {
+            formatter.format(
+                Date(it)
+            )
+        })
+    }
+    var dueDate by remember {
+        mutableStateOf(dueDatePickerState.selectedDateMillis?.let {
+            formatter.format(
+                Date(it)
+            )
+        })
+    }
+
+    // Only way i found to execute function when new date is picked..There must be a better way?
+    documentDate =
+        datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: ""
+    if (document.documentDate != documentDate) {
+        onValueChange(
+            ScreenElement.DOCUMENT_DATE,
+            datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: "")
+    }
+
     if (document is InvoiceState) {
-        document.dueDate =
-            documentDueDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }
-                ?: Strings.get(R.string.document_default_date)
+        dueDate =
+            dueDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: ""
+        if (document.dueDate != dueDate) {
+            onValueChange(
+                ScreenElement.DOCUMENT_DUE_DATE,
+                dueDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: "")
+        }
     }
 
     BottomSheetScaffold(
@@ -180,8 +206,8 @@ fun DocumentAddEdit(
             if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
                 DocumentBottomSheetTextElements(
                     document = document,
-                    datePickerState = documentDatePickerState,
-                    dueDatePickerState = documentDueDatePickerState,
+                    datePickerState = datePickerState,
+                    dueDatePickerState = datePickerState,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)
                     },

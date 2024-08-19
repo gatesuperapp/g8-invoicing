@@ -137,7 +137,7 @@ fun InvoiceListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = document.documentDate,
+                        text = document.documentDate.substringBefore(" "),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,

@@ -138,7 +138,7 @@ fun DeliveryNoteListItem(
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
-                        text = deliveryNote.documentDate,
+                        text = deliveryNote.documentDate.substringBefore(" "),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         // maxLines = 1,

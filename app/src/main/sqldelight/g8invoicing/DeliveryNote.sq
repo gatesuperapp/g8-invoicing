@@ -10,7 +10,7 @@ CREATE TABLE DeliveryNote (
   deleted_at REAL DEFAULT (datetime('now', 'localtime')));
 
 INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
-VALUES (1, "001", '01/01/2023', 'ONXFHGG11',  "€");
+VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€");
 
 
 getDeliveryNote:
