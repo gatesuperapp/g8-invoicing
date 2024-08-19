@@ -32,7 +32,6 @@ class InvoiceAddEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private var fetchJob: Job? = null
-    private var createNewJob: Job? = null
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var deleteJob: Job? = null
@@ -46,15 +45,17 @@ class InvoiceAddEditViewModel @Inject constructor(
 
     init {
         autoSaveInLocalDb()
-            try {
-                id?.let {
-                    fetchInvoiceFromLocalDb(it.toLong())
-                } ?: createNewInvoice()?.let {
+        try {
+            id?.let {
+                fetchInvoiceFromLocalDb(it.toLong())
+            } ?: viewModelScope.launch(context = Dispatchers.Default) {
+                createNewInvoice()?.let {
                     fetchInvoiceFromLocalDb(it)
                 }
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
     }
 
     private fun autoSaveInLocalDb() {
@@ -80,16 +81,16 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
-    private fun createNewInvoice(): Long? {
+    private suspend fun createNewInvoice(): Long? {
         var documentId: Long? = null
-        createNewJob?.cancel()
-        createNewJob = viewModelScope.launch {
+        val createNewJob = viewModelScope.launch {
             try {
                 documentId = documentDataSource.createNew()
             } catch (e: Exception) {
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
+        createNewJob.join()
         return documentId
     }
 
@@ -255,33 +256,33 @@ class InvoiceAddEditViewModel @Inject constructor(
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
-/*    fun updateStateWithIncrementedValue(documentProductId: Any) {
-        val documentProduct =
-            _documentUiState.value.documentProducts?.first { it.id == documentProductId }
-        documentProduct?.let { docProduct ->
-            val updatedDocumentProduct = docProduct.copy(page = docProduct.page + 1)
-            val list =
-                _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
-                    ?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-            _documentUiState.value =
-                _documentUiState.value.copy(documentProducts = updatedList)
+    /*    fun updateStateWithIncrementedValue(documentProductId: Any) {
+            val documentProduct =
+                _documentUiState.value.documentProducts?.first { it.id == documentProductId }
+            documentProduct?.let { docProduct ->
+                val updatedDocumentProduct = docProduct.copy(page = docProduct.page + 1)
+                val list =
+                    _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
+                        ?.toMutableList()
+                val updatedList = (list ?: emptyList()) + updatedDocumentProduct
+                _documentUiState.value =
+                    _documentUiState.value.copy(documentProducts = updatedList)
+            }
         }
-    }
 
-    private fun updateInvoiceStateWithDecrementedValue(documentProductId: Any) {
-        val documentProduct =
-            _documentUiState.value.documentProducts?.first { it.id == documentProductId }
-        documentProduct?.let { docProduct ->
-            val updatedDocumentProduct = docProduct.copy(page = docProduct.page - 1)
-            val list =
-                _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
-                    ?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-            _documentUiState.value =
-                _documentUiState.value.copy(documentProducts = updatedList)
-        }
-    }*/
+        private fun updateInvoiceStateWithDecrementedValue(documentProductId: Any) {
+            val documentProduct =
+                _documentUiState.value.documentProducts?.first { it.id == documentProductId }
+            documentProduct?.let { docProduct ->
+                val updatedDocumentProduct = docProduct.copy(page = docProduct.page - 1)
+                val list =
+                    _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
+                        ?.toMutableList()
+                val updatedList = (list ?: emptyList()) + updatedDocumentProduct
+                _documentUiState.value =
+                    _documentUiState.value.copy(documentProducts = updatedList)
+            }
+        }*/
 
     fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
         val text = when (pageElement) {
