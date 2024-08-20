@@ -34,7 +34,7 @@ class InvoiceListViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                invoiceDataSource.fetchAll().collect {
+                invoiceDataSource.fetchAll()?.collect {
                     _documentsUiState.update { uiState ->
                         uiState.copy(
                             documentStates = it

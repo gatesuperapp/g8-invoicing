@@ -39,10 +39,7 @@ class InvoiceLocalDataSource(
     override suspend fun createNew(): Long? {
         var newInvoiceId: Long? = null
         var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
-        val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
-        val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
-        docNumber =
-            firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
+        docNumber = incrementDocumentNumber(docNumber)
 
         val issuer = getExistingIssuer()?.transformIntoEditable()
             ?: DocumentClientOrIssuerState()
@@ -215,13 +212,16 @@ class InvoiceLocalDataSource(
     }
 
     override suspend fun duplicate(documents: List<InvoiceState>) {
+        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
+        docNumber = incrementDocumentNumber(docNumber)
+
         withContext(Dispatchers.IO) {
             try {
                 documents.forEach {
                     val invoice = InvoiceState(
                         documentType = it.documentType,
                         documentId = it.documentId,
-                        documentNumber = TextFieldValue(getLastDocumentNumber() ?: "XXX"),
+                        documentNumber = TextFieldValue(docNumber),
                         documentDate = it.documentDate,
                         orderNumber = it.orderNumber,
                         documentIssuer = it.documentIssuer,
@@ -523,3 +523,11 @@ class InvoiceLocalDataSource(
     }
 }
 
+fun incrementDocumentNumber(docNumber: String): String {
+    val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
+    if(numberToIncrement.isNotEmpty()) {
+        val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
+        return firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
+    }
+    else return docNumber
+}

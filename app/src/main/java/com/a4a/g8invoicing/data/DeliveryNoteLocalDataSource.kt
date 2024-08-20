@@ -38,11 +38,12 @@ class DeliveryNoteLocalDataSource(
     override suspend fun createNewDeliveryNote(): Long? {
         var newDeliveryNoteId: Long? = null
 
+        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
+        docNumber = incrementDocumentNumber(docNumber)
+
         saveDeliveryNoteInfoInAllTables(
             DeliveryNoteState(
-                documentNumber = TextFieldValue(
-                    getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
-                ),
+                documentNumber = TextFieldValue(docNumber),
                 documentIssuer = getExistingIssuer()?.transformIntoEditable()
                     ?: DocumentClientOrIssuerState(),
             )
@@ -170,6 +171,9 @@ class DeliveryNoteLocalDataSource(
     }
 
     override suspend fun duplicateDeliveryNotes(deliveryNotes: List<DeliveryNoteState>) {
+        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
+        docNumber = incrementDocumentNumber(docNumber)
+
         withContext(Dispatchers.IO) {
             try {
                 deliveryNotes.forEach {
@@ -177,7 +181,7 @@ class DeliveryNoteLocalDataSource(
                         DeliveryNoteState(
                             documentType = it.documentType,
                             documentId = it.documentId,
-                            documentNumber = TextFieldValue(getLastDocumentNumber() ?: "XXX"),
+                            documentNumber = TextFieldValue(docNumber),
                             documentDate = it.documentDate,
                             orderNumber = it.orderNumber,
                             documentIssuer = it.documentIssuer,
