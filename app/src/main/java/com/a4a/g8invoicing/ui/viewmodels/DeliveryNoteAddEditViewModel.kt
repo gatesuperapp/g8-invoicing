@@ -49,8 +49,10 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         try {
             id?.let {
                 fetchDeliveryNoteFromLocalDb(it.toLong())
-            } ?: createNewDeliveryNote()?.let {
-                fetchDeliveryNoteFromLocalDb(it)
+            }?: viewModelScope.launch(context = Dispatchers.Default) {
+                createNewDeliveryNote()?.let {
+                    fetchDeliveryNoteFromLocalDb(it)
+                }
             }
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -79,16 +81,16 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    private fun createNewDeliveryNote(): Long? {
+    private suspend fun createNewDeliveryNote(): Long? {
         var deliveryNoteId: Long? = null
-        createNewJob?.cancel()
-        createNewJob = viewModelScope.launch {
+        val createNewJob = viewModelScope.launch {
             try {
                 deliveryNoteId = deliveryNoteDataSource.createNewDeliveryNote()
             } catch (e: Exception) {
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
+        createNewJob.join()
         return deliveryNoteId
     }
 

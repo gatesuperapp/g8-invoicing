@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.data
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -34,158 +36,103 @@ class DeliveryNoteLocalDataSource(
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
 
     override suspend fun createNewDeliveryNote(): Long? {
+        var newDeliveryNoteId: Long? = null
+
         saveDeliveryNoteInfoInAllTables(
             DeliveryNoteState(
-                documentNumber = TextFieldValue(getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)),
+                documentNumber = TextFieldValue(
+                    getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
+                ),
                 documentIssuer = getExistingIssuer()?.transformIntoEditable()
                     ?: DocumentClientOrIssuerState(),
             )
         )
 
-        return deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+        try {
+            newDeliveryNoteId = deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return newDeliveryNoteId
     }
 
 
     override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
-        return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
-            ?.let {
-                it.transformIntoEditableNote(
-                    fetchDocumentProducts(it.delivery_note_id),
-                    fetchClientAndIssuer(it.delivery_note_id)
-                )
-            }
+        try {
+            return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
+                ?.let {
+                    it.transformIntoEditableNote(
+                        fetchDocumentProducts(it.delivery_note_id),
+                        fetchClientAndIssuer(it.delivery_note_id)
+                    )
+                }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
-    /*    override fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?> {
-            val deliveryNoteId = deliveryNoteQueries.getDeliveryNoteId(id).executeAsOne()
-            val deliveryNoteFlow = deliveryNoteQueries.getDeliveryNote(id).asFlow().map { query ->
-                query.executeAsOne()
-            }
+    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>? {
+        try {
+            return deliveryNoteQueries.getAllDeliveryNotes()
+                .asFlow()
+                .map {
+                    it.executeAsList()
+                        .map { deliveryNote ->
+                            val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
+                            val clientAndIssuer =
+                                fetchClientAndIssuer(deliveryNote.delivery_note_id)
 
-            val productFlow = fetchDocumentProductsFlow(deliveryNoteId).onStart { emit(emptyList()) }
-            val clientAndIssuerFlow = fetchClientOrIssuerFlow(deliveryNoteId).onStart { emit(emptyList()) }
-
-            val combinedFlow = combine(
-                deliveryNoteFlow,
-                productFlow,
-                clientAndIssuerFlow
-            ) { value1, value2, value3 ->
-                value1.transformIntoEditableNote(
-                    documentProducts = value2,
-                    documentClientAndIssuer = value3,
-                )
-            }
-            return combinedFlow
-        }*/
-
-
-    /* @OptIn(ExperimentalCoroutinesApi::class)
-     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
-         return deliveryNoteQueries.getAllDeliveryNotes()
-             .asFlow()
-             .flatMapMerge { query ->
-                 combine(
-                     query.executeAsList().map { deliveryNote ->
-                         fetchDocumentProductsFlow(deliveryNote.delivery_note_id).onStart { emit(emptyList()) }
-                             .map {
-                                 deliveryNote.transformIntoEditableNote(it.toMutableList())
-                             }
-                     }
-                 ) {
-                     it.asList()
-                 }
-             }
-     }*/
-
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>> {
-        return deliveryNoteQueries.getAllDeliveryNotes()
-            .asFlow()
-            .map {
-                it.executeAsList()
-                    .map { deliveryNote ->
-                        val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
-                        val clientAndIssuer = fetchClientAndIssuer(deliveryNote.delivery_note_id)
-
-                        deliveryNote.transformIntoEditableNote(
-                            products,
-                            clientAndIssuer
-                        )
-                    }
-            }
+                            deliveryNote.transformIntoEditableNote(
+                                products,
+                                clientAndIssuer
+                            )
+                        }
+                }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
     private fun fetchDocumentProducts(deliveryNoteId: Long): MutableList<DocumentProductState>? {
-        val listOfIds =
-            deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
-                deliveryNoteId
-            )
-                .executeAsList()
-        return if (listOfIds.isNotEmpty()) {
-            listOfIds.map {
-                documentProductQueries.getDocumentProduct(it.document_product_id)
-                    .executeAsOne().transformIntoEditableDocumentProduct()
-            }.toMutableList()
-        } else null
+        try {
+            val listOfIds =
+                deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
+                    deliveryNoteId
+                )
+                    .executeAsList()
+            return if (listOfIds.isNotEmpty()) {
+                listOfIds.map {
+                    documentProductQueries.getDocumentProduct(it.document_product_id)
+                        .executeAsOne().transformIntoEditableDocumentProduct()
+                }.toMutableList()
+            } else null
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
     private fun fetchClientAndIssuer(deliveryNoteId: Long): List<DocumentClientOrIssuerState>? {
-        val listOfIds =
-            deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
-                deliveryNoteId
-            ).executeAsList()
-
-        return if (listOfIds.isNotEmpty()) {
-            listOfIds.map {
-                documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
-                    .executeAsOne()
-                    .transformIntoEditable()
-            }
-        } else null
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchDocumentProductsFlow(deliveryNoteId: Long): Flow<List<DocumentProductState>> {
-        return deliveryNoteDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
-            deliveryNoteId
-        )
-            .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map {
-                        documentProductQueries.getDocumentProduct(it.document_product_id)
-                            .asFlow()
-                            .map {
-                                it.executeAsOne().transformIntoEditableDocumentProduct()
-                            }
-                    })
-                {
-                    it.asList()
+        try {
+            val listOfIds =
+                deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
+                    deliveryNoteId
+                ).executeAsList()
+            return if (listOfIds.isNotEmpty()) {
+                listOfIds.map {
+                    documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                        .executeAsOne()
+                        .transformIntoEditable()
                 }
-            }
+            } else null
+
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
-
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchClientOrIssuerFlow(deliveryNoteId: Long): Flow<List<DocumentClientOrIssuerState>> {
-        return deliveryNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
-            deliveryNoteId
-        )
-            .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map {
-                        documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
-                            .asFlow()
-                            .map {
-                                it.executeAsOne().transformIntoEditable()
-                            }
-                    })
-                {
-                    it.asList()
-                }
-            }
-    }
-
 
     private fun DeliveryNote.transformIntoEditableNote(
         documentProducts: MutableList<DocumentProductState>? = null,
@@ -216,7 +163,8 @@ class DeliveryNoteLocalDataSource(
                     order_number = deliveryNote.orderNumber?.text,
                     currency = deliveryNote.currency.text
                 )
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -240,13 +188,19 @@ class DeliveryNoteLocalDataSource(
                         )
                     )
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
 
     private fun getLastDocumentNumber(): String? {
-        return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
+        try {
+            return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
@@ -275,7 +229,8 @@ class DeliveryNoteLocalDataSource(
                             )
                         }
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -317,7 +272,8 @@ class DeliveryNoteLocalDataSource(
                             )
                         }
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -359,17 +315,22 @@ class DeliveryNoteLocalDataSource(
                         }
                     }
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
 
     override suspend fun deleteDocumentProduct(deliveryNoteId: Long, documentProductId: Long) {
-        return withContext(Dispatchers.IO) {
-            deliveryNoteDocumentProductQueries.deleteProductLinkedToDeliveryNote(
-                deliveryNoteId,
-                documentProductId
-            )
+        try {
+            return withContext(Dispatchers.IO) {
+                deliveryNoteDocumentProductQueries.deleteProductLinkedToDeliveryNote(
+                    deliveryNoteId,
+                    documentProductId
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -377,34 +338,46 @@ class DeliveryNoteLocalDataSource(
         deliveryNoteId: Long,
         type: ClientOrIssuerType,
     ) {
-        return withContext(Dispatchers.IO) {
-            val documentClientOrIssuer =
-                fetchClientAndIssuer(deliveryNoteId)?.firstOrNull { it.type == type }
+        try {
+            return withContext(Dispatchers.IO) {
+                val documentClientOrIssuer =
+                    fetchClientAndIssuer(deliveryNoteId)?.firstOrNull { it.type == type }
 
-            documentClientOrIssuer?.id?.let {
-                deliveryNoteDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(
-                    deliveryNoteId,
-                    it.toLong()
-                )
-                documentClientOrIssuerQueries.delete(it.toLong())
+                documentClientOrIssuer?.id?.let {
+                    deliveryNoteDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(
+                        deliveryNoteId,
+                        it.toLong()
+                    )
+                    documentClientOrIssuerQueries.delete(it.toLong())
+                }
             }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
     override fun addDocumentProduct(deliveryNoteId: Long, documentProductId: Long) {
-        deliveryNoteDocumentProductQueries.saveProductLinkedToDeliveryNote(
-            id = null,
-            delivery_note_id = deliveryNoteId,
-            document_product_id = documentProductId
-        )
+        try {
+            deliveryNoteDocumentProductQueries.saveProductLinkedToDeliveryNote(
+                id = null,
+                delivery_note_id = deliveryNoteId,
+                document_product_id = documentProductId
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
     }
 
     private fun addDocumentClientOrIssuer(deliveryNoteId: Long, documentClientOrIssuerId: Long) {
-        deliveryNoteDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
-            id = null,
-            delivery_note_id = deliveryNoteId,
-            document_client_or_issuer_id = documentClientOrIssuerId
-        )
+        try {
+            deliveryNoteDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
+                id = null,
+                delivery_note_id = deliveryNoteId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
     }
 
     private fun getExistingIssuer(): DocumentClientOrIssuer? {
@@ -412,27 +385,34 @@ class DeliveryNoteLocalDataSource(
         try {
             issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
-            println("Fetching result failed with exception: ${e.localizedMessage}")
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return issuer
     }
 
     private suspend fun saveDeliveryNoteInfoInAllTables(deliveryNote: DeliveryNoteState) {
-        deliveryNoteQueries.saveDeliveryNote(
-            delivery_note_id = null,
-            number = deliveryNote.documentNumber.text,
-            delivery_date = deliveryNote.documentDate,
-            order_number = deliveryNote.orderNumber?.text,
-            currency = deliveryNote.currency.text
-        )
+        try {
+            deliveryNoteQueries.saveDeliveryNote(
+                delivery_note_id = null,
+                number = deliveryNote.documentNumber.text,
+                delivery_date = deliveryNote.documentDate,
+                order_number = deliveryNote.orderNumber?.text,
+                currency = deliveryNote.currency.text
+            )
 
-        deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { deliveryNoteId ->
-            saveAndLinkOtherElements(deliveryNote, deliveryNoteId)
+            deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { deliveryNoteId ->
+                saveAndLinkOtherElements(deliveryNote, deliveryNoteId)
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
 
-    private suspend fun saveAndLinkOtherElements(deliveryNote: DeliveryNoteState, deliveryNoteId: Long) {
+    private suspend fun saveAndLinkOtherElements(
+        deliveryNote: DeliveryNoteState,
+        deliveryNoteId: Long,
+    ) {
         // Link all products
         deliveryNote.documentProducts?.forEach { documentProduct ->
             saveDocumentProductInDbAndLinkToDocument(

@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.data
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -35,127 +37,121 @@ class InvoiceLocalDataSource(
     private val invoiceDocumentClientOrIssuerQueries = db.linkInvoiceToDocumentClientOrIssuerQueries
 
     override suspend fun createNew(): Long? {
+        var newInvoiceId: Long? = null
+        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
+        val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
+        val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
+        docNumber =
+            firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
+
         val issuer = getExistingIssuer()?.transformIntoEditable()
             ?: DocumentClientOrIssuerState()
         saveInfoInInvoiceTable(
             InvoiceState(
-                documentNumber = TextFieldValue(getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)),
+                documentNumber = TextFieldValue(docNumber),
                 documentIssuer = issuer,
-                footerText = TextFieldValue(getExistingFooter() ?: ""))
+                footerText = TextFieldValue(getExistingFooter() ?: "")
+            )
         )
         saveInfoInOtherTables(
             InvoiceState(documentIssuer = issuer)
         )
-        return invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+        try {
+            newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return newInvoiceId
     }
 
     private fun getLastDocumentNumber(): String? {
-        return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+        try {
+            return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
     override fun fetch(id: Long): InvoiceState? {
-        return invoiceQueries.get(id).executeAsOneOrNull()
-            ?.let {
-                it.transformIntoEditableInvoice(
-                    fetchDocumentProducts(it.invoice_id),
-                    fetchClientAndIssuer(it.invoice_id)
-                )
-            }
+        try {
+            return invoiceQueries.get(id).executeAsOneOrNull()
+                ?.let {
+                    it.transformIntoEditableInvoice(
+                        fetchDocumentProducts(it.invoice_id),
+                        fetchClientAndIssuer(it.invoice_id)
+                    )
+                }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
-    override fun fetchAll(): Flow<List<InvoiceState>> {
-        return invoiceQueries.getAll()
-            .asFlow()
-            .map {
-                it.executeAsList()
-                    .map { document ->
-                        val products = fetchDocumentProducts(document.invoice_id)
-                        val clientAndIssuer = fetchClientAndIssuer(document.invoice_id)
+    override fun fetchAll(): Flow<List<InvoiceState>>? {
+        try {
+            return invoiceQueries.getAll()
+                .asFlow()
+                .map {
+                    it.executeAsList()
+                        .map { document ->
+                            val products = fetchDocumentProducts(document.invoice_id)
+                            val clientAndIssuer = fetchClientAndIssuer(document.invoice_id)
 
-                        document.transformIntoEditableInvoice(
-                            products,
-                            clientAndIssuer
-                        )
-                    }
-            }
+                            document.transformIntoEditableInvoice(
+                                products,
+                                clientAndIssuer
+                            )
+                        }
+                }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
     private fun fetchDocumentProducts(id: Long): MutableList<DocumentProductState>? {
-        val listOfIds = invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(id)
-            .executeAsList()
-        return if (listOfIds.isNotEmpty()) {
-            listOfIds.map {
-                val additionalInfo = invoiceDocumentProductLinkQueries
-                    .getInfoLinkedToDocumentProduct(it.document_product_id)
-                    .executeAsOneOrNull()
-                documentProductQueries.getDocumentProduct(it.document_product_id)
-                    .executeAsOne()
-                    .transformIntoEditableDocumentProduct(
-                        additionalInfo?.date,
-                        additionalInfo?.delivery_note_number
-                    )
-            }.toMutableList()
-        } else null
+        try {
+            val listOfIds = invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(id)
+                .executeAsList()
+            return if (listOfIds.isNotEmpty()) {
+                listOfIds.map {
+                    val additionalInfo = invoiceDocumentProductLinkQueries
+                        .getInfoLinkedToDocumentProduct(it.document_product_id)
+                        .executeAsOneOrNull()
+                    documentProductQueries.getDocumentProduct(it.document_product_id)
+                        .executeAsOne()
+                        .transformIntoEditableDocumentProduct(
+                            additionalInfo?.date,
+                            additionalInfo?.delivery_note_number
+                        )
+                }.toMutableList()
+            } else null
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
 
     private fun fetchClientAndIssuer(documentId: Long): List<DocumentClientOrIssuerState>? {
-        val listOfIds =
-            invoiceDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
-                documentId
-            ).executeAsList()
+        try {
+            val listOfIds =
+                invoiceDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
+                    documentId
+                ).executeAsList()
 
-        return if (listOfIds.isNotEmpty()) {
-            listOfIds.map {
-                documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
-                    .executeAsOne()
-                    .transformIntoEditable()
-            }
-        } else null
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchDocumentProductsFlow(documentId: Long): Flow<List<DocumentProductState>> {
-        return invoiceDocumentProductQueries.getDocumentProductsLinkedToInvoice(
-            documentId
-        )
-            .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map {
-                        documentProductQueries.getDocumentProduct(it.document_product_id)
-                            .asFlow()
-                            .map {
-                                it.executeAsOne().transformIntoEditableDocumentProduct()
-                            }
-                    })
-                {
-                    it.asList()
+            return if (listOfIds.isNotEmpty()) {
+                listOfIds.map {
+                    documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                        .executeAsOne()
+                        .transformIntoEditable()
                 }
-            }
+            } else null
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
     }
-
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun fetchClientOrIssuerFlow(id: Long): Flow<List<DocumentClientOrIssuerState>> {
-        return invoiceDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
-            id
-        )
-            .asFlow()
-            .flatMapMerge { query ->
-                combine(
-                    query.executeAsList().map {
-                        documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
-                            .asFlow()
-                            .map {
-                                it.executeAsOne().transformIntoEditable()
-                            }
-                    })
-                {
-                    it.asList()
-                }
-            }
-    }
-
 
     private fun Invoice.transformIntoEditableInvoice(
         documentProducts: MutableList<DocumentProductState>? = null,
@@ -194,7 +190,8 @@ class InvoiceLocalDataSource(
                         it
                     )
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -211,7 +208,8 @@ class InvoiceLocalDataSource(
                     due_date = document.dueDate,
                     footer = document.footerText.text
                 )
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -237,7 +235,8 @@ class InvoiceLocalDataSource(
                     saveInfoInInvoiceTable(invoice)
                     saveInfoInOtherTables(invoice)
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -277,7 +276,8 @@ class InvoiceLocalDataSource(
                             }
                         }
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -319,7 +319,8 @@ class InvoiceLocalDataSource(
                             )
                         }
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -331,7 +332,9 @@ class InvoiceLocalDataSource(
                 documents.filter { it.documentId != null }.forEach { document ->
                     document.documentProducts?.mapNotNull { it.id }?.forEach {
                         documentProductQueries.deleteDocumentProduct(it.toLong())
-                        invoiceDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(it.toLong())
+                        invoiceDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(
+                            it.toLong()
+                        )
                     }
                     invoiceQueries.delete(id = document.documentId!!.toLong())
                     invoiceDocumentProductQueries.deleteAllProductsLinkedToInvoice(
@@ -361,18 +364,25 @@ class InvoiceLocalDataSource(
                         }
                     }
                 }
-            } catch (cause: Throwable) {
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
 
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
-        return withContext(Dispatchers.IO) {
-            invoiceDocumentProductQueries.deleteProductLinkedToInvoice(
-                documentId,
-                documentProductId
-            )
-            invoiceDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(documentProductId)
+        try {
+            return withContext(Dispatchers.IO) {
+                invoiceDocumentProductQueries.deleteProductLinkedToInvoice(
+                    documentId,
+                    documentProductId
+                )
+                invoiceDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(
+                    documentProductId
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -380,26 +390,34 @@ class InvoiceLocalDataSource(
         id: Long,
         type: ClientOrIssuerType,
     ) {
-        return withContext(Dispatchers.IO) {
-            val documentClientOrIssuer =
-                fetchClientAndIssuer(id)?.firstOrNull { it.type == type }
+        try {
+            return withContext(Dispatchers.IO) {
+                val documentClientOrIssuer =
+                    fetchClientAndIssuer(id)?.firstOrNull { it.type == type }
 
-            documentClientOrIssuer?.id?.let {
-                invoiceDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToInvoice(
-                    id,
-                    it.toLong()
-                )
-                documentClientOrIssuerQueries.delete(it.toLong())
+                documentClientOrIssuer?.id?.let {
+                    invoiceDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToInvoice(
+                        id,
+                        it.toLong()
+                    )
+                    documentClientOrIssuerQueries.delete(it.toLong())
+                }
             }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
     override fun linkDocumentProductToDocument(documentId: Long, documentProductId: Long) {
-        invoiceDocumentProductQueries.saveProductLinkedToInvoice(
-            id = null,
-            invoice_id = documentId,
-            document_product_id = documentProductId
-        )
+        try {
+            invoiceDocumentProductQueries.saveProductLinkedToInvoice(
+                id = null,
+                invoice_id = documentId,
+                document_product_id = documentProductId
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
     }
 
     override fun linkDocumentProductToAdditionalInfo(
@@ -407,22 +425,30 @@ class InvoiceLocalDataSource(
         deliveryNoteNumber: String?,
         deliveryNoteDate: String,
     ) {
-        invoiceDocumentProductAdditionalInfoQueries.saveInfoLinkedToDocumentProduct(
-            document_product_id = documentProductId,
-            delivery_note_number = deliveryNoteNumber,
-            date = deliveryNoteDate
-        )
+        try {
+            invoiceDocumentProductAdditionalInfoQueries.saveInfoLinkedToDocumentProduct(
+                document_product_id = documentProductId,
+                delivery_note_number = deliveryNoteNumber,
+                date = deliveryNoteDate
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
     }
 
     private fun linkDocumentClientOrIssuerToDocument(
         documentId: Long,
         documentClientOrIssuerId: Long,
     ) {
-        invoiceDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToInvoice(
-            id = null,
-            invoice_id = documentId,
-            document_client_or_issuer_id = documentClientOrIssuerId
-        )
+        try {
+            invoiceDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToInvoice(
+                id = null,
+                invoice_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
     }
 
     private fun getExistingIssuer(): DocumentClientOrIssuer? {
@@ -430,7 +456,7 @@ class InvoiceLocalDataSource(
         try {
             issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
-            println("Fetching result failed with exception: ${e.localizedMessage}")
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return issuer
     }
@@ -440,50 +466,59 @@ class InvoiceLocalDataSource(
         try {
             footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull()?.footer
         } catch (e: Exception) {
-            println("Fetching result failed with exception: ${e.localizedMessage}")
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return footer
     }
 
     private fun saveInfoInInvoiceTable(document: InvoiceState) {
-        invoiceQueries.save(
-            invoice_id = null,
-            number = document.documentNumber.text,
-            issuing_date = document.documentDate,
-            order_number = document.orderNumber?.text,
-            currency = document.currency.text,
-            due_date = document.dueDate,
-            footer = document.footerText.text
-        )
+        try {
+            invoiceQueries.save(
+                invoice_id = null,
+                number = document.documentNumber.text,
+                issuing_date = document.documentDate,
+                order_number = document.orderNumber?.text,
+                currency = document.currency.text,
+                due_date = document.dueDate,
+                footer = document.footerText.text
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+
     }
 
     private suspend fun saveInfoInOtherTables(document: DocumentState) {
-        invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
-            // Link all products
-            document.documentProducts?.forEach { documentProduct ->
-                saveDocumentProductInDbAndLinkToDocument(
-                    documentProduct = documentProduct,
-                    documentId = id,
-                    deliveryNoteDate = if (document is DeliveryNoteState) document.documentDate else null,
-                    deliveryNoteNumber = if (document is DeliveryNoteState) document.documentNumber.text else null
-                )
-            }
+        try {
+            invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
+                // Link all products
+                document.documentProducts?.forEach { documentProduct ->
+                    saveDocumentProductInDbAndLinkToDocument(
+                        documentProduct = documentProduct,
+                        documentId = id,
+                        deliveryNoteDate = if (document is DeliveryNoteState) document.documentDate else null,
+                        deliveryNoteNumber = if (document is DeliveryNoteState) document.documentNumber.text else null
+                    )
+                }
 
-            // Link client
-            document.documentClient?.let {
-                saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                    documentClientOrIssuer = it,
-                    documentId = id
-                )
-            }
+                // Link client
+                document.documentClient?.let {
+                    saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                        documentClientOrIssuer = it,
+                        documentId = id
+                    )
+                }
 
-            // Link issuer
-            document.documentIssuer?.let {
-                saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                    documentClientOrIssuer = it,
-                    documentId = id
-                )
+                // Link issuer
+                document.documentIssuer?.let {
+                    saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                        documentClientOrIssuer = it,
+                        documentId = id
+                    )
+                }
             }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 }

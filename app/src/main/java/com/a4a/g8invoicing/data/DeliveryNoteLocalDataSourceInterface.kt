@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 interface DeliveryNoteLocalDataSourceInterface {
    // fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?>
     fun fetchDeliveryNote(id: Long): DeliveryNoteState?
-    fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>
+    fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>?
     suspend fun createNewDeliveryNote(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(documentProduct: DocumentProductState, deliveryNoteId: Long?)
     suspend fun deleteDocumentProduct(deliveryNoteId:Long, documentProductId: Long)

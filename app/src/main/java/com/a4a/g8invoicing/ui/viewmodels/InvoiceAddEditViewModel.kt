@@ -67,7 +67,6 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
-
     private fun fetchInvoiceFromLocalDb(id: Long) {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {

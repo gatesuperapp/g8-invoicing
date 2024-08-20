@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface InvoiceLocalDataSourceInterface {
     fun fetch(id: Long): InvoiceState?
-    fun fetchAll(): Flow<List<InvoiceState>>
+    fun fetchAll(): Flow<List<InvoiceState>>?
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(documentProduct: DocumentProductState, id: Long?,
                                                          deliveryNoteDate: String? = null,
