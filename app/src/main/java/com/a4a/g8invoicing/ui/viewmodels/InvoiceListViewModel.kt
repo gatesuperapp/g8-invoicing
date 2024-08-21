@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
@@ -25,6 +27,7 @@ class InvoiceListViewModel @Inject constructor(
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
     private var duplicateJob: Job? = null
+    private var markAsPaidJob: Job? = null
 
     init {
         fetch()
@@ -42,7 +45,7 @@ class InvoiceListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                println("Fetching all deliveryNotes failed with exception: ${e.localizedMessage}")
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -53,7 +56,7 @@ class InvoiceListViewModel @Inject constructor(
             try {
                 invoiceDataSource.delete(selectedDocuments)
             } catch (e: Exception) {
-                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -64,7 +67,18 @@ class InvoiceListViewModel @Inject constructor(
             try {
                 invoiceDataSource.duplicate(selectedDocuments)
             } catch (e: Exception) {
-                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
+    }
+
+    fun markAsPaid(selectedDocuments: List<InvoiceState>) {
+        markAsPaidJob?.cancel()
+        markAsPaidJob = viewModelScope.launch {
+            try {
+                invoiceDataSource.markAsPaid(selectedDocuments)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }

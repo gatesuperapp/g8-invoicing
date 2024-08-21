@@ -34,8 +34,6 @@ fun DocumentBottomSheetElementsAfterSlide(
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    datePickerState: DatePickerState,
-    dueDatePickerState: DatePickerState?,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
@@ -103,19 +101,18 @@ fun DocumentBottomSheetElementsAfterSlide(
     if (pageElement == ScreenElement.DOCUMENT_DATE) {
         DocumentBottomSheetDatePicker(
             initialDate = parameters.let { it as String },
-            datePickerState = datePickerState,
             onClickBack = onClickBack,
+            onValueChange
         )
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DUE_DATE) {
-        dueDatePickerState?.let {
             DocumentBottomSheetDatePicker(
                 initialDate = parameters.let { it as String },
-                datePickerState = it,
                 onClickBack = onClickBack,
+                onValueChange,
+                isDueDate = true
             )
-        }
     }
 
     if (pageElement == ScreenElement.DOCUMENT_FOOTER) {

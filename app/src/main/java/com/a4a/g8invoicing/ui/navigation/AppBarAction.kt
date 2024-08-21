@@ -11,6 +11,7 @@ import com.a4a.g8invoicing.ui.shared.icons.IconList
 import com.a4a.g8invoicing.ui.shared.icons.IconText
 import com.ninetyninepercent.funfactu.icons.IconApps
 import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
+import com.ninetyninepercent.funfactu.icons.IconDollar
 import com.ninetyninepercent.funfactu.icons.IconDuplicate
 import com.ninetyninepercent.funfactu.icons.IconLabel
 
@@ -80,6 +81,16 @@ fun actionDuplicate(onClick: () -> Unit) =
         icon = IconDuplicate,
         description = R.string.appbar_duplicate,
         label = R.string.appbar_duplicate_label,
+        isInDropDownMenu = false,
+        onClick = onClick
+    )
+
+@Composable
+fun actionMarkAsPaid(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconDollar,
+        description = R.string.appbar_paid,
+        label = R.string.appbar_paid_label,
         isInDropDownMenu = false,
         onClick = onClick
     )

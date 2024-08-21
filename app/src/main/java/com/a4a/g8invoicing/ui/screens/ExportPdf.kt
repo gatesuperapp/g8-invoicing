@@ -124,7 +124,7 @@ fun ExportDocumentAndShowProgressBar(
     LaunchedEffect(true) {
         val job: Job = launch(context = Dispatchers.Default) {
             try {
-                createPdfWithIText(document)
+                createPdfWithIText(document, context)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }

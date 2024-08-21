@@ -167,6 +167,7 @@ class InvoiceLocalDataSource(
                 documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency)),
                 dueDate = it.due_date ?: "",
+                paymentStatus = it.payment_status.toInt(),
                 footerText = TextFieldValue(text = it.footer ?: "")
             )
         }
@@ -204,6 +205,7 @@ class InvoiceLocalDataSource(
                     order_number = document.orderNumber?.text,
                     currency = document.currency.text,
                     due_date = document.dueDate,
+                    payment_status = document.paymentStatus.toLong(),
                     footer = document.footerText.text
                 )
             } catch (e: Exception) {
@@ -236,6 +238,23 @@ class InvoiceLocalDataSource(
                     )
                     saveInfoInInvoiceTable(invoice)
                     saveInfoInOtherTables(invoice)
+                }
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun markAsPaid(documents: List<InvoiceState>) {
+        withContext(Dispatchers.IO) {
+            try {
+                documents.forEach {
+                    if(it.paymentStatus == 0) {
+                        it.paymentStatus = 2
+                    } else {
+                        it.paymentStatus = 0
+                    }
+                    update(it)
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -482,6 +501,7 @@ class InvoiceLocalDataSource(
                 order_number = document.orderNumber?.text,
                 currency = document.currency.text,
                 due_date = document.dueDate,
+                payment_status = document.paymentStatus.toLong(),
                 footer = document.footerText.text
             )
         } catch (e: Exception) {

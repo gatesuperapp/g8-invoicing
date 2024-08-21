@@ -1,9 +1,8 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -11,43 +10,39 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.debugInspectorInfo
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
-import com.itextpdf.layout.element.Text
-import java.math.BigDecimal
+
 
 
 @Composable
 fun DocumentBasicTemplateContent(
-    uiState: DocumentState,
+    document: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<DocumentProductState>?,
@@ -81,8 +76,8 @@ fun DocumentBasicTemplateContent(
                 .background(Color.White)
         ) {
 
-            DocumentBasicTemplateHeader(uiState, onClickElement, selectedItem)
-            uiState.orderNumber?.let {
+            DocumentBasicTemplateHeader(document, onClickElement, selectedItem)
+            document.orderNumber?.let {
                 if(it.text.isNotEmpty())
                     DocumentBasicTemplateOrderNumber(
                         it.text,
@@ -115,11 +110,24 @@ fun DocumentBasicTemplateContent(
                 }
             }
 
-            DocumentBasicTemplatePrices(uiState, footerArray)
+            Box(
+            ) {
+                DocumentBasicTemplatePrices(document, footerArray)
 
-            if (uiState is InvoiceState) {
+                if(document is InvoiceState && document.paymentStatus == 2) {
+                    Image(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .width(100.dp),
+                        painter = painterResource(R.drawable.img_paid),
+                        contentDescription = Strings.get(R.string.invoice_paid),
+                    )
+                }
+            }
+
+            if (document is InvoiceState) {
                 DocumentBasicTemplateFooter(
-                    uiState,
+                    document,
                     onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) }
                 )
             }

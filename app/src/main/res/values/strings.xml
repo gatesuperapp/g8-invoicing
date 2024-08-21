@@ -34,6 +34,8 @@
     <string name="appbar_edit">Modifier la facture</string>
     <string name="appbar_duplicate">Dupliquer</string>
     <string name="appbar_duplicate_label">Dupliquer</string>
+    <string name="appbar_paid">Marquer payée</string>
+    <string name="appbar_paid_label">Payée</string>
     <string name="appbar_send">Envoyer</string>
     <string name="appbar_search">Recherche</string>
     <string name="appbar_save"> Sauvegarder</string>
@@ -129,7 +131,8 @@
     <string name="tax_rate_change_rates">Modifier les taux</string>
     <string name="delivery_note">Bon de livraison</string>
     <string name="invoice">Facture</string>
-    <string name="invoice_due_date">Échéance</string>
+    <string name="invoice_due_date">Échéance :</string>
+    <string name="invoice_paid">Payée &#x2714;</string>
     <string name="invoice_pdf_due_date">Date limite de paiement</string>
     <string name="invoice_pending">En attente</string>
     <string name="invoice_late">En retard</string>
@@ -213,8 +216,8 @@
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
-        &#8226; Conçue pour les paysan·ne·s en priorité \n\nLe G8 vit grâce à sa communauté &#x1F917;
-        Vous pouvez vous abonner pour soutenir le projet...et bénéficier d\'avantages réservés !
+        &#8226; Conçue pour les paysan·ne·s en priorité \n\n
+        Vous pouvez vous abonner pour soutenir le projet...et bénéficier d\'avantages réservés &#x1F917;!
     </string>
     <string name="about2">
     Pour l\'assistance par mail ou toute autre demande :</string>

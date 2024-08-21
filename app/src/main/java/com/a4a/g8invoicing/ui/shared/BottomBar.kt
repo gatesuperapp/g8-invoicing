@@ -8,6 +8,7 @@ import com.a4a.g8invoicing.ui.navigation.actionCategories
 import com.a4a.g8invoicing.ui.navigation.actionConvert
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
+import com.a4a.g8invoicing.ui.navigation.actionMarkAsPaid
 import com.a4a.g8invoicing.ui.navigation.actionNew
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 
@@ -17,23 +18,40 @@ fun BottomBar(
     isButtonNewDisplayed: Boolean = true,
     isListItemSelected: Boolean = false,
     onClickDuplicate: () -> Unit = {},
+    onClickMarkAsPaid: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickUnselectAll: () -> Unit = {},
     onClickNew: () -> Unit = {},
     onClickCategory: (Category) -> Unit = {},
-    onClickConvert:() -> Unit = {},
-    isConvertible:Boolean = false
+    onClickConvert: () -> Unit = {},
+    isConvertible: Boolean = false,
+    isInvoice: Boolean = false,
 ) {
     BottomBarAction(
         navController,
         appBarActions = if (!isListItemSelected) {
-            if(isButtonNewDisplayed) {
+            if (isButtonNewDisplayed) {
                 arrayOf(
                     actionNew(onClick = { onClickNew() }),
                     actionCategories()
                 )
-            } else  arrayOf(
+            } else arrayOf(
                 actionCategories()
+            )
+        } else if (isInvoice) {
+            arrayOf(
+                actionUnselectAll(
+                    onClick = { onClickUnselectAll() }
+                ),
+                actionDuplicate(
+                    onClick = { onClickDuplicate() }
+                ),
+                actionDelete(
+                    onClick = { onClickDelete() }
+                ),
+                actionMarkAsPaid(
+                    onClick = { onClickMarkAsPaid() }
+                )
             )
         } else if (isConvertible) {
             arrayOf(
@@ -46,23 +64,23 @@ fun BottomBar(
                 actionDelete(
                     onClick = { onClickDelete() }
                 ),
-                actionConvert (
+                actionConvert(
                     onClick = { onClickConvert() }
                 )
             )
         } else {
-            arrayOf(
-                actionUnselectAll(
-                    onClick = { onClickUnselectAll() }
-                ),
-                actionDuplicate(
-                    onClick = { onClickDuplicate() }
-                ),
-                actionDelete(
-                    onClick = { onClickDelete() }
-                )
+        arrayOf(
+            actionUnselectAll(
+                onClick = { onClickUnselectAll() }
+            ),
+            actionDuplicate(
+                onClick = { onClickDuplicate() }
+            ),
+            actionDelete(
+                onClick = { onClickDelete() }
             )
-        },
-        onClickCategory
+        )
+    },
+    onClickCategory
     )
 }

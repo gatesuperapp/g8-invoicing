@@ -25,6 +25,7 @@ fun InvoiceList(
     documentsUiState: InvoicesUiState,
     onClickDelete: (List<InvoiceState>) -> Unit,
     onClickDuplicate: (List<InvoiceState>) -> Unit,
+    onClickMarkAsPaid: (List<InvoiceState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -62,8 +63,13 @@ fun InvoiceList(
                 onClickUnselectAll = {
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
+                onClickMarkAsPaid = {
+                    onClickMarkAsPaid(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
                 onClickNew = { onClickNew() },
-                onClickCategory = onClickCategory
+                onClickCategory = onClickCategory,
+                isInvoice = true
             )
         }
     ) { padding ->

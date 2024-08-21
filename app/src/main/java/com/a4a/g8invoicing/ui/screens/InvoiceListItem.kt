@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,8 +31,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.theme.ColorGreen
+import com.a4a.g8invoicing.ui.theme.ColorLightGreen
+import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.pdfFont
+import java.time.LocalDate
+import java.util.Calendar
 
 @Composable
 fun InvoiceListItem(
@@ -41,6 +50,11 @@ fun InvoiceListItem(
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
+
+    val formatter = getDateFormatter()
+    val dueDate = formatter.parse(document.dueDate)?.time
+    val currentDate = java.util.Date().time
+    var latePayment = dueDate != null && dueDate < currentDate
 
     Row(
         verticalAlignment = CenterVertically,
@@ -108,50 +122,47 @@ fun InvoiceListItem(
                     .padding(end = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(space = 6.dp)
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
+                Text(
+                    text = document.documentNumber.text,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    // maxLines = 1,
+                    //overflow = TextOverflow.Ellipsis
+                )
+                document.documentClient?.let {
                     Text(
-                        text = document.documentNumber.text,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        // maxLines = 1,
-                        //overflow = TextOverflow.Ellipsis
+                        text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text
                     )
                 }
-                document.documentClient?.let {
-                    Row() {
-                        Text(
-                            text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text
-                        )
-                    }
-                }
+                Text(
+                    text = if (document.paymentStatus == 2) {
+                        Strings.get(R.string.invoice_paid)
+                    } else {
+                        Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(" ")
+                    },
+                    color = if (document.paymentStatus == 2) ColorGreen else if (latePayment) ColorPinkOrange else Color.Black
+                )
             }
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(space = 6.dp),
                 horizontalAlignment = Alignment.End
             ) {
-                Row(
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Text(
-                        text = document.documentDate.substringBefore(" "),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        // maxLines = 1,
-                        //overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Row(
-                ) {
-                    Text(
-                        text = (document.documentPrices?.let {it.totalPriceWithTax.toString()} ?: "") + stringResource(
-                            id = R.string.currency
-                        ),
-                    )
-                }
+                Text(
+                    text = document.documentDate.substringBefore(" "),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    // maxLines = 1,
+                    //overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = (document.documentPrices?.let { it.totalPriceWithTax.toString() }
+                        ?: "") + stringResource(
+                        id = R.string.currency
+                    ),
+                    color = if (document.paymentStatus == 2) ColorGreen else if (latePayment) ColorPinkOrange else Color.Black
+                )
+
             }
         }
     }

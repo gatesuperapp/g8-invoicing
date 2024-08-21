@@ -46,8 +46,6 @@ import java.math.BigDecimal
 @Composable
 fun DocumentBottomSheetTextElements(
     document: DocumentState,
-    datePickerState: DatePickerState,
-    dueDatePickerState: DatePickerState? = null,
     onDismissBottomSheet: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
@@ -171,8 +169,6 @@ fun DocumentBottomSheetTextElements(
                     onClickClientOrIssuer = onClickClientOrIssuer,
                     onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
                     onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    datePickerState = datePickerState,
-                    dueDatePickerState = dueDatePickerState,
                     currentClientId = currentClientId,
                     currentIssuerId = currentIssuerId,
                     bottomFormOnValueChange = bottomFormOnValueChange,

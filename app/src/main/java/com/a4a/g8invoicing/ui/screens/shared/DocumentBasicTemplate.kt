@@ -1,13 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import android.annotation.SuppressLint
-import android.content.ContentValues
-import android.util.Log
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -15,48 +8,22 @@ import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
-import com.a4a.g8invoicing.ui.theme.textForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
-import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.absoluteValue
-import kotlin.math.max
 
 
 @SuppressLint("UnrememberedMutableState")
@@ -85,7 +52,7 @@ fun DocumentBasicTemplate(
     ) {
 
         DocumentBasicTemplateContent(
-            uiState = uiState,
+            document = uiState,
             onClickElement = onClickElement,
             screenWidth = screenWidth,
             productArray = productArray,

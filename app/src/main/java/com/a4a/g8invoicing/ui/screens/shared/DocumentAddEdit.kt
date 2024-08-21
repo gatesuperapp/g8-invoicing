@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import android.content.ContentValues
 import android.util.Log
+import android.widget.SimpleExpandableListAdapter
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -33,6 +34,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -142,54 +144,6 @@ fun DocumentAddEdit(
             onClickBack()
         }
     }
-    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ROOT)
-    val calendar: Calendar = Calendar.getInstance()
-    formatter.timeZone = calendar.timeZone
-
-    // Date picker & formatter
-    val currentDocumentDate = formatter.parse(document.documentDate)?.time
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = currentDocumentDate,
-        initialDisplayMode = DisplayMode.Picker
-    )
-    val dueDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = currentDocumentDate,
-        initialDisplayMode = DisplayMode.Picker
-    )
-
-    var documentDate by remember {
-        mutableStateOf(datePickerState.selectedDateMillis?.let {
-            formatter.format(
-                Date(it)
-            )
-        })
-    }
-    var dueDate by remember {
-        mutableStateOf(dueDatePickerState.selectedDateMillis?.let {
-            formatter.format(
-                Date(it)
-            )
-        })
-    }
-
-    // Only way i found to execute function when new date is picked..There must be a better way?
-    documentDate =
-        datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: ""
-    if (document.documentDate != documentDate) {
-        onValueChange(
-            ScreenElement.DOCUMENT_DATE,
-            datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: "")
-    }
-
-    if (document is InvoiceState) {
-        dueDate =
-            dueDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: ""
-        if (document.dueDate != dueDate) {
-            onValueChange(
-                ScreenElement.DOCUMENT_DUE_DATE,
-                dueDatePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: "")
-        }
-    }
 
     BottomSheetScaffold(
         sheetSwipeEnabled = false,
@@ -206,8 +160,6 @@ fun DocumentAddEdit(
             if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
                 DocumentBottomSheetTextElements(
                     document = document,
-                    datePickerState = datePickerState,
-                    dueDatePickerState = datePickerState,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)
                     },
@@ -303,13 +255,13 @@ fun DocumentAddEdit(
                 ExportPopup(document, onDismissRequest = { showPopup = false })
             }
 
-            var zoom by remember { mutableStateOf(1f) }
+            var zoom by remember { mutableFloatStateOf(1f) }
             var animatableOffsetX by remember { mutableStateOf(Animatable(0f)) }
             var animatableOffsetY by remember { mutableStateOf(Animatable(0f)) }
-            var offsetY by remember { mutableStateOf(0f) }
+            var offsetY by remember { mutableFloatStateOf(0f) }
             val coroutineScope = rememberCoroutineScope()
             var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
-            var newOffsetY by remember { mutableStateOf(0f) }
+            var newOffsetY by remember { mutableFloatStateOf(0f) }
 
             Column(
                 modifier = Modifier
@@ -644,4 +596,11 @@ private suspend fun PointerInputScope.customTransformGestures(
 
         onGestureEnd(pointer)
     }
+}
+
+fun getDateFormatter(): SimpleDateFormat {
+    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ROOT)
+    val calendar: Calendar = Calendar.getInstance()
+    formatter.timeZone = calendar.timeZone
+    return formatter
 }
