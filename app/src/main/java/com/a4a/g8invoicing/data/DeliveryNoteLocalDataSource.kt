@@ -38,8 +38,9 @@ class DeliveryNoteLocalDataSource(
     override suspend fun createNewDeliveryNote(): Long? {
         var newDeliveryNoteId: Long? = null
 
-        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
-        docNumber = incrementDocumentNumber(docNumber)
+        val docNumber = getLastDocumentNumber()?.let {
+            incrementDocumentNumber(it)
+        } ?: Strings.get(R.string.document_default_number)
 
         saveDeliveryNoteInfoInAllTables(
             DeliveryNoteState(
@@ -171,8 +172,9 @@ class DeliveryNoteLocalDataSource(
     }
 
     override suspend fun duplicateDeliveryNotes(deliveryNotes: List<DeliveryNoteState>) {
-        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
-        docNumber = incrementDocumentNumber(docNumber)
+        val docNumber = getLastDocumentNumber()?.let {
+            incrementDocumentNumber(it)
+        } ?: Strings.get(R.string.document_default_number)
 
         withContext(Dispatchers.IO) {
             try {

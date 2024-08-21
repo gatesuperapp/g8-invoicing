@@ -38,8 +38,9 @@ class InvoiceLocalDataSource(
 
     override suspend fun createNew(): Long? {
         var newInvoiceId: Long? = null
-        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
-        docNumber = incrementDocumentNumber(docNumber)
+        val docNumber = getLastDocumentNumber()?.let {
+            incrementDocumentNumber(it)
+        } ?: Strings.get(R.string.document_default_number)
 
         val issuer = getExistingIssuer()?.transformIntoEditable()
             ?: DocumentClientOrIssuerState()
@@ -212,8 +213,9 @@ class InvoiceLocalDataSource(
     }
 
     override suspend fun duplicate(documents: List<InvoiceState>) {
-        var docNumber = getLastDocumentNumber() ?: Strings.get(R.string.document_default_number)
-        docNumber = incrementDocumentNumber(docNumber)
+        val docNumber = getLastDocumentNumber()?.let {
+            incrementDocumentNumber(it)
+        } ?: Strings.get(R.string.document_default_number)
 
         withContext(Dispatchers.IO) {
             try {

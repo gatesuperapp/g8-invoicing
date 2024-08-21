@@ -223,8 +223,8 @@
     <string name="about_terms_of_service_header_2">et notre</string>
     <string name="about_privacy">politique de confidentialité.</string>
     <string name="account_button_create">Créer mon compte</string>
-    <string name="about_button_contact">contact@the-gate.app</string>
-    <string name="about_contact_email">contact@the-gate.app</string>
+    <string name="about_button_contact">contact@the-gate.fr</string>
+    <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_donate">En savoir plus</string>
     <string name="about_donate_link">https://the-gate.fr/abonnement</string>
     <string name="alert_dialog_delete">Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible.</string>
