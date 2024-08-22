@@ -175,9 +175,14 @@ class InvoiceLocalDataSource(
 
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
         withContext(Dispatchers.IO) {
+            val docNumber = getLastDocumentNumber()?.let {
+                incrementDocumentNumber(it)
+            } ?: Strings.get(R.string.document_default_number)
+
             try {
                 saveInfoInInvoiceTable(
                     InvoiceState(
+                        documentNumber = TextFieldValue(docNumber),
                         orderNumber = deliveryNotes.firstOrNull { it.orderNumber != null }?.orderNumber,
                         documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                         documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
