@@ -120,7 +120,7 @@ fun InvoiceListItem(
                 modifier = Modifier
                     .weight(1F)
                     .padding(end = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(space = 6.dp)
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp)
             ) {
                 Text(
                     text = document.documentNumber.text,

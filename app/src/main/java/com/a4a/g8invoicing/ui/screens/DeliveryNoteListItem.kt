@@ -107,7 +107,7 @@ fun DeliveryNoteListItem(
                 modifier = Modifier
                     .weight(1F)
                     .padding(end = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(space = 6.dp)
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp)
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
