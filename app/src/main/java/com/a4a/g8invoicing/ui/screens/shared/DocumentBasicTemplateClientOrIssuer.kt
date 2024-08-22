@@ -18,69 +18,85 @@ fun DocumentBasicTemplateClientOrIssuer(clientOrIssuer: DocumentClientOrIssuerSt
         textAlign = TextAlign.Center, // have to specify it (in addition to column alignment)
         // because without it, multilines text aren't aligned
         modifier = Modifier
-            .padding(bottom = 2.dp)
+            .padding(bottom = 3.dp)
             .wrapContentHeight(),
         style = MaterialTheme.typography.textForDocumentsBold,
-        text = (clientOrIssuer?.firstName.let {
-            (it?.text ?: "") + " "
+        text = (clientOrIssuer?.firstName?.let {
+            ((it.text))
         }) + (clientOrIssuer?.name?.text ?: "")
     )
-    clientOrIssuer?.address1?.let {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier.wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = it.text
-        )
-    }
-    clientOrIssuer?.address2?.let {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier.wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = it.text
-        )
-    }
-    clientOrIssuer?.zipCode?.let {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier.wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = it.text + " " + clientOrIssuer.city?.text
-        )
-    }
-    clientOrIssuer?.phone?.let {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier.wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = it.text
-        )
-    }
-    clientOrIssuer?.email?.let {
+    if (!clientOrIssuer?.address1?.text.isNullOrEmpty()) {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(bottom = 3.dp)
                 .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = it.text
+            text = clientOrIssuer?.address1?.text ?: ""
         )
     }
-    clientOrIssuer?.companyId1Number?.let {
+    if (!clientOrIssuer?.address2?.text.isNullOrEmpty()) {
         Text(
             textAlign = TextAlign.Center,
-            modifier = Modifier.wrapContentHeight(),
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = clientOrIssuer.companyId1Label?.text + " : " + it.text
+            text = clientOrIssuer?.address2?.text ?: ""
         )
     }
-    clientOrIssuer?.companyId2Number?.let {
+    if (!clientOrIssuer?.zipCode?.text.isNullOrEmpty() ||
+        !clientOrIssuer?.city?.text.isNullOrEmpty()
+    ) {
         Text(
             textAlign = TextAlign.Center,
-            modifier = Modifier.wrapContentHeight(),
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = clientOrIssuer.companyId2Label?.text + " : " + it.text
+            text = clientOrIssuer?.zipCode?.text + " " + clientOrIssuer?.city?.text
+        )
+    }
+    if (!clientOrIssuer?.phone?.text.isNullOrEmpty()) {
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
+            style = MaterialTheme.typography.textForDocuments,
+            text = clientOrIssuer?.phone?.text ?: ""
+        )
+    }
+    if (!clientOrIssuer?.email?.text.isNullOrEmpty()) {
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
+            style = MaterialTheme.typography.textForDocuments,
+            text = clientOrIssuer?.email?.text ?: ""
+        )
+    }
+    if (!clientOrIssuer?.companyId1Number?.text.isNullOrEmpty()) {
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
+            style = MaterialTheme.typography.textForDocuments,
+            text = clientOrIssuer?.companyId1Label?.text + " : "
+                    + clientOrIssuer?.companyId1Number?.text
+        )
+    }
+    if (!clientOrIssuer?.companyId2Number?.text.isNullOrEmpty()) {
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
+            style = MaterialTheme.typography.textForDocuments,
+            text = clientOrIssuer?.companyId2Label?.text + " : "
+                    + clientOrIssuer?.companyId2Number?.text
         )
     }
 }
