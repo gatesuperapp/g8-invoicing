@@ -212,11 +212,13 @@
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
     <string name="about">
-        The Gate (G8) est une application mobile pratique et engagée :\n
+        The Gate (G8) est une application pratique et engagée :\n
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
-        &#8226; Conçue pour les paysan·ne·s en priorité \n\nVous pouvez vous abonner pour soutenir le projet...et bénéficier d\'avantages réservés &#x1F917;
+        &#8226; Conçue pour les paysan·ne·s en priorité
+        &#8226; Indépendance financière et auto-gestion
+        \n\nVous pouvez vous abonner pour permettre le développement des prochaines fonctionnalités et bénéficier d\'avantages réservés &#x1F917;
     </string>
     <string name="about2">
     Pour l\'assistance par mail ou toute autre demande :</string>
@@ -229,7 +231,11 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_donate">En savoir plus</string>
     <string name="about_donate_link">https://the-gate.fr/abonnement</string>
-    <string name="alert_dialog_delete">Êtes-vous sûr·e de vouloir supprimer ce document ? Cette action est irréversible.</string>
+    <string name="alert_dialog_delete">	&#x26A0; Si vous avez déjà envoyé votre facture, il n\'est pas légal de la supprimer :
+        dans le cas où elle n\'a pas encore été payée, vous devez l\'annuler en créant une facture
+        rectificative ; dans le cas où elle a déjà été payée, vous pouvez l\'annuler en créant un avoir. \n
+
+        Si vous n\'avez pas encore envoyé votre facture, vous pouvez la supprimer - cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="alert_dialog_delete_cancel">Non</string>
     <string name="export_ongoing">Export en cours…</string>

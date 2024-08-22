@@ -6,6 +6,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 
 /**/
@@ -19,7 +20,7 @@ fun DeliveryNoteListContent(
 ) {
     LazyColumn {
         items(
-            items = deliveryNotes,
+            items = deliveryNotes.sortedByDescending { getDateFormatter().parse(it.documentDate)?.time },
             key = {
                 it.documentId!!
             }
