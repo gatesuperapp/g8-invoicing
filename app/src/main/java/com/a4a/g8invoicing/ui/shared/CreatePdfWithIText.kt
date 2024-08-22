@@ -2,7 +2,6 @@ package com.a4a.g8invoicing.ui.shared
 
 import android.content.ContentValues
 import android.content.Context
-import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -86,21 +85,20 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
         }
     }
     inputDocument.documentProducts?.let {
-        document.add(createProductsTable(it, fontBold = fontBold, fontRegular = fontRegular))
+        createProductsTable(it, fontBold = fontBold, fontRegular = fontRegular)?.let {
+            try {
+                document.add(it)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
     }
     inputDocument.documentPrices?.let {
         document.add(createPrices(fontBold, it))
     }
-
     if (inputDocument is InvoiceState) {
-
         document.add(createDueDate(fontBold, inputDocument.dueDate.substringBefore(" ")))
         document.add(createFooter(inputDocument.footerText.text))
-        if (inputDocument.paymentStatus == 2) {
-            createPaidStamp(context)?.let {
-                document.add(it)
-            }
-        }
     }
 
     document.close()
@@ -109,17 +107,46 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     writer.close()
     pdfDocument.close()
 
-    addPageNumbering(inputDocument, fileNameBeforeNumbering)
+    addPageNumberingAndDeletePreviousFile(inputDocument, fileNameBeforeNumbering, context)
 }
 
-fun addPageNumbering(inputDocument: DocumentState, fileNameBeforeNumbering: String) {
+fun addPageNumberingAndDeletePreviousFile(
+    inputDocument: DocumentState,
+    fileNameBeforeNumbering: String,
+    context: Context,
+) {
     val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
-
     val finalFileName = "${inputDocument.documentNumber.text}.pdf"
+
     getFile(fileNameBeforeNumbering)?.let {
         if (it.exists() && it.isFile) {
             try {
-                addPageNumberingAndSaveFile(fileNameBeforeNumbering, finalFileName, fontRegular)
+                val pdfDoc = PdfDocument(
+                    PdfReader(getFilePath(fileNameBeforeNumbering)),
+                    PdfWriter(getFilePath(finalFileName))
+                )
+                val doc = Document(pdfDoc)
+                val numberOfPages = pdfDoc.numberOfPages
+
+                if (inputDocument is InvoiceState && inputDocument.paymentStatus == 2) {
+                    createPaidStamp(context)?.let {
+                        doc.add(it)
+                    }
+                }
+
+                if (numberOfPages > 1) {
+                    for (i in 1..numberOfPages) {
+                        doc.showTextAligned(
+                            Paragraph(String.format("%s/%s", i, numberOfPages))
+                                .setFont(fontRegular),
+                            570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
+                        )
+                    }
+                }
+
+                deleteFile(fileNameBeforeNumbering)
+                doc.close()
+                pdfDoc.close()
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -288,71 +315,81 @@ private fun createProductsTable(
     products: List<DocumentProductState>,
     fontRegular: PdfFont,
     fontBold: PdfFont,
-): Table {
-    val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
-    val productsTable = Table(UnitValue.createPercentArray(columnWidth))
-        .useAllAvailableWidth()
-        .setMarginBottom(10f)
-        .setFixedLayout()
+): Table? {
+    try {
+        val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
+        val productsTable = Table(UnitValue.createPercentArray(columnWidth))
+            .useAllAvailableWidth()
+            .setMarginBottom(10f)
+            .setFixedLayout()
 
-    productsTable
-        .addCustomCell(
-            Strings.get(R.string.document_table_description),
-            alignment = TextAlignment.LEFT,
-            isBold = true,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
-        .addCustomCell(
-            Strings.get(R.string.document_table_quantity),
-            isBold = true,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
-        .addCustomCell(
-            Strings.get(R.string.document_table_unit),
-            isBold = true,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
-        .addCustomCell(
-            Strings.get(R.string.document_table_tax_rate),
-            isBold = true,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
-        .addCustomCell(
-            Strings.get(R.string.document_table_unit_price_without_tax),
-            isBold = true,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
-        .addCustomCell(
-            Strings.get(R.string.document_table_total_price_without_tax),
-            isBold = true,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
-
-    val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
-
-    if (linkedDeliveryNotes.isNotEmpty()) {
-        linkedDeliveryNotes.forEach { docNumberAndDate ->
-            addDeliveryNoteRow(
-                productsTable,
-                docNumberAndDate,
+        productsTable
+            .addCustomCell(
+                Strings.get(R.string.document_table_description),
+                alignment = TextAlignment.LEFT,
+                isBold = true,
                 fontBold = fontBold,
                 fontRegular = fontRegular
             )
+            .addCustomCell(
+                Strings.get(R.string.document_table_quantity),
+                isBold = true,
+                fontBold = fontBold,
+                fontRegular = fontRegular
+            )
+            .addCustomCell(
+                Strings.get(R.string.document_table_unit),
+                isBold = true,
+                fontBold = fontBold,
+                fontRegular = fontRegular
+            )
+            .addCustomCell(
+                Strings.get(R.string.document_table_tax_rate),
+                isBold = true,
+                fontBold = fontBold,
+                fontRegular = fontRegular
+            )
+            .addCustomCell(
+                Strings.get(R.string.document_table_unit_price_without_tax),
+                isBold = true,
+                fontBold = fontBold,
+                fontRegular = fontRegular
+            )
+            .addCustomCell(
+                Strings.get(R.string.document_table_total_price_without_tax),
+                isBold = true,
+                fontBold = fontBold,
+                fontRegular = fontRegular
+            )
+
+        val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
+
+        if (linkedDeliveryNotes.isNotEmpty()) {
+            linkedDeliveryNotes.forEach { docNumberAndDate ->
+                addDeliveryNoteRow(
+                    productsTable,
+                    docNumberAndDate,
+                    fontBold = fontBold,
+                    fontRegular = fontRegular
+                )
+                addProductsToTable(
+                    products.filter { it.linkedDocNumber == docNumberAndDate.first },
+                    productsTable, fontBold = fontBold, fontRegular = fontRegular
+                )
+            }
+        } else {
             addProductsToTable(
-                products.filter { it.linkedDocNumber == docNumberAndDate.first },
-                productsTable, fontBold = fontBold, fontRegular = fontRegular
+                products,
+                productsTable,
+                fontBold = fontBold,
+                fontRegular = fontRegular
             )
         }
-    } else {
-        addProductsToTable(products, productsTable, fontBold = fontBold, fontRegular = fontRegular)
+        return productsTable
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
-    return productsTable
+    return null
 }
 
 private fun addDeliveryNoteRow(
@@ -378,7 +415,11 @@ private fun addProductsToTable(
 ) {
     products.forEach {
         val itemName = Text(it.name.text)
-        val itemDescription = Text(it.description?.text).setItalic()
+        var itemDescription = Text("")
+        it.description?.let {
+            itemDescription = Text(it.text).setItalic()
+        }
+
         val item = Paragraph(itemName)
             .add("\n")
             .add(itemDescription)
@@ -516,8 +557,8 @@ private fun createPaidStamp(context: Context): Image? {
             setWidth(180f)
         }
         img.setFixedPosition(
-            200f,
-            200f
+            220f,
+            470f
         )
         return img
     } catch (e: Exception) {
@@ -578,37 +619,6 @@ private fun Table.addCellInFooter(
 data class PriceRow(
     var rowDescription: String,
 )
-
-@Throws(Exception::class)
-private fun addPageNumberingAndSaveFile(
-    previousFileName: String,
-    finalFileName: String,
-    fontRegular: PdfFont,
-) {
-
-    val pdfDoc = PdfDocument(
-        PdfReader(getFilePath(previousFileName)),
-        PdfWriter(getFilePath(finalFileName))
-    )
-    val doc = Document(pdfDoc)
-
-    val numberOfPages = pdfDoc.numberOfPages
-
-    if (numberOfPages > 1) {
-        for (i in 1..numberOfPages) {
-            doc.showTextAligned(
-                Paragraph(String.format("%s/%s", i, numberOfPages))
-                    .setFont(fontRegular),
-                570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
-            )
-        }
-    }
-
-    deleteFile(previousFileName)
-    doc.close()
-    pdfDoc.close()
-}
-
 
 fun getFileUri(context: Context, fileName: String): Uri? {
     var uri: Uri? = null

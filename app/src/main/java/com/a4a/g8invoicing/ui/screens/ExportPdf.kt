@@ -37,7 +37,6 @@ import androidx.core.content.ContextCompat.startActivity
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.DocumentType
-import com.a4a.g8invoicing.ui.shared.addPageNumbering
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.getFileUri
 import com.a4a.g8invoicing.ui.shared.icons.IconShare

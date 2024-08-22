@@ -91,39 +91,40 @@ fun DocumentBasicTemplateContent(
                     .padding(bottom = 6.dp)
             )
 
-            Column(
-                Modifier
-                    .getBorder(ScreenElement.DOCUMENT_PRODUCT, selectedItem) // for selection
-                    .customCombinedClickable(
-                        onClick = {
-                            onClickElement(ScreenElement.DOCUMENT_PRODUCT)
-                        },
-                        onLongClick = {
-                        }
-                    )
-                    .fillMaxWidth()
-            ) {
-                if (!productArray.isNullOrEmpty()) {
-                    DocumentBasicTemplateDataTable(
-                        productArray
-                    )
-                }
-            }
-
             Box(
             ) {
-                DocumentBasicTemplatePrices(document, footerArray)
-
+                Column(
+                    Modifier
+                        .getBorder(ScreenElement.DOCUMENT_PRODUCT, selectedItem) // for selection
+                        .customCombinedClickable(
+                            onClick = {
+                                onClickElement(ScreenElement.DOCUMENT_PRODUCT)
+                            },
+                            onLongClick = {
+                            }
+                        )
+                        .fillMaxWidth()
+                ) {
+                    if (!productArray.isNullOrEmpty()) {
+                        DocumentBasicTemplateDataTable(
+                            productArray
+                        )
+                    }
+                }
                 if(document is InvoiceState && document.paymentStatus == 2) {
                     Image(
                         modifier = Modifier
-                            .align(Alignment.Center)
+                            .align(Alignment.TopCenter)
                             .width(100.dp),
                         painter = painterResource(R.drawable.img_paid),
                         contentDescription = Strings.get(R.string.invoice_paid),
                     )
                 }
             }
+
+                DocumentBasicTemplatePrices(document, footerArray)
+
+
 
             if (document is InvoiceState) {
                 DocumentBasicTemplateFooter(
