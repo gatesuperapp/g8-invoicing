@@ -72,6 +72,7 @@ fun DocumentBottomSheetFormModal(
                         .fillMaxWidth()
                 ) {
                     Text(
+                        style = MaterialTheme.typography.textSmall,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(top = 20.dp)

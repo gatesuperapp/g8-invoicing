@@ -131,7 +131,7 @@ fun DeliveryNoteListItem(
             }
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(space = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp),
                 horizontalAlignment = Alignment.End
             ) {
                 Row(

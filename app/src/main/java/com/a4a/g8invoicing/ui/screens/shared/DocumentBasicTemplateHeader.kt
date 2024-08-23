@@ -113,7 +113,9 @@ fun DocumentBasicTemplateHeader(
                 .weight(1f)
                 .fillMaxWidth(0.3f)
         ) {
-            DocumentBasicTemplateClientOrIssuer(document.documentIssuer)
+            document.documentIssuer?.let {
+                DocumentBasicTemplateClientOrIssuer(it)
+            }
         }
 
         Column(
@@ -148,7 +150,9 @@ fun DocumentBasicTemplateHeader(
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                DocumentBasicTemplateClientOrIssuer(document.documentClient)
+                document.documentClient?.let {
+                    DocumentBasicTemplateClientOrIssuer(it)
+                }
             }
         }
     }

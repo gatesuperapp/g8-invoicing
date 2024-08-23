@@ -136,8 +136,19 @@ fun addPageNumberingAndDeletePreviousFile(
 
                 if (numberOfPages > 1) {
                     for (i in 1..numberOfPages) {
+                        // Display document number on every page footer except first page
+                        val documentNameAndNumber =
+                            if (i == 1) "" else getDocumentName(inputDocument.documentType) + " " +
+                                    inputDocument.documentNumber.text + " - "
                         doc.showTextAligned(
-                            Paragraph(String.format("%s/%s", i, numberOfPages))
+                            Paragraph(
+                                documentNameAndNumber
+                                        + String.format(
+                                    "%s/%s",
+                                    i,
+                                    numberOfPages
+                                )
+                            )
                                 .setFont(fontRegular),
                             570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
                         )
@@ -154,15 +165,21 @@ fun addPageNumberingAndDeletePreviousFile(
     }
 }
 
+private fun getDocumentName(documentType: DocumentType): String {
+    return when (documentType) {
+        DocumentType.INVOICE -> Strings.get(R.string.invoice_number)
+        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.delivery_note_number)
+    }
+}
+
 private fun createTitle(
     documentNumber: String,
     documentType: DocumentType? = null,
     font: PdfFont,
 ): Paragraph {
-    val title = when (documentType) {
-        DocumentType.INVOICE -> Strings.get(R.string.invoice_number)
-        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.delivery_note_number)
-        else -> null
+    var title = ""
+    documentType?.let {
+        title = getDocumentName(it)
     }
 
     return Paragraph(title + documentNumber)

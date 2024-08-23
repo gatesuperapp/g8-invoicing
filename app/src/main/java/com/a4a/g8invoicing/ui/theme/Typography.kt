@@ -101,7 +101,7 @@ val Typography.textSmall: TextStyle
     get() {
         return TextStyle(
             fontFamily = uiFont,
-            fontSize = 10.sp,
+            fontSize = 14.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
