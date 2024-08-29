@@ -7,6 +7,8 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -16,10 +18,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.Invoice
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -27,9 +26,11 @@ class InvoiceLocalDataSource(
     db: Database,
 ) : InvoiceLocalDataSourceInterface {
     private val invoiceQueries = db.invoiceQueries
+    private val invoiceTagQueries = db.invoiceTagQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentProductQueries = db.documentProductQueries
     private val invoiceDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
+    private val linkDocumentToTagQueries = db.linkInvoiceToTagQueries
     private val invoiceDocumentProductAdditionalInfoQueries =
         db.linkInvoiceDocumentProductToDeliveryNoteQueries
     private val invoiceDocumentProductLinkQueries =
@@ -95,10 +96,12 @@ class InvoiceLocalDataSource(
                         .map { document ->
                             val products = fetchDocumentProducts(document.invoice_id)
                             val clientAndIssuer = fetchClientAndIssuer(document.invoice_id)
+                            val tag = fetchTag(document.invoice_id)
 
                             document.transformIntoEditableInvoice(
                                 products,
-                                clientAndIssuer
+                                clientAndIssuer,
+                                tag
                             )
                         }
                 }
@@ -151,13 +154,41 @@ class InvoiceLocalDataSource(
         return null
     }
 
+    private fun fetchTag(documentId: Long): DocumentTag? {
+        try {
+            val tagId = linkDocumentToTagQueries.getInvoiceTag(documentId).executeAsOneOrNull()
+            tagId?.let {
+                invoiceTagQueries.getTag(it).executeAsOneOrNull()?.let { tagName ->
+                    val tag: DocumentTag = enumValueOf(tagName)
+                    return tag
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
+    }
+
     private fun Invoice.transformIntoEditableInvoice(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
+        documentTag: DocumentTag? = null,
     ): InvoiceState {
         this.let {
+            var isPaymentLate = false
+            val formatter = getDateFormatter()
+            it.due_date?.let { date ->
+                val dueDate = formatter.parse(date)?.time
+                val currentDate = java.util.Date().time
+                dueDate?.let {
+                    isPaymentLate = it < currentDate
+                }
+            }
+
             return InvoiceState(
                 documentId = it.invoice_id.toInt(),
+                documentTag = if (isPaymentLate && documentTag == DocumentTag.SENT) DocumentTag.LATE
+                else documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.issuing_date ?: "",
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
@@ -213,6 +244,8 @@ class InvoiceLocalDataSource(
                     payment_status = document.paymentStatus.toLong(),
                     footer = document.footerText.text
                 )
+                // Update tag
+                linkDocumentToDocumentTag(document.documentId?.toLong() ?: 0, document.documentTag)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -250,16 +283,20 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override suspend fun markAsPaid(documents: List<InvoiceState>) {
+    override suspend fun attributeTag(documents: List<InvoiceState>) {
         withContext(Dispatchers.IO) {
             try {
-                documents.forEach {
-                    if(it.paymentStatus == 0) {
-                        it.paymentStatus = 2
-                    } else {
-                        it.paymentStatus = 0
+                documents.forEach { invoice ->
+                    invoice.documentId?.toLong()?.let { invoiceId ->
+                        invoiceTagQueries.getTagId(invoice.documentTag.name).executeAsOneOrNull()
+                            ?.let {
+                                linkDocumentToTagQueries.saveInvoiceTag(
+                                    id = null,
+                                    invoice_id = invoiceId,
+                                    tag_id = it
+                                )
+                            }
                     }
-                    update(it)
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -434,17 +471,32 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override fun linkDocumentProductToDocument(documentId: Long, documentProductId: Long) {
+    override fun linkDocumentProductToDocument(id: Long, documentProductId: Long) {
         try {
             invoiceDocumentProductQueries.saveProductLinkedToInvoice(
                 id = null,
-                invoice_id = documentId,
+                invoice_id = id,
                 document_product_id = documentProductId
             )
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
+
+    override fun linkDocumentToDocumentTag(id: Long, tag: DocumentTag) {
+        try {
+            invoiceTagQueries.getTagId(tag.name.lowercase()).executeAsOneOrNull()?.let {
+                linkDocumentToTagQueries.saveInvoiceTag(
+                    id = null,
+                    invoice_id = id,
+                    tag_id = it
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+    }
+
 
     override fun linkDocumentProductToAdditionalInfo(
         documentProductId: Long,
@@ -518,6 +570,9 @@ class InvoiceLocalDataSource(
     private suspend fun saveInfoInOtherTables(document: DocumentState) {
         try {
             invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
+                // Link tag
+                linkDocumentToDocumentTag(id, document.documentTag)
+
                 // Link all products
                 document.documentProducts?.forEach { documentProduct ->
                     saveDocumentProductInDbAndLinkToDocument(
@@ -543,6 +598,7 @@ class InvoiceLocalDataSource(
                         documentId = id
                     )
                 }
+
             }
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -552,9 +608,8 @@ class InvoiceLocalDataSource(
 
 fun incrementDocumentNumber(docNumber: String): String {
     val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
-    if(numberToIncrement.isNotEmpty()) {
+    if (numberToIncrement.isNotEmpty()) {
         val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
         return firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
-    }
-    else return docNumber
+    } else return docNumber
 }

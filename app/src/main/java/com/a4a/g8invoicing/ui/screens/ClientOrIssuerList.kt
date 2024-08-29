@@ -16,7 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
-import com.a4a.g8invoicing.ui.shared.BottomBar
+import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 
 @Composable
@@ -48,7 +48,7 @@ fun ClientOrIssuerList(
         //   private val _uiState = MutableStateFlow(ClientsUiState())
         // val uiState: StateFlow<ClientsUiState> = _uiState.asStateFlow()
         bottomBar = {
-            BottomBar(
+            GeneralBottomBar(
                 navController = navController,
                 isListItemSelected = selectedMode.value,
                 onClickDelete = {

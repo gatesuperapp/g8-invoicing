@@ -2,7 +2,6 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import android.content.ContentValues
 import android.util.Log
-import android.widget.SimpleExpandableListAdapter
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -25,12 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -60,21 +57,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.navigation.BottomBarEdition
+import com.a4a.g8invoicing.ui.navigation.DocumentBottomBar
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
+import com.a4a.g8invoicing.ui.navigation.actionSavePayment
+import com.a4a.g8invoicing.ui.navigation.actionStyle
 import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
-import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
@@ -82,7 +78,6 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
@@ -453,11 +448,14 @@ private fun DocumentAddEditBottomBar(
     onClickElements: () -> Unit,
     onClickItems: () -> Unit,
     onClickStyle: () -> Unit,
-) {
-    BottomBarEdition(
+    onClickSavePayment: () -> Unit = {},
+    ) {
+    DocumentBottomBar(
         actions = arrayOf(
             actionTextElements(onClickElements),
-            actionItems(onClickItems)
+            actionItems(onClickItems),
+            actionStyle(onClickStyle),
+           // actionSavePayment(onClickSavePayment)
         )
     )
 }

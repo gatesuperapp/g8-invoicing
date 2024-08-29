@@ -15,12 +15,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
-import com.a4a.g8invoicing.ui.shared.BottomBar
+import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -87,7 +86,7 @@ fun Account(
         //   private val _uiState = MutableStateFlow(ClientsUiState())
         // val uiState: StateFlow<ClientsUiState> = _uiState.asStateFlow()
         bottomBar = {
-            BottomBar(
+            GeneralBottomBar(
                 navController = navController,
                 onClickCategory = onClickCategory
             )

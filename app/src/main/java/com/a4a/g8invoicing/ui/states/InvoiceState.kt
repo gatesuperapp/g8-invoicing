@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.ui.states
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import java.text.SimpleDateFormat
@@ -24,6 +25,7 @@ fun getDateInOneMonth(): Calendar {
 
 data class InvoiceState(
     override var documentType: DocumentType = DocumentType.INVOICE,
+    override var documentTag: DocumentTag = DocumentTag.DRAFT,
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
     // Have to put a time "12:00:00" because of a bug, if we don't, DatePicker will show 1 day prior to current date

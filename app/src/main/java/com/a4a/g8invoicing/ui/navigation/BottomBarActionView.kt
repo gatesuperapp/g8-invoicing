@@ -1,19 +1,15 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -40,57 +35,75 @@ fun BottomBarActionView(
 
     ViewWithLayout {
         if (appBarActions !== null) {
-            val (secondaryIcons, primaryIcons) = appBarActions.partition { it.isInDropDownMenu }
-            val (primaryIconsLeft, primaryIconsRight) = primaryIcons.partition { it.alignmentLeft }
-
             Row(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+
                 // Icons on the left side
-                primaryIconsLeft.forEach { action ->
-                    // Categories dropdown menu when clicking "Categories" icon
-                    if (action.description == R.string.appbar_categories) {
-                        Button(
-                            contentPadding = PaddingValues(0.dp),
-                            onClick = {
-                                isExpanded = true
-                            },
-                        ) {
-                            AddIconAndLabel(action)
-                            BottomBarMenu(
-                                navController,
-                                isExpanded,
-                                dismissMenu = { isExpanded = false },
-                                onClickCategory
-                            )
+                appBarActions.filter { !it.isSecondary && it.alignmentLeft }
+                    .forEach { action ->
+                        // Categories dropdown menu when clicking "Categories" icon
+                        if (action.description == R.string.appbar_categories) {
+                            Button(
+                                contentPadding = PaddingValues(0.dp),
+                                onClick = {
+                                    isExpanded = true
+                                },
+                            ) {
+                                AddIconAndLabelInColumn(action)
+                                CategoriesDropdownMenu(
+                                    navController,
+                                    isExpanded,
+                                    dismissMenu = { isExpanded = false },
+                                    onClickCategory
+                                )
+                            }
+                        } else {  // Other icons handled "normally"
+                            Button(
+                                contentPadding = PaddingValues(0.dp),
+                                onClick = action.onClick
+                            ) {
+                                AddIconAndLabelInColumn(
+                                    action,
+                                    24.dp
+                                )
+                            }
                         }
-                    } else {  // Other icons handled "normally"
+
+                        // Will not apply when there's no left icons so items can be centered
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                // Icons on the right side
+                appBarActions.filter { !it.isSecondary && !it.alignmentLeft }
+                    .forEach { action ->
                         Button(
                             contentPadding = PaddingValues(0.dp),
                             onClick = action.onClick
                         ) {
-                            AddIconAndLabel(action, 24.dp, MaterialTheme.colorScheme.onBackground)
+                            if (action.name == "TAG") {
+                                ButtonWithDropdownMenu(
+                                    action,
+                                    listOf(
+                                        actionTagDraft(),
+                                        actionTagSent(),
+                                        actionTagPaid(),
+                                        actionTagLate(),
+                                        actionTagCancelled(),
+                                        actionTagCredit(),
+                                    )
+                                )
+                            } else {
+                                AddIconAndLabelInColumn(
+                                    action,
+                                    24.dp
+                                )
+                            }
                         }
                     }
-
-                    // Will not apply when there's no left icons so items can be centered
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-
-                // Icons on the right side
-                primaryIconsRight.forEach { action ->
-                    Button(
-                        contentPadding = PaddingValues(0.dp),
-                        onClick = action.onClick
-                    ) {
-                        AddIconAndLabel(action, 24.dp, MaterialTheme.colorScheme.onBackground)
-                    }
-                }
                 // Dropdown menu "More"
-                if (secondaryIcons.isNotEmpty()) {
-                    MoreOptionsDropdownMenu(secondaryIcons)
-                }
+                ButtonWithDropdownMenu(actionMore(), appBarActions.filter { it.isSecondary })
             }
         }
     }
@@ -98,7 +111,7 @@ fun BottomBarActionView(
 }
 
 @Composable
-fun AddIconAndLabel(action: AppBarAction, iconSize: Dp?  = null, color: Color? = null) {
+fun AddIconAndLabelInColumn(action: AppBarAction, iconSize: Dp? = null) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -108,7 +121,7 @@ fun AddIconAndLabel(action: AppBarAction, iconSize: Dp?  = null, color: Color? =
                 Modifier
                     .size(iconSize)
             } else Modifier,
-            tint = color ?: LocalContentColor.current,
+            tint = action.iconColor ?: LocalContentColor.current,
             contentDescription = stringResource(id = action.description)
         )
         action.label?.let {

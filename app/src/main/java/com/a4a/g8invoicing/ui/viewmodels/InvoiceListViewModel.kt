@@ -27,7 +27,7 @@ class InvoiceListViewModel @Inject constructor(
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
     private var duplicateJob: Job? = null
-    private var markAsPaidJob: Job? = null
+    private var setTagJob: Job? = null
 
     init {
         fetch()
@@ -72,11 +72,11 @@ class InvoiceListViewModel @Inject constructor(
         }
     }
 
-    fun markAsPaid(selectedDocuments: List<InvoiceState>) {
-        markAsPaidJob?.cancel()
-        markAsPaidJob = viewModelScope.launch {
+    fun attributeTag(selectedDocuments: List<InvoiceState>) {
+        setTagJob?.cancel()
+        setTagJob = viewModelScope.launch {
             try {
-                invoiceDataSource.markAsPaid(selectedDocuments)
+                invoiceDataSource.attributeTag(selectedDocuments)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }

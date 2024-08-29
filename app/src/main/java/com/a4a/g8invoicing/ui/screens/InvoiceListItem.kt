@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,14 +30,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.navigation.AppBarAction
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
+import com.a4a.g8invoicing.ui.navigation.actionTagCredit
+import com.a4a.g8invoicing.ui.navigation.actionTagDraft
+import com.a4a.g8invoicing.ui.navigation.actionTagLate
+import com.a4a.g8invoicing.ui.navigation.actionTagPaid
+import com.a4a.g8invoicing.ui.navigation.actionTagSent
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreen
+import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
 import com.a4a.g8invoicing.ui.theme.ColorLightGreen
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.pdfFont
@@ -50,11 +63,6 @@ fun InvoiceListItem(
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
-
-    val formatter = getDateFormatter()
-    val dueDate = formatter.parse(document.dueDate)?.time
-    val currentDate = java.util.Date().time
-    var latePayment = dueDate != null && dueDate < currentDate
 
     Row(
         verticalAlignment = CenterVertically,
@@ -104,6 +112,14 @@ fun InvoiceListItem(
             // Re-triggers remember calculation when key changes
             val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
+            val action = when (document.documentTag) {
+                DocumentTag.DRAFT -> actionTagDraft()
+                DocumentTag.SENT -> actionTagSent()
+                DocumentTag.PAID -> actionTagPaid()
+                DocumentTag.LATE -> actionTagLate()
+                DocumentTag.CANCELLED -> actionTagCancelled()
+                DocumentTag.CREDIT -> actionTagCredit()
+            }
             Column(
             ) {
                 Checkbox(
@@ -134,14 +150,18 @@ fun InvoiceListItem(
                         text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text
                     )
                 }
-                Text(
-                    text = if (document.paymentStatus == 2) {
-                        Strings.get(R.string.invoice_paid)
-                    } else {
-                        Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(" ")
-                    },
-                    color = if (document.paymentStatus == 2) ColorGreen else if (latePayment) ColorPinkOrange else Color.Black
-                )
+
+                if (document.documentTag == DocumentTag.PAID) {
+                    AddIconAndLabelInRow(action)
+                } else {
+                    Text(
+                        Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(
+                            " "
+                        )
+                        //  color = if (document.paymentStatus == 2) ColorGreen else if (latePayment) ColorPinkOrange else Color.Black
+                    )
+                    AddIconAndLabelInRow(action)
+                }
             }
 
             Column(
@@ -160,13 +180,38 @@ fun InvoiceListItem(
                         ?: "") + stringResource(
                         id = R.string.currency
                     ),
-                    color = if (document.paymentStatus == 2) ColorGreen else if (latePayment) ColorPinkOrange else Color.Black
+                    color = when (document.documentTag) {
+                        DocumentTag.PAID -> ColorGreen
+                        DocumentTag.LATE -> ColorPinkOrange
+                        else -> Color.Black
+                    }
                 )
 
             }
         }
     }
 }
+
+@Composable
+fun AddIconAndLabelInRow(action: AppBarAction) {
+    Row(verticalAlignment = CenterVertically) {
+        Icon(
+            action.icon,
+            modifier = Modifier.size(14.dp).padding(end = 2.dp),
+            tint = action.iconColor ?: MaterialTheme.colorScheme.onBackground,
+            contentDescription = stringResource(id = action.description)
+        )
+        action.label?.let {
+            Text(
+                text = stringResource(id = it),
+                fontStyle = if (action.name == "DRAFT") FontStyle.Italic else null,
+                color = if (action.name == "DRAFT") action.iconColor ?: Color.Black
+                else Color.Black,
+            )
+        }
+    }
+}
+
 
 /*@Preview
 @Composable

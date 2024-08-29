@@ -8,18 +8,18 @@ import com.a4a.g8invoicing.ui.navigation.actionCategories
 import com.a4a.g8invoicing.ui.navigation.actionConvert
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
-import com.a4a.g8invoicing.ui.navigation.actionMarkAsPaid
 import com.a4a.g8invoicing.ui.navigation.actionNew
+import com.a4a.g8invoicing.ui.navigation.actionTag
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 
 @Composable
-fun BottomBar(
+fun GeneralBottomBar(
     navController: NavController,
     isButtonNewDisplayed: Boolean = true,
     isListItemSelected: Boolean = false,
     onClickDuplicate: () -> Unit = {},
-    onClickMarkAsPaid: () -> Unit = {},
     onClickDelete: () -> Unit = {},
+    onClickTag: () -> Unit = {},
     onClickUnselectAll: () -> Unit = {},
     onClickNew: () -> Unit = {},
     onClickCategory: (Category) -> Unit = {},
@@ -32,7 +32,7 @@ fun BottomBar(
         appBarActions = if (!isListItemSelected) {
             if (isButtonNewDisplayed) {
                 arrayOf(
-                    actionNew(onClick = { onClickNew() }),
+                    actionNew(onClickNew),
                     actionCategories()
                 )
             } else arrayOf(
@@ -40,47 +40,25 @@ fun BottomBar(
             )
         } else if (isInvoice) {
             arrayOf(
-                actionUnselectAll(
-                    onClick = { onClickUnselectAll() }
-                ),
-                actionDuplicate(
-                    onClick = { onClickDuplicate() }
-                ),
-                actionDelete(
-                    onClick = { onClickDelete() }
-                ),
-                actionMarkAsPaid(
-                    onClick = { onClickMarkAsPaid() }
-                )
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                actionTag(onClickTag)
             )
         } else if (isConvertible) {
             arrayOf(
-                actionUnselectAll(
-                    onClick = { onClickUnselectAll() }
-                ),
-                actionDuplicate(
-                    onClick = { onClickDuplicate() }
-                ),
-                actionDelete(
-                    onClick = { onClickDelete() }
-                ),
-                actionConvert(
-                    onClick = { onClickConvert() }
-                )
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                actionConvert(onClickConvert)
             )
         } else {
-        arrayOf(
-            actionUnselectAll(
-                onClick = { onClickUnselectAll() }
-            ),
-            actionDuplicate(
-                onClick = { onClickDuplicate() }
-            ),
-            actionDelete(
-                onClick = { onClickDelete() }
+            arrayOf(
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete)
             )
-        )
-    },
-    onClickCategory
+        },
+        onClickCategory
     )
 }

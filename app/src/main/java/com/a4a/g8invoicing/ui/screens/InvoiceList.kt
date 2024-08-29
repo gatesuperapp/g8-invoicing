@@ -15,7 +15,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.BottomBar
+import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 
@@ -25,7 +25,7 @@ fun InvoiceList(
     documentsUiState: InvoicesUiState,
     onClickDelete: (List<InvoiceState>) -> Unit,
     onClickDuplicate: (List<InvoiceState>) -> Unit,
-    onClickMarkAsPaid: (List<InvoiceState>) -> Unit,
+    onClickTag: (List<InvoiceState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -50,7 +50,7 @@ fun InvoiceList(
             )
         },
         bottomBar = {
-            BottomBar(
+            GeneralBottomBar(
                 navController = navController,
                 isListItemSelected = selectedMode.value,
                 onClickDelete = {
@@ -63,8 +63,8 @@ fun InvoiceList(
                 onClickUnselectAll = {
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
-                onClickMarkAsPaid = {
-                    onClickMarkAsPaid(selectedItems.toList())
+                onClickTag = {
+                    onClickTag(selectedItems.toList())
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
                 onClickNew = { onClickNew() },

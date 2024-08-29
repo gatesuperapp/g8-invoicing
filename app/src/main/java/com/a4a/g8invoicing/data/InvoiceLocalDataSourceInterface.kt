@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -20,11 +21,12 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(documentClientOrIssuer: DocumentClientOrIssuerState,  id: Long?)
     suspend fun deleteDocumentClientOrIssuer(id:Long, type: ClientOrIssuerType,)
     suspend fun duplicate(documents: List<InvoiceState>)
-    suspend fun markAsPaid(documents: List<InvoiceState>)
+    suspend fun attributeTag(documents: List<InvoiceState>)
     suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>)
     suspend fun update(document: InvoiceState)
     suspend fun delete(documents: List<InvoiceState>)
     fun linkDocumentProductToDocument(id: Long, documentProductId: Long)
+    fun linkDocumentToDocumentTag(id: Long, tag: DocumentTag)
     fun linkDocumentProductToAdditionalInfo(documentProductId: Long, deliveryNoteNumber: String?, deliveryNoteDate: String)
 
 }

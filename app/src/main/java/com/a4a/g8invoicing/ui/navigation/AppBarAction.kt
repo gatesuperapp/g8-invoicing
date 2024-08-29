@@ -2,13 +2,21 @@ package com.a4a.g8invoicing.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowForward
 import com.a4a.g8invoicing.ui.shared.icons.IconBrush
+import com.a4a.g8invoicing.ui.shared.icons.IconCircle
 import com.a4a.g8invoicing.ui.shared.icons.IconExport
 import com.a4a.g8invoicing.ui.shared.icons.IconList
 import com.a4a.g8invoicing.ui.shared.icons.IconText
+import com.a4a.g8invoicing.ui.theme.ColorCancelled
+import com.a4a.g8invoicing.ui.theme.ColorCredit
+import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
+import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
+import com.a4a.g8invoicing.ui.theme.ColorRedLate
+import com.a4a.g8invoicing.ui.theme.ColorSent
 import com.ninetyninepercent.funfactu.icons.IconApps
 import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
 import com.ninetyninepercent.funfactu.icons.IconDollar
@@ -18,6 +26,7 @@ import com.ninetyninepercent.funfactu.icons.IconLabel
 import icons.IconDelete
 import icons.IconDone
 import icons.IconEdit
+import icons.IconMoreThreeDots
 import icons.IconNew
 
 /**
@@ -32,10 +41,12 @@ import icons.IconNew
  */
 
 data class AppBarAction(
+    val name: String = "",
     val icon: ImageVector,
+    val iconColor: Color? = null,
     @StringRes val label: Int? = null,
     @StringRes val description: Int,
-    val isInDropDownMenu: Boolean,
+    val isSecondary: Boolean = false,
     val alignmentLeft: Boolean = false,
     val onClick: () -> Unit = {},
     val onClickOpenModal: @Composable () -> Unit = {}
@@ -47,7 +58,6 @@ fun actionCategories() =
         icon = IconApps,
         description = R.string.appbar_categories,
         label = R.string.appbar_menu_label,
-        isInDropDownMenu = false,
         alignmentLeft = true,
         onClick = {
             // see CategoriesDropdownMenu
@@ -61,7 +71,6 @@ fun actionNew(onClick: () -> Unit) =
         icon = IconNew,
         description = R.string.appbar_new,
         label = R.string.appbar_new_label,
-        isInDropDownMenu = false,
         onClick = onClick
     )
 
@@ -70,7 +79,6 @@ fun actionEdit() =
     AppBarAction(
         icon = IconEdit,
         description = R.string.appbar_edit,
-        isInDropDownMenu = false,
         onClick = {
         }
     )
@@ -81,17 +89,15 @@ fun actionDuplicate(onClick: () -> Unit) =
         icon = IconDuplicate,
         description = R.string.appbar_duplicate,
         label = R.string.appbar_duplicate_label,
-        isInDropDownMenu = false,
         onClick = onClick
     )
 
 @Composable
-fun actionMarkAsPaid(onClick: () -> Unit) =
+fun actionSavePayment(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDollar,
-        description = R.string.appbar_paid,
-        label = R.string.appbar_paid_label,
-        isInDropDownMenu = false,
+        description = R.string.appbar_save_payment,
+        label = R.string.appbar_save_payment_label,
         onClick = onClick
     )
 
@@ -100,7 +106,7 @@ fun actionDelete(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDelete,
         description = R.string.appbar_delete,
-        isInDropDownMenu = true,
+        isSecondary = true,
         onClick = onClick
     )
 
@@ -110,8 +116,15 @@ fun actionConvert(onClick: () -> Unit) =
         icon = IconArrowForward,
         description = R.string.appbar_convert,
         label = R.string.appbar_convert_label,
-        isInDropDownMenu = false,
         onClick = onClick
+    )
+
+@Composable
+fun actionMore() =
+    AppBarAction(
+        icon = IconMoreThreeDots,
+        description = R.string.appbar_more,
+        label = R.string.appbar_more_label,
     )
 
 @Composable
@@ -119,7 +132,7 @@ fun actionDone(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDone,
         description = R.string.appbar_save,
-        isInDropDownMenu = false,
+        isSecondary = false,
         onClick = onClick
     )
 
@@ -128,7 +141,7 @@ fun actionExport(onClick: () -> Unit) =
     AppBarAction(
         icon = IconExport,
         description = R.string.appbar_export,
-        isInDropDownMenu = false,
+        isSecondary = false,
         onClick = onClick
     )
 
@@ -138,7 +151,7 @@ fun actionUnselectAll(onClick: () -> Unit) =
         icon = IconCheckboxUnselect,
         description = R.string.appbar_unselect_all,
         label = R.string.appbar_unselect_all_label,
-        isInDropDownMenu = false,
+        isSecondary = false,
         alignmentLeft = true,
         onClick = onClick
     )
@@ -146,11 +159,71 @@ fun actionUnselectAll(onClick: () -> Unit) =
 @Composable
 fun actionTag(onClick: () -> Unit) =
     AppBarAction(
+        name = "TAG",
         icon = IconLabel,
         description = R.string.appbar_label,
-        isInDropDownMenu = false,
+        isSecondary = false,
         onClick = onClick
     )
+
+@Composable
+fun actionTagDraft() =
+    AppBarAction(
+        name = "DRAFT",
+        icon = IconCircle,
+        iconColor = ColorGreyDraft,
+        description = R.string.appbar_tag_draft,
+        label = R.string.appbar_tag_draft
+    )
+
+@Composable
+fun actionTagSent() =
+    AppBarAction(
+        icon = IconCircle,
+        iconColor = ColorSent,
+        description = R.string.appbar_tag_sent,
+        label = R.string.appbar_tag_sent
+    )
+@Composable
+fun actionTagPaid() =
+    AppBarAction(
+        icon = IconCircle,
+        iconColor = ColorGreenPaid,
+        description = R.string.appbar_tag_paid,
+        label = R.string.appbar_tag_paid
+    )
+@Composable
+fun actionTagLate() =
+    AppBarAction(
+        icon = IconCircle,
+        iconColor = ColorRedLate,
+        description = R.string.appbar_tag_late,
+        label = R.string.appbar_tag_late
+    )
+@Composable
+fun actionTagCancelled() =
+    AppBarAction(
+        icon = IconCircle,
+        iconColor = ColorCancelled,
+        description = R.string.appbar_tag_cancelled,
+        label = R.string.appbar_tag_cancelled
+    )
+@Composable
+fun actionTagCredit() =
+    AppBarAction(
+        icon = IconCircle,
+        iconColor = ColorCredit,
+        description = R.string.appbar_tag_credit,
+        label = R.string.appbar_tag_credit
+    )
+
+
+
+
+
+
+
+
 
 @Composable
 fun actionTextElements(onClick: () -> Unit) =
@@ -158,7 +231,7 @@ fun actionTextElements(onClick: () -> Unit) =
         icon = IconText,
         label = R.string.appbar_text_label,
         description = R.string.appbar_components,
-        isInDropDownMenu = false,
+        isSecondary = false,
         alignmentLeft = false,
         onClick = onClick
     )
@@ -169,7 +242,7 @@ fun actionItems(onClick: () -> Unit) =
         icon = IconList,
         label = R.string.appbar_list_label,
         description = R.string.appbar_list,
-        isInDropDownMenu = false,
+        isSecondary = false,
         alignmentLeft = false,
         onClick = onClick
     )
@@ -180,7 +253,7 @@ fun actionStyle(onClick: () -> Unit) =
         icon = IconBrush,
         label = R.string.appbar_style_label,
         description = R.string.appbar_text,
-        isInDropDownMenu = false,
+        isSecondary = false,
         alignmentLeft = false,
         onClick = onClick
     )

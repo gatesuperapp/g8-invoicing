@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import java.math.BigDecimal
 
@@ -12,6 +13,7 @@ import java.math.BigDecimal
 abstract class DocumentState {
     abstract var documentId: Int?
     abstract var documentType: DocumentType
+    abstract var documentTag: DocumentTag
     abstract var documentNumber: TextFieldValue // TextFieldValue mandatory to control placing the cursor in the field
     abstract var documentDate: String
     abstract var orderNumber: TextFieldValue?

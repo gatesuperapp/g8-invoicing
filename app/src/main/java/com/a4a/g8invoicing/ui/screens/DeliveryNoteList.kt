@@ -16,7 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.BottomBar
+import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 
@@ -51,7 +51,7 @@ fun DeliveryNoteList(
             )
         },
         bottomBar = {
-            BottomBar(
+            GeneralBottomBar(
                 navController = navController,
                 isListItemSelected = selectedMode.value,
                 onClickDelete = {

@@ -17,14 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.theme.ColorButtonBar
 import com.a4a.g8invoicing.ui.theme.ColorDarkBar
 
 @Composable
-fun BottomBarEditionView(
+fun DocumentBottomBarView(
     actions: Array<AppBarAction>?,
 ) {
     ViewWithLayout {

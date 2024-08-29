@@ -255,34 +255,6 @@ class InvoiceAddEditViewModel @Inject constructor(
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
-    /*    fun updateStateWithIncrementedValue(documentProductId: Any) {
-            val documentProduct =
-                _documentUiState.value.documentProducts?.first { it.id == documentProductId }
-            documentProduct?.let { docProduct ->
-                val updatedDocumentProduct = docProduct.copy(page = docProduct.page + 1)
-                val list =
-                    _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
-                        ?.toMutableList()
-                val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-                _documentUiState.value =
-                    _documentUiState.value.copy(documentProducts = updatedList)
-            }
-        }
-
-        private fun updateInvoiceStateWithDecrementedValue(documentProductId: Any) {
-            val documentProduct =
-                _documentUiState.value.documentProducts?.first { it.id == documentProductId }
-            documentProduct?.let { docProduct ->
-                val updatedDocumentProduct = docProduct.copy(page = docProduct.page - 1)
-                val list =
-                    _documentUiState.value.documentProducts?.filterNot { it.id == documentProductId }
-                        ?.toMutableList()
-                val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-                _documentUiState.value =
-                    _documentUiState.value.copy(documentProducts = updatedList)
-            }
-        }*/
-
     fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> documentUiState.value.documentNumber.text
