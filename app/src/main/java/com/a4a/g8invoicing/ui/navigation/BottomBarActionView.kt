@@ -24,12 +24,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.states.InvoiceState
 
 @Composable
 fun BottomBarActionView(
     navController: NavController,
     appBarActions: Array<AppBarAction>?,
-    onClickCategory: ((Category) -> Unit)?,
+    onClickCategory: (Category) -> Unit,
+    onClickTag: (DocumentTag) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -39,7 +41,6 @@ fun BottomBarActionView(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-
                 // Icons on the left side
                 appBarActions.filter { !it.isSecondary && it.alignmentLeft }
                     .forEach { action ->
@@ -92,7 +93,9 @@ fun BottomBarActionView(
                                         actionTagLate(),
                                         actionTagCancelled(),
                                         actionTagCredit(),
-                                    )
+                                    ),
+                                    iconSize = 12.dp,
+                                    onClickTag = onClickTag
                                 )
                             } else {
                                 AddIconAndLabelInColumn(
@@ -103,7 +106,9 @@ fun BottomBarActionView(
                         }
                     }
                 // Dropdown menu "More"
-                ButtonWithDropdownMenu(actionMore(), appBarActions.filter { it.isSecondary })
+                if(appBarActions.any { it.isSecondary }) {
+                    ButtonWithDropdownMenu(actionMore(), appBarActions.filter { it.isSecondary })
+                }
             }
         }
     }

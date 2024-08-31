@@ -12,7 +12,8 @@
     <string name="appbar_new"> Nouveau</string>
     <string name="appbar_categories"> Catégories</string>
     <string name="dropdown_menu_categories"> Catégories</string>
-    <string name="appbar_label"> Ajouter un label</string>
+    <string name="appbar_label_description"> Ajouter un label</string>
+    <string name="appbar_label">Marquer</string>
     <string name="appbar_text">Modifier le texte</string>
     <string name="appbar_list">Ajouter des items</string>
     <string name="appbar_list_label">Items</string>

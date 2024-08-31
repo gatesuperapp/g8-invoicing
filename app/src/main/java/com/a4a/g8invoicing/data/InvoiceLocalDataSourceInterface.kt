@@ -21,12 +21,13 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(documentClientOrIssuer: DocumentClientOrIssuerState,  id: Long?)
     suspend fun deleteDocumentClientOrIssuer(id:Long, type: ClientOrIssuerType,)
     suspend fun duplicate(documents: List<InvoiceState>)
-    suspend fun attributeTag(documents: List<InvoiceState>)
+    suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag)
     suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>)
     suspend fun update(document: InvoiceState)
     suspend fun delete(documents: List<InvoiceState>)
+    suspend fun markAsPaid(documents: List<InvoiceState>)
     fun linkDocumentProductToDocument(id: Long, documentProductId: Long)
-    fun linkDocumentToDocumentTag(id: Long, tag: DocumentTag)
+    suspend fun linkDocumentToDocumentTag(id: Long, tag: DocumentTag, isUpdate: Boolean = false)
     fun linkDocumentProductToAdditionalInfo(documentProductId: Long, deliveryNoteNumber: String?, deliveryNoteDate: String)
 
 }

@@ -1,16 +1,16 @@
 package com.ninetyninepercent.funfactu.icons
 
+
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath
 import androidx.compose.ui.graphics.vector.ImageVector
 
-
-val IconLabel: ImageVector
+public val IconLabel: ImageVector
     get() {
         if (_sell != null) {
             return _sell!!
         }
-        _sell = materialIcon(name = "Filled.Sell") {
+        _sell = materialIcon(name = "Outlined.Sell") {
             materialPath {
                 moveTo(21.41f, 11.41f)
                 lineToRelative(-8.83f, -8.83f)
@@ -24,12 +24,19 @@ val IconLabel: ImageVector
                 lineToRelative(7.17f, -7.17f)
                 curveTo(22.2f, 13.46f, 22.2f, 12.2f, 21.41f, 11.41f)
                 close()
-                moveTo(6.5f, 8.0f)
-                curveTo(5.67f, 8.0f, 5.0f, 7.33f, 5.0f, 6.5f)
-                reflectiveCurveTo(5.67f, 5.0f, 6.5f, 5.0f)
-                reflectiveCurveTo(8.0f, 5.67f, 8.0f, 6.5f)
-                reflectiveCurveTo(7.33f, 8.0f, 6.5f, 8.0f)
+                moveTo(12.83f, 20.0f)
+                lineTo(4.0f, 11.17f)
+                verticalLineTo(4.0f)
+                horizontalLineToRelative(7.17f)
+                lineTo(20.0f, 12.83f)
+                lineTo(12.83f, 20.0f)
                 close()
+            }
+            materialPath {
+                moveTo(6.5f, 6.5f)
+                moveToRelative(-1.5f, 0.0f)
+                arcToRelative(1.5f, 1.5f, 0.0f, true, true, 3.0f, 0.0f)
+                arcToRelative(1.5f, 1.5f, 0.0f, true, true, -3.0f, 0.0f)
             }
         }
         return _sell!!

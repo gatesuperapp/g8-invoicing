@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -25,7 +26,7 @@ fun InvoiceList(
     documentsUiState: InvoicesUiState,
     onClickDelete: (List<InvoiceState>) -> Unit,
     onClickDuplicate: (List<InvoiceState>) -> Unit,
-    onClickTag: (List<InvoiceState>) -> Unit,
+    onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -64,7 +65,7 @@ fun InvoiceList(
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
                 onClickTag = {
-                    onClickTag(selectedItems.toList())
+                    onClickTag(selectedItems.toList(), it)
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
                 onClickNew = { onClickNew() },

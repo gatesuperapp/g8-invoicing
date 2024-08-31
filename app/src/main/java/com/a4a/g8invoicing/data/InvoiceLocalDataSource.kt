@@ -8,7 +8,6 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -175,20 +174,9 @@ class InvoiceLocalDataSource(
         documentTag: DocumentTag? = null,
     ): InvoiceState {
         this.let {
-            var isPaymentLate = false
-            val formatter = getDateFormatter()
-            it.due_date?.let { date ->
-                val dueDate = formatter.parse(date)?.time
-                val currentDate = java.util.Date().time
-                dueDate?.let {
-                    isPaymentLate = it < currentDate
-                }
-            }
-
             return InvoiceState(
                 documentId = it.invoice_id.toInt(),
-                documentTag = if (isPaymentLate && documentTag == DocumentTag.SENT) DocumentTag.LATE
-                else documentTag ?: DocumentTag.DRAFT,
+                documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.issuing_date ?: "",
                 orderNumber = TextFieldValue(text = it.order_number ?: ""),
@@ -245,7 +233,11 @@ class InvoiceLocalDataSource(
                     footer = document.footerText.text
                 )
                 // Update tag
-                linkDocumentToDocumentTag(document.documentId?.toLong() ?: 0, document.documentTag)
+                linkDocumentToDocumentTag(
+                    document.documentId?.toLong() ?: 0,
+                    document.documentTag,
+                    isUpdate = true
+                )
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -283,20 +275,33 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override suspend fun attributeTag(documents: List<InvoiceState>) {
+    override suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag) {
         withContext(Dispatchers.IO) {
             try {
+                if(tag == DocumentTag.PAID) {
+                    markAsPaid(documents)
+                }
                 documents.forEach { invoice ->
                     invoice.documentId?.toLong()?.let { invoiceId ->
-                        invoiceTagQueries.getTagId(invoice.documentTag.name).executeAsOneOrNull()
-                            ?.let {
-                                linkDocumentToTagQueries.saveInvoiceTag(
-                                    id = null,
-                                    invoice_id = invoiceId,
-                                    tag_id = it
-                                )
-                            }
+                        linkDocumentToDocumentTag(invoiceId, tag, isUpdate = true)
                     }
+                }
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
+    }
+
+    override suspend fun markAsPaid(documents: List<InvoiceState>) {
+        withContext(Dispatchers.IO) {
+            try {
+                documents.forEach {
+                    if(it.paymentStatus == 0) {
+                        it.paymentStatus = 2
+                    } else {
+                        it.paymentStatus = 0
+                    }
+                    update(it)
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -483,20 +488,28 @@ class InvoiceLocalDataSource(
         }
     }
 
-    override fun linkDocumentToDocumentTag(id: Long, tag: DocumentTag) {
+    override suspend fun linkDocumentToDocumentTag(documentId: Long, tag: DocumentTag, isUpdate: Boolean) {
         try {
-            invoiceTagQueries.getTagId(tag.name.lowercase()).executeAsOneOrNull()?.let {
-                linkDocumentToTagQueries.saveInvoiceTag(
-                    id = null,
-                    invoice_id = id,
-                    tag_id = it
-                )
+            withContext(Dispatchers.IO) {
+                invoiceTagQueries.getTagId(tag.name).executeAsOneOrNull()?.let {
+                    if (isUpdate) {
+                        linkDocumentToTagQueries.updateInvoiceTag(
+                            invoice_id = documentId,
+                            tag_id = it
+                        )
+                    } else {
+                        linkDocumentToTagQueries.saveInvoiceTag(
+                            id = null,
+                            invoice_id = documentId,
+                            tag_id = it
+                        )
+                    }
+                }
             }
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
-
 
     override fun linkDocumentProductToAdditionalInfo(
         documentProductId: Long,

@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -28,6 +30,8 @@ import androidx.compose.ui.unit.dp
 fun ButtonWithDropdownMenu(
     action: AppBarAction,
     secondaryItems: List<AppBarAction>,
+    onClickTag: ((DocumentTag) -> Unit)? = null,
+    iconSize: Dp = 24.dp
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -45,18 +49,23 @@ fun ButtonWithDropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { isExpanded = false }
         ) {
-            secondaryItems.forEach { icon ->
+            secondaryItems.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(icon.description)) },
+                    text = { Text(
+                        modifier = Modifier.padding(end = 14.dp),
+                        text = stringResource(item.description)
+                    ) },
                     onClick = {
                         isExpanded = false
-                        action.onClick()
+                        if(onClickTag != null) {
+                            onClickTag(item.tag ?: DocumentTag.DRAFT)
+                        } else action.onClick()
                     },
                     leadingIcon = {
                         Icon(
-                            action.icon,
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.onBackground,
+                            item.icon,
+                            modifier = Modifier.size(iconSize).padding(end = 2.dp),
+                            tint = item.iconColor ?: MaterialTheme.colorScheme.onBackground,
                             contentDescription = stringResource(id = action.description)
                         )
                     }

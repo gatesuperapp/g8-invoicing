@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -45,24 +43,21 @@ import com.a4a.g8invoicing.ui.navigation.actionTagLate
 import com.a4a.g8invoicing.ui.navigation.actionTagPaid
 import com.a4a.g8invoicing.ui.navigation.actionTagSent
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
+import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreen
-import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
-import com.a4a.g8invoicing.ui.theme.ColorLightGreen
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
-import com.a4a.g8invoicing.ui.theme.pdfFont
-import java.time.LocalDate
-import java.util.Calendar
 
 @Composable
 fun InvoiceListItem(
     document: InvoiceState,
     onItemClick: () -> Unit = {},
-    onItemCheckboxClick: (it: Boolean) -> Unit = {},
+    onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
+    val isLatePayment = isPaymentLate(document.dueDate)
 
     Row(
         verticalAlignment = CenterVertically,
@@ -120,15 +115,10 @@ fun InvoiceListItem(
                 DocumentTag.CANCELLED -> actionTagCancelled()
                 DocumentTag.CREDIT -> actionTagCredit()
             }
-            Column(
-            ) {
-                Checkbox(
-                    checked = checkedState.value,
-                    onCheckedChange =
-                    {
-                        checkedState.value = it
-                        onItemCheckboxClick(it)
-                    },
+            Column() {
+                FlippyCheckBox(
+                    action = action,
+                    onItemCheckboxClick = onItemCheckboxClick
                 )
             }
 
@@ -152,15 +142,18 @@ fun InvoiceListItem(
                 }
 
                 if (document.documentTag == DocumentTag.PAID) {
-                    AddIconAndLabelInRow(action)
+                    action.label?.let {
+                        Text(
+                            text = stringResource(id = it),
+                        )
+                    }
                 } else {
                     Text(
                         Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(
                             " "
-                        )
-                        //  color = if (document.paymentStatus == 2) ColorGreen else if (latePayment) ColorPinkOrange else Color.Black
+                        ),
+                        color = if (isLatePayment) ColorPinkOrange else Color.Black
                     )
-                    AddIconAndLabelInRow(action)
                 }
             }
 
@@ -182,22 +175,23 @@ fun InvoiceListItem(
                     ),
                     color = when (document.documentTag) {
                         DocumentTag.PAID -> ColorGreen
-                        DocumentTag.LATE -> ColorPinkOrange
+                        //DocumentTag.LATE -> ColorPinkOrange
                         else -> Color.Black
                     }
                 )
-
             }
         }
     }
 }
 
-@Composable
+/*@Composable
 fun AddIconAndLabelInRow(action: AppBarAction) {
     Row(verticalAlignment = CenterVertically) {
         Icon(
             action.icon,
-            modifier = Modifier.size(14.dp).padding(end = 2.dp),
+            modifier = Modifier
+                .size(14.dp)
+                .padding(end = 2.dp),
             tint = action.iconColor ?: MaterialTheme.colorScheme.onBackground,
             contentDescription = stringResource(id = action.description)
         )
@@ -210,6 +204,14 @@ fun AddIconAndLabelInRow(action: AppBarAction) {
             )
         }
     }
+}*/
+
+fun isPaymentLate(dueDate: String): Boolean {
+    val formatter = getDateFormatter()
+    val dueDate = formatter.parse(dueDate)?.time
+    val currentDate = java.util.Date().time
+    val isLatePayment = dueDate != null && dueDate < currentDate
+    return isLatePayment
 }
 
 

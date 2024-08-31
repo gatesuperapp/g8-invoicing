@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.ui.navigation.BottomBarAction
 import com.a4a.g8invoicing.ui.navigation.Category
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionCategories
 import com.a4a.g8invoicing.ui.navigation.actionConvert
 import com.a4a.g8invoicing.ui.navigation.actionDelete
@@ -19,17 +20,18 @@ fun GeneralBottomBar(
     isListItemSelected: Boolean = false,
     onClickDuplicate: () -> Unit = {},
     onClickDelete: () -> Unit = {},
-    onClickTag: () -> Unit = {},
     onClickUnselectAll: () -> Unit = {},
     onClickNew: () -> Unit = {},
     onClickCategory: (Category) -> Unit = {},
+    onClickTag: (DocumentTag) -> Unit = {},
     onClickConvert: () -> Unit = {},
     isConvertible: Boolean = false,
     isInvoice: Boolean = false,
 ) {
     BottomBarAction(
         navController,
-        appBarActions = if (!isListItemSelected) {
+        appBarActions =
+        if (!isListItemSelected) {
             if (isButtonNewDisplayed) {
                 arrayOf(
                     actionNew(onClickNew),
@@ -43,7 +45,7 @@ fun GeneralBottomBar(
                 actionUnselectAll(onClickUnselectAll),
                 actionDuplicate(onClickDuplicate),
                 actionDelete(onClickDelete),
-                actionTag(onClickTag)
+                actionTag()
             )
         } else if (isConvertible) {
             arrayOf(
@@ -59,6 +61,7 @@ fun GeneralBottomBar(
                 actionDelete(onClickDelete)
             )
         },
-        onClickCategory
+        onClickCategory,
+        onClickTag
     )
 }

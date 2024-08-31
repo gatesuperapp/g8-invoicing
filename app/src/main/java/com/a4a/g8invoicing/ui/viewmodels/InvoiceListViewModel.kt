@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,11 +73,11 @@ class InvoiceListViewModel @Inject constructor(
         }
     }
 
-    fun attributeTag(selectedDocuments: List<InvoiceState>) {
+    fun setTag(selectedDocuments: List<InvoiceState>, tag: DocumentTag) {
         setTagJob?.cancel()
         setTagJob = viewModelScope.launch {
             try {
-                invoiceDataSource.attributeTag(selectedDocuments)
+                invoiceDataSource.setTag(selectedDocuments, tag)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }

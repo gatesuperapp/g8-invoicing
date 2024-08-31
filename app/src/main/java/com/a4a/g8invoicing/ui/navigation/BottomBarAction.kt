@@ -15,7 +15,8 @@ import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 fun BottomBarAction(
     navController: NavController,
     appBarActions: Array<AppBarAction>? = null,
-    onClickCategory: ((Category) -> Unit)? = null,
+    onClickCategory: (Category) -> Unit = { },
+    onClickTag: (DocumentTag) -> Unit,
 ) {
     BottomAppBar(
         modifier = Modifier
@@ -24,7 +25,8 @@ fun BottomBarAction(
             BottomBarActionView(
                 navController,
                 appBarActions,
-                onClickCategory
+                onClickCategory,
+                onClickTag
             )
         },
         contentPadding = PaddingValues(

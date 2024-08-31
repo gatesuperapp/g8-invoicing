@@ -46,10 +46,11 @@ data class AppBarAction(
     val iconColor: Color? = null,
     @StringRes val label: Int? = null,
     @StringRes val description: Int,
+    val tag: DocumentTag? = null,
     val isSecondary: Boolean = false,
     val alignmentLeft: Boolean = false,
     val onClick: () -> Unit = {},
-    val onClickOpenModal: @Composable () -> Unit = {}
+    val onClickOpenModal: @Composable () -> Unit = {},
 )
 
 @Composable
@@ -157,72 +158,80 @@ fun actionUnselectAll(onClick: () -> Unit) =
     )
 
 @Composable
-fun actionTag(onClick: () -> Unit) =
+fun actionTag() =
     AppBarAction(
         name = "TAG",
         icon = IconLabel,
-        description = R.string.appbar_label,
+        description = R.string.appbar_label_description,
+        label = R.string.appbar_label,
         isSecondary = false,
-        onClick = onClick
     )
 
 @Composable
 fun actionTagDraft() =
     AppBarAction(
-        name = "DRAFT",
+        tag = DocumentTag.DRAFT,
         icon = IconCircle,
         iconColor = ColorGreyDraft,
         description = R.string.appbar_tag_draft,
-        label = R.string.appbar_tag_draft
+        label = R.string.appbar_tag_draft,
+        onClick = {} // see ButtonWithDropdownMenu
     )
 
 @Composable
 fun actionTagSent() =
     AppBarAction(
+        tag = DocumentTag.SENT,
         icon = IconCircle,
         iconColor = ColorSent,
         description = R.string.appbar_tag_sent,
-        label = R.string.appbar_tag_sent
+        label = R.string.appbar_tag_sent,
+        onClick = {} // see ButtonWithDropdownMenu
     )
+
 @Composable
 fun actionTagPaid() =
     AppBarAction(
+        tag = DocumentTag.PAID,
         icon = IconCircle,
         iconColor = ColorGreenPaid,
         description = R.string.appbar_tag_paid,
-        label = R.string.appbar_tag_paid
+        label = R.string.appbar_tag_paid,
+         onClick = {} // see ButtonWithDropdownMenu
     )
+
 @Composable
 fun actionTagLate() =
     AppBarAction(
+        tag = DocumentTag.LATE,
         icon = IconCircle,
         iconColor = ColorRedLate,
         description = R.string.appbar_tag_late,
-        label = R.string.appbar_tag_late
+        label = R.string.appbar_tag_late,
+         onClick = {} // see ButtonWithDropdownMenu
     )
+
 @Composable
 fun actionTagCancelled() =
     AppBarAction(
+        tag = DocumentTag.CANCELLED,
         icon = IconCircle,
         iconColor = ColorCancelled,
         description = R.string.appbar_tag_cancelled,
-        label = R.string.appbar_tag_cancelled
+        label = R.string.appbar_tag_cancelled,
+         onClick = {} // see ButtonWithDropdownMenu
     )
+
 @Composable
 fun actionTagCredit() =
     AppBarAction(
+        tag = DocumentTag.CREDIT,
         icon = IconCircle,
         iconColor = ColorCredit,
         description = R.string.appbar_tag_credit,
-        label = R.string.appbar_tag_credit
+        label = R.string.appbar_tag_credit,
+         onClick = {} // see ButtonWithDropdownMenu
     )
-
-
-
-
-
-
-
 
 
 @Composable

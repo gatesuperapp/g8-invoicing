@@ -26,7 +26,9 @@ fun NavGraphBuilder.invoiceList(
             documentsUiState = invoicesUiState,
             onClickDelete = viewModel::delete,
             onClickDuplicate = viewModel::duplicate,
-            onClickTag = viewModel::attributeTag,
+            onClickTag = {selectedDocuments, tag ->
+                viewModel.setTag(selectedDocuments, tag)
+            },
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
