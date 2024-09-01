@@ -104,9 +104,6 @@ fun InvoiceListItem(
                     bottom = 14.dp
                 )
         ) {
-            // Re-triggers remember calculation when key changes
-            val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
             val action = when (document.documentTag) {
                 DocumentTag.DRAFT -> actionTagDraft()
                 DocumentTag.SENT -> actionTagSent()
@@ -118,7 +115,8 @@ fun InvoiceListItem(
             Column() {
                 FlippyCheckBox(
                     action = action,
-                    onItemCheckboxClick = onItemCheckboxClick
+                    onItemCheckboxClick = onItemCheckboxClick,
+                    keyToResetCheckboxes
                 )
             }
 

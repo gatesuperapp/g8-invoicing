@@ -107,7 +107,9 @@ fun BottomBarActionView(
                     }
                 // Dropdown menu "More"
                 if(appBarActions.any { it.isSecondary }) {
-                    ButtonWithDropdownMenu(actionMore(), appBarActions.filter { it.isSecondary })
+                    ButtonWithDropdownMenu(
+                        actionMore(),
+                        appBarActions.filter { it.isSecondary })
                 }
             }
         }

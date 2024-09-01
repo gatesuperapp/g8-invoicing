@@ -59,7 +59,8 @@ fun ButtonWithDropdownMenu(
                         isExpanded = false
                         if(onClickTag != null) {
                             onClickTag(item.tag ?: DocumentTag.DRAFT)
-                        } else action.onClick()
+                        } else
+                            item.onClick()
                     },
                     leadingIcon = {
                         Icon(

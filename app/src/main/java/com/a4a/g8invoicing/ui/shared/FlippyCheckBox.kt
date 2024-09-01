@@ -32,12 +32,13 @@ import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
 fun FlippyCheckBox(
     action: AppBarAction,
     onItemCheckboxClick: (Boolean) -> Unit = {},
-    ) {
+    keyToResetCheckboxes: Boolean,
+) {
     var cardState by remember {
         mutableStateOf(CardFace.Back)
     }
-
-    val checkedState = remember { mutableStateOf(false) }
+    // Re-triggers remember calculation when key changes
+    val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
     FlipCard(
         cardFace = cardState,
@@ -101,8 +102,8 @@ fun FlipCard(
                 color = Color.Transparent,
                 shape = CircleShape
             )
-            .height(24.dp)
-            .width(24.dp)
+            .height(16.dp)
+            .width(16.dp)
 
             .graphicsLayer {
                 if (axis == RotationAxis.AxisX) {
