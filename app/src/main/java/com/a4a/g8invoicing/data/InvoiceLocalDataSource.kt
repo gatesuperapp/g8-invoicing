@@ -8,6 +8,7 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -20,6 +21,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class InvoiceLocalDataSource(
     db: Database,
@@ -77,7 +81,8 @@ class InvoiceLocalDataSource(
                 ?.let {
                     it.transformIntoEditableInvoice(
                         fetchDocumentProducts(it.invoice_id),
-                        fetchClientAndIssuer(it.invoice_id)
+                        fetchClientAndIssuer(it.invoice_id),
+                        fetchTag(it.invoice_id)
                     )
                 }
         } catch (e: Exception) {
@@ -187,7 +192,8 @@ class InvoiceLocalDataSource(
                 currency = TextFieldValue(Strings.get(R.string.currency)),
                 dueDate = it.due_date ?: "",
                 paymentStatus = it.payment_status.toInt(),
-                footerText = TextFieldValue(text = it.footer ?: "")
+                footerText = TextFieldValue(text = it.footer ?: ""),
+                createdDate = it.created_at
             )
         }
     }
@@ -230,7 +236,8 @@ class InvoiceLocalDataSource(
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     payment_status = document.paymentStatus.toLong(),
-                    footer = document.footerText.text
+                    footer = document.footerText.text,
+                    updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
                 // Update tag
                 linkDocumentToDocumentTag(
@@ -572,8 +579,7 @@ class InvoiceLocalDataSource(
                 currency = document.currency.text,
                 due_date = document.dueDate,
                 payment_status = document.paymentStatus.toLong(),
-                footer = document.footerText.text
-            )
+                footer = document.footerText.text)
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }

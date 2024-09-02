@@ -21,7 +21,7 @@ fun InvoiceListContent(
 ) {
     LazyColumn {
         items(
-            items = documents.sortedByDescending { getDateFormatter().parse(it.documentDate)?.time },
+            items = documents.sortedByDescending { getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").parse(it.createdDate ?: "")?.time },
             key = {
                 it.documentId!!
             }

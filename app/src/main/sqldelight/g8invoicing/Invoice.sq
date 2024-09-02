@@ -9,9 +9,9 @@ CREATE TABLE Invoice (
   footer TEXT,
 
 
-  created_at REAL DEFAULT (datetime('now', 'localtime')),
-  updated_at REAL DEFAULT (datetime('now', 'localtime')),
-  deleted_at REAL DEFAULT (datetime('now', 'localtime')));
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
 
 INSERT INTO Invoice (invoice_id, number, issuing_date, order_number, currency, due_date, payment_status)
 VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€", '01/01/2023 12:00:00', 0);
@@ -52,7 +52,9 @@ SET number = :number,
     currency =: currency,
     due_date =: due_date,
     payment_status =: payment_status,
-    footer  =: footer
+    footer  =: footer,
+    updated_at =: updated_at
+
 WHERE
     invoice_id = :invoice_id;
 

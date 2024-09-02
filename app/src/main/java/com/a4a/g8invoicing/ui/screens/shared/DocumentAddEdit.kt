@@ -596,8 +596,8 @@ private suspend fun PointerInputScope.customTransformGestures(
     }
 }
 
-fun getDateFormatter(): SimpleDateFormat {
-    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ROOT)
+fun getDateFormatter(pattern: String = "dd/MM/yyyy HH:mm:ss"): SimpleDateFormat {
+    val formatter = SimpleDateFormat(pattern, Locale.ROOT)
     val calendar: Calendar = Calendar.getInstance()
     formatter.timeZone = calendar.timeZone
     return formatter

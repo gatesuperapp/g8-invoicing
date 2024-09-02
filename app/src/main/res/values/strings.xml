@@ -46,7 +46,7 @@
     <string name="appbar_tag_sent">Envoyée</string>
     <string name="appbar_tag_late">En retard</string>
     <string name="appbar_tag_cancelled">Annulée</string>
-    <string name="appbar_tag_credit">Avoir</string>
+    <string name="appbar_tag_reminded">Relancée</string>
     <string name="drawer_delivery_notes">Bons de livraison</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
     <string name="drawer_products">Items</string>
@@ -223,8 +223,8 @@
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
-        &#8226; Conçue pour les paysan·ne·s en priorité
-        &#8226; Indépendance financière et auto-gestion
+        &#8226; Conçue pour les paysan·ne·s en priorité\n
+        &#8226; Souhaite financer des projets de protection de la faune sauvage
         \n\nVous pouvez vous abonner pour permettre le développement des prochaines fonctionnalités et bénéficier d\'avantages réservés &#x1F917;
     </string>
     <string name="about2">

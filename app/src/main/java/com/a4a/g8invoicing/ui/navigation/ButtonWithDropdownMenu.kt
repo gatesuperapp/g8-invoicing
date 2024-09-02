@@ -65,7 +65,7 @@ fun ButtonWithDropdownMenu(
                     leadingIcon = {
                         Icon(
                             item.icon,
-                            modifier = Modifier.size(iconSize).padding(end = 2.dp),
+                            modifier = Modifier.size(iconSize),
                             tint = item.iconColor ?: MaterialTheme.colorScheme.onBackground,
                             contentDescription = stringResource(id = action.description)
                         )

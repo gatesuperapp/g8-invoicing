@@ -86,7 +86,7 @@ fun DeliveryNoteList(
             // No need to have pull to refresh because it's a flow,
             // thus the list is updated when anything changes in db
             DeliveryNoteListContent(
-                deliveryNotes = deliveryNotesUiState.deliveryNoteStates,
+                documents = deliveryNotesUiState.deliveryNoteStates,
                 onItemClick = onClickListItem,
                 addDeliveryNoteToSelectedList = {
                     selectedItems.add(it)

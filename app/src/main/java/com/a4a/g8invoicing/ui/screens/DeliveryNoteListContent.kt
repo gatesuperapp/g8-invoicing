@@ -12,7 +12,7 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 /**/
 @Composable
 fun DeliveryNoteListContent(
-    deliveryNotes: List<DeliveryNoteState>,
+    documents: List<DeliveryNoteState>,
     onItemClick: (Int) -> Unit = {},
     addDeliveryNoteToSelectedList: (DeliveryNoteState) -> Unit = {},
     removeDeliveryNoteFromSelectedList: (DeliveryNoteState) -> Unit = {},
@@ -20,7 +20,7 @@ fun DeliveryNoteListContent(
 ) {
     LazyColumn {
         items(
-            items = deliveryNotes.sortedByDescending { getDateFormatter().parse(it.documentDate)?.time },
+            items = documents.sortedByDescending { getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").parse(it.createdDate ?: "")?.time },
             key = {
                 it.documentId!!
             }

@@ -53,7 +53,6 @@ data class AppBarAction(
     val onClickOpenModal: @Composable () -> Unit = {},
 )
 
-@Composable
 fun actionCategories() =
     AppBarAction(
         icon = IconApps,
@@ -66,7 +65,6 @@ fun actionCategories() =
     )
 
 //onClickCategory: (Category) -> Unit = null
-@Composable
 fun actionNew(onClick: () -> Unit) =
     AppBarAction(
         icon = IconNew,
@@ -75,7 +73,6 @@ fun actionNew(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionEdit() =
     AppBarAction(
         icon = IconEdit,
@@ -84,7 +81,6 @@ fun actionEdit() =
         }
     )
 
-@Composable
 fun actionDuplicate(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDuplicate,
@@ -93,7 +89,6 @@ fun actionDuplicate(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionSavePayment(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDollar,
@@ -102,7 +97,6 @@ fun actionSavePayment(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionDelete(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDelete,
@@ -111,7 +105,6 @@ fun actionDelete(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionConvert(onClick: () -> Unit) =
     AppBarAction(
         icon = IconArrowForward,
@@ -120,7 +113,6 @@ fun actionConvert(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionMore() =
     AppBarAction(
         icon = IconMoreThreeDots,
@@ -128,7 +120,6 @@ fun actionMore() =
         label = R.string.appbar_more_label,
     )
 
-@Composable
 fun actionDone(onClick: () -> Unit) =
     AppBarAction(
         icon = IconDone,
@@ -137,7 +128,6 @@ fun actionDone(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionExport(onClick: () -> Unit) =
     AppBarAction(
         icon = IconExport,
@@ -146,7 +136,6 @@ fun actionExport(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionUnselectAll(onClick: () -> Unit) =
     AppBarAction(
         icon = IconCheckboxUnselect,
@@ -157,7 +146,6 @@ fun actionUnselectAll(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
 fun actionTag() =
     AppBarAction(
         name = "TAG",
@@ -167,7 +155,6 @@ fun actionTag() =
         isSecondary = false,
     )
 
-@Composable
 fun actionTagDraft() =
     AppBarAction(
         tag = DocumentTag.DRAFT,
@@ -178,7 +165,7 @@ fun actionTagDraft() =
         onClick = {} // see ButtonWithDropdownMenu
     )
 
-@Composable
+
 fun actionTagSent() =
     AppBarAction(
         tag = DocumentTag.SENT,
@@ -189,7 +176,7 @@ fun actionTagSent() =
         onClick = {} // see ButtonWithDropdownMenu
     )
 
-@Composable
+
 fun actionTagPaid() =
     AppBarAction(
         tag = DocumentTag.PAID,
@@ -200,7 +187,7 @@ fun actionTagPaid() =
          onClick = {} // see ButtonWithDropdownMenu
     )
 
-@Composable
+
 fun actionTagLate() =
     AppBarAction(
         tag = DocumentTag.LATE,
@@ -211,7 +198,7 @@ fun actionTagLate() =
          onClick = {} // see ButtonWithDropdownMenu
     )
 
-@Composable
+
 fun actionTagCancelled() =
     AppBarAction(
         tag = DocumentTag.CANCELLED,
@@ -222,19 +209,19 @@ fun actionTagCancelled() =
          onClick = {} // see ButtonWithDropdownMenu
     )
 
-@Composable
-fun actionTagCredit() =
+
+fun actionTagReminded() =
     AppBarAction(
         tag = DocumentTag.CREDIT,
         icon = IconCircle,
         iconColor = ColorCredit,
-        description = R.string.appbar_tag_credit,
-        label = R.string.appbar_tag_credit,
+        description = R.string.appbar_tag_reminded,
+        label = R.string.appbar_tag_reminded,
          onClick = {} // see ButtonWithDropdownMenu
     )
 
 
-@Composable
+
 fun actionTextElements(onClick: () -> Unit) =
     AppBarAction(
         icon = IconText,
@@ -245,7 +232,7 @@ fun actionTextElements(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
+
 fun actionItems(onClick: () -> Unit) =
     AppBarAction(
         icon = IconList,
@@ -256,7 +243,7 @@ fun actionItems(onClick: () -> Unit) =
         onClick = onClick
     )
 
-@Composable
+
 fun actionStyle(onClick: () -> Unit) =
     AppBarAction(
         icon = IconBrush,

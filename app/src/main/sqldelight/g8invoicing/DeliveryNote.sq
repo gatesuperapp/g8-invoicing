@@ -5,20 +5,20 @@ CREATE TABLE DeliveryNote (
   order_number TEXT,
   currency TEXT,
 
-  created_at REAL DEFAULT (datetime('now', 'localtime')),
-  updated_at REAL DEFAULT (datetime('now', 'localtime')),
-  deleted_at REAL DEFAULT (datetime('now', 'localtime')));
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
 
 INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
 VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€");
 
 
-getDeliveryNote:
+get:
 SELECT *
 FROM DeliveryNote
 WHERE delivery_note_id = :id;
 
-getDeliveryNoteId:
+getId:
 SELECT delivery_note_id
 FROM DeliveryNote
 WHERE delivery_note_id = :id;
@@ -29,28 +29,29 @@ FROM DeliveryNote
 ORDER BY delivery_note_id DESC
 LIMIT 1;
 
-getAllDeliveryNotes:
+getAll:
 SELECT *
 FROM DeliveryNote;
 
-getAllDeliveryNotesIds:
+getAllIds:
 SELECT delivery_note_id
 FROM DeliveryNote;
 
-saveDeliveryNote:
+save:
 INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
 VALUES (?,  ?,  ?, ?, ?);
 
-updateDeliveryNote:
+update:
 UPDATE DeliveryNote
 SET number = :number,
     delivery_date = :delivery_date,
     order_number = :order_number,
-    currency =: currency
+    currency =: currency,
+    updated_at =: updated_at
 WHERE
     delivery_note_id = :delivery_note_id;
 
-deleteDeliveryNote:
+delete:
 DELETE FROM DeliveryNote
 WHERE delivery_note_id = :id;
 

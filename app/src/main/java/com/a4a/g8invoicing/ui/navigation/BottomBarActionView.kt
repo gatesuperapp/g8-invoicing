@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.states.InvoiceState
 
 @Composable
 fun BottomBarActionView(
@@ -91,10 +90,10 @@ fun BottomBarActionView(
                                         actionTagSent(),
                                         actionTagPaid(),
                                         actionTagLate(),
+                                        actionTagReminded(),
                                         actionTagCancelled(),
-                                        actionTagCredit(),
                                     ),
-                                    iconSize = 12.dp,
+                                    iconSize = 16.dp,
                                     onClickTag = onClickTag
                                 )
                             } else {

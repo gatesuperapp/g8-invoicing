@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -9,12 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,21 +23,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.navigation.AppBarAction
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
-import com.a4a.g8invoicing.ui.navigation.actionTagCredit
+import com.a4a.g8invoicing.ui.navigation.actionTagReminded
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
 import com.a4a.g8invoicing.ui.navigation.actionTagLate
 import com.a4a.g8invoicing.ui.navigation.actionTagPaid
 import com.a4a.g8invoicing.ui.navigation.actionTagSent
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreen
@@ -55,9 +47,11 @@ fun InvoiceListItem(
     onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
 ) {
+    var action by remember { mutableStateOf(actionTagDraft()) }
+
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
-    val isLatePayment = isPaymentLate(document.dueDate)
+
 
     Row(
         verticalAlignment = CenterVertically,
@@ -96,25 +90,23 @@ fun InvoiceListItem(
         // not centered anymore)
         Row(
             modifier = Modifier
-                .background(Color.White)
                 .padding(
-                    start = 20.dp,
                     end = 20.dp,
                     top = 14.dp,
                     bottom = 14.dp
                 )
         ) {
-            val action = when (document.documentTag) {
+            action = when (document.documentTag) {
                 DocumentTag.DRAFT -> actionTagDraft()
                 DocumentTag.SENT -> actionTagSent()
                 DocumentTag.PAID -> actionTagPaid()
                 DocumentTag.LATE -> actionTagLate()
                 DocumentTag.CANCELLED -> actionTagCancelled()
-                DocumentTag.CREDIT -> actionTagCredit()
+                DocumentTag.CREDIT -> actionTagReminded()
             }
-            Column() {
+            Column {
                 FlippyCheckBox(
-                    action = action,
+                    color = action.iconColor,
                     onItemCheckboxClick = onItemCheckboxClick,
                     keyToResetCheckboxes
                 )
@@ -139,7 +131,7 @@ fun InvoiceListItem(
                     )
                 }
 
-                if (document.documentTag == DocumentTag.PAID) {
+                if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
                     action.label?.let {
                         Text(
                             text = stringResource(id = it),
@@ -149,8 +141,7 @@ fun InvoiceListItem(
                     Text(
                         Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(
                             " "
-                        ),
-                        color = if (isLatePayment) ColorPinkOrange else Color.Black
+                        )
                     )
                 }
             }
@@ -173,7 +164,7 @@ fun InvoiceListItem(
                     ),
                     color = when (document.documentTag) {
                         DocumentTag.PAID -> ColorGreen
-                        //DocumentTag.LATE -> ColorPinkOrange
+                        DocumentTag.LATE -> ColorPinkOrange
                         else -> Color.Black
                     }
                 )
@@ -204,37 +195,5 @@ fun AddIconAndLabelInRow(action: AppBarAction) {
     }
 }*/
 
-fun isPaymentLate(dueDate: String): Boolean {
-    val formatter = getDateFormatter()
-    val dueDate = formatter.parse(dueDate)?.time
-    val currentDate = java.util.Date().time
-    val isLatePayment = dueDate != null && dueDate < currentDate
-    return isLatePayment
-}
 
 
-/*@Preview
-@Composable
-fun ClientListItem() {
-    G8InvoicingTheme {
-        ClientListItem(
-            client = Client(
-                client_id = 1,
-                first_name = "Patou",
-                name = "George",
-                null,
-                null,
-                null,
-                null,
-                "0989789898",
-                "georgi@koko.fr",
-                null,
-                null,
-                null,
-            ),
-            onItemClick = {},
-            onItemCheckboxClick = {},
-            isChecked = false
-        )
-    }
-}*/

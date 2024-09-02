@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -39,11 +41,17 @@ class InvoiceListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 invoiceDataSource.fetchAll()?.collect {
+                    val lateDocuments = it.filter { isPaymentLate(it.dueDate) == true }
+                    if (lateDocuments.isNotEmpty()) {
+                        setTag(lateDocuments, DocumentTag.LATE)
+                    }
+
                     _documentsUiState.update { uiState ->
                         uiState.copy(
                             documentStates = it
                         )
                     }
+
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -77,11 +85,24 @@ class InvoiceListViewModel @Inject constructor(
         setTagJob?.cancel()
         setTagJob = viewModelScope.launch {
             try {
+                // Set tag in Ui state
+                selectedDocuments.forEach {
+                    it.documentTag = tag
+                }
+                // Set tag in local db
                 invoiceDataSource.setTag(selectedDocuments, tag)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
+    }
+
+    private fun isPaymentLate(dueDate: String): Boolean {
+        val formatter = getDateFormatter()
+        val dueDate = formatter.parse(dueDate)?.time
+        val currentDate = java.util.Date().time
+        val isLatePayment = dueDate != null && dueDate < currentDate
+        return isLatePayment
     }
 }
 

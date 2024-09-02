@@ -32,5 +32,6 @@ data class DeliveryNoteState(
     override var documentProducts: List<DocumentProductState>? = null,
     override var documentPrices: DocumentPrices? = null,
     override var currency: TextFieldValue = TextFieldValue(),
+    var createdDate: String? = null
 ): DocumentState()
 

@@ -30,15 +30,14 @@ import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
 
 @Composable
 fun FlippyCheckBox(
-    action: AppBarAction,
+    color: Color?,
     onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
 ) {
-    var cardState by remember {
-        mutableStateOf(CardFace.Back)
-    }
+    var cardState by remember(keyToResetCheckboxes) { mutableStateOf(CardFace.Back) }
     // Re-triggers remember calculation when key changes
     val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
+
 
     FlipCard(
         cardFace = cardState,
@@ -52,7 +51,7 @@ fun FlippyCheckBox(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(action.iconColor ?: MaterialTheme.colorScheme.onBackground)
+                    .background(color ?: MaterialTheme.colorScheme.onBackground)
             )
         },
         front = {
@@ -97,6 +96,10 @@ fun FlipCard(
         onClick = { onClick(cardFace) },
         modifier = modifier
             .padding(12.dp)
+            .padding(
+                //to increase the click touch zone
+                start = 20.dp,
+            )
             .border(
                 width = 2.dp,
                 color = Color.Transparent,

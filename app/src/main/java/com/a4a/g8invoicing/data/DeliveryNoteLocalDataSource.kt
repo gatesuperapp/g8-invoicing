@@ -7,6 +7,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
@@ -15,14 +16,12 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.util.Calendar
 
 class DeliveryNoteLocalDataSource(
     db: Database,
@@ -61,7 +60,7 @@ class DeliveryNoteLocalDataSource(
 
     override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
         try {
-            return deliveryNoteQueries.getDeliveryNote(id).executeAsOneOrNull()
+            return deliveryNoteQueries.get(id).executeAsOneOrNull()
                 ?.let {
                     it.transformIntoEditableNote(
                         fetchDocumentProducts(it.delivery_note_id),
@@ -76,7 +75,7 @@ class DeliveryNoteLocalDataSource(
 
     override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>? {
         try {
-            return deliveryNoteQueries.getAllDeliveryNotes()
+            return deliveryNoteQueries.getAll()
                 .asFlow()
                 .map {
                     it.executeAsList()
@@ -150,7 +149,8 @@ class DeliveryNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
                 documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(Strings.get(R.string.currency))
+                currency = TextFieldValue(Strings.get(R.string.currency)),
+                createdDate = it.created_at
             )
         }
     }
@@ -158,12 +158,13 @@ class DeliveryNoteLocalDataSource(
     override suspend fun updateDeliveryNote(deliveryNote: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
-                deliveryNoteQueries.updateDeliveryNote(
+                deliveryNoteQueries.update(
                     delivery_note_id = deliveryNote.documentId?.toLong() ?: 0,
                     number = deliveryNote.documentNumber.text,
                     delivery_date = deliveryNote.documentDate,
                     order_number = deliveryNote.orderNumber?.text,
-                    currency = deliveryNote.currency.text
+                    currency = deliveryNote.currency.text,
+                    updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -293,7 +294,7 @@ class DeliveryNoteLocalDataSource(
                         documentProductQueries.deleteDocumentProduct(it.toLong())
                     }
 
-                    deliveryNoteQueries.deleteDeliveryNote(id = deliveryNote.documentId!!.toLong())
+                    deliveryNoteQueries.delete(id = deliveryNote.documentId!!.toLong())
                     deliveryNoteDocumentProductQueries.deleteAllProductsLinkedToADeliveryNote(
                         deliveryNote.documentId!!.toLong()
                     )
@@ -398,7 +399,7 @@ class DeliveryNoteLocalDataSource(
 
     private suspend fun saveDeliveryNoteInfoInAllTables(deliveryNote: DeliveryNoteState) {
         try {
-            deliveryNoteQueries.saveDeliveryNote(
+            deliveryNoteQueries.save(
                 delivery_note_id = null,
                 number = deliveryNote.documentNumber.text,
                 delivery_date = deliveryNote.documentDate,
