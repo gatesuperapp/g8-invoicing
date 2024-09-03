@@ -6,10 +6,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.shared.DocumentType
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 
 // This Client is created to manipulate client data,
@@ -17,13 +14,8 @@ import java.util.Locale
 // it allows to not specify the client id (that will be auto-incremented)
 // and to change properties values (var instead of val)
 
-fun getDateInOneMonth(): Calendar {
-    val date = Calendar.getInstance()
-    date.add(Calendar.MONTH, 1)
-    return date
-}
 
-data class InvoiceState(
+data class CreditNoteState(
     override var documentType: DocumentType = DocumentType.INVOICE,
     override var documentTag: DocumentTag = DocumentTag.DRAFT,
     override var documentId: Int? = null,

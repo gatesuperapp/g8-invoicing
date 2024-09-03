@@ -16,7 +16,7 @@ abstract class DocumentState {
     abstract var documentTag: DocumentTag
     abstract var documentNumber: TextFieldValue // TextFieldValue mandatory to control placing the cursor in the field
     abstract var documentDate: String
-    abstract var orderNumber: TextFieldValue?
+    abstract var reference: TextFieldValue?
     abstract var documentIssuer: DocumentClientOrIssuerState?
     abstract var documentClient: DocumentClientOrIssuerState?
     abstract var documentProducts: List<DocumentProductState>?

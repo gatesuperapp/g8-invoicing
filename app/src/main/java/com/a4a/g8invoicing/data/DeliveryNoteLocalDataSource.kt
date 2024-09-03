@@ -144,7 +144,7 @@ class DeliveryNoteLocalDataSource(
                 documentId = it.delivery_note_id.toInt(),
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
-                orderNumber = TextFieldValue(text = it.order_number ?: ""),
+                reference = TextFieldValue(text = it.reference ?: ""),
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
@@ -162,7 +162,7 @@ class DeliveryNoteLocalDataSource(
                     delivery_note_id = deliveryNote.documentId?.toLong() ?: 0,
                     number = deliveryNote.documentNumber.text,
                     delivery_date = deliveryNote.documentDate,
-                    order_number = deliveryNote.orderNumber?.text,
+                    reference = deliveryNote.reference?.text,
                     currency = deliveryNote.currency.text,
                     updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
@@ -186,7 +186,7 @@ class DeliveryNoteLocalDataSource(
                             documentId = it.documentId,
                             documentNumber = TextFieldValue(docNumber),
                             documentDate = it.documentDate,
-                            orderNumber = it.orderNumber,
+                            reference = it.reference,
                             documentIssuer = it.documentIssuer,
                             documentClient = it.documentClient,
                             documentProducts = it.documentProducts,
@@ -403,7 +403,7 @@ class DeliveryNoteLocalDataSource(
                 delivery_note_id = null,
                 number = deliveryNote.documentNumber.text,
                 delivery_date = deliveryNote.documentDate,
-                order_number = deliveryNote.orderNumber?.text,
+                reference = deliveryNote.reference?.text,
                 currency = deliveryNote.currency.text
             )
 

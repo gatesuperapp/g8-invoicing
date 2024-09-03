@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -21,20 +20,20 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.viewmodels.InvoiceAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.CreditNoteAddEditViewModel
 
-fun NavGraphBuilder.invoiceAddEdit(
+fun NavGraphBuilder.creditNoteAddEdit(
     navController: NavController,
     onClickBack: () -> Unit,
 ) {
     composable(
-        route = Screen.InvoiceAddEdit.name + "?itemId={itemId}",
+        route = Screen.CreditNoteAddEdit.name + "?itemId={itemId}",
         arguments = listOf(
             navArgument("itemId") { nullable = true },
         )
     ) { backStackEntry ->
-        val invoiceViewModel: InvoiceAddEditViewModel = hiltViewModel()
-        val uiState by invoiceViewModel.documentUiState.collectAsStateWithLifecycle()
+        val creditNoteViewModel: CreditNoteAddEditViewModel = hiltViewModel()
+        val uiState by creditNoteViewModel.documentUiState.collectAsStateWithLifecycle()
 
         val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = hiltViewModel()
         val clientListUiState by clientOrIssuerListViewModel.clientsUiState
@@ -70,7 +69,7 @@ fun NavGraphBuilder.invoiceAddEdit(
             taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
             products = productListUiState.products.toMutableList(), // The list of products to display when adding a product
             onValueChange = { pageElement, value ->
-                invoiceViewModel.updateUiState(pageElement, value)
+                creditNoteViewModel.updateUiState(pageElement, value)
             },
             onClickProduct = { product ->
                 val lastDocumentProductPage =
@@ -95,18 +94,18 @@ fun NavGraphBuilder.invoiceAddEdit(
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
-                invoiceViewModel.removeDocumentProductFromUiState(it)
-                invoiceViewModel.removeDocumentProductFromLocalDb(it)
+                creditNoteViewModel.removeDocumentProductFromUiState(it)
+                creditNoteViewModel.removeDocumentProductFromLocalDb(it)
             },
             onClickDeleteDocumentClientOrIssuer = { type ->
-                invoiceViewModel.removeDocumentClientOrIssuerFromUiState(type)
-                invoiceViewModel.removeDocumentClientOrIssuerFromLocalDb(type)
+                creditNoteViewModel.removeDocumentClientOrIssuerFromUiState(type)
+                creditNoteViewModel.removeDocumentClientOrIssuerFromLocalDb(type)
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 if (pageElement == ScreenElement.DOCUMENT_NUMBER ||
                     pageElement == ScreenElement.DOCUMENT_ORDER_NUMBER
                 ) {
-                    invoiceViewModel.updateTextFieldCursorOfInvoiceState(pageElement)
+                    creditNoteViewModel.updateTextFieldCursorOfCreditNoteState(pageElement)
                 }
             },
             bottomFormOnValueChange = { pageElement, value, type ->
@@ -147,10 +146,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
                             clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentClientUiState
                             )
-                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentClientUiState
                             )
                             clientOrIssuerAddEditViewModel.clearClientUiState()
@@ -167,10 +166,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                             clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
                                 ClientOrIssuerType.CLIENT
                             )
-                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentClientUiState
                             )
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentClientUiState
                             )
                             clientOrIssuerAddEditViewModel.clearClientUiState()
@@ -182,7 +181,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
                             clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
-                            invoiceViewModel.updateUiState(
+                            creditNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
                             )
@@ -194,10 +193,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                             clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentIssuerUiState
                             )
-                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentIssuerUiState
                             )
                             clientOrIssuerAddEditViewModel.clearIssuerUiState()
@@ -208,10 +207,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                             createNewIssuer(clientOrIssuerAddEditViewModel)
-                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentIssuerUiState
                             )
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
+                            creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentIssuerUiState
                             )
                             clientOrIssuerAddEditViewModel.clearIssuerUiState()
@@ -222,7 +221,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                             clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-                            invoiceViewModel.updateUiState(
+                            creditNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_ISSUER,
                                 documentIssuerUiState
                             )
@@ -234,8 +233,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> {
                         moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                            invoiceViewModel.saveDocumentProductInUiState(documentProduct)
-                            invoiceViewModel.saveDocumentProductInLocalDb(documentProduct)
+                            creditNoteViewModel.saveDocumentProductInUiState(documentProduct)
+                            creditNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
                             productAddEditViewModel.autoSaveDocumentProductInLocalDb()
@@ -250,8 +249,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
-                            invoiceViewModel.saveDocumentProductInUiState(documentProduct)
-                            invoiceViewModel.saveDocumentProductInLocalDb(documentProduct)
+                            creditNoteViewModel.saveDocumentProductInUiState(documentProduct)
+                            creditNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
                             productAddEditViewModel.autoSaveDocumentProductInLocalDb()
@@ -263,7 +262,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
-                            invoiceViewModel.updateUiState(
+                            creditNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_PRODUCT,
                                 documentProduct
                             )
@@ -289,16 +288,3 @@ fun NavGraphBuilder.invoiceAddEdit(
         )
     }
 }
-
-fun createNewIssuer(clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel) {
-    if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
-            ClientOrIssuerType.ISSUER
-        )
-        clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
-            ClientOrIssuerType.ISSUER
-        )
-    }
-}
-

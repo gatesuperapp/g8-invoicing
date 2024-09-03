@@ -1,0 +1,19 @@
+CREATE TABLE LinkCreditNoteDocumentProductToDeliveryNote (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  delivery_note_number TEXT,
+  date TEXT
+);
+
+getInfoLinkedToDocumentProduct:
+SELECT *
+FROM LinkCreditNoteDocumentProductToDeliveryNote
+WHERE document_product_id = :document_product_id;
+
+saveInfoLinkedToDocumentProduct:
+INSERT
+INTO LinkCreditNoteDocumentProductToDeliveryNote (document_product_id, delivery_note_number, date)
+VALUES (?, ?, ?);
+
+deleteInfoLinkedToDocumentProduct:
+DELETE FROM LinkCreditNoteDocumentProductToDeliveryNote
+WHERE  document_product_id = :document_product_id;

@@ -7,8 +7,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.states.CreditNoteState
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
@@ -26,8 +26,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InvoiceAddEditViewModel @Inject constructor(
-    private val documentDataSource: InvoiceLocalDataSourceInterface,
+class CreditNoteAddEditViewModel @Inject constructor(
+    private val documentDataSource: CreditNoteLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -37,20 +37,20 @@ class InvoiceAddEditViewModel @Inject constructor(
     private var deleteJob: Job? = null
     private var autoSaveJob: Job? = null
 
-    // Getting the argument in "InvoiceAddEdit?itemId={itemId}" with savedStateHandle
+    // Getting the argument in "CreditNoteAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
 
-    private val _documentUiState = MutableStateFlow(InvoiceState())
-    val documentUiState: StateFlow<InvoiceState> = _documentUiState
+    private val _documentUiState = MutableStateFlow(CreditNoteState())
+    val documentUiState: StateFlow<CreditNoteState> = _documentUiState
 
     init {
         autoSaveInLocalDb()
         try {
             id?.let {
-                fetchInvoiceFromLocalDb(it.toLong())
+                fetchCreditNoteFromLocalDb(it.toLong())
             } ?: viewModelScope.launch(context = Dispatchers.Default) {
-                createNewInvoice()?.let {
-                    fetchInvoiceFromLocalDb(it)
+                createNewCreditNote()?.let {
+                    fetchCreditNoteFromLocalDb(it)
                 }
             }
         } catch (e: Exception) {
@@ -63,11 +63,11 @@ class InvoiceAddEditViewModel @Inject constructor(
         autoSaveJob = viewModelScope.launch {
             @OptIn(FlowPreview::class)
             _documentUiState.debounce(300)
-                .collect { updateInvoiceInLocalDb() }
+                .collect { updateCreditNoteInLocalDb() }
         }
     }
 
-    private fun fetchInvoiceFromLocalDb(id: Long) {
+    private fun fetchCreditNoteFromLocalDb(id: Long) {
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
@@ -80,7 +80,7 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
-    private suspend fun createNewInvoice(): Long? {
+    private suspend fun createNewCreditNote(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
             try {
@@ -93,7 +93,7 @@ class InvoiceAddEditViewModel @Inject constructor(
         return documentId
     }
 
-    private suspend fun updateInvoiceInLocalDb() {
+    private suspend fun updateCreditNoteInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
@@ -109,7 +109,7 @@ class InvoiceAddEditViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         GlobalScope.launch {
-            updateInvoiceInLocalDb()
+            updateCreditNoteInLocalDb()
         }
     }
 
@@ -221,11 +221,11 @@ class InvoiceAddEditViewModel @Inject constructor(
 
                 // useless??
                 _documentUiState.value.documentId?.let {
-                    fetchInvoiceFromLocalDb(it.toLong())
+                    fetchCreditNoteFromLocalDb(it.toLong())
                 }
 
             } catch (e: Exception) {
-                println("Deleting invoice client or issuer failed with exception: ${e.localizedMessage}")
+                println("Deleting CreditNote client or issuer failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -252,17 +252,17 @@ class InvoiceAddEditViewModel @Inject constructor(
 
     fun updateUiState(screenElement: ScreenElement, value: Any) {
         _documentUiState.value =
-            updateInvoiceUiState(_documentUiState.value, screenElement, value)
+            updateCreditNoteUiState(_documentUiState.value, screenElement, value)
     }
 
-    fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
+    fun updateTextFieldCursorOfCreditNoteState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> documentUiState.value.documentNumber.text
             ScreenElement.DOCUMENT_ORDER_NUMBER -> documentUiState.value.reference?.text
             else -> null
         }
 
-        _documentUiState.value = updateInvoiceUiState(
+        _documentUiState.value = updateCreditNoteUiState(
             _documentUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
@@ -271,11 +271,11 @@ class InvoiceAddEditViewModel @Inject constructor(
     }
 }
 
-fun updateInvoiceUiState(
-    document: InvoiceState,
+fun updateCreditNoteUiState(
+    document: CreditNoteState,
     element: ScreenElement,
     value: Any,
-): InvoiceState {
+): CreditNoteState {
     var doc = document
     when (element) {
         ScreenElement.DOCUMENT_NUMBER -> {

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -66,7 +67,8 @@ fun DocumentBasicTemplateHeader(
                 style = MaterialTheme.typography.titleForDocuments,
                 text = stringResource(
                     id = if (document is DeliveryNoteState) R.string.delivery_note_number
-                    else R.string.invoice_number
+                    else if(document is CreditNoteState) R.string.delivery_note_number
+                        else R.string.invoice_number
                 ) + " " + document.documentNumber.text
             )
 

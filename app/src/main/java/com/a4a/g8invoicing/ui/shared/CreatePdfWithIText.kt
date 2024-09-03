@@ -79,7 +79,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
             inputDocument.documentType
         )
     )
-    inputDocument.orderNumber?.let {
+    inputDocument.reference?.let {
         if (it.text.isNotEmpty()) {
             document.add(createReference(it.text, fontBold))
         }
@@ -169,6 +169,7 @@ private fun getDocumentName(documentType: DocumentType): String {
     return when (documentType) {
         DocumentType.INVOICE -> Strings.get(R.string.invoice_number)
         DocumentType.DELIVERY_NOTE -> Strings.get(R.string.delivery_note_number)
+        DocumentType.CREDIT_NOTE -> Strings.get(R.string.credit_note_number)
     }
 }
 

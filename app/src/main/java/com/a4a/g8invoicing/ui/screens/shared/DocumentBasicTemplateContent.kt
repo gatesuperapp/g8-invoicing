@@ -15,16 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -37,7 +33,6 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
-
 
 
 @Composable
@@ -77,8 +72,8 @@ fun DocumentBasicTemplateContent(
         ) {
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem)
-            document.orderNumber?.let {
-                if(it.text.isNotEmpty())
+            document.reference?.let {
+                if (it.text.isNotEmpty())
                     DocumentBasicTemplateOrderNumber(
                         it.text,
                         onClickElement,
@@ -111,7 +106,7 @@ fun DocumentBasicTemplateContent(
                         )
                     }
                 }
-                if(document is InvoiceState && document.paymentStatus == 2) {
+                if (document is InvoiceState && document.paymentStatus == 2) {
                     Image(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
@@ -122,9 +117,7 @@ fun DocumentBasicTemplateContent(
                 }
             }
 
-                DocumentBasicTemplatePrices(document, footerArray)
-
-
+            DocumentBasicTemplatePrices(document, footerArray)
 
             if (document is InvoiceState) {
                 DocumentBasicTemplateFooter(

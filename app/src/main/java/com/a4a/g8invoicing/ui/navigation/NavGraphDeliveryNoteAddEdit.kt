@@ -205,13 +205,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
-                                ClientOrIssuerType.ISSUER
-                            )
-                            clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
-                                ClientOrIssuerType.ISSUER
-                            )
+                            createNewIssuer(clientOrIssuerAddEditViewModel)
                             deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
                                 documentIssuerUiState
                             )

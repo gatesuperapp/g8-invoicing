@@ -313,7 +313,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> deliveryNoteUiState.value.documentNumber.text
-            ScreenElement.DOCUMENT_ORDER_NUMBER -> deliveryNoteUiState.value.orderNumber?.text
+            ScreenElement.DOCUMENT_ORDER_NUMBER -> deliveryNoteUiState.value.reference?.text
             else -> null
         }
 
@@ -351,7 +351,7 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_ORDER_NUMBER -> {
-            note = note.copy(orderNumber = value as TextFieldValue)
+            note = note.copy(reference = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_PRODUCT -> {

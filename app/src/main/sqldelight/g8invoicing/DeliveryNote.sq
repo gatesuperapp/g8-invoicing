@@ -2,14 +2,14 @@ CREATE TABLE DeliveryNote (
   delivery_note_id INTEGER PRIMARY KEY NOT NULL,
   number TEXT,
   delivery_date TEXT,
-  order_number TEXT,
+  reference TEXT,
   currency TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
   deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
 
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference, currency)
 VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€");
 
 
@@ -38,14 +38,14 @@ SELECT delivery_note_id
 FROM DeliveryNote;
 
 save:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, order_number, currency)
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference, currency)
 VALUES (?,  ?,  ?, ?, ?);
 
 update:
 UPDATE DeliveryNote
 SET number = :number,
     delivery_date = :delivery_date,
-    order_number = :order_number,
+    reference = :reference,
     currency =: currency,
     updated_at =: updated_at
 WHERE

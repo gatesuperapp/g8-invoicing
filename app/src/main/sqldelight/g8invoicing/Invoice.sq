@@ -2,7 +2,7 @@ CREATE TABLE Invoice (
   invoice_id INTEGER PRIMARY KEY NOT NULL,
   number TEXT,
   issuing_date TEXT,
-  order_number TEXT,
+  reference TEXT,
   currency TEXT,
   due_date TEXT,
   payment_status INTEGER NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE Invoice (
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
   deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
 
-INSERT INTO Invoice (invoice_id, number, issuing_date, order_number, currency, due_date, payment_status)
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, currency, due_date, payment_status)
 VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€", '01/01/2023 12:00:00', 0);
 
 get:
@@ -41,14 +41,14 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, order_number, currency, due_date, footer, payment_status)
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, currency, due_date, footer, payment_status)
 VALUES (?,  ?,  ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
 SET number = :number,
     issuing_date = :issuing_date,
-    order_number = :order_number,
+    reference = :reference,
     currency =: currency,
     due_date =: due_date,
     payment_status =: payment_status,

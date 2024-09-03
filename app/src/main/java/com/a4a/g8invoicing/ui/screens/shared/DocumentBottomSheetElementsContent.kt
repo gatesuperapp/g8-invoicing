@@ -61,7 +61,7 @@ fun DocumentBottomSheetElementsContent(
         FormInput(
             label = stringResource(id = R.string.document_order_number),
             inputType = TextInput(
-                text = document.orderNumber,
+                text = document.reference,
                 placeholder = stringResource(id = R.string.document_default_order_number),
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_ORDER_NUMBER, it)

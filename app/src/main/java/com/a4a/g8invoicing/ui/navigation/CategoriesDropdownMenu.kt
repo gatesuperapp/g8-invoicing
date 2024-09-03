@@ -39,12 +39,14 @@ fun CategoriesDropdownMenu(
 ) {
     val categories = listOf(
         //  Category.Home,
-        Category.Invoices,
-        Category.DeliveryNotes,
+        Category.About,
         Category.Clients,
         Category.Products,
+        Category.CreditNotes,
+        Category.DeliveryNotes,
+        Category.Invoices,
         //Category.MyAccount,
-        Category.About,
+
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -98,14 +100,12 @@ sealed class Category(
     val iconDescription: String?,
 ) {
     //object Home : Category(Screen.HomeScreen.name, R.string.home)
-    data object Clients :
-        Category(Screen.ClientOrIssuerList.name, R.string.appbar_client_list, null, null)
+    data object Clients : Category(Screen.ClientOrIssuerList.name, R.string.appbar_client_list, null, null)
 
     data object Products : Category(Screen.ProductList.name, R.string.appbar_products, null, null)
     data object Invoices : Category(Screen.InvoiceList.name, R.string.appbar_invoices, null, null)
-    data object DeliveryNotes :
-        Category(Screen.DeliveryNoteList.name, R.string.appbar_delivery_notes, null, null)
-
+    data object CreditNotes : Category(Screen.CreditNoteList.name, R.string.appbar_credit_notes, null, null)
+    data object DeliveryNotes : Category(Screen.DeliveryNoteList.name, R.string.appbar_delivery_notes, null, null)
     data object MyAccount : Category(Screen.Account.name, R.string.appbar_account, null, null)
     data object About : Category(Screen.About.name, R.string.appbar_about, null, null)
 

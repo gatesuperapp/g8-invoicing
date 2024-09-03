@@ -8,6 +8,8 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSource
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSource
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
@@ -70,6 +72,12 @@ object AppModule {
     @Singleton
     fun invoiceDataSource(driver: SqlDriver): InvoiceLocalDataSourceInterface {
         return InvoiceLocalDataSource(Database(driver))
+    }
+
+    @Provides
+    @Singleton
+    fun creditNoteDataSource(driver: SqlDriver): CreditNoteLocalDataSourceInterface {
+        return CreditNoteLocalDataSource(Database(driver))
     }
 
     @Provides

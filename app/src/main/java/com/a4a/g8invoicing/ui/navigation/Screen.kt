@@ -11,6 +11,8 @@ enum class Screen {
     DocumentProductTaxRates,
     InvoiceAddEdit,
     InvoiceList,
+    CreditNoteAddEdit,
+    CreditNoteList,
     DeliveryNoteList,
     DeliveryNoteAddEdit,
     Account,

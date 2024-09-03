@@ -1,0 +1,32 @@
+CREATE TABLE LinkCreditNoteToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  credit_note_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(document_client_or_issuer_id)
+          ON DELETE CASCADE
+);
+
+INSERT INTO LinkCreditNoteToDocumentClientOrIssuer (id, credit_note_id, document_client_or_issuer_id)
+VALUES (1, 1, 1),
+(2, 1, 2);
+
+getDocumentClientOrIssuerLinkedToCreditNote:
+SELECT *
+FROM LinkCreditNoteToDocumentClientOrIssuer
+WHERE credit_note_id = :credit_note_id;
+
+saveDocumentClientOrIssuerLinkedToCreditNote:
+INSERT
+INTO LinkCreditNoteToDocumentClientOrIssuer (id, credit_note_id, document_client_or_issuer_id)
+VALUES (?, ?, ?);
+
+deleteDocumentClientOrIssuerLinkedToCreditNote:
+DELETE FROM LinkCreditNoteToDocumentClientOrIssuer
+WHERE  credit_note_id = :credit_note_id
+AND document_client_or_issuer_id = :document_client_or_issuer_id;
+
+deleteAllDocumentClientOrIssuerLinkedToCreditNote:
+DELETE FROM LinkCreditNoteToDocumentClientOrIssuer
+WHERE  credit_note_id = :credit_note_id;

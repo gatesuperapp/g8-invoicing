@@ -94,6 +94,22 @@ fun NavGraph(navController: NavHostController) {
                 navigateBack(navController)
             }
         )
+        creditNoteList(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickListItem = {
+                val params = ("?itemId=${it}")
+                navController.navigate(Screen.CreditNoteAddEdit.name + params)
+            },
+            onClickNew = {
+                navController.navigate(Screen.CreditNoteAddEdit.name)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            }
+        )
         clientOrIssuerList(
             navController = navController,
             onClickCategory = {
@@ -123,6 +139,12 @@ fun NavGraph(navController: NavHostController) {
             }
         )
         invoiceAddEdit(
+            navController = navController,
+            onClickBack = {
+                navigateBack(navController)
+            }
+        )
+        creditNoteAddEdit(
             navController = navController,
             onClickBack = {
                 navigateBack(navController)

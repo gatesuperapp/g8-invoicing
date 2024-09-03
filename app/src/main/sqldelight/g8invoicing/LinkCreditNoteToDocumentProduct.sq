@@ -1,0 +1,43 @@
+CREATE TABLE LinkCreditNoteToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  credit_note_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(document_product_id)
+          ON DELETE CASCADE
+);
+
+INSERT INTO LinkCreditNoteToDocumentProduct (id, credit_note_id, document_product_id)
+VALUES (1, 1, 14),
+(2, 1, 15),
+(3, 1, 16),
+(4, 1, 17),
+(5, 1, 18),
+(6, 1, 19),
+(7, 1, 20),
+(8, 1, 21),
+(9, 1, 22),
+(10, 1, 23),
+(11, 1, 24),
+(12, 1, 25),
+(13, 1, 26);
+
+getDocumentProductsLinkedToCreditNote:
+SELECT *
+FROM LinkCreditNoteToDocumentProduct
+WHERE credit_note_id = :credit_note_id;
+
+saveProductLinkedToCreditNote:
+INSERT
+INTO LinkCreditNoteToDocumentProduct (id, credit_note_id, document_product_id)
+VALUES (?, ?, ?);
+
+deleteProductLinkedToCreditNote:
+DELETE FROM LinkCreditNoteToDocumentProduct
+WHERE  credit_note_id = :credit_note_id
+AND document_product_id = :document_product_id;
+
+deleteAllProductsLinkedToCreditNote:
+DELETE FROM LinkCreditNoteToDocumentProduct
+WHERE  credit_note_id = :credit_note_id;

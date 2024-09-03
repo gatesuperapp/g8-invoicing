@@ -4,11 +4,11 @@ import android.content.ContentValues
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
-import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.states.InvoicesUiState
+import com.a4a.g8invoicing.ui.states.CreditNoteState
+import com.a4a.g8invoicing.ui.states.CreditNotesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,12 +19,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class InvoiceListViewModel @Inject constructor(
-    private val invoiceDataSource: InvoiceLocalDataSourceInterface,
+class CreditNoteListViewModel @Inject constructor(
+    private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
 ) : ViewModel() {
 
-    private val _documentsUiState = MutableStateFlow(InvoicesUiState())
-    val documentsUiState: StateFlow<InvoicesUiState> = _documentsUiState.asStateFlow()
+    private val _documentsUiState = MutableStateFlow(CreditNotesUiState())
+    val documentsUiState: StateFlow<CreditNotesUiState> = _documentsUiState.asStateFlow()
 
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
@@ -39,7 +39,7 @@ class InvoiceListViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                invoiceDataSource.fetchAll()?.collect {
+                creditNoteDataSource.fetchAll()?.collect {
                     val lateDocuments = it.filter { isPaymentLate(it.dueDate) == true }
                     if (lateDocuments.isNotEmpty()) {
                         setTag(lateDocuments, DocumentTag.LATE)
@@ -58,29 +58,29 @@ class InvoiceListViewModel @Inject constructor(
         }
     }
 
-    fun delete(selectedDocuments: List<InvoiceState>) {
+    fun delete(selectedDocuments: List<CreditNoteState>) {
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                invoiceDataSource.delete(selectedDocuments)
+                creditNoteDataSource.delete(selectedDocuments)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
 
-    fun duplicate(selectedDocuments: List<InvoiceState>) {
+    fun duplicate(selectedDocuments: List<CreditNoteState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                invoiceDataSource.duplicate(selectedDocuments)
+                creditNoteDataSource.duplicate(selectedDocuments)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
 
-    fun setTag(selectedDocuments: List<InvoiceState>, tag: DocumentTag) {
+    fun setTag(selectedDocuments: List<CreditNoteState>, tag: DocumentTag) {
         setTagJob?.cancel()
         setTagJob = viewModelScope.launch {
             try {
@@ -88,8 +88,6 @@ class InvoiceListViewModel @Inject constructor(
                 selectedDocuments.forEach {
                     it.documentTag = tag
                 }
-                // Set tag in local db
-                invoiceDataSource.setTag(selectedDocuments, tag)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
