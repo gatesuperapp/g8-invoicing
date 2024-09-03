@@ -252,27 +252,15 @@ class InvoiceLocalDataSource(
     }
 
     override suspend fun duplicate(documents: List<InvoiceState>) {
-        val docNumber = getLastDocumentNumber()?.let {
-            incrementDocumentNumber(it)
-        } ?: Strings.get(R.string.document_default_number)
-
         withContext(Dispatchers.IO) {
             try {
                 documents.forEach {
-                    val invoice = InvoiceState(
-                        documentType = it.documentType,
-                        documentId = it.documentId,
-                        documentNumber = TextFieldValue(docNumber),
-                        documentDate = it.documentDate,
-                        orderNumber = it.orderNumber,
-                        documentIssuer = it.documentIssuer,
-                        documentClient = it.documentClient,
-                        documentProducts = it.documentProducts,
-                        documentPrices = it.documentPrices,
-                        currency = it.currency,
-                        dueDate = it.dueDate,
-                        footerText = it.footerText
-                    )
+                    val docNumber = getLastDocumentNumber()?.let {
+                        incrementDocumentNumber(it)
+                    } ?: Strings.get(R.string.document_default_number)
+                    val invoice = it
+                    invoice.documentNumber = TextFieldValue(docNumber)
+
                     saveInfoInInvoiceTable(invoice)
                     saveInfoInOtherTables(invoice)
                 }

@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -90,6 +91,7 @@ fun InvoiceListItem(
         // not centered anymore)
         Row(
             modifier = Modifier
+                .background(Color.White)
                 .padding(
                     end = 20.dp,
                     top = 14.dp,
