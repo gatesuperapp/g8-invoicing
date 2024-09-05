@@ -28,6 +28,8 @@
     <string name="appbar_more">Autres options</string>
     <string name="appbar_more_label">Plus</string>
     <string name="appbar_delete">Supprimer</string>
+    <string name="appbar_create_corrected_invoice">Créer facture de remplacement</string>
+    <string name="appbar_create_credit_note">Créer avoir</string>
     <string name="appbar_convert">Convertir</string>
     <string name="appbar_convert_label">Facturer</string>
     <string name="appbar_unselect_all">Désélectionner</string>
@@ -153,12 +155,14 @@
     <string name="document_due_date">Échéance</string>
     <string name="document_issuer">Émetteur</string>
     <string name="document_client">Client</string>x
-    <string name="document_order_number">Référence</string>
+    <string name="document_reference">Référence</string>
+    <string name="document_free_field">Champ libre</string>
     <string name="document_footer">Pied de page</string>
     <string name="document_line_items">Items</string>
     <string name="invoice_default_number">F001</string>
     <string name="delivery_note_default_number">BL001</string>
-    <string name="credit_note_default_number">A001</string>
+    <string name="credit_note_default_number">FA001</string>
+    <string name="corrected_invoice_cancel_and_replace">Annule et remplace la facture</string>
     <string name="document_default_date">-</string>
     <string name="document_default_due_date">11/01/2024</string>
     <string name="document_default_footer">Escompte pour paiement anticipé : néant
@@ -166,7 +170,7 @@
         Taux de pénalités : néant
         \n  \n  \n IBAN : FR76 1027 8073 7000 983764 8377
     </string>
-     <string name="document_default_order_number">XFGDTSF</string>
+     <string name="document_default_reference">XFGDTSF</string>
     <string name="document_default_issuer_firstName">Ignacio</string>
     <string name="document_default_issuer_name">Cantu</string>
     <string name="document_default_issuer_address1">6 rue de l\'amour</string>

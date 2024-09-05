@@ -27,6 +27,7 @@ data class DeliveryNoteState(
     // override var documentDate: String = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT).format(Calendar.getInstance().time) +  " 12:00:00",
     override var documentDate: String = getDateFormatter().format(Calendar.getInstance().time) + " 12:00:00",
     override var reference: TextFieldValue? = TextFieldValue(),
+    override var freeField: TextFieldValue? = null,
     override var documentIssuer: DocumentClientOrIssuerState? = null,
     override var documentClient: DocumentClientOrIssuerState? = null,
     override var documentProducts: List<DocumentProductState>? = null,

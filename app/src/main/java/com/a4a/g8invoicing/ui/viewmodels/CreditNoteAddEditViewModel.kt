@@ -258,7 +258,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
     fun updateTextFieldCursorOfCreditNoteState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> documentUiState.value.documentNumber.text
-            ScreenElement.DOCUMENT_ORDER_NUMBER -> documentUiState.value.reference?.text
+            ScreenElement.DOCUMENT_REFERENCE -> documentUiState.value.reference?.text
             else -> null
         }
 
@@ -294,7 +294,7 @@ fun updateCreditNoteUiState(
             doc = doc.copy(documentIssuer = value as DocumentClientOrIssuerState)
         }
 
-        ScreenElement.DOCUMENT_ORDER_NUMBER -> {
+        ScreenElement.DOCUMENT_REFERENCE -> {
             doc = doc.copy(reference = value as TextFieldValue)
         }
 

@@ -105,6 +105,22 @@ fun actionDelete(onClick: () -> Unit) =
         onClick = onClick
     )
 
+fun actionCreateCreditNote(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconArrowForward,
+        description = R.string.appbar_create_credit_note,
+        isSecondary = true,
+        onClick = onClick
+    )
+
+fun actionCreateCorrectedInvoice(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconArrowForward,
+        description = R.string.appbar_create_corrected_invoice,
+        isSecondary = true,
+        onClick = onClick
+    )
+
 fun actionConvert(onClick: () -> Unit) =
     AppBarAction(
         icon = IconArrowForward,

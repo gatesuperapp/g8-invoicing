@@ -64,7 +64,6 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
-import com.a4a.g8invoicing.ui.navigation.actionSavePayment
 import com.a4a.g8invoicing.ui.navigation.actionStyle
 import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -384,7 +383,7 @@ fun DocumentAddEdit(
                             it == ScreenElement.DOCUMENT_ISSUER ||
                             it == ScreenElement.DOCUMENT_CLIENT ||
                             it == ScreenElement.DOCUMENT_FOOTER ||
-                            it == ScreenElement.DOCUMENT_ORDER_NUMBER
+                            it == ScreenElement.DOCUMENT_REFERENCE
                         ) {
                             bottomSheetType.value = BottomSheetType.ELEMENTS
                         } else {

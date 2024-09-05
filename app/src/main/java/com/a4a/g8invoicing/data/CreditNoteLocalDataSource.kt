@@ -10,11 +10,11 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.CreditNoteState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerQueries
@@ -45,24 +45,20 @@ class CreditNoteLocalDataSource(
     private val linkCreditNoteToDocumentClientOrIssuerQueries =
         db.linkCreditNoteToDocumentClientOrIssuerQueries
 
-    override suspend fun createNew(): Long? {
+    override suspend fun createNew(creditNote: CreditNoteState?): Long? {
         var newCreditNoteId: Long? = null
-        val docNumber = getLastDocumentNumber()?.let {
-            incrementDocumentNumber(it)
-        } ?: Strings.get(R.string.credit_note_default_number)
         val issuer = getExistingIssuer()?.transformIntoEditable()
             ?: DocumentClientOrIssuerState()
+        val creditNote = creditNote ?: CreditNoteState(
+            documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                incrementDocumentNumber(it)
+            } ?: Strings.get(R.string.credit_note_default_number)),
+            documentIssuer = issuer,
+            footerText = TextFieldValue(getExistingFooter() ?: "")
+        )
 
-        saveInfoInDocumentTable(
-            CreditNoteState(
-                documentNumber = TextFieldValue(docNumber),
-                documentIssuer = issuer,
-                footerText = TextFieldValue(getExistingFooter() ?: "")
-            )
-        )
-        saveInfoInOtherTables(
-            CreditNoteState(documentIssuer = issuer)
-        )
+        saveInfoInDocumentTable(creditNote)
+        saveInfoInOtherTables(creditNote)
         try {
             newCreditNoteId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
         } catch (e: Exception) {
@@ -185,7 +181,7 @@ class CreditNoteLocalDataSource(
         }
     }
 
-    override suspend fun convertDeliveryNotesToCreditNote(deliveryNotes: List<DeliveryNoteState>) {
+    override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
         withContext(Dispatchers.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -195,13 +191,14 @@ class CreditNoteLocalDataSource(
                 saveInfoInDocumentTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
-                        reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
-                        documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
-                        documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
+                        reference = invoices.firstOrNull { it.reference != null }?.reference,
+                        freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
+                        documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                        documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
                         footerText = TextFieldValue(getExistingFooter() ?: "")
                     )
                 )
-                deliveryNotes.forEach {
+                invoices.forEach {
                     saveInfoInOtherTables(
                         it
                     )
@@ -219,7 +216,8 @@ class CreditNoteLocalDataSource(
                     credit_note_id = document.documentId?.toLong() ?: 0,
                     number = document.documentNumber.text,
                     issuing_date = document.documentDate,
-                    order_number = document.reference?.text,
+                    reference = document.reference?.text,
+                    free_field = document.freeField?.text,
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     footer = document.footerText.text,
@@ -417,6 +415,7 @@ class CreditNoteLocalDataSource(
                 number = document.documentNumber.text,
                 issuing_date = document.documentDate,
                 reference = document.reference?.text,
+                free_field = document.freeField?.text,
                 currency = document.currency.text,
                 due_date = document.dueDate,
                 footer = document.footerText.text
@@ -544,7 +543,8 @@ fun saveDocumentProductInDbAndLink(
 fun linkDocumentProductToDocument(
     linkQueries: Any,
     id: Long,
-    documentProductId: Long) {
+    documentProductId: Long,
+) {
     try {
         if (linkQueries is LinkCreditNoteToDocumentProductQueries) {
             linkQueries.saveProductLinkedToCreditNote(

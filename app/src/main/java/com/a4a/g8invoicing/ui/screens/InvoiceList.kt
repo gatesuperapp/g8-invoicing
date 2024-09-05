@@ -28,6 +28,8 @@ fun InvoiceList(
     documentsUiState: InvoicesUiState,
     onClickDelete: (List<InvoiceState>) -> Unit,
     onClickDuplicate: (List<InvoiceState>) -> Unit,
+    onClickCreateCreditNote: (List<InvoiceState>) -> Unit,
+    onClickCreateCorrectedInvoice: (List<InvoiceState>) -> Unit,
     onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
@@ -58,6 +60,14 @@ fun InvoiceList(
                 isListItemSelected = selectedMode.value,
                 onClickDelete = {
                     openAlertDialog.value = true
+                },
+                onClickCreateCreditNote = {
+                    onClickCreateCreditNote(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickCreateCorrectedInvoice = {
+                    onClickCreateCorrectedInvoice(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
                 onClickDuplicate = {
                     onClickDuplicate(selectedItems.toList())

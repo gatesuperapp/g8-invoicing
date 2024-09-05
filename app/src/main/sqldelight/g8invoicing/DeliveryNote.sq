@@ -3,6 +3,7 @@ CREATE TABLE DeliveryNote (
   number TEXT,
   delivery_date TEXT,
   reference TEXT,
+  free_field TEXT,
   currency TEXT,
   footer TEXT,
 
@@ -39,14 +40,15 @@ SELECT delivery_note_id
 FROM DeliveryNote;
 
 save:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference, currency, footer)
-VALUES (?,  ?,  ?, ?, ?, ?);
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer)
+VALUES (?,  ?,  ?, ?, ?,?, ?);
 
 update:
 UPDATE DeliveryNote
 SET number = :number,
     delivery_date = :delivery_date,
     reference = :reference,
+    free_field = :free_field,
     currency =: currency,
     footer  =: footer,
     updated_at =: updated_at

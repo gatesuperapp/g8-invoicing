@@ -2,8 +2,12 @@ package com.a4a.g8invoicing.ui.viewmodels
 
 import android.content.ContentValues
 import android.util.Log
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
@@ -21,13 +25,16 @@ import javax.inject.Inject
 @HiltViewModel
 class InvoiceListViewModel @Inject constructor(
     private val invoiceDataSource: InvoiceLocalDataSourceInterface,
-) : ViewModel() {
+    private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
+    ) : ViewModel() {
 
     private val _documentsUiState = MutableStateFlow(InvoicesUiState())
     val documentsUiState: StateFlow<InvoicesUiState> = _documentsUiState.asStateFlow()
 
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
+    private var createCreditNoteJob: Job? = null
+    private var createCorrectedInvoiceJob: Job? = null
     private var duplicateJob: Job? = null
     private var setTagJob: Job? = null
     private var markAsPaidJob: Job? = null
@@ -75,6 +82,32 @@ class InvoiceListViewModel @Inject constructor(
         duplicateJob = viewModelScope.launch {
             try {
                 invoiceDataSource.duplicate(selectedDocuments)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
+    }
+
+    fun convertToCreditNote(selectedDocuments: List<InvoiceState>) {
+        createCreditNoteJob?.cancel()
+        createCreditNoteJob = viewModelScope.launch {
+            try {
+                creditNoteDataSource.convertInvoiceToCreditNote(selectedDocuments)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
+    }
+
+    fun convertToCorrectedInvoice(selectedDocuments: List<InvoiceState>) {
+        createCorrectedInvoiceJob?.cancel()
+        createCorrectedInvoiceJob = viewModelScope.launch {
+            try {
+                selectedDocuments.forEach {
+                    it.freeField = TextFieldValue(Strings.get(R.string.corrected_invoice_cancel_and_replace) + " " + it.documentNumber.text)
+                }
+                invoiceDataSource.duplicate(selectedDocuments)
+                setTag(selectedDocuments, DocumentTag.CANCELLED)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }

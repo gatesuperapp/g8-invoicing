@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 
@@ -19,9 +21,9 @@ data class DocumentClientOrIssuerState(
     var phone: TextFieldValue? = null,
     var email: TextFieldValue? = null,
     var notes: TextFieldValue? = null,
-    var companyId1Label: TextFieldValue? = TextFieldValue("N° SIRET"),
+    var companyId1Label: TextFieldValue? = TextFieldValue(Strings.get(R.string.document_default_issuer_company_label1)),
     var companyId1Number: TextFieldValue? = null,
-    var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
+    var companyId2Label: TextFieldValue? = TextFieldValue(Strings.get(R.string.document_default_issuer_company_label2)),
     var companyId2Number: TextFieldValue? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

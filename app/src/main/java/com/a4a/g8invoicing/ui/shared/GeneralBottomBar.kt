@@ -7,6 +7,8 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionCategories
 import com.a4a.g8invoicing.ui.navigation.actionConvert
+import com.a4a.g8invoicing.ui.navigation.actionCreateCorrectedInvoice
+import com.a4a.g8invoicing.ui.navigation.actionCreateCreditNote
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionNew
@@ -20,6 +22,8 @@ fun GeneralBottomBar(
     isListItemSelected: Boolean = false,
     onClickDuplicate: () -> Unit = {},
     onClickDelete: () -> Unit = {},
+    onClickCreateCreditNote: () -> Unit = {},
+    onClickCreateCorrectedInvoice: () -> Unit = {},
     onClickUnselectAll: () -> Unit = {},
     onClickNew: () -> Unit = {},
     onClickCategory: (Category) -> Unit = {},
@@ -45,6 +49,8 @@ fun GeneralBottomBar(
                 actionUnselectAll(onClickUnselectAll),
                 actionDuplicate(onClickDuplicate),
                 actionDelete(onClickDelete),
+                actionCreateCreditNote(onClickCreateCreditNote),
+                actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
                 actionTag()
             )
         } else if (isConvertible) {

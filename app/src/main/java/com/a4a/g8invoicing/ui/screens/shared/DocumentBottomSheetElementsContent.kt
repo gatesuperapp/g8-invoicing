@@ -59,16 +59,27 @@ fun DocumentBottomSheetElementsContent(
             pageElement = ScreenElement.DOCUMENT_CLIENT
         ),
         FormInput(
-            label = stringResource(id = R.string.document_order_number),
+            label = stringResource(id = R.string.document_reference),
             inputType = TextInput(
                 text = document.reference,
-                placeholder = stringResource(id = R.string.document_default_order_number),
+                placeholder = stringResource(id = R.string.document_default_reference),
                 onValueChange = {
-                    onValueChange(ScreenElement.DOCUMENT_ORDER_NUMBER, it)
+                    onValueChange(ScreenElement.DOCUMENT_REFERENCE, it)
                 },
             ),
-            pageElement = ScreenElement.DOCUMENT_ORDER_NUMBER
+            pageElement = ScreenElement.DOCUMENT_REFERENCE
+        ),
+        FormInput(
+            label = stringResource(id = R.string.document_free_field),
+            inputType = TextInput(
+                text = document.freeField,
+                onValueChange = {
+                    onValueChange(ScreenElement.DOCUMENT_FREE_FIELD, it)
+                },
+            ),
+            pageElement = ScreenElement.DOCUMENT_FREE_FIELD
         )
+
     )
 
     if (document is InvoiceState) {

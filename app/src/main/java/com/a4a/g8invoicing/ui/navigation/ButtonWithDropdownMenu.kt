@@ -52,7 +52,7 @@ fun ButtonWithDropdownMenu(
             secondaryItems.forEach { item ->
                 DropdownMenuItem(
                     text = { Text(
-                        modifier = Modifier.padding(end = 14.dp),
+                       // modifier = Modifier.padding(end = 14.dp),
                         text = stringResource(item.description)
                     ) },
                     onClick = {

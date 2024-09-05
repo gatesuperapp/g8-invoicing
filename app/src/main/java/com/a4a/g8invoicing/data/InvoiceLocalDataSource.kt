@@ -30,6 +30,7 @@ class InvoiceLocalDataSource(
     private val invoiceTagQueries = db.invoiceTagQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentProductQueries = db.documentProductQueries
+    private val creditNoteQueries = db.creditNoteQueries
     private val linkInvoiceToDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
     private val linkDocumentToTagQueries = db.linkInvoiceToTagQueries
     private val linkInvoiceDocumentProductToDeliveryNoteQueries =
@@ -182,7 +183,8 @@ class InvoiceLocalDataSource(
                 documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.issuing_date ?: "",
-                reference = TextFieldValue(text = it.reference ?: ""),
+                reference = it.reference?.let { TextFieldValue(text = it)},
+                freeField = it.free_field?.let { TextFieldValue(text = it)},
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
@@ -207,6 +209,7 @@ class InvoiceLocalDataSource(
                     InvoiceState(
                         documentNumber = TextFieldValue(docNumber),
                         reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
+                        freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
                         documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                         documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
                         footerText = TextFieldValue(getExistingFooter() ?: "")
@@ -231,6 +234,7 @@ class InvoiceLocalDataSource(
                     number = document.documentNumber.text,
                     issuing_date = document.documentDate,
                     reference = document.reference?.text,
+                    free_field = document.freeField?.text,
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     payment_status = document.paymentStatus.toLong(),
@@ -267,6 +271,7 @@ class InvoiceLocalDataSource(
             }
         }
     }
+
 
     override suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag) {
         withContext(Dispatchers.IO) {
@@ -493,6 +498,7 @@ class InvoiceLocalDataSource(
                 number = document.documentNumber.text,
                 issuing_date = document.documentDate,
                 reference = document.reference?.text,
+                free_field = document.freeField?.text,
                 currency = document.currency.text,
                 due_date = document.dueDate,
                 payment_status = document.paymentStatus.toLong(),
@@ -501,7 +507,6 @@ class InvoiceLocalDataSource(
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
-
     }
 
     private suspend fun saveInfoInOtherTables(document: DocumentState) {

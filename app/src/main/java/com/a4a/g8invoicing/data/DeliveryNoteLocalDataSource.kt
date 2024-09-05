@@ -158,6 +158,7 @@ class DeliveryNoteLocalDataSource(
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
+                freeField = TextFieldValue(text = it.free_field ?: ""),
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
@@ -176,6 +177,7 @@ class DeliveryNoteLocalDataSource(
                     number = document.documentNumber.text,
                     delivery_date = document.documentDate,
                     reference = document.reference?.text,
+                    free_field = document.freeField?.text,
                     currency = document.currency.text,
                     footer = document.footerText.text,
                     updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
@@ -371,6 +373,7 @@ class DeliveryNoteLocalDataSource(
                 number = document.documentNumber.text,
                 delivery_date = document.documentDate,
                 reference = document.reference?.text,
+                free_field = document.freeField?.text,
                 currency = document.currency.text,
                 footer = document.footerText.text
             )

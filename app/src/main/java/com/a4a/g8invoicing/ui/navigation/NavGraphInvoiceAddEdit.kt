@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -104,7 +103,7 @@ fun NavGraphBuilder.invoiceAddEdit(
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 if (pageElement == ScreenElement.DOCUMENT_NUMBER ||
-                    pageElement == ScreenElement.DOCUMENT_ORDER_NUMBER
+                    pageElement == ScreenElement.DOCUMENT_REFERENCE
                 ) {
                     invoiceViewModel.updateTextFieldCursorOfInvoiceState(pageElement)
                 }

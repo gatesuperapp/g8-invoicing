@@ -324,7 +324,7 @@ private fun createIssuerAndClientTable(
 }
 
 private fun createReference(orderNumber: String, font: PdfFont): Paragraph {
-    val reference = Text(Strings.get(R.string.document_order_number) + " : ").setFont(font)
+    val reference = Text(Strings.get(R.string.document_reference) + " : ").setFont(font)
     return Paragraph(reference)
         .add(orderNumber)
 }

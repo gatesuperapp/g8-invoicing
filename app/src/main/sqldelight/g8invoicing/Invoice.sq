@@ -3,6 +3,7 @@ CREATE TABLE Invoice (
   number TEXT,
   issuing_date TEXT,
   reference TEXT,
+  free_field TEXT,
   currency TEXT,
   due_date TEXT,
   payment_status INTEGER NOT NULL,
@@ -41,14 +42,15 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, currency, due_date, footer, payment_status)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
 SET number = :number,
     issuing_date = :issuing_date,
     reference = :reference,
+    free_field = :free_field,
     currency =: currency,
     due_date =: due_date,
     payment_status =: payment_status,

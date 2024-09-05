@@ -26,6 +26,8 @@ fun NavGraphBuilder.invoiceList(
             documentsUiState = invoicesUiState,
             onClickDelete = viewModel::delete,
             onClickDuplicate = viewModel::duplicate,
+            onClickCreateCreditNote = viewModel::convertToCreditNote,
+            onClickCreateCorrectedInvoice = viewModel::convertToCorrectedInvoice,
             onClickTag = {selectedDocuments, tag ->
                 viewModel.setTag(selectedDocuments, tag)
                 viewModel.markAsPaid(selectedDocuments, tag)

@@ -72,14 +72,30 @@ fun DocumentBasicTemplateContent(
         ) {
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem)
+
             document.reference?.let {
                 if (it.text.isNotEmpty())
-                    DocumentBasicTemplateOrderNumber(
+                    DocumentBasicTemplateReference(
                         it.text,
                         onClickElement,
                         selectedItem
                     )
-            } ?: Spacer(modifier = Modifier.height(20.dp))
+            }
+            document.freeField?.let {
+                if(document.reference != null ) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+                if (it.text.isNotEmpty())
+                    DocumentBasicTemplateFreeField(
+                        it.text,
+                        onClickElement,
+                        selectedItem
+                    )
+            }
+
+            if(document.reference == null && document.freeField == null) {
+                Spacer(modifier = Modifier.height(20.dp))
+            }
 
             Spacer(
                 modifier = Modifier
