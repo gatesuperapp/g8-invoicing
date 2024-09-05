@@ -4,6 +4,7 @@ CREATE TABLE DeliveryNote (
   delivery_date TEXT,
   reference TEXT,
   currency TEXT,
+  footer TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -38,8 +39,8 @@ SELECT delivery_note_id
 FROM DeliveryNote;
 
 save:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference, currency)
-VALUES (?,  ?,  ?, ?, ?);
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference, currency, footer)
+VALUES (?,  ?,  ?, ?, ?, ?);
 
 update:
 UPDATE DeliveryNote
@@ -47,6 +48,7 @@ SET number = :number,
     delivery_date = :delivery_date,
     reference = :reference,
     currency =: currency,
+    footer  =: footer,
     updated_at =: updated_at
 WHERE
     delivery_note_id = :delivery_note_id;
@@ -61,3 +63,8 @@ FROM DeliveryNote
 ORDER BY delivery_note_id DESC
 LIMIT 1;
 
+getLastInsertedFooter:
+SELECT footer
+FROM CreditNote
+ORDER BY credit_note_id DESC
+LIMIT 1;

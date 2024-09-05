@@ -54,7 +54,13 @@ SET number = :number,
     payment_status =: payment_status,
     footer  =: footer,
     updated_at =: updated_at
+WHERE
+    invoice_id = :invoice_id;
 
+updatePaymentStatus:
+UPDATE Invoice
+SET payment_status =: payment_status,
+    updated_at =: updated_at
 WHERE
     invoice_id = :invoice_id;
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +47,6 @@ fun CategoriesDropdownMenu(
         Category.DeliveryNotes,
         Category.Invoices,
         //Category.MyAccount,
-
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -66,9 +66,11 @@ fun CategoriesDropdownMenu(
                 modifier = if (selected) {
                     Modifier
                         .background(MainBackground)
+                        .padding(start = 24.dp)
                 } else {
                     Modifier
                         .background(Color.Transparent)
+                        .padding(start = 24.dp)
                 },
                 text = { Text(stringResource(category.resourceId)) },
                 onClick = {
@@ -77,7 +79,7 @@ fun CategoriesDropdownMenu(
                         onClickCategory(category)
                     }
                 },
-                leadingIcon = {
+              /*  leadingIcon = {
                     category.icon?.let {
                         Icon(
                             modifier = Modifier
@@ -87,8 +89,17 @@ fun CategoriesDropdownMenu(
                             contentDescription = category.iconDescription
                         )
                     }
-                }
+                }*/
             )
+
+            if(category is Category.About || category is Category.Products) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 24.dp, end = 16.dp),
+                    thickness = 1.dp,
+                    color = Color.LightGray.copy(alpha = 0.6f)
+                )
+            }
+
         }
     }
 }

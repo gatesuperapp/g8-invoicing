@@ -6,10 +6,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.shared.DocumentType
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 
 // This Client is created to manipulate client data,
@@ -27,7 +24,7 @@ data class InvoiceState(
     override var documentType: DocumentType = DocumentType.INVOICE,
     override var documentTag: DocumentTag = DocumentTag.DRAFT,
     override var documentId: Int? = null,
-    override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
+    override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.invoice_default_number)),
     // Have to put a time "12:00:00" because of a bug, if we don't, DatePicker will show 1 day prior to current date
     // https://issuetracker.google.com/issues/281859606
     override var documentDate: String = getDateFormatter().format(Calendar.getInstance().time) +  " 12:00:00",
@@ -39,7 +36,7 @@ data class InvoiceState(
     override var currency: TextFieldValue  = TextFieldValue(),
     var paymentStatus: Int = 0,
     var dueDate: String = getDateFormatter().format(getDateInOneMonth().time) +  " 12:00:00",
-    var footerText: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_footer)),
-    var createdDate: String? = null
+    override var footerText: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_footer)),
+    override var createdDate: String? = null
 ) : DocumentState()
 

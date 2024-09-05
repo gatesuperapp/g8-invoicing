@@ -24,14 +24,15 @@ data class DeliveryNoteState(
     override var documentNumber: TextFieldValue = TextFieldValue(),
     // Have to put a time "12:00:00" because of a bug, if we don't, DatePicker will show 1 day prior to current date
     // https://issuetracker.google.com/issues/281859606
-   // override var documentDate: String = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT).format(Calendar.getInstance().time) +  " 12:00:00",
-    override var documentDate: String = getDateFormatter().format(Calendar.getInstance().time) +  " 12:00:00",
+    // override var documentDate: String = SimpleDateFormat("dd/MM/yyyy", Locale.ROOT).format(Calendar.getInstance().time) +  " 12:00:00",
+    override var documentDate: String = getDateFormatter().format(Calendar.getInstance().time) + " 12:00:00",
     override var reference: TextFieldValue? = TextFieldValue(),
     override var documentIssuer: DocumentClientOrIssuerState? = null,
     override var documentClient: DocumentClientOrIssuerState? = null,
     override var documentProducts: List<DocumentProductState>? = null,
     override var documentPrices: DocumentPrices? = null,
     override var currency: TextFieldValue = TextFieldValue(),
-    var createdDate: String? = null
-): DocumentState()
+    override var footerText: TextFieldValue = TextFieldValue(),
+    override var createdDate: String? = null,
+) : DocumentState()
 

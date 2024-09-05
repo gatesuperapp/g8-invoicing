@@ -1,12 +1,7 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
@@ -70,7 +65,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.duplicateDeliveryNotes(selectedDeliveryNotes)
+                deliveryNoteDataSource.duplicate(selectedDeliveryNotes)
             } catch (e: Exception) {
                 println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }

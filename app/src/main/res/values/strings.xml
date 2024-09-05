@@ -156,7 +156,9 @@
     <string name="document_order_number">Référence</string>
     <string name="document_footer">Pied de page</string>
     <string name="document_line_items">Items</string>
-    <string name="document_default_number">001</string>
+    <string name="invoice_default_number">F001</string>
+    <string name="delivery_note_default_number">BL001</string>
+    <string name="credit_note_default_number">A001</string>
     <string name="document_default_date">-</string>
     <string name="document_default_due_date">11/01/2024</string>
     <string name="document_default_footer">Escompte pour paiement anticipé : néant

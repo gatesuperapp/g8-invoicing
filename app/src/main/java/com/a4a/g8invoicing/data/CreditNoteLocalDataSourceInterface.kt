@@ -22,8 +22,5 @@ interface CreditNoteLocalDataSourceInterface {
     suspend fun convertDeliveryNotesToCreditNote(deliveryNotes: List<DeliveryNoteState>)
     suspend fun update(document: CreditNoteState)
     suspend fun delete(documents: List<CreditNoteState>)
-    suspend fun markAsPaid(documents: List<CreditNoteState>)
-    fun linkDocumentProductToDocument(id: Long, documentProductId: Long)
-    fun linkDocumentProductToAdditionalInfo(documentProductId: Long, deliveryNoteNumber: String?, deliveryNoteDate: String)
-
+    suspend fun markAsPaid(documents: List<CreditNoteState>, isPaid: Boolean = true)
 }

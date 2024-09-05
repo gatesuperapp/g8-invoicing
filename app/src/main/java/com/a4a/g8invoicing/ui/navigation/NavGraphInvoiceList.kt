@@ -28,6 +28,7 @@ fun NavGraphBuilder.invoiceList(
             onClickDuplicate = viewModel::duplicate,
             onClickTag = {selectedDocuments, tag ->
                 viewModel.setTag(selectedDocuments, tag)
+                viewModel.markAsPaid(selectedDocuments, tag)
             },
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,

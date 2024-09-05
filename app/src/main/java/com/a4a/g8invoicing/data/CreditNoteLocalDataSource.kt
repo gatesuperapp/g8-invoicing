@@ -17,6 +17,16 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
+import g8invoicing.DocumentClientOrIssuerQueries
+import g8invoicing.DocumentProductQueries
+import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
+import g8invoicing.LinkCreditNoteToDocumentClientOrIssuerQueries
+import g8invoicing.LinkCreditNoteToDocumentProductQueries
+import g8invoicing.LinkDeliveryNoteToDocumentClientOrIssuerQueries
+import g8invoicing.LinkDeliveryNoteToDocumentProductQueries
+import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
+import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
+import g8invoicing.LinkInvoiceToDocumentProductQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -29,22 +39,21 @@ class CreditNoteLocalDataSource(
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentProductQueries = db.documentProductQueries
-    private val creditNoteDocumentProductQueries = db.linkCreditNoteToDocumentProductQueries
-    private val creditNoteDocumentProductAdditionalInfoQueries =
+    private val linkCreditNoteToDocumentProductQueries = db.linkCreditNoteToDocumentProductQueries
+    private val linkCreditNoteDocumentProductToDeliveryNoteQueries =
         db.linkCreditNoteDocumentProductToDeliveryNoteQueries
-    private val creditNoteDocumentProductLinkQueries =
-        db.linkCreditNoteDocumentProductToDeliveryNoteQueries
-    private val creditNoteDocumentClientOrIssuerQueries = db.linkCreditNoteToDocumentClientOrIssuerQueries
+    private val linkCreditNoteToDocumentClientOrIssuerQueries =
+        db.linkCreditNoteToDocumentClientOrIssuerQueries
 
     override suspend fun createNew(): Long? {
         var newCreditNoteId: Long? = null
         val docNumber = getLastDocumentNumber()?.let {
             incrementDocumentNumber(it)
-        } ?: Strings.get(R.string.document_default_number)
-
+        } ?: Strings.get(R.string.credit_note_default_number)
         val issuer = getExistingIssuer()?.transformIntoEditable()
             ?: DocumentClientOrIssuerState()
-        saveInfoInCreditNoteTable(
+
+        saveInfoInDocumentTable(
             CreditNoteState(
                 documentNumber = TextFieldValue(docNumber),
                 documentIssuer = issuer,
@@ -110,11 +119,12 @@ class CreditNoteLocalDataSource(
 
     private fun fetchDocumentProducts(id: Long): MutableList<DocumentProductState>? {
         try {
-            val listOfIds = creditNoteDocumentProductQueries.getDocumentProductsLinkedToCreditNote(id)
-                .executeAsList()
+            val listOfIds =
+                linkCreditNoteToDocumentProductQueries.getDocumentProductsLinkedToCreditNote(id)
+                    .executeAsList()
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
-                    val additionalInfo = creditNoteDocumentProductLinkQueries
+                    val additionalInfo = linkCreditNoteDocumentProductToDeliveryNoteQueries
                         .getInfoLinkedToDocumentProduct(it.document_product_id)
                         .executeAsOneOrNull()
                     documentProductQueries.getDocumentProduct(it.document_product_id)
@@ -134,7 +144,7 @@ class CreditNoteLocalDataSource(
     private fun fetchClientAndIssuer(documentId: Long): List<DocumentClientOrIssuerState>? {
         try {
             val listOfIds =
-                creditNoteDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToCreditNote(
+                linkCreditNoteToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToCreditNote(
                     documentId
                 ).executeAsList()
 
@@ -179,10 +189,10 @@ class CreditNoteLocalDataSource(
         withContext(Dispatchers.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
-            } ?: Strings.get(R.string.document_default_number)
+            } ?: Strings.get(R.string.credit_note_default_number)
 
             try {
-                saveInfoInCreditNoteTable(
+                saveInfoInDocumentTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
                         reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
@@ -227,11 +237,11 @@ class CreditNoteLocalDataSource(
                 documents.forEach {
                     val docNumber = getLastDocumentNumber()?.let {
                         incrementDocumentNumber(it)
-                    } ?: Strings.get(R.string.document_default_number)
+                    } ?: Strings.get(R.string.credit_note_default_number)
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
 
-                    saveInfoInCreditNoteTable(creditNote)
+                    saveInfoInDocumentTable(creditNote)
                     saveInfoInOtherTables(creditNote)
                 }
             } catch (e: Exception) {
@@ -240,11 +250,11 @@ class CreditNoteLocalDataSource(
         }
     }
 
-    override suspend fun markAsPaid(documents: List<CreditNoteState>) {
+    override suspend fun markAsPaid(documents: List<CreditNoteState>, isPaid: Boolean) {
         withContext(Dispatchers.IO) {
             try {
                 documents.forEach {
-                    if(it.paymentStatus == 0) {
+                    if (isPaid) {
                         it.paymentStatus = 2
                     } else {
                         it.paymentStatus = 0
@@ -265,33 +275,15 @@ class CreditNoteLocalDataSource(
     ) {
         withContext(Dispatchers.IO) {
             try {
-                documentProductQueries.saveDocumentProduct(
-                    document_product_id = null,
-                    name = documentProduct.name.text,
-                    quantity = documentProduct.quantity.toDouble(),
-                    description = documentProduct.description?.text,
-                    final_price = documentProduct.priceWithTax?.toDouble(),
-                    tax_rate = documentProduct.taxRate?.toDouble(),
-                    unit = documentProduct.unit?.text,
-                    product_id = documentProduct.productId?.toLong()
+                saveDocumentProductInDbAndLink(
+                    documentProductQueries,
+                    linkCreditNoteToDocumentProductQueries,
+                    linkCreditNoteDocumentProductToDeliveryNoteQueries,
+                    documentProduct,
+                    documentId,
+                    deliveryNoteDate,
+                    deliveryNoteNumber
                 )
-
-                documentId?.let { documentId ->
-                    documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
-                        ?.let { id ->
-                            linkDocumentProductToDocument(
-                                documentId,
-                                id.toLong()
-                            )
-                            if (!deliveryNoteDate.isNullOrEmpty()) {
-                                linkDocumentProductToAdditionalInfo(
-                                    id.toLong(),
-                                    deliveryNoteNumber,
-                                    deliveryNoteDate,
-                                )
-                            }
-                        }
-                }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -304,43 +296,17 @@ class CreditNoteLocalDataSource(
     ) {
         withContext(Dispatchers.IO) {
             try {
-                documentClientOrIssuerQueries.save(
-                    document_client_or_issuer_id = null,
-                    type = if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
-                        documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
-                    )
-                        ClientOrIssuerType.ISSUER.name.lowercase() else ClientOrIssuerType.CLIENT.name.lowercase(),
-                    first_name = documentClientOrIssuer.firstName?.text,
-                    name = documentClientOrIssuer.name.text,
-                    address1 = documentClientOrIssuer.address1?.text,
-                    address2 = documentClientOrIssuer.address2?.text,
-                    zip_code = documentClientOrIssuer.zipCode?.text,
-                    city = documentClientOrIssuer.city?.text,
-                    phone = documentClientOrIssuer.phone?.text,
-                    email = documentClientOrIssuer.email?.text,
-                    notes = documentClientOrIssuer.notes?.text,
-                    company_id1_label = documentClientOrIssuer.companyId1Label?.text,
-                    company_id1_number = documentClientOrIssuer.companyId1Number?.text,
-                    company_id2_label = documentClientOrIssuer.companyId2Label?.text,
-                    company_id2_number = documentClientOrIssuer.companyId2Number?.text
+                saveDocumentClientOrIssuerInDbAndLink(
+                    documentClientOrIssuerQueries,
+                    linkCreditNoteToDocumentClientOrIssuerQueries,
+                    documentClientOrIssuer,
+                    documentId
                 )
-
-                documentId?.let { documentId ->
-                    documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
-                        .executeAsOneOrNull()?.toInt()
-                        ?.let { id ->
-                            linkDocumentClientOrIssuerToDocument(
-                                documentId,
-                                id.toLong()
-                            )
-                        }
-                }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
-
 
     override suspend fun delete(documents: List<CreditNoteState>) {
         withContext(Dispatchers.IO) {
@@ -348,15 +314,15 @@ class CreditNoteLocalDataSource(
                 documents.filter { it.documentId != null }.forEach { document ->
                     document.documentProducts?.mapNotNull { it.id }?.forEach {
                         documentProductQueries.deleteDocumentProduct(it.toLong())
-                        creditNoteDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(
+                        linkCreditNoteDocumentProductToDeliveryNoteQueries.deleteInfoLinkedToDocumentProduct(
                             it.toLong()
                         )
                     }
                     creditNoteQueries.delete(id = document.documentId!!.toLong())
-                    creditNoteDocumentProductQueries.deleteAllProductsLinkedToCreditNote(
+                    linkCreditNoteToDocumentProductQueries.deleteAllProductsLinkedToCreditNote(
                         document.documentId!!.toLong()
                     )
-                    creditNoteDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToCreditNote(
+                    linkCreditNoteToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToCreditNote(
                         document.documentId!!.toLong()
                     )
                     document.documentClient?.type?.let {
@@ -389,11 +355,11 @@ class CreditNoteLocalDataSource(
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
             return withContext(Dispatchers.IO) {
-                creditNoteDocumentProductQueries.deleteProductLinkedToCreditNote(
+                linkCreditNoteToDocumentProductQueries.deleteProductLinkedToCreditNote(
                     documentId,
                     documentProductId
                 )
-                creditNoteDocumentProductAdditionalInfoQueries.deleteInfoLinkedToDocumentProduct(
+                linkCreditNoteDocumentProductToDeliveryNoteQueries.deleteInfoLinkedToDocumentProduct(
                     documentProductId
                 )
             }
@@ -412,56 +378,13 @@ class CreditNoteLocalDataSource(
                     fetchClientAndIssuer(id)?.firstOrNull { it.type == type }
 
                 documentClientOrIssuer?.id?.let {
-                    creditNoteDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToCreditNote(
+                    linkCreditNoteToDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToCreditNote(
                         id,
                         it.toLong()
                     )
                     documentClientOrIssuerQueries.delete(it.toLong())
                 }
             }
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-    }
-
-    override fun linkDocumentProductToDocument(id: Long, documentProductId: Long) {
-        try {
-            creditNoteDocumentProductQueries.saveProductLinkedToCreditNote(
-                id = null,
-                credit_note_id = id,
-                document_product_id = documentProductId
-            )
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-    }
-
-    override fun linkDocumentProductToAdditionalInfo(
-        documentProductId: Long,
-        deliveryNoteNumber: String?,
-        deliveryNoteDate: String,
-    ) {
-        try {
-            creditNoteDocumentProductAdditionalInfoQueries.saveInfoLinkedToDocumentProduct(
-                document_product_id = documentProductId,
-                delivery_note_number = deliveryNoteNumber,
-                date = deliveryNoteDate
-            )
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-    }
-
-    private fun linkDocumentClientOrIssuerToDocument(
-        documentId: Long,
-        documentClientOrIssuerId: Long,
-    ) {
-        try {
-            creditNoteDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToCreditNote(
-                id = null,
-                credit_note_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -480,14 +403,14 @@ class CreditNoteLocalDataSource(
     private fun getExistingFooter(): String? {
         var footer: String? = null
         try {
-            footer = creditNoteQueries.getLastInsertedCreditNoteFooter().executeAsOneOrNull()?.footer
+            footer = creditNoteQueries.getLastInsertedFooter().executeAsOneOrNull()?.footer
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return footer
     }
 
-    private fun saveInfoInCreditNoteTable(document: CreditNoteState) {
+    private fun saveInfoInDocumentTable(document: CreditNoteState) {
         try {
             creditNoteQueries.save(
                 credit_note_id = null,
@@ -496,11 +419,11 @@ class CreditNoteLocalDataSource(
                 reference = document.reference?.text,
                 currency = document.currency.text,
                 due_date = document.dueDate,
-                footer = document.footerText.text)
+                footer = document.footerText.text
+            )
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
-
     }
 
     private suspend fun saveInfoInOtherTables(document: DocumentState) {
@@ -510,9 +433,7 @@ class CreditNoteLocalDataSource(
                 document.documentProducts?.forEach { documentProduct ->
                     saveDocumentProductInDbAndLinkToDocument(
                         documentProduct = documentProduct,
-                        documentId = id,
-                        deliveryNoteDate = if (document is DeliveryNoteState) document.documentDate else null,
-                        deliveryNoteNumber = if (document is DeliveryNoteState) document.documentNumber.text else null
+                        documentId = id
                     )
                 }
 
@@ -536,5 +457,172 @@ class CreditNoteLocalDataSource(
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
+
+
 }
+
+fun saveDocumentClientOrIssuerInDbAndLink(
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    linkQueries: Any,
+    documentClientOrIssuer: DocumentClientOrIssuerState,
+    documentId: Long?,
+) {
+    documentClientOrIssuerQueries.save(
+        document_client_or_issuer_id = null,
+        type = if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
+            documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
+        )
+            ClientOrIssuerType.ISSUER.name.lowercase() else ClientOrIssuerType.CLIENT.name.lowercase(),
+        first_name = documentClientOrIssuer.firstName?.text,
+        name = documentClientOrIssuer.name.text,
+        address1 = documentClientOrIssuer.address1?.text,
+        address2 = documentClientOrIssuer.address2?.text,
+        zip_code = documentClientOrIssuer.zipCode?.text,
+        city = documentClientOrIssuer.city?.text,
+        phone = documentClientOrIssuer.phone?.text,
+        email = documentClientOrIssuer.email?.text,
+        notes = documentClientOrIssuer.notes?.text,
+        company_id1_label = documentClientOrIssuer.companyId1Label?.text,
+        company_id1_number = documentClientOrIssuer.companyId1Number?.text,
+        company_id2_label = documentClientOrIssuer.companyId2Label?.text,
+        company_id2_number = documentClientOrIssuer.companyId2Number?.text
+    )
+
+    documentId?.let { documentId ->
+        documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
+            .executeAsOneOrNull()?.toInt()
+            ?.let { id ->
+                linkDocumentClientOrIssuerToDocument(
+                    linkQueries,
+                    documentId,
+                    id.toLong()
+                )
+            }
+    }
+}
+
+fun saveDocumentProductInDbAndLink(
+    documentProductQueries: DocumentProductQueries,
+    linkToDocumentProductQueries: Any,
+    linkToDeliveryNotesQueries: Any,
+    documentProduct: DocumentProductState,
+    documentId: Long?,
+    deliveryNoteDate: String?,
+    deliveryNoteNumber: String?,
+) {
+    documentProductQueries.saveDocumentProduct(
+        document_product_id = null,
+        name = documentProduct.name.text,
+        quantity = documentProduct.quantity.toDouble(),
+        description = documentProduct.description?.text,
+        final_price = documentProduct.priceWithTax?.toDouble(),
+        tax_rate = documentProduct.taxRate?.toDouble(),
+        unit = documentProduct.unit?.text,
+        product_id = documentProduct.productId?.toLong()
+    )
+
+    documentId?.let { documentId ->
+        documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
+            ?.let { id ->
+                linkDocumentProductToDocument(
+                    linkToDocumentProductQueries,
+                    documentId,
+                    id.toLong()
+                )
+                if (!deliveryNoteDate.isNullOrEmpty()) {
+                    linkDocumentProductToAdditionalInfo(
+                        linkToDeliveryNotesQueries,
+                        id.toLong(),
+                        deliveryNoteNumber,
+                        deliveryNoteDate,
+                    )
+                }
+            }
+    }
+}
+
+fun linkDocumentProductToDocument(
+    linkQueries: Any,
+    id: Long,
+    documentProductId: Long) {
+    try {
+        if (linkQueries is LinkCreditNoteToDocumentProductQueries) {
+            linkQueries.saveProductLinkedToCreditNote(
+                id = null,
+                credit_note_id = id,
+                document_product_id = documentProductId
+            )
+        } else if (linkQueries is LinkDeliveryNoteToDocumentProductQueries) {
+            linkQueries.saveProductLinkedToDeliveryNote(
+                id = null,
+                delivery_note_id = id,
+                document_product_id = documentProductId
+            )
+        } else if (linkQueries is LinkInvoiceToDocumentProductQueries) {
+            linkQueries.saveProductLinkedToInvoice(
+                id = null,
+                invoice_id = id,
+                document_product_id = documentProductId
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+}
+
+fun linkDocumentProductToAdditionalInfo(
+    linkToDeliveryNotesQueries: Any,
+    documentProductId: Long,
+    deliveryNoteNumber: String?,
+    deliveryNoteDate: String,
+) {
+    try {
+        if (linkToDeliveryNotesQueries is LinkCreditNoteDocumentProductToDeliveryNoteQueries) {
+            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
+                document_product_id = documentProductId,
+                delivery_note_number = deliveryNoteNumber,
+                date = deliveryNoteDate
+            )
+        } else if (linkToDeliveryNotesQueries is LinkInvoiceDocumentProductToDeliveryNoteQueries) {
+            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
+                document_product_id = documentProductId,
+                delivery_note_number = deliveryNoteNumber,
+                date = deliveryNoteDate
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+}
+
+fun linkDocumentClientOrIssuerToDocument(
+    linkQueries: Any,
+    documentId: Long,
+    documentClientOrIssuerId: Long,
+) {
+    try {
+        if (linkQueries is LinkCreditNoteToDocumentClientOrIssuerQueries) {
+            linkQueries.saveDocumentClientOrIssuerLinkedToCreditNote(
+                id = null,
+                credit_note_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        } else if (linkQueries is LinkDeliveryNoteToDocumentClientOrIssuerQueries) {
+            linkQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
+                id = null,
+                delivery_note_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        } else if (linkQueries is LinkInvoiceToDocumentClientOrIssuerQueries) {
+            linkQueries.saveDocumentClientOrIssuerLinkedToInvoice(
+                id = null,
+                invoice_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+}
+
 

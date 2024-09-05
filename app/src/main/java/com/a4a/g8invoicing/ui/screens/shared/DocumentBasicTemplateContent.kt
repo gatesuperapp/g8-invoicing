@@ -41,7 +41,7 @@ fun DocumentBasicTemplateContent(
     onClickElement: (ScreenElement) -> Unit,
     screenWidth: Dp,
     productArray: List<DocumentProductState>?,
-    footerArray: List<String>,
+    prices: List<String>,
     selectedItem: ScreenElement? = null,
 ) {
     val pagePadding = 20.dp
@@ -117,14 +117,14 @@ fun DocumentBasicTemplateContent(
                 }
             }
 
-            DocumentBasicTemplatePrices(document, footerArray)
+            DocumentBasicTemplatePrices(document, prices)
 
-            if (document is InvoiceState) {
-                DocumentBasicTemplateFooter(
-                    document,
-                    onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) }
-                )
-            }
+
+            DocumentBasicTemplateFooter(
+                document,
+                onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) }
+            )
+
         }
     }
 }

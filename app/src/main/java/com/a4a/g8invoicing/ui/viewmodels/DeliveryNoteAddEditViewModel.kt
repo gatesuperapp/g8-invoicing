@@ -85,7 +85,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         var deliveryNoteId: Long? = null
         val createNewJob = viewModelScope.launch {
             try {
-                deliveryNoteId = deliveryNoteDataSource.createNewDeliveryNote()
+                deliveryNoteId = deliveryNoteDataSource.createNew()
             } catch (e: Exception) {
                 println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
@@ -99,7 +99,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         updateJob = viewModelScope.launch {
             try {
                 id?.let {
-                    deliveryNoteDataSource.updateDeliveryNote(deliveryNoteUiState.value)
+                    deliveryNoteDataSource.update(deliveryNoteUiState.value)
                 }
             } catch (e: Exception) {
                 println("Saving deliveryNote failed with exception: ${e.localizedMessage}")

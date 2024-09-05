@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,15 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
-import com.a4a.g8invoicing.ui.navigation.actionTagReminded
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
-import com.a4a.g8invoicing.ui.navigation.actionTagLate
-import com.a4a.g8invoicing.ui.navigation.actionTagPaid
-import com.a4a.g8invoicing.ui.navigation.actionTagSent
-import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
@@ -93,24 +87,23 @@ fun CreditNoteListItem(
             modifier = Modifier
                 .background(Color.White)
                 .padding(
+                    start = 20.dp,
                     end = 20.dp,
                     top = 14.dp,
                     bottom = 14.dp
                 )
         ) {
-            action = when (document.documentTag) {
-                DocumentTag.DRAFT -> actionTagDraft()
-                DocumentTag.SENT -> actionTagSent()
-                DocumentTag.PAID -> actionTagPaid()
-                DocumentTag.LATE -> actionTagLate()
-                DocumentTag.CANCELLED -> actionTagCancelled()
-                DocumentTag.CREDIT -> actionTagReminded()
-            }
+            // Re-triggers remember calculation when key changes
+            val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
+
             Column {
-                FlippyCheckBox(
-                    color = action.iconColor,
-                    onItemCheckboxClick = onItemCheckboxClick,
-                    keyToResetCheckboxes
+                Checkbox(
+                    checked = checkedState.value,
+                    onCheckedChange =
+                    {
+                        checkedState.value = it
+                        onItemCheckboxClick(it)
+                    },
                 )
             }
 
@@ -133,19 +126,6 @@ fun CreditNoteListItem(
                     )
                 }
 
-                if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
-                    action.label?.let {
-                        Text(
-                            text = stringResource(id = it),
-                        )
-                    }
-                } else {
-                    Text(
-                        Strings.get(R.string.credit_note_due_date) + " " + document.dueDate.substringBefore(
-                            " "
-                        )
-                    )
-                }
             }
 
             Column(

@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import java.math.BigDecimal
@@ -22,6 +24,8 @@ abstract class DocumentState {
     abstract var documentProducts: List<DocumentProductState>?
     abstract var documentPrices: DocumentPrices?
     abstract var currency: TextFieldValue
+    abstract var footerText: TextFieldValue
+    abstract var createdDate: String?
 }
 
 data class DocumentPrices(

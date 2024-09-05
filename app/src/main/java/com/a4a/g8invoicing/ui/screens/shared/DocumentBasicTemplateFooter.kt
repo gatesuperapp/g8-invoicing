@@ -14,13 +14,14 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
 fun DocumentBasicTemplateFooter(
-    uiState: InvoiceState,
+    document: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
 ) {
     Column(
@@ -40,10 +41,12 @@ fun DocumentBasicTemplateFooter(
             modifier = Modifier
                 .padding(bottom = 6.dp)
         ) {
-            Text(
-                style = MaterialTheme.typography.textForDocumentsBold,
-                text = Strings.get(R.string.invoice_pdf_due_date) + " : " + uiState.dueDate.substringBefore(" ")
-            )
+            if(document is InvoiceState) {
+                Text(
+                    style = MaterialTheme.typography.textForDocumentsBold,
+                    text = Strings.get(R.string.invoice_pdf_due_date) + " : " + document.dueDate.substringBefore(" ")
+                )
+            }
         }
         Row {
             Text(
@@ -51,7 +54,7 @@ fun DocumentBasicTemplateFooter(
                     .padding(bottom = 12.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.textForDocuments,
-                text = uiState.footerText.text
+                text = document.footerText.text
             )
         }
     }

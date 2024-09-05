@@ -67,7 +67,7 @@ fun DocumentBasicTemplateHeader(
                 style = MaterialTheme.typography.titleForDocuments,
                 text = stringResource(
                     id = if (document is DeliveryNoteState) R.string.delivery_note_number
-                    else if(document is CreditNoteState) R.string.delivery_note_number
+                    else if(document is CreditNoteState) R.string.credit_note_number
                         else R.string.invoice_number
                 ) + " " + document.documentNumber.text
             )

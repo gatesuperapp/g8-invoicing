@@ -26,7 +26,7 @@ fun DocumentBottomSheetElementsContent(
             label = stringResource(id = R.string.document_number_short),
             inputType = TextInput(
                 text = document.documentNumber,
-                placeholder = stringResource(id = R.string.document_default_number),
+                placeholder = stringResource(id = R.string.invoice_default_number),
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_NUMBER, it)
                 },
@@ -82,18 +82,17 @@ fun DocumentBottomSheetElementsContent(
                     pageElement = ScreenElement.DOCUMENT_DUE_DATE
                 )
             )
-        inputList.add(
-            FormInput(
-                label = stringResource(id = R.string.document_footer),
-                inputType = ForwardElement(
-                    text = document.footerText.text,
-                    isMultiline = false
-                ),
-                pageElement = ScreenElement.DOCUMENT_FOOTER
-            )
-        )
-
     }
+    inputList.add(
+        FormInput(
+            label = stringResource(id = R.string.document_footer),
+            inputType = ForwardElement(
+                text = document.footerText.text,
+                isMultiline = false
+            ),
+            pageElement = ScreenElement.DOCUMENT_FOOTER
+        )
+    )
 
     FormUI(
         inputList = inputList,

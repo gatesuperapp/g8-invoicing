@@ -19,7 +19,7 @@ data class CreditNoteState(
     override var documentType: DocumentType = DocumentType.INVOICE,
     override var documentTag: DocumentTag = DocumentTag.DRAFT,
     override var documentId: Int? = null,
-    override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_number)),
+    override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.credit_note_default_number)),
     // Have to put a time "12:00:00" because of a bug, if we don't, DatePicker will show 1 day prior to current date
     // https://issuetracker.google.com/issues/281859606
     override var documentDate: String = getDateFormatter().format(Calendar.getInstance().time) +  " 12:00:00",
@@ -31,7 +31,7 @@ data class CreditNoteState(
     override var currency: TextFieldValue  = TextFieldValue(),
     var paymentStatus: Int = 0,
     var dueDate: String = getDateFormatter().format(getDateInOneMonth().time) +  " 12:00:00",
-    var footerText: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_footer)),
-    var createdDate: String? = null
+    override var footerText: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_footer)),
+    override var createdDate: String? = null
 ) : DocumentState()
 

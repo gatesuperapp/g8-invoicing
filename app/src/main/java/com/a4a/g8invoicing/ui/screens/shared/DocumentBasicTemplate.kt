@@ -56,7 +56,7 @@ fun DocumentBasicTemplate(
             onClickElement = onClickElement,
             screenWidth = screenWidth,
             productArray = productArray,
-            footerArray = footerArray,
+            prices = footerArray,
             //numberOfPages = pagerState.pageCount,
         )
 

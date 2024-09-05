@@ -157,7 +157,7 @@ fun DocumentBottomSheetTextElements(
 
                         ScreenElement.DOCUMENT_DATE -> document.documentDate
                         ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
-                        ScreenElement.DOCUMENT_FOOTER -> (document as InvoiceState).footerText
+                        ScreenElement.DOCUMENT_FOOTER -> document.footerText
                         else -> {}
                     },
                     onClickBack = {
