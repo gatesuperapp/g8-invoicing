@@ -22,6 +22,7 @@ import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
 import com.ninetyninepercent.funfactu.icons.IconDollar
 import com.ninetyninepercent.funfactu.icons.IconDuplicate
 import com.ninetyninepercent.funfactu.icons.IconLabel
+import com.ninetyninepercent.funfactu.icons.IconMail
 
 import icons.IconDelete
 import icons.IconDone
@@ -167,7 +168,7 @@ fun actionTag() =
         name = "TAG",
         icon = IconLabel,
         description = R.string.appbar_label_description,
-        label = R.string.appbar_label,
+        label = R.string.appbar_tag,
         isSecondary = false,
     )
 
@@ -234,6 +235,14 @@ fun actionTagCancelled() =
         onClick = {} // see ButtonWithDropdownMenu
     )
 
+fun actionSendReminder(onClick: () -> Unit) =
+    AppBarAction(
+        icon = IconMail,
+        description = R.string.appbar_send_reminder,
+        label = R.string.appbar_send_reminder,
+        isSecondary = false,
+        onClick = onClick
+    )
 
 fun actionTextElements(onClick: () -> Unit) =
     AppBarAction(

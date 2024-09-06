@@ -50,7 +50,7 @@ fun ProductList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                isListItemSelected = selectedMode.value,
+                numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
                     onClickDelete(selectedItems.toList())
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)

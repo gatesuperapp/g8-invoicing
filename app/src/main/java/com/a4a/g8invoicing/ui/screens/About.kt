@@ -143,7 +143,8 @@ fun About(
             ), onClick = {
                 composeEmail(
                     context = context,
-                    address = Strings.get(R.string.about_contact_email)
+                    address = Strings.get(R.string.about_contact_email),
+                    emailMessage = ""
                 )
             }) {
                 Text(stringResource(id = R.string.about_button_contact))

@@ -1,7 +1,9 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
 import android.content.ContentValues
+import android.content.Context
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +13,7 @@ import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.screens.composeEmail
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +40,7 @@ class InvoiceListViewModel @Inject constructor(
     private var createCorrectedInvoiceJob: Job? = null
     private var duplicateJob: Job? = null
     private var setTagJob: Job? = null
+    private var sendReminderJob: Job? = null
     private var markAsPaidJob: Job? = null
 
     init {
@@ -129,6 +133,17 @@ class InvoiceListViewModel @Inject constructor(
         markAsPaidJob = viewModelScope.launch {
             try {
                 invoiceDataSource.markAsPaid(selectedDocuments, tag)
+            } catch (e: Exception) {
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+        }
+    }
+
+    fun sendReminder(document: InvoiceState) {
+        sendReminderJob?.cancel()
+        sendReminderJob = viewModelScope.launch {
+            try {
+
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }

@@ -50,7 +50,7 @@ fun ClientOrIssuerList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                isListItemSelected = selectedMode.value,
+                numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
                     onClickDelete(selectedItems.toList())
                     selectedItems.clear()

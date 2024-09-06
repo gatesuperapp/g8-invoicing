@@ -53,7 +53,8 @@ fun CreditNoteList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                isListItemSelected = selectedMode.value,
+                selectedMode = selectedMode.value,
+                numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
                     openAlertDialog.value = true
                 },

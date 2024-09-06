@@ -159,6 +159,7 @@ fun Send(context: Context, document: DocumentState, finalFileName: String) {
                     address = document.documentClient?.email?.text,
                     documentNumber = document.documentNumber.text,
                     documentType = document.documentType,
+                    emailMessage = Strings.get(R.string.export_send_file_content),
                     attachedDocumentUri = it,
                     context = context
                 )
@@ -184,6 +185,7 @@ fun composeEmail(
     address: String? = null,
     documentNumber: String? = null,
     documentType: DocumentType? = null,
+    emailMessage: String,
     attachedDocumentUri: Uri? = null,
     context: Context,
 ) {
@@ -197,15 +199,16 @@ fun composeEmail(
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
         intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
         intent.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
+
+        intent.putExtra(
+            Intent.EXTRA_SUBJECT,
+            Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"
+        )
+        intent.putExtra(Intent.EXTRA_TEXT, emailMessage)
         attachedDocumentUri?.let {
-            intent.putExtra(
-                Intent.EXTRA_SUBJECT,
-                Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"
-            )
-            intent.putExtra(Intent.EXTRA_TEXT, Strings.get(R.string.export_send_file_content))
-         //   intent.putExtra(Intent.EXTRA_STREAM, it)
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(listOf(it)))
         }
+
         startActivity(context, intent, null)
 
     } catch (e: Exception) {

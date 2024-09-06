@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.ui.navigation.actionCreateCreditNote
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionNew
+import com.a4a.g8invoicing.ui.navigation.actionSendReminder
 import com.a4a.g8invoicing.ui.navigation.actionTag
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 
@@ -19,7 +20,8 @@ import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 fun GeneralBottomBar(
     navController: NavController,
     isButtonNewDisplayed: Boolean = true,
-    isListItemSelected: Boolean = false,
+    selectedMode: Boolean = false,
+    numberOfItemsSelected: Int = 0,
     onClickDuplicate: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickCreateCreditNote: () -> Unit = {},
@@ -29,13 +31,14 @@ fun GeneralBottomBar(
     onClickCategory: (Category) -> Unit = {},
     onClickTag: (DocumentTag) -> Unit = {},
     onClickConvert: () -> Unit = {},
+    onClickSendReminder: () -> Unit = {},
     isConvertible: Boolean = false,
     isInvoice: Boolean = false,
 ) {
     BottomBarAction(
         navController,
         appBarActions =
-        if (!isListItemSelected) {
+        if (numberOfItemsSelected == 0) {
             if (isButtonNewDisplayed) {
                 arrayOf(
                     actionNew(onClickNew),
@@ -44,7 +47,7 @@ fun GeneralBottomBar(
             } else arrayOf(
                 actionCategories()
             )
-        } else if (isInvoice) {
+        } else if (isInvoice && numberOfItemsSelected > 1) {
             arrayOf(
                 actionUnselectAll(onClickUnselectAll),
                 actionDuplicate(onClickDuplicate),
@@ -52,6 +55,16 @@ fun GeneralBottomBar(
                 actionCreateCreditNote(onClickCreateCreditNote),
                 actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
                 actionTag()
+            )
+        } else if (isInvoice && numberOfItemsSelected == 1) {
+            arrayOf(
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                actionCreateCreditNote(onClickCreateCreditNote),
+                actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
+                actionTag(),
+                actionSendReminder(onClickSendReminder)
             )
         } else if (isConvertible) {
             arrayOf(

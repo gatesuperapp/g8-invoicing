@@ -14,7 +14,8 @@
     <string name="appbar_categories"> Catégories</string>
     <string name="dropdown_menu_categories"> Catégories</string>
     <string name="appbar_label_description"> Ajouter un label</string>
-    <string name="appbar_label">Marquer</string>
+    <string name="appbar_tag">Marquer</string>
+    <string name="appbar_send_reminder">Relancer</string>
     <string name="appbar_text">Modifier le texte</string>
     <string name="appbar_list">Ajouter des items</string>
     <string name="appbar_list_label">Items</string>
@@ -262,6 +263,13 @@
     <string name="export_send_file_content">Bonjour, \n
         Veuillez trouver votre document ci-joint.\n
         Cordialement\n\n</string>
+    <string name="send_reminder_email_1">Bonjour, \n\n
+        Votre facture </string>
+    <string name="send_reminder_email_2">d\'un montant de </string>
+    <string name="send_reminder_email_3">est arrivée à échéance le </string>
+    <string name="send_reminder_email_4">Nous n\'avons à ce jour pas reçu de paiement
+        et vous remercions de procéder au règlement dès que possible.\n\n
+        Cordialement\n</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
     <string name="export_error_sharing">Erreur. Veuillez passer directement par le dossier "téléchargements". </string>
@@ -269,4 +277,5 @@
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
     <string name="delivery_note_acronym">BL</string>
+
 </resources>
