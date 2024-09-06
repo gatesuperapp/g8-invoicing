@@ -120,6 +120,18 @@ val Typography.textVerySmall: TextStyle
         )
     }
 
+val Typography.callForActions: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFont,
+            color = ColorDarkGray,
+            fontSize = 36.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }
 
 val Typography.textForDocuments: TextStyle
     @Composable

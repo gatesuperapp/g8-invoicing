@@ -15,6 +15,7 @@ data class ClientOrIssuerState(
     var type: ClientOrIssuerType? = null,
     var firstName: TextFieldValue? = null,
     var name: TextFieldValue = TextFieldValue(""),
+    var addressTitle: TextFieldValue? = null,
     var address1: TextFieldValue? = null,
     var address2: TextFieldValue? = null,
     var zipCode: TextFieldValue? = null,
