@@ -246,7 +246,8 @@ class InvoiceLocalDataSource(
                 if (isPaymentLate(document.dueDate)) {
                     linkDocumentToDocumentTag(
                         document.documentId?.toLong() ?: 0,
-                        DocumentTag.LATE,
+                        initialTag = document.documentTag,
+                        newTag = DocumentTag.LATE,
                         updateCase = TagUpdateOrCreationCase.DUE_DATE_EXPIRED
                     )
                 }
@@ -285,7 +286,11 @@ class InvoiceLocalDataSource(
             try {
                 documents.forEach { invoice ->
                     invoice.documentId?.toLong()?.let { invoiceId ->
-                        linkDocumentToDocumentTag(invoiceId, tag, tagUpdateCase)
+                        linkDocumentToDocumentTag(
+                            invoiceId,
+                            initialTag = invoice.documentTag,
+                            newTag = tag,
+                            tagUpdateCase)
                     }
                 }
             } catch (e: Exception) {
@@ -440,24 +445,18 @@ class InvoiceLocalDataSource(
 
     private suspend fun linkDocumentToDocumentTag(
         documentId: Long,
-        tag: DocumentTag,
+        initialTag: DocumentTag,
+        newTag: DocumentTag,
         updateCase: TagUpdateOrCreationCase,
     ) {
         try {
             withContext(Dispatchers.IO) {
-                var tagNeverBeenUpdatedByUserBefore = true
-                try {
-                    tagNeverBeenUpdatedByUserBefore =
-                        linkInvoiceToTagQueries.getInvoiceTag(documentId)
-                            .executeAsOneOrNull()?.updated_by_user_at == null
-                } catch (e: Exception) {
-                    Log.e(ContentValues.TAG, "Error: ${e.message}")
-                }
-
-                invoiceTagQueries.getTagId(tag.name).executeAsOneOrNull()?.let {
+                invoiceTagQueries.getTagId(newTag.name).executeAsOneOrNull()?.let {
                     if (updateCase == TagUpdateOrCreationCase.UPDATED_BY_USER ||
                         updateCase == TagUpdateOrCreationCase.AUTOMATICALLY_CANCELLED ||
-                        (updateCase == TagUpdateOrCreationCase.DUE_DATE_EXPIRED && tagNeverBeenUpdatedByUserBefore)
+                        (updateCase == TagUpdateOrCreationCase.DUE_DATE_EXPIRED
+                                && (initialTag == DocumentTag.DRAFT
+                                || initialTag == DocumentTag.SENT))
                     ) {
                         linkInvoiceToTagQueries.updateInvoiceTag(
                             invoice_id = documentId,
@@ -540,7 +539,8 @@ class InvoiceLocalDataSource(
                 // Link tag
                 linkDocumentToDocumentTag(
                     id,
-                    document.documentTag,
+                    initialTag = document.documentTag,
+                    newTag = document.documentTag,
                     TagUpdateOrCreationCase.TAG_CREATION
                 )
 
