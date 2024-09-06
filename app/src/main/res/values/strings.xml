@@ -28,11 +28,11 @@
     <string name="appbar_more">Autres options</string>
     <string name="appbar_more_label">Plus</string>
     <string name="appbar_delete">Supprimer</string>
-    <string name="appbar_create_corrected_invoice">Créer facture de remplacement</string>
+    <string name="appbar_create_corrected_invoice">Créer facture rectificative</string>
     <string name="appbar_create_credit_note">Créer avoir</string>
     <string name="appbar_convert">Convertir</string>
     <string name="appbar_convert_label">Facturer</string>
-    <string name="appbar_unselect_all">Désélectionner</string>
+    <string name="appbar_unselect_all">Annuler sélection</string>
     <string name="appbar_unselect_all_label">Retour</string>
     <string name="appbar_select_all">Sélectionner tout </string>
     <string name="appbar_edit">Modifier la facture</string>

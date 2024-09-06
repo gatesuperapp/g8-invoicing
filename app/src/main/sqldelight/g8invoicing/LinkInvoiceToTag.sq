@@ -2,6 +2,7 @@ CREATE TABLE LinkInvoiceToTag (
     id INTEGER PRIMARY KEY NOT NULL,
     invoice_id INTEGER NOT NULL,
     tag_id INTEGER NOT NULL,
+    updated_by_user_at TEXT,
 
   FOREIGN KEY(tag_id)
          REFERENCES InvoiceTag(invoice_tag_id)
@@ -10,17 +11,18 @@ CREATE TABLE LinkInvoiceToTag (
 
 saveInvoiceTag:
 INSERT OR REPLACE
-INTO LinkInvoiceToTag (id, invoice_id, tag_id)
-VALUES (?, ?, ?);
+INTO LinkInvoiceToTag (id, invoice_id, tag_id, updated_by_user_at)
+VALUES (?, ?, ?, NULL );
 
 updateInvoiceTag:
 UPDATE LinkInvoiceToTag
 SET invoice_id = :invoice_id,
-    tag_id = :tag_id
+    tag_id = :tag_id,
+    updated_by_user_at = (datetime('now', 'localtime'))
 WHERE
     invoice_id = :invoice_id;
 
 getInvoiceTag:
-SELECT tag_id
+SELECT *
 FROM LinkInvoiceToTag
 WHERE invoice_id = :invoice_id;

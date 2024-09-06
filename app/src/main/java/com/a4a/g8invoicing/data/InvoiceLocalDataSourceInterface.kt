@@ -30,6 +30,6 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>)
     suspend fun update(document: InvoiceState)
     suspend fun delete(documents: List<InvoiceState>)
-    suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag)
+    suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase)
     suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag)
 }

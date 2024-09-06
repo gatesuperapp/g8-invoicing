@@ -40,17 +40,11 @@ class CreditNoteListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 creditNoteDataSource.fetchAll()?.collect {
-                    val lateDocuments = it.filter { isPaymentLate(it.dueDate) == true }
-                    if (lateDocuments.isNotEmpty()) {
-                        setTag(lateDocuments, DocumentTag.LATE)
-                    }
-
                     _documentsUiState.update { uiState ->
                         uiState.copy(
                             documentStates = it
                         )
                     }
-
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")

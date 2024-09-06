@@ -24,7 +24,7 @@ val ColorGreyDraft = Color(0xFFC1C1C1)
 val ColorSent = Color(0xFF3B97D3)
 val ColorGreenPaid = Color(0xFF09D981)
 val ColorRedLate = Color(0xFFFC5A58)
-val ColorCredit = Color(0xFFF8D51B)
+val ColorReminded = Color(0xFFF374AE)
 val ColorCancelled = Color(0xFFFFF4CC)
 
 val ColorGreenPaidCompl = Color(0xFFc3dea5)

@@ -8,8 +8,8 @@ VALUES (1, 'DRAFT'),
 (2, 'SENT'),
 (3, 'PAID'),
 (4, 'LATE'),
-(5, 'CANCELLED'),
-(6, 'CREDIT');
+(5, 'REMINDED'),
+(6, 'CANCELLED');
 
 getTagId:
 SELECT invoice_tag_id

@@ -103,8 +103,8 @@ fun InvoiceListItem(
                 DocumentTag.SENT -> actionTagSent()
                 DocumentTag.PAID -> actionTagPaid()
                 DocumentTag.LATE -> actionTagLate()
+                DocumentTag.REMINDED -> actionTagReminded()
                 DocumentTag.CANCELLED -> actionTagCancelled()
-                DocumentTag.CREDIT -> actionTagReminded()
             }
             Column {
                 FlippyCheckBox(

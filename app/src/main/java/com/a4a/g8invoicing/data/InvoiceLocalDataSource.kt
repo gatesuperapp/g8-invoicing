@@ -32,7 +32,7 @@ class InvoiceLocalDataSource(
     private val documentProductQueries = db.documentProductQueries
     private val creditNoteQueries = db.creditNoteQueries
     private val linkInvoiceToDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
-    private val linkDocumentToTagQueries = db.linkInvoiceToTagQueries
+    private val linkInvoiceToTagQueries = db.linkInvoiceToTagQueries
     private val linkInvoiceDocumentProductToDeliveryNoteQueries =
         db.linkInvoiceDocumentProductToDeliveryNoteQueries
     private val linkInvoiceToDocumentClientOrIssuerQueries =
@@ -159,7 +159,8 @@ class InvoiceLocalDataSource(
 
     private fun fetchTag(documentId: Long): DocumentTag? {
         try {
-            val tagId = linkDocumentToTagQueries.getInvoiceTag(documentId).executeAsOneOrNull()
+            val tagId =
+                linkInvoiceToTagQueries.getInvoiceTag(documentId).executeAsOneOrNull()?.tag_id
             tagId?.let {
                 invoiceTagQueries.getTag(it).executeAsOneOrNull()?.let { tagName ->
                     val tag: DocumentTag = enumValueOf(tagName)
@@ -183,8 +184,8 @@ class InvoiceLocalDataSource(
                 documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.issuing_date ?: "",
-                reference = it.reference?.let { TextFieldValue(text = it)},
-                freeField = it.free_field?.let { TextFieldValue(text = it)},
+                reference = it.reference?.let { TextFieldValue(text = it) },
+                freeField = it.free_field?.let { TextFieldValue(text = it) },
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
@@ -241,12 +242,14 @@ class InvoiceLocalDataSource(
                     footer = document.footerText.text,
                     updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
-                /*// Update tag
-                linkDocumentToDocumentTag(
-                    document.documentId?.toLong() ?: 0,
-                    document.documentTag,
-                    isUpdate = true
-                )*/
+                // Update tag if payment is late (due date expired)
+                if (isPaymentLate(document.dueDate)) {
+                    linkDocumentToDocumentTag(
+                        document.documentId?.toLong() ?: 0,
+                        DocumentTag.LATE,
+                        updateCase = TagUpdateOrCreationCase.DUE_DATE_EXPIRED
+                    )
+                }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -273,12 +276,16 @@ class InvoiceLocalDataSource(
     }
 
 
-    override suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag) {
+    override suspend fun setTag(
+        documents: List<InvoiceState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    ) {
         withContext(Dispatchers.IO) {
             try {
                 documents.forEach { invoice ->
                     invoice.documentId?.toLong()?.let { invoiceId ->
-                        linkDocumentToDocumentTag(invoiceId, tag, isUpdate = true)
+                        linkDocumentToDocumentTag(invoiceId, tag, tagUpdateCase)
                     }
                 }
             } catch (e: Exception) {
@@ -294,7 +301,9 @@ class InvoiceLocalDataSource(
                     invoiceQueries.updatePaymentStatus(
                         invoice_id = it,
                         payment_status = if (tag == DocumentTag.PAID) 2 else 0,
-                        updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
+                        updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(
+                            Calendar.getInstance().time
+                        )
                     )
                 }
             }
@@ -432,18 +441,30 @@ class InvoiceLocalDataSource(
     private suspend fun linkDocumentToDocumentTag(
         documentId: Long,
         tag: DocumentTag,
-        isUpdate: Boolean = false,
+        updateCase: TagUpdateOrCreationCase,
     ) {
         try {
             withContext(Dispatchers.IO) {
+                var tagNeverBeenUpdatedByUserBefore = true
+                try {
+                    tagNeverBeenUpdatedByUserBefore =
+                        linkInvoiceToTagQueries.getInvoiceTag(documentId)
+                            .executeAsOneOrNull()?.updated_by_user_at == null
+                } catch (e: Exception) {
+                    Log.e(ContentValues.TAG, "Error: ${e.message}")
+                }
+
                 invoiceTagQueries.getTagId(tag.name).executeAsOneOrNull()?.let {
-                    if (isUpdate) {
-                        linkDocumentToTagQueries.updateInvoiceTag(
+                    if (updateCase == TagUpdateOrCreationCase.UPDATED_BY_USER ||
+                        updateCase == TagUpdateOrCreationCase.AUTOMATICALLY_CANCELLED ||
+                        (updateCase == TagUpdateOrCreationCase.DUE_DATE_EXPIRED && tagNeverBeenUpdatedByUserBefore)
+                    ) {
+                        linkInvoiceToTagQueries.updateInvoiceTag(
                             invoice_id = documentId,
                             tag_id = it
                         )
-                    } else {
-                        linkDocumentToTagQueries.saveInvoiceTag(
+                    } else if (updateCase == TagUpdateOrCreationCase.TAG_CREATION) {
+                        linkInvoiceToTagQueries.saveInvoiceTag(
                             id = null,
                             invoice_id = documentId,
                             tag_id = it
@@ -512,8 +533,16 @@ class InvoiceLocalDataSource(
     private suspend fun saveInfoInOtherTables(document: DocumentState) {
         try {
             invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
+                if (document is InvoiceState && isPaymentLate(document.dueDate)) {
+                    document.documentTag = DocumentTag.CANCELLED
+                }
+
                 // Link tag
-                linkDocumentToDocumentTag(id, document.documentTag)
+                linkDocumentToDocumentTag(
+                    id,
+                    document.documentTag,
+                    TagUpdateOrCreationCase.TAG_CREATION
+                )
 
                 // Link all products
                 document.documentProducts?.forEach { documentProduct ->
@@ -546,6 +575,14 @@ class InvoiceLocalDataSource(
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
+
+    private fun isPaymentLate(dueDate: String): Boolean {
+        val formatter = getDateFormatter()
+        val dueDate = formatter.parse(dueDate)?.time
+        val currentDate = java.util.Date().time
+        val isLatePayment = dueDate != null && dueDate < currentDate
+        return isLatePayment
+    }
 }
 
 fun incrementDocumentNumber(docNumber: String): String {
@@ -554,4 +591,11 @@ fun incrementDocumentNumber(docNumber: String): String {
         val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
         return firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
     } else return docNumber
+}
+
+enum class TagUpdateOrCreationCase {
+    TAG_CREATION, // new invoice, delivery note conversion, duplication
+    UPDATED_BY_USER,
+    AUTOMATICALLY_CANCELLED, //after creating credit note or corrected invoice
+    DUE_DATE_EXPIRED
 }

@@ -9,8 +9,8 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
+import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,17 +48,11 @@ class InvoiceListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 invoiceDataSource.fetchAll()?.collect {
-                    val lateDocuments = it.filter { isPaymentLate(it.dueDate) == true }
-                    if (lateDocuments.isNotEmpty()) {
-                        setTag(lateDocuments, DocumentTag.LATE)
-                    }
-
                     _documentsUiState.update { uiState ->
                         uiState.copy(
                             documentStates = it
                         )
                     }
-
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -107,14 +101,14 @@ class InvoiceListViewModel @Inject constructor(
                     it.freeField = TextFieldValue(Strings.get(R.string.corrected_invoice_cancel_and_replace) + " " + it.documentNumber.text)
                 }
                 invoiceDataSource.duplicate(selectedDocuments)
-                setTag(selectedDocuments, DocumentTag.CANCELLED)
+                setTag(selectedDocuments, DocumentTag.CANCELLED, TagUpdateOrCreationCase.AUTOMATICALLY_CANCELLED)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
 
-    fun setTag(selectedDocuments: List<InvoiceState>, tag: DocumentTag) {
+    fun setTag(selectedDocuments: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase) {
         setTagJob?.cancel()
         setTagJob = viewModelScope.launch {
             try {
@@ -123,7 +117,7 @@ class InvoiceListViewModel @Inject constructor(
                     it.documentTag = tag
                 }
                 // Set tag in local db
-                invoiceDataSource.setTag(selectedDocuments, tag)
+                invoiceDataSource.setTag(selectedDocuments, tag, tagUpdateCase)
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -141,13 +135,7 @@ class InvoiceListViewModel @Inject constructor(
         }
     }
 
-    private fun isPaymentLate(dueDate: String): Boolean {
-        val formatter = getDateFormatter()
-        val dueDate = formatter.parse(dueDate)?.time
-        val currentDate = java.util.Date().time
-        val isLatePayment = dueDate != null && dueDate < currentDate
-        return isLatePayment
-    }
+
 }
 
 

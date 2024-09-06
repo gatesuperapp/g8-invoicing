@@ -12,7 +12,7 @@ import com.a4a.g8invoicing.ui.shared.icons.IconExport
 import com.a4a.g8invoicing.ui.shared.icons.IconList
 import com.a4a.g8invoicing.ui.shared.icons.IconText
 import com.a4a.g8invoicing.ui.theme.ColorCancelled
-import com.a4a.g8invoicing.ui.theme.ColorCredit
+import com.a4a.g8invoicing.ui.theme.ColorReminded
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
 import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
@@ -200,7 +200,7 @@ fun actionTagPaid() =
         iconColor = ColorGreenPaid,
         description = R.string.appbar_tag_paid,
         label = R.string.appbar_tag_paid,
-         onClick = {} // see ButtonWithDropdownMenu
+        onClick = {} // see ButtonWithDropdownMenu
     )
 
 
@@ -211,9 +211,18 @@ fun actionTagLate() =
         iconColor = ColorRedLate,
         description = R.string.appbar_tag_late,
         label = R.string.appbar_tag_late,
-         onClick = {} // see ButtonWithDropdownMenu
+        onClick = {} // see ButtonWithDropdownMenu
     )
 
+fun actionTagReminded() =
+    AppBarAction(
+        tag = DocumentTag.REMINDED,
+        icon = IconCircle,
+        iconColor = ColorReminded,
+        description = R.string.appbar_tag_reminded,
+        label = R.string.appbar_tag_reminded,
+        onClick = {} // see ButtonWithDropdownMenu
+    )
 
 fun actionTagCancelled() =
     AppBarAction(
@@ -222,20 +231,8 @@ fun actionTagCancelled() =
         iconColor = ColorCancelled,
         description = R.string.appbar_tag_cancelled,
         label = R.string.appbar_tag_cancelled,
-         onClick = {} // see ButtonWithDropdownMenu
+        onClick = {} // see ButtonWithDropdownMenu
     )
-
-
-fun actionTagReminded() =
-    AppBarAction(
-        tag = DocumentTag.CREDIT,
-        icon = IconCircle,
-        iconColor = ColorCredit,
-        description = R.string.appbar_tag_reminded,
-        label = R.string.appbar_tag_reminded,
-         onClick = {} // see ButtonWithDropdownMenu
-    )
-
 
 
 fun actionTextElements(onClick: () -> Unit) =

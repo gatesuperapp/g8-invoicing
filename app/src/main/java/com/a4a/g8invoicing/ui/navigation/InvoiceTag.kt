@@ -5,6 +5,6 @@ enum class DocumentTag {
     SENT,
     PAID,
     LATE,
-    CANCELLED,
-    CREDIT
+    REMINDED,
+    CANCELLED
 }
