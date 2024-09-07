@@ -126,7 +126,7 @@ class CreditNoteLocalDataSource(
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()
                         .transformIntoEditableDocumentProduct(
-                            additionalInfo?.date,
+                            additionalInfo?.delivery_note_date,
                             additionalInfo?.delivery_note_number
                         )
                 }.toMutableList()
@@ -146,7 +146,7 @@ class CreditNoteLocalDataSource(
 
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
-                    documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                    documentClientOrIssuerQueries.get(it.id)
                         .executeAsOne()
                         .transformIntoEditable()
                 }
@@ -456,173 +456,5 @@ class CreditNoteLocalDataSource(
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
-
-
 }
-
-fun saveDocumentClientOrIssuerInDbAndLink(
-    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
-    linkQueries: Any,
-    documentClientOrIssuer: DocumentClientOrIssuerState,
-    documentId: Long?,
-) {
-    documentClientOrIssuerQueries.save(
-        document_client_or_issuer_id = null,
-        type = if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
-            documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
-        )
-            ClientOrIssuerType.ISSUER.name.lowercase() else ClientOrIssuerType.CLIENT.name.lowercase(),
-        first_name = documentClientOrIssuer.firstName?.text,
-        name = documentClientOrIssuer.name.text,
-        address1 = documentClientOrIssuer.address1?.text,
-        address2 = documentClientOrIssuer.address2?.text,
-        zip_code = documentClientOrIssuer.zipCode?.text,
-        city = documentClientOrIssuer.city?.text,
-        phone = documentClientOrIssuer.phone?.text,
-        email = documentClientOrIssuer.email?.text,
-        notes = documentClientOrIssuer.notes?.text,
-        company_id1_label = documentClientOrIssuer.companyId1Label?.text,
-        company_id1_number = documentClientOrIssuer.companyId1Number?.text,
-        company_id2_label = documentClientOrIssuer.companyId2Label?.text,
-        company_id2_number = documentClientOrIssuer.companyId2Number?.text
-    )
-
-    documentId?.let { documentId ->
-        documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
-            .executeAsOneOrNull()?.toInt()
-            ?.let { id ->
-                linkDocumentClientOrIssuerToDocument(
-                    linkQueries,
-                    documentId,
-                    id.toLong()
-                )
-            }
-    }
-}
-
-fun saveDocumentProductInDbAndLink(
-    documentProductQueries: DocumentProductQueries,
-    linkToDocumentProductQueries: Any,
-    linkToDeliveryNotesQueries: Any,
-    documentProduct: DocumentProductState,
-    documentId: Long?,
-    deliveryNoteDate: String?,
-    deliveryNoteNumber: String?,
-) {
-    documentProductQueries.saveDocumentProduct(
-        document_product_id = null,
-        name = documentProduct.name.text,
-        quantity = documentProduct.quantity.toDouble(),
-        description = documentProduct.description?.text,
-        final_price = documentProduct.priceWithTax?.toDouble(),
-        tax_rate = documentProduct.taxRate?.toDouble(),
-        unit = documentProduct.unit?.text,
-        product_id = documentProduct.productId?.toLong()
-    )
-
-    documentId?.let { documentId ->
-        documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
-            ?.let { id ->
-                linkDocumentProductToDocument(
-                    linkToDocumentProductQueries,
-                    documentId,
-                    id.toLong()
-                )
-                if (!deliveryNoteDate.isNullOrEmpty()) {
-                    linkDocumentProductToAdditionalInfo(
-                        linkToDeliveryNotesQueries,
-                        id.toLong(),
-                        deliveryNoteNumber,
-                        deliveryNoteDate,
-                    )
-                }
-            }
-    }
-}
-
-fun linkDocumentProductToDocument(
-    linkQueries: Any,
-    id: Long,
-    documentProductId: Long,
-) {
-    try {
-        if (linkQueries is LinkCreditNoteToDocumentProductQueries) {
-            linkQueries.saveProductLinkedToCreditNote(
-                id = null,
-                credit_note_id = id,
-                document_product_id = documentProductId
-            )
-        } else if (linkQueries is LinkDeliveryNoteToDocumentProductQueries) {
-            linkQueries.saveProductLinkedToDeliveryNote(
-                id = null,
-                delivery_note_id = id,
-                document_product_id = documentProductId
-            )
-        } else if (linkQueries is LinkInvoiceToDocumentProductQueries) {
-            linkQueries.saveProductLinkedToInvoice(
-                id = null,
-                invoice_id = id,
-                document_product_id = documentProductId
-            )
-        }
-    } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
-}
-
-fun linkDocumentProductToAdditionalInfo(
-    linkToDeliveryNotesQueries: Any,
-    documentProductId: Long,
-    deliveryNoteNumber: String?,
-    deliveryNoteDate: String,
-) {
-    try {
-        if (linkToDeliveryNotesQueries is LinkCreditNoteDocumentProductToDeliveryNoteQueries) {
-            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
-                document_product_id = documentProductId,
-                delivery_note_number = deliveryNoteNumber,
-                date = deliveryNoteDate
-            )
-        } else if (linkToDeliveryNotesQueries is LinkInvoiceDocumentProductToDeliveryNoteQueries) {
-            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
-                document_product_id = documentProductId,
-                delivery_note_number = deliveryNoteNumber,
-                date = deliveryNoteDate
-            )
-        }
-    } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
-}
-
-fun linkDocumentClientOrIssuerToDocument(
-    linkQueries: Any,
-    documentId: Long,
-    documentClientOrIssuerId: Long,
-) {
-    try {
-        if (linkQueries is LinkCreditNoteToDocumentClientOrIssuerQueries) {
-            linkQueries.saveDocumentClientOrIssuerLinkedToCreditNote(
-                id = null,
-                credit_note_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
-        } else if (linkQueries is LinkDeliveryNoteToDocumentClientOrIssuerQueries) {
-            linkQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
-                id = null,
-                delivery_note_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
-        } else if (linkQueries is LinkInvoiceToDocumentClientOrIssuerQueries) {
-            linkQueries.saveDocumentClientOrIssuerLinkedToInvoice(
-                id = null,
-                invoice_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
-        }
-    } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
-}
-
 

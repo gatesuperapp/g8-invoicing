@@ -16,10 +16,7 @@ data class ClientOrIssuerState(
     var firstName: TextFieldValue? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var addressTitle: TextFieldValue? = null,
-    var address1: TextFieldValue? = null,
-    var address2: TextFieldValue? = null,
-    var zipCode: TextFieldValue? = null,
-    var city: TextFieldValue? = null,
+    var addresses: List<AddressState>? = null,
     var phone: TextFieldValue? = null,
     var email: TextFieldValue? = null,
     var notes: TextFieldValue? = null,
@@ -28,4 +25,12 @@ data class ClientOrIssuerState(
     var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
     var companyId2Number: TextFieldValue? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
+)
+
+data class AddressState(
+    var id: Int? = null,
+    var addressLine1: TextFieldValue? = null,
+    var addressLine2: TextFieldValue? = null,
+    var zipCode: TextFieldValue? = null,
+    var city: TextFieldValue? = null,
 )

@@ -1,0 +1,29 @@
+CREATE TABLE DocumentClientOrIssuerAddress (
+  id INTEGER PRIMARY KEY NOT NULL,
+  address_line_1 TEXT,
+  address_line_2 TEXT,
+  zip_code TEXT,
+  city TEXT
+);
+
+get:
+SELECT *
+FROM DocumentClientOrIssuerAddress
+WHERE id = :id;
+
+save:
+INSERT INTO DocumentClientOrIssuerAddress (id, address_line_1, address_line_2, zip_code, city)
+VALUES (?, ?, ?, ?, ?);
+
+update:
+UPDATE DocumentClientOrIssuerAddress
+SET address_line_1 = :address_line_1,
+    address_line_2 = :address_line_2,
+    zip_code = :zip_code,
+    city = :city
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM DocumentClientOrIssuerAddress
+WHERE id = :id;

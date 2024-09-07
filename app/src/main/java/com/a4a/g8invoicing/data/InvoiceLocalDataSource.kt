@@ -9,6 +9,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
+import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -16,7 +17,19 @@ import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import g8invoicing.DocumentClientOrIssuer
+import g8invoicing.DocumentClientOrIssuerAddressQueries
+import g8invoicing.DocumentClientOrIssuerQueries
+import g8invoicing.DocumentProductQueries
 import g8invoicing.Invoice
+import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
+import g8invoicing.LinkCreditNoteToDocumentClientOrIssuerQueries
+import g8invoicing.LinkCreditNoteToDocumentProductQueries
+import g8invoicing.LinkDeliveryNoteToDocumentClientOrIssuerQueries
+import g8invoicing.LinkDeliveryNoteToDocumentProductQueries
+import g8invoicing.LinkDocumentClientOrIssuerToAddressQueries
+import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
+import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
+import g8invoicing.LinkInvoiceToDocumentProductQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -126,7 +139,7 @@ class InvoiceLocalDataSource(
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()
                         .transformIntoEditableDocumentProduct(
-                            additionalInfo?.date,
+                            additionalInfo?.delivery_date,
                             additionalInfo?.delivery_note_number
                         )
                 }.toMutableList()
@@ -146,7 +159,7 @@ class InvoiceLocalDataSource(
 
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
-                    documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                    documentClientOrIssuerQueries.get(it.id)
                         .executeAsOne()
                         .transformIntoEditable()
                 }
@@ -290,7 +303,8 @@ class InvoiceLocalDataSource(
                             invoiceId,
                             initialTag = invoice.documentTag,
                             newTag = tag,
-                            tagUpdateCase)
+                            tagUpdateCase
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -598,4 +612,244 @@ enum class TagUpdateOrCreationCase {
     UPDATED_BY_USER,
     AUTOMATICALLY_CANCELLED, //after creating credit note or corrected invoice
     DUE_DATE_EXPIRED
+}
+
+fun saveDocumentProductInDbAndLink(
+    documentProductQueries: DocumentProductQueries,
+    linkToDocumentProductQueries: Any,
+    linkToDeliveryNotesQueries: Any,
+    documentProduct: DocumentProductState,
+    documentId: Long?,
+    deliveryNoteDate: String?,
+    deliveryNoteNumber: String?,
+) {
+    documentProductQueries.saveDocumentProduct(
+        document_product_id = null,
+        name = documentProduct.name.text,
+        quantity = documentProduct.quantity.toDouble(),
+        description = documentProduct.description?.text,
+        final_price = documentProduct.priceWithTax?.toDouble(),
+        tax_rate = documentProduct.taxRate?.toDouble(),
+        unit = documentProduct.unit?.text,
+        product_id = documentProduct.productId?.toLong()
+    )
+
+    documentId?.let { documentId ->
+        documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
+            ?.let { id ->
+                linkDocumentProductToDocument(
+                    linkToDocumentProductQueries,
+                    documentId,
+                    id.toLong()
+                )
+                if (!deliveryNoteDate.isNullOrEmpty()) {
+                    linkDocumentProductToAdditionalInfo(
+                        linkToDeliveryNotesQueries,
+                        id.toLong(),
+                        deliveryNoteNumber,
+                        deliveryNoteDate,
+                    )
+                }
+            }
+    }
+}
+
+fun linkDocumentProductToDocument(
+    linkQueries: Any,
+    documentId: Long,
+    documentProductId: Long,
+) {
+    try {
+        if (linkQueries is LinkCreditNoteToDocumentProductQueries) {
+            linkQueries.saveProductLinkedToCreditNote(
+                id = null,
+                credit_note_id = documentId,
+                document_product_id = documentProductId
+            )
+        } else if (linkQueries is LinkDeliveryNoteToDocumentProductQueries) {
+            linkQueries.saveProductLinkedToDeliveryNote(
+                id = null,
+                delivery_note_id = documentId,
+                document_product_id = documentProductId
+            )
+        } else if (linkQueries is LinkInvoiceToDocumentProductQueries) {
+            linkQueries.saveProductLinkedToInvoice(
+                id = null,
+                invoice_id = documentId,
+                document_product_id = documentProductId
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+}
+
+fun linkDocumentProductToAdditionalInfo(
+    linkToDeliveryNotesQueries: Any,
+    documentProductId: Long,
+    deliveryNoteNumber: String?,
+    deliveryNoteDate: String,
+) {
+    try {
+        if (linkToDeliveryNotesQueries is LinkCreditNoteDocumentProductToDeliveryNoteQueries) {
+            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
+                document_product_id = documentProductId,
+                delivery_note_number = deliveryNoteNumber,
+                delivery_note_date = deliveryNoteDate
+            )
+        } else if (linkToDeliveryNotesQueries is LinkInvoiceDocumentProductToDeliveryNoteQueries) {
+            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
+                document_product_id = documentProductId,
+                delivery_note_number = deliveryNoteNumber,
+                delivery_date = deliveryNoteDate
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+}
+
+fun saveDocumentClientOrIssuerInDbAndLink(
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
+    linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    linkQueries: Any,
+    documentClientOrIssuer: DocumentClientOrIssuerState,
+    documentId: Long?,
+) {
+    saveDocumentClientOrIssuer(
+        documentClientOrIssuerQueries,
+        documentClientOrIssuerAddressQueries,
+        linkDocumentClientOrIssuerToAddressQueries,
+        documentClientOrIssuer
+    )
+
+    documentId?.let { documentId ->
+        documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
+            .executeAsOneOrNull()?.toInt()
+            ?.let { id ->
+                linkDocumentClientOrIssuerToDocument(
+                    linkQueries,
+                    documentId,
+                    id.toLong()
+                )
+            }
+    }
+}
+
+fun linkDocumentClientOrIssuerToDocument(
+    linkQueries: Any,
+    documentId: Long,
+    documentClientOrIssuerId: Long,
+) {
+    try {
+        if (linkQueries is LinkCreditNoteToDocumentClientOrIssuerQueries) {
+            linkQueries.saveDocumentClientOrIssuerLinkedToCreditNote(
+                id = null,
+                credit_note_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        } else if (linkQueries is LinkDeliveryNoteToDocumentClientOrIssuerQueries) {
+            linkQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
+                id = null,
+                delivery_note_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        } else if (linkQueries is LinkInvoiceToDocumentClientOrIssuerQueries) {
+            linkQueries.saveDocumentClientOrIssuerLinkedToInvoice(
+                id = null,
+                invoice_id = documentId,
+                document_client_or_issuer_id = documentClientOrIssuerId
+            )
+        }
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+}
+
+private suspend fun saveDocumentClientOrIssuer(
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
+    linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    documentClientOrIssuer: DocumentClientOrIssuerState
+) {
+    saveInfoInDocumentClientOrIssuerTable(documentClientOrIssuerQueries, documentClientOrIssuer)
+    saveInfoInOtherDocumentClientOrIssuerTables(
+        documentClientOrIssuerAddressQueries,
+        documentClientOrIssuerQueries,
+        linkDocumentClientOrIssuerToAddressQueries,
+        documentClientOrIssuer.id?.toLong(),
+        documentClientOrIssuer.addresses
+    )
+}
+
+private suspend fun saveInfoInDocumentClientOrIssuerTable(
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    documentClientOrIssuer: DocumentClientOrIssuerState,
+): Int? {
+    var documentClientOrIssuerId: Int? = null
+    withContext(Dispatchers.IO) {
+        try {
+            documentClientOrIssuerQueries.save(
+                id = null,
+                type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                    documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+                )
+                    ClientOrIssuerType.CLIENT.name.lowercase()
+                else ClientOrIssuerType.ISSUER.name.lowercase(),
+                documentClientOrIssuer.firstName?.text,
+                documentClientOrIssuer.name.text,
+                documentClientOrIssuer.phone?.text,
+                documentClientOrIssuer.email?.text,
+                documentClientOrIssuer.notes?.text,
+                documentClientOrIssuer.companyId1Label?.text,
+                documentClientOrIssuer.companyId1Number?.text,
+                documentClientOrIssuer.companyId2Label?.text,
+                documentClientOrIssuer.companyId2Number?.text,
+            )
+            documentClientOrIssuerId =
+                documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
+                    .executeAsOneOrNull()
+                    ?.toInt()
+
+        } catch (cause: Throwable) {
+        }
+    }
+    return documentClientOrIssuerId
+}
+
+private suspend fun saveInfoInOtherDocumentClientOrIssuerTables(
+    documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    documentClientOrIssuerId: Long?,
+    addresses: List<AddressState>?,
+) {
+    return withContext(Dispatchers.IO) {
+        try {
+            addresses?.forEach { address ->
+                documentClientOrIssuerAddressQueries.save(
+                    id = null,
+                    address_line_1 = address.addressLine1?.text,
+                    address_line_2 = address.addressLine2?.text,
+                    zip_code = address.zipCode?.text,
+                    city = address.city?.text,
+                )
+
+                documentClientOrIssuerId?.let { clientOrIssuerId ->
+                    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                        ?.toInt()
+                        ?.let { addressId ->
+                            linkClientOrIssuerToAddress(
+                                linkDocumentClientOrIssuerToAddressQueries,
+                                clientOrIssuerId,
+                                addressId.toLong()
+                            )
+                        }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+    }
 }

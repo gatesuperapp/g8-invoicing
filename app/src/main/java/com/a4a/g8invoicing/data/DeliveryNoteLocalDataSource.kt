@@ -136,7 +136,7 @@ class DeliveryNoteLocalDataSource(
                 ).executeAsList()
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
-                    documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                    documentClientOrIssuerQueries.get(it.id)
                         .executeAsOne()
                         .transformIntoEditable()
                 }
@@ -156,7 +156,7 @@ class DeliveryNoteLocalDataSource(
             return DeliveryNoteState(
                 documentId = it.delivery_note_id.toInt(),
                 documentNumber = TextFieldValue(text = it.number ?: ""),
-                documentDate = it.delivery_date ?: "",
+                documentDate = it.delivery_note_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
                 freeField = TextFieldValue(text = it.free_field ?: ""),
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },

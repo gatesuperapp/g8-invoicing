@@ -117,7 +117,6 @@ class InvoiceAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-
                 documentDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
                     id = _documentUiState.value.documentId?.toLong()

@@ -97,11 +97,12 @@
     <string name="client_block_address">Adresse</string>
     <string name="client_block_identification">Identification</string>
     <string name="client_address">Adresse</string>
-    <string name="client_add_address">+</string>
+    <string name="client_add_address">+ Ajouter une adresse</string>
+    <string name="client_delete_address">Effacer l\'adresse</string>
     <string name="client_address_title">Intitulé</string>
-    <string name="client_address_title_invoicing_placeholder">Adresse de facturation</string>
+    <string name="client_address_title_invoicing_placeholder">Adresse du siège/du domicile</string>
     <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
-    <string name="client_address_title_head_office_placeholder">Adresse du siège social</string>
+    <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
     <string name="client_address1">Adresse 1</string>
     <string name="client_address1_input">6 rue caterpillar</string>
     <string name="client_address2">Adresse 2</string>

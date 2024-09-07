@@ -1,0 +1,19 @@
+CREATE TABLE LinkDocumentClientOrIssuerToAddress (
+  id INTEGER PRIMARY KEY NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+  address_id INTEGER NOT NULL
+);
+
+get:
+SELECT *
+FROM LinkDocumentClientOrIssuerToAddress
+WHERE id = :id;
+
+save:
+INSERT
+INTO LinkDocumentClientOrIssuerToAddress (id, document_client_or_issuer_id, address_id)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM LinkDocumentClientOrIssuerToAddress
+WHERE  id = :id;

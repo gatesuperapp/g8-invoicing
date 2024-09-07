@@ -1,7 +1,7 @@
 CREATE TABLE LinkCreditNoteDocumentProductToDeliveryNote (
   document_product_id INTEGER PRIMARY KEY NOT NULL,
   delivery_note_number TEXT,
-  date TEXT
+  delivery_note_date TEXT
 );
 
 getInfoLinkedToDocumentProduct:
@@ -11,7 +11,7 @@ WHERE document_product_id = :document_product_id;
 
 saveInfoLinkedToDocumentProduct:
 INSERT
-INTO LinkCreditNoteDocumentProductToDeliveryNote (document_product_id, delivery_note_number, date)
+INTO LinkCreditNoteDocumentProductToDeliveryNote (document_product_id, delivery_note_number, delivery_note_date)
 VALUES (?, ?, ?);
 
 deleteInfoLinkedToDocumentProduct:

@@ -4,7 +4,7 @@ CREATE TABLE LinkCreditNoteToDocumentClientOrIssuer (
   document_client_or_issuer_id INTEGER NOT NULL,
 
     FOREIGN KEY(document_client_or_issuer_id)
-          REFERENCES DocumentClientOrIssuer(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(id)
           ON DELETE CASCADE
 );
 

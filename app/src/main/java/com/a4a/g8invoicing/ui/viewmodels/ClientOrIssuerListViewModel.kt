@@ -83,9 +83,9 @@ class ClientOrIssuerListViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                selectedItems.forEach { selectedClientOrIssuer ->
-                    selectedClientOrIssuer.id?.let {
-                        clientOrIssuerDataSource.deleteClientOrIssuer(it.toLong())
+                selectedItems.forEach { clientOrIssuer ->
+                    clientOrIssuer.id?.let {
+                        clientOrIssuerDataSource.deleteClientOrIssuer(clientOrIssuer)
                     }
                 }
             } catch (e: Exception) {
