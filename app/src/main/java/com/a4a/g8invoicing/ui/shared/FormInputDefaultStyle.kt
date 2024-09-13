@@ -4,6 +4,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -11,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.inputField
+import com.a4a.g8invoicing.ui.theme.inputLabel
 
 
 @Composable
@@ -34,9 +37,8 @@ fun FormInputDefaultStyle(
                         top = 0.dp,
                         bottom = 0.dp
                     ),
-                color = Color.LightGray,
                 text = placeholder ?: "",
-                style = LocalTextStyle.current
+                style = MaterialTheme.typography.inputField
             )
         },
         interactionSource = interactionSource,

@@ -13,7 +13,7 @@ import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import g8invoicing.DocumentClientOrIssuer
@@ -42,8 +42,10 @@ class InvoiceLocalDataSource(
     private val invoiceQueries = db.invoiceQueries
     private val invoiceTagQueries = db.invoiceTagQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
+    private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries =
+        db.linkDocumentClientOrIssuerToAddressQueries
     private val documentProductQueries = db.documentProductQueries
-    private val creditNoteQueries = db.creditNoteQueries
     private val linkInvoiceToDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
     private val linkInvoiceToTagQueries = db.linkInvoiceToTagQueries
     private val linkInvoiceDocumentProductToDeliveryNoteQueries =
@@ -53,15 +55,13 @@ class InvoiceLocalDataSource(
 
     override suspend fun createNew(): Long? {
         var newInvoiceId: Long? = null
-        val docNumber = getLastDocumentNumber()?.let {
-            incrementDocumentNumber(it)
-        } ?: Strings.get(R.string.invoice_default_number)
-
         val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: DocumentClientOrIssuerState()
+            ?: ClientOrIssuerState()
         saveInfoInInvoiceTable(
             InvoiceState(
-                documentNumber = TextFieldValue(docNumber),
+                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                    incrementDocumentNumber(it)
+                } ?: Strings.get(R.string.invoice_default_number)),
                 documentIssuer = issuer,
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )
@@ -150,7 +150,7 @@ class InvoiceLocalDataSource(
         return null
     }
 
-    private fun fetchClientAndIssuer(documentId: Long): List<DocumentClientOrIssuerState>? {
+    private fun fetchClientAndIssuer(documentId: Long): List<ClientOrIssuerState>? {
         try {
             val listOfIds =
                 linkInvoiceToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
@@ -161,8 +161,27 @@ class InvoiceLocalDataSource(
                 listOfIds.map {
                     documentClientOrIssuerQueries.get(it.id)
                         .executeAsOne()
-                        .transformIntoEditable()
+                        .transformIntoEditable(
+                            fetchDocumentClientOrIssuerAddresses(it.id)
+                        )
                 }
+            } else null
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
+    }
+
+    private fun fetchDocumentClientOrIssuerAddresses(id: Long): MutableList<AddressState>? {
+        try {
+            val listOfIds = linkDocumentClientOrIssuerToAddressQueries.get(id)
+                .executeAsList()
+            return if (listOfIds.isNotEmpty()) {
+                listOfIds.map {
+                    documentClientOrIssuerAddressQueries.get(it.id)
+                        .executeAsOne()
+                        .transformIntoEditable()
+                }.toMutableList()
             } else null
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -188,7 +207,7 @@ class InvoiceLocalDataSource(
 
     private fun Invoice.transformIntoEditableInvoice(
         documentProducts: MutableList<DocumentProductState>? = null,
-        documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
+        documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
     ): InvoiceState {
         this.let {
@@ -343,7 +362,7 @@ class InvoiceLocalDataSource(
                 saveDocumentProductInDbAndLink(
                     documentProductQueries,
                     linkInvoiceToDocumentProductQueries,
-                    linkInvoiceDocumentProductToDeliveryNoteQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
                     documentProduct,
                     documentId,
                     deliveryNoteDate,
@@ -357,13 +376,15 @@ class InvoiceLocalDataSource(
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
-        documentClientOrIssuer: DocumentClientOrIssuerState,
+        documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
     ) {
         withContext(Dispatchers.IO) {
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
+                    documentClientOrIssuerAddressQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
                     linkInvoiceToDocumentClientOrIssuerQueries,
                     documentClientOrIssuer,
                     documentId
@@ -392,6 +413,10 @@ class InvoiceLocalDataSource(
                     linkInvoiceToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToInvoice(
                         document.documentId!!.toLong()
                     )
+                    document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
+                        documentClientOrIssuerAddressQueries.delete(it.toLong())
+                        linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
+                    }
                     document.documentClient?.type?.let {
                         deleteDocumentClientOrIssuer(
                             document.documentId!!.toLong(),
@@ -709,12 +734,12 @@ fun linkDocumentProductToAdditionalInfo(
     }
 }
 
-fun saveDocumentClientOrIssuerInDbAndLink(
+suspend fun saveDocumentClientOrIssuerInDbAndLink(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
     linkQueries: Any,
-    documentClientOrIssuer: DocumentClientOrIssuerState,
+    documentClientOrIssuer: ClientOrIssuerState,
     documentId: Long?,
 ) {
     saveDocumentClientOrIssuer(
@@ -743,24 +768,30 @@ fun linkDocumentClientOrIssuerToDocument(
     documentClientOrIssuerId: Long,
 ) {
     try {
-        if (linkQueries is LinkCreditNoteToDocumentClientOrIssuerQueries) {
-            linkQueries.saveDocumentClientOrIssuerLinkedToCreditNote(
-                id = null,
-                credit_note_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
-        } else if (linkQueries is LinkDeliveryNoteToDocumentClientOrIssuerQueries) {
-            linkQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
-                id = null,
-                delivery_note_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
-        } else if (linkQueries is LinkInvoiceToDocumentClientOrIssuerQueries) {
-            linkQueries.saveDocumentClientOrIssuerLinkedToInvoice(
-                id = null,
-                invoice_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
+        when (linkQueries) {
+            is LinkInvoiceToDocumentClientOrIssuerQueries -> {
+                linkQueries.saveDocumentClientOrIssuerLinkedToInvoice(
+                    id = null,
+                    invoice_id = documentId,
+                    document_client_or_issuer_id = documentClientOrIssuerId
+                )
+            }
+
+            is LinkCreditNoteToDocumentClientOrIssuerQueries -> {
+                linkQueries.saveDocumentClientOrIssuerLinkedToCreditNote(
+                    id = null,
+                    credit_note_id = documentId,
+                    document_client_or_issuer_id = documentClientOrIssuerId
+                )
+            }
+
+            is LinkDeliveryNoteToDocumentClientOrIssuerQueries -> {
+                linkQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
+                    id = null,
+                    delivery_note_id = documentId,
+                    document_client_or_issuer_id = documentClientOrIssuerId
+                )
+            }
         }
     } catch (e: Exception) {
         Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -771,31 +802,31 @@ private suspend fun saveDocumentClientOrIssuer(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
-    documentClientOrIssuer: DocumentClientOrIssuerState
+    documentClientOrIssuer: ClientOrIssuerState,
 ) {
     saveInfoInDocumentClientOrIssuerTable(documentClientOrIssuerQueries, documentClientOrIssuer)
-    saveInfoInOtherDocumentClientOrIssuerTables(
-        documentClientOrIssuerAddressQueries,
-        documentClientOrIssuerQueries,
-        linkDocumentClientOrIssuerToAddressQueries,
-        documentClientOrIssuer.id?.toLong(),
-        documentClientOrIssuer.addresses
-    )
+    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+        ?.let { documentClientId ->
+            saveInfoInAddressTables(
+                documentClientOrIssuerAddressQueries,
+                linkDocumentClientOrIssuerToAddressQueries,
+                documentClientId,
+                documentClientOrIssuer.addresses
+            )
+        }
 }
 
 private suspend fun saveInfoInDocumentClientOrIssuerTable(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
-    documentClientOrIssuer: DocumentClientOrIssuerState,
-): Int? {
-    var documentClientOrIssuerId: Int? = null
+    documentClientOrIssuer: ClientOrIssuerState,
+) {
     withContext(Dispatchers.IO) {
         try {
             documentClientOrIssuerQueries.save(
                 id = null,
                 type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
                     documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-                )
-                    ClientOrIssuerType.CLIENT.name.lowercase()
+                ) ClientOrIssuerType.CLIENT.name.lowercase()
                 else ClientOrIssuerType.ISSUER.name.lowercase(),
                 documentClientOrIssuer.firstName?.text,
                 documentClientOrIssuer.name.text,
@@ -807,22 +838,15 @@ private suspend fun saveInfoInDocumentClientOrIssuerTable(
                 documentClientOrIssuer.companyId2Label?.text,
                 documentClientOrIssuer.companyId2Number?.text,
             )
-            documentClientOrIssuerId =
-                documentClientOrIssuerQueries.getLastInsertedClientOrIssuerId()
-                    .executeAsOneOrNull()
-                    ?.toInt()
-
         } catch (cause: Throwable) {
         }
     }
-    return documentClientOrIssuerId
 }
 
-private suspend fun saveInfoInOtherDocumentClientOrIssuerTables(
+private suspend fun saveInfoInAddressTables(
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
-    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
-    documentClientOrIssuerId: Long?,
+    documentClientOrIssuerId: Long,
     addresses: List<AddressState>?,
 ) {
     return withContext(Dispatchers.IO) {
@@ -830,23 +854,21 @@ private suspend fun saveInfoInOtherDocumentClientOrIssuerTables(
             addresses?.forEach { address ->
                 documentClientOrIssuerAddressQueries.save(
                     id = null,
+                    address_title = address.addressTitle?.text,
                     address_line_1 = address.addressLine1?.text,
                     address_line_2 = address.addressLine2?.text,
                     zip_code = address.zipCode?.text,
                     city = address.city?.text,
                 )
 
-                documentClientOrIssuerId?.let { clientOrIssuerId ->
-                    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-                        ?.toInt()
-                        ?.let { addressId ->
-                            linkClientOrIssuerToAddress(
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                clientOrIssuerId,
-                                addressId.toLong()
-                            )
-                        }
-                }
+                documentClientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
+                    ?.let { addressId ->
+                        linkClientOrIssuerToAddress(
+                            linkDocumentClientOrIssuerToAddressQueries,
+                            documentClientOrIssuerId,
+                            addressId
+                        )
+                    }
             }
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")

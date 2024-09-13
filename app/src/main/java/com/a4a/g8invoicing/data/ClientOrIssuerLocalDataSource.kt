@@ -9,7 +9,6 @@ import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.viewmodels.PersonType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuer
@@ -32,12 +31,12 @@ class ClientOrIssuerLocalDataSource(
     private val linkDocumentClientOrIssuerToAddressQueries =
         db.linkDocumentClientOrIssuerToAddressQueries
 
-    override fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
+    override fun fetch(id: Long): ClientOrIssuerState? {
         try {
             return clientOrIssuerQueries.get(id).executeAsOneOrNull()
                 ?.let {
                     it.transformIntoEditable(
-                        fetchClientOrIssuerAddresses(it.id)
+                        fetchClientOrIssuerAddresses(it.id)?.toMutableList()
                     )
                 }
         } catch (e: Exception) {
@@ -46,7 +45,7 @@ class ClientOrIssuerLocalDataSource(
         return null
     }
 
-    override fun fetchDocumentClientOrIssuer(id: Long): DocumentClientOrIssuerState? {
+    override fun fetchDocumentClientOrIssuer(id: Long): ClientOrIssuerState? {
         try {
             return documentClientOrIssuerQueries.get(id).executeAsOneOrNull()
                 ?.let {
@@ -66,29 +65,32 @@ class ClientOrIssuerLocalDataSource(
             .map { query ->
                 query.executeAsList()
                     .map {
-                        it.transformIntoEditable()
+                        it.transformIntoEditable(
+                            fetchClientOrIssuerAddresses(it.id)?.toMutableList()
+                        )
                     }
             }
     }
 
-    private fun fetchClientOrIssuerAddresses(id: Long): List<AddressState>? {
+    fun fetchClientOrIssuerAddresses(clientOrIssuerId: Long): List<AddressState>? {
         try {
-            val listOfIds = linkClientOrIssuerToAddressQueries.get(id)
-                .executeAsList()
+            val listOfIds = linkClientOrIssuerToAddressQueries.getWithClientOrIssuerId(clientOrIssuerId)
+                    .executeAsList()
             return if (listOfIds.isNotEmpty()) {
-                listOfIds.map {
-                    clientOrIssuerAddressQueries.get(it.id)
+                listOfIds.map { addressId ->
+                    clientOrIssuerAddressQueries.get(addressId)
                         .executeAsOne()
                         .transformIntoEditable()
                 }
-            } else null
+            } else
+                null
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
 
-    private fun fetchDocumentClientOrIssuerAddresses(id: Long): List<AddressState>? {
+    private fun fetchDocumentClientOrIssuerAddresses(id: Long): MutableList<AddressState>? {
         try {
             val listOfIds = linkDocumentClientOrIssuerToAddressQueries.get(id)
                 .executeAsList()
@@ -97,7 +99,7 @@ class ClientOrIssuerLocalDataSource(
                     documentClientOrIssuerAddressQueries.get(it.id)
                         .executeAsOne()
                         .transformIntoEditable()
-                }
+                }.toMutableList()
             } else null
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -106,10 +108,12 @@ class ClientOrIssuerLocalDataSource(
     }
 
     override suspend fun saveClientOrIssuer(
-        clientOrIssuer: ClientOrIssuerState
+        clientOrIssuer: ClientOrIssuerState,
     ) {
         saveInfoInClientOrIssuerTable(clientOrIssuer)
-        saveInfoInOtherClientOrIssuerTables(clientOrIssuer.id?.toLong(), clientOrIssuer.addresses)
+        clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { clientId ->
+            saveInfoInAddressTables(clientId, clientOrIssuer.addresses)
+        }
     }
 
     private suspend fun saveInfoInClientOrIssuerTable(clientOrIssuer: ClientOrIssuerState) {
@@ -134,8 +138,8 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    private suspend fun saveInfoInOtherClientOrIssuerTables(
-        clientOrIssuerId: Long?,
+    private suspend fun saveInfoInAddressTables(
+        clientOrIssuerId: Long,
         addresses: List<AddressState>?,
     ) {
         return withContext(Dispatchers.IO) {
@@ -143,22 +147,21 @@ class ClientOrIssuerLocalDataSource(
                 addresses?.forEach { address ->
                     clientOrIssuerAddressQueries.save(
                         id = null,
+                        address_title = address.addressTitle?.text,
                         address_line_1 = address.addressLine1?.text,
                         address_line_2 = address.addressLine2?.text,
                         zip_code = address.zipCode?.text,
                         city = address.city?.text,
                     )
 
-                    clientOrIssuerId?.let { clientOrIssuerId ->
-                        clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
-                            ?.let { addressId ->
-                                linkClientOrIssuerToAddress(
-                                    linkClientOrIssuerToAddressQueries,
-                                    clientOrIssuerId,
-                                    addressId.toLong()
-                                )
-                            }
-                    }
+                    clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
+                        ?.let { addressId ->
+                            linkClientOrIssuerToAddress(
+                                linkClientOrIssuerToAddressQueries,
+                                clientOrIssuerId,
+                                addressId
+                            )
+                        }
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -170,7 +173,7 @@ class ClientOrIssuerLocalDataSource(
         return withContext(Dispatchers.IO) {
             try {
                 clientsOrIssuers.forEach { client ->
-                    client.id?.let {clientId ->
+                    client.id?.let { clientId ->
                         //TODO: get the string outta here
                         if (!client.firstName?.text.isNullOrEmpty()) {
                             client.firstName = TextFieldValue("${client.firstName?.text} - Copie")
@@ -178,7 +181,7 @@ class ClientOrIssuerLocalDataSource(
                             client.name = TextFieldValue("${client.name.text} - Copie")
                         }
                         saveInfoInClientOrIssuerTable(client)
-                        saveInfoInOtherClientOrIssuerTables(clientId.toLong(), client.addresses)
+                        saveInfoInAddressTables(clientId.toLong(), client.addresses)
                     }
                 }
             } catch (e: Exception) {
@@ -188,7 +191,7 @@ class ClientOrIssuerLocalDataSource(
     }
 
     override suspend fun updateClientOrIssuer(
-        clientOrIssuer: ClientOrIssuerState
+        clientOrIssuer: ClientOrIssuerState,
     ) {
         return withContext(Dispatchers.IO) {
             try {
@@ -207,15 +210,22 @@ class ClientOrIssuerLocalDataSource(
                         company_id2_number = clientOrIssuer.companyId2Number?.text,
                     )
                 }
-                clientOrIssuer.addresses?.forEach { address ->
-                    address.id?.let {
-                        clientOrIssuerAddressQueries.update(
-                            id = it.toLong(),
-                            address_line_1 = address.addressLine1?.text,
-                            address_line_2 = address.addressLine2?.text,
-                            zip_code = address.zipCode?.text,
-                            city = address.city?.text,
-                        )
+                clientOrIssuer.addresses?.let { addresses ->
+                    val (addressesToUpdate, addressesToCreate) = addresses.partition { it.id != null }
+                    addressesToUpdate.forEach { address ->
+                        address.id?.let {
+                            clientOrIssuerAddressQueries.update(
+                                id = it.toLong(),
+                                address_title = address.addressTitle?.text,
+                                address_line_1 = address.addressLine1?.text,
+                                address_line_2 = address.addressLine2?.text,
+                                zip_code = address.zipCode?.text,
+                                city = address.city?.text,
+                            )
+                        }
+                    }
+                    clientOrIssuer.id?.let {
+                        saveInfoInAddressTables(it.toLong(), addressesToCreate)
                     }
                 }
             } catch (cause: Throwable) {
@@ -224,7 +234,7 @@ class ClientOrIssuerLocalDataSource(
     }
 
     override suspend fun updateDocumentClientOrIssuer(
-        documentClientOrIssuer: DocumentClientOrIssuerState
+        documentClientOrIssuer: ClientOrIssuerState,
     ) {
         return withContext(Dispatchers.IO) {
             try {
@@ -251,6 +261,7 @@ class ClientOrIssuerLocalDataSource(
                     address.id?.let {
                         documentClientOrIssuerAddressQueries.update(
                             id = it.toLong(),
+                            address_title = address.addressTitle?.text,
                             address_line_1 = address.addressLine1?.text,
                             address_line_2 = address.addressLine2?.text,
                             zip_code = address.zipCode?.text,
@@ -269,6 +280,9 @@ class ClientOrIssuerLocalDataSource(
                 clientOrIssuer.id?.let {
                     clientOrIssuerQueries.delete(it.toLong())
                 }
+                clientOrIssuer.id?.let {
+                    linkClientOrIssuerToAddressQueries.deleteWithClientId(it.toLong())
+                }
                 clientOrIssuer.addresses?.filter { it.id != null }?.forEach {
                     clientOrIssuerAddressQueries.delete(it.id!!.toLong())
                 }
@@ -277,7 +291,7 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    override suspend fun deleteDocumentClientOrIssuer(documentClientOrIssuer: DocumentClientOrIssuerState) {
+    override suspend fun deleteDocumentClientOrIssuer(documentClientOrIssuer: ClientOrIssuerState) {
         return withContext(Dispatchers.IO) {
             try {
                 documentClientOrIssuer.id?.let {
@@ -308,6 +322,8 @@ fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {
     val clientOrIssuer = this
 
     return AddressState(
+        id = clientOrIssuer.id.toInt(),
+        addressTitle = clientOrIssuer.address_title?.let { TextFieldValue(text = it) },
         addressLine1 = clientOrIssuer.address_line_1?.let { TextFieldValue(text = it) },
         addressLine2 = clientOrIssuer.address_line_2?.let { TextFieldValue(text = it) },
         zipCode = clientOrIssuer.zip_code?.let { TextFieldValue(text = it) },
@@ -355,6 +371,7 @@ fun DocumentClientOrIssuerAddress.transformIntoEditable(): AddressState {
 
     return AddressState(
         id = address.id.toInt(),
+        addressTitle = address.address_title?.let { TextFieldValue(text = it) },
         addressLine1 = address.address_line_1?.let { TextFieldValue(text = it) },
         addressLine2 = address.address_line_2?.let { TextFieldValue(text = it) },
         zipCode = address.zip_code?.let { TextFieldValue(text = it) },
@@ -364,10 +381,10 @@ fun DocumentClientOrIssuerAddress.transformIntoEditable(): AddressState {
 
 fun DocumentClientOrIssuer.transformIntoEditable(
     addresses: List<AddressState>? = null,
-): DocumentClientOrIssuerState {
+): ClientOrIssuerState {
     val documentClientOrIssuer = this
 
-    return DocumentClientOrIssuerState(
+    return ClientOrIssuerState(
         id = documentClientOrIssuer.id.toInt(),
         type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
             ClientOrIssuerType.DOCUMENT_CLIENT

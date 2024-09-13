@@ -75,7 +75,7 @@ fun DocumentBottomSheetProducts(
         var isProductListVisible by remember { mutableStateOf(false) }
         var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
             mutableStateOf(
-                DocumentBottomSheetTypeOfForm.ADD_PRODUCT
+                DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
             )
         }
 
@@ -168,7 +168,7 @@ fun DocumentBottomSheetProducts(
                     onProductClick = {
                         onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
                         // so we open bottom document form with the chosen product
-                        typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_PRODUCT
+                        typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
                         onShowDocumentForm(true)
                         CoroutineScope(Dispatchers.IO).launch {
                             delay(TimeUnit.MILLISECONDS.toMillis(500))
@@ -181,7 +181,7 @@ fun DocumentBottomSheetProducts(
             }
 
             if (showDocumentForm) {
-                DocumentBottomSheetFormModal(
+                DocumentBottomSheetClientOrIssuerFormModal(
                     typeOfCreation = typeOfCreation,
                     documentProduct = documentProductUiState,
                     taxRates = taxRates,

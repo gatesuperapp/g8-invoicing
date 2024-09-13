@@ -75,9 +75,6 @@ class ClientOrIssuerListViewModel @Inject constructor(
         }
     }
 
-    fun fetchClientOrIssuerFromLocalDb(id: Long): ClientOrIssuerState? {
-        return clientOrIssuerDataSource.fetchClientOrIssuer(id)
-    }
 
     fun deleteClientsOrIssuers(selectedItems: List<ClientOrIssuerState>) {
         deleteJob?.cancel()

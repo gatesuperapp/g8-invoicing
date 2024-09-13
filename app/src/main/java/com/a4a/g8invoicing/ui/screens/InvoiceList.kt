@@ -141,7 +141,8 @@ fun InvoiceList(
                         onClickDelete(selectedItems.toList())
                         selectedItems.clear()
                         selectedMode.value = false
-                    }
+                    },
+                    isInvoice = true
                 )
             }
         }

@@ -2,7 +2,7 @@ package com.a4a.g8invoicing.data
 
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import kotlinx.coroutines.flow.Flow
 
@@ -25,7 +25,7 @@ interface DeliveryNoteLocalDataSourceInterface {
 
     suspend fun deleteDocumentProduct(deliveryNoteId: Long, documentProductId: Long)
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
-        documentClientOrIssuer: DocumentClientOrIssuerState,
+        documentClientOrIssuer: ClientOrIssuerState,
         deliveryNoteId: Long?,
     )
 

@@ -1,9 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -12,27 +8,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentBottomSheetElementsAfterSlide(
     pageElement: ScreenElement?,
     parameters: Any?,
     onClickBack: () -> Unit,
-    documentClientUiState: DocumentClientOrIssuerState,
-    documentIssuerUiState: DocumentClientOrIssuerState,
+    documentClientUiState: ClientOrIssuerState,
+    documentIssuerUiState: ClientOrIssuerState,
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
-    onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
+    onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -48,16 +42,17 @@ fun DocumentBottomSheetElementsAfterSlide(
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
         mutableStateOf(
-            DocumentBottomSheetTypeOfForm.ADD_PRODUCT
+            DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
         )
     }
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
-        val params = parameters as Pair<DocumentClientOrIssuerState?, List<ClientOrIssuerState>>
-        DocumentBottomSheetDocumentClientOrIssuer(
-            item = params.first,
+        DocumentBottomSheetClientOrIssuerPreview(
+            item = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
             onClickBack = onClickBack,
             onClickNewButton = {
+                onClickNewDocumentClientOrIssuer(if(pageElement == ScreenElement.DOCUMENT_CLIENT ) ClientOrIssuerType.DOCUMENT_CLIENT
+                    else ClientOrIssuerType.DOCUMENT_ISSUER)
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
@@ -75,15 +70,15 @@ fun DocumentBottomSheetElementsAfterSlide(
 
         if (isClientOrIssuerListVisible) {
             DocumentBottomSheetClientOrIssuerList(
-                list = params.second,
+                list = parameters.second,
                 pageElement = pageElement,
                 onClickBack = { isClientOrIssuerListVisible = false },
                 onClientOrIssuerClick = {
                     onClickClientOrIssuer(it) // Update the AddEditViewModel with the chosen item
                     // so we open bottom document form with data
                     typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
-                        DocumentBottomSheetTypeOfForm.ADD_CLIENT
-                    } else DocumentBottomSheetTypeOfForm.ADD_ISSUER
+                        DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT
+                    } else DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER
                     onShowDocumentForm(true)
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
@@ -126,7 +121,7 @@ fun DocumentBottomSheetElementsAfterSlide(
 
 
     if (showDocumentForm) {
-        DocumentBottomSheetFormModal(
+        DocumentBottomSheetClientOrIssuerFormModal(
             typeOfCreation = typeOfCreation,
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
@@ -143,5 +138,4 @@ fun DocumentBottomSheetElementsAfterSlide(
             onSelectTaxRate = onSelectTaxRate
         )
     }
-
 }

@@ -11,22 +11,12 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
-import g8invoicing.DocumentClientOrIssuerQueries
-import g8invoicing.DocumentProductQueries
-import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
-import g8invoicing.LinkCreditNoteToDocumentClientOrIssuerQueries
-import g8invoicing.LinkCreditNoteToDocumentProductQueries
-import g8invoicing.LinkDeliveryNoteToDocumentClientOrIssuerQueries
-import g8invoicing.LinkDeliveryNoteToDocumentProductQueries
-import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
-import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
-import g8invoicing.LinkInvoiceToDocumentProductQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -38,6 +28,8 @@ class CreditNoteLocalDataSource(
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
+    private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries = db.linkDocumentClientOrIssuerToAddressQueries
     private val documentProductQueries = db.documentProductQueries
     private val linkCreditNoteToDocumentProductQueries = db.linkCreditNoteToDocumentProductQueries
     private val linkCreditNoteDocumentProductToDeliveryNoteQueries =
@@ -45,11 +37,11 @@ class CreditNoteLocalDataSource(
     private val linkCreditNoteToDocumentClientOrIssuerQueries =
         db.linkCreditNoteToDocumentClientOrIssuerQueries
 
-    override suspend fun createNew(creditNote: CreditNoteState?): Long? {
+    override suspend fun createNew(): Long? {
         var newCreditNoteId: Long? = null
         val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: DocumentClientOrIssuerState()
-        val creditNote = creditNote ?: CreditNoteState(
+            ?: ClientOrIssuerState()
+        val creditNote = CreditNoteState(
             documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
             } ?: Strings.get(R.string.credit_note_default_number)),
@@ -57,7 +49,7 @@ class CreditNoteLocalDataSource(
             footerText = TextFieldValue(getExistingFooter() ?: "")
         )
 
-        saveInfoInDocumentTable(creditNote)
+        saveInfoInCreditNoteTable(creditNote)
         saveInfoInOtherTables(creditNote)
         try {
             newCreditNoteId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -137,7 +129,7 @@ class CreditNoteLocalDataSource(
         return null
     }
 
-    private fun fetchClientAndIssuer(documentId: Long): List<DocumentClientOrIssuerState>? {
+    private fun fetchClientAndIssuer(documentId: Long): List<ClientOrIssuerState>? {
         try {
             val listOfIds =
                 linkCreditNoteToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToCreditNote(
@@ -159,7 +151,7 @@ class CreditNoteLocalDataSource(
 
     private fun CreditNote.transformIntoEditableCreditNote(
         documentProducts: MutableList<DocumentProductState>? = null,
-        documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
+        documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
     ): CreditNoteState {
         this.let {
@@ -188,7 +180,7 @@ class CreditNoteLocalDataSource(
             } ?: Strings.get(R.string.credit_note_default_number)
 
             try {
-                saveInfoInDocumentTable(
+                saveInfoInCreditNoteTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
                         reference = invoices.firstOrNull { it.reference != null }?.reference,
@@ -239,25 +231,8 @@ class CreditNoteLocalDataSource(
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
 
-                    saveInfoInDocumentTable(creditNote)
+                    saveInfoInCreditNoteTable(creditNote)
                     saveInfoInOtherTables(creditNote)
-                }
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
-            }
-        }
-    }
-
-    override suspend fun markAsPaid(documents: List<CreditNoteState>, isPaid: Boolean) {
-        withContext(Dispatchers.IO) {
-            try {
-                documents.forEach {
-                    if (isPaid) {
-                        it.paymentStatus = 2
-                    } else {
-                        it.paymentStatus = 0
-                    }
-                    update(it)
                 }
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -276,7 +251,7 @@ class CreditNoteLocalDataSource(
                 saveDocumentProductInDbAndLink(
                     documentProductQueries,
                     linkCreditNoteToDocumentProductQueries,
-                    linkCreditNoteDocumentProductToDeliveryNoteQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
                     documentProduct,
                     documentId,
                     deliveryNoteDate,
@@ -289,13 +264,15 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
-        documentClientOrIssuer: DocumentClientOrIssuerState,
+        documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
     ) {
         withContext(Dispatchers.IO) {
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
+                    documentClientOrIssuerAddressQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
                     linkCreditNoteToDocumentClientOrIssuerQueries,
                     documentClientOrIssuer,
                     documentId
@@ -323,6 +300,14 @@ class CreditNoteLocalDataSource(
                     linkCreditNoteToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToCreditNote(
                         document.documentId!!.toLong()
                     )
+                    document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
+                        documentClientOrIssuerAddressQueries.delete(it.toLong())
+                        linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
+                    }
+                    document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
+                        documentClientOrIssuerAddressQueries.delete(it.toLong())
+                        linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
+                    }
                     document.documentClient?.type?.let {
                         deleteDocumentClientOrIssuer(
                             document.documentId!!.toLong(),
@@ -408,7 +393,7 @@ class CreditNoteLocalDataSource(
         return footer
     }
 
-    private fun saveInfoInDocumentTable(document: CreditNoteState) {
+    private fun saveInfoInCreditNoteTable(document: CreditNoteState) {
         try {
             creditNoteQueries.save(
                 credit_note_id = null,

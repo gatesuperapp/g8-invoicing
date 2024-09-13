@@ -24,23 +24,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.textSmall
-import com.a4a.g8invoicing.ui.theme.textVerySmall
 
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DocumentBottomSheetFormModal(
+fun DocumentBottomSheetClientOrIssuerFormModal(
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
-    documentClientUiState: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
-    documentIssuerUiState: DocumentClientOrIssuerState = DocumentClientOrIssuerState(),
+    documentClientUiState: ClientOrIssuerState = ClientOrIssuerState(),
+    documentIssuerUiState: ClientOrIssuerState = ClientOrIssuerState(),
     documentProduct: DocumentProductState = DocumentProductState(),
     taxRates: List<BigDecimal>,
     onClickCancel: () -> Unit,
@@ -94,9 +94,9 @@ fun DocumentBottomSheetFormModal(
                             DocumentBottomSheetTypeOfForm.NEW_CLIENT -> stringResource(id = R.string.document_modal_new_client)
                             DocumentBottomSheetTypeOfForm.NEW_ISSUER -> stringResource(id = R.string.document_modal_new_issuer)
                             DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> stringResource(id = R.string.document_modal_new_product)
-                            DocumentBottomSheetTypeOfForm.ADD_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
-                            DocumentBottomSheetTypeOfForm.ADD_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
-                            DocumentBottomSheetTypeOfForm.ADD_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
+                            DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
+                            DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
+                            DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
                             DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
                             DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
                             DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> stringResource(id = R.string.document_modal_edit_product)
@@ -116,24 +116,26 @@ fun DocumentBottomSheetFormModal(
                 }
             }
             if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)) {
-                DocumentClientOrIssuerAddEditForm(
-                    documentClientOrIssuerState = documentClientUiState,
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuerUiState = documentClientUiState,
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
                     },
-                    bottomFormPlaceCursor = {
+                    placeCursorAtTheEndOfText = {
                         bottomFormPlaceCursor(it, ClientOrIssuerType.DOCUMENT_CLIENT)
-                    }
+                    },
+                    isInBottomSheetModal = true
                 )
             } else if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.ISSUER.name)) {
-                DocumentClientOrIssuerAddEditForm(
-                    documentClientOrIssuerState = documentIssuerUiState,
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuerUiState = documentIssuerUiState,
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
                     },
-                    bottomFormPlaceCursor = {
+                    placeCursorAtTheEndOfText = {
                         bottomFormPlaceCursor(it, ClientOrIssuerType.DOCUMENT_ISSUER)
-                    }
+                    },
+                    isInBottomSheetModal = true
                 )
             } else {
                 if (!isTaxSelectionVisible) {

@@ -68,7 +68,6 @@ import com.a4a.g8invoicing.ui.navigation.actionStyle
 import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
@@ -88,8 +87,8 @@ fun DocumentAddEdit(
     document: DocumentState,
     clientList: MutableList<ClientOrIssuerState>,
     issuerList: MutableList<ClientOrIssuerState>,
-    documentClientUiState: DocumentClientOrIssuerState,
-    documentIssuerUiState: DocumentClientOrIssuerState,
+    documentClientUiState: ClientOrIssuerState,
+    documentIssuerUiState: ClientOrIssuerState,
     documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
     products: MutableList<ProductState>,
@@ -98,7 +97,8 @@ fun DocumentAddEdit(
     onClickProduct: (ProductState) -> Unit,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
-    onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
+    onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -164,6 +164,7 @@ fun DocumentAddEdit(
                     taxRates = taxRates,
                     onValueChange = onValueChange,
                     onClickClientOrIssuer = onClickClientOrIssuer,
+                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
                     onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
                     onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                     currentClientId = document.documentClient?.id,
@@ -176,7 +177,7 @@ fun DocumentAddEdit(
                     onSelectTaxRate = onSelectTaxRate,
                     localFocusManager = LocalFocusManager.current,
                     showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm
+                    onShowDocumentForm = onShowDocumentForm,
                 )
             } else {
                 DocumentBottomSheetProducts(

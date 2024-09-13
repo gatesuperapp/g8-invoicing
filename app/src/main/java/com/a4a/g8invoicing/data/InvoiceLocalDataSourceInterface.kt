@@ -4,7 +4,7 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import kotlinx.coroutines.flow.Flow
 
@@ -21,7 +21,7 @@ interface InvoiceLocalDataSourceInterface {
 
     suspend fun deleteDocumentProduct(id: Long, documentProductId: Long)
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
-        documentClientOrIssuer: DocumentClientOrIssuerState,
+        documentClientOrIssuer: ClientOrIssuerState,
         id: Long?,
     )
 

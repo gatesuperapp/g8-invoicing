@@ -262,6 +262,13 @@ class ProductAddEditViewModel @Inject constructor(
 
         return listOfErrors.isEmpty()
     }
+
+    fun clearValidateInputErrors(type: ProductType) {
+        when (type) {
+            ProductType.PRODUCT -> productUiState.value.errors.clear()
+            ProductType.DOCUMENT_PRODUCT  -> documentProductUiState.value.errors.clear()
+        }
+    }
 }
 
 private fun updateProductUiState(

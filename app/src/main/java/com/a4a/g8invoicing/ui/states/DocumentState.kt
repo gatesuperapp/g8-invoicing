@@ -18,8 +18,8 @@ abstract class DocumentState {
     abstract var documentDate: String
     abstract var reference: TextFieldValue?
     abstract var freeField: TextFieldValue?
-    abstract var documentIssuer: DocumentClientOrIssuerState?
-    abstract var documentClient: DocumentClientOrIssuerState?
+    abstract var documentIssuer: ClientOrIssuerState?
+    abstract var documentClient: ClientOrIssuerState?
     abstract var documentProducts: List<DocumentProductState>?
     abstract var documentPrices: DocumentPrices?
     abstract var currency: TextFieldValue

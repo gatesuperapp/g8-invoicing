@@ -7,11 +7,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.AddressState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
@@ -46,12 +46,12 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     private val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
     private val _documentClientUiState =
-        MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
-    val documentClientUiState: StateFlow<DocumentClientOrIssuerState> = _documentClientUiState
+        MutableStateFlow(ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
+    val documentClientUiState: StateFlow<ClientOrIssuerState> = _documentClientUiState
 
     private val _documentIssuerUiState =
-        MutableStateFlow(DocumentClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
-    val documentIssuerUiState: StateFlow<DocumentClientOrIssuerState> = _documentIssuerUiState
+        MutableStateFlow(ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
+    val documentIssuerUiState: StateFlow<ClientOrIssuerState> = _documentIssuerUiState
 
 
     init {
@@ -102,10 +102,11 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
     // Used when sliding the bottom form from documents
     // Editing a document client or issuer
-    fun setDocumentClientOrIssuerUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
-        if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
+    fun setDocumentClientOrIssuerUiState(documentClientOrIssuer: ClientOrIssuerState) {
+        if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT) {
             _documentClientUiState.value = documentClientOrIssuer
-        else {
+            _documentClientUiState.value.errors = mutableListOf()
+        } else {
             _documentIssuerUiState.value = documentClientOrIssuer
         }
     }
@@ -114,40 +115,36 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     // Choosing a client or issuer
     fun setDocumentClientOrIssuerUiStateWithSelected(clientOrIssuer: ClientOrIssuerState) {
         if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
-            _documentClientUiState.value = DocumentClientOrIssuerState(
+            _documentClientUiState.value = ClientOrIssuerState(
                 id = null,
                 name = clientOrIssuer.name,
+                phone = clientOrIssuer.phone,
+                email = clientOrIssuer.email,
                 type = if (clientOrIssuer.type == ClientOrIssuerType.ISSUER) ClientOrIssuerType.DOCUMENT_ISSUER
                 else ClientOrIssuerType.DOCUMENT_CLIENT,
                 firstName = clientOrIssuer.firstName,
-                address1 = clientOrIssuer.address1,
-                address2 = clientOrIssuer.address2,
-                zipCode = clientOrIssuer.zipCode,
-                city = clientOrIssuer.city,
-                phone = clientOrIssuer.phone,
-                email = clientOrIssuer.email,
+                addresses = clientOrIssuer.addresses,
                 notes = clientOrIssuer.notes,
                 companyId1Label = clientOrIssuer.companyId1Label,
                 companyId1Number = clientOrIssuer.companyId1Number,
                 companyId2Label = clientOrIssuer.companyId2Label,
-                companyId2Number = clientOrIssuer.companyId2Number
+                companyId2Number = clientOrIssuer.companyId2Number,
+                errors = mutableListOf()
             )
-        } else _documentIssuerUiState.value = DocumentClientOrIssuerState(
+        } else _documentIssuerUiState.value = ClientOrIssuerState(
             id = null,
             name = clientOrIssuer.name,
             type = clientOrIssuer.type,
             firstName = clientOrIssuer.firstName,
-            address1 = clientOrIssuer.address1,
-            address2 = clientOrIssuer.address2,
-            zipCode = clientOrIssuer.zipCode,
-            city = clientOrIssuer.city,
+            addresses = clientOrIssuer.addresses,
             phone = clientOrIssuer.phone,
             email = clientOrIssuer.email,
             notes = clientOrIssuer.notes,
             companyId1Label = clientOrIssuer.companyId1Label,
             companyId1Number = clientOrIssuer.companyId1Number,
             companyId2Label = clientOrIssuer.companyId2Label,
-            companyId2Number = clientOrIssuer.companyId2Number
+            companyId2Number = clientOrIssuer.companyId2Number,
+            errors = mutableListOf()
         )
     }
 
@@ -158,10 +155,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 type = type,
                 firstName = _documentClientUiState.value.firstName,
                 name = _documentClientUiState.value.name,
-                address1 = _documentClientUiState.value.address1,
-                address2 = _documentClientUiState.value.address2,
-                zipCode = _documentClientUiState.value.zipCode,
-                city = _documentClientUiState.value.city,
+                addresses = _documentClientUiState.value.addresses,
                 phone = _documentClientUiState.value.phone,
                 email = _documentClientUiState.value.email,
                 notes = _documentClientUiState.value.notes,
@@ -175,10 +169,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             type = type,
             firstName = _documentIssuerUiState.value.firstName,
             name = _documentIssuerUiState.value.name,
-            address1 = _documentIssuerUiState.value.address1,
-            address2 = _documentIssuerUiState.value.address2,
-            zipCode = _documentIssuerUiState.value.zipCode,
-            city = _documentIssuerUiState.value.city,
+            addresses = _documentClientUiState.value.addresses,
             phone = _documentIssuerUiState.value.phone,
             email = _documentIssuerUiState.value.email,
             notes = _documentIssuerUiState.value.notes,
@@ -189,35 +180,23 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         )
     }
 
-    fun clearClientUiState() {
-        _clientUiState.value = ClientOrIssuerState()
-        _documentClientUiState.value = DocumentClientOrIssuerState()
+    fun clearClientOrIssuerUiState(type: ClientOrIssuerType) {
+        if (type == ClientOrIssuerType.DOCUMENT_CLIENT) {
+            _clientUiState.value = ClientOrIssuerState()
+            _documentClientUiState.value = ClientOrIssuerState()
+        } else {
+            _issuerUiState.value = ClientOrIssuerState()
+            _documentIssuerUiState.value = ClientOrIssuerState()
+        }
     }
 
-    fun clearIssuerUiState() {
-        _clientUiState.value = ClientOrIssuerState()
-        _documentIssuerUiState.value = DocumentClientOrIssuerState()
-    }
 
     private fun fetchFromLocalDb(id: Long) {
-        val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
+        val clientOrIssuer: ClientOrIssuerState? = dataSource.fetch(id)
 
-        _clientUiState.value = _clientUiState.value.copy(
-            id = clientOrIssuer?.id,
-            firstName = TextFieldValue(clientOrIssuer?.firstName?.text ?: ""),
-            name = TextFieldValue(clientOrIssuer?.name?.text ?: ""),
-            address1 = TextFieldValue(clientOrIssuer?.address1?.text ?: ""),
-            address2 = TextFieldValue(clientOrIssuer?.address2?.text ?: ""),
-            zipCode = TextFieldValue(clientOrIssuer?.zipCode?.text ?: ""),
-            city = TextFieldValue(clientOrIssuer?.city?.text ?: ""),
-            phone = TextFieldValue(clientOrIssuer?.phone?.text ?: ""),
-            email = TextFieldValue(clientOrIssuer?.email?.text ?: ""),
-            notes = TextFieldValue(clientOrIssuer?.notes?.text ?: ""),
-            companyId1Label = TextFieldValue(clientOrIssuer?.companyId1Label?.text ?: ""),
-            companyId1Number = TextFieldValue(clientOrIssuer?.companyId1Number?.text ?: ""),
-            companyId2Label = TextFieldValue(clientOrIssuer?.companyId2Label?.text ?: ""),
-            companyId2Number = TextFieldValue(clientOrIssuer?.companyId2Number?.text ?: ""),
-        )
+        clientOrIssuer?.let {
+            _clientUiState.value = it
+        }
     }
 
     fun saveClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
@@ -233,7 +212,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             }
         }
     }
-
 
     fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
         updateJob?.cancel()
@@ -307,6 +285,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     )
                 }
             }
+
             ClientOrIssuerType.ISSUER -> {
                 val text = updateCursorOfClientOrIssuer(type, pageElement)
                 text?.let {
@@ -318,6 +297,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     )
                 }
             }
+
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
                 val text = updateCursorOfDocumentClientOrIssuer(type, pageElement)
                 text?.let {
@@ -329,6 +309,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     )
                 }
             }
+
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
                 val text = updateCursorOfDocumentClientOrIssuer(type, pageElement)
                 text?.let {
@@ -340,6 +321,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     )
                 }
             }
+
             else -> {}
         }
     }
@@ -348,46 +330,144 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         type: ClientOrIssuerType,
         pageElement: ScreenElement,
     ): String? {
+        val firstAddress = if (type == ClientOrIssuerType.CLIENT)
+            _clientUiState.value.addresses?.getOrNull(0)
+        else _issuerUiState.value.addresses?.getOrNull(0)
+        val secondAddress = if (type == ClientOrIssuerType.CLIENT)
+            _clientUiState.value.addresses?.getOrNull(1)
+        else _issuerUiState.value.addresses?.getOrNull(1)
+
+        val thirdAddress = if (type == ClientOrIssuerType.CLIENT)
+            _clientUiState.value.addresses?.getOrNull(2)
+        else _issuerUiState.value.addresses?.getOrNull(2)
+
         val text = when (pageElement) {
             ScreenElement.CLIENT_OR_ISSUER_NAME ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.name.text
                 else _issuerUiState.value.name.text
+
             ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.firstName?.text
                 else _issuerUiState.value.firstName?.text
+
             ScreenElement.CLIENT_OR_ISSUER_EMAIL ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.email?.text
                 else _issuerUiState.value.email?.text
-            ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 ->
-                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.address1?.text
-            else _issuerUiState.value.address1?.text
-            ScreenElement.CLIENT_OR_ISSUER_ADDRESS2 ->
-                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.address2?.text
-            else _issuerUiState.value.address2?.text
-            ScreenElement.CLIENT_OR_ISSUER_ZIP ->
-                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.zipCode?.text
-                else _issuerUiState.value.zipCode?.text
-            ScreenElement.CLIENT_OR_ISSUER_CITY ->
-                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.city?.text
-                else _issuerUiState.value.city?.text
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
+                firstAddress?.let {
+                    it.addressTitle?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
+                firstAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
+                firstAddress?.let {
+                    it.addressLine2?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP_1 -> {
+                firstAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY_1 -> {
+                firstAddress?.let {
+                    it.city?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
+                secondAddress?.let {
+                    it.addressTitle?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
+                secondAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
+                secondAddress?.let {
+                    it.addressLine2?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP_2 -> {
+                secondAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY_2 -> {
+                secondAddress?.let {
+                    it.city?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
+                thirdAddress?.let {
+                    it.addressTitle?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
+                thirdAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
+                thirdAddress?.let {
+                    it.addressLine2?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP_3 -> {
+                thirdAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY_3 -> {
+                thirdAddress?.let {
+                    it.city?.text
+                }
+            }
+
             ScreenElement.CLIENT_OR_ISSUER_PHONE ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.phone?.text
                 else _issuerUiState.value.phone?.text
+
             ScreenElement.CLIENT_OR_ISSUER_NOTES ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.notes?.text
                 else _issuerUiState.value.notes?.text
+
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId1Label?.text
                 else _issuerUiState.value.companyId1Label?.text
+
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId1Number?.text
                 else _issuerUiState.value.companyId1Number?.text
+
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId2Label?.text
                 else _issuerUiState.value.companyId2Label?.text
+
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE ->
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId2Number?.text
                 else _issuerUiState.value.companyId2Number?.text
+
             else -> null
         }
         return text
@@ -397,46 +477,144 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         type: ClientOrIssuerType,
         pageElement: ScreenElement,
     ): String? {
+        val firstAddress = if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
+            _documentClientUiState.value.addresses?.getOrNull(0)
+        else _documentIssuerUiState.value.addresses?.getOrNull(0)
+        val secondAddress = if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
+            _documentClientUiState.value.addresses?.getOrNull(1)
+        else _documentIssuerUiState.value.addresses?.getOrNull(1)
+
+        val thirdAddress = if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
+            _documentClientUiState.value.addresses?.getOrNull(2)
+        else _documentIssuerUiState.value.addresses?.getOrNull(2)
+
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.name.text
+                if (type == ClientOrIssuerType.CLIENT) _documentClientUiState.value.name.text
                 else _documentIssuerUiState.value.name.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.firstName?.text
+                if (type == ClientOrIssuerType.CLIENT) _documentClientUiState.value.firstName?.text
                 else _documentIssuerUiState.value.firstName?.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.email?.text
+                if (type == ClientOrIssuerType.CLIENT) _documentClientUiState.value.email?.text
                 else _documentIssuerUiState.value.email?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1 ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.address1?.text
-                else _documentIssuerUiState.value.address1?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2 ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.address2?.text
-                else _documentIssuerUiState.value.address2?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.zipCode?.text
-                else _documentIssuerUiState.value.zipCode?.text
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.city?.text
-                else _documentIssuerUiState.value.city?.text
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
+                firstAddress?.let {
+                    it.addressTitle?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
+                firstAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
+                firstAddress?.let {
+                    it.addressLine2?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_1 -> {
+                firstAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_1 -> {
+                firstAddress?.let {
+                    it.city?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
+                secondAddress?.let {
+                    it.addressTitle?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
+                secondAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
+                secondAddress?.let {
+                    it.addressLine2?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_2 -> {
+                secondAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_2 -> {
+                secondAddress?.let {
+                    it.city?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
+                thirdAddress?.let {
+                    it.addressTitle?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
+                thirdAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
+                thirdAddress?.let {
+                    it.addressLine2?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_3 -> {
+                thirdAddress?.let {
+                    it.addressLine1?.text
+                }
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_3 -> {
+                thirdAddress?.let {
+                    it.city?.text
+                }
+            }
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.phone?.text
                 else _documentIssuerUiState.value.phone?.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.notes?.text
                 else _documentIssuerUiState.value.notes?.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId1Label?.text
                 else _documentIssuerUiState.value.companyId1Label?.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId1Number?.text
                 else _documentIssuerUiState.value.companyId1Number?.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId2Label?.text
                 else _documentIssuerUiState.value.companyId2Label?.text
+
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId2Number?.text
                 else _documentIssuerUiState.value.companyId2Number?.text
+
             else -> null
         }
         return text
@@ -463,6 +641,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         value: Any,
     ): ClientOrIssuerState {
         var person = clientOrIssuer
+        val firstAddress = person.addresses?.getOrNull(0)
+        val secondAddress = person.addresses?.getOrNull(1)
+        val thirdAddress = person.addresses?.getOrNull(2)
+
         when (element) {
             ScreenElement.CLIENT_OR_ISSUER_NAME -> person =
                 person.copy(name = value as TextFieldValue)
@@ -473,20 +655,113 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ScreenElement.CLIENT_OR_ISSUER_EMAIL -> person =
                 person.copy(email = value as TextFieldValue)
 
-            ScreenElement.CLIENT_OR_ISSUER_ADDRESS1 -> person =
-                person.copy(address1 = value as TextFieldValue)
-
-            ScreenElement.CLIENT_OR_ISSUER_ADDRESS2 -> person =
-                person.copy(address2 = value as TextFieldValue)
-
-            ScreenElement.CLIENT_OR_ISSUER_ZIP -> person =
-                person.copy(zipCode = value as TextFieldValue)
-
-            ScreenElement.CLIENT_OR_ISSUER_CITY -> person =
-                person.copy(city = value as TextFieldValue)
-
             ScreenElement.CLIENT_OR_ISSUER_PHONE -> person =
                 person.copy(phone = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
+                val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
+                val newAddress = firstAddress?.copy(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
+                val newAddress = firstAddress?.copy(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP_1 -> {
+                val newAddress = firstAddress?.copy(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY_1 -> {
+                val newAddress = firstAddress?.copy(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
+                val newAddress = secondAddress?.copy(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
+                val newAddress = secondAddress?.copy(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
+                val newAddress = secondAddress?.copy(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP_2 -> {
+                val newAddress = secondAddress?.copy(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY_2 -> {
+                val newAddress = secondAddress?.copy(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
+                val newAddress = thirdAddress?.copy(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
+                val newAddress = thirdAddress?.copy(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
+                val newAddress = thirdAddress?.copy(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_ZIP_3 -> {
+                val newAddress = thirdAddress?.copy(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.CLIENT_OR_ISSUER_CITY_3 -> {
+                val newAddress = thirdAddress?.copy(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
 
             ScreenElement.CLIENT_OR_ISSUER_NOTES -> person =
                 person.copy(notes = value as TextFieldValue)
@@ -508,12 +783,30 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         return person
     }
 
+    private fun getNewAddresses(
+        newAddress: AddressState,
+        addresses: List<AddressState>?,
+        addressIndex: Int,
+    ): List<AddressState> {
+
+        val initialAddresses = addresses ?: mutableListOf()
+        val newAddresses = if (initialAddresses.isEmpty()) listOf(newAddress) else
+            initialAddresses.slice(0 until addressIndex) + newAddress + initialAddresses.slice(
+                addressIndex + 1 until initialAddresses.size
+            )
+        return newAddresses
+    }
+
     private fun updateDocumentClientOrIssuerUiState(
-        documentClientOrIssuer: DocumentClientOrIssuerState,
+        documentClientOrIssuer: ClientOrIssuerState,
         element: ScreenElement,
         value: Any,
-    ): DocumentClientOrIssuerState {
+    ): ClientOrIssuerState {
         var person = documentClientOrIssuer
+        val firstAddress = person.addresses?.getOrNull(0)
+        val secondAddress = person.addresses?.getOrNull(1)
+        val thirdAddress = person.addresses?.getOrNull(2)
+
         when (element) {
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> person =
                 person.copy(name = value as TextFieldValue)
@@ -524,20 +817,114 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL -> person =
                 person.copy(email = value as TextFieldValue)
 
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS1 -> person =
-                person.copy(address1 = value as TextFieldValue)
-
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS2 -> person =
-                person.copy(address2 = value as TextFieldValue)
-
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP -> person =
-                person.copy(zipCode = value as TextFieldValue)
-
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY -> person =
-                person.copy(city = value as TextFieldValue)
-
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> person =
                 person.copy(phone = value as TextFieldValue)
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
+                val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
+                val newAddress = firstAddress?.copy(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
+                val newAddress = firstAddress?.copy(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_1 -> {
+                val newAddress = firstAddress?.copy(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_1 -> {
+                val newAddress = firstAddress?.copy(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
+                val newAddress = secondAddress?.copy(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
+                val newAddress = secondAddress?.copy(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
+                val newAddress = secondAddress?.copy(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_2 -> {
+                val newAddress = secondAddress?.copy(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_2 -> {
+                val newAddress = secondAddress?.copy(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
+                val newAddress = thirdAddress?.copy(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
+                val newAddress = thirdAddress?.copy(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
+                val newAddress = thirdAddress?.copy(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_3 -> {
+                val newAddress = thirdAddress?.copy(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_3 -> {
+                val newAddress = thirdAddress?.copy(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue)
+
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES -> person =
                 person.copy(notes = value as TextFieldValue)
@@ -600,10 +987,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
                 FormInputsValidator.validateName(_documentIssuerUiState.value.name.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
+                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 FormInputsValidator.validateEmail(_documentIssuerUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
+                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
                 }
                 _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
                     errors = listOfErrors
@@ -611,6 +998,19 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             }
         }
         return listOfErrors.isEmpty()
+    }
+
+    fun clearValidateInputErrors(type: ClientOrIssuerType) {
+        when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value.errors.clear()
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value.errors.clear()
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                _documentClientUiState.value = ClientOrIssuerState()
+                _documentClientUiState.value.errors.clear()
+            }
+
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value.errors.clear()
+        }
     }
 }
 

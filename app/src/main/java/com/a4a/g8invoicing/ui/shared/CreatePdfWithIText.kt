@@ -12,7 +12,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.screens.shared.FooterRowName
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -194,8 +194,8 @@ private fun createDate(date: String): Paragraph {
 }
 
 private fun createIssuerAndClientTable(
-    issuer: DocumentClientOrIssuerState?,
-    client: DocumentClientOrIssuerState?,
+    issuer: ClientOrIssuerState?,
+    client: ClientOrIssuerState?,
     font: PdfFont,
     documentType: DocumentType,
 ): Table {
@@ -204,93 +204,8 @@ private fun createIssuerAndClientTable(
         .setMarginBottom(40F)
         .setFixedLayout()
 
-    val issuerFirstName = issuer?.firstName?.text?.let { Text("$it ").setFont(font) }
-    val issuerName = Text(issuer?.name?.text + "\n").setFont(font)
-    val issuerAddress1 = issuer?.address1?.text?.let { Text(it + "\n") }
-    val issuerAddress2 = issuer?.address2?.text?.let { Text(it + "\n") }
-    val issuerZipCode = issuer?.zipCode?.text?.let { Text("$it ") }
-    val issuerCity = issuer?.city?.text?.let { Text(it + "\n") }
-    val issuerPhone = issuer?.phone?.text?.let { Text(it + "\n") }
-    val issuerCompanyLabel1 = issuer?.companyId1Number?.text?.let {
-        Text(issuer.companyId1Label?.text + " : " + it + "\n")
-    }
-    val issuerCompanyLabel2 = issuer?.companyId2Number?.text?.let {
-        Text(issuer.companyId2Label?.text + " : " + it + "\n")
-    }
-    val issuer = Paragraph()
-        .setFixedLeading(16F)
-        .setPaddingRight(40f)
-    issuerFirstName?.let {
-        issuer.add(it)
-    }
-    issuerName?.let {
-        issuer.add(it)
-    }
-    issuerAddress1?.let {
-        issuer.add(it)
-    }
-    issuerAddress2?.let {
-        issuer.add(it)
-    }
-    issuerZipCode?.let {
-        issuer.add(it)
-    }
-    issuerCity?.let {
-        issuer.add(it)
-    }
-    issuerPhone?.let {
-        issuer.add(it)
-    }
-    issuerCompanyLabel1?.let {
-        issuer.add(it)
-    }
-    issuerCompanyLabel2?.let {
-        issuer.add(it)
-    }
-
-    val clientFirstName = client?.firstName?.text?.let { Text("$it ").setFont(font) }
-    val clientName = Text(client?.name?.text + "\n").setFont(font)
-    val clientAddress1 = client?.address1?.text?.let { Text(it + "\n") }
-    val clientAddress2 = client?.address2?.text?.let { Text(it + "\n") }
-    val clientZipCode = client?.zipCode?.text?.let { Text("$it ") }
-    val clientCity = client?.city?.text?.let { Text(it + "\n") }
-    val clientPhone = client?.phone?.text?.let { Text(it + "\n") }
-    val clientCompanyLabel1 = client?.companyId1Number?.text?.let {
-        Text(client.companyId1Label?.text + " : " + it + "\n")
-    }
-    val clientCompanyLabel2 = client?.companyId2Number?.text?.let {
-        Text(client.companyId2Label?.text + " : " + it + "\n")
-    }
-    val client = Paragraph()
-        .setFixedLeading(16F)
-        .setPadding(12f)
-    clientFirstName?.let {
-        client.add(it)
-    }
-    clientName?.let {
-        client.add(it)
-    }
-    clientAddress1?.let {
-        client.add(it)
-    }
-    clientAddress2?.let {
-        client.add(it)
-    }
-    clientZipCode?.let {
-        client.add(it)
-    }
-    clientCity?.let {
-        client.add(it)
-    }
-    clientPhone?.let {
-        client.add(it)
-    }
-    clientCompanyLabel1?.let {
-        client.add(it)
-    }
-    clientCompanyLabel2?.let {
-        client.add(it)
-    }
+    val issuer = createClientOrIssuerParagraph(issuer, font)
+    val client = createClientOrIssuerParagraph(client, font)
 
     issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER))
     issuerAndClientTable.addCell(
@@ -321,6 +236,61 @@ private fun createIssuerAndClientTable(
     cell.setNextRenderer(RoundedCellRenderer(cell, ColorConstants.LIGHT_GRAY, false))
 
     return issuerAndClientTable.addCell(cell)
+}
+
+private fun createClientOrIssuerParagraph(clientOrIssuer: ClientOrIssuerState?, font: PdfFont): Paragraph {
+    val issuerFirstName = clientOrIssuer?.firstName?.text?.let { Text("$it ").setFont(font) }
+    val issuerName = Text(clientOrIssuer?.name?.text + "\n").setFont(font)
+    val issuerPhone = clientOrIssuer?.phone?.text?.let { Text(it + "\n") }
+    val issuerCompanyLabel1 = clientOrIssuer?.companyId1Number?.text?.let {
+        Text(clientOrIssuer.companyId1Label?.text + " : " + it + "\n")
+    }
+    val issuerCompanyLabel2 = clientOrIssuer?.companyId2Number?.text?.let {
+        Text(clientOrIssuer.companyId2Label?.text + " : " + it + "\n")
+    }
+    val clientOrIssuerParagraph = Paragraph()
+        .setFixedLeading(16F)
+        .setPaddingRight(40f)
+
+    issuerFirstName?.let {
+        clientOrIssuerParagraph.add(it)
+    }
+    issuerName?.let {
+        clientOrIssuerParagraph.add(it)
+    }
+
+    for(i in 1..(clientOrIssuer?.addresses?.size ?: 1)) {
+        var address = clientOrIssuer?.addresses?.first()
+        when (i) {
+            2 -> address = clientOrIssuer?.addresses?.getOrNull(1)
+            3 -> address = clientOrIssuer?.addresses?.getOrNull(2)
+        }
+        if (!address?.addressTitle?.text.isNullOrEmpty()) {
+            clientOrIssuerParagraph.add(address?.addressTitle?.text + "\n")
+        }
+        if (!address?.addressLine1?.text.isNullOrEmpty()) {
+            clientOrIssuerParagraph.add(address?.addressLine1?.text + "\n")
+        }
+        if (!address?.addressLine2?.text.isNullOrEmpty()) {
+            clientOrIssuerParagraph.add(address?.addressLine2?.text + "\n")
+        }
+        if (!address?.zipCode?.text.isNullOrEmpty() ||
+                    !address?.city?.text.isNullOrEmpty()
+                ) {
+            clientOrIssuerParagraph.add(address?.zipCode?.text + " " + address?.city?.text  + "\n")
+        }
+    }
+    issuerPhone?.let {
+        clientOrIssuerParagraph.add(it)
+    }
+    issuerCompanyLabel1?.let {
+        clientOrIssuerParagraph.add(it)
+    }
+    issuerCompanyLabel2?.let {
+        clientOrIssuerParagraph.add(it)
+    }
+
+    return clientOrIssuerParagraph
 }
 
 private fun createReference(orderNumber: String, font: PdfFont): Paragraph {

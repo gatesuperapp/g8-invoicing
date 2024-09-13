@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 
@@ -36,7 +37,8 @@ fun ClientOrIssuerList(
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
-
+    // On delete document
+    val openAlertDialog = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopBar(
@@ -50,12 +52,10 @@ fun ClientOrIssuerList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
+                selectedMode = selectedMode.value,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
-                    onClickDelete(selectedItems.toList())
-                    selectedItems.clear()
-                    selectedMode.value = false
-                    // No need to reset checkboxes as items are deleted
+                    openAlertDialog.value = true
                 },
                 onClickDuplicate = {
                     onClickDuplicate(selectedItems.toList())
@@ -95,6 +95,20 @@ fun ClientOrIssuerList(
                 },
                 keyToUnselectAll = keyToResetCheckboxes.value
             )
+        }
+
+        when {
+            openAlertDialog.value -> {
+                AlertDialogDeleteDocument(
+                    onDismissRequest = { openAlertDialog.value = false },
+                    onConfirmation = {
+                        openAlertDialog.value = false
+                        onClickDelete(selectedItems.toList())
+                        selectedItems.clear()
+                        selectedMode.value = false
+                    }
+                )
+            }
         }
     }
 }

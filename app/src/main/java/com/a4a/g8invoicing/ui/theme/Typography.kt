@@ -7,6 +7,7 @@ import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
@@ -130,6 +131,33 @@ val Typography.callForActions: TextStyle
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
+        )
+    }
+
+val Typography.inputLabel: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFont,
+            color = ColorDarkGray,
+            fontSize = 16.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            ),
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+
+val Typography.inputField: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFont,
+            color = Color.LightGray,
+            fontSize = 16.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            ),
         )
     }
 

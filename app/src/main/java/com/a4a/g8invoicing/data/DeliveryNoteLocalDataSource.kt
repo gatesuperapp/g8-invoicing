@@ -10,7 +10,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
@@ -28,6 +28,8 @@ class DeliveryNoteLocalDataSource(
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
+    private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries = db.linkDocumentClientOrIssuerToAddressQueries
     private val documentProductQueries = db.documentProductQueries
     private val linkDeliveryNoteToDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
     private val linkDeliveryNoteToDocumentClientOrIssuerQueries =
@@ -39,7 +41,7 @@ class DeliveryNoteLocalDataSource(
             incrementDocumentNumber(it)
         } ?: Strings.get(R.string.delivery_note_default_number)
         val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: DocumentClientOrIssuerState()
+            ?: ClientOrIssuerState()
 
         saveInfoInDocumentTable(
             DeliveryNoteState(
@@ -128,7 +130,7 @@ class DeliveryNoteLocalDataSource(
         return null
     }
 
-    private fun fetchClientAndIssuer(deliveryNoteId: Long): List<DocumentClientOrIssuerState>? {
+    private fun fetchClientAndIssuer(deliveryNoteId: Long): List<ClientOrIssuerState>? {
         try {
             val listOfIds =
                 linkDeliveryNoteToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
@@ -150,13 +152,13 @@ class DeliveryNoteLocalDataSource(
 
     private fun DeliveryNote.transformIntoEditableNote(
         documentProducts: MutableList<DocumentProductState>? = null,
-        documentClientAndIssuer: List<DocumentClientOrIssuerState>? = null,
+        documentClientAndIssuer: List<ClientOrIssuerState>? = null,
     ): DeliveryNoteState {
         this.let {
             return DeliveryNoteState(
                 documentId = it.delivery_note_id.toInt(),
                 documentNumber = TextFieldValue(text = it.number ?: ""),
-                documentDate = it.delivery_note_date ?: "",
+                documentDate = it.delivery_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
                 freeField = TextFieldValue(text = it.free_field ?: ""),
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
@@ -249,13 +251,15 @@ class DeliveryNoteLocalDataSource(
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
-        documentClientOrIssuer: DocumentClientOrIssuerState,
+        documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
     ) {
         withContext(Dispatchers.IO) {
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
+                    documentClientOrIssuerAddressQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
                     linkDeliveryNoteToDocumentClientOrIssuerQueries,
                     documentClientOrIssuer,
                     documentId

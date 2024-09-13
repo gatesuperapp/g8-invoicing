@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.ProductsUiState
 
@@ -38,6 +39,8 @@ fun ProductList(
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
+    // On delete document
+    val openAlertDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -50,10 +53,10 @@ fun ProductList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
+                selectedMode = selectedMode.value,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
-                    onClickDelete(selectedItems.toList())
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    openAlertDialog.value = true
                 },
                 onClickDuplicate = {
                     onClickDuplicate(selectedItems.toList())
@@ -93,6 +96,20 @@ fun ProductList(
                 },
                 keyToUnselectAll = keyToResetCheckboxes.value
             )
+        }
+
+        when {
+            openAlertDialog.value -> {
+                AlertDialogDeleteDocument(
+                    onDismissRequest = { openAlertDialog.value = false },
+                    onConfirmation = {
+                        openAlertDialog.value = false
+                        onClickDelete(selectedItems.toList())
+                        selectedItems.clear()
+                        selectedMode.value = false
+                    }
+                )
+            }
         }
     }
 }

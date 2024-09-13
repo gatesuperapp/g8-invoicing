@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusManager
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
@@ -42,7 +41,6 @@ import icons.IconDone
 import java.math.BigDecimal
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentBottomSheetTextElements(
     document: DocumentState,
@@ -50,11 +48,12 @@ fun DocumentBottomSheetTextElements(
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
     issuers: MutableList<ClientOrIssuerState>,
-    documentClientUiState: DocumentClientOrIssuerState,
-    documentIssuerUiState: DocumentClientOrIssuerState,
+    documentClientUiState: ClientOrIssuerState,
+    documentIssuerUiState: ClientOrIssuerState,
     taxRates: List<BigDecimal>,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
-    onClickDocumentClientOrIssuer: (DocumentClientOrIssuerState) -> Unit,
+    onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -149,12 +148,10 @@ fun DocumentBottomSheetTextElements(
                             document.documentIssuer,
                             issuers
                         )
-
                         ScreenElement.DOCUMENT_CLIENT -> Pair(
                             document.documentClient,
                             clients
                         )
-
                         ScreenElement.DOCUMENT_DATE -> document.documentDate
                         ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
                         ScreenElement.DOCUMENT_FOOTER -> document.footerText
@@ -167,6 +164,7 @@ fun DocumentBottomSheetTextElements(
                     documentIssuerUiState = documentIssuerUiState,
                     taxRates = taxRates,
                     onClickClientOrIssuer = onClickClientOrIssuer,
+                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
                     onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
                     onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                     currentClientId = currentClientId,
@@ -178,7 +176,7 @@ fun DocumentBottomSheetTextElements(
                     onSelectTaxRate = onSelectTaxRate,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
-                    onValueChange = onValueChange
+                    onValueChange = onValueChange,
                 )
             }
         }

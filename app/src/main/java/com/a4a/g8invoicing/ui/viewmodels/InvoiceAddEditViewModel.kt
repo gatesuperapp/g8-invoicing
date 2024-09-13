@@ -13,7 +13,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -192,7 +192,7 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: DocumentClientOrIssuerState) {
+    fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: ClientOrIssuerState) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
@@ -239,7 +239,7 @@ class InvoiceAddEditViewModel @Inject constructor(
         )
     }
 
-    fun saveDocumentClientOrIssuerInUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
+    fun saveDocumentClientOrIssuerInUiState(documentClientOrIssuer: ClientOrIssuerState) {
         if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
             _documentUiState.value = _documentUiState.value.copy(
                 documentClient = documentClientOrIssuer
@@ -268,58 +268,59 @@ class InvoiceAddEditViewModel @Inject constructor(
             )
         )
     }
-}
 
-fun updateInvoiceUiState(
-    document: InvoiceState,
-    element: ScreenElement,
-    value: Any,
-): InvoiceState {
-    var doc = document
-    when (element) {
-        ScreenElement.DOCUMENT_NUMBER -> {
-            doc = doc.copy(documentNumber = value as TextFieldValue)
+    private fun updateInvoiceUiState(
+        document: InvoiceState,
+        element: ScreenElement,
+        value: Any,
+    ): InvoiceState {
+        var doc = document
+        when (element) {
+            ScreenElement.DOCUMENT_NUMBER -> {
+                doc = doc.copy(documentNumber = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_DATE -> {
+                doc = doc.copy(documentDate = value as String)
+            }
+
+            ScreenElement.DOCUMENT_CLIENT -> {
+                doc = doc.copy(documentClient = value as ClientOrIssuerState)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER -> {
+                doc = doc.copy(documentIssuer = value as ClientOrIssuerState)
+            }
+
+            ScreenElement.DOCUMENT_REFERENCE -> {
+                doc = doc.copy(reference = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PRODUCT -> {
+                val updatedDocumentProduct = value as DocumentProductState
+                val list =
+                    doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
+                val updatedList = (list ?: emptyList()) + updatedDocumentProduct
+
+                doc = doc.copy(documentProducts = updatedList)
+            }
+
+            ScreenElement.DOCUMENT_CURRENCY -> {
+                doc = doc.copy(currency = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_DUE_DATE -> {
+                doc = doc.copy(dueDate = value as String)
+            }
+
+            ScreenElement.DOCUMENT_FOOTER -> {
+                doc = doc.copy(footerText = value as TextFieldValue)
+            }
+
+            else -> {}
         }
-
-        ScreenElement.DOCUMENT_DATE -> {
-            doc = doc.copy(documentDate = value as String)
-        }
-
-        ScreenElement.DOCUMENT_CLIENT -> {
-            doc = doc.copy(documentClient = value as DocumentClientOrIssuerState)
-        }
-
-        ScreenElement.DOCUMENT_ISSUER -> {
-            doc = doc.copy(documentIssuer = value as DocumentClientOrIssuerState)
-        }
-
-        ScreenElement.DOCUMENT_REFERENCE -> {
-            doc = doc.copy(reference = value as TextFieldValue)
-        }
-
-        ScreenElement.DOCUMENT_PRODUCT -> {
-            val updatedDocumentProduct = value as DocumentProductState
-            val list = doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-
-            doc = doc.copy(documentProducts = updatedList)
-        }
-
-        ScreenElement.DOCUMENT_CURRENCY -> {
-            doc = doc.copy(currency = value as TextFieldValue)
-        }
-
-        ScreenElement.DOCUMENT_DUE_DATE -> {
-            doc = doc.copy(dueDate = value as String)
-        }
-
-        ScreenElement.DOCUMENT_FOOTER -> {
-            doc = doc.copy(footerText = value as TextFieldValue)
-        }
-
-        else -> {}
+        return doc
     }
-    return doc
 }
 
 

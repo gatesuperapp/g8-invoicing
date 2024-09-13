@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
-fun DocumentBasicTemplateClientOrIssuer(clientOrIssuer: DocumentClientOrIssuerState?) {
+fun DocumentBasicTemplateClientOrIssuer(clientOrIssuer: ClientOrIssuerState?) {
     Text(
         textAlign = TextAlign.Center, // have to specify it (in addition to column alignment)
         // because without it, multilines text aren't aligned
@@ -25,38 +25,53 @@ fun DocumentBasicTemplateClientOrIssuer(clientOrIssuer: DocumentClientOrIssuerSt
             ((it.text))
         }) + (clientOrIssuer?.name?.text ?: "")
     )
-    if (!clientOrIssuer?.address1?.text.isNullOrEmpty()) {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(bottom = 3.dp)
-                .wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = clientOrIssuer?.address1?.text ?: ""
-        )
+    for(i in 0..(clientOrIssuer?.addresses?.size ?: 1)) {
+        val address = clientOrIssuer?.addresses?.getOrNull(i)
+
+        if (!address?.addressTitle?.text.isNullOrEmpty()) {
+            Text(
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = 3.dp)
+                    .wrapContentHeight(),
+                style = MaterialTheme.typography.textForDocuments,
+                text =address?.addressTitle?.text ?: ""
+            )
+        }
+        if (!address?.addressLine1?.text.isNullOrEmpty()) {
+            Text(
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = 3.dp)
+                    .wrapContentHeight(),
+                style = MaterialTheme.typography.textForDocuments,
+                text =address?.addressLine1?.text ?: ""
+            )
+        }
+        if (!address?.addressLine2?.text.isNullOrEmpty()) {
+            Text(
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = 3.dp)
+                    .wrapContentHeight(),
+                style = MaterialTheme.typography.textForDocuments,
+                text = address?.addressLine2?.text ?: ""
+            )
+        }
+        if (!address?.zipCode?.text.isNullOrEmpty() ||
+            !address?.city?.text.isNullOrEmpty()
+        ) {
+            Text(
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = 3.dp)
+                    .wrapContentHeight(),
+                style = MaterialTheme.typography.textForDocuments,
+                text = address?.zipCode?.text + " " + address?.city?.text
+            )
+        }
     }
-    if (!clientOrIssuer?.address2?.text.isNullOrEmpty()) {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(bottom = 3.dp)
-                .wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = clientOrIssuer?.address2?.text ?: ""
-        )
-    }
-    if (!clientOrIssuer?.zipCode?.text.isNullOrEmpty() ||
-        !clientOrIssuer?.city?.text.isNullOrEmpty()
-    ) {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(bottom = 3.dp)
-                .wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = clientOrIssuer?.zipCode?.text + " " + clientOrIssuer?.city?.text
-        )
-    }
+
     if (!clientOrIssuer?.phone?.text.isNullOrEmpty()) {
         Text(
             textAlign = TextAlign.Center,

@@ -10,12 +10,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import icons.IconDelete
 
 @Composable
 fun AlertDialogDeleteDocument(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
+    isInvoice: Boolean = false,
 ) {
     AlertDialog(
         icon = {
@@ -25,11 +27,13 @@ fun AlertDialogDeleteDocument(
             )
         },
         text = {
+            val text = if (isInvoice) R.string.alert_dialog_delete_invoice
+            else R.string.alert_dialog_delete_general
             Text(
-                text = stringResource(id = R.string.alert_dialog_delete),
+                text = Strings.get(text),
                 style = TextStyle(
-                    textAlign = TextAlign.Center)
-
+                    textAlign = TextAlign.Center
+                )
             )
         },
         textContentColor = Color.Black,

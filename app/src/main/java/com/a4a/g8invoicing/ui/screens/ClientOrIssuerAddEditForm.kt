@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,7 +38,6 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActions
-import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 import icons.IconDelete
 
 @Composable
@@ -49,9 +45,15 @@ fun ClientOrIssuerAddEditForm(
     clientOrIssuerUiState: ClientOrIssuerState,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
+    isInBottomSheetModal: Boolean = false,
 ) {
     val localFocusManager = LocalFocusManager.current
-    var clientAddresses by remember { mutableIntStateOf(1) }
+    var numberOfClientAddresses by remember {
+        mutableIntStateOf(
+            clientOrIssuerUiState.addresses?.size ?: 1
+        )
+    }
+    val paddingTop = if (isInBottomSheetModal) 20.dp else 80.dp
 
     Column(
         modifier = Modifier
@@ -59,7 +61,7 @@ fun ClientOrIssuerAddEditForm(
             .background(ColorBackgroundGrey)
             .fillMaxSize()
             .padding(12.dp)
-            .padding(top = 80.dp)
+            .padding(top = paddingTop, bottom = 40.dp)
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
@@ -86,10 +88,15 @@ fun ClientOrIssuerAddEditForm(
                         text = clientOrIssuerUiState.name,
                         placeholder = stringResource(id = R.string.client_name_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_NAME, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
+                                else ScreenElement.CLIENT_OR_ISSUER_NAME,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_NAME
+                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
+                    else ScreenElement.CLIENT_OR_ISSUER_NAME
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_first_name),
@@ -97,10 +104,15 @@ fun ClientOrIssuerAddEditForm(
                         text = clientOrIssuerUiState.firstName,
                         placeholder = stringResource(id = R.string.client_first_name_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME
+                                else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
+                    pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
+                    else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_email),
@@ -108,10 +120,15 @@ fun ClientOrIssuerAddEditForm(
                         text = clientOrIssuerUiState.email,
                         placeholder = stringResource(id = R.string.client_email_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL
+                                else ScreenElement.CLIENT_OR_ISSUER_EMAIL,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_EMAIL
+                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL
+                    else ScreenElement.CLIENT_OR_ISSUER_EMAIL
                 ),
                 FormInput(
                     label = stringResource(id = R.string.client_phone),
@@ -119,12 +136,16 @@ fun ClientOrIssuerAddEditForm(
                         text = clientOrIssuerUiState.phone,
                         placeholder = stringResource(id = R.string.client_phone_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_PHONE, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE
+                                else ScreenElement.CLIENT_OR_ISSUER_PHONE,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_PHONE
+                    pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
+                    else ScreenElement.CLIENT_OR_ISSUER_PHONE
                 )
-
             )
             // Create the UI with list items
             FormUI(
@@ -137,7 +158,13 @@ fun ClientOrIssuerAddEditForm(
 
         Spacer(Modifier.padding(bottom = 16.dp))
 
-        for (i in 1..clientAddresses) {
+        for (i in 1..numberOfClientAddresses) {
+            var address = clientOrIssuerUiState.addresses?.getOrNull(0)
+            when (i) {
+                2 -> address = clientOrIssuerUiState.addresses?.getOrNull(1)
+                3 -> address = clientOrIssuerUiState.addresses?.getOrNull(2)
+            }
+
             Column(
                 modifier = Modifier
                     .background(color = Color.White, shape = RoundedCornerShape(6.dp))
@@ -150,50 +177,74 @@ fun ClientOrIssuerAddEditForm(
                     FormInput(
                         label = stringResource(id = R.string.client_address1),
                         inputType = TextInput(
-                            text = clientOrIssuerUiState.address1,
+                            text = address?.addressLine1,
                             placeholder = stringResource(id = R.string.client_address1_input),
                             onValueChange = {
-                                onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS1, it)
+                                onValueChange(
+                                    if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
+                                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i"),
+                                    it
+                                )
                             }
                         ),
-                        pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS1
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
                     ),
                     FormInput(
                         label = stringResource(id = R.string.client_address2),
                         inputType = TextInput(
-                            text = clientOrIssuerUiState.address2,
+                            text = address?.addressLine2,
                             placeholder = stringResource(id = R.string.client_address2_input),
                             onValueChange = {
-                                onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS2, it)
+                                onValueChange(
+                                    if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i")
+                                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i"),
+                                    it
+                                )
                             }
                         ),
-                        pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS2
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i")
                     ),
                     FormInput(
                         label = stringResource(id = R.string.client_zip_code),
                         inputType = TextInput(
-                            text = clientOrIssuerUiState.zipCode,
+                            text = address?.zipCode,
                             placeholder = stringResource(id = R.string.client_zip_code_input),
                             onValueChange = {
-                                onValueChange(ScreenElement.CLIENT_OR_ISSUER_ZIP, it)
+                                onValueChange(
+                                    if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ZIP_$i")
+                                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_ZIP_$i"),
+                                    it
+                                )
                             }
                         ),
-                        pageElement = ScreenElement.CLIENT_OR_ISSUER_ZIP
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ZIP_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_ZIP_$i")
                     ),
                     FormInput(
                         label = stringResource(id = R.string.client_city),
                         inputType = TextInput(
-                            text = clientOrIssuerUiState.city,
+                            text = address?.city,
                             placeholder = stringResource(id = R.string.client_city_input),
                             onValueChange = {
-                                onValueChange(ScreenElement.CLIENT_OR_ISSUER_CITY, it)
+                                onValueChange(
+                                    if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_CITY_$i")
+                                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i"),
+                                    it
+                                )
                             }
                         ),
-                        pageElement = ScreenElement.CLIENT_OR_ISSUER_CITY
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_CITY_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i")
                     )
                 )
 
-                if (clientAddresses > 1) {
+                if (numberOfClientAddresses > 1) {
                     var placeholderId = 0
                     when (i) {
                         1 -> placeholderId = R.string.client_address_title_invoicing_placeholder
@@ -204,13 +255,19 @@ fun ClientOrIssuerAddEditForm(
                     inputList.add(0, FormInput(
                         label = stringResource(id = R.string.client_address_title),
                         inputType = TextInput(
-                            text = clientOrIssuerUiState.addressTitle,
+                            text = address?.addressTitle,
                             placeholder = stringResource(placeholderId),
                             onValueChange = {
-                                onValueChange(ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE, it)
+                                onValueChange(
+                                    if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
+                                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i"),
+                                    it
+                                )
                             }
                         ),
-                        pageElement = ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
                     ))
                 }
 
@@ -223,17 +280,16 @@ fun ClientOrIssuerAddEditForm(
                 )
             }
 
-            if (clientAddresses > 1 && i != clientAddresses) {
-                Spacer(modifier = Modifier.padding(bottom = 14.dp))
-            }
-
-            if (clientAddresses == 1) {
-                AddAddressButton(onClick = { clientAddresses += 1 })
-            } else if (i == clientAddresses) {
-                Row(Modifier.padding(bottom = 16.dp)) {
-                    AddAddressButton(onClick = { clientAddresses += 1 })
+            Row(Modifier.padding(bottom = 6.dp)) {
+                if (i == 3) {
                     Spacer(Modifier.weight(1F))
-                    AddDeleteButton(onClick = { clientAddresses -= 1 })
+                    AddDeleteButton(onClick = { numberOfClientAddresses -= 1 })
+                } else if (numberOfClientAddresses == 1) {
+                    AddAddressButton(onClick = { numberOfClientAddresses += 1 })
+                } else if (i == numberOfClientAddresses) {
+                    AddAddressButton(onClick = { numberOfClientAddresses += 1 })
+                    Spacer(Modifier.weight(1F))
+                    AddDeleteButton(onClick = { numberOfClientAddresses -= 1 })
                 }
             }
         }
@@ -251,34 +307,51 @@ fun ClientOrIssuerAddEditForm(
                     label = TextInput(
                         text = clientOrIssuerUiState.companyId1Label,
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL
+                                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL,
+                                it
+                            )
                         },
-
-                        ),
+                    ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId1Number,
                         placeholder = stringResource(id = R.string.client_company_identification1_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE
+                                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1
+                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1
+                    else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1
                 ),
                 FormInput(
                     label = TextInput(
                         text = clientOrIssuerUiState.companyId2Label,
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL
+                                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
+                                it
+                            )
                         }
                     ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId2Number,
                         placeholder = stringResource(id = R.string.client_company_identification2_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE
+                                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
+                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
+                    else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
                 )
             )
 
@@ -307,10 +380,15 @@ fun ClientOrIssuerAddEditForm(
                         text = clientOrIssuerUiState.notes,
                         placeholder = stringResource(id = R.string.client_notes_input),
                         onValueChange = {
-                            onValueChange(ScreenElement.CLIENT_OR_ISSUER_NOTES, it)
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
+                                else ScreenElement.CLIENT_OR_ISSUER_NOTES,
+                                it
+                            )
                         }
                     ),
-                    pageElement = ScreenElement.CLIENT_OR_ISSUER_NOTES
+                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
+                    else ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
                 ))
 
             // Create the UI with list items
@@ -326,17 +404,15 @@ fun ClientOrIssuerAddEditForm(
 
 @Composable
 fun AddDeleteButton(onClick: () -> Unit) {
-    FilledIconButton(
+    IconButton(
         onClick = onClick,
         modifier = Modifier
-            .padding(end = 0.dp)
-            .size(30.dp),
-        shape = CircleShape,
-        colors = IconButtonDefaults.filledIconButtonColors(contentColor = Color.White)
+            .padding(end = 4.dp, top = 4.dp)
+            .size(14.dp)
     ) {
         Icon(
             modifier = Modifier
-                .size(20.dp),
+                .size(22.dp),
             imageVector = IconDelete,
             tint = ColorDarkGray,
             contentDescription = Strings.get(R.string.client_delete_address)

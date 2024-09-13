@@ -13,7 +13,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.DocumentClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -220,7 +220,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: DocumentClientOrIssuerState) {
+    fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: ClientOrIssuerState) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
@@ -267,7 +267,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         )
     }
 
-    fun saveDocumentClientOrIssuerInDeliveryNoteUiState(documentClientOrIssuer: DocumentClientOrIssuerState) {
+    fun saveDocumentClientOrIssuerInDeliveryNoteUiState(documentClientOrIssuer: ClientOrIssuerState) {
         if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
             _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
                 documentClient = documentClientOrIssuer
@@ -343,11 +343,11 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_CLIENT -> {
-            note = note.copy(documentClient = value as DocumentClientOrIssuerState)
+            note = note.copy(documentClient = value as ClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
-            note = note.copy(documentIssuer = value as DocumentClientOrIssuerState)
+            note = note.copy(documentIssuer = value as ClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_REFERENCE -> {
