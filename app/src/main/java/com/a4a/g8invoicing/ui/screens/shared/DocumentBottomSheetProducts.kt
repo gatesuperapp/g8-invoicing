@@ -179,7 +179,7 @@ fun DocumentBottomSheetProducts(
                     }
                 )
             }
-
+/*
             if (showDocumentForm) {
                 DocumentBottomSheetClientOrIssuerFormModal(
                     typeOfCreation = typeOfCreation,
@@ -196,7 +196,7 @@ fun DocumentBottomSheetProducts(
                     },
                     onSelectTaxRate = onSelectTaxRate
                 )
-            }
+            }*/
         }
     }
 }

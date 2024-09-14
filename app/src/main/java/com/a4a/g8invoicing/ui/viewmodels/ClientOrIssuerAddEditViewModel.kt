@@ -13,12 +13,9 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -30,8 +27,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 ) : ViewModel() {
     private var saveJob: Job? = null
     private var updateJob: Job? = null
-    private var autoSaveIssuerJob: Job? = null
-    private var autoSaveClientJob: Job? = null
+    private var autoSaveJob: Job? = null
 
     // Getting the argument in "ClientAddEdit?itemId={itemId}" with savedStateHandle
     private val id: String? = savedStateHandle["itemId"]
@@ -63,40 +59,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 fetchFromLocalDb(it.toLong())
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        GlobalScope.launch {
-            updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT)
-            updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER)
-        }
-    }
-
-    fun autoSaveIssuerFormInputsInLocalDb() {
-        autoSaveIssuerJob?.cancel()
-        autoSaveIssuerJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentIssuerUiState.debounce(300)
-                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_ISSUER) }
-        }
-    }
-
-    fun autoSaveClientFormInputsInLocalDb() {
-        autoSaveClientJob?.cancel()
-        autoSaveClientJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentClientUiState.debounce(300)
-                .collect { updateClientOrIssuerInLocalDb(ClientOrIssuerType.DOCUMENT_CLIENT) }
-        }
-    }
-
-    fun stopAutoSaveIssuerFormInputsInLocalDb() {
-        autoSaveIssuerJob?.cancel()
-    }
-
-    fun stopAutoSaveClientFormInputsInLocalDb() {
-        autoSaveClientJob?.cancel()
     }
 
 
@@ -199,14 +161,18 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
+    fun createNew(type: ClientOrIssuerType) {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
+            val stateToSave = when (type) {
+                ClientOrIssuerType.CLIENT -> _clientUiState.value
+                ClientOrIssuerType.ISSUER ->_issuerUiState.value
+                ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+                ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+            }
+
             try {
-                dataSource.saveClientOrIssuer(
-                    if (type == ClientOrIssuerType.CLIENT) _clientUiState.value
-                    else _issuerUiState.value
-                )
+                dataSource.createNew(stateToSave)
             } catch (e: Exception) {
                 println("Saving clients failed with exception: ${e.localizedMessage}")
             }
@@ -268,6 +234,40 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                         pageElement,
                         value
                     )
+            }
+        }
+    }
+
+    fun removeAddressFromClientOrIssuerState(
+        type: ClientOrIssuerType,
+    ) {
+        when (type) {
+            ClientOrIssuerType.CLIENT -> {
+                val newAddresses = _clientUiState.value.addresses?.dropLast(1)
+                _clientUiState.value = _clientUiState.value.copy(
+                    addresses = newAddresses
+                )
+            }
+
+            ClientOrIssuerType.ISSUER -> {
+                val newAddresses = _issuerUiState.value.addresses?.dropLast(1)
+                _issuerUiState.value = _issuerUiState.value.copy(
+                    addresses = newAddresses
+                )
+            }
+
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                val newAddresses = _documentClientUiState.value.addresses?.dropLast(1)
+                _documentClientUiState.value = _documentClientUiState.value.copy(
+                    addresses = newAddresses
+                )
+            }
+
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                val newAddresses = _documentIssuerUiState.value.addresses?.dropLast(1)
+                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                    addresses = newAddresses
+                )
             }
         }
     }

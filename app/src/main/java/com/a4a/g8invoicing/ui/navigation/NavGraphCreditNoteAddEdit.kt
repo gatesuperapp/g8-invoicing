@@ -90,10 +90,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
             onClickDocumentClientOrIssuer = {// Edit a document product
-                if (it.type == ClientOrIssuerType.DOCUMENT_ISSUER)
-                    clientOrIssuerAddEditViewModel.autoSaveIssuerFormInputsInLocalDb()
-                else clientOrIssuerAddEditViewModel.autoSaveClientFormInputsInLocalDb()
-
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
@@ -148,7 +144,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     // ADD = choose from existing list
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                             creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentClientUiState
                             )
@@ -176,7 +171,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                             creditNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
@@ -187,7 +181,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
 
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                             creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentIssuerUiState
                             )
@@ -214,7 +207,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
 
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                             creditNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_ISSUER,
                                 documentIssuerUiState
@@ -277,6 +269,9 @@ fun NavGraphBuilder.creditNoteAddEdit(
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = {
                 showDocumentForm = it
+            },
+            onClickDeleteAddress = {
+                clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
             }
         )
     }

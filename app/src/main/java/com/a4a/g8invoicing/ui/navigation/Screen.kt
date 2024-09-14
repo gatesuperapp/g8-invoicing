@@ -3,7 +3,7 @@ package com.a4a.g8invoicing.ui.navigation
 enum class Screen {
     HomeScreen,
     ClientOrIssuerList,
-    ClientOrIssuerAddEdit,
+    ClientAddEdit,
     ProductList,
     ProductAddEdit,
     ProductTaxRates,

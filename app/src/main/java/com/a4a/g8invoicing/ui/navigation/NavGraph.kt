@@ -57,12 +57,7 @@ fun NavGraph(navController: NavHostController) {
                 navigateBack(navController)
             }
         )
-        clientOrIssuerAddEdit(
-            navController = navController,
-            goToPreviousScreen = { key, result ->
-                navigateBackWithResult(navController, key, result)
-            }
-        )
+
         deliveryNoteList(
             navController = navController,
             onClickCategory = {
@@ -118,16 +113,17 @@ fun NavGraph(navController: NavHostController) {
             },
             onClickListItem = {
                 val params = ("?itemId=${it.id}&type=client")
-                navController.navigate(Screen.ClientOrIssuerAddEdit.name + params)
+                navController.navigate(Screen.ClientAddEdit.name + params)
             },
             onClickNew = {
-                navController.navigate(Screen.ClientOrIssuerAddEdit.name)
+                val params = ("?type=client")
+                navController.navigate(Screen.ClientAddEdit.name + params)
             },
             onClickBack = {
                 navigateBack(navController)
             }
         )
-        clientOrIssuerAddEdit(
+        clientAddEdit(
             navController = navController,
             goToPreviousScreen = { key, result ->
                 navigateBackWithResult(navController, key, result)

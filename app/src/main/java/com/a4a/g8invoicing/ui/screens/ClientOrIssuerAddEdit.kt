@@ -10,14 +10,15 @@ import com.a4a.g8invoicing.ui.navigation.actionDone
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 
 @Composable
-fun ClientOrIssuerAddEdit(
+fun ClientAddEdit(
     navController: NavController,
     clientOrIssuer: ClientOrIssuerState,
     isNew: Boolean,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickDone: () -> Unit,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    onClickDeleteAddress: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -34,7 +35,8 @@ fun ClientOrIssuerAddEdit(
         ClientOrIssuerAddEditForm(
             clientOrIssuer,
             onValueChange,
-            placeCursorAtTheEndOfText
+            placeCursorAtTheEndOfText,
+            onClickDeleteAddress = onClickDeleteAddress
         )
 
     }

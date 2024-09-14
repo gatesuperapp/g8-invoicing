@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import android.app.appsearch.AppSearchSchema.DoublePropertyConfig
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,10 +90,6 @@ fun NavGraphBuilder.invoiceAddEdit(
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
             onClickDocumentClientOrIssuer = {// Edit a document product
-                if (it.type == ClientOrIssuerType.DOCUMENT_ISSUER)
-                    clientOrIssuerAddEditViewModel.autoSaveIssuerFormInputsInLocalDb()
-                else clientOrIssuerAddEditViewModel.autoSaveClientFormInputsInLocalDb()
-
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
@@ -149,7 +144,6 @@ fun NavGraphBuilder.invoiceAddEdit(
                     // ADD = choose from existing list
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                             invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentClientUiState
                             )
@@ -177,7 +171,6 @@ fun NavGraphBuilder.invoiceAddEdit(
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveClientFormInputsInLocalDb()
                             invoiceViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
@@ -188,7 +181,6 @@ fun NavGraphBuilder.invoiceAddEdit(
 
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                             invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentIssuerUiState
                             )
@@ -215,7 +207,6 @@ fun NavGraphBuilder.invoiceAddEdit(
 
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
                             invoiceViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_ISSUER,
                                 documentIssuerUiState
@@ -278,20 +269,16 @@ fun NavGraphBuilder.invoiceAddEdit(
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = {
                 showDocumentForm = it
+            },
+            onClickDeleteAddress = {
+                clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
             }
         )
     }
 }
 
 fun createNewClientOrIssuer(clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel, type: ClientOrIssuerType) {
-    if (clientOrIssuerAddEditViewModel.validateInputs(type)) {
-        clientOrIssuerAddEditViewModel.stopAutoSaveIssuerFormInputsInLocalDb()
-        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
-            type
-        )
-        clientOrIssuerAddEditViewModel.saveClientOrIssuerInLocalDb(
-            type
-        )
-    }
+        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(type)
+        clientOrIssuerAddEditViewModel.createNew(type)
 }
 

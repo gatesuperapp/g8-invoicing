@@ -7,7 +7,7 @@ CREATE TABLE LinkClientOrIssuerToAddress (
 get:
 SELECT *
 FROM LinkClientOrIssuerToAddress
-WHERE id = :id;
+WHERE client_or_issuer_id = :client_or_issuer_id;
 
 getWithClientOrIssuerId:
 SELECT address_id

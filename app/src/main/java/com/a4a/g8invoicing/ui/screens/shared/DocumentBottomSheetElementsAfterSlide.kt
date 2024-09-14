@@ -38,6 +38,8 @@ fun DocumentBottomSheetElementsAfterSlide(
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
+
 ) {
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
@@ -135,7 +137,8 @@ fun DocumentBottomSheetElementsAfterSlide(
             onClickDone = {
                 onClickDoneForm(typeOfCreation)
             },
-            onSelectTaxRate = onSelectTaxRate
+            onSelectTaxRate = onSelectTaxRate,
+            onClickDeleteAddress = onClickDeleteAddress
         )
     }
 }

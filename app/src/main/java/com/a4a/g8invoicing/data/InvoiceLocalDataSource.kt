@@ -157,15 +157,21 @@ class InvoiceLocalDataSource(
                     documentId
                 ).executeAsList()
 
-            return if (listOfIds.isNotEmpty()) {
-                listOfIds.map {
-                    documentClientOrIssuerQueries.get(it.id)
-                        .executeAsOne()
-                        .transformIntoEditable(
+            val clientAndIssuer: MutableList<ClientOrIssuerState> = mutableListOf()
+            listOfIds.forEach {
+                 val address =   documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                        .executeAsOneOrNull()?.let {
+                            it.transformIntoEditable(
                             fetchDocumentClientOrIssuerAddresses(it.id)
-                        )
-                }
-            } else null
+                            )
+                        }
+                address?.let { clientAndIssuer.add(it) }
+            }
+            return if (clientAndIssuer.isNotEmpty())
+                clientAndIssuer.toList()
+            else
+                null
+
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -413,10 +419,6 @@ class InvoiceLocalDataSource(
                     linkInvoiceToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToInvoice(
                         document.documentId!!.toLong()
                     )
-                    document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
-                        documentClientOrIssuerAddressQueries.delete(it.toLong())
-                        linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
-                    }
                     document.documentClient?.type?.let {
                         deleteDocumentClientOrIssuer(
                             document.documentId!!.toLong(),
@@ -428,6 +430,10 @@ class InvoiceLocalDataSource(
                             document.documentId!!.toLong(),
                             it
                         )
+                    }
+                    document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
+                        documentClientOrIssuerAddressQueries.delete(it.toLong())
+                        linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
                     }
                     document.documentProducts?.filter { it.id != null }?.let {
                         it.forEach { documentProduct ->

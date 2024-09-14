@@ -7,7 +7,7 @@ CREATE TABLE LinkDocumentClientOrIssuerToAddress (
 get:
 SELECT *
 FROM LinkDocumentClientOrIssuerToAddress
-WHERE id = :id;
+WHERE document_client_or_issuer_id = :document_client_or_issuer_id;
 
 save:
 INSERT

@@ -74,7 +74,8 @@ class ClientOrIssuerLocalDataSource(
 
     fun fetchClientOrIssuerAddresses(clientOrIssuerId: Long): List<AddressState>? {
         try {
-            val listOfIds = linkClientOrIssuerToAddressQueries.getWithClientOrIssuerId(clientOrIssuerId)
+            val listOfIds =
+                linkClientOrIssuerToAddressQueries.getWithClientOrIssuerId(clientOrIssuerId)
                     .executeAsList()
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map { addressId ->
@@ -107,13 +108,20 @@ class ClientOrIssuerLocalDataSource(
         return null
     }
 
-    override suspend fun saveClientOrIssuer(
+    override suspend fun createNew(
         clientOrIssuer: ClientOrIssuerState,
-    ) {
+    ): Long? {
+        var id: Long? = null
         saveInfoInClientOrIssuerTable(clientOrIssuer)
-        clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { clientId ->
-            saveInfoInAddressTables(clientId, clientOrIssuer.addresses)
+        try {
+            id = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+            id?.let {
+                saveInfoInAddressTables(it, clientOrIssuer.addresses)
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
+        return id
     }
 
     private suspend fun saveInfoInClientOrIssuerTable(clientOrIssuer: ClientOrIssuerState) {
@@ -121,7 +129,10 @@ class ClientOrIssuerLocalDataSource(
             try {
                 clientOrIssuerQueries.save(
                     id = null,
-                    type = clientOrIssuer.type?.name?.lowercase(),
+                    type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                        clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+                    ) ClientOrIssuerType.CLIENT.name.lowercase()
+                    else ClientOrIssuerType.ISSUER.name.lowercase(),
                     clientOrIssuer.firstName?.text,
                     clientOrIssuer.name.text,
                     clientOrIssuer.phone?.text,
@@ -210,6 +221,21 @@ class ClientOrIssuerLocalDataSource(
                         company_id2_number = clientOrIssuer.companyId2Number?.text,
                     )
                 }
+
+                // Delete addresses
+                val oldAddressesIds = clientOrIssuer.id?.toLong()?.let {
+                    linkClientOrIssuerToAddressQueries.get(it).executeAsList().map { it.address_id }
+                }
+                val newAddressesIds =
+                    clientOrIssuer.addresses?.mapNotNull { it.id?.toLong() } ?: mutableListOf()
+
+                val addressesToDelete = oldAddressesIds?.filterNot { it in newAddressesIds }
+                addressesToDelete?.forEach {
+                    linkClientOrIssuerToAddressQueries.delete(it)
+                    clientOrIssuerAddressQueries.delete(it)
+                }
+
+                // Update and create
                 clientOrIssuer.addresses?.let { addresses ->
                     val (addressesToUpdate, addressesToCreate) = addresses.partition { it.id != null }
                     addressesToUpdate.forEach { address ->
@@ -279,8 +305,6 @@ class ClientOrIssuerLocalDataSource(
             try {
                 clientOrIssuer.id?.let {
                     clientOrIssuerQueries.delete(it.toLong())
-                }
-                clientOrIssuer.id?.let {
                     linkClientOrIssuerToAddressQueries.deleteWithClientId(it.toLong())
                 }
                 clientOrIssuer.addresses?.filter { it.id != null }?.forEach {

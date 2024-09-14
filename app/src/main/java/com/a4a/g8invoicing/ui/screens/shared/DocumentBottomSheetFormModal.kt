@@ -48,6 +48,7 @@ fun DocumentBottomSheetClientOrIssuerFormModal(
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
@@ -124,7 +125,10 @@ fun DocumentBottomSheetClientOrIssuerFormModal(
                     placeCursorAtTheEndOfText = {
                         bottomFormPlaceCursor(it, ClientOrIssuerType.DOCUMENT_CLIENT)
                     },
-                    isInBottomSheetModal = true
+                    isInBottomSheetModal = true,
+                    onClickDeleteAddress = {
+                        onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT)
+                    }
                 )
             } else if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.ISSUER.name)) {
                 ClientOrIssuerAddEditForm(
@@ -135,7 +139,10 @@ fun DocumentBottomSheetClientOrIssuerFormModal(
                     placeCursorAtTheEndOfText = {
                         bottomFormPlaceCursor(it, ClientOrIssuerType.DOCUMENT_ISSUER)
                     },
-                    isInBottomSheetModal = true
+                    isInBottomSheetModal = true,
+                    onClickDeleteAddress = {
+                        onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER)
+                    }
                 )
             } else {
                 if (!isTaxSelectionVisible) {

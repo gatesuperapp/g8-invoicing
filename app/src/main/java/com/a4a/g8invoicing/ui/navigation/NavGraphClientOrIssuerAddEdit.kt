@@ -6,26 +6,26 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEdit
+import com.a4a.g8invoicing.ui.screens.ClientAddEdit
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 
-fun NavGraphBuilder.clientOrIssuerAddEdit(
+fun NavGraphBuilder.clientAddEdit(
     navController: NavController,
     goToPreviousScreen: (String, Pair<String, String>) -> Unit,
 ) {
     composable(
-        route = Screen.ClientOrIssuerAddEdit.name + "?itemId={itemId}&type={type}",
+        route = Screen.ClientAddEdit.name + "?itemId={itemId}&type={type}",
         arguments = listOf(
-            navArgument("itemId") { nullable = true }, // used in the ViewModel
+            navArgument("itemId") { nullable = true },
             navArgument("type") { nullable = true },
-        )
+        ) // used in the ViewModel
     ) { backStackEntry ->
         val viewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
         val clientUiState by viewModel.clientUiState
         val isNew = backStackEntry.arguments?.getString("itemId") == null
 
-        ClientOrIssuerAddEdit(
+        ClientAddEdit(
             navController = navController,
             clientOrIssuer = clientUiState,
             isNew = backStackEntry.arguments?.getString("itemId") == null,
@@ -40,7 +40,7 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
             onClickDone = {
                 if(viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
                     if (isNew) {
-                        viewModel.saveClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
+                        viewModel.createNew(ClientOrIssuerType.CLIENT)
                     } else {
                         viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
                     }
@@ -56,6 +56,9 @@ fun NavGraphBuilder.clientOrIssuerAddEdit(
                     Pair("", "")
                 )
             }, // If the user went back, no need to pass value
+            onClickDeleteAddress = {
+                viewModel.removeAddressFromClientOrIssuerState(ClientOrIssuerType.CLIENT)
+            }
         )
     }
 }

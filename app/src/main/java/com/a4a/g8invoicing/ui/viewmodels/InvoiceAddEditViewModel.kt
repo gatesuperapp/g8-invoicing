@@ -58,10 +58,10 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
+    @OptIn(FlowPreview::class)
     private fun autoSaveInLocalDb() {
         autoSaveJob?.cancel()
         autoSaveJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class)
             _documentUiState.debounce(300)
                 .collect { updateInvoiceInLocalDb() }
         }
@@ -86,7 +86,7 @@ class InvoiceAddEditViewModel @Inject constructor(
             try {
                 documentId = documentDataSource.createNew()
             } catch (e: Exception) {
-                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+                println("Create new invoice failed with exception: ${e.localizedMessage}")
             }
         }
         createNewJob.join()
@@ -101,7 +101,7 @@ class InvoiceAddEditViewModel @Inject constructor(
                     documentDataSource.update(documentUiState.value)
                 }
             } catch (e: Exception) {
-                println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
+                println("Update invoice failed with exception: ${e.localizedMessage}")
             }
         }
     }

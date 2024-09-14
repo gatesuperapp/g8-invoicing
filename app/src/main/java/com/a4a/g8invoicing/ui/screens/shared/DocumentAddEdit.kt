@@ -109,6 +109,7 @@ fun DocumentAddEdit(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -178,6 +179,7 @@ fun DocumentAddEdit(
                     localFocusManager = LocalFocusManager.current,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
+                    onClickDeleteAddress = onClickDeleteAddress
                 )
             } else {
                 DocumentBottomSheetProducts(

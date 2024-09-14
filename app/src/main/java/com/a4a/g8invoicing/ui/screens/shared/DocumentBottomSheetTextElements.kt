@@ -66,6 +66,7 @@ fun DocumentBottomSheetTextElements(
     localFocusManager: FocusManager,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -177,6 +178,7 @@ fun DocumentBottomSheetTextElements(
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
                     onValueChange = onValueChange,
+                    onClickDeleteAddress = onClickDeleteAddress
                 )
             }
         }

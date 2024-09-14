@@ -46,6 +46,7 @@ fun ClientOrIssuerAddEditForm(
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isInBottomSheetModal: Boolean = false,
+    onClickDeleteAddress: () -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
     var numberOfClientAddresses by remember {
@@ -283,13 +284,19 @@ fun ClientOrIssuerAddEditForm(
             Row(Modifier.padding(bottom = 6.dp)) {
                 if (i == 3) {
                     Spacer(Modifier.weight(1F))
-                    AddDeleteButton(onClick = { numberOfClientAddresses -= 1 })
+                    DeleteAddressButton(onClick = {
+                        numberOfClientAddresses -= 1
+                        onClickDeleteAddress()
+                    })
                 } else if (numberOfClientAddresses == 1) {
                     AddAddressButton(onClick = { numberOfClientAddresses += 1 })
                 } else if (i == numberOfClientAddresses) {
                     AddAddressButton(onClick = { numberOfClientAddresses += 1 })
                     Spacer(Modifier.weight(1F))
-                    AddDeleteButton(onClick = { numberOfClientAddresses -= 1 })
+                    DeleteAddressButton(onClick = {
+                        numberOfClientAddresses -= 1
+                        onClickDeleteAddress()
+                    })
                 }
             }
         }
@@ -403,7 +410,7 @@ fun ClientOrIssuerAddEditForm(
 }
 
 @Composable
-fun AddDeleteButton(onClick: () -> Unit) {
+fun DeleteAddressButton(onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
