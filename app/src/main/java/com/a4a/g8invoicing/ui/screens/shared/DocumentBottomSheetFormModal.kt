@@ -37,7 +37,7 @@ import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DocumentBottomSheetClientOrIssuerFormModal(
+fun DocumentBottomSheetFormModal(
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
     documentClientUiState: ClientOrIssuerState = ClientOrIssuerState(),
     documentIssuerUiState: ClientOrIssuerState = ClientOrIssuerState(),
@@ -48,7 +48,7 @@ fun DocumentBottomSheetClientOrIssuerFormModal(
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
-    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()

@@ -123,7 +123,7 @@ fun DocumentBottomSheetElementsAfterSlide(
 
 
     if (showDocumentForm) {
-        DocumentBottomSheetClientOrIssuerFormModal(
+        DocumentBottomSheetFormModal(
             typeOfCreation = typeOfCreation,
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,

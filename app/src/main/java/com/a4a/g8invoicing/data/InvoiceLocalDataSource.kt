@@ -674,7 +674,7 @@ fun saveDocumentProductInDbAndLink(
                     id.toLong()
                 )
                 if (!deliveryNoteDate.isNullOrEmpty()) {
-                    linkDocumentProductToAdditionalInfo(
+                    linkDocumentProductToDeliveryNoteInfo(
                         linkToDeliveryNotesQueries,
                         id.toLong(),
                         deliveryNoteNumber,
@@ -715,7 +715,7 @@ fun linkDocumentProductToDocument(
     }
 }
 
-fun linkDocumentProductToAdditionalInfo(
+fun linkDocumentProductToDeliveryNoteInfo(
     linkToDeliveryNotesQueries: Any,
     documentProductId: Long,
     deliveryNoteNumber: String?,
