@@ -368,7 +368,7 @@ class InvoiceLocalDataSource(
                 saveDocumentProductInDbAndLink(
                     documentProductQueries,
                     linkInvoiceToDocumentProductQueries,
-                    linkDocumentClientOrIssuerToAddressQueries,
+                    linkInvoiceDocumentProductToDeliveryNoteQueries,
                     documentProduct,
                     documentId,
                     deliveryNoteDate,
