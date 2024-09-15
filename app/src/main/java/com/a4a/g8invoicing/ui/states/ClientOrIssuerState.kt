@@ -21,8 +21,10 @@ data class ClientOrIssuerState(
     var notes: TextFieldValue? = null,
     var companyId1Label: TextFieldValue? = TextFieldValue(Strings.get(R.string.document_default_issuer_company_label1)),
     var companyId1Number: TextFieldValue? = null,
-    var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
+    var companyId2Label: TextFieldValue? = TextFieldValue(Strings.get(R.string.document_default_issuer_company_label2)),
     var companyId2Number: TextFieldValue? = null,
+    var companyId3Label: TextFieldValue? = TextFieldValue(Strings.get(R.string.document_default_issuer_company_label3)),
+    var companyId3Number: TextFieldValue? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )
 

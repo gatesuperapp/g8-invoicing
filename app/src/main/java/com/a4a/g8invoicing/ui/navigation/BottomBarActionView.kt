@@ -30,7 +30,8 @@ fun BottomBarActionView(
     navController: NavController,
     appBarActions: Array<AppBarAction>?,
     onClickCategory: (Category) -> Unit,
-    onClickTag: (DocumentTag) -> Unit
+    onClickTag: (DocumentTag) -> Unit,
+    onChangeBackground: () -> Unit,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -48,6 +49,7 @@ fun BottomBarActionView(
                             Button(
                                 contentPadding = PaddingValues(0.dp),
                                 onClick = {
+                                    onChangeBackground()
                                     isExpanded = true
                                 },
                             ) {
@@ -55,7 +57,10 @@ fun BottomBarActionView(
                                 CategoriesDropdownMenu(
                                     navController,
                                     isExpanded,
-                                    dismissMenu = { isExpanded = false },
+                                    dismissMenu = {
+                                        onChangeBackground()
+                                        isExpanded = false
+                                    },
                                     onClickCategory
                                 )
                             }
@@ -94,7 +99,10 @@ fun BottomBarActionView(
                                         actionTagCancelled(),
                                     ),
                                     iconSize = 16.dp,
-                                    onClickTag = onClickTag
+                                    onClickTag = {
+                                        onClickTag(it)
+                                    },
+                                    onChangeBackground = onChangeBackground
                                 )
                             } else {
                                 AddIconAndLabelInColumn(
@@ -105,10 +113,12 @@ fun BottomBarActionView(
                         }
                     }
                 // Dropdown menu "More"
-                if(appBarActions.any { it.isSecondary }) {
+                if (appBarActions.any { it.isSecondary }) {
                     ButtonWithDropdownMenu(
                         actionMore(),
-                        appBarActions.filter { it.isSecondary })
+                        appBarActions.filter { it.isSecondary },
+                        onChangeBackground = onChangeBackground
+                    )
                 }
             }
         }

@@ -31,13 +31,15 @@ fun ButtonWithDropdownMenu(
     action: AppBarAction,
     secondaryItems: List<AppBarAction>,
     onClickTag: ((DocumentTag) -> Unit)? = null,
-    iconSize: Dp = 24.dp
+    iconSize: Dp = 24.dp,
+    onChangeBackground: () -> Unit,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
     Button(
         contentPadding = PaddingValues(0.dp),
         onClick = {
+            onChangeBackground()
             isExpanded = true
         },
     ) {
@@ -47,17 +49,23 @@ fun ButtonWithDropdownMenu(
             modifier = Modifier
                 .background(Color.White),
             expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }
+            onDismissRequest = {
+                onChangeBackground()
+                isExpanded = false
+            }
         ) {
             secondaryItems.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(
-                       // modifier = Modifier.padding(end = 14.dp),
-                        text = stringResource(item.description)
-                    ) },
+                    text = {
+                        Text(
+                            // modifier = Modifier.padding(end = 14.dp),
+                            text = stringResource(item.description)
+                        )
+                    },
                     onClick = {
+                        onChangeBackground()
                         isExpanded = false
-                        if(onClickTag != null) {
+                        if (onClickTag != null) {
                             onClickTag(item.tag ?: DocumentTag.DRAFT)
                         } else
                             item.onClick()

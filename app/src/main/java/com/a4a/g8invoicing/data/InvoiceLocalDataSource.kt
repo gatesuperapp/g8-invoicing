@@ -843,6 +843,8 @@ private suspend fun saveInfoInDocumentClientOrIssuerTable(
                 documentClientOrIssuer.companyId1Number?.text,
                 documentClientOrIssuer.companyId2Label?.text,
                 documentClientOrIssuer.companyId2Number?.text,
+                documentClientOrIssuer.companyId3Label?.text,
+                documentClientOrIssuer.companyId3Number?.text,
             )
         } catch (cause: Throwable) {
         }

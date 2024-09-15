@@ -114,4 +114,15 @@ fun DocumentBasicTemplateClientOrIssuer(clientOrIssuer: ClientOrIssuerState?) {
                     + clientOrIssuer?.companyId2Number?.text
         )
     }
+    if (!clientOrIssuer?.companyId3Number?.text.isNullOrEmpty()) {
+        Text(
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(bottom = 3.dp)
+                .wrapContentHeight(),
+            style = MaterialTheme.typography.textForDocuments,
+            text = clientOrIssuer?.companyId3Label?.text + " : "
+                    + clientOrIssuer?.companyId3Number?.text
+        )
+    }
 }

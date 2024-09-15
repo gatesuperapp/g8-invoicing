@@ -1,8 +1,9 @@
 package com.a4a.g8invoicing.ui.screens
 
-import android.content.Context
 import android.text.TextUtils.substring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
@@ -23,6 +26,7 @@ import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
+import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 
 @Composable
 fun InvoiceList(
@@ -50,6 +54,9 @@ fun InvoiceList(
     val openAlertDialog = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    var backgroundColor = remember { mutableStateOf(transparent) }
 
     Scaffold(
         topBar = {
@@ -100,36 +107,49 @@ fun InvoiceList(
                 },
                 onClickNew = { onClickNew() },
                 onClickCategory = onClickCategory,
-                isInvoice = true
+                isInvoice = true,
+                onChangeBackground = {
+                    backgroundColor.value = changeBackgroundColor(backgroundColor.value)
+                }
             )
         }
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(
-                    padding
-                )
+                .padding(padding)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // No need to have pull to refresh because it's a flow,
-            // thus the list is updated when anything changes in db
-            InvoiceListContent(
-                documents = documentsUiState.documentStates,
-                onItemClick = onClickListItem,
-                addDeliveryNoteToSelectedList = {
-                    selectedItems.add(it)
-                    selectedMode.value = true
-                },
-                removeDeliveryNoteFromSelectedList = {
-                    selectedItems.remove(it)
-                    if (selectedItems.isEmpty()) {
-                        selectedMode.value = false
-                    }
-                },
-                keyToUnselectAll = keyToResetCheckboxes.value
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                // No need to have pull to refresh because it's a flow,
+                // thus the list is updated when anything changes in db
+                InvoiceListContent(
+                    documents = documentsUiState.documentStates,
+                    onItemClick = onClickListItem,
+                    addDeliveryNoteToSelectedList = {
+                        selectedItems.add(it)
+                        selectedMode.value = true
+                    },
+                    removeDeliveryNoteFromSelectedList = {
+                        selectedItems.remove(it)
+                        if (selectedItems.isEmpty()) {
+                            selectedMode.value = false
+                        }
+                    },
+                    keyToUnselectAll = keyToResetCheckboxes.value
+                )
+
+                Column(
+                    // apply darker background when bottom menu is expanded
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(backgroundColor.value),
+                ) {}
+            }
         }
 
         when {
@@ -172,4 +192,16 @@ private fun resetSelectedItems(
     selectedMode.value = false
     // Allow to "reset" the checkbox rememberValue to false inDeliveryNoteListItem when recomposing
     keyToResetCheckboxes.value = !keyToResetCheckboxes.value
+}
+
+fun changeBackgroundColor(initialColor: Brush): Brush {
+    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    val gradient = Brush.verticalGradient(
+        listOf(Color.Transparent, ColorGrayTransp),
+        startY = 4f,
+        endY = 600f
+        )
+    return if(initialColor == gradient) {
+        transparent
+    } else gradient
 }

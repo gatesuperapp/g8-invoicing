@@ -142,6 +142,8 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.companyId1Number?.text,
                     clientOrIssuer.companyId2Label?.text,
                     clientOrIssuer.companyId2Number?.text,
+                    clientOrIssuer.companyId3Label?.text,
+                    clientOrIssuer.companyId3Number?.text,
                 )
             } catch (e: Exception) {
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -219,6 +221,8 @@ class ClientOrIssuerLocalDataSource(
                         company_id1_number = clientOrIssuer.companyId1Number?.text,
                         company_id2_label = clientOrIssuer.companyId2Label?.text,
                         company_id2_number = clientOrIssuer.companyId2Number?.text,
+                        company_id3_label = clientOrIssuer.companyId3Label?.text,
+                        company_id3_number = clientOrIssuer.companyId3Number?.text,
                     )
                 }
 
@@ -281,6 +285,8 @@ class ClientOrIssuerLocalDataSource(
                         company_id1_number = documentClientOrIssuer.companyId1Number?.text,
                         company_id2_label = documentClientOrIssuer.companyId2Label?.text,
                         company_id2_number = documentClientOrIssuer.companyId2Number?.text,
+                        company_id3_label = documentClientOrIssuer.companyId3Label?.text,
+                        company_id3_number = documentClientOrIssuer.companyId3Number?.text,
                     )
                 }
                 documentClientOrIssuer.addresses?.forEach { address ->
@@ -379,7 +385,7 @@ fun ClientOrIssuer.transformIntoEditable(
             }
         },
         companyId1Number = clientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
-        companyId2Label = clientOrIssuer.company_id1_number?.let {
+        companyId2Label = clientOrIssuer.company_id2_number?.let {
             clientOrIssuer.company_id2_label?.let {
                 TextFieldValue(
                     text = it
@@ -387,6 +393,14 @@ fun ClientOrIssuer.transformIntoEditable(
             }
         },
         companyId2Number = clientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
+        companyId3Label = clientOrIssuer.company_id3_number?.let {
+            clientOrIssuer.company_id3_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId3Number = clientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
     )
 }
 
@@ -427,7 +441,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
             }
         },
         companyId1Number = documentClientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
-        companyId2Label = documentClientOrIssuer.company_id1_number?.let {
+        companyId2Label = documentClientOrIssuer.company_id2_number?.let {
             documentClientOrIssuer.company_id2_label?.let {
                 TextFieldValue(
                     text = it
@@ -435,6 +449,14 @@ fun DocumentClientOrIssuer.transformIntoEditable(
             }
         },
         companyId2Number = documentClientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
+        companyId3Label = documentClientOrIssuer.company_id3_number?.let {
+            documentClientOrIssuer.company_id3_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
     )
 }
 

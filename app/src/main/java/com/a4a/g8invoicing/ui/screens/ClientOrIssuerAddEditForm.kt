@@ -359,6 +359,31 @@ fun ClientOrIssuerAddEditForm(
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
+                ),
+                FormInput(
+                    label = TextInput(
+                        text = clientOrIssuerUiState.companyId3Label,
+                        onValueChange = {
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL
+                                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
+                                it
+                            )
+                        }
+                    ),
+                    inputType = TextInput(
+                        text = clientOrIssuerUiState.companyId3Number,
+                        placeholder = stringResource(id = R.string.client_company_identification3_input),
+                        onValueChange = {
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE
+                                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
+                                it
+                            )
+                        }
+                    ),
+                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3
+                    else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3
                 )
             )
 

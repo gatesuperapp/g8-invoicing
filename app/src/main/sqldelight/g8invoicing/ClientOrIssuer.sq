@@ -10,6 +10,8 @@ CREATE TABLE ClientOrIssuer (
   company_id1_number TEXT,
   company_id2_label TEXT,
   company_id2_number TEXT,
+  company_id3_label TEXT,
+  company_id3_number TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -18,8 +20,8 @@ CREATE TABLE ClientOrIssuer (
 
 INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number)
 VALUES (1,  'issuer', 'issuerAudus', 'Zu', '0789384749', 'audus@rich.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
- (2, 'client', 'clientHaha', 'Biocoop',  '0789384749', 'client@', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
- (3, 'client', 'clientBernadoutteett', 'Delaplandidugg', '0789384749', 'client@', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' )
+ (2, 'client', 'clientHaha', 'Biocoop',  '0789384749', 'client@d.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
+ (3, 'client', 'clientBernadoutteett', 'Delaplandidugg', '0789384749', 'client@aez.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' )
 ;
 
 
@@ -52,8 +54,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number)
-VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number)
+VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -66,7 +68,9 @@ SET type = :type,
     company_id1_label = :company_id1_label,
     company_id1_number = :company_id1_number,
     company_id2_label = :company_id2_label,
-    company_id2_number = :company_id2_number
+    company_id2_number = :company_id2_number,
+    company_id3_label = :company_id3_label,
+    company_id3_number = :company_id3_number
 WHERE
     id = :id;
 

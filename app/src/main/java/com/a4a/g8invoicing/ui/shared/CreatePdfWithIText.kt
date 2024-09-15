@@ -248,6 +248,9 @@ private fun createClientOrIssuerParagraph(clientOrIssuer: ClientOrIssuerState?, 
     val issuerCompanyLabel2 = clientOrIssuer?.companyId2Number?.text?.let {
         Text(clientOrIssuer.companyId2Label?.text + " : " + it + "\n")
     }
+    val issuerCompanyLabel3 = clientOrIssuer?.companyId3Number?.text?.let {
+        Text(clientOrIssuer.companyId3Label?.text + " : " + it + "\n")
+    }
     val clientOrIssuerParagraph = Paragraph()
         .setFixedLeading(16F)
         .setPaddingRight(40f)
@@ -287,6 +290,9 @@ private fun createClientOrIssuerParagraph(clientOrIssuer: ClientOrIssuerState?, 
         clientOrIssuerParagraph.add(it)
     }
     issuerCompanyLabel2?.let {
+        clientOrIssuerParagraph.add(it)
+    }
+    issuerCompanyLabel3?.let {
         clientOrIssuerParagraph.add(it)
     }
 

@@ -34,6 +34,7 @@ val ColorLightGreyo = Color(0xFFe3e3e3)
 val ColorDarkGray = Color(0xFF545b66)
 val ColorDarkGrayo = Color(0xFF888b91)
 val ColorDarkGrayTransp = Color(0x8A545b66)
+val ColorGrayTransp = Color(0x30545b66)
 val ColorBlueCredit = Color(0xFFD8EFFF)
 val ColorBlueLink = Color(0xFF3B97D3)
 

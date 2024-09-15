@@ -17,7 +17,8 @@ fun BottomBarAction(
     appBarActions: Array<AppBarAction>? = null,
     onClickCategory: (Category) -> Unit = { },
     onClickTag: (DocumentTag) -> Unit,
-) {
+    onChangeBackground: () -> Unit,
+    ) {
     BottomAppBar(
         modifier = Modifier
             .border(1.dp, ColorLoudGrey),
@@ -26,7 +27,8 @@ fun BottomBarAction(
                 navController,
                 appBarActions,
                 onClickCategory,
-                onClickTag
+                onClickTag,
+                onChangeBackground
             )
         },
         contentPadding = PaddingValues(

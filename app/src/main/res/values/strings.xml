@@ -120,6 +120,8 @@
     <string name="client_company_identification1_input">123456789 12345</string>
     <string name="client_company_identification2">N° TVA</string>
     <string name="client_company_identification2_input">123456789</string>
+    <string name="client_company_identification3">N° RCS</string>
+    <string name="client_company_identification3_input">123456789</string>
     <string name="client_notes">Notes privées</string>
     <string name="client_notes_input">La pudibonde est une chenille.</string>
     <string name="client_detail_balance">Solde</string>
@@ -190,6 +192,7 @@
     <string name="document_default_issuer_company_label1">N° SIRET</string>
     <string name="document_default_issuer_company_number1">776EYEYI</string>
     <string name="document_default_issuer_company_label2">N° TVA</string>
+    <string name="document_default_issuer_company_label3">N° RCS</string>
     <string name="document_default_issuer_company_number2">64554828928938</string>
     <string name="document_default_client_firstName">Laura</string>
     <string name="document_default_client_name">Toun</string>

@@ -91,6 +91,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 companyId1Number = clientOrIssuer.companyId1Number,
                 companyId2Label = clientOrIssuer.companyId2Label,
                 companyId2Number = clientOrIssuer.companyId2Number,
+                companyId3Label = clientOrIssuer.companyId3Label,
+                companyId3Number = clientOrIssuer.companyId3Number,
                 errors = mutableListOf()
             )
         } else _documentIssuerUiState.value = ClientOrIssuerState(
@@ -106,6 +108,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             companyId1Number = clientOrIssuer.companyId1Number,
             companyId2Label = clientOrIssuer.companyId2Label,
             companyId2Number = clientOrIssuer.companyId2Number,
+            companyId3Label = clientOrIssuer.companyId3Label,
+            companyId3Number = clientOrIssuer.companyId3Number,
             errors = mutableListOf()
         )
     }
@@ -124,7 +128,9 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 companyId1Label = _documentClientUiState.value.companyId1Label,
                 companyId1Number = _documentClientUiState.value.companyId1Number,
                 companyId2Label = _documentClientUiState.value.companyId2Label,
-                companyId2Number = _documentClientUiState.value.companyId2Number
+                companyId2Number = _documentClientUiState.value.companyId2Number,
+                companyId3Label = _documentClientUiState.value.companyId3Label,
+                companyId3Number = _documentClientUiState.value.companyId3Number
             )
         } else _issuerUiState.value = ClientOrIssuerState(
             id = null,
@@ -138,7 +144,9 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             companyId1Label = _documentIssuerUiState.value.companyId1Label,
             companyId1Number = _documentIssuerUiState.value.companyId1Number,
             companyId2Label = _documentIssuerUiState.value.companyId2Label,
-            companyId2Number = _documentIssuerUiState.value.companyId2Number
+            companyId2Number = _documentIssuerUiState.value.companyId2Number,
+            companyId3Label = _documentClientUiState.value.companyId3Label,
+            companyId3Number = _documentClientUiState.value.companyId3Number
         )
     }
 
@@ -468,6 +476,14 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId2Number?.text
                 else _issuerUiState.value.companyId2Number?.text
 
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId3Label?.text
+                else _issuerUiState.value.companyId3Label?.text
+
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.companyId3Number?.text
+                else _issuerUiState.value.companyId3Number?.text
+
             else -> null
         }
         return text
@@ -614,6 +630,14 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE ->
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId2Number?.text
                 else _documentIssuerUiState.value.companyId2Number?.text
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId3Label?.text
+                else _documentIssuerUiState.value.companyId3Label?.text
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.companyId3Number?.text
+                else _documentIssuerUiState.value.companyId3Number?.text
 
             else -> null
         }
@@ -778,6 +802,12 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person =
                 person.copy(companyId2Number = value as TextFieldValue)
 
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person =
+                person.copy(companyId3Label = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE -> person =
+                person.copy(companyId3Number = value as TextFieldValue)
+
             else -> null
         }
         return person
@@ -788,11 +818,9 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         addresses: List<AddressState>?,
         addressIndex: Int,
     ): List<AddressState> {
-
-        val initialAddresses = addresses ?: mutableListOf()
-        val newAddresses = if (initialAddresses.isEmpty()) listOf(newAddress) else
-            initialAddresses.slice(0 until addressIndex) + newAddress + initialAddresses.slice(
-                addressIndex + 1 until initialAddresses.size
+        val newAddresses = if (addresses.isNullOrEmpty()) listOf(newAddress) else
+            addresses.slice(0 until addressIndex) + newAddress + addresses.slice(
+                addressIndex + 1 until addresses.size
             )
         return newAddresses
     }
@@ -940,6 +968,12 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person =
                 person.copy(companyId2Number = value as TextFieldValue)
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person =
+                person.copy(companyId3Label = value as TextFieldValue)
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE -> person =
+                person.copy(companyId3Number = value as TextFieldValue)
 
             else -> null
         }
