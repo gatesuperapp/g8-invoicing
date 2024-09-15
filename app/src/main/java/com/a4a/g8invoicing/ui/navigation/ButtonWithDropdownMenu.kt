@@ -58,7 +58,7 @@ fun ButtonWithDropdownMenu(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            modifier = if(action.name == "TAG") Modifier.padding(end = 24.dp)
+                            modifier = if(action.name == "TAG") Modifier.padding(end = 44.dp)
                             else Modifier.padding(end = 0.dp),
                             text = stringResource(item.description)
                         )

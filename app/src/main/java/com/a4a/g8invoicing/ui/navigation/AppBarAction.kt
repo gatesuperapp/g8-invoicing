@@ -45,6 +45,7 @@ data class AppBarAction(
     val name: String = "",
     val icon: ImageVector,
     val iconColor: Color? = null,
+    val iconBorder: Color? = null,
     @StringRes val label: Int? = null,
     @StringRes val description: Int,
     val tag: DocumentTag? = null,
@@ -170,6 +171,17 @@ fun actionTag() =
         description = R.string.appbar_label_description,
         label = R.string.appbar_tag,
         isSecondary = false,
+    )
+
+fun actionTagUndefined() =
+    AppBarAction(
+        tag = DocumentTag.UNDEFINED,
+        icon = IconCircle,
+        iconColor = Color.Transparent,
+        iconBorder = ColorGreyDraft,
+        description = R.string.appbar_tag_draft,
+        label = R.string.appbar_tag_draft,
+        onClick = {} // see ButtonWithDropdownMenu
     )
 
 fun actionTagDraft() =

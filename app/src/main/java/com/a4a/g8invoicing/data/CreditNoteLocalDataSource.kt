@@ -157,7 +157,6 @@ class CreditNoteLocalDataSource(
         this.let {
             return CreditNoteState(
                 documentId = it.credit_note_id.toInt(),
-                documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.issuing_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),

@@ -17,7 +17,7 @@ import java.util.Calendar
 
 data class CreditNoteState(
     override var documentType: DocumentType = DocumentType.INVOICE,
-    override var documentTag: DocumentTag = DocumentTag.DRAFT,
+    override var documentTag: DocumentTag = DocumentTag.UNDEFINED,
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.credit_note_default_number)),
     // Have to put a time "12:00:00" because of a bug, if we don't, DatePicker will show 1 day prior to current date

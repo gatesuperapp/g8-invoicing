@@ -6,8 +6,11 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
@@ -42,86 +45,99 @@ fun ProductListItem(
 
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
+    // For changing background when item selected
+    val backgroundColor = remember { mutableStateOf(Color.Transparent) }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
-            .clickable(
-                interactionSource = interactionSource,
-                indication = rememberRipple(color = Color.Black, bounded = false),
-            ) {
-                //onItemClick()
-            }
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { offset ->
-                        val press = PressInteraction.Press(offset)
-                        isPressed = true
-                        interactionSource.emit(press)
-                        tryAwaitRelease()
-                        interactionSource.emit(PressInteraction.Release(press))
-                        isPressed = false
-                    },
-                    onTap = {
-                        onItemClick()
-                    },
-                    onLongPress = {
-                        //TODO Implement check
-                        // onItemCheckboxClick()
-                    }
-                )
-            }
     ) {
-        // Adding padding in the inside row, to keep the click & the ripple in all row
-        // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
-        // not centered anymore)
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(Color.White)
-                .padding(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 14.dp,
-                    bottom = 14.dp
-                )
-        ) {
-            // Retriggers remember calculation when key changes
-            val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
-            Row(
-                modifier = Modifier
-                    .padding(end = 20.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (displayCheckboxes) {
-                    Checkbox(
-                        checked = checkedState.value,
-                        onCheckedChange =
-                        {
-                            checkedState.value = it
-                            onItemCheckboxClick(it)
+                .clip(RoundedCornerShape(5.dp))
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = rememberRipple(color = Color.Black, bounded = false),
+                ) {
+                    //onItemClick()
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            val press = PressInteraction.Press(offset)
+                            isPressed = true
+                            interactionSource.emit(press)
+                            tryAwaitRelease()
+                            interactionSource.emit(PressInteraction.Release(press))
+                            isPressed = false
                         },
+                        onTap = {
+                            onItemClick()
+                        },
+                        onLongPress = {
+                            //TODO Implement check
+                            // onItemCheckboxClick()
+                        }
                     )
                 }
-                Text(
-                    modifier = Modifier.weight(1F),
-                    text = product.name.text,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    // maxLines = 1,
-                    //overflow = TextOverflow.Ellipsis
-                )
+        ) {
+            // Adding padding in the inside row, to keep the click & the ripple in all row
+            // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
+            // not centered anymore)
+            Row(
+                modifier = Modifier
+                    .background(Color.White)
+                    .padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 14.dp,
+                        bottom = 14.dp
+                    )
+            ) {
+                // Retriggers remember calculation when key changes
+                val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
-                Text(
-                    text = product.priceWithTax?.let {
-                        it.toString() + stringResource(R.string.currency)
-                    } ?: " - "
-                )
+                Row(
+                    modifier = Modifier
+                        .padding(end = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (displayCheckboxes) {
+                        Checkbox(
+                            checked = checkedState.value,
+                            onCheckedChange =
+                            {
+                                checkedState.value = it
+                                onItemCheckboxClick(it)
+                            },
+                        )
+                    }
+                    Text(
+                        modifier = Modifier.weight(1F),
+                        text = product.name.text,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        // maxLines = 1,
+                        //overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        text = product.priceWithTax?.let {
+                            it.toString() + stringResource(R.string.currency)
+                        } ?: " - "
+                    )
+                }
             }
         }
+        Column(
+            // apply darker background when item is selected
+            modifier = Modifier
+                .height(104.dp)
+                .fillMaxWidth()
+                .background(backgroundColor.value),
+        ) {}
     }
 }
 

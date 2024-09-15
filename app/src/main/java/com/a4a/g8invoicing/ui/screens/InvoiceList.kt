@@ -56,7 +56,7 @@ fun InvoiceList(
     val context = LocalContext.current
 
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-    var backgroundColor = remember { mutableStateOf(transparent) }
+    val backgroundColor = remember { mutableStateOf(transparent) }
 
     Scaffold(
         topBar = {
@@ -109,7 +109,7 @@ fun InvoiceList(
                 onClickCategory = onClickCategory,
                 isInvoice = true,
                 onChangeBackground = {
-                    backgroundColor.value = changeBackgroundColor(backgroundColor.value)
+                    backgroundColor.value = changeBackgroundWithVerticalGradient(backgroundColor.value)
                 }
             )
         }
@@ -127,15 +127,15 @@ fun InvoiceList(
             ) {
                 // No need to have pull to refresh because it's a flow,
                 // thus the list is updated when anything changes in db
-                InvoiceListContent(
+                DocumentListContent(
                     documents = documentsUiState.documentStates,
                     onItemClick = onClickListItem,
-                    addDeliveryNoteToSelectedList = {
-                        selectedItems.add(it)
+                    addDocumentToSelectedList = {
+                        selectedItems.add(it as InvoiceState)
                         selectedMode.value = true
                     },
-                    removeDeliveryNoteFromSelectedList = {
-                        selectedItems.remove(it)
+                    removeDocumentFromSelectedList = {
+                        selectedItems.remove(it as InvoiceState)
                         if (selectedItems.isEmpty()) {
                             selectedMode.value = false
                         }
@@ -194,7 +194,7 @@ private fun resetSelectedItems(
     keyToResetCheckboxes.value = !keyToResetCheckboxes.value
 }
 
-fun changeBackgroundColor(initialColor: Brush): Brush {
+fun changeBackgroundWithVerticalGradient(initialColor: Brush): Brush {
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
     val gradient = Brush.verticalGradient(
         listOf(Color.Transparent, ColorGrayTransp),
@@ -205,3 +205,4 @@ fun changeBackgroundColor(initialColor: Brush): Brush {
         transparent
     } else gradient
 }
+

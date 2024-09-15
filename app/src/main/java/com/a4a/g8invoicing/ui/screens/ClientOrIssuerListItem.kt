@@ -6,9 +6,11 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Checkbox
@@ -37,9 +39,8 @@ fun ClientOrIssuerListItem(
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
     isCheckboxDisplayed: Boolean, // Don't display checkboxes when list is displayed in bottomSheet
-    highlightInList: Boolean = false
+    highlightInList: Boolean = false,
 ) {
-
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -49,96 +50,111 @@ fun ClientOrIssuerListItem(
         Color.White
     }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    // For changing background when item selected
+    val backgroundColor = remember { mutableStateOf(Color.Transparent) }
+
+    Box(
         modifier = Modifier
-            //      .fillMaxWidth()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = rememberRipple(color = Color.Black, bounded = false),
-            ) {
-                //onItemClick()
-            }
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { offset ->
-                        val press = PressInteraction.Press(offset)
-                        isPressed = true
-                        interactionSource.emit(press)
-                        tryAwaitRelease()
-                        interactionSource.emit(PressInteraction.Release(press))
-                        isPressed = false
-                    },
-                    onTap = {
-                        onItemClick()
-                    },
-                    onLongPress = {
-                        //TODO Implement check
-                        // onItemCheckboxClick()
-                    }
-                )
-            }
     ) {
-        // Adding padding in the inside row, to keep the click & the ripple in all row
-        // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
-        // not centered anymore)
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .background(itemBackground)
-                .padding(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 20.dp,
-                    bottom = 20.dp
-                )
-        ) {
-            // Retriggers remember calculation when key changes
-            val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
-            if (isCheckboxDisplayed) {
-                Column(
+                //      .fillMaxWidth()
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = rememberRipple(color = Color.Black, bounded = false),
                 ) {
-                    Checkbox(
-                        checked = checkedState.value,
-                        onCheckedChange =
-                        {
-                            checkedState.value = it
-                            onItemCheckboxClick(it)
+                    //onItemClick()
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onPress = { offset ->
+                            val press = PressInteraction.Press(offset)
+                            isPressed = true
+                            interactionSource.emit(press)
+                            tryAwaitRelease()
+                            interactionSource.emit(PressInteraction.Release(press))
+                            isPressed = false
                         },
+                        onTap = {
+                            onItemClick()
+                        },
+                        onLongPress = {
+                            //TODO Implement check
+                            // onItemCheckboxClick()
+                        }
                     )
                 }
-            }
-
-            Column(
+        ) {
+            // Adding padding in the inside row, to keep the click & the ripple in all row
+            // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
+            // not centered anymore)
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(space = 6.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(end = 20.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                    verticalAlignment = Alignment.Top
-                ) {
-                    val clientName = (clientOrIssuer.firstName?.let { it.text + " " } ?: "") + clientOrIssuer.name.text
-                    Text(
-                        text = clientName,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        style = MaterialTheme.typography.titleSmall
-                        )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
+                    .background(itemBackground)
+                    .padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 20.dp,
+                        bottom = 20.dp
                     )
+            ) {
+                // Retriggers remember calculation when key changes
+                val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
+
+                if (isCheckboxDisplayed) {
+                    Column(
+                    ) {
+                        Checkbox(
+                            checked = checkedState.value,
+                            onCheckedChange =
+                            {
+                                checkedState.value = it
+                                onItemCheckboxClick(it)
+                            },
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(space = 6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 20.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        val clientName = (clientOrIssuer.firstName?.let { it.text + " " }
+                            ?: "") + clientOrIssuer.name.text
+                        Text(
+                            text = clientName,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(
+                            text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
+                        )
+                    }
                 }
             }
         }
+        Column(
+            // apply darker background when item is selected
+            modifier = Modifier
+                .height(104.dp)
+                .fillMaxWidth()
+                .background(backgroundColor.value),
+        ) {}
     }
 }
 

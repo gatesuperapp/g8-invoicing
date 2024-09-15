@@ -13,45 +13,33 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.navigation.AppBarAction
-import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
+import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 
 @Composable
 fun FlippyCheckBox(
-    color: Color?,
+    fillColor: Color?,
+    borderColor: Color?,
     onItemCheckboxClick: (Boolean) -> Unit = {},
-    keyToResetCheckboxes: Boolean,
+    checkboxFace: CheckboxFace,
+    checkedState: Boolean,
 ) {
-    var cardState by remember(keyToResetCheckboxes) { mutableStateOf(CardFace.Back) }
-    // Re-triggers remember calculation when key changes
-    val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
-
     FlipCard(
-        cardFace = cardState,
+        cardFace = checkboxFace,
         onClick = {
             onItemCheckboxClick(true)
-            cardState = it.next
-            checkedState.value = true
         },
         axis = RotationAxis.AxisY,
         back = {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color ?: MaterialTheme.colorScheme.onBackground)
+                    .background(fillColor ?: Color.White)
             )
         },
         front = {
@@ -61,50 +49,44 @@ fun FlippyCheckBox(
                         .fillMaxSize()
                 ) {
                     Checkbox(
-                        //  modifier = Modifier.background(Color.Yellow),
-                        checked = checkedState.value,
-                        onCheckedChange =
-                        {
+                        checked = checkedState,
+                        onCheckedChange = {
                             onItemCheckboxClick(false)
-                            checkedState.value = false
-                            cardState = CardFace.Back
                         },
                     )
                 }
             }
-        }
+        },
+        borderColor = borderColor
     )
 }
 
 @Composable
 fun FlipCard(
-    cardFace: CardFace,
-    onClick: (CardFace) -> Unit,
+    cardFace: CheckboxFace,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     axis: RotationAxis = RotationAxis.AxisY,
     back: @Composable () -> Unit = {},
     front: @Composable () -> Unit = {},
+    borderColor: Color?,
 ) {
     val rotation = animateFloatAsState(
         targetValue = cardFace.angle,
         animationSpec = tween(
             durationMillis = 400,
             easing = FastOutSlowInEasing,
-        )
+        ), label = ""
     )
     Card(
-        onClick = { onClick(cardFace) },
+        onClick = { onClick() },
         modifier = modifier
             .padding(12.dp)
             .padding(
                 //to increase the click touch zone
                 start = 20.dp,
             )
-            .border(
-                width = 2.dp,
-                color = Color.Transparent,
-                shape = CircleShape
-            )
+
             .height(16.dp)
             .width(16.dp)
 
@@ -119,13 +101,25 @@ fun FlipCard(
     ) {
         if (rotation.value <= 90f) {
             Box(
-                Modifier.fillMaxSize()
+                Modifier
+                    .fillMaxSize()
+                    .border(
+                        width = 1.5.dp,
+                        color = Color.Transparent,
+                        shape = CircleShape
+                    )
             ) {
                 front()
             }
         } else {
             Box(
                 Modifier
+                    .border(
+                        width = 1.5.dp,
+                        color = ColorGrayTransp,
+                        shape = CircleShape
+                    )
+                    .background(Color.White)
                     .fillMaxSize()
                     .graphicsLayer {
                         if (axis == RotationAxis.AxisX) {
@@ -141,17 +135,17 @@ fun FlipCard(
     }
 }
 
-enum class CardFace(val angle: Float) {
+enum class CheckboxFace(val angle: Float) {
     Front(0f) {
-        override val next: CardFace
+        override val next: CheckboxFace
             get() = Back
     },
     Back(180f) {
-        override val next: CardFace
+        override val next: CheckboxFace
             get() = Front
     };
 
-    abstract val next: CardFace
+    abstract val next: CheckboxFace
 }
 
 enum class RotationAxis {

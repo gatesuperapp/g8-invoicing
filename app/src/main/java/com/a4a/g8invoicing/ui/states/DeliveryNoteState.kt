@@ -19,7 +19,7 @@ import java.util.Locale
 // and to change properties values (var instead of val)
 data class DeliveryNoteState(
     override var documentType: DocumentType = DocumentType.DELIVERY_NOTE,
-    override var documentTag: DocumentTag = DocumentTag.DRAFT,
+    override var documentTag: DocumentTag = DocumentTag.UNDEFINED,
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(),
     // Have to put a time "12:00:00" because of a bug, if we don't, DatePicker will show 1 day prior to current date

@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -41,6 +45,10 @@ fun ProductList(
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
     // On delete document
     val openAlertDialog = remember { mutableStateOf(false) }
+
+    // Add background when bottom menu expanded
+    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    val backgroundColor = remember { mutableStateOf(transparent) }
 
     Scaffold(
         topBar = {
@@ -79,23 +87,35 @@ fun ProductList(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // No need to have pull to refresh because it's a flow,
-            // thus the list is updated when anything changes in db
-            ProductListContent(
-                products = productsUiState.products,
-                onProductClick = onClickListItem,
-                addProductToSelectedList = {
-                    selectedItems.add(it)
-                    selectedMode.value = true
-                },
-                removeProductFromSelectedList = {
-                    selectedItems.remove(it)
-                    if (selectedItems.isEmpty()) {
-                        selectedMode.value = false
-                    }
-                },
-                keyToUnselectAll = keyToResetCheckboxes.value
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                // No need to have pull to refresh because it's a flow,
+                // thus the list is updated when anything changes in db
+                ProductListContent(
+                    products = productsUiState.products,
+                    onProductClick = onClickListItem,
+                    addProductToSelectedList = {
+                        selectedItems.add(it)
+                        selectedMode.value = true
+                    },
+                    removeProductFromSelectedList = {
+                        selectedItems.remove(it)
+                        if (selectedItems.isEmpty()) {
+                            selectedMode.value = false
+                        }
+                    },
+                    keyToUnselectAll = keyToResetCheckboxes.value
+                )
+
+                Column(
+                    // apply darker background when bottom menu is expanded
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(backgroundColor.value),
+                ) {}
+            }
         }
 
         when {

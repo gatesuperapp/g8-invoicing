@@ -29,9 +29,9 @@ fun NavGraph(navController: NavHostController) {
     NavHost(
         navController,
         //startDestination = (Screen.About.name),
-          startDestination = (Screen.InvoiceList.name),
+        //  startDestination = (Screen.InvoiceList.name),
         // startDestination = (Screen.CreditNoteList.name),
-        //startDestination = (Screen.DeliveryNoteList.name),
+        startDestination = (Screen.DeliveryNoteList.name),
         //startDestination = (Screen.ProductList.name),
         //  startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
