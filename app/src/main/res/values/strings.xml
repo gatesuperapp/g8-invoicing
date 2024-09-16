@@ -174,10 +174,7 @@
     <string name="corrected_invoice_cancel_and_replace">Annule et remplace la facture</string>
     <string name="document_default_date">-</string>
     <string name="document_default_due_date">11/01/2024</string>
-    <string name="document_default_footer">Escompte pour paiement anticipé : néant
-    \n
-        Taux de pénalités : néant
-        \n  \n  \n IBAN : FR76 1027 8073 7000 983764 8377
+    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1027 8073 7000 983764 8377
     </string>
      <string name="document_default_reference">XFGDTSF</string>
     <string name="document_default_issuer_firstName">Ignacio</string>

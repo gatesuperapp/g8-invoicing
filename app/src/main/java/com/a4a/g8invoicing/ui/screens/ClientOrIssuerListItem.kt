@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
@@ -23,11 +24,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.a4a.g8invoicing.ui.navigation.actionTagUndefined
+import com.a4a.g8invoicing.ui.shared.CheckboxFace
+import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
@@ -49,9 +55,13 @@ fun ClientOrIssuerListItem(
     } else {
         Color.White
     }
+    // For the checkbox
+    var checkboxFace by remember(keyToResetCheckboxes) { mutableStateOf(CheckboxFace.Back) }
+    // Re-triggers remember calculation when key changes
+    val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
     // For changing background when item selected
-    val backgroundColor = remember { mutableStateOf(Color.Transparent) }
+    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.Transparent) }
 
     Box(
         modifier = Modifier
@@ -60,6 +70,7 @@ fun ClientOrIssuerListItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 //      .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
                 .clickable(
                     interactionSource = interactionSource,
                     indication = rememberRipple(color = Color.Black, bounded = false),
@@ -80,8 +91,12 @@ fun ClientOrIssuerListItem(
                             onItemClick()
                         },
                         onLongPress = {
-                            //TODO Implement check
-                            // onItemCheckboxClick()
+                            checkboxFace = checkboxFace.next
+                            checkedState.value = !checkedState.value
+                            onItemCheckboxClick(checkedState.value)
+                            // Change item background color
+                            backgroundColor.value =
+                                changeSelectedItemBackgroundColor(backgroundColor.value)
                         }
                     )
                 }
@@ -93,25 +108,27 @@ fun ClientOrIssuerListItem(
                 modifier = Modifier
                     .background(itemBackground)
                     .padding(
-                        start = 20.dp,
+                        start = if(isCheckboxDisplayed) 0.dp else 30.dp,
                         end = 20.dp,
-                        top = 20.dp,
-                        bottom = 20.dp
+                        top = 14.dp,
+                        bottom = 14.dp
                     )
             ) {
-                // Retriggers remember calculation when key changes
-                val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
                 if (isCheckboxDisplayed) {
-                    Column(
-                    ) {
-                        Checkbox(
-                            checked = checkedState.value,
-                            onCheckedChange =
-                            {
-                                checkedState.value = it
+                    Column {
+                        FlippyCheckBox(
+                            fillColor = actionTagUndefined().iconColor,
+                            borderColor = actionTagUndefined().iconBorder,
+                            onItemCheckboxClick = {
+                                checkboxFace = checkboxFace.next
+                                checkedState.value = !checkedState.value
                                 onItemCheckboxClick(it)
+                                // Change item background color
+                                backgroundColor.value =
+                                    changeSelectedItemBackgroundColor(backgroundColor.value)
                             },
+                            checkboxFace = checkboxFace,
+                            checkedState = checkedState.value
                         )
                     }
                 }
@@ -119,14 +136,14 @@ fun ClientOrIssuerListItem(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(space = 6.dp)
+                    verticalArrangement = Arrangement.spacedBy(space = 2.dp)
                 ) {
                     Row(
                         modifier = Modifier
                             .padding(end = 20.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                        verticalAlignment = Alignment.Top
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         val clientName = (clientOrIssuer.firstName?.let { it.text + " " }
                             ?: "") + clientOrIssuer.name.text
@@ -134,7 +151,9 @@ fun ClientOrIssuerListItem(
                             text = clientName,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.titleSmall
+                            //style = MaterialTheme.typography.titleSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     Row(
@@ -143,6 +162,9 @@ fun ClientOrIssuerListItem(
                     ) {
                         Text(
                             text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
+                            fontSize = 16.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -151,7 +173,7 @@ fun ClientOrIssuerListItem(
         Column(
             // apply darker background when item is selected
             modifier = Modifier
-                .height(104.dp)
+                .height(78.dp)
                 .fillMaxWidth()
                 .background(backgroundColor.value),
         ) {}

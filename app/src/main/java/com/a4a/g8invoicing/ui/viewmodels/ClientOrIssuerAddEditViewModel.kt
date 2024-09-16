@@ -341,6 +341,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         val firstAddress = if (type == ClientOrIssuerType.CLIENT)
             _clientUiState.value.addresses?.getOrNull(0)
         else _issuerUiState.value.addresses?.getOrNull(0)
+
         val secondAddress = if (type == ClientOrIssuerType.CLIENT)
             _clientUiState.value.addresses?.getOrNull(1)
         else _issuerUiState.value.addresses?.getOrNull(1)

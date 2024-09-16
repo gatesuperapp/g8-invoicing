@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
@@ -46,7 +47,7 @@ fun ClientOrIssuerAddEditForm(
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isInBottomSheetModal: Boolean = false,
-    onClickDeleteAddress: () -> Unit
+    onClickDeleteAddress: () -> Unit,
 ) {
     val localFocusManager = LocalFocusManager.current
     var numberOfClientAddresses by remember {
@@ -160,19 +161,12 @@ fun ClientOrIssuerAddEditForm(
         Spacer(Modifier.padding(bottom = 16.dp))
 
         for (i in 1..numberOfClientAddresses) {
-            var address = clientOrIssuerUiState.addresses?.getOrNull(0)
-            when (i) {
-                2 -> address = clientOrIssuerUiState.addresses?.getOrNull(1)
-                3 -> address = clientOrIssuerUiState.addresses?.getOrNull(2)
-            }
+            val address = clientOrIssuerUiState.addresses?.getOrNull(i - 1)
 
             Column(
                 modifier = Modifier
                     .background(color = Color.White, shape = RoundedCornerShape(6.dp))
-                    .padding(
-                        top = 8.dp
-                    )
-
+                    .padding(top = 8.dp)
             ) {
                 val inputList = mutableListOf(
                     FormInput(
@@ -281,23 +275,45 @@ fun ClientOrIssuerAddEditForm(
                 )
             }
 
+            if (!previousAddressIsFilled(clientOrIssuerUiState, i)) {
+                Spacer(Modifier.padding(bottom = 16.dp))
+            }
+
             Row(Modifier.padding(bottom = 6.dp)) {
-                if (i == 3) {
+
+                if (i != 3 &&
+                    numberOfClientAddresses == i
+                    && previousAddressIsFilled(clientOrIssuerUiState, i)
+                ) {
+                    AddAddressButton(
+                        onClick = { numberOfClientAddresses += 1 },
+                        bottomPadding = if (i == 1) 16.dp else 0.dp
+                    )
+                }
+                if (i > 1 && i == numberOfClientAddresses) {
                     Spacer(Modifier.weight(1F))
                     DeleteAddressButton(onClick = {
                         numberOfClientAddresses -= 1
-                        onClickDeleteAddress()
-                    })
-                } else if (numberOfClientAddresses == 1) {
-                    AddAddressButton(onClick = { numberOfClientAddresses += 1 })
-                } else if (i == numberOfClientAddresses) {
-                    AddAddressButton(onClick = { numberOfClientAddresses += 1 })
-                    Spacer(Modifier.weight(1F))
-                    DeleteAddressButton(onClick = {
-                        numberOfClientAddresses -= 1
-                        onClickDeleteAddress()
+                        if (clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
+                            onClickDeleteAddress()
+                        }
                     })
                 }
+
+                /*else if (numberOfClientAddresses == i && clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
+                    AddAddressButton(onClick = { numberOfClientAddresses += 1 })
+                } else if (i != 1 && i == numberOfClientAddresses) {
+                    AddAddressButton(onClick = {
+                        numberOfClientAddresses += 1
+                    })
+                    Spacer(Modifier.weight(1F))
+                    DeleteAddressButton(onClick = {
+                        numberOfClientAddresses -= 1
+                        if(clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
+                            onClickDeleteAddress()
+                        }
+                    })
+                }*/
             }
         }
 
@@ -434,12 +450,25 @@ fun ClientOrIssuerAddEditForm(
     }
 }
 
+private fun previousAddressIsFilled(clientOrIssuerUiState: ClientOrIssuerState, i: Int): Boolean {
+    val lastAddressesElement = clientOrIssuerUiState.addresses?.getOrNull(i - 1)
+    val fieldsOfLastAddress = listOf(
+        lastAddressesElement?.addressTitle?.text,
+        lastAddressesElement?.addressLine1?.text,
+        lastAddressesElement?.addressLine2?.text,
+        lastAddressesElement?.zipCode?.text,
+        lastAddressesElement?.city?.text,
+    )
+    return lastAddressesElement != null
+            && fieldsOfLastAddress.any { !it.isNullOrEmpty() }
+}
+
 @Composable
 fun DeleteAddressButton(onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
-            .padding(end = 4.dp, top = 4.dp)
+            .padding(end = 4.dp, top = 4.dp, bottom = 16.dp)
             .size(14.dp)
     ) {
         Icon(
@@ -453,9 +482,9 @@ fun DeleteAddressButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun AddAddressButton(onClick: (Int) -> Unit) {
+fun AddAddressButton(onClick: (Int) -> Unit, bottomPadding: Dp = 0.dp) {
     ClickableText(
-        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 16.dp),
+        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = bottomPadding),
         onClick = onClick,
         style = MaterialTheme.typography.callForActions,
         text = AnnotatedString(Strings.get(R.string.client_add_address))

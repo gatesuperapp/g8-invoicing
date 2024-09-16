@@ -151,7 +151,7 @@ fun Product.transformIntoEditableProduct(taxQueries: TaxRateQueries): ProductSta
     return ProductState(
         productId = this.product_id.toInt(),
         name = TextFieldValue(this.name),
-        description = this.description?.let { TextFieldValue() },
+        description = this.description?.let { TextFieldValue(it) },
         priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
         taxRate = this.product_tax_id?.let {
             taxQueries.getTaxRate(it)

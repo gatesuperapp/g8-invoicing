@@ -9,7 +9,6 @@ CREATE TABLE Invoice (
   payment_status INTEGER NOT NULL,
   footer TEXT,
 
-
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
   deleted_at TEXT DEFAULT (datetime('now', 'localtime')));

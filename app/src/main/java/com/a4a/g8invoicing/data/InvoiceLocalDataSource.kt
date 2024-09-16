@@ -63,7 +63,9 @@ class InvoiceLocalDataSource(
                     incrementDocumentNumber(it)
                 } ?: Strings.get(R.string.invoice_default_number)),
                 documentIssuer = issuer,
-                footerText = TextFieldValue(getExistingFooter() ?: "")
+                footerText = TextFieldValue(
+                    getExistingFooter() ?: Strings.get(R.string.document_default_footer)
+                )
             )
         )
         saveInfoInOtherTables(
@@ -159,12 +161,12 @@ class InvoiceLocalDataSource(
 
             val clientAndIssuer: MutableList<ClientOrIssuerState> = mutableListOf()
             listOfIds.forEach {
-                 val address =   documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
-                        .executeAsOneOrNull()?.let {
-                            it.transformIntoEditable(
+                val address = documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                    .executeAsOneOrNull()?.let {
+                        it.transformIntoEditable(
                             fetchDocumentClientOrIssuerAddresses(it.id)
-                            )
-                        }
+                        )
+                    }
                 address?.let { clientAndIssuer.add(it) }
             }
             return if (clientAndIssuer.isNotEmpty())
@@ -304,6 +306,7 @@ class InvoiceLocalDataSource(
                     } ?: Strings.get(R.string.invoice_default_number)
                     val invoice = it
                     invoice.documentNumber = TextFieldValue(docNumber)
+                    invoice.documentTag = DocumentTag.DRAFT
 
                     saveInfoInInvoiceTable(invoice)
                     saveInfoInOtherTables(invoice)
@@ -313,7 +316,6 @@ class InvoiceLocalDataSource(
             }
         }
     }
-
 
     override suspend fun setTag(
         documents: List<InvoiceState>,
