@@ -17,3 +17,7 @@ VALUES (?, ?, ?);
 delete:
 DELETE FROM LinkDocumentClientOrIssuerToAddress
 WHERE  id = :id;
+
+deleteWithClientId:
+DELETE FROM LinkClientOrIssuerToAddress
+WHERE  client_or_issuer_id = :client_or_issuer_id;

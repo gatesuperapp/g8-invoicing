@@ -24,8 +24,7 @@ VALUES (?, ?, ?);
 
 deleteDocumentClientOrIssuerLinkedToInvoice:
 DELETE FROM LinkInvoiceToDocumentClientOrIssuer
-WHERE  invoice_id = :invoice_id
-AND document_client_or_issuer_id = :document_client_or_issuer_id;
+WHERE document_client_or_issuer_id = :document_client_or_issuer_id;
 
 deleteAllDocumentClientOrIssuerLinkedToInvoice:
 DELETE FROM LinkInvoiceToDocumentClientOrIssuer

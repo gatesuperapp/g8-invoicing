@@ -200,7 +200,6 @@ class InvoiceAddEditViewModel @Inject constructor(
                     documentClientOrIssuer = documentClientOrIssuer,
                     id = _documentUiState.value.documentId?.toLong()
                 )
-
             } catch (e: Exception) {
                 println("Saving documentProduct failed with exception: ${e.localizedMessage}")
             }

@@ -144,6 +144,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                     // ADD = choose from existing list
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                            documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.DOCUMENT_CLIENT )
                             invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentClientUiState
                             )
@@ -170,6 +172,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     // EDIT = edit the chosen item (will only impact the document, doesn't change
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
+                        documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
                             invoiceViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_CLIENT,

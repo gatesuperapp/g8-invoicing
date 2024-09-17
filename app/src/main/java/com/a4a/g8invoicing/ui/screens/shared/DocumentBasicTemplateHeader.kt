@@ -67,8 +67,8 @@ fun DocumentBasicTemplateHeader(
                 style = MaterialTheme.typography.titleForDocuments,
                 text = stringResource(
                     id = if (document is DeliveryNoteState) R.string.delivery_note_number
-                    else if(document is CreditNoteState) R.string.credit_note_number
-                        else R.string.invoice_number
+                    else if (document is CreditNoteState) R.string.credit_note_number
+                    else R.string.invoice_number
                 ) + " " + document.documentNumber.text
             )
 
@@ -120,42 +120,45 @@ fun DocumentBasicTemplateHeader(
             }
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .padding(bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(bottom = 2.dp),
-                style = MaterialTheme.typography.textForDocumentsSecondary,
-                text = stringResource(id = R.string.document_recipient)
-            )
-
+        val numberOfAddresses = document.documentClient?.addresses?.size ?: 1
+       // for (i in 1..numberOfAddresses) {
             Column(
                 modifier = Modifier
-                    .getBorder(ScreenElement.DOCUMENT_CLIENT, selectedItem)
-                    .customCombinedClickable(
-                        onClick = {
-                            onClickElement(ScreenElement.DOCUMENT_CLIENT)
-                        },
-                        onLongClick = {
-                        }
-                    )
-                    .fillMaxWidth()
-                    .border(
-                        1.dp,
-                        SolidColor(Color.LightGray),
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .padding(10.dp),
+                    .fillMaxWidth(0.5f)
+                    .padding(bottom = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                document.documentClient?.let {
-                    DocumentBasicTemplateClientOrIssuer(it)
+                Text(
+                    modifier = Modifier
+                        .padding(bottom = 2.dp),
+                    style = MaterialTheme.typography.textForDocumentsSecondary,
+                    text = stringResource(id = R.string.document_recipient)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .getBorder(ScreenElement.DOCUMENT_CLIENT, selectedItem)
+                        .customCombinedClickable(
+                            onClick = {
+                                onClickElement(ScreenElement.DOCUMENT_CLIENT)
+                            },
+                            onLongClick = {
+                            }
+                        )
+                        .fillMaxWidth()
+                        .border(
+                            1.dp,
+                            SolidColor(Color.LightGray),
+                            shape = RoundedCornerShape(15.dp)
+                        )
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    document.documentClient?.let {
+                        DocumentBasicTemplateClientOrIssuer(it)
+                    }
                 }
             }
-        }
+      //  }
     }
 }

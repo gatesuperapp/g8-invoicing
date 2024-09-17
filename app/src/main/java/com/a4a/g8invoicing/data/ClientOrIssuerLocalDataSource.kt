@@ -226,7 +226,7 @@ class ClientOrIssuerLocalDataSource(
                     )
                 }
 
-                // Delete addresses
+                // Addresses to delete
                 val oldAddressesIds = clientOrIssuer.id?.toLong()?.let {
                     linkClientOrIssuerToAddressQueries.get(it).executeAsList().map { it.address_id }
                 }
@@ -239,7 +239,7 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuerAddressQueries.delete(it)
                 }
 
-                // Update and create
+                // Addresses to update and create
                 clientOrIssuer.addresses?.let { addresses ->
                     val (addressesToUpdate, addressesToCreate) = addresses.partition { it.id != null }
                     addressesToUpdate.forEach { address ->
@@ -326,6 +326,7 @@ class ClientOrIssuerLocalDataSource(
             try {
                 documentClientOrIssuer.id?.let {
                     documentClientOrIssuerQueries.delete(it.toLong())
+                    linkDocumentClientOrIssuerToAddressQueries.deleteWithClientId(it.toLong())
                 }
                 documentClientOrIssuer.addresses?.filter { it.id != null }?.forEach {
                     documentClientOrIssuerAddressQueries.delete(it.id!!.toLong())
