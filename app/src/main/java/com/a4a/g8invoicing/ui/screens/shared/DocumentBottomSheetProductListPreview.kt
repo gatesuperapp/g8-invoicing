@@ -14,7 +14,7 @@ import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
-fun DocumentBottomSheetDocumentProductList(
+fun DocumentBottomSheetDocumentProductListPreview(
     list: List<DocumentProductState>,
     onClickNew: () -> Unit, // Add a new product to the document (product list)
     onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)

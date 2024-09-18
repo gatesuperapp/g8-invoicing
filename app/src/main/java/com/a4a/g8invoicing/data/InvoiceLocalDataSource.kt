@@ -115,6 +115,8 @@ class InvoiceLocalDataSource(
                             val clientAndIssuer = fetchClientAndIssuer(document.invoice_id)
                             val tag = fetchTag(document.invoice_id)
 
+                            Log.e(ContentValues.TAG, "clientAndIssuer" + clientAndIssuer)
+
                             document.transformIntoEditableInvoice(
                                 products,
                                 clientAndIssuer,
@@ -157,6 +159,26 @@ class InvoiceLocalDataSource(
             val listOfIds =
                 linkInvoiceToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
                     documentId
+                ).executeAsList()
+
+            return if (listOfIds.isNotEmpty()) {
+                listOfIds.map {
+                    documentClientOrIssuerQueries.get(it.document_client_or_issuer_id)
+                        .executeAsOne()
+                        .transformIntoEditable()
+                }
+            } else null
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
+    }
+
+    /*private fun fetchClientAndIssuer(documentId: Long): List<ClientOrIssuerState>? {
+        try {
+            val listOfIds =
+                linkInvoiceToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToInvoice(
+                    documentId
                 ).executeAsList().map { it.document_client_or_issuer_id }
 
             val clientAndIssuer: MutableList<ClientOrIssuerState> = mutableListOf()
@@ -180,7 +202,7 @@ class InvoiceLocalDataSource(
             Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
-    }
+    }*/
 
     private fun fetchDocumentClientOrIssuerAddresses(id: Long): MutableList<AddressState>? {
         try {
@@ -965,3 +987,45 @@ private suspend fun saveInfoInAddressTables(
     }
 }
 
+fun DocumentClientOrIssuer.transformIntoEditable(
+    addresses: List<AddressState>? = null,
+): ClientOrIssuerState {
+    val documentClientOrIssuer = this
+
+    return ClientOrIssuerState(
+        id = documentClientOrIssuer.id.toInt(),
+        type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
+            ClientOrIssuerType.DOCUMENT_CLIENT
+        else ClientOrIssuerType.DOCUMENT_ISSUER,
+        firstName = documentClientOrIssuer.first_name?.let { TextFieldValue(text = it) },
+        addresses = addresses,
+        name = TextFieldValue(text = documentClientOrIssuer.name),
+        phone = documentClientOrIssuer.phone?.let { TextFieldValue(text = it) },
+        email = documentClientOrIssuer.email?.let { TextFieldValue(text = it) },
+        notes = documentClientOrIssuer.notes?.let { TextFieldValue(text = it) },
+        companyId1Label = documentClientOrIssuer.company_id1_number?.let {
+            documentClientOrIssuer.company_id1_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId1Number = documentClientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
+        companyId2Label = documentClientOrIssuer.company_id2_number?.let {
+            documentClientOrIssuer.company_id2_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId2Number = documentClientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
+        companyId3Label = documentClientOrIssuer.company_id3_number?.let {
+            documentClientOrIssuer.company_id3_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
+    )
+}

@@ -17,7 +17,7 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
-fun DocumentBottomSheetProductList(
+fun DocumentBottomSheetProducts(
     list: List<ProductState>,
     onClickBack: () -> Unit,
     onProductClick: (ProductState) -> Unit, // To select a product

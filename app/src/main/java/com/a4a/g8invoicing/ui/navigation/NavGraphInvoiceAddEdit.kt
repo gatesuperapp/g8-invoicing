@@ -157,9 +157,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                     }
                     // NEW = create new & save in clients list too
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
+                        //documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
                             createNewClientOrIssuer(clientOrIssuerAddEditViewModel,ClientOrIssuerType.DOCUMENT_CLIENT )
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+
                             invoiceViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentClientUiState
                             )

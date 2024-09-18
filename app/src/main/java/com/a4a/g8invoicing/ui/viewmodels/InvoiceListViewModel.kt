@@ -48,11 +48,15 @@ class InvoiceListViewModel @Inject constructor(
     }
 
     private fun fetch() {
+        Log.e(ContentValues.TAG, "clientAndIssuer" + "fetchJob?.cancel()")
+
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
                 invoiceDataSource.fetchAll()?.collect {
                     _documentsUiState.update { uiState ->
+                        Log.e(ContentValues.TAG, "clientAndIssuer _documentsUiState" + _documentsUiState)
+
                         uiState.copy(
                             documentStates = it
                         )

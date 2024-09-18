@@ -162,7 +162,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
 
     private fun fetchFromLocalDb(id: Long) {
-        val clientOrIssuer: ClientOrIssuerState? = dataSource.fetch(id)
+        val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
 
         clientOrIssuer?.let {
             _clientUiState.value = it

@@ -141,7 +141,7 @@ fun DocumentBottomSheetProducts(
                 }
             }
 
-            DocumentBottomSheetDocumentProductList(
+            DocumentBottomSheetDocumentProductListPreview(
                 list = params.first ?: emptyList(),
                 onClickNew = {
                     typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
@@ -162,7 +162,7 @@ fun DocumentBottomSheetProducts(
             )
 
             if (isProductListVisible) {
-                DocumentBottomSheetProductList(
+                DocumentBottomSheetProducts(
                     list = params.second ?: emptyList(),
                     onClickBack = { isProductListVisible = false },
                     onProductClick = {

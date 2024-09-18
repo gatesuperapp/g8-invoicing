@@ -11,8 +11,7 @@ import kotlinx.coroutines.flow.Flow
  */
 
 interface ClientOrIssuerLocalDataSourceInterface {
-    fun fetch(id: Long): ClientOrIssuerState?
-    fun fetchDocumentClientOrIssuer(id: Long): ClientOrIssuerState?
+    fun fetchClientOrIssuer(id: Long): ClientOrIssuerState?
     fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>>
     suspend fun createNew(clientOrIssuer: ClientOrIssuerState): Long?
     suspend fun duplicateClients(clientsOrIssuers: List<ClientOrIssuerState>)

@@ -295,15 +295,6 @@ fun DocumentAddEdit(
                                 val maxY = (size.height * (zoom - 1) / 2f)
                                 val minY = -(size.height * (zoom - 1))
 
-                                Log.e(
-                                    ContentValues.TAG,
-                                    "GGGG: size.height = " + size.height
-                                )
-                                Log.e(
-                                    ContentValues.TAG,
-                                    "GGGG: maxY = " + maxY
-                                )
-
                                 if (zoom > 1f) {
                                     newOffsetX = newOffsetX.coerceIn(-maxX, maxX)
                                     // coerceIn limits dragging in bounds
@@ -335,11 +326,6 @@ fun DocumentAddEdit(
                                         )
                                     }
                                 }
-                                Log.e(
-                                    ContentValues.TAG,
-                                    "GGGG: animatableOffsetY = " + animatableOffsetY.value
-                                )
-
 
                                 if (zoom == 1f && animatableOffsetY.value > 0f) { // dragging above the document
                                     coroutineScope.launch {

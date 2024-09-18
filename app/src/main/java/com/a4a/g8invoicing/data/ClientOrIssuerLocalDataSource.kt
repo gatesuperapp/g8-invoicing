@@ -31,26 +31,12 @@ class ClientOrIssuerLocalDataSource(
     private val linkDocumentClientOrIssuerToAddressQueries =
         db.linkDocumentClientOrIssuerToAddressQueries
 
-    override fun fetch(id: Long): ClientOrIssuerState? {
+    override fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
         try {
             return clientOrIssuerQueries.get(id).executeAsOneOrNull()
                 ?.let {
                     it.transformIntoEditable(
                         fetchClientOrIssuerAddresses(it.id)?.toMutableList()
-                    )
-                }
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return null
-    }
-
-    override fun fetchDocumentClientOrIssuer(id: Long): ClientOrIssuerState? {
-        try {
-            return documentClientOrIssuerQueries.get(id).executeAsOneOrNull()
-                ?.let {
-                    it.transformIntoEditable(
-                        fetchDocumentClientOrIssuerAddresses(it.id)
                     )
                 }
         } catch (e: Exception) {
@@ -418,48 +404,6 @@ fun DocumentClientOrIssuerAddress.transformIntoEditable(): AddressState {
     )
 }
 
-fun DocumentClientOrIssuer.transformIntoEditable(
-    addresses: List<AddressState>? = null,
-): ClientOrIssuerState {
-    val documentClientOrIssuer = this
-
-    return ClientOrIssuerState(
-        id = documentClientOrIssuer.id.toInt(),
-        type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
-            ClientOrIssuerType.DOCUMENT_CLIENT
-        else ClientOrIssuerType.DOCUMENT_ISSUER,
-        firstName = documentClientOrIssuer.first_name?.let { TextFieldValue(text = it) },
-        addresses = addresses,
-        name = TextFieldValue(text = documentClientOrIssuer.name),
-        phone = documentClientOrIssuer.phone?.let { TextFieldValue(text = it) },
-        email = documentClientOrIssuer.email?.let { TextFieldValue(text = it) },
-        notes = documentClientOrIssuer.notes?.let { TextFieldValue(text = it) },
-        companyId1Label = documentClientOrIssuer.company_id1_number?.let {
-            documentClientOrIssuer.company_id1_label?.let {
-                TextFieldValue(
-                    text = it
-                )
-            }
-        },
-        companyId1Number = documentClientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
-        companyId2Label = documentClientOrIssuer.company_id2_number?.let {
-            documentClientOrIssuer.company_id2_label?.let {
-                TextFieldValue(
-                    text = it
-                )
-            }
-        },
-        companyId2Number = documentClientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
-        companyId3Label = documentClientOrIssuer.company_id3_number?.let {
-            documentClientOrIssuer.company_id3_label?.let {
-                TextFieldValue(
-                    text = it
-                )
-            }
-        },
-        companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
-    )
-}
 
 fun linkClientOrIssuerToAddress(
     linkQueries: Any,
