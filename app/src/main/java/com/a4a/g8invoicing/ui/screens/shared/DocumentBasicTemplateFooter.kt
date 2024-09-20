@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -54,7 +55,8 @@ fun DocumentBasicTemplateFooter(
                     .padding(bottom = 12.dp),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.textForDocuments,
-                text = document.footerText.text
+                text = document.footerText.text,
+                lineHeight = 10.sp
             )
         }
     }

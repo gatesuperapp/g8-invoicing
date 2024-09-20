@@ -7,16 +7,19 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.screens.shared.FooterRowName
+import com.a4a.g8invoicing.ui.screens.shared.PricesRowName
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
+import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.io.source.ByteArrayOutputStream
 import com.itextpdf.kernel.colors.Color
@@ -81,7 +84,8 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     )
     inputDocument.reference?.let {
         if (it.text.isNotEmpty()) {
-            document.add(createReference(it.text, fontBold))
+            document.add(createReference(it.text, fontBold)
+                .setPaddingBottom(2f))
         }
     }
     inputDocument.documentProducts?.let {
@@ -185,13 +189,16 @@ private fun createTitle(
 
     return Paragraph(title + documentNumber)
         .setFont(font)
-        .setFontSize(20F)
+        .setFontSize(22F)
         .setMarginBottom(-6F)
 }
 
 private fun createDate(date: String): Paragraph {
-    return Paragraph(Strings.get(R.string.document_date) + " : " + date).setFontSize(14F)
+    return Paragraph(Strings.get(R.string.document_date) + " : " + date)
+        .setFontSize(16F)
+        .setMarginBottom(16F)
 }
+
 
 private fun createIssuerAndClientTable(
     issuer: ClientOrIssuerState?,
@@ -201,102 +208,183 @@ private fun createIssuerAndClientTable(
 ): Table {
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
-        .setMarginBottom(40F)
+        .setMarginBottom(10F)
         .setFixedLayout()
 
-    val issuer = createClientOrIssuerParagraph(issuer, font)
-    val client = createClientOrIssuerParagraph(client, font)
-
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER))
+    // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
     issuerAndClientTable.addCell(
-        Cell()
-            .setBorder(Border.NO_BORDER)
-            .add(
-                Paragraph(
-                    when (documentType) {
-                        DocumentType.INVOICE -> Strings.get(R.string.document_recipient)
-                        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.document_recipient)
-                        else -> null
-                    }
+        Cell().setBorder(Border.NO_BORDER)
+    )
+    client?.addresses?.let {
+        issuerAndClientTable.addCell(createAddressTitle(it, 0))
+    }
+
+    // ROW X : Just adding space
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(1f))
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(1f))
+
+    // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
+    val issuerContent = createClientOrIssuerParagraph(issuer, font)
+    val issuerCell = Cell().setBorder(Border.NO_BORDER)
+    issuerContent.forEach {
+        issuerCell.add(it)
+    }
+    issuerAndClientTable.addCell(issuerCell)
+    issuerAndClientTable.addCell(
+        createClientRectangleAndContent(
+            createClientOrIssuerParagraph(client, font)
+        ).setPaddingBottom(8f)
+    )
+
+    // ROW X : Just adding space
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(6f))
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(6f))
+
+    // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TITLE 3
+    val numberOfAddresses = client?.addresses?.size ?: 1
+    for (i in 1..<numberOfAddresses) {
+        client?.addresses?.let {
+            issuerAndClientTable.addCell(createAddressTitle(it, i))
+        }
+    }
+    // ROW X : Just adding space
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(1f))
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(1f))
+
+    // ROW 4:  CLIENT ADDRESS 2 ----------ADDRESS 3
+    for (i in 1..<numberOfAddresses) {
+        issuerAndClientTable.addCell(
+            createClientRectangleAndContent(
+                createClientOrIssuerParagraph(
+                    client,
+                    font,
+                    displayAllInfo = false,
+                    addressIndex = i
                 )
-                    .setFontColor(ColorConstants.DARK_GRAY)
             )
-            .setTextAlignment(TextAlignment.CENTER)
-    )
-    issuerAndClientTable.addCell(
-        Cell()
-            .setBorder(Border.NO_BORDER)
-            .add(issuer)
-    )
+        )
+    }
 
-    val cell = Cell()
-        .setBorder(Border.NO_BORDER)
-        .add(client)
-        .setTextAlignment(TextAlignment.CENTER)
-    cell.setNextRenderer(RoundedCellRenderer(cell, ColorConstants.LIGHT_GRAY, false))
-
-    return issuerAndClientTable.addCell(cell)
+    // ROW X : Just adding space
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(12f))
+    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
+        .setPaddingBottom(12f))
+    return issuerAndClientTable
 }
 
-private fun createClientOrIssuerParagraph(clientOrIssuer: ClientOrIssuerState?, font: PdfFont): Paragraph {
-    val issuerFirstName = clientOrIssuer?.firstName?.text?.let { Text("$it ").setFont(font) }
-    val issuerName = Text(clientOrIssuer?.name?.text + "\n").setFont(font)
-    val issuerPhone = clientOrIssuer?.phone?.text?.let { Text(it + "\n") }
-    val issuerCompanyLabel1 = clientOrIssuer?.companyId1Number?.text?.let {
-        Text(clientOrIssuer.companyId1Label?.text + " : " + it + "\n")
-    }
-    val issuerCompanyLabel2 = clientOrIssuer?.companyId2Number?.text?.let {
-        Text(clientOrIssuer.companyId2Label?.text + " : " + it + "\n")
-    }
-    val issuerCompanyLabel3 = clientOrIssuer?.companyId3Number?.text?.let {
-        Text(clientOrIssuer.companyId3Label?.text + " : " + it + "\n")
-    }
-    val clientOrIssuerParagraph = Paragraph()
-        .setFixedLeading(16F)
-        .setPaddingRight(40f)
+private fun createAddressTitle(addresses: List<AddressState>, index: Int): Cell {
+    return Cell()
+        .setBorder(Border.NO_BORDER)
+        .add(
+            Paragraph(
+                when (index) {
+                    0 -> if (addresses.size == 1) Strings.get(R.string.document_recipient)
+                    else addresses.first().addressTitle?.text ?: ""
 
-    issuerFirstName?.let {
-        clientOrIssuerParagraph.add(it)
+                    else -> addresses.get(index).addressTitle?.text ?: ""
+                }
+            )
+                .setFontColor(ColorConstants.DARK_GRAY)
+                .setFixedLeading(6F)
+        )
+        .setTextAlignment(TextAlignment.CENTER)
+}
+
+private fun createClientRectangleAndContent(content: List<Paragraph>): Cell {
+    val cell = Cell()
+        .setBorder(Border.NO_BORDER)
+        .setTextAlignment(TextAlignment.CENTER)
+        .setPaddingBottom(8f)
+    content.forEach {
+        cell.add(it)
     }
-    issuerName?.let {
-        clientOrIssuerParagraph.add(it)
+    cell.setNextRenderer(RoundedCellRenderer(cell, ColorConstants.LIGHT_GRAY, false))
+    return cell
+}
+
+private fun createClientOrIssuerParagraph(
+    clientOrIssuer: ClientOrIssuerState?,
+    font: PdfFont,
+    displayAllInfo: Boolean = true,
+    addressIndex: Int = 0,
+): MutableList<Paragraph> {
+    var listToReturn: MutableList<Paragraph> = mutableListOf()
+    val address = clientOrIssuer?.addresses?.get(addressIndex)
+
+    val nameAndAddress = Paragraph()
+        .setFixedLeading(12F)
+        .setPaddingTop(if (clientOrIssuer?.type == ClientOrIssuerType.DOCUMENT_CLIENT) 10f else 0f)
+        .setPaddingBottom(5f)
+    if (displayAllInfo) {
+        val issuerFirstName = clientOrIssuer?.firstName?.text?.let { Text("$it ").setFont(font) }
+        val issuerName = Text(clientOrIssuer?.name?.text + "\n").setFont(font)
+
+        issuerFirstName?.let {
+            nameAndAddress.add(it)
+        }
+        issuerName?.let {
+            nameAndAddress.add(it)
+        }
+    }
+    listToReturn.add(nameAndAddress)
+
+    if (!address?.addressLine1?.text.isNullOrEmpty()) {
+        nameAndAddress.add(address?.addressLine1?.text + "\n")
+    }
+    if (!address?.addressLine2?.text.isNullOrEmpty()) {
+        nameAndAddress.add(address?.addressLine2?.text + "\n")
+    }
+    if (!address?.zipCode?.text.isNullOrEmpty() ||
+        !address?.city?.text.isNullOrEmpty()
+    ) {
+        nameAndAddress.add(address?.zipCode?.text + " " + address?.city?.text + "\n")
     }
 
-    for(i in 1..(clientOrIssuer?.addresses?.size ?: 1)) {
-        var address = clientOrIssuer?.addresses?.first()
-        when (i) {
-            2 -> address = clientOrIssuer?.addresses?.getOrNull(1)
-            3 -> address = clientOrIssuer?.addresses?.getOrNull(2)
+    if (displayAllInfo) {
+        val numberAndEmail = Paragraph()
+            .setFixedLeading(12F)
+            .setPaddingBottom(5f)
+        val issuerPhone = clientOrIssuer?.phone?.text?.let { Text(it + "\n") }
+        val issuerEmail = clientOrIssuer?.email?.text?.let { Text(it + "\n") }
+        issuerPhone?.let {
+            numberAndEmail.add(it)
         }
-        if (!address?.addressTitle?.text.isNullOrEmpty()) {
-            clientOrIssuerParagraph.add(address?.addressTitle?.text + "\n")
+        issuerEmail?.let {
+            numberAndEmail.add(it)
         }
-        if (!address?.addressLine1?.text.isNullOrEmpty()) {
-            clientOrIssuerParagraph.add(address?.addressLine1?.text + "\n")
-        }
-        if (!address?.addressLine2?.text.isNullOrEmpty()) {
-            clientOrIssuerParagraph.add(address?.addressLine2?.text + "\n")
-        }
-        if (!address?.zipCode?.text.isNullOrEmpty() ||
-                    !address?.city?.text.isNullOrEmpty()
-                ) {
-            clientOrIssuerParagraph.add(address?.zipCode?.text + " " + address?.city?.text  + "\n")
-        }
-    }
-    issuerPhone?.let {
-        clientOrIssuerParagraph.add(it)
-    }
-    issuerCompanyLabel1?.let {
-        clientOrIssuerParagraph.add(it)
-    }
-    issuerCompanyLabel2?.let {
-        clientOrIssuerParagraph.add(it)
-    }
-    issuerCompanyLabel3?.let {
-        clientOrIssuerParagraph.add(it)
-    }
+        listToReturn.add(numberAndEmail)
 
-    return clientOrIssuerParagraph
+        val companyInfo = Paragraph()
+            .setFixedLeading(12F)
+            .setPaddingBottom(4f)
+        val issuerCompanyLabel1 = clientOrIssuer?.companyId1Number?.text?.let {
+            Text(clientOrIssuer.companyId1Label?.text + " : " + it + "\n")
+        }
+        val issuerCompanyLabel2 = clientOrIssuer?.companyId2Number?.text?.let {
+            Text(clientOrIssuer.companyId2Label?.text + " : " + it + "\n")
+        }
+        val issuerCompanyLabel3 = clientOrIssuer?.companyId3Number?.text?.let {
+            Text(clientOrIssuer.companyId3Label?.text + " : " + it + "\n")
+        }
+        issuerCompanyLabel1?.let {
+            companyInfo.add(it)
+        }
+        issuerCompanyLabel2?.let {
+            companyInfo.add(it)
+        }
+        issuerCompanyLabel3?.let {
+            companyInfo.add(it)
+        }
+        listToReturn.add(companyInfo)
+    }
+    return listToReturn
 }
 
 private fun createReference(orderNumber: String, font: PdfFont): Paragraph {
@@ -409,15 +497,16 @@ private fun addProductsToTable(
 ) {
     products.forEach {
         val itemName = Text(it.name.text)
+
         var itemDescription = Text("")
         it.description?.let {
             itemDescription = Text(it.text).setItalic()
         }
 
         val item = Paragraph(itemName)
-            .add("\n")
+            .add("\n\n")
             .add(itemDescription)
-            .setFixedLeading(14F)
+
         productsTable.addCustomCell(
             paragraph = item,
             alignment = TextAlignment.LEFT,
@@ -460,7 +549,7 @@ private fun addProductsToTable(
 }
 
 private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
-    val footerArray = listOf(
+    val pricesArray = listOf(
         PriceRow(
             rowDescription = "TOTAL_WITHOUT_TAX"
         ),
@@ -475,23 +564,22 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
         ),
     )
 
-    val footerColumnsWidth = floatArrayOf(90f, 10f)
-    val footerTable = Table(UnitValue.createPercentArray(footerColumnsWidth))
+    val pricesColumnsWidth = floatArrayOf(90f, 10f)
+    val pricesTable = Table(UnitValue.createPercentArray(pricesColumnsWidth))
         .useAllAvailableWidth()
         .setTextAlignment(TextAlignment.RIGHT)
         .setPaddingBottom(8f)
 
-    if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
-        footerTable.addCellInFooter(Paragraph(Strings.get(R.string.document_total_without_tax)))
+    if (pricesArray.any { it.rowDescription == PricesRowName.TOTAL_WITHOUT_TAX.name }) {
+        pricesTable.addCellInPrices(Paragraph(Strings.get(R.string.document_total_without_tax)))
 
         val totalWithoutTax = Paragraph(documentPrices.totalPriceWithoutTax?.toString() ?: " - ")
         totalWithoutTax.add(Strings.get(R.string.currency))
-        footerTable.addCellInFooter(totalWithoutTax)
-
+        pricesTable.addCellInPrices(totalWithoutTax)
     }
 
-    if (footerArray.any { it.rowDescription.contains("TAXES") }) {
-        val taxes = footerArray
+    if (pricesArray.any { it.rowDescription.contains("TAXES") }) {
+        val taxes = pricesArray
             .filter { it.rowDescription.contains("TAXES") }
             .map { it.rowDescription }.toMutableList()
 
@@ -506,7 +594,7 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
                     tax
                 ).stripTrailingZeros()
             }?.let {
-                footerTable.addCellInFooter(
+                pricesTable.addCellInPrices(
                     Paragraph(
                         Strings.get(R.string.document_tax) + " " + it.first.setScale(
                             0,
@@ -514,22 +602,22 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
                         ).toString() + "% : "
                     )
                 )
-                footerTable.addCellInFooter(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
+                pricesTable.addCellInPrices(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
             }
         }
     }
-    if (footerArray.any { it.rowDescription == FooterRowName.TOTAL_WITH_TAX.name }) {
-        footerTable.addCellInFooter(
+    if (pricesArray.any { it.rowDescription == PricesRowName.TOTAL_WITH_TAX.name }) {
+        pricesTable.addCellInPrices(
             Paragraph(
                 Strings.get((R.string.document_total_with_tax)) + " "
             ).setFont(font)
         )
         val totalWithTax = Paragraph(documentPrices.totalPriceWithTax?.toString() ?: " - ")
         totalWithTax.add(Strings.get(R.string.currency))
-        footerTable.addCellInFooter(totalWithTax.setFont(font))
+        pricesTable.addCellInPrices(totalWithTax.setFont(font))
     }
 
-    return footerTable
+    return pricesTable
 }
 
 private fun createDueDate(font: PdfFont, date: String): Paragraph {
@@ -564,7 +652,7 @@ private fun createPaidStamp(context: Context): Image? {
 
 private fun createFooter(text: String): Paragraph {
     return Paragraph(text)
-        .setFixedLeading(16F)
+        .setFixedLeading(14F)
         .setTextAlignment(TextAlignment.CENTER)
 }
 
@@ -580,9 +668,11 @@ private fun Table.addCustomCell(
     val paddingLeft = 6f
     val paddingRight = 6f
     val paddingTop = 4f
+    val paddingBottom = 4f
 
     val textToAdd = if (text != null) {
-        Paragraph(text).setFixedLeading(14F)
+        Paragraph(text)
+            .setFixedLeading(11F)
     } else paragraph
 
     val colSpan = if (isSpan) 6 else 1
@@ -593,12 +683,13 @@ private fun Table.addCustomCell(
             .setPaddingLeft(paddingLeft)
             .setPaddingRight(paddingRight)
             .setPaddingTop(paddingTop)
+            .setPaddingBottom(paddingBottom)
             .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 1f))
             .setFont(if (isBold) fontBold else fontRegular)
     )
 }
 
-private fun Table.addCellInFooter(
+private fun Table.addCellInPrices(
     paragraph: Paragraph? = null,
 ): Table {
     return this.addCell(

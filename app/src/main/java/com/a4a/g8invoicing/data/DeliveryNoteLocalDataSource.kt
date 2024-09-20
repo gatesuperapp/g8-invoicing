@@ -69,7 +69,13 @@ class DeliveryNoteLocalDataSource(
                 ?.let {
                     it.transformIntoEditableNote(
                         fetchDocumentProducts(it.delivery_note_id),
-                        fetchClientAndIssuer(it.delivery_note_id)
+                        fetchClientAndIssuer(
+                            it.delivery_note_id,
+                            linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                            linkDocumentClientOrIssuerToAddressQueries,
+                            documentClientOrIssuerQueries,
+                            documentClientOrIssuerAddressQueries
+                        )
                     )
                 }
         } catch (e: Exception) {
@@ -87,7 +93,13 @@ class DeliveryNoteLocalDataSource(
                         .map { deliveryNote ->
                             val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
                             val clientAndIssuer =
-                                fetchClientAndIssuer(deliveryNote.delivery_note_id)
+                                fetchClientAndIssuer(
+                                    deliveryNote.delivery_note_id,
+                                    linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                                    linkDocumentClientOrIssuerToAddressQueries,
+                                    documentClientOrIssuerQueries,
+                                    documentClientOrIssuerAddressQueries
+                                )
 
                             deliveryNote.transformIntoEditableNote(
                                 products,
@@ -130,25 +142,6 @@ class DeliveryNoteLocalDataSource(
         return null
     }
 
-    private fun fetchClientAndIssuer(deliveryNoteId: Long): List<ClientOrIssuerState>? {
-        try {
-            val listOfIds =
-                linkDeliveryNoteToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
-                    deliveryNoteId
-                ).executeAsList()
-            return if (listOfIds.isNotEmpty()) {
-                listOfIds.map {
-                    documentClientOrIssuerQueries.get(it.id)
-                        .executeAsOne()
-                        .transformIntoEditable()
-                }
-            } else null
-
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return null
-    }
 
     private fun DeliveryNote.transformIntoEditableNote(
         documentProducts: MutableList<DocumentProductState>? = null,
@@ -332,7 +325,13 @@ class DeliveryNoteLocalDataSource(
         try {
             return withContext(Dispatchers.IO) {
                 val documentClientOrIssuer =
-                    fetchClientAndIssuer(deliveryNoteId)?.firstOrNull { it.type == type }
+                    fetchClientAndIssuer(
+                        deliveryNoteId,
+                        linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentClientOrIssuerQueries,
+                        documentClientOrIssuerAddressQueries
+                    )?.firstOrNull { it.type == type }
 
                 documentClientOrIssuer?.id?.let {
                     linkDeliveryNoteToDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(

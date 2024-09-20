@@ -74,7 +74,13 @@ class CreditNoteLocalDataSource(
                 ?.let {
                     it.transformIntoEditableCreditNote(
                         fetchDocumentProducts(it.credit_note_id),
-                        fetchClientAndIssuer(it.credit_note_id),
+                        fetchClientAndIssuer(
+                            it.credit_note_id,
+                            linkCreditNoteToDocumentClientOrIssuerQueries,
+                            linkDocumentClientOrIssuerToAddressQueries,
+                            documentClientOrIssuerQueries,
+                            documentClientOrIssuerAddressQueries
+                        )
                     )
                 }
         } catch (e: Exception) {
@@ -91,7 +97,13 @@ class CreditNoteLocalDataSource(
                     it.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.credit_note_id)
-                            val clientAndIssuer = fetchClientAndIssuer(document.credit_note_id)
+                            val clientAndIssuer =  fetchClientAndIssuer(
+                                document.credit_note_id,
+                                linkCreditNoteToDocumentClientOrIssuerQueries,
+                                linkDocumentClientOrIssuerToAddressQueries,
+                                documentClientOrIssuerQueries,
+                                documentClientOrIssuerAddressQueries
+                            )
 
                             document.transformIntoEditableCreditNote(
                                 products,
@@ -122,26 +134,6 @@ class CreditNoteLocalDataSource(
                             additionalInfo?.delivery_note_number
                         )
                 }.toMutableList()
-            } else null
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return null
-    }
-
-    private fun fetchClientAndIssuer(documentId: Long): List<ClientOrIssuerState>? {
-        try {
-            val listOfIds =
-                linkCreditNoteToDocumentClientOrIssuerQueries.getDocumentClientOrIssuerLinkedToCreditNote(
-                    documentId
-                ).executeAsList()
-
-            return if (listOfIds.isNotEmpty()) {
-                listOfIds.map {
-                    documentClientOrIssuerQueries.get(it.id)
-                        .executeAsOne()
-                        .transformIntoEditable()
-                }
             } else null
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -357,7 +349,13 @@ class CreditNoteLocalDataSource(
         try {
             return withContext(Dispatchers.IO) {
                 val documentClientOrIssuer =
-                    fetchClientAndIssuer(id)?.firstOrNull { it.type == type }
+                    fetchClientAndIssuer(
+                        id,
+                        linkCreditNoteToDocumentClientOrIssuerQueries,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentClientOrIssuerQueries,
+                        documentClientOrIssuerAddressQueries
+                    )?.firstOrNull { it.type == type }
 
                 documentClientOrIssuer?.id?.let {
                     linkCreditNoteToDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToCreditNote(

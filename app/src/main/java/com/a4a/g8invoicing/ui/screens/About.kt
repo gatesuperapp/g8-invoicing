@@ -54,7 +54,6 @@ fun About(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
 
-
     Scaffold(
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
@@ -133,7 +132,7 @@ fun About(
                     top = 40.dp,
                     start = 40.dp,
                     end = 40.dp,
-                    bottom = 20.dp
+                    bottom = 10.dp
                 ),
                 text = stringResource(id = R.string.about2)
             )
@@ -159,23 +158,19 @@ fun About(
 fun TermsOfService(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append(Strings.get(R.string.about_terms_of_service_header) + " ")
-
-        pushStringAnnotation(tag = "terms", annotation = "https://the-gate.fr/conditions-generales")
+        pushStringAnnotation(tag = "terms", annotation = Strings.get(R.string.about_terms_of_service_url_1) )
         withStyle(style = SpanStyle(color = ColorBlueLink)) {
             append(Strings.get(R.string.about_terms_of_service) + " ")
         }
         pop()
-
         append(Strings.get(R.string.about_terms_of_service_header_2) + " ")
-
         pushStringAnnotation(
             tag = "policy",
-            annotation = "https://the-gate.fr/politique-confidentialite"
+            annotation = Strings.get(R.string.about_terms_of_service_url_2)
         )
         withStyle(style = SpanStyle(color = ColorBlueLink)) {
             append(Strings.get(R.string.about_privacy))
         }
-
         pop()
     }
 

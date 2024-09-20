@@ -58,6 +58,12 @@ SET number = :number,
 WHERE
     invoice_id = :invoice_id;
 
+updateNumber:
+UPDATE Invoice
+SET number = :number
+WHERE
+    invoice_id = :invoice_id;
+
 updatePaymentStatus:
 UPDATE Invoice
 SET payment_status =: payment_status,

@@ -22,10 +22,8 @@ import javax.inject.Inject
 class CreditNoteListViewModel @Inject constructor(
     private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
 ) : ViewModel() {
-
     private val _documentsUiState = MutableStateFlow(CreditNotesUiState())
     val documentsUiState: StateFlow<CreditNotesUiState> = _documentsUiState.asStateFlow()
-
     private var fetchJob: Job? = null
     private var deleteJob: Job? = null
     private var duplicateJob: Job? = null

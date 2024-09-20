@@ -1,12 +1,15 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,9 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.theme.ColorGreyo
+import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.subTitleForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 import com.a4a.g8invoicing.ui.theme.titleForDocuments
@@ -33,6 +39,7 @@ fun DocumentBasicTemplateHeader(
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
+
     Row(
         Modifier
             .fillMaxWidth()
@@ -91,56 +98,108 @@ fun DocumentBasicTemplateHeader(
             )
         }
     }
-    Column {
-        Row(
-            Modifier
-                .fillMaxWidth()
+    val client = document.documentClient
+
+    // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
+    Row {
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+        )
+        val addressTitle =
+            if (client?.addresses?.size == 1) stringResource(id = R.string.document_recipient)
+            else client?.addresses?.getOrNull(0)?.addressTitle?.text
+                ?: ""
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
+            Text(
                 modifier = Modifier
-                    .getBorder(ScreenElement.DOCUMENT_ISSUER, selectedItem)
-                    .customCombinedClickable(
-                        onClick = {
-                            onClickElement(ScreenElement.DOCUMENT_ISSUER)
-                        },
-                        onLongClick = {
-                        }
-                    )
-                    .padding(end = 20.dp, bottom = 20.dp)
-                    .weight(1f)
-                    .fillMaxWidth(0.3f)
-            ) {
-                document.documentIssuer?.let {
-                    DocumentBasicTemplateClientOrIssuer(it)
+                    .padding(bottom = 2.dp),
+                style = MaterialTheme.typography.textForDocumentsSecondary,
+                text = addressTitle
+            )
+        }
+    }
+
+    // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
+    Row() {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.5f)
+                .getBorder(ScreenElement.DOCUMENT_ISSUER, selectedItem)
+                .customCombinedClickable(
+                    onClick = {
+                        onClickElement(ScreenElement.DOCUMENT_ISSUER)
+                    },
+                    onLongClick = {
+                    }
+                )
+        ) {
+            document.documentIssuer?.let {
+                DocumentBasicTemplateClientOrIssuer(it)
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            document.documentClient?.let {
+                DocumentClientRectangleAndContent(
+                    it,
+                    onClickElement,
+                    selectedItem,
+                    addressIndex = 0,
+                    displayAllInfo = true
+                )
+            }
+        }
+    }
+
+    document.documentClient?.addresses?.let { addresses ->
+        if (addresses.size > 1) {
+            // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TTITLE 3
+            Row {
+                for (i in 1..<addresses.size) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(if (i == 1) 0.5f else 1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(bottom = 2.dp),
+                            style = MaterialTheme.typography.textForDocumentsSecondary,
+                            text = addresses.getOrNull(i)?.addressTitle?.text ?: ""
+                        )
+                    }
                 }
             }
 
-            DocumentClientRectangleAndContent(
-                document,
-                onClickElement,
-                selectedItem,
-                addressIndex = 0,
-                displayAllInfo = true
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Row(
-            Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End)
-
-        ) {
-            val numberOfAddresses = document.documentClient?.addresses?.size ?: 1
-            for (i in 1..<numberOfAddresses) {
-                DocumentClientRectangleAndContent(
-                    document,
-                    onClickElement,
-                    selectedItem,
-                    addressIndex = i,
-                    displayAllInfo = false
-                )
+            // ROW 4:  CLIENT ADDRESS 2 ----------ADDRESS 3
+            Row {
+                for (i in 1..<addresses.size) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth(if (i == 1) 0.5f else 1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        document.documentClient?.let {
+                            DocumentClientRectangleAndContent(
+                                it,
+                                onClickElement,
+                                selectedItem,
+                                addressIndex = i,
+                                displayAllInfo = false
+                            )
+                        }
+                    }
+                    if (i == 1) Spacer(modifier = Modifier.width(2.dp))
+                }
             }
         }
     }
@@ -148,18 +207,17 @@ fun DocumentBasicTemplateHeader(
 
 @Composable
 fun DocumentClientRectangleAndContent(
-    document: DocumentState,
+    documentClient: ClientOrIssuerState,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
     addressIndex: Int,
     displayAllInfo: Boolean,
 ) {
-    var customModifier1 = Modifier.padding(0.dp)
+    var customModifier1 = Modifier.fillMaxWidth()
     customModifier1 = if (addressIndex == 0)
         customModifier1.then(
             Modifier
-                .fillMaxWidth(0.5f)
-                .padding(bottom = 8.dp)
+                .padding(bottom = 6.dp)
         )
     else
         customModifier1.then(
@@ -171,10 +229,6 @@ fun DocumentClientRectangleAndContent(
         modifier = customModifier1,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val addressTitle =
-            if (document.documentClient?.addresses?.size == 1) stringResource(id = R.string.document_recipient)
-            else document.documentClient?.addresses?.getOrNull(addressIndex)?.addressTitle?.text
-                ?: ""
         var customModifier2 = Modifier
             .getBorder(ScreenElement.DOCUMENT_CLIENT, selectedItem)
             .customCombinedClickable(
@@ -189,35 +243,28 @@ fun DocumentClientRectangleAndContent(
                 SolidColor(Color.LightGray),
                 shape = RoundedCornerShape(15.dp)
             )
-            .padding(10.dp)
+            .padding(top = 8.dp)
+            .fillMaxWidth()
         customModifier2 = if (addressIndex == 0)
             customModifier2.then(
                 Modifier
-                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             )
         else
             customModifier2.then(
                 Modifier
-                    .padding(0.dp)
+                    .padding(bottom = 4.dp)
             )
 
-        Text(
-            modifier = Modifier
-                .padding(bottom = 2.dp),
-            style = MaterialTheme.typography.textForDocumentsSecondary,
-            text = addressTitle
-        )
         Column(
             modifier = customModifier2,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            document.documentClient?.let {
-                DocumentBasicTemplateClientOrIssuer(
-                    it,
-                    addressIndex = addressIndex,
-                    displayAllInfo = displayAllInfo
-                )
-            }
+            DocumentBasicTemplateClientOrIssuer(
+                documentClient,
+                addressIndex = addressIndex,
+                displayAllInfo = displayAllInfo
+            )
         }
     }
 }

@@ -91,9 +91,9 @@
     <string name="client_business_name_input">Entreprise X</string>
     <string name="category">Type de client</string>
     <string name="client_first_name">Prénom</string>
-    <string name="client_first_name_input">Calliteara</string>
+    <string name="client_first_name_input">Rhinolophus</string>
     <string name="client_name">Nom <sup>*</sup></string>
-    <string name="client_name_input">Pudibunda</string>
+    <string name="client_name_input">Hipposideros</string>
     <string name="client_block_address">Adresse</string>
     <string name="client_block_identification">Identification</string>
     <string name="client_address">Adresse</string>
@@ -104,15 +104,15 @@
     <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
     <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
     <string name="client_address1">Adresse 1</string>
-    <string name="client_address1_input">6 rue caterpillar</string>
+    <string name="client_address1_input">6 rue de l\'église</string>
     <string name="client_address2">Adresse 2</string>
-    <string name="client_address2_input">Appt 888</string>
+    <string name="client_address2_input">Lieu-dit de l\'arribet</string>
     <string name="client_city">Ville</string>
-    <string name="client_city_input">Toulouse</string>
+    <string name="client_city_input">Écholoc</string>
     <string name="client_zip_code">Code Postal</string>
-    <string name="client_zip_code_input">31240</string>
+    <string name="client_zip_code_input">81000</string>
     <string name="client_email">E-mail</string>
-    <string name="client_email_input">pudib@ecomail.fr</string>
+    <string name="client_email_input">petitrhino@ecomail.fr</string>
     <string name="client_phone">Téléphone</string>
     <string name="client_phone_input">0787878787</string>
     <string name="form_label_edit">Modifier</string>
@@ -123,7 +123,7 @@
     <string name="client_company_identification3">N° RCS</string>
     <string name="client_company_identification3_input">123456789</string>
     <string name="client_notes">Notes privées</string>
-    <string name="client_notes_input">La pudibonde est une chenille.</string>
+    <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus. </string>
     <string name="client_detail_balance">Solde</string>
     <string name="client_detail_paid">Payé</string>
     <string name="client_detail_to_be_paid">À payer</string>
@@ -248,20 +248,29 @@
     <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez nos</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et notre</string>
+    <string name="about_terms_of_service_url_1">https://the-gate.fr/conditions-generales</string>
+    <string name="about_terms_of_service_url_2">https://the-gate.fr/conditions-generales</string>
     <string name="about_privacy">politique de confidentialité.</string>
     <string name="account_button_create">Créer mon compte</string>
     <string name="about_button_contact">contact@the-gate.fr</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_donate">En savoir plus</string>
     <string name="about_donate_link">https://the-gate.fr/abonnement</string>
-    <string name="alert_dialog_delete_invoice">Si vous avez déjà envoyé votre facture, il n\'est pas légal de la supprimer :
-        dans le cas où elle n\'a pas encore été payée, vous devez l\'annuler en créant une facture
-        rectificative ; dans le cas où elle a déjà été payée, vous pouvez l\'annuler en créant un avoir. \n
+    <string name="invoice_advice_legal_1">Avant de créer votre première facture,
+        vous pouvez consulter les mentions obligatoires pour être conforme à la loi française</string>
+    <string name="invoice_advice_legal_2">dans notre superbe liste (mieux faite que celle du gouv &#x1F60F;).</string>
+    <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
+    <string name="alert_dialog_delete_invoice_1">Si vous avez déjà envoyé la facture, il n\'est pas légal de la supprimer :
+        \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
+        \n• si elle a été payée, il faut créer un avoir puis une nouvelle facture. \n
+    </string>
+    <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
+    <string name="alert_dialog_delete_invoice_3">\nSinon, vous pouvez la supprimer. Attention, cette action est irréversible.</string>
+    <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
 
-        Si vous n\'avez pas encore envoyé votre facture, vous pouvez la supprimer - cette action est irréversible.</string>
-    <string name="alert_dialog_delete_general">Confirmez-vous la suppression ? Cette action est irréversible.</string>
-    <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
-    <string name="alert_dialog_delete_cancel">Non</string>
+    <string name="alert_dialog_delete_general">Attention, cette action est irréversible.</string>
+    <string name="alert_dialog_delete_confirm">Supprimer</string>
+    <string name="alert_dialog_delete_cancel">Annuler</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l\'export.</string>

@@ -142,19 +142,6 @@ class InvoiceListViewModel @Inject constructor(
             }
         }
     }
-
-    fun sendReminder(document: InvoiceState) {
-        sendReminderJob?.cancel()
-        sendReminderJob = viewModelScope.launch {
-            try {
-
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
-            }
-        }
-    }
-
-
 }
 
 

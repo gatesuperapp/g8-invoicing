@@ -275,12 +275,11 @@ fun ClientOrIssuerAddEditForm(
                 )
             }
 
-            if (!previousAddressIsFilled(clientOrIssuerUiState, i)) {
+            if (i == 1 && !previousAddressIsFilled(clientOrIssuerUiState, 1)) {
                 Spacer(Modifier.padding(bottom = 16.dp))
             }
 
             Row(Modifier.padding(bottom = 6.dp)) {
-
                 if (i != 3 &&
                     numberOfClientAddresses == i
                     && previousAddressIsFilled(clientOrIssuerUiState, i)
@@ -299,21 +298,6 @@ fun ClientOrIssuerAddEditForm(
                         }
                     })
                 }
-
-                /*else if (numberOfClientAddresses == i && clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
-                    AddAddressButton(onClick = { numberOfClientAddresses += 1 })
-                } else if (i != 1 && i == numberOfClientAddresses) {
-                    AddAddressButton(onClick = {
-                        numberOfClientAddresses += 1
-                    })
-                    Spacer(Modifier.weight(1F))
-                    DeleteAddressButton(onClick = {
-                        numberOfClientAddresses -= 1
-                        if(clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
-                            onClickDeleteAddress()
-                        }
-                    })
-                }*/
             }
         }
 

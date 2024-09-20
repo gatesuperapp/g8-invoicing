@@ -26,28 +26,18 @@ fun DocumentBasicTemplateClientOrIssuer(
             textAlign = TextAlign.Center, // have to specify it (in addition to column alignment)
             // because without it, multilines text aren't aligned
             modifier = Modifier
-                .padding(bottom = 3.dp)
+                .padding(bottom = 1.dp)
                 .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocumentsBold,
             text = clientName
         )
     }
 
-    if (!address?.addressTitle?.text.isNullOrEmpty()) {
-        Text(
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .padding(bottom = 3.dp)
-                .wrapContentHeight(),
-            style = MaterialTheme.typography.textForDocuments,
-            text = address?.addressTitle?.text ?: ""
-        )
-    }
     if (!address?.addressLine1?.text.isNullOrEmpty()) {
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .padding(bottom = 3.dp)
+                .padding(bottom = 1.dp)
                 .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
             text = address?.addressLine1?.text ?: ""
@@ -57,7 +47,7 @@ fun DocumentBasicTemplateClientOrIssuer(
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .padding(bottom = 3.dp)
+                .padding(bottom = 1.dp)
                 .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
             text = address?.addressLine2?.text ?: ""
@@ -69,20 +59,19 @@ fun DocumentBasicTemplateClientOrIssuer(
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .padding(bottom = 3.dp)
+                .padding(bottom = 4.dp)
                 .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
             text = address?.zipCode?.text + " " + address?.city?.text
         )
     }
 
-
     if (displayAllInfo) {
         if (!clientOrIssuer?.phone?.text.isNullOrEmpty()) {
             Text(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(bottom = 3.dp)
+                    .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
                 text = clientOrIssuer?.phone?.text ?: ""
@@ -92,7 +81,7 @@ fun DocumentBasicTemplateClientOrIssuer(
             Text(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(bottom = 3.dp)
+                    .padding(bottom = 4.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
                 text = clientOrIssuer?.email?.text ?: ""
@@ -102,7 +91,7 @@ fun DocumentBasicTemplateClientOrIssuer(
             Text(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(bottom = 3.dp)
+                    .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
                 text = clientOrIssuer?.companyId1Label?.text + " : "
@@ -113,7 +102,7 @@ fun DocumentBasicTemplateClientOrIssuer(
             Text(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(bottom = 3.dp)
+                    .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
                 text = clientOrIssuer?.companyId2Label?.text + " : "
@@ -124,7 +113,6 @@ fun DocumentBasicTemplateClientOrIssuer(
             Text(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(bottom = 3.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
                 text = clientOrIssuer?.companyId3Label?.text + " : "

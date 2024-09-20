@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.DocumentState
 
-/**/
+
 @Composable
 fun DocumentListContent(
     documents: List<DocumentState>,
@@ -47,29 +47,28 @@ fun DocumentListContent(
              }
  */
 
-                DocumentListItem(
-                    document = document,
-                    onItemClick = {
-                        document.documentId?.let {
-                            onItemClick(it)
-                        }
-                    },
-                    onItemCheckboxClick = { isChecked ->
-                        // Update list
-                        if (isChecked) {
-                            addDocumentToSelectedList(document)
-                        } else {
-                            removeDocumentFromSelectedList(document)
-                        }
-                    },
-                    keyToUnselectAll
-                )
+            DocumentListItem(
+                document = document,
+                onItemClick = {
+                    document.documentId?.let {
+                        onItemClick(it)
+                    }
+                },
+                onItemCheckboxClick = { isChecked ->
+                    // Update list
+                    if (isChecked) {
+                        addDocumentToSelectedList(document)
+                    } else {
+                        removeDocumentFromSelectedList(document)
+                    }
+                },
+                keyToUnselectAll
+            )
 
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = Color.LightGray.copy(alpha = 0.6f)
-                )
-
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = Color.LightGray.copy(alpha = 0.6f)
+            )
         }
     }
 }

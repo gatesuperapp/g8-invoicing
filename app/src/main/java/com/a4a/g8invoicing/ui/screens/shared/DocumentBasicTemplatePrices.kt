@@ -26,7 +26,7 @@ fun DocumentBasicTemplatePrices(
     Row(
         Modifier
             .fillMaxWidth()
-            .padding(top = 10.dp)
+            .padding(top = 10.dp, bottom = 10.dp)
     ) {
         val paddingBottom = 5.dp
         Spacer(
@@ -45,7 +45,7 @@ fun DocumentBasicTemplatePrices(
             // TVA 5% :
             // Total TTC :
 
-            if (footerArray.any { it == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
+            if (footerArray.any { it == PricesRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
@@ -76,7 +76,7 @@ fun DocumentBasicTemplatePrices(
                     }
                 }
             }
-            if (footerArray.any { it == FooterRowName.TOTAL_WITH_TAX.name }) {
+            if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
                     text = stringResource(id = R.string.document_total_with_tax) + " "
@@ -91,7 +91,7 @@ fun DocumentBasicTemplatePrices(
             // TVA 20% : 1€
              // TVA 5% : 1€
             // Total TTC : 14€
-            if (footerArray.any { it == FooterRowName.TOTAL_WITHOUT_TAX.name }) {
+            if (footerArray.any { it == PricesRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = paddingBottom, end = 3.dp),
@@ -123,7 +123,7 @@ fun DocumentBasicTemplatePrices(
                     }
                 }
             }
-            if (footerArray.any { it == FooterRowName.TOTAL_WITH_TAX.name }) {
+            if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(end = 3.dp),

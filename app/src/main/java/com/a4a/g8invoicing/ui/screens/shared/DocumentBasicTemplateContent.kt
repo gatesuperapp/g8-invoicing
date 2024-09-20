@@ -132,9 +132,7 @@ fun DocumentBasicTemplateContent(
                     )
                 }
             }
-
             DocumentBasicTemplatePrices(document, prices)
-
 
             DocumentBasicTemplateFooter(
                 document,

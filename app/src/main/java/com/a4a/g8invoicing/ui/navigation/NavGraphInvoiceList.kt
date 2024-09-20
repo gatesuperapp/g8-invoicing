@@ -17,7 +17,7 @@ fun NavGraphBuilder.invoiceList(
     onClickListItem: (Int) -> Unit,
     onClickNew: () -> Unit,
     onClickBack: () -> Unit,
-) {
+    ) {
     composable(route = Screen.InvoiceList.name) {
         val viewModel: InvoiceListViewModel = hiltViewModel()
         val invoicesUiState by viewModel.documentsUiState
@@ -34,12 +34,10 @@ fun NavGraphBuilder.invoiceList(
                 viewModel.setTag(selectedDocuments, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
                 viewModel.markAsPaid(selectedDocuments, tag)
             },
-            onClickSendReminder = {
-                viewModel.sendReminder(it)
-            },
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
-            onClickBack = { onClickBack() })
+            onClickBack = { onClickBack() }
+        )
     }
 }

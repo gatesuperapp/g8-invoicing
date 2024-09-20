@@ -442,7 +442,7 @@ private fun DocumentAddEditBottomBar(
         actions = arrayOf(
             actionTextElements(onClickElements),
             actionItems(onClickItems),
-            actionStyle(onClickStyle),
+            //actionStyle(onClickStyle),
            // actionSavePayment(onClickSavePayment)
         )
     )

@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
@@ -26,7 +37,9 @@ import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
+import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
+import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
 
 @Composable
 fun InvoiceList(
@@ -37,7 +50,6 @@ fun InvoiceList(
     onClickCreateCreditNote: (List<InvoiceState>) -> Unit,
     onClickCreateCorrectedInvoice: (List<InvoiceState>) -> Unit,
     onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
-    onClickSendReminder: (InvoiceState) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -57,6 +69,8 @@ fun InvoiceList(
 
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
     val backgroundColor = remember { mutableStateOf(transparent) }
+
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         topBar = {
@@ -95,7 +109,6 @@ fun InvoiceList(
                 },
                 onClickSendReminder = {
                     val document = selectedItems.first()
-                    onClickSendReminder(selectedItems.first())
                     composeEmail(
                         address = document.documentClient?.email?.text,
                         documentNumber = document.documentNumber.text,
@@ -109,7 +122,8 @@ fun InvoiceList(
                 onClickCategory = onClickCategory,
                 isInvoice = true,
                 onChangeBackground = {
-                    backgroundColor.value = changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
                 }
             )
         }
@@ -125,23 +139,32 @@ fun InvoiceList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                // No need to have pull to refresh because it's a flow,
-                // thus the list is updated when anything changes in db
-                DocumentListContent(
-                    documents = documentsUiState.documentStates,
-                    onItemClick = onClickListItem,
-                    addDocumentToSelectedList = {
-                        selectedItems.add(it as InvoiceState)
-                        selectedMode.value = true
-                    },
-                    removeDocumentFromSelectedList = {
-                        selectedItems.remove(it as InvoiceState)
-                        if (selectedItems.isEmpty()) {
-                            selectedMode.value = false
-                        }
-                    },
-                    keyToUnselectAll = keyToResetCheckboxes.value
-                )
+                if (documentsUiState.documentStates.isNotEmpty()) {
+                    DocumentListContent(
+                        documents = documentsUiState.documentStates,
+                        onItemClick = onClickListItem,
+                        addDocumentToSelectedList = {
+                            selectedItems.add(it as InvoiceState)
+                            selectedMode.value = true
+                        },
+                        removeDocumentFromSelectedList = {
+                            selectedItems.remove(it as InvoiceState)
+                            if (selectedItems.isEmpty()) {
+                                selectedMode.value = false
+                            }
+                        },
+                        keyToUnselectAll = keyToResetCheckboxes.value
+                    )
+                } else {
+                    Column (
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        TextAdvice(uriHandler)
+                    }
+                }
 
                 Column(
                     // apply darker background when bottom menu is expanded
@@ -200,9 +223,34 @@ fun changeBackgroundWithVerticalGradient(initialColor: Brush): Brush {
         listOf(Color.Transparent, ColorGrayTransp),
         startY = 4f,
         endY = 600f
-        )
-    return if(initialColor == gradient) {
+    )
+    return if (initialColor == gradient) {
         transparent
     } else gradient
 }
 
+@Composable
+fun TextAdvice(uriHandler: UriHandler) {
+    val annotatedString = buildAnnotatedString {
+        append(Strings.get(R.string.invoice_advice_legal_1) + " ")
+        pushStringAnnotation(
+            tag = "link",
+            annotation = Strings.get(R.string.invoice_advice_legal_url)
+        )
+        withStyle(style = SpanStyle(color = ColorBlueLink)) {
+            append(Strings.get(R.string.invoice_advice_legal_2) + " ")
+        }
+    }
+
+    ClickableText(
+        modifier = Modifier
+            .padding(top = 20.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
+        text = annotatedString,
+        style = MaterialTheme.typography.textWithLinkCenteredMedium,
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(tag = "link", start = offset, end = offset)
+                .firstOrNull()?.let {
+                    uriHandler.openUri(it.item)
+                }
+        })
+}

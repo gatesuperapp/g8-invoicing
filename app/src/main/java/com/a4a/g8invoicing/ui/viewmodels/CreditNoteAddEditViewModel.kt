@@ -97,9 +97,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                id?.let {
-                    documentDataSource.update(documentUiState.value)
-                }
+                documentDataSource.update(documentUiState.value)
             } catch (e: Exception) {
                 println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }

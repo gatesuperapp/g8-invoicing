@@ -226,7 +226,7 @@ fun RowScope.TableCell(
             .rightBorder(borderWidth, Color.LightGray)
             .leftBorder(borderWidth, Color.LightGray)
             .weight(weight)
-            .padding(start = 2.dp, end = 4.dp, top = 2.dp)
+            .padding(start = 4.dp, end = 4.dp, top = 4.dp)
             .fillMaxHeight(),
         horizontalAlignment = if (alignEnd) {
             Alignment.End
@@ -243,6 +243,7 @@ fun RowScope.TableCell(
         )
         if (!subText.isNullOrEmpty()) {
             Text(
+                modifier = Modifier.padding(top = 2.dp),
                 text = subText,
                 style = MaterialTheme.typography.textForDocuments,
                 fontStyle = FontStyle.Italic

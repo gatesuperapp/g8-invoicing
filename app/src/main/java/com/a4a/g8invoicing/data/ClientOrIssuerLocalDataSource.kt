@@ -11,7 +11,6 @@ import com.a4a.g8invoicing.ui.viewmodels.PersonType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
-import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerAddress
 import g8invoicing.LinkClientOrIssuerToAddressQueries
 import g8invoicing.LinkDocumentClientOrIssuerToAddressQueries
@@ -28,8 +27,7 @@ class ClientOrIssuerLocalDataSource(
     private val linkClientOrIssuerToAddressQueries = db.linkClientOrIssuerToAddressQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
-    private val linkDocumentClientOrIssuerToAddressQueries =
-        db.linkDocumentClientOrIssuerToAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries = db.linkDocumentClientOrIssuerToAddressQueries
 
     override fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
         try {
@@ -334,7 +332,6 @@ class ClientOrIssuerLocalDataSource(
     }
 }
 
-
 fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {
     val clientOrIssuer = this
 
@@ -403,7 +400,6 @@ fun DocumentClientOrIssuerAddress.transformIntoEditable(): AddressState {
         city = address.city?.let { TextFieldValue(text = it) },
     )
 }
-
 
 fun linkClientOrIssuerToAddress(
     linkQueries: Any,

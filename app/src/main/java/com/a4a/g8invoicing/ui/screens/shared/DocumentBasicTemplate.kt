@@ -38,13 +38,13 @@ fun DocumentBasicTemplate(
     val productArray = uiState.documentProducts
     /*    val pageNumber = productArray?.last()?.page ?: 1
         val pagerState = rememberPagerState { pageNumber }*/
-    val footerArray = mutableStateListOf(FooterRowName.TOTAL_WITHOUT_TAX.name)
+    val footerArray = mutableStateListOf(PricesRowName.TOTAL_WITHOUT_TAX.name)
     val taxRates =
         uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
     taxRates?.forEach {
         footerArray.add("TAXES_$it")
     }
-    footerArray.add(FooterRowName.TOTAL_WITH_TAX.name)
+    footerArray.add(PricesRowName.TOTAL_WITH_TAX.name)
 
 
     Column(
@@ -64,7 +64,7 @@ fun DocumentBasicTemplate(
 }
 
 
-enum class FooterRowName {
+enum class PricesRowName {
     TOTAL_WITHOUT_TAX, TAXES_20, TAXES_10, TAXES_5, TOTAL_WITH_TAX
 }
 

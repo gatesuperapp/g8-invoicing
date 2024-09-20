@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.R
 
@@ -120,6 +121,20 @@ val Typography.textVerySmall: TextStyle
             )
         )
     }
+
+val Typography.textWithLinkCenteredMedium: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFont,
+            fontSize = 16.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            ),
+            textAlign = TextAlign.Center
+        )
+    }
+
 
 val Typography.callForActions: TextStyle
     @Composable

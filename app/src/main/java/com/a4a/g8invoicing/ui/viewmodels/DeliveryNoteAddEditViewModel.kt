@@ -49,7 +49,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         try {
             id?.let {
                 fetchDeliveryNoteFromLocalDb(it.toLong())
-            }?: viewModelScope.launch(context = Dispatchers.Default) {
+            } ?: viewModelScope.launch(context = Dispatchers.Default) {
                 createNewDeliveryNote()?.let {
                     fetchDeliveryNoteFromLocalDb(it)
                 }
@@ -98,9 +98,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                id?.let {
-                    deliveryNoteDataSource.update(deliveryNoteUiState.value)
-                }
+                deliveryNoteDataSource.update(deliveryNoteUiState.value)
             } catch (e: Exception) {
                 println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }

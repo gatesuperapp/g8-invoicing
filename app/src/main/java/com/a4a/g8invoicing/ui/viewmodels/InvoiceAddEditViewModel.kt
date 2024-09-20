@@ -93,13 +93,16 @@ class InvoiceAddEditViewModel @Inject constructor(
         return documentId
     }
 
+    fun updateUiState(screenElement: ScreenElement, value: Any) {
+        _documentUiState.value =
+            updateInvoiceUiState(_documentUiState.value, screenElement, value)
+    }
+
     private suspend fun updateInvoiceInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                id?.let {
-                    documentDataSource.update(documentUiState.value)
-                }
+                documentDataSource.update(documentUiState.value)
             } catch (e: Exception) {
                 println("Update invoice failed with exception: ${e.localizedMessage}")
             }
@@ -246,11 +249,6 @@ class InvoiceAddEditViewModel @Inject constructor(
         else _documentUiState.value = _documentUiState.value.copy(
             documentIssuer = documentClientOrIssuer
         )
-    }
-
-    fun updateUiState(screenElement: ScreenElement, value: Any) {
-        _documentUiState.value =
-            updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
     fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
