@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,10 @@ fun Settings(
     onClickBack: () -> Unit,
     onClickForward: (ScreenElement) -> Unit
 ) {
+    // Add background when bottom menu expanded
+    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    val backgroundColor = remember { mutableStateOf(transparent) }
+
     Scaffold(
         topBar = {
             TopBar(
@@ -46,7 +52,11 @@ fun Settings(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                onClickCategory = onClickCategory
+                onClickCategory = onClickCategory,
+                onChangeBackground = {
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                }
             )
         }
     ) { padding ->

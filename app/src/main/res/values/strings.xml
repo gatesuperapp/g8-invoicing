@@ -258,12 +258,12 @@
     <string name="invoice_advice_legal_1">Bienvenue au G8 aka</string>
     <string name="invoice_advice_legal_2">The Gate</string>
     <string name="invoice_advice_legal_3">!\n\n
-        Vous êtes actuellement dans la catégorie « Factures ».
-        \n\n Vous pouvez créer une facture en cliquant sur le bouton « Créer ». Veillez à bien respecter les mentions obligatoires pour obtenir des factures conformes -\n</string>
-    <string name="invoice_advice_legal_4">cliquez ici pour en savoir plus.</string>
+        Vous êtes actuellement dans la catégorie «Factures».
+        \n\n Vous pouvez créer une facture grâce au bouton en bas à droite de votre écran. Veillez à respecter les mentions obligatoires pour être en conformité avec la loi</string>
+    <string name="invoice_advice_legal_4">→ cliquez ici pour en savoir plus.</string>
     <string name="invoice_advice_legal_5"> \n\nVous pouvez
-        accéder aux autres catégories grâce au bouton « Menu ».\n
-    \n\n Bonne navigation &#x1F60D;</string>
+        accéder aux autres catégories via le bouton «Menu».\n
+    \n\n Bonne navigation &#x270C;</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative

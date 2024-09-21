@@ -22,6 +22,8 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.auth.AuthResult
@@ -43,6 +45,10 @@ fun Account(
 ) {
     val context = LocalContext.current
     var userAuthorized by remember { mutableStateOf(false) }
+
+    // Add background when bottom menu expanded
+    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    val backgroundColor = remember { mutableStateOf(transparent) }
 
     LaunchedEffect(httpRequestResult, context) {
         when (httpRequestResult) {
@@ -88,7 +94,11 @@ fun Account(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                onClickCategory = onClickCategory
+                onClickCategory = onClickCategory,
+                onChangeBackground = {
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                }
             )
         }
     ) { padding ->

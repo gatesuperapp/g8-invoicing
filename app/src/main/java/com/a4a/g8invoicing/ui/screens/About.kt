@@ -7,8 +7,10 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -23,10 +25,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -53,6 +58,9 @@ fun About(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
+    // Add background when bottom menu expanded
+    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    val backgroundColor = remember { mutableStateOf(transparent) }
 
     Scaffold(
         topBar = {
@@ -62,17 +70,18 @@ fun About(
                 onClickBackArrow = onClickBack
             )
         },
-        //   private val _uiState = MutableStateFlow(ClientsUiState())
-        // val uiState: StateFlow<ClientsUiState> = _uiState.asStateFlow()
         bottomBar = {
             GeneralBottomBar(
                 isButtonNewDisplayed = false,
                 navController = navController,
-                onClickCategory = onClickCategory
+                onClickCategory = onClickCategory,
+                onChangeBackground = {
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                }
             )
         }
     ) { padding ->
-
         val infiniteTransition = rememberInfiniteTransition(label = "border")
         val targetOffset = with(LocalDensity.current) {
             1000.dp.toPx()
@@ -93,63 +102,73 @@ fun About(
             end = Offset(offset + brushSize, offset + brushSize),
             tileMode = TileMode.Mirror
         )
-
-        Column(
+        Box(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(padding)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
         ) {
-            Text(
-                modifier = Modifier.padding(
-                    top = 40.dp,
-                    start = 40.dp,
-                    end = 40.dp,
-                    bottom = 20.dp
-                ),
-                text = stringResource(id = R.string.about)
-            )
-
-            Button(
-                modifier = Modifier.border(
-                    BorderStroke(
-                        width = 4.dp,
-                        brush = brush
-                    ),shape = RoundedCornerShape(50)
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
-                onClick = {
-                    uriHandler.openUri(Strings.get(R.string.about_donate_link))
-                },
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(padding)
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(stringResource(id = R.string.about_donate))
-            }
-
-            Text(
-                modifier = Modifier.padding(
-                    top = 40.dp,
-                    start = 40.dp,
-                    end = 40.dp,
-                    bottom = 10.dp
-                ),
-                text = stringResource(id = R.string.about2)
-            )
-
-            Button(elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 3.dp
-            ), onClick = {
-                composeEmail(
-                    context = context,
-                    address = Strings.get(R.string.about_contact_email),
-                    emailMessage = ""
+                Text(
+                    modifier = Modifier.padding(
+                        top = 40.dp,
+                        start = 40.dp,
+                        end = 40.dp,
+                        bottom = 20.dp
+                    ),
+                    text = stringResource(id = R.string.about)
                 )
-            }) {
-                Text(stringResource(id = R.string.about_button_contact))
-            }
 
-            TermsOfService(uriHandler)
+                Button(
+                    modifier = Modifier.border(
+                        BorderStroke(
+                            width = 4.dp,
+                            brush = brush
+                        ), shape = RoundedCornerShape(50)
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                    onClick = {
+                        uriHandler.openUri(Strings.get(R.string.about_donate_link))
+                    },
+                ) {
+                    Text(stringResource(id = R.string.about_donate))
+                }
+
+                Text(
+                    modifier = Modifier.padding(
+                        top = 20.dp,
+                        start = 40.dp,
+                        end = 40.dp,
+                        bottom = 10.dp
+                    ),
+                    text = stringResource(id = R.string.about2)
+                )
+
+                Button(elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 3.dp
+                ), onClick = {
+                    composeEmail(
+                        context = context,
+                        address = Strings.get(R.string.about_contact_email),
+                        emailMessage = ""
+                    )
+                }) {
+                    Text(stringResource(id = R.string.about_button_contact))
+                }
+
+                TermsOfService(uriHandler)
+            }
+            Column(
+                // apply darker background when bottom menu is expanded
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(backgroundColor.value),
+            ) {}
         }
     }
 }
@@ -158,7 +177,10 @@ fun About(
 fun TermsOfService(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append(Strings.get(R.string.about_terms_of_service_header) + " ")
-        pushStringAnnotation(tag = "terms", annotation = Strings.get(R.string.about_terms_of_service_url_1) )
+        pushStringAnnotation(
+            tag = "terms",
+            annotation = Strings.get(R.string.about_terms_of_service_url_1)
+        )
         withStyle(style = SpanStyle(color = ColorBlueLink)) {
             append(Strings.get(R.string.about_terms_of_service) + " ")
         }

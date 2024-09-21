@@ -64,6 +64,8 @@ fun ProductList(
                 selectedMode = selectedMode.value,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
                     openAlertDialog.value = true
                 },
                 onClickDuplicate = {
@@ -74,7 +76,11 @@ fun ProductList(
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
                 onClickNew = { onClickNew() },
-                onClickCategory = onClickCategory
+                onClickCategory = onClickCategory,
+                onChangeBackground = {
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                }
             )
         }
     ) { padding ->
@@ -121,12 +127,17 @@ fun ProductList(
         when {
             openAlertDialog.value -> {
                 AlertDialogDeleteDocument(
-                    onDismissRequest = { openAlertDialog.value = false },
+                    onDismissRequest = {
+                        openAlertDialog.value = false
+                        backgroundColor.value =
+                            changeBackgroundWithVerticalGradient(backgroundColor.value)},
                     onConfirmation = {
                         openAlertDialog.value = false
                         onClickDelete(selectedItems.toList())
                         selectedItems.clear()
                         selectedMode.value = false
+                        backgroundColor.value =
+                            changeBackgroundWithVerticalGradient(backgroundColor.value)
                     }
                 )
             }

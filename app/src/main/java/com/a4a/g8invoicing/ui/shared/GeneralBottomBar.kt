@@ -34,7 +34,7 @@ fun GeneralBottomBar(
     onClickSendReminder: () -> Unit = {},
     isConvertible: Boolean = false,
     isInvoice: Boolean = false,
-    onChangeBackground: () -> Unit = {},
+    onChangeBackground: () -> Unit,
     ) {
     BottomBarAction(
         navController,

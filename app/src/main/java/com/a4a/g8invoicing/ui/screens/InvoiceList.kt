@@ -71,6 +71,7 @@ fun InvoiceList(
 
     val context = LocalContext.current
 
+    // Add background when bottom menu expanded
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
     val backgroundColor = remember { mutableStateOf(transparent) }
 
@@ -90,6 +91,8 @@ fun InvoiceList(
                 selectedMode = selectedMode.value,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
+                    backgroundColor.value =
+                        changeBackgroundWithVerticalGradient(backgroundColor.value)
                     openAlertDialog.value = true
                 },
                 onClickCreateCreditNote = {
@@ -183,12 +186,18 @@ fun InvoiceList(
         when {
             openAlertDialog.value -> {
                 AlertDialogDeleteDocument(
-                    onDismissRequest = { openAlertDialog.value = false },
+                    onDismissRequest = {
+                        openAlertDialog.value = false
+                        backgroundColor.value =
+                            changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    },
                     onConfirmation = {
                         openAlertDialog.value = false
                         onClickDelete(selectedItems.toList())
                         selectedItems.clear()
                         selectedMode.value = false
+                        backgroundColor.value =
+                            changeBackgroundWithVerticalGradient(backgroundColor.value)
                     },
                     isInvoice = true
                 )
