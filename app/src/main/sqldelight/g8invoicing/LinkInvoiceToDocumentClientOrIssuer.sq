@@ -8,10 +8,6 @@ CREATE TABLE LinkInvoiceToDocumentClientOrIssuer (
           ON DELETE CASCADE
 );
 
-INSERT INTO LinkInvoiceToDocumentClientOrIssuer (id, invoice_id, document_client_or_issuer_id)
-VALUES (1, 1, 1),
-(2, 1, 2);
-
 getDocumentClientOrIssuerLinkedToInvoice:
 SELECT *
 FROM LinkInvoiceToDocumentClientOrIssuer

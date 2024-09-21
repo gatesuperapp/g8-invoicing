@@ -13,8 +13,6 @@ CREATE TABLE Invoice (
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
   deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
 
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, currency, due_date, payment_status)
-VALUES (1, "001", '01/01/2023 12:00:00', 'ONXFHGG11',  "€", '01/01/2023 12:00:00', 0);
 
 get:
 SELECT *

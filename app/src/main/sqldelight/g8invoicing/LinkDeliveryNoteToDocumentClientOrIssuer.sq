@@ -8,10 +8,6 @@ CREATE TABLE LinkDeliveryNoteToDocumentClientOrIssuer (
           ON DELETE CASCADE
 );
 
-INSERT INTO LinkDeliveryNoteToDocumentClientOrIssuer (id, delivery_note_id, document_client_or_issuer_id)
-VALUES (1, 1, 1),
-(2, 1, 2);
-
 getDocumentClientOrIssuerLinkedToDeliveryNote:
 SELECT *
 FROM LinkDeliveryNoteToDocumentClientOrIssuer

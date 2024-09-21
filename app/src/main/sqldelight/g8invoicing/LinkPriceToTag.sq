@@ -8,10 +8,6 @@ PRIMARY KEY (item_price_id, client_tag_id),
          ON DELETE CASCADE
 );
 
-
-INSERT INTO PriceWithTag (item_price_id, client_tag_id)
-VALUES (2, 1);
-
 saveLabelledPrice:
 INSERT
 INTO PriceWithTag (item_price_id, client_tag_id)

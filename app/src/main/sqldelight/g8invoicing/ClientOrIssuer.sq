@@ -18,13 +18,6 @@ CREATE TABLE ClientOrIssuer (
   deleted_at REAL DEFAULT (datetime('now', 'localtime'))
 );
 
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number)
-VALUES (1,  'issuer', 'issuerAudus', 'Zu', '0789384749', 'audus@rich.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
- (2, 'client', 'clientHaha', 'Biocoop',  '0789384749', 'client@d.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' ),
- (3, 'client', 'clientBernadoutteett', 'Delaplandidugg', '0789384749', 'client@aez.fr', 'millionariat en vue', 'N° SIRET', '1833', 'N° TVA', '1833' )
-;
-
-
 get:
 SELECT *
 FROM ClientOrIssuer

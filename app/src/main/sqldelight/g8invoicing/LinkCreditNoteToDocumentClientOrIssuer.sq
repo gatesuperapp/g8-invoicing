@@ -8,10 +8,6 @@ CREATE TABLE LinkCreditNoteToDocumentClientOrIssuer (
           ON DELETE CASCADE
 );
 
-INSERT INTO LinkCreditNoteToDocumentClientOrIssuer (id, credit_note_id, document_client_or_issuer_id)
-VALUES (1, 1, 1),
-(2, 1, 2);
-
 getDocumentClientOrIssuerLinkedToCreditNote:
 SELECT *
 FROM LinkCreditNoteToDocumentClientOrIssuer
