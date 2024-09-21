@@ -1,5 +1,8 @@
 package com.a4a.g8invoicing.ui.shared
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.AlertDialog
@@ -8,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
@@ -44,9 +48,6 @@ fun AlertDialogDeleteDocument(
             else
                 Text(
                     text = Strings.get(R.string.alert_dialog_delete_general),
-                    style = TextStyle(
-                        textAlign = TextAlign.Center
-                    )
                 )
         },
         textContentColor = Color.Black,
@@ -54,15 +55,6 @@ fun AlertDialogDeleteDocument(
             onDismissRequest()
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text(text = stringResource(id = R.string.alert_dialog_delete_cancel))
-            }
-        },
-        dismissButton = {
             Button(
                 onClick = {
                     onConfirmation()
@@ -83,15 +75,15 @@ fun DeleteInvoiceLink(uriHandler: UriHandler) {
             annotation = Strings.get(R.string.alert_dialog_delete_url)
         )
         withStyle(style = SpanStyle(color = ColorBlueLink)) {
-            append(Strings.get(R.string.alert_dialog_delete_invoice_2) + " ")
+            append(Strings.get(R.string.alert_dialog_delete_invoice_2))
         }
-       // pop()
+        // pop()
         append(Strings.get(R.string.alert_dialog_delete_invoice_3))
-       // pop()
+        // pop()
     }
 
     ClickableText(
-        modifier = Modifier.padding(top = 20.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
+        modifier = Modifier.padding(top = 20.dp, start = 40.dp, end = 40.dp),
         text = annotatedString,
         style = MaterialTheme.typography.bodyMedium,
         onClick = { offset ->

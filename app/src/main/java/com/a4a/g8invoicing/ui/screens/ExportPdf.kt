@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
@@ -107,8 +108,16 @@ fun ExportPdf(
 
             Send(context, deliveryNote, finalFileName)
             Share(context, finalFileName)
-        }
 
+            Text(
+                modifier = Modifier
+                    .padding(50.dp),
+                text = stringResource(R.string.export_send_advice),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleSmall,
+                color = Color.White
+            )
+        }
     }
 }
 

@@ -24,8 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -156,10 +160,11 @@ fun InvoiceList(
                         keyToUnselectAll = keyToResetCheckboxes.value
                     )
                 } else {
-                    Column (
+                    Column(
                         modifier = Modifier
+                            .padding(top = 40.dp)
                             .fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         TextAdvice(uriHandler)
@@ -233,13 +238,22 @@ fun changeBackgroundWithVerticalGradient(initialColor: Brush): Brush {
 fun TextAdvice(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append(Strings.get(R.string.invoice_advice_legal_1) + " ")
+        append(
+            AnnotatedString(
+                Strings.get(R.string.invoice_advice_legal_2) + " ",
+                SpanStyle(fontStyle = FontStyle.Italic)
+            )
+        )
+        append(Strings.get(R.string.invoice_advice_legal_3) + " ")
+
         pushStringAnnotation(
             tag = "link",
             annotation = Strings.get(R.string.invoice_advice_legal_url)
         )
         withStyle(style = SpanStyle(color = ColorBlueLink)) {
-            append(Strings.get(R.string.invoice_advice_legal_2) + " ")
+            append(Strings.get(R.string.invoice_advice_legal_4) + " ")
         }
+        append(Strings.get(R.string.invoice_advice_legal_5))
     }
 
     ClickableText(

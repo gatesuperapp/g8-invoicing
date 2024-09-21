@@ -106,7 +106,7 @@
     <string name="client_address1">Adresse 1</string>
     <string name="client_address1_input">6 rue de l\'église</string>
     <string name="client_address2">Adresse 2</string>
-    <string name="client_address2_input">Lieu-dit de l\'arribet</string>
+    <string name="client_address2_input">Lieu-dit beròi</string>
     <string name="client_city">Ville</string>
     <string name="client_city_input">Écholoc</string>
     <string name="client_zip_code">Code Postal</string>
@@ -240,7 +240,6 @@
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
         &#8226; Conçue pour les paysan·ne·s en priorité\n
-        &#8226; Souhaite financer des projets de protection de la faune sauvage
         \n\nVous pouvez vous abonner pour permettre le développement des prochaines fonctionnalités et bénéficier d\'avantages réservés &#x1F917;
     </string>
     <string name="about2">
@@ -256,26 +255,32 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_donate">En savoir plus</string>
     <string name="about_donate_link">https://the-gate.fr/abonnement</string>
-    <string name="invoice_advice_legal_1">Avant de créer votre première facture,
-        vous pouvez consulter les mentions obligatoires pour être conforme à la loi française</string>
-    <string name="invoice_advice_legal_2">dans notre superbe liste (mieux faite que celle du gouv &#x1F60F;).</string>
+    <string name="invoice_advice_legal_1">Bienvenue au G8 aka</string>
+    <string name="invoice_advice_legal_2">The Gate</string>
+    <string name="invoice_advice_legal_3">!\n\n
+        Vous êtes actuellement dans la catégorie « Factures ».
+        \n\n Vous pouvez créer une facture en cliquant sur le bouton « Créer ». Veillez à bien respecter les mentions obligatoires pour obtenir des factures conformes -\n</string>
+    <string name="invoice_advice_legal_4">cliquez ici pour en savoir plus.</string>
+    <string name="invoice_advice_legal_5"> \n\nVous pouvez
+        accéder aux autres catégories grâce au bouton « Menu ».\n
+    \n\n Bonne navigation &#x1F60D;</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="alert_dialog_delete_invoice_1">Si vous avez déjà envoyé la facture, il n\'est pas légal de la supprimer :
+    <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
-        \n• si elle a été payée, il faut créer un avoir puis une nouvelle facture. \n
+        \n• si elle a été payée, il faut créer un avoir + une nouvelle facture.
     </string>
     <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nSinon, vous pouvez la supprimer. Attention, cette action est irréversible.</string>
+    <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
 
-    <string name="alert_dialog_delete_general">Attention, cette action est irréversible.</string>
-    <string name="alert_dialog_delete_confirm">Supprimer</string>
-    <string name="alert_dialog_delete_cancel">Annuler</string>
+    <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
+    <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l\'export.</string>
     <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8)</string>
     <string name="export_send_file">Envoyer par e-mail</string>
+    <string name="export_send_advice">ⓘ Pour l\'instant The Gate ne sauvegarde pas vos documents sur le cloud. Il faut donc penser à les préserver dans les mails envoyés ou dans un espace de stockage, pour y accéder en cas de perte de votre mobile.</string>
     <string name="export_send_file_content">Bonjour, \n
         Veuillez trouver votre document ci-joint.\n
         Cordialement\n\n</string>
