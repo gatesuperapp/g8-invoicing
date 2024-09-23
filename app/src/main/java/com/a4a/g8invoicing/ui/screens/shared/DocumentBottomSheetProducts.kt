@@ -158,7 +158,8 @@ fun DocumentBottomSheetProducts(
                     typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
                     onShowDocumentForm(true)
                 },
-                onClickDelete = onClickDeleteDocumentProduct
+                onClickDelete = onClickDeleteDocumentProduct,
+                isClientOrIssuerListEmpty = parameters.second.isEmpty()
             )
 
             if (isProductListVisible) {

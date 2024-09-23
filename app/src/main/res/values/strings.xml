@@ -244,9 +244,9 @@
     </string>
     <string name="about2">
     Pour l\'assistance par mail ou toute autre demande :</string>
-    <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez nos</string>
+    <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez les</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
-    <string name="about_terms_of_service_header_2">et notre</string>
+    <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://the-gate.fr/conditions-generales</string>
     <string name="about_terms_of_service_url_2">https://the-gate.fr/conditions-generales</string>
     <string name="about_privacy">politique de confidentialité.</string>
@@ -259,10 +259,10 @@
     <string name="invoice_advice_legal_2">The Gate</string>
     <string name="invoice_advice_legal_3">!\n\n
         Vous êtes actuellement dans la catégorie «Factures».
-        \n\n Vous pouvez créer une facture grâce au bouton en bas à droite de votre écran. Veillez à respecter les mentions obligatoires pour être en conformité avec la loi</string>
-    <string name="invoice_advice_legal_4">→ cliquez ici pour en savoir plus.</string>
-    <string name="invoice_advice_legal_5"> \n\nVous pouvez
-        accéder aux autres catégories via le bouton «Menu».\n
+        \n\n Avant de créer une facture, il est préférable de prendre connaissance des mentions obligatoires à respecter (voir le site du gouvernement ou cliquer \n</string>
+    <string name="invoice_advice_legal_4">ici).</string>
+    <string name="invoice_advice_legal_5"> \n\n Si vous souhaitez
+        accéder aux autres catégories (bons de livraison, clients..), choisissez le bouton «Menu».\n
     \n\n Bonne navigation &#x270C;</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :

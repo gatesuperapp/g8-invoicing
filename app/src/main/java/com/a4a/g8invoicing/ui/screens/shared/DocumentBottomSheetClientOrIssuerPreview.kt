@@ -27,6 +27,7 @@ fun DocumentBottomSheetClientOrIssuerPreview(
     onClickChooseButton: () -> Unit,
     onClickItem: (ClientOrIssuerState) -> Unit,
     onClickDelete: (ClientOrIssuerType)  -> Unit,
+    isClientOrIssuerListEmpty: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -54,12 +55,14 @@ fun DocumentBottomSheetClientOrIssuerPreview(
                 hasBackground = false,
                 stringResource(id = R.string.document_bottom_sheet_list_add_new)
             )
-            ButtonAddOrChoose(
-                onClickChooseButton,
-                hasBorder = false,
-                hasBackground = true,
-                stringResource(id = R.string.document_bottom_sheet_document_product_add)
-            )
+            if(!isClientOrIssuerListEmpty) {
+                ButtonAddOrChoose(
+                    onClickChooseButton,
+                    hasBorder = false,
+                    hasBackground = true,
+                    stringResource(id = R.string.document_bottom_sheet_document_product_add)
+                )
+            }
         } else {
             // Display the existing item
             DocumentClientOrIssuerContent(

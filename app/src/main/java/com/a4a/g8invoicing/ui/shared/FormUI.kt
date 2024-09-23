@@ -246,6 +246,7 @@ fun RowWithLabelAndInput(
                     taxRate = (formInput.inputType).taxRate,
                     keyboardOption = imeAction,
                     formActions = formActions,
+                    focusRequester = focusRequester,
                 )
             } else {
                 FormInputCreatorDecimal(

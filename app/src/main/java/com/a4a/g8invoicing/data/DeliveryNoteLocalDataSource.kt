@@ -41,7 +41,6 @@ class DeliveryNoteLocalDataSource(
             incrementDocumentNumber(it)
         } ?: Strings.get(R.string.delivery_note_default_number)
         val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: ClientOrIssuerState()
 
         saveInfoInDocumentTable(
             DeliveryNoteState(

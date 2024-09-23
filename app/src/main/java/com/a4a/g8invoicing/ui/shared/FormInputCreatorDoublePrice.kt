@@ -17,6 +17,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -34,6 +38,7 @@ fun FormInputCreatorDoublePrice(
     taxRate: BigDecimal? = null,
     keyboardOption: ImeAction,
     formActions: KeyboardActions,
+    focusRequester: FocusRequester?,
 ) {
     // Stateful : mutable values are remembered here - avoids recomposing all form
     var text1 by remember { mutableStateOf(textInput1.text) }
@@ -45,6 +50,20 @@ fun FormInputCreatorDoublePrice(
     // Rules to format the display, as Compose don't do it alone :
     // for instance, allow the input of only 1 separator (2,15 and not 2,15.23,23)
     val decimalFormatter = DecimalFormatter()
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var customModifier = Modifier
+        .onFocusChanged {
+            if (it.isFocused) {
+                keyboardController?.show()
+            }
+        }
+        .fillMaxWidth()
+        .padding(bottom = 3.dp)
+
+    focusRequester?.let {
+        customModifier = customModifier.then(Modifier.focusRequester(focusRequester))
+    }
 
     fun updateFieldsWithCalculatedValues(newValue: String, isFirstField: Boolean) {
         taxRate?.let { tax ->
@@ -92,9 +111,7 @@ fun FormInputCreatorDoublePrice(
 
             BasicTextField(
                 maxLines = 1,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 3.dp),
+                modifier = customModifier,
                 value = text1?.replace(".", ",") ?: "",
                 onValueChange = {
                     text1 = decimalFormatter.cleanup(it)

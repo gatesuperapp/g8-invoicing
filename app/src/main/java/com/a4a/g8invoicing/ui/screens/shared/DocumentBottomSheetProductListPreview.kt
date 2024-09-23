@@ -19,7 +19,9 @@ fun DocumentBottomSheetDocumentProductListPreview(
     onClickNew: () -> Unit, // Add a new product to the document (product list)
     onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)
     onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
-    onClickDelete: (Int) -> Unit, // Delete a document product
+    onClickDelete: (Int) -> Unit, // Delete a document product,
+    isClientOrIssuerListEmpty: Boolean
+
 ) {
     Column(
         modifier = Modifier
@@ -35,13 +37,14 @@ fun DocumentBottomSheetDocumentProductListPreview(
             hasBackground = false,
             stringResource(id = R.string.document_bottom_sheet_list_add_new)
         )
-        ButtonAddOrChoose( // Choosing a product to add to the document
-            onClickChooseExisting,
-            hasBorder = false,
-            hasBackground = true,
-            stringResource(id = R.string.document_bottom_sheet_document_product_add)
-        )
-
+        if(!isClientOrIssuerListEmpty) {
+            ButtonAddOrChoose( // Choosing a product to add to the document
+                onClickChooseExisting,
+                hasBorder = false,
+                hasBackground = true,
+                stringResource(id = R.string.document_bottom_sheet_document_product_add)
+            )
+        }
         // Display the existing list
         DocumentProductListContent(
             documentProducts = list,

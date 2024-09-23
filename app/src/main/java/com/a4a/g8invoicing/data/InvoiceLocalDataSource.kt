@@ -57,7 +57,6 @@ class InvoiceLocalDataSource(
     override suspend fun createNew(): Long? {
         var newInvoiceId: Long? = null
         val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: ClientOrIssuerState()
         saveInfoInInvoiceTable(
             InvoiceState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {

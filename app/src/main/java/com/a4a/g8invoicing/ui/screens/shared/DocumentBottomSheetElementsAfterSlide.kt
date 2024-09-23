@@ -67,7 +67,8 @@ fun DocumentBottomSheetElementsAfterSlide(
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
                 onShowDocumentForm(true)
             },
-            onClickDelete = onClickDeleteDocumentClientOrIssuer
+            onClickDelete = onClickDeleteDocumentClientOrIssuer,
+            isClientOrIssuerListEmpty = parameters.second.isEmpty()
         )
 
         if (isClientOrIssuerListVisible) {

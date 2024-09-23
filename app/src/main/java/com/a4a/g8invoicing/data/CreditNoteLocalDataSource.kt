@@ -40,7 +40,6 @@ class CreditNoteLocalDataSource(
     override suspend fun createNew(): Long? {
         var newCreditNoteId: Long? = null
         val issuer = getExistingIssuer()?.transformIntoEditable()
-            ?: ClientOrIssuerState()
         val creditNote = CreditNoteState(
             documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)

@@ -40,11 +40,11 @@ fun DocumentBottomSheetProducts(
                 )
             }
         }
-        // Display the existing list
-        ProductListContent(
-            products = list,
-            onProductClick = onProductClick,
-            displayCheckboxes = false
-        )
+            // Display the existing list
+            ProductListContent(
+                products = list,
+                onProductClick = onProductClick,
+                displayCheckboxes = false
+            )
     }
 }
