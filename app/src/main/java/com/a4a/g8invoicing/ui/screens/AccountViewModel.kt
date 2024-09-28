@@ -47,7 +47,7 @@ class AccountViewModel @Inject constructor(
                     result.value = it
                 }
             } catch (e: Exception) {
-                println("Fetching result failed with exception: ${e.localizedMessage}")
+                //println("Fetching result failed with exception: ${e.localizedMessage}")
             }
         }
     }

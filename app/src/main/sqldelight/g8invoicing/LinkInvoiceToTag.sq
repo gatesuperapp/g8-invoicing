@@ -26,3 +26,7 @@ getInvoiceTag:
 SELECT *
 FROM LinkInvoiceToTag
 WHERE invoice_id = :invoice_id;
+
+delete:
+DELETE FROM LinkInvoiceToTag
+WHERE invoice_id = :id;

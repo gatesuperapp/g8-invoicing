@@ -30,6 +30,7 @@ import retrofit2.create
 import javax.inject.Singleton
 import retrofit2.converter.moshi.MoshiConverterFactory
 
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

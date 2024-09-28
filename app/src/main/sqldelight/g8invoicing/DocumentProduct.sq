@@ -14,34 +14,6 @@ CREATE TABLE DocumentProduct (
             ON DELETE CASCADE
 );
 
-INSERT INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, product_id)
-VALUES (1, 'aaa',1, '', 5, 20,  'kg',  1),
- (2, 'aaa',1, '', 5, 20,  'kg',  1),
- (3, 'aaa',1, '', 5, 20,  'kg',  1),
- (4, 'aaa',1, '', 5, 20,  'kg',  1),
- (5, 'aaa',1, '', 5, 20,  'kg',  1),
- (6, 'aaa',1, '', 5, 20,  'kg',  1),
- (7, 'aaa',1, '', 5, 20,  'kg',  1),
- (8, 'aaa',1, '', 5, 20,  'kg',  1),
- (9, 'aaa',1, '', 5, 20,  'kg',  1),
- (10, 'aaa',1, '', 5, 20,  'kg',  1),
- (11, 'aaa',1, '', 5, 20,  'kg',  1),
- (12, 'aaa',1, '', 5, 20,  'kg',  1),
- (13, 'aa',1, '', 5, 20,  'kg', 1),
- (14, 'aaa',1, '', 5, 20,  'kg',  1),
- (15, 'aaa',1, '', 5, 20,  'kg',  1),
- (16, 'aaa',1, '', 5, 20,  'kg',  1),
- (17, 'aaa',1, '', 5, 20,  'kg',  1),
- (18, 'aaa',1, '', 5, 20,  'kg',  1),
- (19, 'aaa',1, '', 5, 20,  'kg',  1),
- (20, 'aaa',1, '', 5, 20,  'kg',  1),
- (21, 'aaa',1, '', 5, 20,  'kg',  1),
- (22, 'aaa',1, '', 5, 20,  'kg',  1),
- (23, 'aaa',1, '', 5, 20,  'kg',  1),
- (24, 'aaa',1, '', 5, 20,  'kg',  1),
- (25, 'aaa',1, '', 5, 20,  'kg',  1),
- (26, 'aaa',1, '', 5, 20,  'kg',  1) ;
-
 getDocumentProduct:
 SELECT *
 FROM DocumentProduct

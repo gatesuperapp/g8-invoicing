@@ -152,7 +152,8 @@ fun DocumentBottomSheetProducts(
                     }
                 },
                 onClickChooseExisting = {
-                    isProductListVisible = true },
+                    isProductListVisible = true
+                },
                 onClickDocumentProduct = {
                     onClickDocumentProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT

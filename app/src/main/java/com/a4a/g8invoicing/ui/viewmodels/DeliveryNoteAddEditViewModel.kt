@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -23,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,7 +54,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -76,7 +75,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     _deliveryNoteUiState.value = it
                 }
             } catch (e: Exception) {
-                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+                //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -87,7 +86,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             try {
                 deliveryNoteId = deliveryNoteDataSource.createNew()
             } catch (e: Exception) {
-                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+                //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
         createNewJob.join()
@@ -100,7 +99,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.update(deliveryNoteUiState.value)
             } catch (e: Exception) {
-                println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
+                //println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -112,9 +111,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInLocalDb(documentProduct: DocumentProductState) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
+    fun saveDocumentProductInLocalDbAndWaitForTheId(documentProduct: DocumentProductState): Int?  {
+        var documentProductId: Int? = null
+        runBlocking {
             try {
 
                 deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
@@ -122,10 +121,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
-                println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
             }
         }
+        return documentProductId
     }
+
 
     fun removeDocumentProductFromLocalDb(documentProductId: Int) {
         deleteJob?.cancel()
@@ -152,7 +153,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                      }
                  }*/
             } catch (e: Exception) {
-                println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+                //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -186,11 +187,11 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
 
         } catch (e: Exception) {
-            println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+            //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
-    fun saveDocumentProductInDeliveryNoteUiState(documentProduct: DocumentProductState) {
+    fun saveDocumentProductInUiState(documentProduct: DocumentProductState) {
         try {
             val list = _deliveryNoteUiState.value.documentProducts
             var maxId = 1
@@ -214,7 +215,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                     _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
             }
         } catch (e: Exception) {
-            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
+            //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
@@ -228,7 +229,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 )
 
             } catch (e: Exception) {
-                println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -250,7 +251,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
+                //println("Deleting delivery note client or issuer failed with exception: ${e.localizedMessage}")
             }
         }
     }

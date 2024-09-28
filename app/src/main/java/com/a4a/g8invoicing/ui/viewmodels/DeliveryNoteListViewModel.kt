@@ -45,7 +45,7 @@ class DeliveryNoteListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                println("Fetching all deliveryNotes failed with exception: ${e.localizedMessage}")
+                //println("Fetching all deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -56,7 +56,7 @@ class DeliveryNoteListViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.deleteDeliveryNotes(selectedDeliveryNotes)
             } catch (e: Exception) {
-                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
+                //println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -67,7 +67,7 @@ class DeliveryNoteListViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.duplicate(selectedDeliveryNotes)
             } catch (e: Exception) {
-                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
+                //println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -78,7 +78,7 @@ class DeliveryNoteListViewModel @Inject constructor(
             try {
                 invoiceDataSource.convertDeliveryNotesToInvoice(selectedDeliveryNotes)
             } catch (e: Exception) {
-                println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
+                //println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }
         }
     }

@@ -21,7 +21,7 @@ interface DeliveryNoteLocalDataSourceInterface {
     suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
         deliveryNoteId: Long?,
-    )
+    ): Int?
 
     suspend fun deleteDocumentProduct(deliveryNoteId: Long, documentProductId: Long)
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(

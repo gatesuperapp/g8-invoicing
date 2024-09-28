@@ -18,8 +18,10 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
@@ -29,7 +31,8 @@ class CreditNoteLocalDataSource(
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
-    private val linkDocumentClientOrIssuerToAddressQueries = db.linkDocumentClientOrIssuerToAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries =
+        db.linkDocumentClientOrIssuerToAddressQueries
     private val documentProductQueries = db.documentProductQueries
     private val linkCreditNoteToDocumentProductQueries = db.linkCreditNoteToDocumentProductQueries
     private val linkCreditNoteDocumentProductToDeliveryNoteQueries =
@@ -53,7 +56,7 @@ class CreditNoteLocalDataSource(
         try {
             newCreditNoteId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return newCreditNoteId
     }
@@ -62,7 +65,7 @@ class CreditNoteLocalDataSource(
         try {
             return creditNoteQueries.getLastCreditNoteNumber().executeAsOneOrNull()?.number
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -83,7 +86,7 @@ class CreditNoteLocalDataSource(
                     )
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -96,7 +99,7 @@ class CreditNoteLocalDataSource(
                     it.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.credit_note_id)
-                            val clientAndIssuer =  fetchClientAndIssuer(
+                            val clientAndIssuer = fetchClientAndIssuer(
                                 document.credit_note_id,
                                 linkCreditNoteToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
@@ -111,7 +114,7 @@ class CreditNoteLocalDataSource(
                         }
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -135,7 +138,7 @@ class CreditNoteLocalDataSource(
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -186,7 +189,7 @@ class CreditNoteLocalDataSource(
                     )
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -206,7 +209,7 @@ class CreditNoteLocalDataSource(
                     updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -225,7 +228,7 @@ class CreditNoteLocalDataSource(
                     saveInfoInOtherTables(creditNote)
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -235,22 +238,24 @@ class CreditNoteLocalDataSource(
         documentId: Long?,
         deliveryNoteDate: String?,
         deliveryNoteNumber: String?,
-    ) {
+    ): Int? {
+        var documentProductId: Int? = null
         withContext(Dispatchers.IO) {
-            try {
-                saveDocumentProductInDbAndLink(
-                    documentProductQueries,
-                    linkCreditNoteToDocumentProductQueries,
-                    linkDocumentClientOrIssuerToAddressQueries,
-                    documentProduct,
-                    documentId,
-                    deliveryNoteDate,
-                    deliveryNoteNumber
-                )
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                try {
+                    documentProductId = saveDocumentProductInDbAndLink(
+                        documentProductQueries,
+                        linkCreditNoteToDocumentProductQueries,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentProduct,
+                        documentId,
+                        deliveryNoteDate,
+                        deliveryNoteNumber
+                    )
+                } catch (e: Exception) {
+                    //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                }
             }
-        }
+        return documentProductId
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
@@ -268,7 +273,7 @@ class CreditNoteLocalDataSource(
                     documentId
                 )
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -320,7 +325,7 @@ class CreditNoteLocalDataSource(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -337,7 +342,7 @@ class CreditNoteLocalDataSource(
                 )
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -365,7 +370,7 @@ class CreditNoteLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -374,7 +379,7 @@ class CreditNoteLocalDataSource(
         try {
             issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return issuer
     }
@@ -384,7 +389,7 @@ class CreditNoteLocalDataSource(
         try {
             footer = creditNoteQueries.getLastInsertedFooter().executeAsOneOrNull()?.footer
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return footer
     }
@@ -402,7 +407,7 @@ class CreditNoteLocalDataSource(
                 footer = document.footerText.text
             )
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -434,7 +439,7 @@ class CreditNoteLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 }

@@ -4,7 +4,7 @@ import android.content.SharedPreferences
 import retrofit2.HttpException
 class AuthRepository(
     private val api: AuthApi,
-    private val prefs: SharedPreferences
+    private val authPrefs: SharedPreferences
 ) : AuthRepositoryInterface {
     override suspend fun signUp(username: String, password: String): AuthResult<Unit> {
         return try {
@@ -34,7 +34,7 @@ class AuthRepository(
                     password = password
                 )
             )
-            prefs.edit()
+            authPrefs.edit()
                 .putString("jwt", response.token)
                 .apply()
             AuthResult.Authorized()
@@ -51,7 +51,7 @@ class AuthRepository(
 
     override suspend fun authenticate(): AuthResult<Unit> {
         return try {
-            val token = prefs.getString("jwt", null) ?: return AuthResult.Unauthorized()
+            val token = authPrefs.getString("jwt", null) ?: return AuthResult.Unauthorized()
             api.authenticate("Bearer $token")
             AuthResult.Authorized()
         } catch(e: HttpException) {

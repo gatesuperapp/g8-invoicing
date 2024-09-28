@@ -42,7 +42,7 @@ class ProductListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                println("Fetching products failed with exception: ${e.localizedMessage}")
+                //println("Fetching products failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -57,7 +57,7 @@ class ProductListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                println("Deleting products failed with exception: ${e.localizedMessage}")
+                //println("Deleting products failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -68,7 +68,7 @@ class ProductListViewModel @Inject constructor(
             try {
                 productDataSource.duplicateProducts(selectedProducts)
             } catch (e: Exception) {
-                println("Duplicating products failed with exception: ${e.localizedMessage}")
+                //println("Duplicating products failed with exception: ${e.localizedMessage}")
             }
         }
     }

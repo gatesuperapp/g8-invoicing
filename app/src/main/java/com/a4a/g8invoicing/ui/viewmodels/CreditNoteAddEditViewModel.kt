@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,7 +55,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -75,7 +76,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                     _documentUiState.value = it
                 }
             } catch (e: Exception) {
-                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+                //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -86,7 +87,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
             try {
                 documentId = documentDataSource.createNew()
             } catch (e: Exception) {
-                println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+                //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
         createNewJob.join()
@@ -99,7 +100,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
             try {
                 documentDataSource.update(documentUiState.value)
             } catch (e: Exception) {
-                println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
+                //println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -111,20 +112,21 @@ class CreditNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInLocalDb(documentProduct: DocumentProductState) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
+    fun saveDocumentProductInLocalDbAndWaitForTheId(documentProduct: DocumentProductState): Int? {
+        var documentProductId: Int? = null
+        runBlocking {  // launch a new coroutine and keep a reference to its Job
             try {
-
-                documentDataSource.saveDocumentProductInDbAndLinkToDocument(
+                documentProductId = documentDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
                     id = _documentUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
-                println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
             }
         }
+        return documentProductId
     }
+
 
     fun removeDocumentProductFromLocalDb(documentProductId: Int) {
         deleteJob?.cancel()
@@ -138,7 +140,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                 }
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
             } catch (e: Exception) {
-                println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+                //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -159,7 +161,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
 
 
         } catch (e: Exception) {
-            println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
+            //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
@@ -187,7 +189,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                     _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
             }
         } catch (e: Exception) {
-            println("Saving delivery note product failed with exception: ${e.localizedMessage}")
+            //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
@@ -201,7 +203,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                 )
 
             } catch (e: Exception) {
-                println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -223,7 +225,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                println("Deleting CreditNote client or issuer failed with exception: ${e.localizedMessage}")
+                //println("Deleting CreditNote client or issuer failed with exception: ${e.localizedMessage}")
             }
         }
     }

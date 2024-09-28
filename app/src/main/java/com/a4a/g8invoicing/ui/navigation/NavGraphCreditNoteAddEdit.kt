@@ -73,10 +73,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
             },
             onClickProduct = { product ->
                 val lastDocumentProductPage =
-                // Initialize documentProductUiState to display it in the bottomSheet form
-                productAddEditViewModel.setDocumentProductUiStateWithProduct(
-                    product,
-                )
+                    // Initialize documentProductUiState to display it in the bottomSheet form
+                    productAddEditViewModel.setDocumentProductUiStateWithProduct(
+                        product,
+                    )
             },
             onClickClientOrIssuer = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
@@ -89,7 +89,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
-            onClickDocumentClientOrIssuer = {// Edit a document product
+            onClickDocumentClientOrIssuer = {// Edit a document client/issuer
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
             },
             onClickDeleteDocumentProduct = {
@@ -156,7 +156,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     // NEW = create new & save in clients list too
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            createNewClientOrIssuer(clientOrIssuerAddEditViewModel, ClientOrIssuerType.DOCUMENT_CLIENT)
+                            createNewClientOrIssuer(
+                                clientOrIssuerAddEditViewModel,
+                                ClientOrIssuerType.DOCUMENT_CLIENT
+                            )
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                             creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentClientUiState
@@ -193,7 +196,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
 
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            createNewClientOrIssuer(clientOrIssuerAddEditViewModel, ClientOrIssuerType.DOCUMENT_ISSUER)
+                            createNewClientOrIssuer(
+                                clientOrIssuerAddEditViewModel,
+                                ClientOrIssuerType.DOCUMENT_ISSUER
+                            )
                             documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
                             creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentIssuerUiState
@@ -218,14 +224,11 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
                         moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                            documentProduct.id  = creditNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
                             creditNoteViewModel.saveDocumentProductInUiState(documentProduct)
-                            creditNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
-                            // And if a document product is overflowing the page, and page is changed
-                            // we want this to be saved in db
-                            productAddEditViewModel.autoSaveDocumentProductInLocalDb()
-
                             //  productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
+
                         }
                     }
 
@@ -234,12 +237,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
+
+                            documentProduct.id  = creditNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
                             creditNoteViewModel.saveDocumentProductInUiState(documentProduct)
-                            creditNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
-                            // And if a document product is overflowing the page, and page is changed
-                            // we want this to be saved in db
-                            productAddEditViewModel.autoSaveDocumentProductInLocalDb()
-                          // productAddEditViewModel.clearProductUiState()
+                            // productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
                         }
                     }

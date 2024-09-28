@@ -32,7 +32,7 @@ data class CreditNoteState(
     override var currency: TextFieldValue  = TextFieldValue(),
     var paymentStatus: Int = 0,
     var dueDate: String = getDateFormatter().format(getDateInOneMonth().time) +  " 12:00:00",
-    override var footerText: TextFieldValue = TextFieldValue(Strings.get(R.string.document_default_footer)),
+    override var footerText: TextFieldValue = TextFieldValue(""),
     override var createdDate: String? = null
 ) : DocumentState()
 

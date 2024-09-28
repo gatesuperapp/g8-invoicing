@@ -152,7 +152,7 @@ class ProductAddEditViewModel @Inject constructor(
             try {
                 taxRates = taxDataSource.fetchProductTaxes()
             } catch (e: Exception) {
-                println("Fetching tax rates failed with exception: ${e.localizedMessage}")
+                //println("Fetching tax rates failed with exception: ${e.localizedMessage}")
             }
         }
         return taxRates
@@ -164,7 +164,7 @@ class ProductAddEditViewModel @Inject constructor(
             try {
                 dataSource.saveProduct(productUiState.value)
             } catch (e: Exception) {
-                println("Saving products failed with exception: ${e.localizedMessage}")
+                //println("Saving products failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -179,7 +179,7 @@ class ProductAddEditViewModel @Inject constructor(
                     dataSource.updateDocumentProduct(documentProductUiState.value)
                 }
             } catch (e: Exception) {
-                println("Saving products failed with exception: ${e.localizedMessage}")
+                //println("Saving products failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -288,7 +288,7 @@ private fun updateProductUiState(
 
         ScreenElement.PRODUCT_FINAL_PRICE -> {
             product =
-                product.copy(priceWithTax = (value as String).toBigDecimalOrNull() ?: BigDecimal(0))
+                product.copy(priceWithTax = (value as String).replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0))
         }
 
         ScreenElement.PRODUCT_UNIT -> {
@@ -329,7 +329,7 @@ private fun updateDocumentProductUiState(
 
         ScreenElement.DOCUMENT_PRODUCT_FINAL_PRICE -> {
             documentProduct = documentProduct.copy(
-                priceWithTax = (value as String).toBigDecimalOrNull() ?: BigDecimal(0)
+                priceWithTax = (value as String).replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0)
             )
         }
 

@@ -56,7 +56,7 @@ class DeliveryNoteLocalDataSource(
         try {
             newDeliveryNoteId = deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return newDeliveryNoteId
     }
@@ -78,7 +78,7 @@ class DeliveryNoteLocalDataSource(
                     )
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -107,7 +107,7 @@ class DeliveryNoteLocalDataSource(
                         }
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -117,7 +117,7 @@ class DeliveryNoteLocalDataSource(
         try {
             footer = deliveryNoteQueries.getLastInsertedFooter().executeAsOneOrNull()?.footer
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return footer
     }
@@ -136,7 +136,7 @@ class DeliveryNoteLocalDataSource(
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -177,7 +177,7 @@ class DeliveryNoteLocalDataSource(
                     updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -196,7 +196,7 @@ class DeliveryNoteLocalDataSource(
                     saveInfoInOtherTables(document)
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -205,7 +205,7 @@ class DeliveryNoteLocalDataSource(
         try {
             return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -213,7 +213,8 @@ class DeliveryNoteLocalDataSource(
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
         deliveryNoteId: Long?,
-    ) {
+    ): Int? {
+        var documentProductId: Int? = null
         withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.saveDocumentProduct(
@@ -230,6 +231,7 @@ class DeliveryNoteLocalDataSource(
                 deliveryNoteId?.let { deliveryNoteId ->
                     documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
                         ?.let { id ->
+                            documentProductId = id
                             addDocumentProduct(
                                 deliveryNoteId,
                                 id.toLong()
@@ -237,9 +239,11 @@ class DeliveryNoteLocalDataSource(
                         }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
+        return documentProductId
+
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
@@ -257,7 +261,7 @@ class DeliveryNoteLocalDataSource(
                     documentId
                 )
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -299,7 +303,7 @@ class DeliveryNoteLocalDataSource(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -313,7 +317,7 @@ class DeliveryNoteLocalDataSource(
                 )
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -341,7 +345,7 @@ class DeliveryNoteLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -353,7 +357,7 @@ class DeliveryNoteLocalDataSource(
                 document_product_id = documentProductId
             )
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -363,7 +367,7 @@ class DeliveryNoteLocalDataSource(
         try {
             issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return issuer
     }
@@ -380,7 +384,7 @@ class DeliveryNoteLocalDataSource(
                 footer = document.footerText.text
             )
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 

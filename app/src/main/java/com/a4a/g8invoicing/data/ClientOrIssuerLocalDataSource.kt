@@ -38,7 +38,7 @@ class ClientOrIssuerLocalDataSource(
                     )
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -70,7 +70,7 @@ class ClientOrIssuerLocalDataSource(
             } else
                 null
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -87,7 +87,7 @@ class ClientOrIssuerLocalDataSource(
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -103,7 +103,7 @@ class ClientOrIssuerLocalDataSource(
                 saveInfoInAddressTables(it, clientOrIssuer.addresses)
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return id
     }
@@ -130,7 +130,7 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.companyId3Number?.text,
                 )
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -161,7 +161,7 @@ class ClientOrIssuerLocalDataSource(
                         }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -182,7 +182,7 @@ class ClientOrIssuerLocalDataSource(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -421,6 +421,6 @@ fun linkClientOrIssuerToAddress(
             )
         }
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
 }

@@ -37,6 +37,7 @@ import java.math.RoundingMode
 // It would give a thicker border in the table middle, we don't want that
 
 val borderWidth = 0.7.dp
+
 @Composable
 fun DocumentBasicTemplateDataTable(
     products: List<DocumentProductState>,
@@ -51,7 +52,7 @@ fun DocumentBasicTemplateDataTable(
     val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
 
     if (linkedDeliveryNotes.isNotEmpty()) {
-        linkedDeliveryNotes.forEach {docNumberAndDate ->
+        linkedDeliveryNotes.forEach { docNumberAndDate ->
             LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
             DocumentProductsRows(
                 products.filter { it.linkedDocNumber == docNumberAndDate.first },
@@ -137,7 +138,7 @@ fun getLinkedDeliveryNotes(products: List<DocumentProductState>): MutableList<Pa
 @Composable
 fun LinkedDeliveryNoteRow(
     linkedNoteColumnWeight: Float,
-    docNumberAndDate: Pair<String?, String?>
+    docNumberAndDate: Pair<String?, String?>,
 ) {
     Row(
         Modifier
@@ -226,13 +227,17 @@ fun RowScope.TableCell(
             .rightBorder(borderWidth, Color.LightGray)
             .leftBorder(borderWidth, Color.LightGray)
             .weight(weight)
-            .padding(start = 4.dp, end = 4.dp, top = 4.dp)
+            .padding(
+                top = if (isBold) 4.dp else 2.dp,
+                bottom = if (isBold) 4.dp else 2.dp,
+                start = 4.dp,
+                end = 4.dp
+            )
             .fillMaxHeight(),
         horizontalAlignment = if (alignEnd) {
             Alignment.End
         } else Alignment.Start
     ) {
-
         Text(
             text = text,
             style = if (isBold) MaterialTheme.typography.textForDocumentsBold
@@ -250,7 +255,7 @@ fun RowScope.TableCell(
                 // maxLines = 1
             )
         }
-        Spacer(Modifier.padding(2.dp))
+        //  Spacer(Modifier.padding(2.dp))
         // Spacer avoids subtext to be cut in half horizontally (due to column weight, don't know why)
     }
 }

@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui.viewmodels
 
 import android.content.ContentValues
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
@@ -17,6 +18,7 @@ import com.a4a.g8invoicing.ui.screens.composeEmail
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.migration.CustomInjection
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,14 +50,14 @@ class InvoiceListViewModel @Inject constructor(
     }
 
     private fun fetch() {
-        Log.e(ContentValues.TAG, "clientAndIssuer" + "fetchJob?.cancel()")
+        //Log.e(ContentValues.TAG, "clientAndIssuer" + "fetchJob?.cancel()")
 
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
                 invoiceDataSource.fetchAll()?.collect {
                     _documentsUiState.update { uiState ->
-                        Log.e(ContentValues.TAG, "clientAndIssuer _documentsUiState" + _documentsUiState)
+                        //Log.e(ContentValues.TAG, "clientAndIssuer _documentsUiState" + _documentsUiState)
 
                         uiState.copy(
                             documentStates = it
@@ -63,7 +65,7 @@ class InvoiceListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -74,7 +76,7 @@ class InvoiceListViewModel @Inject constructor(
             try {
                 invoiceDataSource.delete(selectedDocuments)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -85,7 +87,7 @@ class InvoiceListViewModel @Inject constructor(
             try {
                 invoiceDataSource.duplicate(selectedDocuments)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -96,7 +98,7 @@ class InvoiceListViewModel @Inject constructor(
             try {
                 creditNoteDataSource.convertInvoiceToCreditNote(selectedDocuments)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -111,7 +113,7 @@ class InvoiceListViewModel @Inject constructor(
                 invoiceDataSource.duplicate(selectedDocuments)
                 setTag(selectedDocuments, DocumentTag.CANCELLED, TagUpdateOrCreationCase.AUTOMATICALLY_CANCELLED)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -127,7 +129,7 @@ class InvoiceListViewModel @Inject constructor(
                 // Set tag in local db
                 invoiceDataSource.setTag(selectedDocuments, tag, tagUpdateCase)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -138,7 +140,7 @@ class InvoiceListViewModel @Inject constructor(
             try {
                 invoiceDataSource.markAsPaid(selectedDocuments, tag)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import android.content.ContentValues
-import android.util.Log
+import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -57,20 +56,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.navigation.DocumentBottomBar
 import com.a4a.g8invoicing.ui.navigation.TopBar
-import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
-import com.a4a.g8invoicing.ui.navigation.actionStyle
+import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import dagger.hilt.android.migration.CustomInjection.inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -79,7 +78,8 @@ import java.util.Calendar
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
-
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentAddEdit(
@@ -109,8 +109,10 @@ fun DocumentAddEdit(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
-    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
 ) {
+
+
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -223,6 +225,12 @@ fun DocumentAddEdit(
                     navController = navController,
                     onClickBack = onClickBack,
                     onClickExport = {
+
+                        //AAAAH
+                        // val isFirstRun: Boolean = SettingsManager.isFirstRun(getActivity())
+                        // if(isFirstRun) {
+
+                        // }
                         showPopup = true
                     }
                 )

@@ -5,6 +5,7 @@ import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import dagger.Binds
 import kotlinx.coroutines.flow.Flow
 
 interface CreditNoteLocalDataSourceInterface {
@@ -13,7 +14,7 @@ interface CreditNoteLocalDataSourceInterface {
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(documentProduct: DocumentProductState, id: Long?,
                                                          deliveryNoteDate: String? = null,
-                                                         deliveryNoteNumber: String? = null)
+                                                         deliveryNoteNumber: String? = null): Int?
     suspend fun deleteDocumentProduct(id:Long, documentProductId: Long)
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(documentClientOrIssuer: ClientOrIssuerState, id: Long?)
     suspend fun deleteDocumentClientOrIssuer(id:Long, type: ClientOrIssuerType,)

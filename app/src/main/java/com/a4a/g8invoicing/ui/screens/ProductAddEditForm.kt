@@ -128,7 +128,7 @@ fun ProductAddEditForm(
                             } else {
                                 "$taxRate%"
                             }
-                        } ?: "-",
+                        },
                     ),
                     pageElement = ScreenElement.PRODUCT_TAX_RATE
                 ),

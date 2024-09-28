@@ -53,7 +53,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
                         }
                     }
             } catch (e: Exception) {
-                println("Fetching clients failed with exception: ${e.localizedMessage}")
+                //println("Fetching clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -70,7 +70,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
                         }
                     }
             } catch (e: Exception) {
-                println("Fetching issuers failed with exception: ${e.localizedMessage}")
+                //println("Fetching issuers failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -86,7 +86,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                println("Deleting clients failed with exception: ${e.localizedMessage}")
+                //println("Deleting clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -97,7 +97,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
             try {
                 clientOrIssuerDataSource.duplicateClients(selectedItems)
             } catch (e: Exception) {
-                println("Duplicating clients failed with exception: ${e.localizedMessage}")
+                //println("Duplicating clients failed with exception: ${e.localizedMessage}")
             }
         }
     }

@@ -218,8 +218,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
                         moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                            deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(documentProduct)
-                            deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
+
+                            documentProduct.id  = deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
+                            deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
                             productAddEditViewModel.autoSaveDocumentProductInLocalDb()
@@ -234,8 +235,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
-                            deliveryNoteViewModel.saveDocumentProductInDeliveryNoteUiState(documentProduct)
-                            deliveryNoteViewModel.saveDocumentProductInLocalDb(documentProduct)
+                            documentProduct.id  = deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
+                            deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
+
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
                             productAddEditViewModel.autoSaveDocumentProductInLocalDb()

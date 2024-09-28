@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
-import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
@@ -78,14 +77,15 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
         createIssuerAndClientTable(
             inputDocument.documentIssuer,
             inputDocument.documentClient,
-            fontBold,
-            inputDocument.documentType
+            fontBold
         )
     )
     inputDocument.reference?.let {
         if (it.text.isNotEmpty()) {
-            document.add(createReference(it.text, fontBold)
-                .setPaddingBottom(2f))
+            document.add(
+                createReference(it.text, fontBold)
+                    .setPaddingBottom(2f)
+            )
         }
     }
     inputDocument.documentProducts?.let {
@@ -93,7 +93,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
             try {
                 document.add(it)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -163,7 +163,7 @@ fun addPageNumberingAndDeletePreviousFile(
                 doc.close()
                 pdfDoc.close()
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -204,7 +204,6 @@ private fun createIssuerAndClientTable(
     issuer: ClientOrIssuerState?,
     client: ClientOrIssuerState?,
     font: PdfFont,
-    documentType: DocumentType,
 ): Table {
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
@@ -212,70 +211,92 @@ private fun createIssuerAndClientTable(
         .setFixedLayout()
 
     // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
-    issuerAndClientTable.addCell(
-        Cell().setBorder(Border.NO_BORDER)
-    )
     client?.addresses?.let {
-        issuerAndClientTable.addCell(createAddressTitle(it, 0))
-    }
-
-    // ROW X : Just adding space
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(1f))
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(1f))
-
-    // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
-    val issuerContent = createClientOrIssuerParagraph(issuer, font)
-    val issuerCell = Cell().setBorder(Border.NO_BORDER)
-    issuerContent.forEach {
-        issuerCell.add(it)
-    }
-    issuerAndClientTable.addCell(issuerCell)
-    issuerAndClientTable.addCell(
-        createClientRectangleAndContent(
-            createClientOrIssuerParagraph(client, font)
-        ).setPaddingBottom(8f)
-    )
-
-    // ROW X : Just adding space
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(6f))
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(6f))
-
-    // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TITLE 3
-    val numberOfAddresses = client?.addresses?.size ?: 1
-    for (i in 1..<numberOfAddresses) {
-        client?.addresses?.let {
-            issuerAndClientTable.addCell(createAddressTitle(it, i))
-        }
-    }
-    // ROW X : Just adding space
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(1f))
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(1f))
-
-    // ROW 4:  CLIENT ADDRESS 2 ----------ADDRESS 3
-    for (i in 1..<numberOfAddresses) {
         issuerAndClientTable.addCell(
-            createClientRectangleAndContent(
-                createClientOrIssuerParagraph(
-                    client,
-                    font,
-                    displayAllInfo = false,
-                    addressIndex = i
-                )
-            )
+            Cell().setBorder(Border.NO_BORDER)
+        )
+        issuerAndClientTable.addCell(createAddressTitle(it, 0))
+
+        // ROW X : Just adding space
+        issuerAndClientTable.addCell(
+            Cell().setBorder(Border.NO_BORDER)
+                .setPaddingBottom(1f)
+        )
+        issuerAndClientTable.addCell(
+            Cell().setBorder(Border.NO_BORDER)
+                .setPaddingBottom(1f)
         )
     }
 
+    // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
+    issuer?.let {
+        val issuerContent = createClientOrIssuerParagraph(it, font)
+        val issuerCell = Cell().setBorder(Border.NO_BORDER)
+        issuerContent.forEach {
+            issuerCell.add(it)
+        }
+        issuerAndClientTable.addCell(issuerCell)
+    }
+    client?.let {
+        issuerAndClientTable.addCell(
+            createClientRectangleAndContent(
+                createClientOrIssuerParagraph(it, font)
+            ).setPaddingBottom(8f)
+        )
+        // ROW X : Just adding space
+        issuerAndClientTable.addCell(
+            Cell().setBorder(Border.NO_BORDER)
+                .setPaddingBottom(6f)
+        )
+        issuerAndClientTable.addCell(
+            Cell().setBorder(Border.NO_BORDER)
+                .setPaddingBottom(6f)
+        )
+    }
+
+
+    // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TITLE 3
+    client?.addresses?.let { addresses ->
+        val numberOfAddresses = addresses.size ?: 1
+        for (i in 1..<numberOfAddresses) {
+            addresses.let {
+                issuerAndClientTable.addCell(createAddressTitle(it, i))
+            }
+        }
+        // ROW X : Just adding space
+        issuerAndClientTable.addCell(
+            Cell().setBorder(Border.NO_BORDER)
+                .setPaddingBottom(1f)
+        )
+        issuerAndClientTable.addCell(
+            Cell().setBorder(Border.NO_BORDER)
+                .setPaddingBottom(1f)
+        )
+
+        // ROW 4:  CLIENT ADDRESS 2 ----------ADDRESS 3
+        for (i in 1..<numberOfAddresses) {
+            issuerAndClientTable.addCell(
+                createClientRectangleAndContent(
+                    createClientOrIssuerParagraph(
+                        client,
+                        font,
+                        displayAllInfo = false,
+                        addressIndex = i
+                    )
+                )
+            )
+        }
+    }
     // ROW X : Just adding space
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(12f))
-    issuerAndClientTable.addCell(Cell().setBorder(Border.NO_BORDER)
-        .setPaddingBottom(12f))
+    issuerAndClientTable.addCell(
+        Cell().setBorder(Border.NO_BORDER)
+            .setPaddingBottom(25f)
+    )
+    issuerAndClientTable.addCell(
+        Cell().setBorder(Border.NO_BORDER)
+            .setPaddingBottom(25f)
+    )
+
     return issuerAndClientTable
 }
 
@@ -469,7 +490,7 @@ private fun createProductsTable(
         }
         return productsTable
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
     return null
 }
@@ -495,20 +516,23 @@ private fun addProductsToTable(
     fontRegular: PdfFont,
     fontBold: PdfFont,
 ) {
+    val spacingBetweenTextLines = 10F
+    val spacingBetweenNameAndDescription = 4F
     products.forEach {
-        val itemName = Text(it.name.text)
-
-        var itemDescription = Text("")
+        // To put description in italic + have a larger spacing between name & description
+        val itemName = Paragraph(Text(it.name.text)).setFixedLeading(spacingBetweenTextLines)
+        val spacing = Paragraph("\n").setFixedLeading(spacingBetweenNameAndDescription)
+        var itemDescription: Paragraph? = null
         it.description?.let {
-            itemDescription = Text(it.text).setItalic()
+            itemDescription = Paragraph(
+                Text(it.text)
+                    .setItalic()
+            ).setFixedLeading(spacingBetweenTextLines)
         }
-
-        val item = Paragraph(itemName)
-            .add("\n\n")
-            .add(itemDescription)
+        val paragraphs: List<Paragraph?> = listOf(itemName, spacing, itemDescription)
 
         productsTable.addCustomCell(
-            paragraph = item,
+            paragraphs = paragraphs,
             alignment = TextAlignment.LEFT,
             fontBold = fontBold,
             fontRegular = fontRegular
@@ -644,7 +668,7 @@ private fun createPaidStamp(context: Context): Image? {
         )
         return img
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
     return null
 }
@@ -658,35 +682,34 @@ private fun createFooter(text: String): Paragraph {
 
 private fun Table.addCustomCell(
     text: String? = null,
-    paragraph: Paragraph? = null,
+    paragraphs: List<Paragraph?>? = null,
     alignment: TextAlignment = TextAlignment.RIGHT,
     isBold: Boolean = false,
     isSpan: Boolean = false, //Used to merge cells,
     fontBold: PdfFont,
     fontRegular: PdfFont,
 ): Table {
-    val paddingLeft = 6f
-    val paddingRight = 6f
-    val paddingTop = 4f
-    val paddingBottom = 4f
-
-    val textToAdd = if (text != null) {
-        Paragraph(text)
-            .setFixedLeading(11F)
-    } else paragraph
-
+    val paddingLeftOrRight = 6f
+    val paddingTopOrBottom = if (isBold) 4f else 3f
     val colSpan = if (isSpan) 6 else 1
 
-    return this.addCell(
-        Cell(1, colSpan).add(textToAdd)
-            .setTextAlignment(alignment)
-            .setPaddingLeft(paddingLeft)
-            .setPaddingRight(paddingRight)
-            .setPaddingTop(paddingTop)
-            .setPaddingBottom(paddingBottom)
-            .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 1f))
-            .setFont(if (isBold) fontBold else fontRegular)
-    )
+    val cell = Cell(1, colSpan)
+        .setTextAlignment(alignment)
+        .setPaddingLeft(paddingLeftOrRight)
+        .setPaddingRight(paddingLeftOrRight)
+        .setPaddingTop(paddingTopOrBottom)
+        .setPaddingBottom(paddingTopOrBottom)
+        .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 1f))
+        .setFont(if (isBold) fontBold else fontRegular)
+
+    if (text != null) {
+        cell.add(Paragraph(text))
+    } else {
+        paragraphs?.filterNotNull()?.forEach {
+            cell.add(it)
+        }
+    }
+    return this.addCell(cell)
 }
 
 private fun Table.addCellInPrices(
@@ -715,7 +738,7 @@ fun getFileUri(context: Context, fileName: String): Uri? {
             file
         )
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
     return uri
 }
@@ -733,13 +756,13 @@ fun getFile(fileName: String): File? {
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     val directory = File(folder, "g8")
     if (directory.exists() && directory.isDirectory) {
-        println("Directory exists.")
+        //println("Directory exists.")
     } else {
         val result = directory.mkdir()
         if (result) {
-            Log.e(ContentValues.TAG, "Directory created successfully: ${directory.absolutePath}")
+            //Log.e(ContentValues.TAG, "Directory created successfully: ${directory.absolutePath}")
         } else {
-            Log.e(ContentValues.TAG, "Failed to create directory.")
+            //Log.e(ContentValues.TAG, "Failed to create directory.")
             return null
         }
     }
@@ -752,9 +775,9 @@ private fun deleteFile(fileName: String) {
     val file = File("$folder/g8/$fileName")
     if (file.exists()) {
         file.delete()
-        Log.e(ContentValues.TAG, "File deleted successfully: ${file.absolutePath}")
+        //Log.e(ContentValues.TAG, "File deleted successfully: ${file.absolutePath}")
     } else {
-        Log.e(ContentValues.TAG, "Error deleting file. ${file.absolutePath}")
+        //Log.e(ContentValues.TAG, "Error deleting file. ${file.absolutePath}")
     }
 }
 

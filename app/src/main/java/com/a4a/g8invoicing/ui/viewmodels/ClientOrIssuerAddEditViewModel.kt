@@ -182,7 +182,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             try {
                 dataSource.createNew(stateToSave)
             } catch (e: Exception) {
-                println("Saving clients failed with exception: ${e.localizedMessage}")
+                //println("Saving clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -210,7 +210,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                println("Updating clients failed with exception: ${e.localizedMessage}")
+                //println("Updating clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -652,7 +652,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 try {
                     lastClientId = dataSource.getLastCreatedClientId()
                 } catch (e: Exception) {
-                    println("Getting last client failed with exception: ${e.localizedMessage}")
+                    //println("Getting last client failed with exception: ${e.localizedMessage}")
                 }
             }
             getLastItemIdJob.join() // Waiting for the coroutine to complete

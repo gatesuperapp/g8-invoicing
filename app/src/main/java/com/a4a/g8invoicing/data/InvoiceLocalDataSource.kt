@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.data
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -21,7 +19,6 @@ import g8invoicing.DocumentClientOrIssuerAddressQueries
 import g8invoicing.DocumentClientOrIssuerQueries
 import g8invoicing.DocumentProductQueries
 import g8invoicing.Invoice
-import g8invoicing.LinkClientOrIssuerToAddressQueries
 import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkCreditNoteToDocumentClientOrIssuerQueries
 import g8invoicing.LinkCreditNoteToDocumentProductQueries
@@ -74,7 +71,7 @@ class InvoiceLocalDataSource(
         try {
             newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return newInvoiceId
     }
@@ -83,7 +80,7 @@ class InvoiceLocalDataSource(
         try {
             return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -105,7 +102,7 @@ class InvoiceLocalDataSource(
                     )
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -135,7 +132,7 @@ class InvoiceLocalDataSource(
                         }
                 }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -159,7 +156,7 @@ class InvoiceLocalDataSource(
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -176,7 +173,7 @@ class InvoiceLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
@@ -230,7 +227,7 @@ class InvoiceLocalDataSource(
                     )
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -263,7 +260,7 @@ class InvoiceLocalDataSource(
                     updateDocumentClientOrIssuer(it)
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -352,7 +349,7 @@ class InvoiceLocalDataSource(
                     saveInfoInOtherTables(invoice)
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -375,7 +372,7 @@ class InvoiceLocalDataSource(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -394,7 +391,7 @@ class InvoiceLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -418,7 +415,7 @@ class InvoiceLocalDataSource(
                 )
 
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -438,7 +435,7 @@ class InvoiceLocalDataSource(
                     documentId
                 )
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -485,9 +482,12 @@ class InvoiceLocalDataSource(
                             )
                         }
                     }
+                    document.documentId?.let {
+                        deleteTag(it)
+                    }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -504,7 +504,19 @@ class InvoiceLocalDataSource(
                 )
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+    }
+
+    override suspend fun deleteTag(invoiceId: Int) {
+        try {
+            return withContext(Dispatchers.IO) {
+                linkInvoiceToTagQueries.delete(
+                    invoiceId.toLong()
+                )
+            }
+        } catch (e: Exception) {
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -538,7 +550,7 @@ class InvoiceLocalDataSource(
                     }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -571,7 +583,7 @@ class InvoiceLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -586,7 +598,7 @@ class InvoiceLocalDataSource(
                 document_client_or_issuer_id = documentClientOrIssuerId
             )
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -595,7 +607,7 @@ class InvoiceLocalDataSource(
         try {
             issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return issuer
     }
@@ -605,7 +617,7 @@ class InvoiceLocalDataSource(
         try {
             footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull()?.footer
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return footer
     }
@@ -624,7 +636,7 @@ class InvoiceLocalDataSource(
                 footer = document.footerText.text
             )
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -671,7 +683,7 @@ class InvoiceLocalDataSource(
 
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
@@ -707,7 +719,8 @@ fun saveDocumentProductInDbAndLink(
     documentId: Long?,
     deliveryNoteDate: String?,
     deliveryNoteNumber: String?,
-) {
+): Int? {
+    var documentProductId: Int? = null
     documentProductQueries.saveDocumentProduct(
         document_product_id = null,
         name = documentProduct.name.text,
@@ -722,6 +735,8 @@ fun saveDocumentProductInDbAndLink(
     documentId?.let { documentId ->
         documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
             ?.let { id ->
+                documentProductId = id
+
                 linkDocumentProductToDocument(
                     linkToDocumentProductQueries,
                     documentId,
@@ -737,6 +752,7 @@ fun saveDocumentProductInDbAndLink(
                 }
             }
     }
+    return documentProductId
 }
 
 fun linkDocumentProductToDocument(
@@ -765,7 +781,7 @@ fun linkDocumentProductToDocument(
             )
         }
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
 }
 
@@ -790,7 +806,7 @@ fun linkDocumentProductToDeliveryNoteInfo(
             )
         }
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
 }
 
@@ -854,7 +870,7 @@ fun linkDocumentClientOrIssuerToDocument(
             }
         }
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
 }
 
@@ -933,7 +949,7 @@ private suspend fun saveInfoInAddressTables(
                     }
             }
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 }
@@ -1026,7 +1042,7 @@ fun fetchClientAndIssuer(
             null
 
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
     return null
 }
@@ -1047,7 +1063,7 @@ fun fetchDocumentClientOrIssuerAddresses(
             }.toMutableList()
         } else null
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
     return null
 }

@@ -134,7 +134,7 @@ fun ExportDocumentAndShowProgressBar(
             try {
                 createPdfWithIText(document, context)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
         job.join()
@@ -178,7 +178,7 @@ fun Send(context: Context, document: DocumentState, finalFileName: String) {
                 Toast.LENGTH_LONG
             ).show()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         // startActivity(context, share, null)
     }) {
@@ -221,7 +221,7 @@ fun composeEmail(
         startActivity(context, intent, null)
 
     } catch (e: Exception) {
-        Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
 }
 
@@ -243,7 +243,7 @@ fun Share(context: Context, finalFileName: String) {
                 Toast.LENGTH_LONG
             ).show()
         } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }) {
         Icon(imageVector = IconShare, contentDescription = null)

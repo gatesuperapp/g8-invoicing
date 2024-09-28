@@ -31,5 +31,6 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun update(document: InvoiceState)
     suspend fun delete(documents: List<InvoiceState>)
     suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase)
+    suspend fun deleteTag(invoiceId: Int)
     suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag)
 }

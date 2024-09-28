@@ -223,8 +223,9 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
                         moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                            documentProduct.id  = invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
                             invoiceViewModel.saveDocumentProductInUiState(documentProduct)
-                            invoiceViewModel.saveDocumentProductInLocalDb(documentProduct)
+
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
                             productAddEditViewModel.autoSaveDocumentProductInLocalDb()
@@ -239,8 +240,9 @@ fun NavGraphBuilder.invoiceAddEdit(
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
+                            documentProduct.id  = invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
                             invoiceViewModel.saveDocumentProductInUiState(documentProduct)
-                            invoiceViewModel.saveDocumentProductInLocalDb(documentProduct)
+
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
                             productAddEditViewModel.autoSaveDocumentProductInLocalDb()

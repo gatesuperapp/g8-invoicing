@@ -45,7 +45,7 @@ class CreditNoteListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -56,7 +56,7 @@ class CreditNoteListViewModel @Inject constructor(
             try {
                 creditNoteDataSource.delete(selectedDocuments)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -67,7 +67,7 @@ class CreditNoteListViewModel @Inject constructor(
             try {
                 creditNoteDataSource.duplicate(selectedDocuments)
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -81,7 +81,7 @@ class CreditNoteListViewModel @Inject constructor(
                     it.documentTag = tag
                 }
             } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }

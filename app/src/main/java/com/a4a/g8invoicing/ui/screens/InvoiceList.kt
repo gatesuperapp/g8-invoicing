@@ -260,7 +260,7 @@ fun TextAdvice(uriHandler: UriHandler) {
             annotation = Strings.get(R.string.invoice_advice_legal_url)
         )
         withStyle(style = SpanStyle(color = ColorBlueLink)) {
-            append(Strings.get(R.string.invoice_advice_legal_4) + " ")
+            append(Strings.get(R.string.invoice_advice_legal_4))
         }
         append(Strings.get(R.string.invoice_advice_legal_5))
     }
