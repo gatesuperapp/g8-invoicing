@@ -118,7 +118,6 @@ fun ClientOrIssuerListItem(
                     Column {
                         FlippyCheckBox(
                             fillColor = actionTagUndefined().iconColor,
-                            borderColor = actionTagUndefined().iconBorder,
                             onItemCheckboxClick = {
                                 checkboxFace = checkboxFace.next
                                 checkedState.value = !checkedState.value
@@ -128,7 +127,8 @@ fun ClientOrIssuerListItem(
                                     changeSelectedItemBackgroundColor(backgroundColor.value)
                             },
                             checkboxFace = checkboxFace,
-                            checkedState = checkedState.value
+                            checkedState = checkedState.value,
+
                         )
                     }
                 }

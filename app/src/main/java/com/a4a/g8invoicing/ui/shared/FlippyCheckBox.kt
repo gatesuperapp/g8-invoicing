@@ -24,10 +24,10 @@ import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 @Composable
 fun FlippyCheckBox(
     fillColor: Color?,
-    borderColor: Color?,
     onItemCheckboxClick: (Boolean) -> Unit = {},
     checkboxFace: CheckboxFace,
     checkedState: Boolean,
+    displayBorder: Boolean = true
 ) {
     FlipCard(
         cardFace = checkboxFace,
@@ -57,7 +57,7 @@ fun FlippyCheckBox(
                 }
             }
         },
-        borderColor = borderColor
+        displayBorder = displayBorder
     )
 }
 
@@ -69,7 +69,7 @@ fun FlipCard(
     axis: RotationAxis = RotationAxis.AxisY,
     back: @Composable () -> Unit = {},
     front: @Composable () -> Unit = {},
-    borderColor: Color?,
+    displayBorder: Boolean
 ) {
     val rotation = animateFloatAsState(
         targetValue = cardFace.angle,
@@ -86,10 +86,8 @@ fun FlipCard(
                 //to increase the click touch zone
                 start = 20.dp,
             )
-
             .height(16.dp)
             .width(16.dp)
-
             .graphicsLayer {
                 if (axis == RotationAxis.AxisX) {
                     rotationX = rotation.value
@@ -116,7 +114,7 @@ fun FlipCard(
                 Modifier
                     .border(
                         width = 1.5.dp,
-                        color = ColorGrayTransp,
+                        color = if(displayBorder) ColorGrayTransp else Color.Transparent,
                         shape = CircleShape
                     )
                     .background(Color.White)

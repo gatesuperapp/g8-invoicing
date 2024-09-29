@@ -52,6 +52,16 @@ import java.math.RoundingMode
 
 fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
+    getFile(fileNameBeforeNumbering)?.let {
+        if (it.exists() && it.isFile) {
+            var kk = deleteFile(fileNameBeforeNumbering)
+        }
+    }
+    getFile(fileNameBeforeNumbering)?.let {
+        if (it.exists() && it.isFile) {
+            deleteFile(fileNameBeforeNumbering)
+        }
+    }
 
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     writer.isFullCompression
@@ -163,7 +173,7 @@ fun addPageNumberingAndDeletePreviousFile(
                 doc.close()
                 pdfDoc.close()
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
@@ -769,16 +779,15 @@ fun getFile(fileName: String): File? {
     return File("$folder/g8/$fileName")
 }
 
-private fun deleteFile(fileName: String) {
+private fun deleteFile(fileName: String): Boolean {
+    var isDeleted = false
     val folder =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     val file = File("$folder/g8/$fileName")
     if (file.exists()) {
-        file.delete()
-        //Log.e(ContentValues.TAG, "File deleted successfully: ${file.absolutePath}")
-    } else {
-        //Log.e(ContentValues.TAG, "Error deleting file. ${file.absolutePath}")
+        isDeleted = file.delete()
     }
+    return isDeleted
 }
 
 

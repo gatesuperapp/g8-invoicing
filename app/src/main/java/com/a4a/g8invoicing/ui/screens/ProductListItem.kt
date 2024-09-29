@@ -109,7 +109,6 @@ fun ProductListItem(
                     Column {
                         FlippyCheckBox(
                             fillColor = actionTagUndefined().iconColor,
-                            borderColor = actionTagUndefined().iconBorder,
                             onItemCheckboxClick = {
                                 checkboxFace = checkboxFace.next
                                 checkedState.value = !checkedState.value

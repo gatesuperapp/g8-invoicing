@@ -4,6 +4,8 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -37,6 +39,8 @@ import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
+import com.a4a.g8invoicing.ui.shared.AlertDialogError
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.getFileUri
@@ -56,6 +60,23 @@ fun ExportPdf(
     val context = LocalContext.current
     var isExportOngoing by remember { mutableStateOf(ExportStatus.ONGOING) }
     val finalFileName = "${deliveryNote.documentNumber.text}.pdf"
+
+    val openAlertDialog = remember { mutableStateOf(false) }
+    val errorMessage = remember { mutableStateOf("") }
+    when {
+        openAlertDialog.value -> {
+            AlertDialogError(
+                onDismissRequest = {
+                    openAlertDialog.value = false
+                },
+                onConfirmation = {
+                    openAlertDialog.value = false
+                },
+                errorMessage = errorMessage.value
+            )
+        }
+    }
+
 
     Column(
         modifier = Modifier
@@ -94,6 +115,10 @@ fun ExportPdf(
             context,
             loadingIsOver = {
                 isExportOngoing = ExportStatus.DONE
+            },
+            displayErrorMessage = {
+                errorMessage.value = it ?: ""
+                openAlertDialog.value = true
             }
         )
 
@@ -126,6 +151,7 @@ fun ExportDocumentAndShowProgressBar(
     document: DocumentState,
     context: Context,
     loadingIsOver: () -> Unit,
+    displayErrorMessage: (String?) -> Unit,
 ) {
     var loading by remember { mutableStateOf(true) }
 
@@ -134,7 +160,8 @@ fun ExportDocumentAndShowProgressBar(
             try {
                 createPdfWithIText(document, context)
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                displayErrorMessage(e.message)
+                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
         job.join()
@@ -209,10 +236,12 @@ fun composeEmail(
         intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
         intent.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
 
-        intent.putExtra(
-            Intent.EXTRA_SUBJECT,
-            Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"
-        )
+        if(documentNumber != null) {
+            intent.putExtra(
+                Intent.EXTRA_SUBJECT,
+                Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"
+            )
+        }
         intent.putExtra(Intent.EXTRA_TEXT, emailMessage)
         attachedDocumentUri?.let {
             intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(listOf(it)))

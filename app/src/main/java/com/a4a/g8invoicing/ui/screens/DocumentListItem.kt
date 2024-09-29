@@ -42,6 +42,7 @@ import com.a4a.g8invoicing.ui.navigation.actionTagPaid
 import com.a4a.g8invoicing.ui.navigation.actionTagSent
 import com.a4a.g8invoicing.ui.navigation.actionTagUndefined
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
+import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -132,7 +133,6 @@ fun DocumentListItem(
                 Column {
                     FlippyCheckBox(
                         fillColor = action.iconColor,
-                        borderColor = action.iconBorder,
                         onItemCheckboxClick = {
                             checkboxFace = checkboxFace.next
                             checkedState.value = !checkedState.value
@@ -142,7 +142,8 @@ fun DocumentListItem(
                                 changeSelectedItemBackgroundColor(backgroundColor.value)
                         },
                         checkboxFace = checkboxFace,
-                        checkedState = checkedState.value
+                        checkedState = checkedState.value,
+                        displayBorder = document.documentType != DocumentType.INVOICE
                     )
                 }
 

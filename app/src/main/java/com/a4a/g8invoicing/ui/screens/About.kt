@@ -12,7 +12,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -82,7 +84,7 @@ fun About(
             )
         }
     ) { padding ->
-        val infiniteTransition = rememberInfiniteTransition(label = "border")
+        /*val infiniteTransition = rememberInfiniteTransition(label = "border")
         val targetOffset = with(LocalDensity.current) {
             1000.dp.toPx()
         }
@@ -101,7 +103,7 @@ fun About(
             start = Offset(offset, offset),
             end = Offset(offset + brushSize, offset + brushSize),
             tileMode = TileMode.Mirror
-        )
+        )*/
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -125,13 +127,13 @@ fun About(
                 )
 
                 Button(
-                    modifier = Modifier.border(
+                  /*  modifier = Modifier.border(
                         BorderStroke(
                             width = 4.dp,
                             brush = brush
                         ), shape = RoundedCornerShape(50)
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp),
+                    ),*/
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
                     onClick = {
                         uriHandler.openUri(Strings.get(R.string.about_donate_link))
                     },
@@ -162,6 +164,8 @@ fun About(
                 }
 
                 TermsOfService(uriHandler)
+                Spacer(modifier = Modifier.height(30.dp))
+                Text(stringResource(id = R.string.about_kaomoji))
             }
             Column(
                 // apply darker background when bottom menu is expanded
@@ -201,12 +205,11 @@ fun TermsOfService(uriHandler: UriHandler) {
         text = annotatedString,
         style = MaterialTheme.typography.bodyLarge,
         onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "policy", start = offset, end = offset)
+            annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
                 .firstOrNull()?.let {
                     uriHandler.openUri(it.item)
                 }
-
-            annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
+            annotatedString.getStringAnnotations(tag = "policy", start = offset, end = offset)
                 .firstOrNull()?.let {
                     uriHandler.openUri(it.item)
                 }

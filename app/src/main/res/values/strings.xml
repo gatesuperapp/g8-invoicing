@@ -234,26 +234,27 @@
         Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
+    <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
     <string name="about">
         The Gate (G8) est une application pratique et engagée :\n
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
         &#8226; Conçue pour les paysan·ne·s en priorité\n
-        \nVous pouvez vous abonner pour permettre le développement des prochaines fonctionnalités et bénéficier d\'avantages réservés &#x1F917;
+        \nVous pouvez vous abonner pour permettre le développement des prochaines fonctionnalités et bénéficier d\'avantages réservés !
     </string>
     <string name="about2">
     Pour l\'assistance par mail ou toute autre demande :</string>
     <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez les</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
-    <string name="about_terms_of_service_url_1">https://the-gate.fr/conditions-generales</string>
-    <string name="about_terms_of_service_url_2">https://the-gate.fr/conditions-generales</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
     <string name="about_privacy">politique de confidentialité.</string>
     <string name="account_button_create">Créer mon compte</string>
     <string name="about_button_contact">contact@the-gate.fr</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
-    <string name="about_donate">En savoir plus</string>
+    <string name="about_donate">&#160; ˗ˏˋ  &#160;En savoir plus  ˎˊ˗ &#160;&#160;</string>
     <string name="about_donate_link">https://the-gate.fr/abonnement</string>
     <string name="invoice_advice_legal_1">Bienvenue au G8 aka</string>
     <string name="invoice_advice_legal_2">The Gate</string>
@@ -262,8 +263,8 @@
         \n\n Avant de créer une facture, il est préférable de prendre connaissance des mentions obligatoires à respecter (voir sur le site du gouvernement ou sur\n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5">). \n\n Si vous souhaitez
-        accéder aux autres catégories (bons de livraison, clients..), choisissez le bouton «Menu».\n
-    \n\n Bonne navigation &#x270C;</string>
+        accéder aux autres catégories, choisissez le bouton «Menu».\n
+    \n\n Bon voyage \n\n (㇏(˶ᵔ ᵕ ᵔ˶)ノ)</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
@@ -273,6 +274,8 @@
     <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
+    <string name="alert_dialog_error">Une erreur s\'est produite : \n</string>
+    <string name="alert_dialog_error_confirm">OK pas cool</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
