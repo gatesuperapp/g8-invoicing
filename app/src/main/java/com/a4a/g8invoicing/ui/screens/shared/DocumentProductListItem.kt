@@ -62,7 +62,7 @@ fun DocumentProductListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = documentProduct.quantity.toString(),
+                text = documentProduct.quantity.stripTrailingZeros().toPlainString().replace(".", ","),
                 fontWeight = FontWeight.SemiBold
             )
             Text(

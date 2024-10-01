@@ -197,7 +197,7 @@ fun DocumentListItem(
                         fontWeight = FontWeight.SemiBold,
                     )
                     Text(
-                        text = (document.documentPrices?.let { it.totalPriceWithTax.toString() }
+                        text = (document.documentPrices?.let { it.totalPriceWithTax.toString().replace(".", ",") }
                             ?: "") + stringResource(
                             id = R.string.currency
                         ),

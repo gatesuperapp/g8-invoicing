@@ -260,10 +260,9 @@
     <string name="invoice_advice_legal_2">The Gate</string>
     <string name="invoice_advice_legal_3">!\n\n
         Vous êtes actuellement dans la catégorie «Factures».
-        \n\n Avant de créer une facture, il est préférable de prendre connaissance des mentions obligatoires à respecter (voir sur le site du gouvernement ou sur\n</string>
+        \n\n Avant de créer une facture, nous vous conseillons de prendre connaissance des mentions obligatoires à respecter, elles sont résumées sur\n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5">). \n\n Si vous souhaitez
-        accéder aux autres catégories, choisissez le bouton «Menu».\n
+    <string name="invoice_advice_legal_5">. \n\n Pour accéder aux autres catégories, vous pouvez cliquer sur le bouton «Menu».\n
     \n\n Bon voyage \n\n (㇏(˶ᵔ ᵕ ᵔ˶)ノ)</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :
@@ -274,15 +273,18 @@
     <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
-    <string name="alert_dialog_error">Une erreur s\'est produite : \n</string>
-    <string name="alert_dialog_error_confirm">OK pas cool</string>
+    <string name="alert_dialog_error">((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
+    <string name="alert_dialog_error_confirm">Ouch</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l\'export.</string>
-    <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8)</string>
+    <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
+    <string name="export_clickable_text">ⓘ</string>
+    <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
+        \n\n• Veillez à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte ou vol de votre téléphone. </string>
+    <string name="export_info_popup_validate">a'ight</string>
     <string name="export_send_file">Envoyer par e-mail</string>
-    <string name="export_send_advice">ⓘ Veillez à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage.</string>
     <string name="export_send_file_content">Bonjour, \n
         Veuillez trouver votre document ci-joint.\n
         Cordialement\n\n</string>

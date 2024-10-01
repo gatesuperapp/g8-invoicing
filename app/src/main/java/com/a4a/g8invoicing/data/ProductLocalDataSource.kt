@@ -167,8 +167,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(linkedDate: String? = n
         description = this.description?.let { TextFieldValue(it) },
         priceWithTax = this.final_price?.toBigDecimal()?.setScale(2, RoundingMode.HALF_UP),
         taxRate = this.tax_rate?.toBigDecimal(),
-        quantity = this.quantity.toBigDecimal().setScale(2, RoundingMode.HALF_UP)
-            .stripTrailingZeros(),
+        quantity = this.quantity.toBigDecimal(),
         unit = TextFieldValue(this.unit ?: ""),
         productId = this.product_id?.toInt(),
         linkedDate = linkedDate,

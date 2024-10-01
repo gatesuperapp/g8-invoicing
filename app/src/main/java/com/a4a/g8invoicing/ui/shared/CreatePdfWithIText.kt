@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.PricesRowName
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
@@ -50,18 +51,8 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 
-fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
+fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
     val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
-    getFile(fileNameBeforeNumbering)?.let {
-        if (it.exists() && it.isFile) {
-            var kk = deleteFile(fileNameBeforeNumbering)
-        }
-    }
-    getFile(fileNameBeforeNumbering)?.let {
-        if (it.exists() && it.isFile) {
-            deleteFile(fileNameBeforeNumbering)
-        }
-    }
 
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     writer.isFullCompression
@@ -69,7 +60,6 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
 
     val fontRegular = PdfFontFactory.createFont("assets/helvetica.ttf")
     val fontBold: PdfFont = PdfFontFactory.createFont("assets/helveticabold.ttf")
-
 
     val document = Document(pdfDocument, PageSize.A4)
         .setFont(fontRegular)
@@ -121,16 +111,35 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context) {
     writer.close()
     pdfDocument.close()
 
-    addPageNumberingAndDeletePreviousFile(inputDocument, fileNameBeforeNumbering, context)
+    return addPageNumberingAndDeletePreviousFile(inputDocument, fileNameBeforeNumbering, context)
 }
 
 fun addPageNumberingAndDeletePreviousFile(
     inputDocument: DocumentState,
     fileNameBeforeNumbering: String,
     context: Context,
-) {
+): String {
     val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
-    val finalFileName = "${inputDocument.documentNumber.text}.pdf"
+    var finalFileName = "${inputDocument.documentNumber.text}.pdf"
+    var isDeleted = false
+    getFile(finalFileName)?.let { file ->
+        if (file.exists() && file.isFile) {
+            isDeleted = deleteFile(finalFileName)
+        }
+    }
+    val newName = File(finalFileName).nameWithoutExtension
+    var i = 1
+    while (getFile(finalFileName) != null && getFile(finalFileName)!!.exists() && !isDeleted ) {
+        // When the pdf has been saved the day or more before
+        // it cant be erased anymore, throwing a java.nio.file.NoSuchFileException
+        // because there's no read/write permission. So we're renaming the file in such case
+        finalFileName =
+            newName.substringBefore(" - ") + " - " + (i) + ".pdf"
+
+        isDeleted = deleteFile(finalFileName)
+        i += 1
+    }
+
 
     getFile(fileNameBeforeNumbering)?.let {
         if (it.exists() && it.isFile) {
@@ -142,7 +151,7 @@ fun addPageNumberingAndDeletePreviousFile(
                 val doc = Document(pdfDoc)
                 val numberOfPages = pdfDoc.numberOfPages
 
-                if (inputDocument is InvoiceState && inputDocument.paymentStatus == 2) {
+                if (inputDocument is InvoiceState && inputDocument.documentTag == DocumentTag.PAID) {
                     createPaidStamp(context)?.let {
                         doc.add(it)
                     }
@@ -177,6 +186,7 @@ fun addPageNumberingAndDeletePreviousFile(
             }
         }
     }
+    return finalFileName
 }
 
 private fun getDocumentName(documentType: DocumentType): String {
@@ -548,7 +558,7 @@ private fun addProductsToTable(
             fontRegular = fontRegular
         )
         productsTable.addCustomCell(
-            text = it.quantity.toString(),
+            text = it.quantity.stripTrailingZeros().toPlainString().replace(".", ","),
             fontBold = fontBold,
             fontRegular = fontRegular
         )
@@ -569,13 +579,13 @@ private fun addProductsToTable(
         }
         productsTable.addCustomCell(
             text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
-                .toString() + Strings.get(R.string.currency),
+                .toString().replace(".", ",") + Strings.get(R.string.currency),
             fontBold = fontBold,
             fontRegular = fontRegular
         )
         productsTable.addCustomCell(
             text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
-                .toString() + Strings.get(R.string.currency),
+                .toString().replace(".", ",") + Strings.get(R.string.currency),
             fontBold = fontBold,
             fontRegular = fontRegular
         )
@@ -607,7 +617,8 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
     if (pricesArray.any { it.rowDescription == PricesRowName.TOTAL_WITHOUT_TAX.name }) {
         pricesTable.addCellInPrices(Paragraph(Strings.get(R.string.document_total_without_tax)))
 
-        val totalWithoutTax = Paragraph(documentPrices.totalPriceWithoutTax?.toString() ?: " - ")
+        val totalWithoutTax =
+            Paragraph(documentPrices.totalPriceWithoutTax?.toString()?.replace(".", ",") ?: " - ")
         totalWithoutTax.add(Strings.get(R.string.currency))
         pricesTable.addCellInPrices(totalWithoutTax)
     }
@@ -646,7 +657,8 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
                 Strings.get((R.string.document_total_with_tax)) + " "
             ).setFont(font)
         )
-        val totalWithTax = Paragraph(documentPrices.totalPriceWithTax?.toString() ?: " - ")
+        val totalWithTax =
+            Paragraph(documentPrices.totalPriceWithTax?.toString()?.replace(".", ",") ?: " - ")
         totalWithTax.add(Strings.get(R.string.currency))
         pricesTable.addCellInPrices(totalWithTax.setFont(font))
     }
@@ -713,7 +725,7 @@ private fun Table.addCustomCell(
         .setFont(if (isBold) fontBold else fontRegular)
 
     if (text != null) {
-        cell.add(Paragraph(text))
+        cell.add(Paragraph(text).setFixedLeading(10F))
     } else {
         paragraphs?.filterNotNull()?.forEach {
             cell.add(it)

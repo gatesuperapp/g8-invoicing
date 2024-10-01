@@ -4,8 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -17,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,16 +30,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Blue
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.AlertDialogError
+import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.getFileUri
@@ -59,20 +62,36 @@ fun ExportPdf(
 ) {
     val context = LocalContext.current
     var isExportOngoing by remember { mutableStateOf(ExportStatus.ONGOING) }
-    val finalFileName = "${deliveryNote.documentNumber.text}.pdf"
+    var finalFileName by remember { mutableStateOf("") }
 
-    val openAlertDialog = remember { mutableStateOf(false) }
+    val openErrorDialog = remember { mutableStateOf(false) }
     val errorMessage = remember { mutableStateOf("") }
     when {
-        openAlertDialog.value -> {
-            AlertDialogError(
+        openErrorDialog.value -> {
+            AlertDialogErrorOrInfo(
                 onDismissRequest = {
-                    openAlertDialog.value = false
+                    openErrorDialog.value = false
                 },
                 onConfirmation = {
-                    openAlertDialog.value = false
+                    openErrorDialog.value = false
                 },
-                errorMessage = errorMessage.value
+                message = Strings.get(R.string.alert_dialog_error) + errorMessage.value,
+                confirmationText = stringResource(id = R.string.alert_dialog_error_confirm)
+            )
+        }
+    }
+    val openInfoDialog = remember { mutableStateOf(false) }
+    when {
+        openInfoDialog.value -> {
+            AlertDialogErrorOrInfo(
+                onDismissRequest = {
+                    openInfoDialog.value = false
+                },
+                onConfirmation = {
+                    openInfoDialog.value = false
+                },
+                message = Strings.get(R.string.export_info_popup) + errorMessage.value,
+                confirmationText = stringResource(id = R.string.export_info_popup_validate)
             )
         }
     }
@@ -110,38 +129,43 @@ fun ExportPdf(
             style = MaterialTheme.typography.headlineSmall,
             color = Color.White
         )
+
         ExportDocumentAndShowProgressBar(
             deliveryNote,
             context,
             loadingIsOver = {
+                finalFileName = it
                 isExportOngoing = ExportStatus.DONE
             },
             displayErrorMessage = {
                 errorMessage.value = it ?: ""
-                openAlertDialog.value = true
+                openErrorDialog.value = true
             }
         )
 
         if (isExportOngoing == ExportStatus.DONE) {
             Text(
                 modifier = Modifier
-                    .padding(bottom = 50.dp),
+                    .padding(bottom = 5.dp),
                 text = stringResource(R.string.export_done_file_location),
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleSmall,
-                color = Color.White
+                color = White
             )
+
+            ClickableText(
+                modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 50.dp),
+                onClick = { openInfoDialog.value = true },
+                style = TextStyle(
+                    color = White,
+                    fontSize = 18.sp
+                ),
+                text = AnnotatedString(Strings.get(R.string.export_clickable_text)),
+            )
+
 
             Send(context, deliveryNote, finalFileName)
             Share(context, finalFileName)
-
-            Text(
-                modifier = Modifier
-                    .padding(50.dp),
-                text = stringResource(R.string.export_send_advice),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleSmall,
-                color = Color.White
-            )
         }
     }
 }
@@ -150,15 +174,16 @@ fun ExportPdf(
 fun ExportDocumentAndShowProgressBar(
     document: DocumentState,
     context: Context,
-    loadingIsOver: () -> Unit,
+    loadingIsOver: (String) -> Unit,
     displayErrorMessage: (String?) -> Unit,
 ) {
     var loading by remember { mutableStateOf(true) }
 
     LaunchedEffect(true) {
+        var fileName = ""
         val job: Job = launch(context = Dispatchers.Default) {
             try {
-                createPdfWithIText(document, context)
+                fileName = createPdfWithIText(document, context)
             } catch (e: Exception) {
                 displayErrorMessage(e.message)
                 Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -166,7 +191,7 @@ fun ExportDocumentAndShowProgressBar(
         }
         job.join()
         loading = false
-        loadingIsOver()
+        loadingIsOver(fileName)
     }
 
     if (!loading) {
@@ -236,7 +261,7 @@ fun composeEmail(
         intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
         intent.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
 
-        if(documentNumber != null) {
+        if (documentNumber != null) {
             intent.putExtra(
                 Intent.EXTRA_SUBJECT,
                 Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"

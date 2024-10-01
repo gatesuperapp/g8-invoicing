@@ -71,7 +71,7 @@ fun DocumentBasicTemplatePrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(id = R.string.document_tax) + " " + it.first.toString() + "% : "
+                            text = stringResource(id = R.string.document_tax) + " " + it.first.toString().replace(".", ",") + "% : "
                         )
                     }
                 }
@@ -96,7 +96,7 @@ fun DocumentBasicTemplatePrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom, end = 3.dp),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentPrices?.totalPriceWithoutTax?.toString()
+                    text = (uiState.documentPrices?.totalPriceWithoutTax?.toString()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
@@ -118,7 +118,7 @@ fun DocumentBasicTemplatePrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom, end = 3.dp),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = it.second.toString() + stringResource(id = R.string.currency)
+                            text = it.second.toString().replace(".", ",") + stringResource(id = R.string.currency)
                         )
                     }
                 }
@@ -128,7 +128,7 @@ fun DocumentBasicTemplatePrices(
                     modifier = Modifier
                         .padding(end = 3.dp),
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = (uiState.documentPrices?.totalPriceWithTax?.toString()
+                    text = (uiState.documentPrices?.totalPriceWithTax?.toString()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }

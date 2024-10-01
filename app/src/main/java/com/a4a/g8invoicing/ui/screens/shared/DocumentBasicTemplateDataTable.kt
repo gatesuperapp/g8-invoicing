@@ -182,7 +182,7 @@ fun DocumentProductsRows(
                 subText = it.description?.text
             )
             TableCell(
-                text = it.quantity.toString() + " ",
+                text = it.quantity.stripTrailingZeros().toPlainString().replace(".", ",") + " ",
                 weight = quantityColumnWeight,
                 alignEnd = true
             )
@@ -198,12 +198,12 @@ fun DocumentProductsRows(
             )
             TableCell(
                 text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
-                    .toString() + stringResource(id = R.string.currency),
+                    .toString().replace(".", ",") + stringResource(id = R.string.currency),
                 alignEnd = true
             )
             TableCell(
                 text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
-                    .toString() + stringResource(id = R.string.currency),
+                    .toString().replace(".", ",") + stringResource(id = R.string.currency),
                 alignEnd = true
             )
 
