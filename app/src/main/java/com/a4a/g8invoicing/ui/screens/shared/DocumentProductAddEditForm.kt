@@ -18,6 +18,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -107,7 +108,7 @@ fun DocumentProductAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.product_description),
                     inputType = TextInput(
-                        text = documentProduct.description,
+                        text = documentProduct.description ?: TextFieldValue(""),
                         placeholder = stringResource(id = R.string.product_description_input),
                         onValueChange = {
                             bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION, it)
@@ -155,7 +156,7 @@ fun DocumentProductAddEditForm(
                 FormInput(
                     label = stringResource(id = R.string.product_unit),
                     inputType = TextInput(
-                        text = documentProduct.unit,
+                        text = documentProduct.unit ?: TextFieldValue(""),
                         placeholder = stringResource(id = R.string.product_unit_input),
                         onValueChange = {
                             bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT, it)

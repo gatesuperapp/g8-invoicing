@@ -1022,10 +1022,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
                 FormInputsValidator.validateName(_documentIssuerUiState.value.name.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 FormInputsValidator.validateEmail(_documentIssuerUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
+                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
                 }
                 _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
                     errors = listOfErrors

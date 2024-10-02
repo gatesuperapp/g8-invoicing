@@ -172,7 +172,6 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(linkedDate: String? = n
         productId = this.product_id?.toInt(),
         linkedDate = linkedDate,
         linkedDocNumber = linkedDocNumber
-
     )
 }
 
