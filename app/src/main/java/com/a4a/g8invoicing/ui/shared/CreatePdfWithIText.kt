@@ -7,6 +7,10 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
@@ -63,31 +67,64 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
 
     val document = Document(pdfDocument, PageSize.A4)
         .setFont(fontRegular)
-        .setFontSize(10F)
+        .setFontSize(9.5F)
+
+    val titleFontSize = 20F
+    val dateFontSize = 16F
+    val clientAndIssuerFontSize = 9.5F
+    val referenceFontSize = 9.5F
+    val productTableFontSize = 9.5F
+    val footerFontSize = 9.5F
 
     document.add(
         createTitle(
             inputDocument.documentNumber.text,
             inputDocument.documentType,
-            fontRegular
+            fontBold,
+            titleFontSize
         )
     )
-    document.add(createDate(inputDocument.documentDate.substringBefore(" ")))
+    document.add(
+        createDate(
+            inputDocument.documentDate.substringBefore(" "),
+            fontBold,
+            dateFontSize
+        )
+    )
     document.add(
         createIssuerAndClientTable(
             inputDocument.documentIssuer,
             inputDocument.documentClient,
-            fontBold
+            fontBold,
+            clientAndIssuerFontSize
         )
     )
-    inputDocument.reference?.let {
-        if (it.text.isNotEmpty()) {
-            document.add(
-                createReference(it.text, fontBold)
-                    .setPaddingBottom(2f)
-            )
+    if (!inputDocument.reference?.text.isNullOrEmpty()) {
+        inputDocument.reference?.let {
+            if (it.text.isNotEmpty()) {
+                document.add(
+                    createReference(it.text, fontBold)
+                        .setMarginTop(4F)
+                )
+            }
         }
     }
+
+    if (!inputDocument.freeField?.text.isNullOrEmpty()) {
+        inputDocument.freeField?.let {
+            if (it.text.isNotEmpty()) {
+                document.add(
+                    createFreeText(it.text, fontRegular)
+                        .setMarginTop(
+                            if (!inputDocument.reference?.text.isNullOrEmpty())
+                                2F
+                            else 10F
+                        )
+                )
+            }
+        }
+    }
+
     inputDocument.documentProducts?.let {
         createProductsTable(it, fontBold = fontBold, fontRegular = fontRegular)?.let {
             try {
@@ -96,13 +133,31 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
+
     }
     inputDocument.documentPrices?.let {
-        document.add(createPrices(fontBold, it))
+        document.add(
+            createPrices(
+                fontBold,
+                it,
+                productTableFontSize
+            )
+        )
     }
     if (inputDocument is InvoiceState) {
-        document.add(createDueDate(fontBold, inputDocument.dueDate.substringBefore(" ")))
-        document.add(createFooter(inputDocument.footerText.text))
+        document.add(
+            createDueDate(
+                fontBold,
+                inputDocument.dueDate.substringBefore(" "),
+                footerFontSize
+            )
+        )
+        document.add(
+            createFooter(
+                inputDocument.footerText.text,
+                footerFontSize
+            )
+        )
     }
 
     document.close()
@@ -129,13 +184,13 @@ fun addPageNumberingAndDeletePreviousFile(
     }
     val newName = File(finalFileName).nameWithoutExtension
     var i = 1
-    while (getFile(finalFileName) != null && getFile(finalFileName)!!.exists() && !isDeleted ) {
+    while (getFile(finalFileName) != null && getFile(finalFileName)!!.exists() && !isDeleted) {
         // When the pdf has been saved the day or more before
         // it cant be erased anymore, throwing a java.nio.file.NoSuchFileException
         // because there's no read/write permission. So we're renaming the file in such case
         finalFileName =
             newName.substringBefore(" - ") + " - " + (i) + ".pdf"
-
+        ""
         isDeleted = deleteFile(finalFileName)
         i += 1
     }
@@ -201,6 +256,7 @@ private fun createTitle(
     documentNumber: String,
     documentType: DocumentType? = null,
     font: PdfFont,
+    titleFontSize: Float,
 ): Paragraph {
     var title = ""
     documentType?.let {
@@ -209,14 +265,15 @@ private fun createTitle(
 
     return Paragraph(title + documentNumber)
         .setFont(font)
-        .setFontSize(22F)
+        .setFontSize(titleFontSize)
         .setMarginBottom(-6F)
 }
 
-private fun createDate(date: String): Paragraph {
+private fun createDate(date: String, font: PdfFont, fontSize: Float): Paragraph {
     return Paragraph(Strings.get(R.string.document_date) + " : " + date)
-        .setFontSize(16F)
-        .setMarginBottom(16F)
+        .setFont(font)
+        .setFontSize(fontSize)
+        .setMarginBottom(24F)
 }
 
 
@@ -224,10 +281,10 @@ private fun createIssuerAndClientTable(
     issuer: ClientOrIssuerState?,
     client: ClientOrIssuerState?,
     font: PdfFont,
+    fontSize: Float,
 ): Table {
     val issuerAndClientTable = Table(2)
         .useAllAvailableWidth()
-        .setMarginBottom(10F)
         .setFixedLayout()
 
     // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
@@ -235,7 +292,7 @@ private fun createIssuerAndClientTable(
         issuerAndClientTable.addCell(
             Cell().setBorder(Border.NO_BORDER)
         )
-        issuerAndClientTable.addCell(createAddressTitle(it, 0))
+        issuerAndClientTable.addCell(createAddressTitle(it, 0, fontSize))
 
         // ROW X : Just adding space
         issuerAndClientTable.addCell(
@@ -250,7 +307,7 @@ private fun createIssuerAndClientTable(
 
     // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
     issuer?.let {
-        val issuerContent = createClientOrIssuerParagraph(it, font)
+        val issuerContent = createClientOrIssuerParagraph(it, font, fontSize = fontSize)
         val issuerCell = Cell().setBorder(Border.NO_BORDER)
         issuerContent.forEach {
             issuerCell.add(it)
@@ -260,7 +317,7 @@ private fun createIssuerAndClientTable(
     client?.let {
         issuerAndClientTable.addCell(
             createClientRectangleAndContent(
-                createClientOrIssuerParagraph(it, font)
+                createClientOrIssuerParagraph(it, font, fontSize = fontSize)
             ).setPaddingBottom(8f)
         )
         // ROW X : Just adding space
@@ -280,7 +337,7 @@ private fun createIssuerAndClientTable(
         val numberOfAddresses = addresses.size ?: 1
         for (i in 1..<numberOfAddresses) {
             addresses.let {
-                issuerAndClientTable.addCell(createAddressTitle(it, i))
+                issuerAndClientTable.addCell(createAddressTitle(it, i, fontSize = fontSize))
             }
         }
         // ROW X : Just adding space
@@ -301,7 +358,8 @@ private fun createIssuerAndClientTable(
                         client,
                         font,
                         displayAllInfo = false,
-                        addressIndex = i
+                        addressIndex = i,
+                        fontSize = fontSize
                     )
                 )
             )
@@ -320,7 +378,11 @@ private fun createIssuerAndClientTable(
     return issuerAndClientTable
 }
 
-private fun createAddressTitle(addresses: List<AddressState>, index: Int): Cell {
+private fun createAddressTitle(
+    addresses: List<AddressState>,
+    index: Int,
+    fontSize: Float,
+): Cell {
     return Cell()
         .setBorder(Border.NO_BORDER)
         .add(
@@ -334,6 +396,7 @@ private fun createAddressTitle(addresses: List<AddressState>, index: Int): Cell 
             )
                 .setFontColor(ColorConstants.DARK_GRAY)
                 .setFixedLeading(6F)
+                .setFontSize(fontSize)
         )
         .setTextAlignment(TextAlignment.CENTER)
 }
@@ -355,6 +418,7 @@ private fun createClientOrIssuerParagraph(
     font: PdfFont,
     displayAllInfo: Boolean = true,
     addressIndex: Int = 0,
+    fontSize: Float,
 ): MutableList<Paragraph> {
     var listToReturn: MutableList<Paragraph> = mutableListOf()
     val address = clientOrIssuer?.addresses?.get(addressIndex)
@@ -428,10 +492,20 @@ private fun createClientOrIssuerParagraph(
     return listToReturn
 }
 
-private fun createReference(orderNumber: String, font: PdfFont): Paragraph {
+private fun createReference(
+    text: String,
+    font: PdfFont,
+): Paragraph {
     val reference = Text(Strings.get(R.string.document_reference) + " : ").setFont(font)
     return Paragraph(reference)
-        .add(orderNumber)
+        .add(text)
+}
+
+private fun createFreeText(
+    text: String,
+    font: PdfFont
+): Paragraph {
+    return Paragraph(text).setFont(font)
 }
 
 private fun createProductsTable(
@@ -440,10 +514,11 @@ private fun createProductsTable(
     fontBold: PdfFont,
 ): Table? {
     try {
-        val columnWidth = floatArrayOf(49f, 10f, 10f, 10f, 10f, 11f)
+        val columnWidth = floatArrayOf(45f, 9f, 13f, 8f, 12f, 13f)
         val productsTable = Table(UnitValue.createPercentArray(columnWidth))
             .useAllAvailableWidth()
-            .setMarginBottom(10f)
+            .setMarginTop(10f)
+            .setMarginBottom(12f)
             .setFixedLayout()
 
         productsTable
@@ -497,7 +572,9 @@ private fun createProductsTable(
                 )
                 addProductsToTable(
                     products.filter { it.linkedDocNumber == docNumberAndDate.first },
-                    productsTable, fontBold = fontBold, fontRegular = fontRegular
+                    productsTable,
+                    fontBold = fontBold,
+                    fontRegular = fontRegular
                 )
             }
         } else {
@@ -505,7 +582,7 @@ private fun createProductsTable(
                 products,
                 productsTable,
                 fontBold = fontBold,
-                fontRegular = fontRegular
+                fontRegular = fontRegular,
             )
         }
         return productsTable
@@ -526,7 +603,8 @@ private fun addDeliveryNoteRow(
         alignment = TextAlignment.LEFT,
         isBold = true,
         isSpan = true,
-        fontBold = fontBold, fontRegular = fontRegular
+        fontBold = fontBold,
+        fontRegular = fontRegular,
     )
 }
 
@@ -574,7 +652,7 @@ private fun addProductsToTable(
         var priceWithoutTax = BigDecimal(0)
         it.priceWithTax?.let { priceWithTax ->
             priceWithoutTax =
-                (priceWithTax - priceWithTax * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100))
+                BigDecimal(priceWithTax.toDouble() / (1.0 + (it.taxRate ?: 0).toDouble() / 100.0))
 
         }
         productsTable.addCustomCell(
@@ -592,7 +670,7 @@ private fun addProductsToTable(
     }
 }
 
-private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
+private fun createPrices(font: PdfFont, documentPrices: DocumentPrices, fontSize: Float): Table {
     val pricesArray = listOf(
         PriceRow(
             rowDescription = "TOTAL_WITHOUT_TAX"
@@ -613,6 +691,7 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
         .useAllAvailableWidth()
         .setTextAlignment(TextAlignment.RIGHT)
         .setPaddingBottom(8f)
+        .setPaddingRight(4f)
 
     if (pricesArray.any { it.rowDescription == PricesRowName.TOTAL_WITHOUT_TAX.name }) {
         pricesTable.addCellInPrices(Paragraph(Strings.get(R.string.document_total_without_tax)))
@@ -655,23 +734,24 @@ private fun createPrices(font: PdfFont, documentPrices: DocumentPrices): Table {
         pricesTable.addCellInPrices(
             Paragraph(
                 Strings.get((R.string.document_total_with_tax)) + " "
-            ).setFont(font)
+            ).setFont(font).setFontSize(fontSize)
         )
         val totalWithTax =
             Paragraph(documentPrices.totalPriceWithTax?.toString()?.replace(".", ",") ?: " - ")
         totalWithTax.add(Strings.get(R.string.currency))
-        pricesTable.addCellInPrices(totalWithTax.setFont(font))
+        pricesTable.addCellInPrices(totalWithTax.setFont(font).setFontSize(fontSize))
     }
 
     return pricesTable
 }
 
-private fun createDueDate(font: PdfFont, date: String): Paragraph {
+private fun createDueDate(font: PdfFont, date: String, fontSize: Float): Paragraph {
     return Paragraph(Strings.get(R.string.invoice_pdf_due_date) + " : " + date)
         .setFixedLeading(16F)
         .setPaddingTop(12f)
         .setTextAlignment(TextAlignment.CENTER)
         .setFont(font)
+        .setFontSize(fontSize)
 }
 
 private fun createPaidStamp(context: Context): Image? {
@@ -696,8 +776,9 @@ private fun createPaidStamp(context: Context): Image? {
 }
 
 
-private fun createFooter(text: String): Paragraph {
+private fun createFooter(text: String, fontSize: Float): Paragraph {
     return Paragraph(text)
+        .setFontSize(fontSize)
         .setFixedLeading(14F)
         .setTextAlignment(TextAlignment.CENTER)
 }
@@ -712,7 +793,7 @@ private fun Table.addCustomCell(
     fontRegular: PdfFont,
 ): Table {
     val paddingLeftOrRight = 6f
-    val paddingTopOrBottom = if (isBold) 4f else 3f
+    val paddingTopOrBottom = if (isBold) 5f else 3f
     val colSpan = if (isSpan) 6 else 1
 
     val cell = Cell(1, colSpan)

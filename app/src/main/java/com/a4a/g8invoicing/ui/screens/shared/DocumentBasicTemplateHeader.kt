@@ -2,8 +2,6 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,8 +25,6 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
-import com.a4a.g8invoicing.ui.theme.ColorGreyo
-import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.subTitleForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 import com.a4a.g8invoicing.ui.theme.titleForDocuments
@@ -39,7 +35,6 @@ fun DocumentBasicTemplateHeader(
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
-
     Row(
         Modifier
             .fillMaxWidth()
@@ -71,7 +66,7 @@ fun DocumentBasicTemplateHeader(
                     id = if (document is DeliveryNoteState) R.string.delivery_note_number
                     else if (document is CreditNoteState) R.string.credit_note_number
                     else R.string.invoice_number
-                ) + " " + document.documentNumber.text
+                ) + document.documentNumber.text
             )
 
             Spacer(
@@ -81,7 +76,7 @@ fun DocumentBasicTemplateHeader(
 
             Text(
                 modifier = Modifier
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 8.dp)
                     .getBorder(ScreenElement.DOCUMENT_DATE, selectedItem)
                     .customCombinedClickable(
                         onClick = {
@@ -126,6 +121,7 @@ fun DocumentBasicTemplateHeader(
 
     // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
     Row() {
+        val numberOfAddresses = document.documentClient?.addresses?.size ?: 0
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
@@ -213,20 +209,11 @@ fun DocumentClientRectangleAndContent(
     addressIndex: Int,
     displayAllInfo: Boolean,
 ) {
-    var customModifier1 = Modifier.fillMaxWidth()
-    customModifier1 = if (addressIndex == 0)
-        customModifier1.then(
-            Modifier
-                .padding(bottom = 6.dp)
-        )
-    else
-        customModifier1.then(
-            Modifier
-                .padding(bottom = 20.dp)
-        )
 
     Column(
-        modifier = customModifier1,
+        modifier = Modifier
+            .padding(bottom = 6.dp)
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var customModifier2 = Modifier

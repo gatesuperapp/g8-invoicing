@@ -295,6 +295,10 @@ class InvoiceAddEditViewModel @Inject constructor(
                 doc = doc.copy(reference = value as TextFieldValue)
             }
 
+            ScreenElement.DOCUMENT_FREE_FIELD -> {
+                doc = doc.copy(freeField = value as TextFieldValue)
+            }
+
             ScreenElement.DOCUMENT_PRODUCT -> {
                 val updatedDocumentProduct = value as DocumentProductState
                 val list =

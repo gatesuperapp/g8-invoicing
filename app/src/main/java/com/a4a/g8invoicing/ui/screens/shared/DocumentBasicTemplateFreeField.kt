@@ -30,7 +30,7 @@ fun DocumentBasicTemplateFreeField(
 
     ) {
         Text(
-            style = MaterialTheme.typography.textForDocumentsBold,
+            style = MaterialTheme.typography.textForDocuments,
             text = freeField
         )
     }

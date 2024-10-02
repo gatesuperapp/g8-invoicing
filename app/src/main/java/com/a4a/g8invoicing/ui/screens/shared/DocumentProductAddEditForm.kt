@@ -74,9 +74,8 @@ fun DocumentProductAddEditForm(
             documentProduct.let {productState ->
                 productState.taxRate?.let {taxRate ->
                     productState.priceWithTax?.let { priceWithTax ->
-                        priceWithoutTax = priceWithTax - priceWithTax * taxRate / BigDecimal(100)
+                        priceWithoutTax = BigDecimal(priceWithTax.toDouble() / (1.0 + taxRate.toDouble() / 100.0))
                     }
-
                 }
             }
             // Create the list with all fields

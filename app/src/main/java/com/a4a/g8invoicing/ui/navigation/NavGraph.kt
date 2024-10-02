@@ -32,7 +32,7 @@ fun NavGraph(navController: NavHostController) {
         startDestination = (Screen.InvoiceList.name),
         // startDestination = (Screen.CreditNoteList.name),
         // startDestination = (Screen.DeliveryNoteList.name),
-        // startDestination = (Screen.ProductList.name),
+        //  startDestination = (Screen.ProductList.name),
         // startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
         //  startDestination = (Screen.ClientOrIssuerList.name),

@@ -38,7 +38,7 @@ fun FormInputCreatorDoublePrice(
     taxRate: BigDecimal? = null,
     keyboardOption: ImeAction,
     formActions: KeyboardActions,
-    focusRequester: FocusRequester?,
+    focusRequester: FocusRequester?
 ) {
     // Stateful : mutable values are remembered here - avoids recomposing all form
     var text1 by remember { mutableStateOf(textInput1.text) }
@@ -69,7 +69,8 @@ fun FormInputCreatorDoublePrice(
         taxRate?.let { tax ->
             if (isFirstField) {
                 text2 = newValue.toBigDecimalOrNull()?.let {
-                    formatWithTwoDecimals.format(it - it * tax / BigDecimal(100)).toString()
+                    val value = it.toDouble() / (1.0 + tax.toDouble() / 100.0)
+                    formatWithTwoDecimals.format(BigDecimal(value)).toString()
                 }?.toString() ?: ""
             } else {
                 text1 = newValue.toBigDecimalOrNull()?.let {

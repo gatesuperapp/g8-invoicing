@@ -44,7 +44,7 @@ fun DocumentBasicTemplateContent(
     prices: List<String>,
     selectedItem: ScreenElement? = null,
 ) {
-    val pagePadding = 20.dp
+    val pagePadding = 24.dp
 
     Box(
         modifier = Modifier
@@ -73,34 +73,32 @@ fun DocumentBasicTemplateContent(
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem)
 
-            document.reference?.let {
-                if (it.text.isNotEmpty())
-                    DocumentBasicTemplateReference(
-                        it.text,
-                        onClickElement,
-                        selectedItem
-                    )
-            }
-            document.freeField?.let {
-                if(document.reference != null ) {
-                    Spacer(modifier = Modifier.height(6.dp))
+            if(!document.reference?.text.isNullOrEmpty()) {
+                document.reference?.let {
+                    Spacer(Modifier.height(14.dp))
+                    if (it.text.isNotEmpty())
+                        DocumentBasicTemplateReference(
+                            it.text,
+                            onClickElement,
+                            selectedItem
+                        )
                 }
-                if (it.text.isNotEmpty())
-                    DocumentBasicTemplateFreeField(
-                        it.text,
-                        onClickElement,
-                        selectedItem
-                    )
+            }
+            if(!document.freeField?.text.isNullOrEmpty()) {
+                document.freeField?.let {
+                    if (!document.reference?.text.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                    } else Spacer(Modifier.height(10.dp))
+                    if (it.text.isNotEmpty())
+                        DocumentBasicTemplateFreeField(
+                            it.text,
+                            onClickElement,
+                            selectedItem
+                        )
+                }
             }
 
-            if(document.reference == null && document.freeField == null) {
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-
-            Spacer(
-                modifier = Modifier
-                    .padding(bottom = 6.dp)
-            )
+            Spacer(Modifier.height(10.dp))
 
             Box(
             ) {
@@ -138,7 +136,6 @@ fun DocumentBasicTemplateContent(
                 document,
                 onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) }
             )
-
         }
     }
 }

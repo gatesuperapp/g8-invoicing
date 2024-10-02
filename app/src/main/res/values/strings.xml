@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">G8 Invoicing</string>
+    <string name="app_name">G8</string>
     <string name="ic_arrow_back">Back button</string>
     <string name="next">Next</string>
     <string name="start_app">Start using the app</string>
@@ -283,7 +283,7 @@
     <string name="export_clickable_text">ⓘ</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
         \n\n• Veillez à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte ou vol de votre téléphone. </string>
-    <string name="export_info_popup_validate">a'ight</string>
+    <string name="export_info_popup_validate">okurrr</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n
         Veuillez trouver votre document ci-joint.\n

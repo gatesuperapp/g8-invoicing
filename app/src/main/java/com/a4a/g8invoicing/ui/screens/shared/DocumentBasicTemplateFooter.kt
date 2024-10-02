@@ -29,7 +29,7 @@ fun DocumentBasicTemplateFooter(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 10.dp)
+            .padding(top = 8.dp)
             .customCombinedClickable(
                 onClick = {
                     onClickElement(ScreenElement.DOCUMENT_FOOTER)

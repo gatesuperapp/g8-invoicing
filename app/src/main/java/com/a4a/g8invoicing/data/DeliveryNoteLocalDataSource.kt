@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.util.Calendar
 
 class DeliveryNoteLocalDataSource(
@@ -437,10 +438,8 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrice
     val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
     groupedItems.values.forEach { documentProduct ->
         val listOfAmounts = documentProduct.filter { it.priceWithTax != null }.map {
-            val priceWithoutTax =
-                it.priceWithTax!! - it.priceWithTax!! * (it.taxRate ?: BigDecimal(0)) / BigDecimal(
-                    100
-                )
+            val value = it.priceWithTax!!.toDouble() / (1.0 + (it.taxRate ?: 0.0).toDouble() / 100.0)
+            val priceWithoutTax = BigDecimal(value)
 
             priceWithoutTax * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
         }
