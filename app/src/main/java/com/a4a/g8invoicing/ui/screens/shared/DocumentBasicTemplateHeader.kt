@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -60,7 +58,6 @@ fun DocumentBasicTemplateHeader(
                         onLongClick = {
                         }
                     ),
-                fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleForDocuments,
                 text = stringResource(
                     id = if (document is DeliveryNoteState) R.string.delivery_note_number
@@ -85,7 +82,6 @@ fun DocumentBasicTemplateHeader(
                         onLongClick = {
                         }
                     ),
-                fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.subTitleForDocuments,
                 text = stringResource(id = R.string.document_date) + " : " + document.documentDate.substringBefore(
                     " "

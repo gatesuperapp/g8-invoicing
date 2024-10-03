@@ -12,15 +12,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -48,19 +56,21 @@ fun DocumentBottomSheetFormModal(
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
-    onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {}
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {},
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
+
 
     ModalBottomSheet(
         onDismissRequest = onClickCancel,
         sheetState = sheetState,
         dragHandle = null
     ) {
-        Column(modifier = Modifier
-            .padding(bottom = bottomPadding)
+        Column(
+            modifier = Modifier
+                .padding(bottom = bottomPadding)
         ) {
             Row(
                 modifier = Modifier
@@ -120,7 +130,11 @@ fun DocumentBottomSheetFormModal(
                 ClientOrIssuerAddEditForm(
                     clientOrIssuerUiState = documentClientUiState,
                     onValueChange = { screenElement, value ->
-                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
+                        bottomFormOnValueChange(
+                            screenElement,
+                            value,
+                            ClientOrIssuerType.DOCUMENT_CLIENT
+                        )
                     },
                     placeCursorAtTheEndOfText = {
                         bottomFormPlaceCursor(it, ClientOrIssuerType.DOCUMENT_CLIENT)
@@ -134,7 +148,11 @@ fun DocumentBottomSheetFormModal(
                 ClientOrIssuerAddEditForm(
                     clientOrIssuerUiState = documentIssuerUiState,
                     onValueChange = { screenElement, value ->
-                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
+                        bottomFormOnValueChange(
+                            screenElement,
+                            value,
+                            ClientOrIssuerType.DOCUMENT_ISSUER
+                        )
                     },
                     placeCursorAtTheEndOfText = {
                         bottomFormPlaceCursor(it, ClientOrIssuerType.DOCUMENT_ISSUER)

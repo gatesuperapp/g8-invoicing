@@ -154,6 +154,7 @@ class CreditNoteLocalDataSource(
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.issuing_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
+                freeField = it.free_field?.let { TextFieldValue(text = it) },
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,

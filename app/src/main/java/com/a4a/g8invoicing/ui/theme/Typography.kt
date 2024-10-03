@@ -213,11 +213,12 @@ val Typography.textForDocumentsSecondary: TextStyle
         )
     }
 
+
 val Typography.titleForDocuments: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = pdfFont,
+            fontFamily = pdfFontBold,
             fontSize = 13.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
@@ -229,7 +230,7 @@ val Typography.subTitleForDocuments: TextStyle
     @Composable
     get() {
         return TextStyle(
-            fontFamily = pdfFont,
+            fontFamily = pdfFontBold,
             fontSize = 10.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,

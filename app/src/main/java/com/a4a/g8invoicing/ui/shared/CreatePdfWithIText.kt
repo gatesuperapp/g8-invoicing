@@ -56,7 +56,25 @@ import java.math.RoundingMode
 
 
 fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
-    val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
+    var fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
+
+    // Check if this file already exists and delete it
+    var isDeleted = false
+    getFile(fileNameBeforeNumbering)?.let { file ->
+        if (file.exists() && file.isFile) {
+            isDeleted = deleteFile(fileNameBeforeNumbering)
+        }
+    }
+    val newName = File(fileNameBeforeNumbering).nameWithoutExtension
+    var i = 1
+    while (getFile(fileNameBeforeNumbering) != null && getFile(fileNameBeforeNumbering)!!.exists() && !isDeleted) {
+        // When the pdf has been saved the day or more before
+        // it cant be erased anymore, throwing a java.nio.file.NoSuchFileException
+        // because there's no read/write permission. So we're renaming the file in such case
+        fileNameBeforeNumbering = newName.substringBefore(" - ") + " - " + (i) + ".pdf"
+        isDeleted = deleteFile(fileNameBeforeNumbering)
+        i += 1
+    }
 
     val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
     writer.isFullCompression
@@ -128,7 +146,14 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
     inputDocument.documentProducts?.let {
         createProductsTable(it, fontBold = fontBold, fontRegular = fontRegular)?.let {
             try {
-                document.add(it)
+                document.add(
+                    it
+                        .setMarginTop(
+                            if (inputDocument.reference?.text.isNullOrEmpty() && inputDocument.reference?.text.isNullOrEmpty()) 20f
+                            else 10f
+                        )
+                        .setMarginBottom(12f)
+                )
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -188,9 +213,7 @@ fun addPageNumberingAndDeletePreviousFile(
         // When the pdf has been saved the day or more before
         // it cant be erased anymore, throwing a java.nio.file.NoSuchFileException
         // because there's no read/write permission. So we're renaming the file in such case
-        finalFileName =
-            newName.substringBefore(" - ") + " - " + (i) + ".pdf"
-        ""
+        finalFileName = newName.substringBefore(" - ") + " - " + (i) + ".pdf"
         isDeleted = deleteFile(finalFileName)
         i += 1
     }
@@ -503,7 +526,7 @@ private fun createReference(
 
 private fun createFreeText(
     text: String,
-    font: PdfFont
+    font: PdfFont,
 ): Paragraph {
     return Paragraph(text).setFont(font)
 }
@@ -517,8 +540,6 @@ private fun createProductsTable(
         val columnWidth = floatArrayOf(45f, 9f, 13f, 8f, 12f, 13f)
         val productsTable = Table(UnitValue.createPercentArray(columnWidth))
             .useAllAvailableWidth()
-            .setMarginTop(10f)
-            .setMarginBottom(12f)
             .setFixedLayout()
 
         productsTable

@@ -98,7 +98,9 @@ fun DocumentBasicTemplateContent(
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
+            if(document.freeField?.text.isNullOrEmpty() && document.reference?.text.isNullOrEmpty())
+            Spacer(Modifier.height(20.dp))
+            else  Spacer(Modifier.height(10.dp))
 
             Box(
             ) {

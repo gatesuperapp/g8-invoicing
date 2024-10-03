@@ -16,7 +16,7 @@ import java.util.Calendar
 
 
 data class CreditNoteState(
-    override var documentType: DocumentType = DocumentType.INVOICE,
+    override var documentType: DocumentType = DocumentType.CREDIT_NOTE,
     override var documentTag: DocumentTag = DocumentTag.UNDEFINED,
     override var documentId: Int? = null,
     override var documentNumber: TextFieldValue = TextFieldValue(Strings.get(R.string.credit_note_default_number)),
