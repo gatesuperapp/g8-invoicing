@@ -22,14 +22,14 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
 
-/*
-        // Compulsory to be able to detect keyboard visibility
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-*/
+        /*
+                // Compulsory to be able to detect keyboard visibility
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+        */
 
         setContent {
             MainCompose()
-           // val viewModel: PrepareDBViewModel = hiltViewModel()
+            // val viewModel: PrepareDBViewModel = hiltViewModel()
         }
     }
 }
