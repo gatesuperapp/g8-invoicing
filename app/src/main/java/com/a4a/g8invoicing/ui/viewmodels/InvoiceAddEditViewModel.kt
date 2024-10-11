@@ -306,6 +306,7 @@ class InvoiceAddEditViewModel @Inject constructor(
                 val updatedList = (list ?: emptyList()) + updatedDocumentProduct
 
                 doc = doc.copy(documentProducts = updatedList)
+                doc = doc.copy(documentPrices = calculateDocumentPrices(updatedList))
             }
 
             ScreenElement.DOCUMENT_CURRENCY -> {

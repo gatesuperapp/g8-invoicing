@@ -64,7 +64,7 @@ fun DocumentBasicTemplatePrices(
                 }
 
                 taxesAmount.forEach { tax ->
-                    uiState.documentPrices?.totalAmountsOfEachTax?.first {
+                    uiState.documentPrices?.totalAmountsOfEachTax?.firstOrNull {
                         it.first.stripTrailingZeros() == tax.stripTrailingZeros()
                     }?.let {
                         Text(
@@ -111,7 +111,7 @@ fun DocumentBasicTemplatePrices(
                 }
 
                 taxesAmount.forEach { tax ->
-                    uiState.documentPrices?.totalAmountsOfEachTax?.first {
+                    uiState.documentPrices?.totalAmountsOfEachTax?.firstOrNull {
                         it.first.stripTrailingZeros() == tax.stripTrailingZeros()
                     }?.let {
                         Text(

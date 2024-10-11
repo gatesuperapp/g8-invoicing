@@ -46,11 +46,7 @@ fun DocumentBasicTemplate(
     }
     footerArray.add(PricesRowName.TOTAL_WITH_TAX.name)
 
-
-    Column(
-
-    ) {
-
+    Column {
         DocumentBasicTemplateContent(
             document = uiState,
             onClickElement = onClickElement,
@@ -59,10 +55,8 @@ fun DocumentBasicTemplate(
             prices = footerArray,
             //numberOfPages = pagerState.pageCount,
         )
-
     }
 }
-
 
 enum class PricesRowName {
     TOTAL_WITHOUT_TAX, TAXES_20, TAXES_10, TAXES_5, TOTAL_WITH_TAX
