@@ -538,7 +538,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_1 -> {
                 firstAddress?.let {
-                    it.addressLine1?.text
+                    it.zipCode?.text
                 }
             }
 
@@ -568,7 +568,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_2 -> {
                 secondAddress?.let {
-                    it.addressLine1?.text
+                    it.zipCode?.text
                 }
             }
 
@@ -598,7 +598,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_3 -> {
                 thirdAddress?.let {
-                    it.addressLine1?.text
+                    it.zipCode?.text
                 }
             }
 

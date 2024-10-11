@@ -217,8 +217,8 @@
     <string name="document_table_total_price_without_tax">Total HT</string>
     <string name="document_table_tax_rate">TVA</string>
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
-    <string name="document_bottom_sheet_list_add_new_client">Nouvel client</string>
-    <string name="document_bottom_sheet_list_add_new_issuer">Nouveau émetteur</string>
+    <string name="document_bottom_sheet_list_add_new_client">Nouveau client</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel émetteur</string>
     <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
     <string name="document_modal_add_product">Ajout produit</string>
     <string name="document_modal_edit_product">Édition produit</string>
