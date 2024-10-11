@@ -58,7 +58,7 @@ fun ButtonWithDropdownMenu(
                 DropdownMenuItem(
                     text = {
                         Text(
-                            modifier = if(action.name == "TAG") Modifier.padding(end = 44.dp)
+                            modifier = if (action.name == "TAG") Modifier.padding(end = 44.dp)
                             else Modifier.padding(end = 0.dp),
                             text = stringResource(item.description)
                         )
@@ -72,12 +72,14 @@ fun ButtonWithDropdownMenu(
                             item.onClick()
                     },
                     leadingIcon = {
-                        Icon(
-                            item.icon,
-                            modifier = Modifier.size(iconSize),
-                            tint = item.iconColor ?: MaterialTheme.colorScheme.onBackground,
-                            contentDescription = stringResource(id = action.description)
-                        )
+                        item.icon?.let {
+                            Icon(
+                                it,
+                                modifier = Modifier.size(iconSize),
+                                tint = item.iconColor ?: MaterialTheme.colorScheme.onBackground,
+                                contentDescription = stringResource(id = action.description)
+                            )
+                        }
                     }
                 )
             }

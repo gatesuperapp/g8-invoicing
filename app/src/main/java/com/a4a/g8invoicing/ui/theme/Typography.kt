@@ -141,13 +141,40 @@ val Typography.callForActions: TextStyle
     get() {
         return TextStyle(
             fontFamily = uiFont,
-            color = ColorDarkGray,
+            color = Color.LightGray,
             fontSize = 14.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
             )
         )
     }
+
+val Typography.callForActionsViolet: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFontBold,
+            color = ColorVioletLight,
+            fontSize = 14.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }
+
+val Typography.callForActionsDisabled: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFontBold,
+            color = ColorGrayTransp,
+            fontSize = 14.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }
+
 
 val Typography.inputLabel: TextStyle
     @Composable

@@ -131,15 +131,18 @@ fun AddIconAndLabelInColumn(action: AppBarAction, iconSize: Dp? = null) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            action.icon,
-            modifier = if (iconSize != null) {
-                Modifier
-                    .size(iconSize)
-            } else Modifier,
-            tint = action.iconColor ?: LocalContentColor.current,
-            contentDescription = stringResource(id = action.description)
-        )
+        action.icon?.let {
+            Icon(
+                it,
+                modifier = if (iconSize != null) {
+                    Modifier
+                        .size(iconSize)
+                } else Modifier,
+                tint = action.iconColor ?: LocalContentColor.current,
+                contentDescription = stringResource(id = action.description)
+            )
+        }
+
         action.label?.let {
             Text(
                 text = stringResource(id = it),

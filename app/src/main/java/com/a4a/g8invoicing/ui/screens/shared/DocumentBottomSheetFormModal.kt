@@ -12,23 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -38,9 +30,12 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
+import com.a4a.g8invoicing.ui.theme.callForActionsViolet
 import com.a4a.g8invoicing.ui.theme.textSmall
 
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +78,7 @@ fun DocumentBottomSheetFormModal(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        style = MaterialTheme.typography.textSmall,
+                        style = MaterialTheme.typography.callForActionsViolet,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(top = 20.dp)
@@ -114,12 +109,38 @@ fun DocumentBottomSheetFormModal(
                             else -> ""
                         }
                     )
+
+                    val requiredFieldsAreFilled: Boolean =
+                        if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)
+                            && documentClientUiState.name.text.isNotEmpty()
+                        ) {
+                            true
+                        } else if (typeOfCreation?.name.toString()
+                                .contains(ClientOrIssuerType.ISSUER.name)
+                            && documentIssuerUiState.name.text.isNotEmpty()
+                        ) {
+                            true
+                        } else if (typeOfCreation?.name.toString()
+                                .contains(ProductType.PRODUCT.name)
+                            && documentProduct.name.text.isNotEmpty()
+                            && documentProduct.quantity != BigDecimal(0)
+                        ) {
+                            true
+                        } else false
+
+                    var customModifier = Modifier
+                        .padding(top = 20.dp)
+                        .align(Alignment.TopEnd)
+                    customModifier = if (requiredFieldsAreFilled)
+                        customModifier.then(
+                            Modifier
+                                .clickable { onClickDone() }
+                        ) else customModifier
+
                     Text(
-                        style = MaterialTheme.typography.textSmall,
-                        modifier = Modifier
-                            .padding(top = 20.dp)
-                            .align(Alignment.TopEnd)
-                            .clickable { onClickDone() },
+                        style = if (requiredFieldsAreFilled) MaterialTheme.typography.callForActionsViolet
+                        else MaterialTheme.typography.callForActionsDisabled,
+                        modifier = customModifier,
                         text = if (!isTaxSelectionVisible) {
                             stringResource(id = R.string.document_modal_product_save)
                         } else ""

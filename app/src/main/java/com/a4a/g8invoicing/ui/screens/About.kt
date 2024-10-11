@@ -48,6 +48,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
+import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
@@ -66,7 +67,7 @@ fun About(
 
     Scaffold(
         topBar = {
-            com.a4a.g8invoicing.ui.navigation.TopBar(
+           TopBar(
                 title = R.string.appbar_about,
                 navController = navController,
                 onClickBackArrow = onClickBack

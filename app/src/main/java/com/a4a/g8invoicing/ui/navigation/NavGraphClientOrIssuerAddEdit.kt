@@ -28,7 +28,6 @@ fun NavGraphBuilder.clientAddEdit(
         ClientAddEdit(
             navController = navController,
             clientOrIssuer = clientUiState,
-            isNew = backStackEntry.arguments?.getString("itemId") == null,
             onValueChange = { pageElement, value ->
                 clientUiState.type?.let {
                     viewModel.updateClientOrIssuerState(pageElement, value, it)

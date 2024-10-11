@@ -45,13 +45,16 @@ fun DocumentBottomBarView(
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(
-                                action.icon,
-                                modifier = Modifier
-                                    .size(24.dp),
-                                tint = ColorButtonBar,
-                                contentDescription = stringResource(id = action.description)
-                            )
+                            action.icon?.let {
+                                Icon(
+                                    it,
+                                    modifier = Modifier
+                                        .size(24.dp),
+                                    tint = ColorButtonBar,
+                                    contentDescription = stringResource(id = action.description)
+                                )
+                            }
+
                             action.label?.let {
                                 Text(
                                     text = stringResource(id = it),

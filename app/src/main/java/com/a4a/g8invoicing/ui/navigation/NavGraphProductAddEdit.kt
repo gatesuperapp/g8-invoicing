@@ -29,7 +29,6 @@ fun NavGraphBuilder.productAddEdit(
         ProductAddEdit(
             navController = navController,
             product = productUiState,
-            isNew = isNew,
             onValueChange = { pageElement, value ->
                 viewModel.updateProductState(pageElement, value, ProductType.PRODUCT)
             },

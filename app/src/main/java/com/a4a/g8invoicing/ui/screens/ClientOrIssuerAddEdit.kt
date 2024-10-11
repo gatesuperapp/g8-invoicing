@@ -4,29 +4,42 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.navigation.TopBar
-import com.a4a.g8invoicing.ui.navigation.actionDone
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+
 
 @Composable
 fun ClientAddEdit(
     navController: NavController,
     clientOrIssuer: ClientOrIssuerState,
-    isNew: Boolean,
     onValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickDone: () -> Unit,
     onClickBack: () -> Unit,
-    onClickDeleteAddress: () -> Unit
+    onClickDeleteAddress: () -> Unit,
 ) {
+    val requiredFieldsAreFilled: Boolean =
+        if (clientOrIssuer.type?.name == ClientOrIssuerType.CLIENT.name
+            && clientOrIssuer.name.text.isNotEmpty()
+        ) {
+            true
+        } else if (clientOrIssuer.type?.name == ClientOrIssuerType.ISSUER.name
+            && clientOrIssuer.name.text.isNotEmpty()
+        ) {
+            true
+        } else false
+
+
     Scaffold(
         topBar = {
             ClientAddEditTopBar(
-                isNewClient = isNew,
                 navController = navController,
-                onClickDone =  onClickDone,
-                onClickBackArrow = onClickBack
+                onClickDone = onClickDone,
+                onClickBackArrow = onClickBack,
+                isValidateCtaDisabled = requiredFieldsAreFilled
             )
         }
     ) {
@@ -44,21 +57,17 @@ fun ClientAddEdit(
 
 @Composable
 private fun ClientAddEditTopBar(
-    isNewClient: Boolean,
     navController: NavController,
     onClickDone: () -> Unit,
     onClickBackArrow: () -> Unit,
+    isValidateCtaDisabled: Boolean,
 ) {
     TopBar(
-        title = if (isNewClient) {
-            R.string.appbar_title_add_new
-        } else {
-            R.string.appbar_title_info
-        },
-        actionDone(
-            onClick = onClickDone
-        ),
+        ctaText = Strings.get(R.string.document_modal_product_save),
+        ctaTextDisabled = isValidateCtaDisabled,
         navController = navController,
-        onClickBackArrow = onClickBackArrow
+        onClickBackArrow = onClickBackArrow,
+        isCancelCtaDisplayed = true,
+        onClickCtaValidate = onClickDone
     )
 }

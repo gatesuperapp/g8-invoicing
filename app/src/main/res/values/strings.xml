@@ -92,7 +92,7 @@
     <string name="category">Type de client</string>
     <string name="client_first_name">Prénom</string>
     <string name="client_first_name_input">Rhinolophus</string>
-    <string name="client_name">Nom <sup>*</sup></string>
+    <string name="client_name">Nom</string>
     <string name="client_name_input">Hipposideros</string>
     <string name="client_block_address">Adresse</string>
     <string name="client_block_identification">Identification</string>
@@ -133,7 +133,7 @@
     <string name="client_detail_total_payment_overdue">En retard</string>
     <string name="currency">€</string>
     <string name="copy">Copie de</string>
-    <string name="product_name">Nom <sup>*</sup></string>
+    <string name="product_name">Nom</string>
     <string name="product_name_input">Betteraves</string>
     <string name="product_description">Description</string>
     <string name="product_unit">Unité</string>
@@ -144,7 +144,7 @@
     <string name="product_price_with_tax">TTC</string>
     <string name="product_price_input">3</string>
     <string name="product_tax">TVA</string>
-    <string name="document_product_quantity">Quantité *</string>
+    <string name="document_product_quantity">Quantité</string>
     <string name="document_product_quantity_input">1</string>
     <string name="tax_rate_screen_title">Taux de TVA</string>
     <string name="tax_rate_change_rates">Modifier les taux</string>
@@ -276,7 +276,7 @@
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_error">((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_dialog_info">(㇏( • ᴗ - )ノ)  \n\n  Toutes vos modifications s\'enregistrent automatiquement en arrière-plan.</string>
+    <string name="alert_dialog_info">(㇏(•ᴗ-)ノ)  \n\n  Toutes vos modifications s\'enregistrent automatiquement en arrière-plan.</string>
     <string name="alert_dialog_error_confirm">Ouch</string>
     <string name="alert_dialog_info_confirm">Coolos</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>

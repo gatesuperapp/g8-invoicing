@@ -5,27 +5,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowForward
 import com.a4a.g8invoicing.ui.shared.icons.IconBrush
+import com.a4a.g8invoicing.ui.shared.icons.IconCheckboxUnselect
 import com.a4a.g8invoicing.ui.shared.icons.IconCircle
 import com.a4a.g8invoicing.ui.shared.icons.IconExport
 import com.a4a.g8invoicing.ui.shared.icons.IconList
 import com.a4a.g8invoicing.ui.shared.icons.IconText
 import com.a4a.g8invoicing.ui.theme.ColorCancelled
-import com.a4a.g8invoicing.ui.theme.ColorReminded
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
 import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
+import com.a4a.g8invoicing.ui.theme.ColorReminded
 import com.a4a.g8invoicing.ui.theme.ColorSent
 import com.ninetyninepercent.funfactu.icons.IconApps
-import com.ninetyninepercent.funfactu.icons.IconCheckboxUnselect
 import com.ninetyninepercent.funfactu.icons.IconDollar
 import com.ninetyninepercent.funfactu.icons.IconDuplicate
 import com.ninetyninepercent.funfactu.icons.IconLabel
 import com.ninetyninepercent.funfactu.icons.IconMail
-
 import icons.IconDelete
-import icons.IconDone
 import icons.IconEdit
 import icons.IconMoreThreeDots
 import icons.IconNew
@@ -43,7 +42,7 @@ import icons.IconNew
 
 data class AppBarAction(
     val name: String = "",
-    val icon: ImageVector,
+    val icon: ImageVector? = null,
     val iconColor: Color? = null,
     val iconBorder: Color? = null,
     @StringRes val label: Int? = null,
@@ -136,14 +135,6 @@ fun actionMore() =
         icon = IconMoreThreeDots,
         description = R.string.appbar_more,
         label = R.string.appbar_more_label,
-    )
-
-fun actionDone(onClick: () -> Unit) =
-    AppBarAction(
-        icon = IconDone,
-        description = R.string.appbar_save,
-        isSecondary = false,
-        onClick = onClick
     )
 
 fun actionExport(onClick: () -> Unit) =
