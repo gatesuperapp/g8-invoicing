@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -127,7 +128,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_EMAIL,
                                 it
                             )
-                        }
+                        },
+                        keyboardType = KeyboardType.Email
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL
                     else ScreenElement.CLIENT_OR_ISSUER_EMAIL
@@ -143,10 +145,12 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_PHONE,
                                 it
                             )
-                        }
+                        },
+                        keyboardType = KeyboardType.Number
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
-                    else ScreenElement.CLIENT_OR_ISSUER_PHONE
+                    else ScreenElement.CLIENT_OR_ISSUER_PHONE,
+
                 )
             )
             // Create the UI with list items
@@ -214,7 +218,8 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ZIP_$i"),
                                     it
                                 )
-                            }
+                            },
+                            keyboardType = KeyboardType.Number
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ZIP_$i")

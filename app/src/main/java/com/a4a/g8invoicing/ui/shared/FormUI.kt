@@ -269,13 +269,14 @@ class FormInput(
     val label: Any,
     val inputType: Any,
     val inputType2: Any? = null, // Used for DoubleInputCreator
-    val pageElement: ScreenElement,
+    val pageElement: ScreenElement
 )
 
 class TextInput(
     val text: TextFieldValue? = null,
     val placeholder: String? = null,
     val onValueChange: (TextFieldValue) -> Unit = {},
+    val keyboardType: KeyboardType = KeyboardType.Text
 )
 
 class DecimalInput(

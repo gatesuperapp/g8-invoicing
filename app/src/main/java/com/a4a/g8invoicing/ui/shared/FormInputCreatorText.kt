@@ -84,7 +84,7 @@ fun FormInputCreatorText(
                  else LocalTextStyle.current,
                 keyboardOptions = KeyboardOptions(
                     imeAction = keyboardOption,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = input.keyboardType
                 ),
                 keyboardActions = formActions,
             ) { innerTextField ->
