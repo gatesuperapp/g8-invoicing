@@ -507,15 +507,16 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME ->
-                if (type == ClientOrIssuerType.CLIENT) _documentClientUiState.value.name.text
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
+                    _documentClientUiState.value.name.text
                 else _documentIssuerUiState.value.name.text
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME ->
-                if (type == ClientOrIssuerType.CLIENT) _documentClientUiState.value.firstName?.text
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.firstName?.text
                 else _documentIssuerUiState.value.firstName?.text
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL ->
-                if (type == ClientOrIssuerType.CLIENT) _documentClientUiState.value.email?.text
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.email?.text
                 else _documentIssuerUiState.value.email?.text
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
