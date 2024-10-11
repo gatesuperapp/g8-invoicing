@@ -12,7 +12,8 @@ class DecimalFormatter(
     // Not used yet, Adds a separator for thousands (ex: 2,500 instead of 2500)
     private val thousandsSeparator = symbols.groupingSeparator
     // Decimal separator will be "," for France for instance, "." for USA
-    private val decimalSeparator = symbols.decimalSeparator
+    private val comaSeparator = ",".single()
+    private val dotSeparator = ".".single()
 
     fun cleanup(input: String): String {
 
@@ -28,28 +29,13 @@ class DecimalFormatter(
                 sb.append(char)
                 continue
             }
-            if (char == decimalSeparator && !hasDecimalSep && sb.isNotEmpty()) {
-                sb.append(char)
+            if (char == comaSeparator || char == dotSeparator
+                && !hasDecimalSep && sb.isNotEmpty()) {
+                sb.append(comaSeparator)
                 hasDecimalSep = true
             }
         }
 
         return sb.toString()
-    }
-
-    // Not used yet, Adds a separator for thousands (ex: 2,500 instead of 2500)
-    fun formatForVisual(input: String): String {
-
-        val split = input.split(decimalSeparator)
-
-        val intPart = split[0]
-            .reversed()
-            .chunked(3)
-            .joinToString(separator = thousandsSeparator.toString())
-            .reversed()
-
-        val fractionPart = split.getOrNull(1)
-
-        return if (fractionPart == null) intPart else intPart + decimalSeparator + fractionPart
     }
 }
