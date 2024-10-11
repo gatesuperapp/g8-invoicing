@@ -7,11 +7,17 @@ CREATE TABLE AlertDialog (
 INSERT INTO AlertDialog (id, name)
 VALUES (1, 'WELCOME_AND_TERMS_ALERT'),
 (2, 'INVOICE_LEGAL_ALERT'),
-(3, 'DATA_LOSS_ALERT');
+(3, 'DATA_LOSS_ALERT'),
+(4, 'AUTO_SAVE_DOC_ALERT')
+;
 
+fetch:
+SELECT hasBeenShown
+FROM AlertDialog
+WHERE id = :id;
 
-updateAlertDialog:
+update:
 UPDATE AlertDialog
 SET hasBeenShown = 1
 WHERE
-    name = :name;
+    id = :id;

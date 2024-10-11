@@ -6,6 +6,8 @@ import android.content.SharedPreferences
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.a4a.g8invoicing.Database
+import com.a4a.g8invoicing.data.AlertDialogDataSourceInterface
+import com.a4a.g8invoicing.data.AlertDialogLocalDataSource
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSource
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSource
@@ -79,6 +81,12 @@ object AppModule {
     @Singleton
     fun creditNoteDataSource(driver: SqlDriver): CreditNoteLocalDataSourceInterface {
         return CreditNoteLocalDataSource(Database(driver))
+    }
+
+    @Provides
+    @Singleton
+    fun alertDialogDataSource(driver: SqlDriver): AlertDialogDataSourceInterface {
+        return AlertDialogLocalDataSource(Database(driver))
     }
 
     @Provides

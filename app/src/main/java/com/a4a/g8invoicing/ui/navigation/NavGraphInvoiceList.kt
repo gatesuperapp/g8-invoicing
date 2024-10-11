@@ -8,7 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.screens.InvoiceList
-import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
 
 fun NavGraphBuilder.invoiceList(
@@ -23,7 +23,15 @@ fun NavGraphBuilder.invoiceList(
         val invoicesUiState by viewModel.documentsUiState
             .collectAsStateWithLifecycle()
 
+        val autoSaveAlertViewModel: AlertDialogViewModel = hiltViewModel()
+        val displayAutoSaveAlertDialog = autoSaveAlertViewModel.fetchAlertDialogFromLocalDb(4) ?: false
+
         InvoiceList(
+            displayAutoSaveAlertDialog = displayAutoSaveAlertDialog,
+            onDisplayAutoSaveAlertDialogClose = {
+                autoSaveAlertViewModel.updateAlertDialogInLocalDb(4)
+            },
+            openCreateNewScreen = { onClickNew() },
             navController = navController,
             documentsUiState = invoicesUiState,
             onClickDelete = viewModel::delete,
@@ -34,7 +42,6 @@ fun NavGraphBuilder.invoiceList(
                 viewModel.setTag(selectedDocuments, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
                 viewModel.markAsPaid(selectedDocuments, tag)
             },
-            onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
             onClickBack = { onClickBack() }

@@ -7,6 +7,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.ui.screens.CreditNoteList
+import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
 import com.a4a.g8invoicing.ui.viewmodels.CreditNoteListViewModel
 
 fun NavGraphBuilder.creditNoteList(
@@ -21,7 +22,15 @@ fun NavGraphBuilder.creditNoteList(
         val creditNotesUiState by viewModel.documentsUiState
             .collectAsStateWithLifecycle()
 
+        val autoSaveAlertViewModel: AlertDialogViewModel = hiltViewModel()
+        val displayAutoSaveAlertDialog = autoSaveAlertViewModel.fetchAlertDialogFromLocalDb(4) ?: false
+
         CreditNoteList(
+            displayAutoSaveAlertDialog = displayAutoSaveAlertDialog,
+            onDisplayAutoSaveAlertDialogClose = {
+                autoSaveAlertViewModel.updateAlertDialogInLocalDb(4)
+            },
+            openCreateNewScreen = { onClickNew() },
             navController = navController,
             documentsUiState = creditNotesUiState,
             onClickDelete = viewModel::delete,

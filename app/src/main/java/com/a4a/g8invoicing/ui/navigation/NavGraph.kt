@@ -3,7 +3,10 @@ package com.a4a.g8invoicing.ui.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
@@ -13,6 +16,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
+import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /*
 Process to add a new screen/VM/datasource:
@@ -26,6 +36,7 @@ Process to add a new screen/VM/datasource:
 
 @Composable
 fun NavGraph(navController: NavHostController) {
+
     NavHost(
         navController,
         // startDestination = (Screen.About.name),
@@ -68,6 +79,7 @@ fun NavGraph(navController: NavHostController) {
                 navController.navigate(Screen.DeliveryNoteAddEdit.name + params)
             },
             onClickNew = {
+
                 navController.navigate(Screen.DeliveryNoteAddEdit.name)
             },
             onClickBack = {

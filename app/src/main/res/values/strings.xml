@@ -276,7 +276,9 @@
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_error">((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
+    <string name="alert_dialog_info">(㇏( • ᴗ - )ノ)  \n\n  Toutes vos modifications s\'enregistrent automatiquement en arrière-plan.</string>
     <string name="alert_dialog_error_confirm">Ouch</string>
+    <string name="alert_dialog_info_confirm">Coolos</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>

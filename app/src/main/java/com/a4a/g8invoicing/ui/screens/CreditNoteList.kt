@@ -15,11 +15,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
+import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.CreditNotesUiState
@@ -27,6 +30,9 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 
 @Composable
 fun CreditNoteList(
+    displayAutoSaveAlertDialog: Boolean,
+    onDisplayAutoSaveAlertDialogClose: () -> Unit,
+    openCreateNewScreen: () -> Unit,
     navController: NavController,
     documentsUiState: CreditNotesUiState,
     onClickDelete: (List<CreditNoteState>) -> Unit,
@@ -44,8 +50,9 @@ fun CreditNoteList(
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
 
-    // On delete document
+    // Alert dialogs
     val openAlertDialog = remember { mutableStateOf(false) }
+    val checkIfAutoSaveDialogMustBeOpened = remember { mutableStateOf(false) }
 
     // Add background when bottom menu expanded
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
@@ -81,7 +88,7 @@ fun CreditNoteList(
                     onClickTag(selectedItems.toList(), it)
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
-                onClickNew = { onClickNew() },
+                onClickNew = { checkIfAutoSaveDialogMustBeOpened.value = true },
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
                     backgroundColor.value =
@@ -145,6 +152,32 @@ fun CreditNoteList(
                             changeBackgroundWithVerticalGradient(backgroundColor.value)
                     }
                 )
+            }
+        }
+
+        when {
+            checkIfAutoSaveDialogMustBeOpened.value -> {
+                if(displayAutoSaveAlertDialog) {
+                    onDisplayAutoSaveAlertDialogClose()
+                    AlertDialogErrorOrInfo(
+                        onDismissRequest = {
+                            openCreateNewScreen()
+                            checkIfAutoSaveDialogMustBeOpened.value = false
+
+                        },
+                        onConfirmation = {
+                            openCreateNewScreen()
+                            checkIfAutoSaveDialogMustBeOpened.value = false
+                        },
+                        message = Strings.get(R.string.alert_dialog_info),
+                        confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
+                    )
+
+                } else {
+                    openCreateNewScreen()
+                    checkIfAutoSaveDialogMustBeOpened.value = false
+                }
+
             }
         }
     }

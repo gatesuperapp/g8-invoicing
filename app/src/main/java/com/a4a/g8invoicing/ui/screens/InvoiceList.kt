@@ -7,14 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
@@ -27,12 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -41,16 +37,18 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
+import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
-import g8invoicing.DocumentProduct
 
 @Composable
 fun InvoiceList(
+    displayAutoSaveAlertDialog: Boolean,
+    onDisplayAutoSaveAlertDialogClose: () -> Unit,
     navController: NavController,
     documentsUiState: InvoicesUiState,
     onClickDelete: (List<InvoiceState>) -> Unit,
@@ -58,20 +56,21 @@ fun InvoiceList(
     onClickCreateCreditNote: (List<InvoiceState>) -> Unit,
     onClickCreateCorrectedInvoice: (List<InvoiceState>) -> Unit,
     onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
-    onClickNew: () -> Unit,
+    openCreateNewScreen: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
     onClickBack: () -> Unit,
 ) {
     // Main list to handle actions with selected items
-    val selectedItems =remember { mutableStateListOf<InvoiceState>()}
+    val selectedItems = remember { mutableStateListOf<InvoiceState>() }
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
 
-    // On delete document
-    val openAlertDialog = remember { mutableStateOf(false) }
+    // Alert dialogs
+    val openDeleteAlertDialog = remember { mutableStateOf(false) }
+    val checkIfAutoSaveDialogMustBeOpened = remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -96,7 +95,7 @@ fun InvoiceList(
                 onClickDelete = {
                     backgroundColor.value =
                         changeBackgroundWithVerticalGradient(backgroundColor.value)
-                    openAlertDialog.value = true
+                    openDeleteAlertDialog.value = true
                 },
                 onClickCreateCreditNote = {
                     onClickCreateCreditNote(selectedItems.toList())
@@ -128,7 +127,9 @@ fun InvoiceList(
                     )
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
-                onClickNew = { onClickNew() },
+                onClickNew = {
+                    checkIfAutoSaveDialogMustBeOpened.value = true
+                },
                 onClickCategory = onClickCategory,
                 isInvoice = true,
                 onChangeBackground = {
@@ -188,15 +189,15 @@ fun InvoiceList(
         }
 
         when {
-            openAlertDialog.value -> {
+            openDeleteAlertDialog.value -> {
                 AlertDialogDeleteDocument(
                     onDismissRequest = {
-                        openAlertDialog.value = false
+                        openDeleteAlertDialog.value = false
                         backgroundColor.value =
                             changeBackgroundWithVerticalGradient(backgroundColor.value)
                     },
                     onConfirmation = {
-                        openAlertDialog.value = false
+                        openDeleteAlertDialog.value = false
                         onClickDelete(selectedItems.toList())
                         selectedItems.clear()
                         selectedMode.value = false
@@ -207,8 +208,35 @@ fun InvoiceList(
                 )
             }
         }
+
+        when {
+            checkIfAutoSaveDialogMustBeOpened.value -> {
+                if(displayAutoSaveAlertDialog) {
+                    onDisplayAutoSaveAlertDialogClose()
+                    AlertDialogErrorOrInfo(
+                        onDismissRequest = {
+                            openCreateNewScreen()
+                            checkIfAutoSaveDialogMustBeOpened.value = false
+
+                                           },
+                        onConfirmation = {
+                            openCreateNewScreen()
+                            checkIfAutoSaveDialogMustBeOpened.value = false
+                        },
+                        message = Strings.get(R.string.alert_dialog_info),
+                        confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
+                    )
+
+                } else {
+                    openCreateNewScreen()
+                    checkIfAutoSaveDialogMustBeOpened.value = false
+                }
+
+            }
+        }
     }
 }
+
 
 private fun createReminderTextMessage(document: InvoiceState): String {
     val message =
