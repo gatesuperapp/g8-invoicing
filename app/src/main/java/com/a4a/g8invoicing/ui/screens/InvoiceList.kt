@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,6 +47,7 @@ import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
+import g8invoicing.DocumentProduct
 
 @Composable
 fun InvoiceList(
@@ -62,7 +64,7 @@ fun InvoiceList(
     onClickBack: () -> Unit,
 ) {
     // Main list to handle actions with selected items
-    val selectedItems = mutableListOf<InvoiceState>()
+    val selectedItems =remember { mutableStateListOf<InvoiceState>()}
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
@@ -90,7 +92,6 @@ fun InvoiceList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                selectedMode = selectedMode.value,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
                     backgroundColor.value =

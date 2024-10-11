@@ -61,7 +61,6 @@ fun ClientOrIssuerList(
         bottomBar = {
             GeneralBottomBar(
                 navController = navController,
-                selectedMode = selectedMode.value,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
                     backgroundColor.value =

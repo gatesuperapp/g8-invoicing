@@ -50,7 +50,8 @@ fun DocumentBottomSheetElementsAfterSlide(
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         DocumentBottomSheetClientOrIssuerPreview(
-            item = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
+            pageElement = pageElement,
+            clientOrIssuer = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
             onClickBack = onClickBack,
             onClickNewButton = {
                 onClickNewDocumentClientOrIssuer(if(pageElement == ScreenElement.DOCUMENT_CLIENT ) ClientOrIssuerType.DOCUMENT_CLIENT

@@ -20,7 +20,6 @@ import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 fun GeneralBottomBar(
     navController: NavController,
     isButtonNewDisplayed: Boolean = true,
-    selectedMode: Boolean = false,
     numberOfItemsSelected: Int = 0,
     onClickDuplicate: () -> Unit = {},
     onClickDelete: () -> Unit = {},

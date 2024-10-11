@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
@@ -21,13 +23,14 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
 fun DocumentBottomSheetClientOrIssuerPreview(
-    item: ClientOrIssuerState?,
+    pageElement: ScreenElement,
+    clientOrIssuer: ClientOrIssuerState?,
     onClickBack: () -> Unit,
     onClickNewButton: () -> Unit,
     onClickChooseButton: () -> Unit,
     onClickItem: (ClientOrIssuerState) -> Unit,
-    onClickDelete: (ClientOrIssuerType)  -> Unit,
-    isClientOrIssuerListEmpty: Boolean
+    onClickDelete: (ClientOrIssuerType) -> Unit,
+    isClientOrIssuerListEmpty: Boolean,
 ) {
     Column(
         modifier = Modifier
@@ -48,14 +51,18 @@ fun DocumentBottomSheetClientOrIssuerPreview(
             }
         }
 
-        if (item == null) {
+        if (clientOrIssuer == null) {
             ButtonAddOrChoose(
                 onClickNewButton,
                 hasBorder = true,
                 hasBackground = false,
-                stringResource(id = R.string.document_bottom_sheet_list_add_new)
+                stringResource(
+                    id = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
+                        R.string.document_bottom_sheet_list_add_new_client
+                    else R.string.document_bottom_sheet_list_add_new_issuer
+                )
             )
-            if(!isClientOrIssuerListEmpty) {
+            if (!isClientOrIssuerListEmpty) {
                 ButtonAddOrChoose(
                     onClickChooseButton,
                     hasBorder = false,
@@ -66,7 +73,7 @@ fun DocumentBottomSheetClientOrIssuerPreview(
         } else {
             // Display the existing item
             DocumentClientOrIssuerContent(
-                item = item,
+                item = clientOrIssuer,
                 onClickItem = onClickItem,
                 onClickDelete = onClickDelete
             )
