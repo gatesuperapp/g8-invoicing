@@ -97,9 +97,7 @@ fun DocumentBasicTemplateHeader(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
         )
-        val addressTitle =
-            if (client?.addresses?.size == 1) stringResource(id = R.string.document_recipient)
-            else client?.addresses?.getOrNull(0)?.addressTitle?.text
+        val addressTitle = client?.addresses?.getOrNull(0)?.addressTitle?.text
                 ?: ""
         Column(
             modifier = Modifier

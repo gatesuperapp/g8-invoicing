@@ -209,7 +209,6 @@
     <string name="document_total_without_tax">Total HT :</string>
     <string name="document_total_with_tax">Total TTC :</string>
     <string name="document_tax">TVA</string>
-    <string name="document_recipient">Adressé à</string>
     <string name="document_table_description">Désignation</string>
     <string name="document_table_quantity">Qté</string>
     <string name="document_table_unit">Unité</string>
@@ -276,8 +275,8 @@
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠\n\  &#160;&#160;&#160;&#160;&#160;&#160;  ((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_auto_save_dialog_info">𝕚𝕟𝕗𝕠\n&#160;&#160;&#160;&#160;  (◍•ᴗ•◍)♡\n\nLes documents crées ainsi que toutes les modifications s\'enregistrent automatiquement en arrière-plan.  </string>
-    <string name="alert_convert_notes_dialog_info">𝕚𝕟𝕗𝕠\n   &#160;&#160;&#160;&#160;    \n(◍•ᴗ•◍)♡\n\nPour convertir des bons de livraison en facture, il faut les sélectionner (clic long ou clic sur la coche) puis choisir «Facturer».  </string>
+    <string name="alert_auto_save_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nLes documents crées ainsi que toutes les modifications s\'enregistrent automatiquement en arrière-plan.  </string>
+    <string name="alert_convert_notes_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour convertir des bons de livraison en facture, il faut les sélectionner (clic long ou clic sur la coche) puis choisir «Facturer».  </string>
     <string name="alert_delete_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour supprimer un document, il faut le sélectionner (clic long sur l\'élément ou clic sur la coche) puis choisir «Plus» et «Supprimer».   </string>
     <string name="alert_dialog_error_confirm">Ouch</string>
     <string name="alert_dialog_info_confirm">Merveilleux</string>

@@ -244,7 +244,6 @@ fun ClientOrIssuerAddEditForm(
                     )
                 )
 
-
                 var placeholderId = 0
                 when (i) {
                     1 -> placeholderId = R.string.client_address_title_invoicing_placeholder

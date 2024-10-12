@@ -60,18 +60,14 @@ class InvoiceLocalDataSource(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: Strings.get(R.string.invoice_default_number)),
+                documentIssuer = issuer,
                 footerText = TextFieldValue(
                     getExistingFooter() ?: Strings.get(R.string.document_default_footer)
                 )
             )
         )
         saveInfoInOtherTables(
-            InvoiceState(
-                documentIssuer = issuer,
-                documentClient = ClientOrIssuerState(
-                    addresses = listOf(AddressState(addressTitle = TextFieldValue(Strings.get(R.string.client_address_title_invoicing_placeholder))))
-                )
-            )
+            InvoiceState(documentIssuer = issuer)
         )
         try {
             newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()

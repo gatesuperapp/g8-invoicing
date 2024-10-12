@@ -412,10 +412,8 @@ private fun createAddressTitle(
         .add(
             Paragraph(
                 when (index) {
-                    0 -> if (addresses.size == 1) Strings.get(R.string.document_recipient)
-                    else addresses.first().addressTitle?.text ?: ""
-
-                    else -> addresses.get(index).addressTitle?.text ?: ""
+                    0 -> addresses.first().addressTitle?.text ?: ""
+                    else -> addresses[index].addressTitle?.text ?: ""
                 }
             )
                 .setFontColor(ColorConstants.DARK_GRAY)
