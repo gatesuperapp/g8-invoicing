@@ -27,8 +27,6 @@ import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.CreditNotesUiState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
-import com.a4a.g8invoicing.ui.states.InvoiceState
 
 @Composable
 fun CreditNoteList(
@@ -172,7 +170,7 @@ fun CreditNoteList(
                             openCreateNewScreen()
                             checkIfAutoSaveDialogMustBeOpened.value = false
                         },
-                        message = Strings.get(R.string.alert_dialog_info),
+                        message = Strings.get(R.string.alert_auto_save_dialog_info),
                         confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
                     )
 

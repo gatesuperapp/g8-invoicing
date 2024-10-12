@@ -276,9 +276,13 @@
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_error">((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_dialog_info">Les nouveaux documents ainsi que toutes vos modifications s\'enregistrent automatiquement en arrière-plan. \n\n (㇏(•ᴗ-)ノ)\n </string>
+    <string name="alert_auto_save_dialog_info">(◍•ᴗ•◍)♡ \n\n Les nouveaux documents ainsi que toutes vos modifications s\'enregistrent automatiquement en arrière-plan ! \n </string>
+    <string name="alert_convert_notes_dialog_info">(◍•ᴗ•◍)♡ \n\n  Pour convertir des bons de livraison en facture, sélectionnez-les (clic long sur l\'élément ou clic sur la coche) puis choisissez «Facturer». \n </string>
+    <string name="alert_delete_dialog_info">(◍•ᴗ•◍)♡ \n\n  Pour supprimer un document, sélectionnez-le (clic long sur l\'élément ou clic sur la coche) puis choisissez «Plus» et «Supprimer». \n </string>
     <string name="alert_dialog_error_confirm">Ouch</string>
-    <string name="alert_dialog_info_confirm">Coolos</string>
+    <string name="alert_dialog_info_confirm">Classe.</string>
+    <string name="alert_convert_notes_info_confirm">Excellent</string>
+    <string name="alert_delete_info_confirm">Capito</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>

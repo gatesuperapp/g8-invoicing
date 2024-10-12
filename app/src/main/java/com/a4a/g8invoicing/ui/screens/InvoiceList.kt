@@ -223,7 +223,7 @@ fun InvoiceList(
                             openCreateNewScreen()
                             checkIfAutoSaveDialogMustBeOpened.value = false
                         },
-                        message = Strings.get(R.string.alert_dialog_info),
+                        message = Strings.get(R.string.alert_auto_save_dialog_info),
                         confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
                     )
 

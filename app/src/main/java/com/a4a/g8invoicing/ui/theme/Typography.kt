@@ -141,7 +141,7 @@ val Typography.callForActions: TextStyle
     get() {
         return TextStyle(
             fontFamily = uiFont,
-            color = Color.LightGray,
+            color = Color.DarkGray,
             fontSize = 14.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,

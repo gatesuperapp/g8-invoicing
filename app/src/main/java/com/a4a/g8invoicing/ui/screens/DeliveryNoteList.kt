@@ -25,8 +25,6 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
 
@@ -173,7 +171,7 @@ fun DeliveryNoteList(
                             openCreateNewScreen()
                             checkIfAutoSaveDialogMustBeOpened.value = false
                         },
-                        message = Strings.get(R.string.alert_dialog_info),
+                        message = Strings.get(R.string.alert_auto_save_dialog_info),
                         confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
                     )
 
@@ -181,7 +179,6 @@ fun DeliveryNoteList(
                     openCreateNewScreen()
                     checkIfAutoSaveDialogMustBeOpened.value = false
                 }
-
             }
         }
     }
