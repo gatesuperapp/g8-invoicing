@@ -95,6 +95,7 @@ fun DocumentAddEdit(
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
     onClickProduct: (ProductState) -> Unit,
+    onClickNewProduct: () -> Unit,
     onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
@@ -193,15 +194,14 @@ fun DocumentAddEdit(
                     products = products,
                     taxRates = taxRates,
                     onClickProduct = onClickProduct,
+                    onClickNewProduct = onClickNewProduct,
                     onClickDocumentProduct = onClickDocumentProduct,
                     onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     bottomFormOnValueChange = bottomFormOnValueChange,
                     bottomFormPlaceCursor = bottomFormPlaceCursor,
                     onClickDoneForm = onClickDoneForm,
                     onClickCancelForm = onClickCancelForm,
                     onSelectTaxRate = onSelectTaxRate,
-                    localFocusManager = LocalFocusManager.current,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm
                 )

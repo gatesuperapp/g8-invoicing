@@ -77,6 +77,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     product,
                 )
             },
+            onClickNewProduct = {
+                productAddEditViewModel.clearProductNameAndDescription()
+            },
             onClickClientOrIssuer = {
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)

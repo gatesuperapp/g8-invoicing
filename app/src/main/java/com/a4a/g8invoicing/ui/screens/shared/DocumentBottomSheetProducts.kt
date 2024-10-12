@@ -52,15 +52,14 @@ fun DocumentBottomSheetProducts(
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
     onClickProduct: (ProductState) -> Unit,
+    onClickNewProduct: () -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
-    placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
-    localFocusManager: FocusManager,
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
 ) {
@@ -150,6 +149,7 @@ fun DocumentBottomSheetProducts(
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
                         isProductListVisible = false
                     }
+                    onClickNewProduct()
                 },
                 onClickChooseExisting = {
                     isProductListVisible = true

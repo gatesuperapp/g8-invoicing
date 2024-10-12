@@ -15,6 +15,7 @@ import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -69,6 +70,7 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         super.onCleared()
         GlobalScope.launch {
@@ -117,6 +119,20 @@ class ProductAddEditViewModel @Inject constructor(
     fun clearProductUiState() { // Used when sliding the form in documents
         _productUiState.value = ProductState()
         _documentProductUiState.value = DocumentProductState()
+    }
+
+    fun clearProductNameAndDescription() { // Used when sliding the form in documents
+        _productUiState.value =  _productUiState.value.copy(
+            name = TextFieldValue(),
+            description = TextFieldValue(),
+            priceWithTax = null
+        )
+
+        _documentProductUiState.value = _documentProductUiState.value.copy(
+            name = TextFieldValue(),
+            description = TextFieldValue(),
+            priceWithTax = null
+        )
     }
 
     private fun fetchProductFromLocalDb(id: Long) {
@@ -215,7 +231,7 @@ class ProductAddEditViewModel @Inject constructor(
         }
         _productUiState.value = updateProductUiState(
             _productUiState.value, pageElement, TextFieldValue(
-                text = text ?: "",
+                text = text,
                 selection = TextRange(text.length)
             )
         )

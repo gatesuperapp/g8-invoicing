@@ -31,7 +31,7 @@ fun NavGraphBuilder.invoiceAddEdit(
         arguments = listOf(
             navArgument("itemId") { nullable = true },
         )
-    ) { backStackEntry ->
+    ) {
         val invoiceViewModel: InvoiceAddEditViewModel = hiltViewModel()
         val uiState by invoiceViewModel.documentUiState.collectAsStateWithLifecycle()
 
@@ -72,11 +72,13 @@ fun NavGraphBuilder.invoiceAddEdit(
                 invoiceViewModel.updateUiState(pageElement, value)
             },
             onClickProduct = { product ->
-                val lastDocumentProductPage =
-                    // Initialize documentProductUiState to display it in the bottomSheet form
-                    productAddEditViewModel.setDocumentProductUiStateWithProduct(
-                        product,
-                    )
+                // Initialize documentProductUiState to display it in the bottomSheet form
+                productAddEditViewModel.setDocumentProductUiStateWithProduct(
+                    product,
+                )
+            },
+            onClickNewProduct = {
+                productAddEditViewModel.clearProductNameAndDescription()
             },
             onClickClientOrIssuer = {
                 // Initialize to display it in the bottomSheet form
@@ -145,7 +147,9 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(ClientOrIssuerType.DOCUMENT_CLIENT )
+                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
+                                ClientOrIssuerType.DOCUMENT_CLIENT
+                            )
                             invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
                                 documentClientUiState
                             )
@@ -159,7 +163,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                         //documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            createNewClientOrIssuer(clientOrIssuerAddEditViewModel,ClientOrIssuerType.DOCUMENT_CLIENT )
+                            createNewClientOrIssuer(
+                                clientOrIssuerAddEditViewModel,
+                                ClientOrIssuerType.DOCUMENT_CLIENT
+                            )
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
 
                             invoiceViewModel.saveDocumentClientOrIssuerInUiState(
@@ -198,7 +205,10 @@ fun NavGraphBuilder.invoiceAddEdit(
 
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            createNewClientOrIssuer(clientOrIssuerAddEditViewModel, ClientOrIssuerType.DOCUMENT_ISSUER)
+                            createNewClientOrIssuer(
+                                clientOrIssuerAddEditViewModel,
+                                ClientOrIssuerType.DOCUMENT_ISSUER
+                            )
                             documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
                             invoiceViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentIssuerUiState
@@ -223,7 +233,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
                         moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                            documentProduct.id  = invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
+                            documentProduct.id =
+                                invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
+                                    documentProduct
+                                )
                             invoiceViewModel.saveDocumentProductInUiState(documentProduct)
 
                             // And if a document product is overflowing the page, and page is changed
@@ -240,7 +253,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
-                            documentProduct.id  = invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
+                            documentProduct.id =
+                                invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
+                                    documentProduct
+                                )
                             invoiceViewModel.saveDocumentProductInUiState(documentProduct)
 
                             // And if a document product is overflowing the page, and page is changed
@@ -284,8 +300,11 @@ fun NavGraphBuilder.invoiceAddEdit(
     }
 }
 
-fun createNewClientOrIssuer(clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel, type: ClientOrIssuerType) {
-        clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(type)
-        clientOrIssuerAddEditViewModel.createNew(type)
+fun createNewClientOrIssuer(
+    clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel,
+    type: ClientOrIssuerType,
+) {
+    clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(type)
+    clientOrIssuerAddEditViewModel.createNew(type)
 }
 

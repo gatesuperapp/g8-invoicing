@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +48,8 @@ import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
+import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.textVerySmall
 
 @Composable
 fun DocumentListItem(
@@ -159,7 +162,8 @@ fun DocumentListItem(
                     Text(
                         text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.textSmall,
                     )
                 } ?: Text(" - ")
 
@@ -176,7 +180,8 @@ fun DocumentListItem(
                                 " "
                             ),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.textSmall,
                         )
                     }
                 }
@@ -202,7 +207,8 @@ fun DocumentListItem(
                         DocumentTag.PAID -> ColorGreen
                         DocumentTag.LATE -> ColorPinkOrange
                         else -> Color.Black
-                    }
+                    },
+                    style = MaterialTheme.typography.textSmall
                 )
             }
         }
