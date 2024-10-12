@@ -181,6 +181,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
                             )
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_ISSUER,
+                                documentIssuerUiState
+                            )
                             showDocumentForm = false
                         }
                     }
@@ -218,6 +222,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                             creditNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_ISSUER,
+                                documentIssuerUiState
+                            )
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_ISSUER,
                                 documentIssuerUiState
                             )
                             showDocumentForm = false

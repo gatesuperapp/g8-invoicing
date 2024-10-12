@@ -13,11 +13,13 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,26 +61,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
             id?.let {
                 fetchFromLocalDb(it.toLong())
-            }
-        }
-    }
-
-    // Used when sliding the bottom form from documents
-    // Creating new document client or issuer
-    fun createNew(type: ClientOrIssuerType) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
-            val stateToSave = when (type) {
-                ClientOrIssuerType.CLIENT -> _clientUiState.value
-                ClientOrIssuerType.ISSUER ->_issuerUiState.value
-                ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
-                ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
-            }
-
-            try {
-                dataSource.createNew(stateToSave)
-            } catch (e: Exception) {
-                //println("Saving clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -191,8 +173,26 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
+    fun createNew(type: ClientOrIssuerType) {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            val stateToSave = when (type) {
+                ClientOrIssuerType.CLIENT -> _clientUiState.value
+                ClientOrIssuerType.ISSUER ->_issuerUiState.value
+                ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+                ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+            }
 
-    fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
+            try {
+                dataSource.createNew(stateToSave)
+            } catch (e: Exception) {
+                //println("Saving clients failed with exception: ${e.localizedMessage}")
+            }
+        }
+    }
+
+    fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType,
+                                      documentClientOrIssuer: ClientOrIssuerState? = null) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
@@ -202,15 +202,19 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                     }
 
                     ClientOrIssuerType.DOCUMENT_CLIENT -> {
-                        dataSource.updateDocumentClientOrIssuer(documentClientUiState.value)
+                        documentClientOrIssuer?.let {
+                            dataSource.updateDocumentClientOrIssuer(it)
+                        }
+                    }
+
+                    ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                        documentClientOrIssuer?.let {
+                            dataSource.updateDocumentClientOrIssuer(it)
+                        }
                     }
 
                     ClientOrIssuerType.ISSUER -> {
                         dataSource.updateClientOrIssuer(issuerUiState.value)
-                    }
-
-                    ClientOrIssuerType.DOCUMENT_ISSUER -> {
-                        dataSource.updateDocumentClientOrIssuer(documentIssuerUiState.value)
                     }
                 }
 

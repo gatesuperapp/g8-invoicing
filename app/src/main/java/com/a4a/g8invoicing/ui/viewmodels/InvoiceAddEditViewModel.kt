@@ -7,14 +7,17 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
@@ -64,7 +67,9 @@ class InvoiceAddEditViewModel @Inject constructor(
         autoSaveJob?.cancel()
         autoSaveJob = viewModelScope.launch {
             _documentUiState.debounce(300)
-                .collect { updateInvoiceInLocalDb() }
+                .collect {
+                    updateInvoiceInLocalDb()
+                }
         }
     }
 

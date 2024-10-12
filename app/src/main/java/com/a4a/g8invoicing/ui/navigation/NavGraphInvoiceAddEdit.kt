@@ -187,9 +187,14 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
                             )
-                            showDocumentForm = false
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_CLIENT,
+                                documentClientUiState
+                            )
                         }
+                        showDocumentForm = false
                     }
+
 
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
@@ -226,6 +231,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 ScreenElement.DOCUMENT_ISSUER,
                                 documentIssuerUiState
                             )
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_ISSUER,
+                                documentIssuerUiState
+                            )
+
                             showDocumentForm = false
                         }
                     }

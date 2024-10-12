@@ -178,6 +178,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
                             )
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_CLIENT,
+                                documentClientUiState
+                            )
                             showDocumentForm = false
                         }
                     }
@@ -212,6 +216,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                             deliveryNoteViewModel.updateDeliveryNoteState(
                                 ScreenElement.DOCUMENT_ISSUER,
+                                documentIssuerUiState
+                            )
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_ISSUER,
                                 documentIssuerUiState
                             )
                             showDocumentForm = false

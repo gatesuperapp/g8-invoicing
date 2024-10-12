@@ -100,7 +100,7 @@
     <string name="client_add_address">+ Ajouter une adresse</string>
     <string name="client_delete_address">Effacer l\'adresse</string>
     <string name="client_address_title">Intitulé</string>
-    <string name="client_address_title_invoicing_placeholder">Adresse du siège/du domicile</string>
+    <string name="client_address_title_invoicing_placeholder">Adressé à</string>
     <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
     <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
     <string name="client_address1">Adresse 1</string>
@@ -258,14 +258,14 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_donate">&#160; ˗ˏˋ  &#160;En savoir plus  ˎˊ˗ &#160;&#160;</string>
     <string name="about_donate_link">https://the-gate.fr/abonnement</string>
-    <string name="invoice_advice_legal_1">Bienvenue au G8 aka</string>
+    <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka</string>
     <string name="invoice_advice_legal_2">The Gate</string>
     <string name="invoice_advice_legal_3">!\n\n
-        Vous êtes actuellement dans la catégorie «Factures».
-        \n\n Avant de créer une facture, nous vous conseillons de prendre connaissance des mentions obligatoires à respecter, elles sont résumées sur\n</string>
+        Tu es actuellement dans la catégorie «Factures».
+        \n\n Avant de créer une facture, tu peux prendre connaissance des mentions obligatoires pour une facture conforme, elles sont résumées sur\n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5">. \n\n Pour accéder aux autres catégories, vous pouvez cliquer sur le bouton «Menu».\n
-    \n\n Bon voyage \n\n (㇏(˶ᵔ ᵕ ᵔ˶)ノ)</string>
+    <string name="invoice_advice_legal_5">. \n\n Pour accéder aux autres catégories, clique sur le bouton «Menu».\n
+    \n\n 𝔹𝕠𝕟 𝕧𝕠𝕪𝕒𝕘𝕖 \n\n (㇏(˶ᵔ ᵕ ᵔ˶)ノ)</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
@@ -275,13 +275,13 @@
     <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
-    <string name="alert_dialog_error">((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_auto_save_dialog_info">(◍•ᴗ•◍)♡ \n\n Les nouveaux documents ainsi que toutes vos modifications s\'enregistrent automatiquement en arrière-plan ! \n </string>
-    <string name="alert_convert_notes_dialog_info">(◍•ᴗ•◍)♡ \n\n  Pour convertir des bons de livraison en facture, sélectionnez-les (clic long sur l\'élément ou clic sur la coche) puis choisissez «Facturer». \n </string>
-    <string name="alert_delete_dialog_info">(◍•ᴗ•◍)♡ \n\n  Pour supprimer un document, sélectionnez-le (clic long sur l\'élément ou clic sur la coche) puis choisissez «Plus» et «Supprimer». \n </string>
+    <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠\n\  &#160;&#160;&#160;&#160;&#160;&#160;  ((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
+    <string name="alert_auto_save_dialog_info">𝕚𝕟𝕗𝕠\n&#160;&#160;&#160;&#160;  (◍•ᴗ•◍)♡\n\nLes documents crées ainsi que toutes les modifications s\'enregistrent automatiquement en arrière-plan.  </string>
+    <string name="alert_convert_notes_dialog_info">𝕚𝕟𝕗𝕠\n   &#160;&#160;&#160;&#160;    \n(◍•ᴗ•◍)♡\n\nPour convertir des bons de livraison en facture, il faut les sélectionner (clic long ou clic sur la coche) puis choisir «Facturer».  </string>
+    <string name="alert_delete_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour supprimer un document, il faut le sélectionner (clic long sur l\'élément ou clic sur la coche) puis choisir «Plus» et «Supprimer».   </string>
     <string name="alert_dialog_error_confirm">Ouch</string>
-    <string name="alert_dialog_info_confirm">Classe.</string>
-    <string name="alert_convert_notes_info_confirm">Excellent</string>
+    <string name="alert_dialog_info_confirm">Merveilleux</string>
+    <string name="alert_convert_notes_info_confirm">Superbe</string>
     <string name="alert_delete_info_confirm">Capito</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="export_ongoing">Export en cours…</string>

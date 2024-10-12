@@ -51,6 +51,7 @@ class InvoiceLocalDataSource(
     private val linkInvoiceToDocumentClientOrIssuerQueries =
         db.linkInvoiceToDocumentClientOrIssuerQueries
 
+
     override suspend fun createNew(): Long? {
         var newInvoiceId: Long? = null
         val issuer = getExistingIssuer()?.transformIntoEditable()
@@ -59,14 +60,18 @@ class InvoiceLocalDataSource(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: Strings.get(R.string.invoice_default_number)),
-                documentIssuer = issuer,
                 footerText = TextFieldValue(
                     getExistingFooter() ?: Strings.get(R.string.document_default_footer)
                 )
             )
         )
         saveInfoInOtherTables(
-            InvoiceState(documentIssuer = issuer)
+            InvoiceState(
+                documentIssuer = issuer,
+                documentClient = ClientOrIssuerState(
+                    addresses = listOf(AddressState(addressTitle = TextFieldValue(Strings.get(R.string.client_address_title_invoicing_placeholder))))
+                )
+            )
         )
         try {
             newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -256,80 +261,9 @@ class InvoiceLocalDataSource(
                         updateCase = TagUpdateOrCreationCase.DUE_DATE_EXPIRED
                     )
                 }
-                document.documentClient?.let {
-                    updateDocumentClientOrIssuer(it)
-                }
+
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
-            }
-        }
-    }
-
-    private suspend fun updateDocumentClientOrIssuer(
-        clientOrIssuer: ClientOrIssuerState,
-    ) {
-        return withContext(Dispatchers.IO) {
-            try {
-                clientOrIssuer.id?.let {
-                    documentClientOrIssuerQueries.update(
-                        id = it.toLong(),
-                        type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                            clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-                        ) ClientOrIssuerType.CLIENT.name.lowercase()
-                        else ClientOrIssuerType.ISSUER.name.lowercase(),
-                        first_name = clientOrIssuer.firstName?.text,
-                        name = clientOrIssuer.name.text,
-                        phone = clientOrIssuer.phone?.text,
-                        email = clientOrIssuer.email?.text,
-                        notes = clientOrIssuer.notes?.text,
-                        company_id1_label = clientOrIssuer.companyId1Label?.text,
-                        company_id1_number = clientOrIssuer.companyId1Number?.text,
-                        company_id2_label = clientOrIssuer.companyId2Label?.text,
-                        company_id2_number = clientOrIssuer.companyId2Number?.text,
-                        company_id3_label = clientOrIssuer.companyId3Label?.text,
-                        company_id3_number = clientOrIssuer.companyId3Number?.text,
-                    )
-                }
-
-                // Addresses to delete
-                val oldAddressesIds = clientOrIssuer.id?.toLong()?.let {
-                    linkDocumentClientOrIssuerToAddressQueries.get(it).executeAsList()
-                        .map { it.address_id }
-                }
-                val newAddressesIds =
-                    clientOrIssuer.addresses?.mapNotNull { it.id?.toLong() } ?: mutableListOf()
-
-                val addressesToDelete = oldAddressesIds?.filterNot { it in newAddressesIds }
-                addressesToDelete?.forEach {
-                    linkDocumentClientOrIssuerToAddressQueries.delete(it)
-                    documentClientOrIssuerAddressQueries.delete(it)
-                }
-
-                // Addresses to update and create
-                clientOrIssuer.addresses?.let { addresses ->
-                    val (addressesToUpdate, addressesToCreate) = addresses.partition { it.id != null }
-                    addressesToUpdate.forEach { address ->
-                        address.id?.let {
-                            documentClientOrIssuerAddressQueries.update(
-                                id = it.toLong(),
-                                address_title = address.addressTitle?.text,
-                                address_line_1 = address.addressLine1?.text,
-                                address_line_2 = address.addressLine2?.text,
-                                zip_code = address.zipCode?.text,
-                                city = address.city?.text,
-                            )
-                        }
-                    }
-                    clientOrIssuer.id?.let {
-                        saveInfoInAddressTables(
-                            documentClientOrIssuerAddressQueries,
-                            linkDocumentClientOrIssuerToAddressQueries,
-                            documentClientOrIssuerId = it.toLong(),
-                            addresses = addressesToCreate
-                        )
-                    }
-                }
-            } catch (cause: Throwable) {
             }
         }
     }
@@ -883,7 +817,7 @@ private suspend fun saveDocumentClientOrIssuer(
     saveInfoInDocumentClientOrIssuerTable(documentClientOrIssuerQueries, documentClientOrIssuer)
     documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
         ?.let { documentClientId ->
-            saveInfoInAddressTables(
+            saveInfoInDocumentClientOrIssuerAddressTables(
                 documentClientOrIssuerAddressQueries,
                 linkDocumentClientOrIssuerToAddressQueries,
                 documentClientId,
@@ -921,7 +855,7 @@ private suspend fun saveInfoInDocumentClientOrIssuerTable(
     }
 }
 
-private suspend fun saveInfoInAddressTables(
+private suspend fun saveInfoInDocumentClientOrIssuerAddressTables(
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
     documentClientOrIssuerId: Long,
@@ -952,4 +886,118 @@ private suspend fun saveInfoInAddressTables(
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
+}
+
+fun DocumentClientOrIssuer.transformIntoEditable(
+    addresses: List<AddressState>? = null,
+): ClientOrIssuerState {
+    val documentClientOrIssuer = this
+
+    return ClientOrIssuerState(
+        id = documentClientOrIssuer.id.toInt(),
+        type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
+            ClientOrIssuerType.DOCUMENT_CLIENT
+        else ClientOrIssuerType.DOCUMENT_ISSUER,
+        firstName = documentClientOrIssuer.first_name?.let { TextFieldValue(text = it) },
+        addresses = addresses,
+        name = TextFieldValue(text = documentClientOrIssuer.name),
+        phone = documentClientOrIssuer.phone?.let { TextFieldValue(text = it) },
+        email = documentClientOrIssuer.email?.let { TextFieldValue(text = it) },
+        notes = documentClientOrIssuer.notes?.let { TextFieldValue(text = it) },
+        companyId1Label = documentClientOrIssuer.company_id1_number?.let {
+            documentClientOrIssuer.company_id1_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId1Number = documentClientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
+        companyId2Label = documentClientOrIssuer.company_id2_number?.let {
+            documentClientOrIssuer.company_id2_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId2Number = documentClientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
+        companyId3Label = documentClientOrIssuer.company_id3_number?.let {
+            documentClientOrIssuer.company_id3_label?.let {
+                TextFieldValue(
+                    text = it
+                )
+            }
+        },
+        companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
+    )
+}
+
+fun fetchClientAndIssuer(
+    documentId: Long,
+    linkQueries: Any,
+    linkAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
+): List<ClientOrIssuerState>? {
+    try {
+        val listOfIds: List<Long> = if (linkQueries is LinkInvoiceToDocumentClientOrIssuerQueries) {
+            linkQueries.getDocumentClientOrIssuerLinkedToInvoice(
+                documentId
+            ).executeAsList().map { it.document_client_or_issuer_id }
+        } else if (linkQueries is LinkCreditNoteToDocumentClientOrIssuerQueries) {
+            linkQueries.getDocumentClientOrIssuerLinkedToCreditNote(
+                documentId
+            ).executeAsList().map { it.document_client_or_issuer_id }
+        } else if (linkQueries is LinkDeliveryNoteToDocumentClientOrIssuerQueries)
+            linkQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
+                documentId
+            ).executeAsList().map { it.document_client_or_issuer_id }
+        else emptyList()
+
+
+        val clientAndIssuer: MutableList<ClientOrIssuerState> = mutableListOf()
+        listOfIds.forEach {
+            val documentClientOrIssuer = documentClientOrIssuerQueries.get(it)
+                .executeAsOneOrNull()?.let {
+                    it.transformIntoEditable(
+                        fetchDocumentClientOrIssuerAddresses(
+                            it.id,
+                            linkAddressQueries,
+                            documentClientOrIssuerAddressQueries
+                        )?.toMutableList()
+                    )
+                }
+            documentClientOrIssuer?.let {
+                clientAndIssuer.add(it)
+            }
+        }
+        return if (clientAndIssuer.isNotEmpty())
+            clientAndIssuer.toList()
+        else
+            null
+
+    } catch (e: Exception) {
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return null
+}
+
+fun fetchDocumentClientOrIssuerAddresses(
+    id: Long,
+    linkQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
+): MutableList<AddressState>? {
+    try {
+        val listOfIds: List<Long> = linkQueries.get(id).executeAsList().map { it.address_id }
+
+        return if (listOfIds.isNotEmpty()) {
+            listOfIds.map {
+                documentClientOrIssuerAddressQueries.get(it)
+                    .executeAsOne()
+                    .transformIntoEditable()
+            }.toMutableList()
+        } else null
+    } catch (e: Exception) {
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return null
 }

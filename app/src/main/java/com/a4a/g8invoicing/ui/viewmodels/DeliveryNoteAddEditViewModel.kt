@@ -281,34 +281,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
     }
 
-    /*fun updateDeliveryNoteStateWithIncrementedValue(documentProductId: Any) {
-        val documentProduct =
-            _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
-        documentProduct?.let { docProduct ->
-            val updatedDocumentProduct = docProduct.copy(page = docProduct.page + 1)
-            val list =
-                _deliveryNoteUiState.value.documentProducts?.filterNot { it.id == documentProductId }
-                    ?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-            _deliveryNoteUiState.value =
-                _deliveryNoteUiState.value.copy(documentProducts = updatedList)
-        }
-    }
-
-    private fun updateDeliveryNoteStateWithDecrementedValue(documentProductId: Any) {
-        val documentProduct =
-            _deliveryNoteUiState.value.documentProducts?.first { it.id == documentProductId }
-        documentProduct?.let { docProduct ->
-            val updatedDocumentProduct = docProduct.copy(page = docProduct.page - 1)
-            val list =
-                _deliveryNoteUiState.value.documentProducts?.filterNot { it.id == documentProductId }
-                    ?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-            _deliveryNoteUiState.value =
-                _deliveryNoteUiState.value.copy(documentProducts = updatedList)
-        }
-    }*/
-
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.DOCUMENT_NUMBER -> deliveryNoteUiState.value.documentNumber.text
