@@ -21,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -36,6 +38,7 @@ import com.a4a.g8invoicing.ui.theme.textSmall
 
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
+import org.bouncycastle.asn1.x500.style.RFC4519Style.c
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,11 +70,15 @@ fun DocumentBottomSheetFormModal(
             modifier = Modifier
                 .padding(bottom = bottomPadding)
         ) {
+            var customModifier = Modifier.fillMaxWidth()
+            if(typeOfCreation?.name?.contains("PRODUCT") == true) {
+                customModifier = customModifier.then(Modifier.bottomBorder(1.dp, ColorDarkGray))
+            }
+            customModifier =customModifier.then(Modifier
+                .padding(top = 60.dp, end = 30.dp, start = 30.dp))
+
             Row(
-                modifier = Modifier
-                    .bottomBorder(1.dp, ColorDarkGray)
-                    .padding(top = 60.dp, end = 30.dp, start = 30.dp)
-                    .fillMaxWidth()
+                modifier = customModifier
             ) {
                 Box(
                     modifier = Modifier
