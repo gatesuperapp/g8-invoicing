@@ -177,13 +177,14 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
                 footerFontSize
             )
         )
-        document.add(
-            createFooter(
-                inputDocument.footerText.text,
-                footerFontSize
-            )
-        )
     }
+
+    document.add(
+        createFooter(
+            inputDocument.footerText.text,
+            footerFontSize
+        )
+    )
 
     document.close()
 

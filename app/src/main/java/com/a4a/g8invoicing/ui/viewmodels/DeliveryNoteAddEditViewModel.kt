@@ -331,43 +331,51 @@ fun updateDeliveryNoteUiState(
     element: ScreenElement,
     value: Any,
 ): DeliveryNoteState {
-    var note = deliveryNote
+    var doc = deliveryNote
     when (element) {
         ScreenElement.DOCUMENT_NUMBER -> {
-            note = note.copy(documentNumber = value as TextFieldValue)
+            doc = doc.copy(documentNumber = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_DATE -> {
-            note = note.copy(documentDate = value as String)
+            doc = doc.copy(documentDate = value as String)
         }
 
         ScreenElement.DOCUMENT_CLIENT -> {
-            note = note.copy(documentClient = value as ClientOrIssuerState)
+            doc = doc.copy(documentClient = value as ClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_ISSUER -> {
-            note = note.copy(documentIssuer = value as ClientOrIssuerState)
+            doc = doc.copy(documentIssuer = value as ClientOrIssuerState)
         }
 
         ScreenElement.DOCUMENT_REFERENCE -> {
-            note = note.copy(reference = value as TextFieldValue)
+            doc = doc.copy(reference = value as TextFieldValue)
+        }
+
+        ScreenElement.DOCUMENT_FREE_FIELD -> {
+            doc = doc.copy(freeField = value as TextFieldValue)
         }
 
         ScreenElement.DOCUMENT_PRODUCT -> {
             val updatedDocumentProduct = value as DocumentProductState
-            val list = note.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
+            val list = doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
             val updatedList = (list ?: emptyList()) + updatedDocumentProduct
 
-            note = note.copy(documentProducts = updatedList)
+            doc = doc.copy(documentProducts = updatedList)
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {
-            note = note.copy(currency = value as TextFieldValue)
+            doc = doc.copy(currency = value as TextFieldValue)
+        }
+
+        ScreenElement.DOCUMENT_FOOTER -> {
+            doc = doc.copy(footerText = value as TextFieldValue)
         }
 
         else -> {}
     }
-    return note
+    return doc
 }
 
 

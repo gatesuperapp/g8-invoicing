@@ -159,6 +159,7 @@ class DeliveryNoteLocalDataSource(
                 documentProducts = documentProducts,
                 documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency)),
+                footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at
             )
         }
