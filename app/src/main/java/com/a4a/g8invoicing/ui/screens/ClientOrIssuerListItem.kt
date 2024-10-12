@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +34,6 @@ import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
-import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
 @Composable
 fun ClientOrIssuerListItem(
@@ -45,138 +42,122 @@ fun ClientOrIssuerListItem(
     onItemCheckboxClick: (it: Boolean) -> Unit = {},
     keyToResetCheckboxes: Boolean,
     isCheckboxDisplayed: Boolean, // Don't display checkboxes when list is displayed in bottomSheet
-    highlightInList: Boolean = false,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
-    val itemBackground = if (highlightInList) {
-        ColorLightGreenTransp
-    } else {
-        Color.White
-    }
+
     // For the checkbox
     var checkboxFace by remember(keyToResetCheckboxes) { mutableStateOf(CheckboxFace.Back) }
     // Re-triggers remember calculation when key changes
     val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
     // For changing background when item selected
-    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.Transparent) }
+    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.White) }
 
-    Box(
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .clip(RoundedCornerShape(5.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(color = Color.Black, bounded = false),
+            ) {
+                //onItemClick()
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val press = PressInteraction.Press(offset)
+                        isPressed = true
+                        interactionSource.emit(press)
+                        tryAwaitRelease()
+                        interactionSource.emit(PressInteraction.Release(press))
+                        isPressed = false
+                    },
+                    onTap = {
+                        onItemClick()
+                    },
+                    onLongPress = {
+                        checkboxFace = checkboxFace.next
+                        checkedState.value = !checkedState.value
+                        onItemCheckboxClick(checkedState.value)
+                        // Change item background color
+                        backgroundColor.value =
+                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                    }
+                )
+            }
+            .background(backgroundColor.value)
     ) {
+        // Adding padding in the inside row, to keep the click & the ripple in all row
+        // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
+        // not centered anymore)
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                //      .fillMaxWidth()
-                .clip(RoundedCornerShape(5.dp))
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = rememberRipple(color = Color.Black, bounded = false),
-                ) {
-                    //onItemClick()
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = { offset ->
-                            val press = PressInteraction.Press(offset)
-                            isPressed = true
-                            interactionSource.emit(press)
-                            tryAwaitRelease()
-                            interactionSource.emit(PressInteraction.Release(press))
-                            isPressed = false
-                        },
-                        onTap = {
-                            onItemClick()
-                        },
-                        onLongPress = {
+                .padding(
+                    start = if (isCheckboxDisplayed) 0.dp else 30.dp,
+                    end = 20.dp,
+                    top = 14.dp,
+                    bottom = 14.dp
+                )
+        ) {
+            if (isCheckboxDisplayed) {
+                Column {
+                    FlippyCheckBox(
+                        fillColorWhenSelectionOff = actionTagUndefined().iconColor,
+                        backgroundColorWhenSelectionOn = backgroundColor.value,
+                        onItemCheckboxClick = {
                             checkboxFace = checkboxFace.next
                             checkedState.value = !checkedState.value
-                            onItemCheckboxClick(checkedState.value)
+                            onItemCheckboxClick(it)
                             // Change item background color
                             backgroundColor.value =
                                 changeSelectedItemBackgroundColor(backgroundColor.value)
-                        }
-                    )
+                        },
+                        checkboxFace = checkboxFace,
+                        checkedState = checkedState.value,
+
+                        )
                 }
-        ) {
-            // Adding padding in the inside row, to keep the click & the ripple in all row
-            // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
-            // not centered anymore)
-            Row(
+            }
+
+            Column(
                 modifier = Modifier
-                    .background(itemBackground)
-                    .padding(
-                        start = if(isCheckboxDisplayed) 0.dp else 30.dp,
-                        end = 20.dp,
-                        top = 14.dp,
-                        bottom = 14.dp
-                    )
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp)
             ) {
-                if (isCheckboxDisplayed) {
-                    Column {
-                        FlippyCheckBox(
-                            fillColor = actionTagUndefined().iconColor,
-                            onItemCheckboxClick = {
-                                checkboxFace = checkboxFace.next
-                                checkedState.value = !checkedState.value
-                                onItemCheckboxClick(it)
-                                // Change item background color
-                                backgroundColor.value =
-                                    changeSelectedItemBackgroundColor(backgroundColor.value)
-                            },
-                            checkboxFace = checkboxFace,
-                            checkedState = checkedState.value,
-
-                        )
-                    }
-                }
-
-                Column(
+                Row(
                     modifier = Modifier
+                        .padding(end = 20.dp)
                         .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(space = 2.dp)
+                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(end = 20.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val clientName = (clientOrIssuer.firstName?.let { it.text + " " }
-                            ?: "") + clientOrIssuer.name.text
-                        Text(
-                            text = clientName,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            //style = MaterialTheme.typography.titleSmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    val clientName = (clientOrIssuer.firstName?.let { it.text + " " }
+                        ?: "") + clientOrIssuer.name.text
+                    Text(
+                        text = clientName,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        //style = MaterialTheme.typography.titleSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
-        Column(
-            // apply darker background when item is selected
-            modifier = Modifier
-                .height(78.dp)
-                .fillMaxWidth()
-                .background(backgroundColor.value),
-        ) {}
     }
 }
-

@@ -53,150 +53,115 @@ fun ProductListItem(
     val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
     // For changing background when item selected
-    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.Transparent) }
+    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.White) }
 
-    Box(
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .clip(RoundedCornerShape(5.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(color = Color.Black, bounded = false),
+            ) {
+                //onItemClick()
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val press = PressInteraction.Press(offset)
+                        isPressed = true
+                        interactionSource.emit(press)
+                        tryAwaitRelease()
+                        interactionSource.emit(PressInteraction.Release(press))
+                        isPressed = false
+                    },
+                    onTap = {
+                        onItemClick()
+                    },
+                    onLongPress = {
+                        checkboxFace = checkboxFace.next
+                        checkedState.value = !checkedState.value
+                        onItemCheckboxClick(checkedState.value)
+                        // Change item background color
+                        backgroundColor.value =
+                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                    }
+                )
+            }
+            .background(backgroundColor.value)
     ) {
+        // Adding padding in the inside row, to keep the click & the ripple in all row
+        // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
+        // not centered anymore)
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = rememberRipple(color = Color.Black, bounded = false),
-                ) {
-                    //onItemClick()
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = { offset ->
-                            val press = PressInteraction.Press(offset)
-                            isPressed = true
-                            interactionSource.emit(press)
-                            tryAwaitRelease()
-                            interactionSource.emit(PressInteraction.Release(press))
-                            isPressed = false
-                        },
-                        onTap = {
-                            onItemClick()
-                        },
-                        onLongPress = {
+                .padding(
+                    start = if (isCheckboxDisplayed) 0.dp else 30.dp,
+                    end = 20.dp,
+                    top = 14.dp,
+                    bottom = 14.dp
+                )
+        ) {
+            if (isCheckboxDisplayed) {
+                Column {
+                    FlippyCheckBox(
+                        fillColorWhenSelectionOff = actionTagUndefined().iconColor,
+                        backgroundColorWhenSelectionOn = backgroundColor.value,
+                        onItemCheckboxClick = {
                             checkboxFace = checkboxFace.next
                             checkedState.value = !checkedState.value
-                            onItemCheckboxClick(checkedState.value)
+                            onItemCheckboxClick(it)
                             // Change item background color
                             backgroundColor.value =
                                 changeSelectedItemBackgroundColor(backgroundColor.value)
-                        }
+                        },
+                        checkboxFace = checkboxFace,
+                        checkedState = checkedState.value
                     )
                 }
-        ) {
-            // Adding padding in the inside row, to keep the click & the ripple in all row
-            // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
-            // not centered anymore)
-            Row(
+            }
+
+            Column(
                 modifier = Modifier
-                    .background(Color.White)
-                    .padding(
-                        start = if(isCheckboxDisplayed) 0.dp else 30.dp,
-                        end = 20.dp,
-                        top = 14.dp,
-                        bottom = 14.dp
-                    )
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp)
             ) {
-                if (isCheckboxDisplayed) {
-                    Column {
-                        FlippyCheckBox(
-                            fillColor = actionTagUndefined().iconColor,
-                            onItemCheckboxClick = {
-                                checkboxFace = checkboxFace.next
-                                checkedState.value = !checkedState.value
-                                onItemCheckboxClick(it)
-                                // Change item background color
-                                backgroundColor.value =
-                                    changeSelectedItemBackgroundColor(backgroundColor.value)
-                            },
-                            checkboxFace = checkboxFace,
-                            checkedState = checkedState.value
-                        )
-                    }
-                }
-
-                Column(
+                Row(
                     modifier = Modifier
+                        .padding(end = 20.dp)
                         .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(space = 2.dp)
+                    horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(end = 20.dp)
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1F),
-                            text = product.name.text,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                    Text(
+                        modifier = Modifier.weight(1F),
+                        text = product.name.text,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
 
-                        Text(
-                            text = product.priceWithTax?.let {
-                                it.toString() + stringResource(R.string.currency)
-                            } ?: " - "
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = if (!product.description?.text.isNullOrEmpty())
-                                product.description!!.text else " - ",
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
+                    Text(
+                        text = product.priceWithTax?.let {
+                            it.toString() + stringResource(R.string.currency)
+                        } ?: " - "
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (!product.description?.text.isNullOrEmpty())
+                            product.description!!.text else " - ",
+                        fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
-        Column(
-            // apply darker background when item is selected
-            modifier = Modifier
-                .height(78.dp)
-                .fillMaxWidth()
-                .background(backgroundColor.value),
-        ) {}
     }
 }
-
-/*@Preview
-@Composable
-fun ClientListItem() {
-    G8InvoicingTheme {
-        ClientListItem(
-            client = Client(
-                client_id = 1,
-                first_name = "Patou",
-                name = "George",
-                null,
-                null,
-                null,
-                null,
-                "0989789898",
-                "georgi@koko.fr",
-                null,
-                null,
-                null,
-            ),
-            onItemClick = {},
-            onItemCheckboxClick = {},
-            isChecked = false
-        )
-    }
-}*/

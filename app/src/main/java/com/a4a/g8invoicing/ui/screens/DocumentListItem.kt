@@ -6,11 +6,8 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
@@ -48,6 +45,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorGreen
+import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 
 @Composable
@@ -67,161 +65,153 @@ fun DocumentListItem(
     val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
 
     // For changing background when item selected
-    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.Transparent) }
+    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.White) }
 
-    Box(
+
+    Row(
+        verticalAlignment = CenterVertically,
         modifier = Modifier
-    ) {
-        Row(
-            verticalAlignment = CenterVertically,
-            modifier = Modifier
-                //      .fillMaxWidth()
-                //.background(itemBackgroundColor)
-                .clip(RoundedCornerShape(5.dp))
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = rememberRipple(color = Color.Black, bounded = false),
-                ) {
-                    //onItemClick()
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onPress = { offset ->
-                            val press = PressInteraction.Press(offset)
-                            isPressed = true
-                            interactionSource.emit(press)
-                            tryAwaitRelease()
-                            interactionSource.emit(PressInteraction.Release(press))
-                            isPressed = false
-                        },
-                        onTap = {
-                            onItemClick()
-                        },
-                        onLongPress = {
-                            checkboxFace = checkboxFace.next
-                            checkedState.value = !checkedState.value
-                            onItemCheckboxClick(checkedState.value)
-                            // Change item background color
-                            backgroundColor.value =
-                                changeSelectedItemBackgroundColor(backgroundColor.value)
-                        }
-                    )
-                }
-        ) {
-
-            // Adding padding in the inside row, to keep the click & the ripple in all row
-            // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
-            // not centered anymore)
-            Row(
-                modifier = Modifier
-                    .background(Color.White)
-                    .padding(
-                        end = 20.dp,
-                        top = 14.dp,
-                        bottom = 14.dp
-                    )
+            .clip(RoundedCornerShape(5.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = rememberRipple(color = Color.Black, bounded = false),
             ) {
-                action = when (document.documentTag) {
-                    DocumentTag.DRAFT -> actionTagDraft()
-                    DocumentTag.SENT -> actionTagSent()
-                    DocumentTag.PAID -> actionTagPaid()
-                    DocumentTag.LATE -> actionTagLate()
-                    DocumentTag.REMINDED -> actionTagReminded()
-                    DocumentTag.CANCELLED -> actionTagCancelled()
-                    else -> actionTagUndefined()
-                }
-                Column {
-                    FlippyCheckBox(
-                        fillColor = action.iconColor,
-                        onItemCheckboxClick = {
-                            checkboxFace = checkboxFace.next
-                            checkedState.value = !checkedState.value
-                            onItemCheckboxClick(it)
-                            // Change item background color
-                            backgroundColor.value =
-                                changeSelectedItemBackgroundColor(backgroundColor.value)
-                        },
-                        checkboxFace = checkboxFace,
-                        checkedState = checkedState.value,
-                        displayBorder = document.documentType != DocumentType.INVOICE
-                    )
-                }
+                //onItemClick()
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { offset ->
+                        val press = PressInteraction.Press(offset)
+                        isPressed = true
+                        interactionSource.emit(press)
+                        tryAwaitRelease()
+                        interactionSource.emit(PressInteraction.Release(press))
+                        isPressed = false
+                    },
+                    onTap = {
+                        onItemClick()
+                    },
+                    onLongPress = {
+                        checkboxFace = checkboxFace.next
+                        checkedState.value = !checkedState.value
+                        onItemCheckboxClick(checkedState.value)
+                        // Change item background color
+                        backgroundColor.value =
+                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                    }
+                )
+            }
+            .background(backgroundColor.value)
+    ) {
 
-                Column(
-                    modifier = Modifier
-                        .weight(1F)
-                        .padding(end = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(space = 2.dp)
-                ) {
+        // Adding padding in the inside row, to keep the click & the ripple in all row
+        // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
+        // not centered anymore)
+        Row(
+            modifier = Modifier
+                .padding(
+                    end = 20.dp,
+                    top = 14.dp,
+                    bottom = 14.dp
+                )
+        ) {
+            action = when (document.documentTag) {
+                DocumentTag.DRAFT -> actionTagDraft()
+                DocumentTag.SENT -> actionTagSent()
+                DocumentTag.PAID -> actionTagPaid()
+                DocumentTag.LATE -> actionTagLate()
+                DocumentTag.REMINDED -> actionTagReminded()
+                DocumentTag.CANCELLED -> actionTagCancelled()
+                else -> actionTagUndefined()
+            }
+            Column {
+                FlippyCheckBox(
+                    fillColorWhenSelectionOff = action.iconColor,
+                    backgroundColorWhenSelectionOn = backgroundColor.value,
+                    onItemCheckboxClick = {
+                        checkboxFace = checkboxFace.next
+                        checkedState.value = !checkedState.value
+                        onItemCheckboxClick(it)
+                        // Change item background color
+                        backgroundColor.value =
+                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                    },
+                    checkboxFace = checkboxFace,
+                    checkedState = checkedState.value,
+                    displayBorder = document.documentType != DocumentType.INVOICE
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(end = 6.dp),
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp)
+            ) {
+                Text(
+                    text = document.documentNumber.text,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                document.documentClient?.let {
                     Text(
-                        text = document.documentNumber.text,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    document.documentClient?.let {
+                } ?: Text(" - ")
+
+                if (document is InvoiceState) {
+                    if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
+                        action.label?.let {
+                            Text(
+                                text = stringResource(id = it),
+                            )
+                        }
+                    } else {
                         Text(
-                            text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text,
+                            text = Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(
+                                " "
+                            ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                    } ?: Text(" - ")
-
-                    if(document is InvoiceState) {
-                        if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
-                            action.label?.let {
-                                Text(
-                                    text = stringResource(id = it),
-                                )
-                            }
-                        } else {
-                            Text(
-                                text = Strings.get(R.string.invoice_due_date) + " " + document.dueDate.substringBefore(
-                                    " "
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
                     }
                 }
+            }
 
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(space = 2.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = document.documentDate.substringBefore(" "),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(
-                        text = (document.documentPrices?.let { it.totalPriceWithTax.toString().replace(".", ",") }
-                            ?: "") + stringResource(
-                            id = R.string.currency
-                        ),
-                        color = when (document.documentTag) {
-                            DocumentTag.PAID -> ColorGreen
-                            DocumentTag.LATE -> ColorPinkOrange
-                            else -> Color.Black
-                        }
-                    )
-                }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(space = 2.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = document.documentDate.substringBefore(" "),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = (document.documentPrices?.let {
+                        it.totalPriceWithTax.toString().replace(".", ",")
+                    }
+                        ?: "") + stringResource(
+                        id = R.string.currency
+                    ),
+                    color = when (document.documentTag) {
+                        DocumentTag.PAID -> ColorGreen
+                        DocumentTag.LATE -> ColorPinkOrange
+                        else -> Color.Black
+                    }
+                )
             }
         }
-        Column(
-            // apply darker background when item is selected
-            modifier = Modifier
-                .height(if(document is InvoiceState) 104.dp else 78.dp)
-                .fillMaxWidth()
-                .background(backgroundColor.value),
-        ) {}
     }
 }
 
+
 fun changeSelectedItemBackgroundColor(initialColor: Color): Color {
-    return if (initialColor == Color.Transparent) {
-        ColorGrayTransp
-    } else Color.Transparent
+    return if (initialColor == Color.White) {
+        ColorLightGreyo
+    } else Color.White
 }

@@ -64,7 +64,6 @@ fun ClientOrIssuerListContent(
                 },
                 keyToUnselectAll,
                 isCheckboxDisplayed,
-                highlightInList
             )
             HorizontalDivider(
                 thickness = 1.dp,
@@ -73,14 +72,5 @@ fun ClientOrIssuerListContent(
         }
     }
 }
-
-/*@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ResetItem(dismissState: DismissState) {
-    LaunchedEffect(Unit) {
-        dismissState.reset()
-    }
-}*/
-
 
 

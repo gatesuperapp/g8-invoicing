@@ -168,7 +168,7 @@ fun actionTagUndefined() =
     AppBarAction(
         tag = DocumentTag.UNDEFINED,
         icon = IconCircle,
-        iconColor = Color.Transparent,
+        iconColor = Color.White,
         iconBorder = ColorGreyDraft,
         description = R.string.appbar_tag_draft,
         label = R.string.appbar_tag_draft,
