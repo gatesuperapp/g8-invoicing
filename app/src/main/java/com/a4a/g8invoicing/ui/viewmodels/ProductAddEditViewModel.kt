@@ -210,13 +210,13 @@ class ProductAddEditViewModel @Inject constructor(
     private fun updateCursorOfProductState(pageElement: ScreenElement) {
         val text = when (pageElement) {
             ScreenElement.PRODUCT_NAME -> productUiState.value.name.text
-            ScreenElement.PRODUCT_DESCRIPTION -> productUiState.value.description?.text
+            ScreenElement.PRODUCT_DESCRIPTION -> productUiState.value.description?.text ?: ""
             else -> ""
         }
         _productUiState.value = updateProductUiState(
             _productUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
-                selection = TextRange(text?.length ?: 0)
+                selection = TextRange(text.length)
             )
         )
     }
@@ -225,7 +225,7 @@ class ProductAddEditViewModel @Inject constructor(
         val input = when (pageElement) {
             ScreenElement.DOCUMENT_PRODUCT_NAME -> documentProductUiState.value.name.text
             ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> documentProductUiState.value.quantity
-            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description?.text
+            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description?.text ?: ""
             ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit?.text
             else -> ""
         }
