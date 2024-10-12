@@ -222,7 +222,7 @@
     <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
     <string name="document_modal_add_product">Ajout produit</string>
     <string name="document_modal_edit_product">Édition produit</string>
-    <string name="document_modal_new_product">Nouvel produit</string>
+    <string name="document_modal_new_product">Nouveau produit</string>
     <string name="document_modal_new_issuer">Nouvel émetteur</string>
     <string name="document_modal_edit_issuer">Édition émetteur</string>
     <string name="document_modal_new_client">Nouveau client</string>
@@ -276,7 +276,7 @@
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_error">((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_dialog_info">(㇏(•ᴗ-)ノ)  \n\n  Toutes vos modifications s\'enregistrent automatiquement en arrière-plan.</string>
+    <string name="alert_dialog_info">Les nouveaux documents ainsi que toutes vos modifications s\'enregistrent automatiquement en arrière-plan. \n\n (㇏(•ᴗ-)ノ)\n </string>
     <string name="alert_dialog_error_confirm">Ouch</string>
     <string name="alert_dialog_info_confirm">Coolos</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -23,6 +24,7 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
+import com.a4a.g8invoicing.ui.states.ProductState
 
 @Composable
 fun ClientOrIssuerList(
@@ -36,7 +38,8 @@ fun ClientOrIssuerList(
     onClickBack: () -> Unit,
 ) {
     // Main list to handle actions with selected items
-    val selectedItems = mutableListOf<ClientOrIssuerState>()
+    val selectedItems = remember { mutableStateListOf<ClientOrIssuerState>() }
+
     // Will recompose the BottomBar (only) when an item is selected, or when all items are unselected
     val selectedMode = remember { mutableStateOf(false) }
     // Will recompose all the items when clicking "unselect all"
