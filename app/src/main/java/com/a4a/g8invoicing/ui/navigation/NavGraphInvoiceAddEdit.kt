@@ -79,7 +79,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     )
             },
             onClickClientOrIssuer = {
-                // Initialize documentProductUiState to display it in the bottomSheet form
+                // Initialize to display it in the bottomSheet form
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)
             },
             onClickDocumentProduct = {// Edit a document product

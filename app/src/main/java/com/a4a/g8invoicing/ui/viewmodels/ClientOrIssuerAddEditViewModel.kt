@@ -53,10 +53,32 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     init {
         // When coming from the navigation (NavGraph) we must get the savedStateHandle and init
         // -- & it is necessarily a client, as there's no "Issuers" list in the menu
+
         // When coming from a document (the bottom sheet form), no need to init
+
         if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
             id?.let {
                 fetchFromLocalDb(it.toLong())
+            }
+        }
+    }
+
+    // Used when sliding the bottom form from documents
+    // Creating new document client or issuer
+    fun createNew(type: ClientOrIssuerType) {
+        saveJob?.cancel()
+        saveJob = viewModelScope.launch {
+            val stateToSave = when (type) {
+                ClientOrIssuerType.CLIENT -> _clientUiState.value
+                ClientOrIssuerType.ISSUER ->_issuerUiState.value
+                ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+                ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+            }
+
+            try {
+                dataSource.createNew(stateToSave)
+            } catch (e: Exception) {
+                //println("Saving clients failed with exception: ${e.localizedMessage}")
             }
         }
     }
@@ -169,23 +191,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun createNew(type: ClientOrIssuerType) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
-            val stateToSave = when (type) {
-                ClientOrIssuerType.CLIENT -> _clientUiState.value
-                ClientOrIssuerType.ISSUER ->_issuerUiState.value
-                ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
-                ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
-            }
-
-            try {
-                dataSource.createNew(stateToSave)
-            } catch (e: Exception) {
-                //println("Saving clients failed with exception: ${e.localizedMessage}")
-            }
-        }
-    }
 
     fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType) {
         updateJob?.cancel()
