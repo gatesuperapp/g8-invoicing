@@ -306,12 +306,16 @@ class InvoiceAddEditViewModel @Inject constructor(
 
             ScreenElement.DOCUMENT_PRODUCT -> {
                 val updatedDocumentProduct = value as DocumentProductState
+
+                val productIndex =  doc.documentProducts?.indexOfFirst{ it.id == value.id } ?: 0
                 val list =
                     doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
-                val updatedList = (list ?: emptyList()) + updatedDocumentProduct
 
-                doc = doc.copy(documentProducts = updatedList)
-                doc = doc.copy(documentPrices = calculateDocumentPrices(updatedList))
+                list?.let{
+                    it.add(productIndex, updatedDocumentProduct)
+                    doc = doc.copy(documentProducts = it)
+                    doc = doc.copy(documentPrices = calculateDocumentPrices(it))
+                }
             }
 
             ScreenElement.DOCUMENT_CURRENCY -> {
