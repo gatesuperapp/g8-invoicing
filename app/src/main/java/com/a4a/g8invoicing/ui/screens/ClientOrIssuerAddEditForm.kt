@@ -59,7 +59,7 @@ fun ClientOrIssuerAddEditForm(
             clientOrIssuerUiState.addresses?.size ?: 1
         )
     }
-    val paddingTop = if (isInBottomSheetModal) 20.dp else 80.dp
+    val paddingTop = if (isInBottomSheetModal) 10.dp else 80.dp
 
     Column(
         modifier = Modifier

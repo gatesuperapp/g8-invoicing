@@ -38,7 +38,8 @@ fun ProductTaxRatesContent(
 
     modifier = if (isDisplayedInBottomSheet)
         modifier.then(Modifier
-            .fillMaxHeight(0.7f)
+            .fillMaxHeight(0.5f)
+            .background(Color.LightGray.copy(alpha = 0.4f))
             .padding(top = 30.dp, end = 60.dp, start = 60.dp))
     else
         modifier.then(Modifier

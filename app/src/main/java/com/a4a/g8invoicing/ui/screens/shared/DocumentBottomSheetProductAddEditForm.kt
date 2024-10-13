@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -28,7 +28,6 @@ import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
-import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -46,10 +45,10 @@ fun DocumentProductAddEditForm(
 
     Column(
         modifier = Modifier
+            .fillMaxHeight(0.5f)
+            .background(Color.LightGray.copy(alpha = 0.4f))
             .verticalScroll(rememberScrollState())
-            .background(ColorBackgroundGrey)
-            .fillMaxSize()
-            //.padding(12.dp)
+            .padding(12.dp)
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {

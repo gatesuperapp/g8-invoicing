@@ -21,8 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
@@ -31,14 +29,11 @@ import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
-import com.a4a.g8invoicing.ui.theme.textSmall
 
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
-import org.bouncycastle.asn1.x500.style.RFC4519Style.c
 import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,15 +65,12 @@ fun DocumentBottomSheetFormModal(
             modifier = Modifier
                 .padding(bottom = bottomPadding)
         ) {
-            var customModifier = Modifier.fillMaxWidth()
-            if(typeOfCreation?.name?.contains("PRODUCT") == true) {
-                customModifier = customModifier.then(Modifier.bottomBorder(1.dp, ColorDarkGray))
-            }
-            customModifier =customModifier.then(Modifier
-                .padding(top = 60.dp, end = 30.dp, start = 30.dp))
 
             Row(
-                modifier = customModifier
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name))
+                        60.dp else 40.dp, end = 30.dp, start = 30.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -136,7 +128,7 @@ fun DocumentBottomSheetFormModal(
                         } else false
 
                     var customModifier = Modifier
-                        .padding(top = 20.dp)
+                        .padding(top = 20.dp, bottom = 20.dp)
                         .align(Alignment.TopEnd)
                     customModifier = if (requiredFieldsAreFilled)
                         customModifier.then(
@@ -207,7 +199,7 @@ fun DocumentBottomSheetFormModal(
                         }
                     )
                 } else {
-                    OpenTaxSelection(
+                    DocumentBottomSheetTaxSelection(
                         taxRates = taxRates,
                         currentTaxRate = documentProduct.taxRate,
                         onSelectTaxRate = {
@@ -222,7 +214,7 @@ fun DocumentBottomSheetFormModal(
 }
 
 @Composable
-fun OpenTaxSelection(
+fun DocumentBottomSheetTaxSelection(
     taxRates: List<BigDecimal>?,
     currentTaxRate: BigDecimal?,
     onSelectTaxRate: (BigDecimal?) -> Unit,
