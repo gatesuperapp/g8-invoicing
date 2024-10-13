@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.PricesRowName
+import com.a4a.g8invoicing.ui.screens.shared.calculatePriceWithoutTax
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -670,11 +671,13 @@ private fun addProductsToTable(
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
         var priceWithoutTax = BigDecimal(0)
-        it.priceWithTax?.let { priceWithTax ->
-            priceWithoutTax =
-                BigDecimal(priceWithTax.toDouble() / (1.0 + (it.taxRate ?: 0).toDouble() / 100.0))
 
+        it.taxRate?.let { taxRate ->
+            it.priceWithTax?.let { priceWithTax ->
+                priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
+            }
         }
+
         productsTable.addCustomCell(
             text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
                 .toString().replace(".", ",") + Strings.get(R.string.currency),

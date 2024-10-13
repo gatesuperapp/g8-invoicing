@@ -28,6 +28,7 @@ import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import g8invoicing.TaxRate
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -71,10 +72,10 @@ fun DocumentProductAddEditForm(
         ) {
             var priceWithoutTax: BigDecimal? = null
 
-            documentProduct.let {productState ->
-                productState.taxRate?.let {taxRate ->
+            documentProduct.let { productState ->
+                productState.taxRate?.let { taxRate ->
                     productState.priceWithTax?.let { priceWithTax ->
-                        priceWithoutTax = BigDecimal(priceWithTax.toDouble() / (1.0 + taxRate.toDouble() / 100.0))
+                        priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
                     }
                 }
             }
@@ -120,7 +121,8 @@ fun DocumentProductAddEditForm(
                         id = R.string.product_price
                     ),
                     inputType = DecimalInput(
-                        text = (documentProduct.priceWithTax?.setScale(2, RoundingMode.HALF_UP) ?: "")
+                        text = (documentProduct.priceWithTax?.setScale(2, RoundingMode.HALF_UP)
+                            ?: "")
                             .toString(),
                         taxRate = documentProduct.taxRate,
                         placeholder = stringResource(id = R.string.product_price_input),
@@ -175,6 +177,10 @@ fun DocumentProductAddEditForm(
             )
         }
     }
+}
+
+fun calculatePriceWithoutTax(priceWithTax: BigDecimal, taxRate: BigDecimal): BigDecimal {
+    return BigDecimal(priceWithTax.toDouble() / (1.0 + taxRate.toDouble() / 100.0))
 }
 
 

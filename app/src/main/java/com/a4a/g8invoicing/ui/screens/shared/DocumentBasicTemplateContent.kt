@@ -117,7 +117,7 @@ fun DocumentBasicTemplateContent(
                         .fillMaxWidth()
                 ) {
                     if (!productArray.isNullOrEmpty()) {
-                        DocumentBasicTemplateDataTable(
+                        DocumentBasicTemplateProductsTable(
                             productArray
                         )
                     }

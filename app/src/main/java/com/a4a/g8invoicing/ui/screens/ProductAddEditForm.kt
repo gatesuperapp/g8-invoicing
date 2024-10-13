@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.screens.shared.calculatePriceWithoutTax
 import com.a4a.g8invoicing.ui.shared.DecimalInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
@@ -65,13 +66,14 @@ fun ProductAddEditForm(
         ) {
             var priceWithoutTax: BigDecimal? = null
 
-            product.let {productState ->
-                productState.taxRate?.let {taxRate ->
-                    productState.priceWithTax?.let { priceWithTax ->
-                        priceWithoutTax = BigDecimal(priceWithTax.toDouble() / (1.0 + taxRate.toDouble() / 100.0))
+            product.let {
+                it.taxRate?.let { taxRate ->
+                    it.priceWithTax?.let { priceWithTax ->
+                        priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
                     }
                 }
             }
+
             // Create the list with all fields
             val inputList = listOfNotNull(
                 FormInput(

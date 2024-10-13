@@ -39,7 +39,7 @@ import java.math.RoundingMode
 val borderWidth = 0.7.dp
 
 @Composable
-fun DocumentBasicTemplateDataTable(
+fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
 ) {
     val descriptionColumnWeight = .8f
@@ -164,9 +164,11 @@ fun DocumentProductsRows(
 ) {
     tableData.forEach {
         var priceWithoutTax = BigDecimal(0)
-        it.priceWithTax?.let { priceWithTax ->
-            priceWithoutTax =
-                (priceWithTax - priceWithTax * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100))
+
+        it.taxRate?.let { taxRate ->
+            it.priceWithTax?.let { priceWithTax ->
+                priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
+            }
         }
 
         Row(
