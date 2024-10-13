@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -40,6 +41,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDelete
 
 @Composable
@@ -49,7 +51,8 @@ fun ClientOrIssuerAddEditForm(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isInBottomSheetModal: Boolean = false,
     onClickDeleteAddress: () -> Unit,
-) {
+    typeOfCreation: DocumentBottomSheetTypeOfForm?,
+    ) {
     val localFocusManager = LocalFocusManager.current
     var numberOfClientAddresses by remember {
         mutableIntStateOf(
@@ -279,30 +282,31 @@ fun ClientOrIssuerAddEditForm(
                 )
             }
 
-            if (i == 1 && !previousAddressIsFilled(clientOrIssuerUiState, 1)) {
-                Spacer(Modifier.padding(bottom = 16.dp))
-            }
-
-            Row(Modifier.padding(bottom = 6.dp)) {
-                if (i != 3 &&
-                    numberOfClientAddresses == i
-                    && previousAddressIsFilled(clientOrIssuerUiState, i)
-                ) {
-                    AddAddressButton(
-                        onClick = { numberOfClientAddresses += 1 },
-                        bottomPadding = if (i == 1) 16.dp else 0.dp
-                    )
+            if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)) {
+                if (i == 1 && !previousAddressIsFilled(clientOrIssuerUiState, 1)) {
+                    Spacer(Modifier.padding(bottom = 16.dp))
                 }
-                if (i > 1 && i == numberOfClientAddresses) {
-                    Spacer(Modifier.weight(1F))
-                    DeleteAddressButton(onClick = {
-                        numberOfClientAddresses -= 1
-                        if (clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
-                            onClickDeleteAddress()
-                        }
-                    })
+                Row(Modifier.padding(bottom = 6.dp)) {
+                    if (i != 3 &&
+                        numberOfClientAddresses == i
+                        && previousAddressIsFilled(clientOrIssuerUiState, i)
+                    ) {
+                        AddAddressButton(
+                            onClick = { numberOfClientAddresses += 1 },
+                            bottomPadding = if (i == 1) 16.dp else 0.dp
+                        )
+                    }
+                    if (i > 1 && i == numberOfClientAddresses) {
+                        Spacer(Modifier.weight(1F))
+                        DeleteAddressButton(onClick = {
+                            numberOfClientAddresses -= 1
+                            if (clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
+                                onClickDeleteAddress()
+                            }
+                        })
+                    }
                 }
-            }
+            } else Spacer(Modifier.padding(bottom = 20.dp))
         }
 
         Column(

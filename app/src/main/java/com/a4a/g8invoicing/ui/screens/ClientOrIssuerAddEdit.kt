@@ -7,6 +7,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 
@@ -49,9 +50,9 @@ fun ClientAddEdit(
             clientOrIssuer,
             onValueChange,
             placeCursorAtTheEndOfText,
-            onClickDeleteAddress = onClickDeleteAddress
+            onClickDeleteAddress = onClickDeleteAddress,
+            typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_CLIENT
         )
-
     }
 }
 

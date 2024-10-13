@@ -157,6 +157,7 @@ fun DocumentBottomSheetFormModal(
             if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)) {
                 ClientOrIssuerAddEditForm(
                     clientOrIssuerUiState = documentClientUiState,
+                    typeOfCreation = typeOfCreation,
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(
                             screenElement,
@@ -175,6 +176,7 @@ fun DocumentBottomSheetFormModal(
             } else if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.ISSUER.name)) {
                 ClientOrIssuerAddEditForm(
                     clientOrIssuerUiState = documentIssuerUiState,
+                    typeOfCreation = typeOfCreation,
                     onValueChange = { screenElement, value ->
                         bottomFormOnValueChange(
                             screenElement,
