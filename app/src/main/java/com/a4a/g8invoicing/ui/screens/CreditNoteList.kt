@@ -30,9 +30,6 @@ import com.a4a.g8invoicing.ui.states.CreditNotesUiState
 
 @Composable
 fun CreditNoteList(
-    displayAutoSaveAlertDialog: Boolean,
-    onDisplayAutoSaveAlertDialogClose: () -> Unit,
-    openCreateNewScreen: () -> Unit,
     navController: NavController,
     documentsUiState: CreditNotesUiState,
     onClickDelete: (List<CreditNoteState>) -> Unit,
@@ -89,7 +86,7 @@ fun CreditNoteList(
                     onClickTag(selectedItems.toList(), it)
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
-                onClickNew = { checkIfAutoSaveDialogMustBeOpened.value = true },
+                onClickNew = { onClickNew() },
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
                     backgroundColor.value =
@@ -153,32 +150,6 @@ fun CreditNoteList(
                             changeBackgroundWithVerticalGradient(backgroundColor.value)
                     }
                 )
-            }
-        }
-
-        when {
-            checkIfAutoSaveDialogMustBeOpened.value -> {
-                if(displayAutoSaveAlertDialog) {
-                    onDisplayAutoSaveAlertDialogClose()
-                    AlertDialogErrorOrInfo(
-                        onDismissRequest = {
-                            openCreateNewScreen()
-                            checkIfAutoSaveDialogMustBeOpened.value = false
-
-                        },
-                        onConfirmation = {
-                            openCreateNewScreen()
-                            checkIfAutoSaveDialogMustBeOpened.value = false
-                        },
-                        message = Strings.get(R.string.alert_auto_save_dialog_info),
-                        confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
-                    )
-
-                } else {
-                    openCreateNewScreen()
-                    checkIfAutoSaveDialogMustBeOpened.value = false
-                }
-
             }
         }
     }

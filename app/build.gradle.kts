@@ -14,7 +14,7 @@ android {
         applicationId = "com.a4a.g8invoicing"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
+        versionCode = 13
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -112,5 +112,8 @@ dependencies {
     // Auth info storage
     implementation("androidx.security:security-crypto:1.0.0")
     implementation("org.mindrot:jbcrypt:0.4")
+
+    // Lottie
+    implementation("com.airbnb.android:lottie-compose:4.0.0")
 
 }

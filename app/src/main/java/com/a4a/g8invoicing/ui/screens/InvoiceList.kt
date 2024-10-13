@@ -1,12 +1,22 @@
 package com.a4a.g8invoicing.ui.screens
 
 import android.text.TextUtils.substring
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
@@ -14,9 +24,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -24,11 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -37,18 +47,18 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
+import com.a4a.g8invoicing.ui.shared.AnimationLottie
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun InvoiceList(
-    displayAutoSaveAlertDialog: Boolean,
-    onDisplayAutoSaveAlertDialogClose: () -> Unit,
     navController: NavController,
     documentsUiState: InvoicesUiState,
     onClickDelete: (List<InvoiceState>) -> Unit,
@@ -56,7 +66,7 @@ fun InvoiceList(
     onClickCreateCreditNote: (List<InvoiceState>) -> Unit,
     onClickCreateCorrectedInvoice: (List<InvoiceState>) -> Unit,
     onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
-    openCreateNewScreen: () -> Unit,
+    onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
     onClickBack: () -> Unit,
@@ -77,8 +87,6 @@ fun InvoiceList(
     // Add background when bottom menu expanded
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
     val backgroundColor = remember { mutableStateOf(transparent) }
-
-    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         topBar = {
@@ -127,9 +135,7 @@ fun InvoiceList(
                     )
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
-                onClickNew = {
-                    checkIfAutoSaveDialogMustBeOpened.value = true
-                },
+                onClickNew = { onClickNew() },
                 onClickCategory = onClickCategory,
                 isInvoice = true,
                 onChangeBackground = {
@@ -139,6 +145,7 @@ fun InvoiceList(
             )
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -150,33 +157,33 @@ fun InvoiceList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                if (documentsUiState.documentStates.isNotEmpty()) {
-                    DocumentListContent(
-                        documents = documentsUiState.documentStates,
-                        onItemClick = onClickListItem,
-                        addDocumentToSelectedList = {
-                            selectedItems.add(it as InvoiceState)
-                            selectedMode.value = true
-                        },
-                        removeDocumentFromSelectedList = {
-                            selectedItems.remove(it as InvoiceState)
-                            if (selectedItems.isEmpty()) {
-                                selectedMode.value = false
-                            }
-                        },
-                        keyToUnselectAll = keyToResetCheckboxes.value
-                    )
+                if (documentsUiState.documentStates.isEmpty()) {
+                    DisplayBatHelperWelcome()
                 } else {
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                            .padding(top = 40.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        TextAdvice(uriHandler)
+                    Column {
+                        DocumentListContent(
+                            documents = documentsUiState.documentStates,
+                            onItemClick = onClickListItem,
+                            addDocumentToSelectedList = {
+                                selectedItems.add(it as InvoiceState)
+                                selectedMode.value = true
+                            },
+                            removeDocumentFromSelectedList = {
+                                selectedItems.remove(it as InvoiceState)
+                                if (selectedItems.isEmpty()) {
+                                    selectedMode.value = false
+                                }
+                            },
+                            keyToUnselectAll = keyToResetCheckboxes.value
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        if(documentsUiState.documentStates.size == 1)
+                            DisplayBatHelperMenuAdvice()
+
                     }
+
+
                 }
 
                 Column(
@@ -208,31 +215,177 @@ fun InvoiceList(
                 )
             }
         }
+    }
+}
 
-        when {
-            checkIfAutoSaveDialogMustBeOpened.value -> {
-                if(displayAutoSaveAlertDialog) {
-                    onDisplayAutoSaveAlertDialogClose()
-                    AlertDialogErrorOrInfo(
-                        onDismissRequest = {
-                            openCreateNewScreen()
-                            checkIfAutoSaveDialogMustBeOpened.value = false
+@Composable
+fun DisplayBatHelperWelcome(){
+    var visibleText by remember { mutableIntStateOf(0) }
+    val numberOfIterations = remember { mutableIntStateOf(1) }
+    val uriHandler = LocalUriHandler.current
 
-                                           },
-                        onConfirmation = {
-                            openCreateNewScreen()
-                            checkIfAutoSaveDialogMustBeOpened.value = false
-                        },
-                        message = Strings.get(R.string.alert_auto_save_dialog_info),
-                        confirmationText = stringResource(id = R.string.alert_dialog_info_confirm)
-                    )
-
-                } else {
-                    openCreateNewScreen()
-                    checkIfAutoSaveDialogMustBeOpened.value = false
-                }
-
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(top = 40.dp)
+            .padding(
+                top = 20.dp,
+                start = 40.dp,
+                end = 40.dp,
+                bottom = 20.dp
+            )
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier.clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() } // This is mandatory
+            ) {
+                if (visibleText < 4) {
+                    visibleText += 1
+                } else visibleText = 0
+                numberOfIterations.intValue += 1
             }
+        ) {
+            AnimationLottie(
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(150.dp)
+                    .align(Alignment.Center),
+                file = R.raw.bat_smiling_eyes,
+                numberOfIteration = numberOfIterations.intValue
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visibleText == 0,
+            enter = fadeIn(tween(1000)),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_legal_help),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visibleText == 1,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_legal_3),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visibleText == 2,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
+            exit = fadeOut(tween(100)),
+        ) {
+            TextAdvice(uriHandler)
+        }
+
+        AnimatedVisibility(
+            visible = visibleText == 3,
+            enter = fadeIn( tween(
+                2000,
+                delayMillis = 100,
+                easing = LinearOutSlowInEasing
+            )),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_legal_6),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun DisplayBatHelperMenuAdvice(){
+    var visibleText by remember { mutableIntStateOf(0) }
+    val numberOfIterations = remember { mutableIntStateOf(2) }
+
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(top = 40.dp)
+            .padding(
+                top = 20.dp,
+                start = 40.dp,
+                end = 40.dp,
+                bottom = 20.dp
+            )
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            Modifier.clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() } // This is mandatory
+            ) {
+                if (visibleText < 2) {
+                    visibleText += 1
+                } else visibleText = 0
+                numberOfIterations.intValue += 1
+            }
+        ) {
+            AnimationLottie(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(45.dp)
+                    .align(Alignment.Center),
+                file = R.raw.bat_openmouth,
+                numberOfIteration = numberOfIterations.intValue
+            )
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        AnimatedVisibility(
+            visible = visibleText == 1,
+            enter = fadeIn(tween(1000)),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_bottom_menu),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visibleText == 2,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_bottom_menu2),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -278,14 +431,7 @@ fun changeBackgroundWithVerticalGradient(initialColor: Brush): Brush {
 @Composable
 fun TextAdvice(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
-        append(Strings.get(R.string.invoice_advice_legal_1) + " ")
-        append(
-            AnnotatedString(
-                Strings.get(R.string.invoice_advice_legal_2) + " ",
-                SpanStyle(fontStyle = FontStyle.Italic)
-            )
-        )
-        append(Strings.get(R.string.invoice_advice_legal_3) + " ")
+        append(Strings.get(R.string.invoice_advice_legal_3_1) + " ")
 
         pushStringAnnotation(
             tag = "link",
@@ -298,8 +444,6 @@ fun TextAdvice(uriHandler: UriHandler) {
     }
 
     ClickableText(
-        modifier = Modifier
-            .padding(top = 20.dp, start = 40.dp, end = 40.dp, bottom = 20.dp),
         text = annotatedString,
         style = MaterialTheme.typography.textWithLinkCenteredMedium,
         onClick = { offset ->

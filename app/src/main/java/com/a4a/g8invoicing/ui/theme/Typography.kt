@@ -98,6 +98,19 @@ val customTypography = Typography(
 
 )
 
+val Typography.textTitle: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFontBold,
+            fontSize = 18.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            )
+        )
+    }
+
+
 val Typography.textSmall: TextStyle
     @Composable
     get() {

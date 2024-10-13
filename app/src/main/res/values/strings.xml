@@ -64,9 +64,9 @@
     <string name="appbar_client_edit">Modifier client</string>
     <string name="appbar_product_edit">Modifier produit</string>
     <string name="drawer_settings">Réglages</string>
-    <string name="appbar_account">Mon Compte</string>
-    <string name="drawer_about">À propos</string>
-    <string name="appbar_about">À propos</string>
+    <string name="appbar_account">Abonnement</string>
+    <string name="drawer_about">Aide </string>
+    <string name="appbar_about">Aide </string>
     <string name="drawer_menu_description">Menu navigation button</string>
     <string name="drawer_home_description">Home navigation button</string>
     <string name="drawer_invoices_description">Invoices button</string>
@@ -176,7 +176,7 @@
     <string name="document_default_due_date">11/01/2024</string>
     <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1027 8073 7000 983764 8377
     </string>
-     <string name="document_default_reference">XFGDTSF</string>
+    <string name="document_default_reference">XFGDTSF</string>
     <string name="document_default_issuer_firstName">Ignacio</string>
     <string name="document_default_issuer_name">Cantu</string>
     <string name="document_default_issuer_address1">6 rue de l\'amour</string>
@@ -235,18 +235,39 @@
         Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
+    <string name="account_subscribe">
+        Tu peux t\'abonner à partir de 2€ par mois pour soutenir le projet et bénéficier d\'avantages exclusifs !\n\n
+        C\'est aussi grâce à ta contribution que les prochaines fonctionnalités pourront voir le jour : ajout du logo,  prix par client, nouveaux modèles, appli de bureau, et + encore.
+    </string>
+    <string name="account_subscribe2">
+        Gros avantage : si vous souscrivez dès maintenant, l\'appli de bureau (dès qu\'elle est prête)
+        sera automatiquement incluse dans vore abonnement…Sinon, il vous faudra prendre l\'abonnement à 10€/mois !
+    </string>
     <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
+    <string name="about_title_about">À propos</string>
+    <string name="about_title_tutorials">Tutos &amp; conseils</string>
+    <string name="about_title_tutorials_button">Voyons voir</string>
+    <string name="about_title_tutorials_button_link">https://the-gate.fr/conseils-et-tutos</string>
+    <string name="about_tutorials"> Plusieurs articles sont disponibles sur le site internet :\n
+        &#8226; Comment numéroter les factures \n
+        &#8226; Supprimer ou annuler une facture \n
+        &#8226; Transformer des bons de livraison en facture\n
+        &#8226; Mentions obligatoires sur les factures\n
+        &#8226; Délai de conservation des documents comptables
+    </string>
+    <string name="about_title_contact">Contact</string>
     <string name="about">
-        The Gate (G8) est une application pratique et engagée :\n
+        𝕘𝟠 est une application pratique et engagée :\n
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
         &#8226; Conçue pour les paysan·ne·s en priorité\n
-        \nVous pouvez vous abonner pour permettre le développement des prochaines fonctionnalités et bénéficier d\'avantages réservés !
+        &#8226; Souhaite financer des projets de protection de la faune sauvage -
+        des chiroptères en particulier.\n
     </string>
     <string name="about2">
-    Pour l\'assistance par mail ou toute autre demande :</string>
-    <string name="about_terms_of_service_header">P.S. : En utilisant l\'application, vous acceptez les</string>
+    Pour l\'assistance par mail, une remontée de bug ou toute autre demande :</string>
+    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez les</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
@@ -255,27 +276,42 @@
     <string name="account_button_create">Créer mon compte</string>
     <string name="about_button_contact">contact@the-gate.fr</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
-    <string name="about_donate">&#160; ˗ˏˋ  &#160;En savoir plus  ˎˊ˗ &#160;&#160;</string>
-    <string name="about_donate_link">https://the-gate.fr/abonnement</string>
+    <string name="account_donate">En savoir plus</string>
+    <string name="account_donate_link">https://the-gate.fr/abonnement</string>
+    <string name="account_bat_love">𝕘𝕚𝕞𝕞𝕖 𝕝𝕠𝕧𝕖</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka</string>
     <string name="invoice_advice_legal_2">The Gate</string>
-    <string name="invoice_advice_legal_3">!\n\n
-        Tu es actuellement dans la catégorie «Factures».
-        \n\n Avant de créer une facture, tu peux prendre connaissance des mentions obligatoires pour une facture conforme, elles sont résumées sur\n</string>
+    <string name="invoice_advice_legal_help">Clique-moi dessus…!</string>
+    <string name="invoice_advice_legal_3">Je suis Petit Rhino, ton nouveau meilleur amigo ♡ \n\n
+        Clique sur moi quand tu me vois, ou quand il y a des pointillés : j\'aime parler.
+        \n\n …</string>
+    <string name="invoice_advice_legal_3_1">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, il est conseillé de prendre connaissance des mentions obligatoires pour une facture conforme. Je te les ai résumées là : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5">. \n\n Pour accéder aux autres catégories, clique sur le bouton «Menu».\n
-    \n\n 𝔹𝕠𝕟 𝕧𝕠𝕪𝕒𝕘𝕖 \n\n (㇏(˶ᵔ ᵕ ᵔ˶)ノ)</string>
+    <string name="invoice_advice_legal_5"> \n\n … \n
+   </string>
+    <string name="invoice_advice_legal_6">Je voulais aussi te dire que les documents que tu crées ainsi que toutes tes modifications s\'enregistrent automatiquement en arrière-plan. Parce que je t\'aime.\n\n
+        Tu peux maintenant cliquer sur «Créer» pour te lancer, ou «Menu» pour découvrir le reste de l\'app.\n\n
+        𝕤𝕖𝕖 𝕪𝕒
+   </string>
+    <string name="invoice_advice_legal_7">. \n\n
+   </string>
+
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="alert_dialog_delete_invoice_1">Êtes vous sûr·e ? \n\nSi vous avez déjà envoyé la facture à votre client·e, il n\'est pas légal de la supprimer :
+    <string name="invoice_advice_bottom_menu">Tu peux sélectionner une facture dans ta liste en cliquant longtemps dessus ou en cliquant sur la coche ○ à gauche du numéro de facture. \n\n …   </string>
+    <string name="invoice_advice_bottom_menu2">Cela fait apparaître différentes options : marquer tes factures par un tag, envoyer un mail de relance tout prêt, créer un avoir et + \n\n 𝕖𝕟𝕛𝕠𝕪
+</string>
+    <string name="delivery_note_advice_convert">Pour convertir un ou plusieurs bons de livraison en une facture, tu peux sélectionner les bons dans ta liste en cliquant longtemps dessus ou en cliquant sur la coche ○ \n\n …   </string>
+    <string name="delivery_note_advice_convert2">Choisis ensuite «Facturer» puis rdv dans l\'onglet «Factures» pour voir le document fraîchement créé ! \n\n 𝕒𝕨𝕖𝕤𝕠𝕞𝕖    </string>
+
+    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
-        \n• si elle a été payée, il faut créer un avoir + une nouvelle facture.
+        \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.
     </string>
     <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
     <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠\n\  &#160;&#160;&#160;&#160;&#160;&#160;  ((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_auto_save_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nLes documents crées ainsi que toutes les modifications s\'enregistrent automatiquement en arrière-plan.  </string>
     <string name="alert_convert_notes_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour convertir des bons de livraison en facture, il faut les sélectionner (clic long ou clic sur la coche) puis choisir «Facturer».  </string>
     <string name="alert_delete_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour supprimer un document, il faut le sélectionner (clic long sur l\'élément ou clic sur la coche) puis choisir «Plus» et «Supprimer».   </string>
     <string name="alert_dialog_error_confirm">Ouch</string>
@@ -287,9 +323,9 @@
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l\'export.</string>
     <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
-    <string name="export_clickable_text">ⓘ</string>
+    <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
-        \n\n• Veillez à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte ou vol de votre téléphone. </string>
+        \n\n• Pense à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte ou vol de votre téléphone. </string>
     <string name="export_info_popup_validate">okurrr</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n
