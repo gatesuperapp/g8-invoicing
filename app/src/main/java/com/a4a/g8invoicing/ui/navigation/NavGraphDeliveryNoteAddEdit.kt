@@ -69,7 +69,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
             products = productListUiState.products.toMutableList(), // The list of products to display when adding a product
             onValueChange = { pageElement, value ->
-                deliveryNoteViewModel.updateDeliveryNoteState(pageElement, value)
+                deliveryNoteViewModel.updateUiState(pageElement, value)
             },
             onClickProduct = { product ->
                 // Initialize documentProductUiState to display it in the bottomSheet form
@@ -174,7 +174,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     // the initial object)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            deliveryNoteViewModel.updateDeliveryNoteState(
+                            deliveryNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_CLIENT,
                                 documentClientUiState
                             )
@@ -214,7 +214,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            deliveryNoteViewModel.updateDeliveryNoteState(
+                            deliveryNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_ISSUER,
                                 documentIssuerUiState
                             )
@@ -246,12 +246,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
+
                             documentProduct.id  = deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
                             deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
 
-                            // And if a document product is overflowing the page, and page is changed
-                            // we want this to be saved in db
-                            productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                           // productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
                         }
@@ -260,7 +258,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
-                            deliveryNoteViewModel.updateDeliveryNoteState(
+                            deliveryNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_PRODUCT,
                                 documentProduct
                             )

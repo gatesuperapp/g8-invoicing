@@ -223,9 +223,9 @@ class InvoiceLocalDataSource(
                     )
                 )
                 deliveryNotes.forEach {
-                    val deliveryNote = it.copy(documentTag = DocumentTag.DRAFT)
+                    var deliveryNote = it.copy(documentTag = DocumentTag.DRAFT)
                     saveInfoInOtherTables(
-                        deliveryNote
+                        it
                     )
                 }
             } catch (e: Exception) {

@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
@@ -305,14 +306,10 @@ class InvoiceAddEditViewModel @Inject constructor(
             }
 
             ScreenElement.DOCUMENT_PRODUCT -> {
-                val updatedDocumentProduct = value as DocumentProductState
-
-                val productIndex =  doc.documentProducts?.indexOfFirst{ it.id == value.id } ?: 0
-                val list =
-                    doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
-
-                list?.let{
-                    it.add(productIndex, updatedDocumentProduct)
+                updateDocumentProductList(
+                    value as DocumentProductState,
+                    doc
+                )?.let {
                     doc = doc.copy(documentProducts = it)
                     doc = doc.copy(documentPrices = calculateDocumentPrices(it))
                 }
@@ -334,6 +331,18 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
         return doc
     }
+}
+
+fun updateDocumentProductList(
+    value: DocumentProductState,
+    doc: DocumentState,
+): MutableList<DocumentProductState>? {
+    val productIndex = doc.documentProducts?.indexOfFirst { it.id == value.id } ?: 0
+    val list =
+        doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
+
+    list?.add(productIndex, value)
+    return list
 }
 
 

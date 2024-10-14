@@ -303,11 +303,13 @@ fun updateCreditNoteUiState(
         }
 
         ScreenElement.DOCUMENT_PRODUCT -> {
-            val updatedDocumentProduct = value as DocumentProductState
-            val list = doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-
-            doc = doc.copy(documentProducts = updatedList)
+            updateDocumentProductList(
+                value as DocumentProductState,
+                doc
+            )?.let {
+                doc = doc.copy(documentProducts = it)
+                doc = doc.copy(documentPrices = calculateDocumentPrices(it))
+            }
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {

@@ -20,18 +20,18 @@ interface DeliveryNoteLocalDataSourceInterface {
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        deliveryNoteId: Long?,
+        documentId: Long?,
     ): Int?
 
-    suspend fun deleteDocumentProduct(deliveryNoteId: Long, documentProductId: Long)
+    suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long)
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
         documentClientOrIssuer: ClientOrIssuerState,
-        deliveryNoteId: Long?,
+        documentId: Long?,
     )
 
-    suspend fun deleteDocumentClientOrIssuer(deliveryNoteId: Long, type: ClientOrIssuerType)
-    suspend fun duplicate(deliveryNotes: List<DeliveryNoteState>)
-    suspend fun update(deliveryNote: DeliveryNoteState)
-    suspend fun deleteDeliveryNotes(deliveryNotes: List<DeliveryNoteState>)
-    fun addDocumentProduct(deliveryNoteId: Long, documentProductId: Long)
+    suspend fun deleteDocumentClientOrIssuer(documentId: Long, type: ClientOrIssuerType)
+    suspend fun duplicate(documents: List<DeliveryNoteState>)
+    suspend fun update(document: DeliveryNoteState)
+    suspend fun deleteDeliveryNotes(documents: List<DeliveryNoteState>)
+    fun addDocumentProduct(documentId: Long, documentProductId: Long)
 }

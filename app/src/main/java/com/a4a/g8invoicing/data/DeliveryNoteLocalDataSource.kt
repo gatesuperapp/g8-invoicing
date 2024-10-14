@@ -128,8 +128,7 @@ class DeliveryNoteLocalDataSource(
             val listOfIds =
                 linkDeliveryNoteToDocumentProductQueries.getDocumentProductsLinkedToDeliveryNote(
                     deliveryNoteId
-                )
-                    .executeAsList()
+                ).executeAsList()
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
                     documentProductQueries.getDocumentProduct(it.document_product_id)
@@ -245,7 +244,6 @@ class DeliveryNoteLocalDataSource(
             }
         }
         return documentProductId
-
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(

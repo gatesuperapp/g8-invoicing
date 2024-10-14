@@ -93,6 +93,11 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         return deliveryNoteId
     }
 
+    fun updateUiState(screenElement: ScreenElement, value: Any) {
+        _deliveryNoteUiState.value =
+            updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
+    }
+
     private suspend fun updateDeliveryNoteInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
@@ -118,7 +123,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
                 deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
+                    documentId = _deliveryNoteUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
                 //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
@@ -225,7 +230,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
-                    deliveryNoteId = _deliveryNoteUiState.value.documentId?.toLong()
+                    documentId = _deliveryNoteUiState.value.documentId?.toLong()
                 )
 
             } catch (e: Exception) {
@@ -274,11 +279,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
             documentIssuer = documentClientOrIssuer
         )
-    }
-
-    fun updateDeliveryNoteState(screenElement: ScreenElement, value: Any) {
-        _deliveryNoteUiState.value =
-            updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
     }
 
     fun updateTextFieldCursorOfDeliveryNoteState(pageElement: ScreenElement) {
@@ -330,11 +330,13 @@ fun updateDeliveryNoteUiState(
         }
 
         ScreenElement.DOCUMENT_PRODUCT -> {
-            val updatedDocumentProduct = value as DocumentProductState
-            val list = doc.documentProducts?.filterNot { it.id == value.id }?.toMutableList()
-            val updatedList = (list ?: emptyList()) + updatedDocumentProduct
-
-            doc = doc.copy(documentProducts = updatedList)
+            updateDocumentProductList(
+                value as DocumentProductState,
+                doc
+            )?.let {
+                doc = doc.copy(documentProducts = it)
+                doc = doc.copy(documentPrices = calculateDocumentPrices(it))
+            }
         }
 
         ScreenElement.DOCUMENT_CURRENCY -> {
