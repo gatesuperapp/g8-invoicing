@@ -670,13 +670,11 @@ private fun addProductsToTable(
             it.setScale(0, RoundingMode.HALF_UP).toString() + "%"
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
-        var priceWithoutTax = BigDecimal(0)
-
-        it.taxRate?.let { taxRate ->
+        var priceWithoutTax = it.taxRate?.let { taxRate ->
             it.priceWithTax?.let { priceWithTax ->
-                priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
+                calculatePriceWithoutTax(priceWithTax, taxRate)
             }
-        }
+        } ?: it.priceWithTax ?: BigDecimal(0)
 
         productsTable.addCustomCell(
             text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)

@@ -246,7 +246,7 @@
     <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
     <string name="about_title_about">À propos</string>
     <string name="about_title_tutorials">Tutos &amp; conseils</string>
-    <string name="about_title_tutorials_button">Voyons voir</string>
+    <string name="about_title_tutorials_button">Accéder au site</string>
     <string name="about_title_tutorials_button_link">https://the-gate.fr/conseils-et-tutos</string>
     <string name="about_tutorials"> Plusieurs articles sont disponibles sur le site internet :\n
         &#8226; Comment numéroter les factures \n
@@ -262,12 +262,11 @@
         &#8226; Ni pub ni traceur \n
         &#8226; Logiciel libre et open-source\n
         &#8226; Conçue pour les paysan·ne·s en priorité\n
-        &#8226; Souhaite financer des projets de protection de la faune sauvage -
-        des chiroptères en particulier.\n
+        &#8226; Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.\n
     </string>
     <string name="about2">
-    Pour l\'assistance par mail, une remontée de bug ou toute autre demande :</string>
-    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez les</string>
+    Pour contacter l\'assistance, remonter un bug ou toute autre demande :</string>
+    <string name="about_terms_of_service_header">En utilisant l\'application, tu acceptes les</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
@@ -279,30 +278,30 @@
     <string name="account_donate">En savoir plus</string>
     <string name="account_donate_link">https://the-gate.fr/abonnement</string>
     <string name="account_bat_love">𝕘𝕚𝕞𝕞𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka</string>
-    <string name="invoice_advice_legal_2">The Gate</string>
-    <string name="invoice_advice_legal_help">Clique-moi dessus…!</string>
-    <string name="invoice_advice_legal_3">Je suis Petit Rhino, ton nouveau meilleur amigo ♡ \n\n
-        Clique sur moi quand tu me vois, ou quand il y a des pointillés : j\'aime parler.
+    <string name="invoice_advice_legal_help">Clique sur moi …!</string>
+    <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n
+        Tu peux me cliquer dessus quand tu me vois, souvent plusieurs fois d\'affilée : j\'aime parler.
         \n\n …</string>
-    <string name="invoice_advice_legal_3_1">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, il est conseillé de prendre connaissance des mentions obligatoires pour une facture conforme. Je te les ai résumées là : \n</string>
+    <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des mentions obligatoires pour une facture conforme.
+        Je sais, c\'est pas super funky, mais je ne voudrais pas que tu prennes un péno fiscal et \n\n … </string>
+    <string name="invoice_advice_legal_3">que tu m\'en veuilles après… je suis un être sensible.  \n\n
+        Pur te facilier la vie, j\'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5"> \n\n … \n
+    <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
    </string>
-    <string name="invoice_advice_legal_6">Je voulais aussi te dire que les documents que tu crées ainsi que toutes tes modifications s\'enregistrent automatiquement en arrière-plan. Parce que je t\'aime.\n\n
-        Tu peux maintenant cliquer sur «Créer» pour te lancer, ou «Menu» pour découvrir le reste de l\'app.\n\n
+    <string name="invoice_advice_legal_6">les documents que tu crées ainsi que toutes tes modifications s\'enregistrent automatiquement en arrière-plan. Ça c\'est simplement parce que je t\'aime
+        fort.  \n\n… \n
+   </string>
+    <string name="invoice_advice_legal_7"> Voilà tu peux maintenant cliquer sur «Créer» pour te lancer, ou «Menu» pour découvrir le reste de l\'app.\n\n
         𝕤𝕖𝕖 𝕪𝕒
    </string>
-    <string name="invoice_advice_legal_7">. \n\n
-   </string>
-
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="invoice_advice_bottom_menu">Tu peux sélectionner une facture dans ta liste en cliquant longtemps dessus ou en cliquant sur la coche ○ à gauche du numéro de facture. \n\n …   </string>
-    <string name="invoice_advice_bottom_menu2">Cela fait apparaître différentes options : marquer tes factures par un tag, envoyer un mail de relance tout prêt, créer un avoir et + \n\n 𝕖𝕟𝕛𝕠𝕪
-</string>
-    <string name="delivery_note_advice_convert">Pour convertir un ou plusieurs bons de livraison en une facture, tu peux sélectionner les bons dans ta liste en cliquant longtemps dessus ou en cliquant sur la coche ○ \n\n …   </string>
-    <string name="delivery_note_advice_convert2">Choisis ensuite «Facturer» puis rdv dans l\'onglet «Factures» pour voir le document fraîchement créé ! \n\n 𝕒𝕨𝕖𝕤𝕠𝕞𝕖    </string>
-
+    <string name="invoice_advice_bottom_menu">Hey c\'est re-moi en plus swag avec mon faux piercing sur la joue. Si je bée ainsi de la bouche c\'est qu\'il faut absolument que je te montre une astuce, mais \n\n …   </string>
+    <string name="invoice_advice_bottom_menu1">avant de te spoiler, je te dis ce qu'on cherche : comment faire apparaître des options très utiles, comme supprimer un document ? \n\n …    </string>
+    <string name="invoice_advice_bottom_menu2">Solution : clique sur le cercle ○ devant le numéro de la facture, ça la sélectionne et de nouvelles options s\'affichent dans le menu du bas. \n\n 𝕕𝕖 𝕣𝕚𝕖𝕟 𝕔𝕚𝕒𝕠 𝕔𝕚𝕒𝕠</string>
+    <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
+    <string name="delivery_note_advice_convert2">Ensuite clique sur «Facturer» dans le menu du bas et rdv dans l\'onglet «Factures» pour voir la pépite. \n\n 𝕒𝕝𝕝𝕖𝕫 𝕔𝕚𝕒𝕠   </string>
     <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
         \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.
@@ -325,7 +324,7 @@
     <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
-        \n\n• Pense à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte ou vol de votre téléphone. </string>
+        \n\n• Pense à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte du téléphone. </string>
     <string name="export_info_popup_validate">okurrr</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n

@@ -51,11 +51,11 @@ import com.a4a.g8invoicing.ui.shared.AnimationLottie
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
-import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.style.TextAlign
+import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 
 @Composable
 fun InvoiceList(
@@ -174,16 +174,13 @@ fun InvoiceList(
                                     selectedMode.value = false
                                 }
                             },
-                            keyToUnselectAll = keyToResetCheckboxes.value
+                            keyToResetCheckboxes = keyToResetCheckboxes.value
                         )
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        if(documentsUiState.documentStates.size == 1)
+                        if (documentsUiState.documentStates.size == 1)
                             DisplayBatHelperMenuAdvice()
-
                     }
-
-
                 }
 
                 Column(
@@ -219,7 +216,7 @@ fun InvoiceList(
 }
 
 @Composable
-fun DisplayBatHelperWelcome(){
+fun DisplayBatHelperWelcome() {
     var visibleText by remember { mutableIntStateOf(0) }
     val numberOfIterations = remember { mutableIntStateOf(1) }
     val uriHandler = LocalUriHandler.current
@@ -243,7 +240,7 @@ fun DisplayBatHelperWelcome(){
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() } // This is mandatory
             ) {
-                if (visibleText < 4) {
+                if (visibleText < 6) {
                     visibleText += 1
                 } else visibleText = 0
                 numberOfIterations.intValue += 1
@@ -282,7 +279,7 @@ fun DisplayBatHelperWelcome(){
             exit = fadeOut(tween(100)),
         ) {
             Text(
-                text = Strings.get(R.string.invoice_advice_legal_3),
+                text = Strings.get(R.string.invoice_advice_legal_1),
                 textAlign = TextAlign.Center
             )
         }
@@ -298,16 +295,36 @@ fun DisplayBatHelperWelcome(){
             ),
             exit = fadeOut(tween(100)),
         ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_legal_2),
+                textAlign = TextAlign.Center
+            )
+        }
+
+
+        AnimatedVisibility(
+            visible = visibleText == 3,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
+            exit = fadeOut(tween(100)),
+        ) {
             TextAdvice(uriHandler)
         }
 
         AnimatedVisibility(
-            visible = visibleText == 3,
-            enter = fadeIn( tween(
-                2000,
-                delayMillis = 100,
-                easing = LinearOutSlowInEasing
-            )),
+            visible = visibleText == 4,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
             exit = fadeOut(tween(100)),
         ) {
             Text(
@@ -315,11 +332,28 @@ fun DisplayBatHelperWelcome(){
                 textAlign = TextAlign.Center
             )
         }
+
+        AnimatedVisibility(
+            visible = visibleText == 5,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_legal_7),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
 @Composable
-private fun DisplayBatHelperMenuAdvice(){
+private fun DisplayBatHelperMenuAdvice() {
     var visibleText by remember { mutableIntStateOf(0) }
     val numberOfIterations = remember { mutableIntStateOf(2) }
 
@@ -342,7 +376,7 @@ private fun DisplayBatHelperMenuAdvice(){
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() } // This is mandatory
             ) {
-                if (visibleText < 2) {
+                if (visibleText < 3) {
                     visibleText += 1
                 } else visibleText = 0
                 numberOfIterations.intValue += 1
@@ -373,6 +407,18 @@ private fun DisplayBatHelperMenuAdvice(){
 
         AnimatedVisibility(
             visible = visibleText == 2,
+            enter = fadeIn(tween(1000)),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.invoice_advice_bottom_menu1),
+                textAlign = TextAlign.Center
+            )
+        }
+
+
+        AnimatedVisibility(
+            visible = visibleText == 3,
             enter = fadeIn(
                 tween(
                     2000,
@@ -431,13 +477,13 @@ fun changeBackgroundWithVerticalGradient(initialColor: Brush): Brush {
 @Composable
 fun TextAdvice(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
-        append(Strings.get(R.string.invoice_advice_legal_3_1) + " ")
+        append(Strings.get(R.string.invoice_advice_legal_3) + " ")
 
         pushStringAnnotation(
             tag = "link",
             annotation = Strings.get(R.string.invoice_advice_legal_url)
         )
-        withStyle(style = SpanStyle(color = ColorBlueLink)) {
+        withStyle(style = SpanStyle(color = ColorVioletLight)) {
             append(Strings.get(R.string.invoice_advice_legal_4))
         }
         append(Strings.get(R.string.invoice_advice_legal_5))

@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.content.ContentValues
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -33,10 +35,10 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
-import com.a4a.g8invoicing.ui.navigation.actionTagReminded
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
 import com.a4a.g8invoicing.ui.navigation.actionTagLate
 import com.a4a.g8invoicing.ui.navigation.actionTagPaid
+import com.a4a.g8invoicing.ui.navigation.actionTagReminded
 import com.a4a.g8invoicing.ui.navigation.actionTagSent
 import com.a4a.g8invoicing.ui.navigation.actionTagUndefined
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
@@ -44,32 +46,29 @@ import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.textSmall
-import com.a4a.g8invoicing.ui.theme.textVerySmall
 
 @Composable
 fun DocumentListItem(
     document: DocumentState,
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (Boolean) -> Unit = {},
-    keyToResetCheckboxes: Boolean,
+    keyToResetCheckbox: Boolean,
 ) {
     var action by remember { mutableStateOf(actionTagDraft()) }
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
-    // For the checkbox
-    var checkboxFace by remember(keyToResetCheckboxes) { mutableStateOf(CheckboxFace.Back) }
+   // Log.e(ContentValues.TAG,"dddd  keyToResetCheckbox =" + keyToResetCheckbox)
+
+
     // Re-triggers remember calculation when key changes
-    val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
-    // For changing background when item selected
-    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.White) }
-
+    val checkedState = remember(keyToResetCheckbox) { mutableStateOf(false) }
+   // Log.e(ContentValues.TAG,"dddd  checkedState =" + checkedState.value)
+    // Log.e(ContentValues.TAG,"dddd  ===== =")
 
     Row(
         verticalAlignment = CenterVertically,
@@ -95,16 +94,15 @@ fun DocumentListItem(
                         onItemClick()
                     },
                     onLongPress = {
-                        checkboxFace = checkboxFace.next
-                        checkedState.value = !checkedState.value
-                        onItemCheckboxClick(checkedState.value)
-                        // Change item background color
-                        backgroundColor.value =
-                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                     /*   Log.e(ContentValues.TAG,"dddd--  onLongPress checkedState =" + checkedState.value)
+                        Log.e(ContentValues.TAG,"dddd ===== =")*/
+                     /*   checkedState.value = !checkedState.value
+
+                        onItemCheckboxClick(checkedState.value)*/
                     }
                 )
             }
-            .background(backgroundColor.value)
+            .background(if (checkedState.value) ColorLightGreyo else Color.White)
     ) {
 
         // Adding padding in the inside row, to keep the click & the ripple in all row
@@ -130,16 +128,15 @@ fun DocumentListItem(
             Column {
                 FlippyCheckBox(
                     fillColorWhenSelectionOff = action.iconColor,
-                    backgroundColorWhenSelectionOn = backgroundColor.value,
+                    backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
                     onItemCheckboxClick = {
-                        checkboxFace = checkboxFace.next
+                      /*  Log.e(ContentValues.TAG,"dddd-----  FlippyCheckBox checkedState =" + checkedState.value)
+                        Log.e(ContentValues.TAG,"dddd ===== =")*/
                         checkedState.value = !checkedState.value
-                        onItemCheckboxClick(it)
-                        // Change item background color
-                        backgroundColor.value =
-                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                        onItemCheckboxClick(checkedState.value)
                     },
-                    checkboxFace = checkboxFace,
+                    checkboxFace = if (checkedState.value) CheckboxFace.Front
+                    else CheckboxFace.Back,
                     checkedState = checkedState.value,
                     displayBorder = document.documentType != DocumentType.INVOICE
                 )

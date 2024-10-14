@@ -16,8 +16,9 @@ fun DocumentListContent(
     onItemClick: (Int) -> Unit = {},
     addDocumentToSelectedList: (DocumentState) -> Unit = {},
     removeDocumentFromSelectedList: (DocumentState) -> Unit = {},
-    keyToUnselectAll: Boolean,
+    keyToResetCheckboxes: Boolean,
 ) {
+
     LazyColumn {
         items(
             items = documents.sortedByDescending {
@@ -62,7 +63,7 @@ fun DocumentListContent(
                         removeDocumentFromSelectedList(document)
                     }
                 },
-                keyToUnselectAll
+                keyToResetCheckbox = keyToResetCheckboxes
             )
 
             HorizontalDivider(

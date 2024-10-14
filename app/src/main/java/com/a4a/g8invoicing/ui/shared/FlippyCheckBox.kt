@@ -5,8 +5,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,7 +29,7 @@ import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 fun FlippyCheckBox(
     fillColorWhenSelectionOff: Color?,
     backgroundColorWhenSelectionOn: Color? = null,
-    onItemCheckboxClick: (Boolean) -> Unit = {},
+    onItemCheckboxClick: () -> Unit = {},
     checkboxFace: CheckboxFace,
     checkedState: Boolean,
     displayBorder: Boolean = true,
@@ -38,8 +41,8 @@ fun FlippyCheckBox(
             easing = FastOutSlowInEasing,
         ), label = ""
     )
+
     Card(
-        onClick = { onItemCheckboxClick(true) },
         modifier = Modifier
             .padding(12.dp)
             .padding(
@@ -54,7 +57,7 @@ fun FlippyCheckBox(
             }
     ) {
         if (rotation.value <= 90f) {
-            Box(
+            Row(
                 Modifier
                     .fillMaxSize()
                     .border(
@@ -72,7 +75,7 @@ fun FlippyCheckBox(
                     Checkbox(
                         checked = checkedState,
                         onCheckedChange = {
-                            onItemCheckboxClick(false)
+                            onItemCheckboxClick()
                         },
                     )
                 }
@@ -80,12 +83,15 @@ fun FlippyCheckBox(
         } else {
             Box(
                 Modifier
+                    .fillMaxSize()
+                    .clickable {
+                        onItemCheckboxClick()
+                    }
                     .border(
                         width = 1.5.dp,
                         color = if (displayBorder) ColorGrayTransp else Color.Transparent,
                         shape = CircleShape
                     )
-                    .fillMaxSize()
                     .graphicsLayer {
                         rotationY = 180f
                     },

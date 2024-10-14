@@ -140,7 +140,7 @@ fun DeliveryNoteList(
                                 selectedMode.value = false
                             }
                         },
-                        keyToUnselectAll = keyToResetCheckboxes.value
+                        keyToResetCheckboxes = keyToResetCheckboxes.value
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -185,7 +185,7 @@ fun DeliveryNoteList(
 @Composable
 private fun DisplayBatHelperAdvice() {
     var visibleText by remember { mutableIntStateOf(0) }
-    val numberOfIterations = remember { mutableIntStateOf(1) }
+    val numberOfIterations = remember { mutableIntStateOf(4) }
 
     Column(
         modifier = Modifier
@@ -206,7 +206,7 @@ private fun DisplayBatHelperAdvice() {
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() } // This is mandatory
             ) {
-                if (visibleText < 2) {
+                if (visibleText < 3) {
                     visibleText += 1
                 } else visibleText = 0
                 numberOfIterations.intValue += 1
@@ -237,6 +237,23 @@ private fun DisplayBatHelperAdvice() {
 
         AnimatedVisibility(
             visible = visibleText == 2,
+            enter = fadeIn(
+                tween(
+                    2000,
+                    delayMillis = 100,
+                    easing = LinearOutSlowInEasing
+                )
+            ),
+            exit = fadeOut(tween(100)),
+        ) {
+            Text(
+                text = Strings.get(R.string.delivery_note_advice_convert1),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        AnimatedVisibility(
+            visible = visibleText == 3,
             enter = fadeIn(
                 tween(
                     2000,

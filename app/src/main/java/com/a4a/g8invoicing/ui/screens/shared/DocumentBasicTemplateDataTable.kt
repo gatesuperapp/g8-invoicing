@@ -163,13 +163,11 @@ fun DocumentProductsRows(
     taxColumnWeight: Float,
 ) {
     tableData.forEach {
-        var priceWithoutTax = BigDecimal(0)
-
-        it.taxRate?.let { taxRate ->
+        val priceWithoutTax = it.taxRate?.let { taxRate ->
             it.priceWithTax?.let { priceWithTax ->
-                priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
+                calculatePriceWithoutTax(priceWithTax, taxRate)
             }
-        }
+        } ?: it.priceWithTax ?: BigDecimal(0)
 
         Row(
             Modifier

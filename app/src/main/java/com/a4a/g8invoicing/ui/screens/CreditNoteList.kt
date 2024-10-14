@@ -123,7 +123,7 @@ fun CreditNoteList(
                             selectedMode.value = false
                         }
                     },
-                    keyToUnselectAll = keyToResetCheckboxes.value
+                    keyToResetCheckboxes = keyToResetCheckboxes.value
                 )
                 Column(
                     // apply darker background when bottom menu is expanded

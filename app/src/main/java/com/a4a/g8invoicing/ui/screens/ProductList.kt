@@ -104,11 +104,11 @@ fun ProductList(
                 ProductListContent(
                     products = productsUiState.products,
                     onProductClick = onClickListItem,
-                    addProductToSelectedList = {
+                    addToSelectedList = {
                         selectedItems.add(it)
                         selectedMode.value = true
                     },
-                    removeProductFromSelectedList = {
+                    removeFromSelectedList = {
                         selectedItems.remove(it)
                         if (selectedItems.isEmpty()) {
                             selectedMode.value = false

@@ -114,7 +114,7 @@ fun ClientOrIssuerList(
                             selectedMode.value = false
                         }
                     },
-                    keyToUnselectAll = keyToResetCheckboxes.value
+                    keyToResetCheckboxes = keyToResetCheckboxes.value
                 )
 
                 Column(

@@ -35,28 +35,22 @@ import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
+import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.textSmall
 
 @Composable
 fun ClientOrIssuerListItem(
     clientOrIssuer: ClientOrIssuerState,
     onItemClick: () -> Unit = {},
-    onItemCheckboxClick: (it: Boolean) -> Unit = {},
-    keyToResetCheckboxes: Boolean,
-    isCheckboxDisplayed: Boolean, // Don't display checkboxes when list is displayed in bottomSheet
+    onItemCheckboxClick: (Boolean) -> Unit = {},
+    isCheckboxDisplayed: Boolean,
+    keyToResetCheckbox: Boolean,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
-
-    // For the checkbox
-    var checkboxFace by remember(keyToResetCheckboxes) { mutableStateOf(CheckboxFace.Back) }
     // Re-triggers remember calculation when key changes
-    val checkedState = remember(keyToResetCheckboxes) { mutableStateOf(false) }
-
-    // For changing background when item selected
-    val backgroundColor = remember(keyToResetCheckboxes) { mutableStateOf(Color.White) }
-
+    val checkedState = remember(keyToResetCheckbox) { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -82,16 +76,12 @@ fun ClientOrIssuerListItem(
                         onItemClick()
                     },
                     onLongPress = {
-                        checkboxFace = checkboxFace.next
-                        checkedState.value = !checkedState.value
-                        onItemCheckboxClick(checkedState.value)
-                        // Change item background color
-                        backgroundColor.value =
-                            changeSelectedItemBackgroundColor(backgroundColor.value)
+                    /*    checkedState.value = !checkedState.value
+                        onItemCheckboxClick(checkedState.value)*/
                     }
                 )
             }
-            .background(backgroundColor.value)
+            .background(if (checkedState.value) ColorLightGreyo else Color.White)
     ) {
         // Adding padding in the inside row, to keep the click & the ripple in all row
         // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
@@ -109,18 +99,14 @@ fun ClientOrIssuerListItem(
                 Column {
                     FlippyCheckBox(
                         fillColorWhenSelectionOff = actionTagUndefined().iconColor,
-                        backgroundColorWhenSelectionOn = backgroundColor.value,
+                        backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
                         onItemCheckboxClick = {
-                            checkboxFace = checkboxFace.next
                             checkedState.value = !checkedState.value
-                            onItemCheckboxClick(it)
-                            // Change item background color
-                            backgroundColor.value =
-                                changeSelectedItemBackgroundColor(backgroundColor.value)
+                            onItemCheckboxClick(checkedState.value)
                         },
-                        checkboxFace = checkboxFace,
+                        checkboxFace = if (checkedState.value) CheckboxFace.Front
+                        else CheckboxFace.Back,
                         checkedState = checkedState.value,
-
                         )
                 }
             }
