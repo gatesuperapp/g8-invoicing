@@ -58,16 +58,26 @@ fun DocumentListItem(
     onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckbox: Boolean,
 ) {
-    var action by remember { mutableStateOf(actionTagDraft()) }
-    var isPressed by remember { mutableStateOf(false) }
+    val action = remember { mutableStateOf(actionTagDraft()) }
+    var isPressed = remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
-   // Log.e(ContentValues.TAG,"dddd  keyToResetCheckbox =" + keyToResetCheckbox)
+    action.value = when (document.documentTag) {
+            DocumentTag.DRAFT -> actionTagDraft()
+            DocumentTag.SENT -> actionTagSent()
+            DocumentTag.PAID -> actionTagPaid()
+            DocumentTag.LATE -> actionTagLate()
+            DocumentTag.REMINDED -> actionTagReminded()
+            DocumentTag.CANCELLED -> actionTagCancelled()
+            else -> actionTagUndefined()
+        }
+
+    // Log.e(ContentValues.TAG,"dddd  keyToResetCheckbox =" + keyToResetCheckbox)
 
 
     // Re-triggers remember calculation when key changes
     val checkedState = remember(keyToResetCheckbox) { mutableStateOf(false) }
-   // Log.e(ContentValues.TAG,"dddd  checkedState =" + checkedState.value)
+    // Log.e(ContentValues.TAG,"dddd  checkedState =" + checkedState.value)
     // Log.e(ContentValues.TAG,"dddd  ===== =")
 
     Row(
@@ -84,21 +94,21 @@ fun DocumentListItem(
                 detectTapGestures(
                     onPress = { offset ->
                         val press = PressInteraction.Press(offset)
-                        isPressed = true
+                        isPressed.value = true
                         interactionSource.emit(press)
                         tryAwaitRelease()
                         interactionSource.emit(PressInteraction.Release(press))
-                        isPressed = false
+                        isPressed.value = false
                     },
                     onTap = {
                         onItemClick()
                     },
                     onLongPress = {
-                     /*   Log.e(ContentValues.TAG,"dddd--  onLongPress checkedState =" + checkedState.value)
-                        Log.e(ContentValues.TAG,"dddd ===== =")*/
-                     /*   checkedState.value = !checkedState.value
+                        /*   Log.e(ContentValues.TAG,"dddd--  onLongPress checkedState =" + checkedState.value)
+                           Log.e(ContentValues.TAG,"dddd ===== =")*/
+                        /*   checkedState.value = !checkedState.value
 
-                        onItemCheckboxClick(checkedState.value)*/
+                           onItemCheckboxClick(checkedState.value)*/
                     }
                 )
             }
@@ -116,22 +126,14 @@ fun DocumentListItem(
                     bottom = 14.dp
                 )
         ) {
-            action = when (document.documentTag) {
-                DocumentTag.DRAFT -> actionTagDraft()
-                DocumentTag.SENT -> actionTagSent()
-                DocumentTag.PAID -> actionTagPaid()
-                DocumentTag.LATE -> actionTagLate()
-                DocumentTag.REMINDED -> actionTagReminded()
-                DocumentTag.CANCELLED -> actionTagCancelled()
-                else -> actionTagUndefined()
-            }
+
             Column {
                 FlippyCheckBox(
-                    fillColorWhenSelectionOff = action.iconColor,
+                    fillColorWhenSelectionOff = action.value.iconColor,
                     backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
                     onItemCheckboxClick = {
-                      /*  Log.e(ContentValues.TAG,"dddd-----  FlippyCheckBox checkedState =" + checkedState.value)
-                        Log.e(ContentValues.TAG,"dddd ===== =")*/
+                        /*  Log.e(ContentValues.TAG,"dddd-----  FlippyCheckBox checkedState =" + checkedState.value)
+                          Log.e(ContentValues.TAG,"dddd ===== =")*/
                         checkedState.value = !checkedState.value
                         onItemCheckboxClick(checkedState.value)
                     },
@@ -166,7 +168,7 @@ fun DocumentListItem(
 
                 if (document is InvoiceState) {
                     if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
-                        action.label?.let {
+                        action.value.label?.let {
                             Text(
                                 text = stringResource(id = it),
                             )

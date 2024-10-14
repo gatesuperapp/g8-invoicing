@@ -195,7 +195,7 @@ fun Account(
             }
         }*/
 
-        val numberOfIterations = remember { mutableIntStateOf(1) }
+        val numberOfIterations = remember { mutableIntStateOf(2) }
 
         Box(
             modifier = Modifier
@@ -209,6 +209,7 @@ fun Account(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
                 Text(
                     modifier = Modifier.padding(
                         top = 40.dp,
@@ -239,17 +240,17 @@ fun Account(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-              //  var visibleText by remember { mutableStateOf(false) }
+                var visibleText by remember { mutableStateOf(false) }
 
                 Box(
                     Modifier
                         .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() } // This is mandatory
-                    ) {
-                        numberOfIterations.intValue += 1
-           //             visibleText = !visibleText
-                    }
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() } // This is mandatory
+                        ) {
+                            numberOfIterations.intValue += 1
+                            visibleText = !visibleText
+                        }
                 ) {
                     AnimationLottie(
                         modifier = Modifier
@@ -260,7 +261,7 @@ fun Account(
                         numberOfIteration = numberOfIterations.intValue
                     )
                 }
-/*
+
                 AnimatedVisibility(
                     visible = visibleText,
                     enter = fadeIn(
@@ -276,9 +277,9 @@ fun Account(
                         text = Strings.get(R.string.account_bat_love),
                         textAlign = TextAlign.Center
                     )
-                }*/
-
+                }
             }
+
             Column(
                 // apply darker background when bottom menu is expanded
                 modifier = Modifier

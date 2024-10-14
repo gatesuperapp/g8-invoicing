@@ -18,7 +18,6 @@ fun DocumentListContent(
     removeDocumentFromSelectedList: (DocumentState) -> Unit = {},
     keyToResetCheckboxes: Boolean,
 ) {
-
     LazyColumn {
         items(
             items = documents.sortedByDescending {

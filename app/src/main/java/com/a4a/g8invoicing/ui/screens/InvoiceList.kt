@@ -240,7 +240,7 @@ fun DisplayBatHelperWelcome() {
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() } // This is mandatory
             ) {
-                if (visibleText < 6) {
+                if (visibleText < 5) {
                     visibleText += 1
                 } else visibleText = 0
                 numberOfIterations.intValue += 1
@@ -333,22 +333,7 @@ fun DisplayBatHelperWelcome() {
             )
         }
 
-        AnimatedVisibility(
-            visible = visibleText == 5,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = Strings.get(R.string.invoice_advice_legal_7),
-                textAlign = TextAlign.Center
-            )
-        }
+
     }
 }
 

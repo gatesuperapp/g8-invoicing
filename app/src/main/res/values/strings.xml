@@ -277,7 +277,7 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="account_donate">En savoir plus</string>
     <string name="account_donate_link">https://the-gate.fr/abonnement</string>
-    <string name="account_bat_love">𝕘𝕚𝕞𝕞𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="account_bat_love">𝕚 𝕔𝕒𝕟𝕥 𝕝𝕚𝕧𝕖 𝕨𝕚𝕥𝕙𝕠𝕦𝕥 𝕦</string>
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n
         Tu peux me cliquer dessus quand tu me vois, souvent plusieurs fois d\'affilée : j\'aime parler.
@@ -285,23 +285,20 @@
     <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des mentions obligatoires pour une facture conforme.
         Je sais, c\'est pas super funky, mais je ne voudrais pas que tu prennes un péno fiscal et \n\n … </string>
     <string name="invoice_advice_legal_3">que tu m\'en veuilles après… je suis un être sensible.  \n\n
-        Pur te facilier la vie, j\'ai tout résumé ici : \n</string>
+        Pour te facilier la vie, j\'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
    </string>
-    <string name="invoice_advice_legal_6">les documents que tu crées ainsi que toutes tes modifications s\'enregistrent automatiquement en arrière-plan. Ça c\'est simplement parce que je t\'aime
-        fort.  \n\n… \n
-   </string>
-    <string name="invoice_advice_legal_7"> Voilà tu peux maintenant cliquer sur «Créer» pour te lancer, ou «Menu» pour découvrir le reste de l\'app.\n\n
-        𝕤𝕖𝕖 𝕪𝕒
+    <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n
    </string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="invoice_advice_bottom_menu">Hey c\'est re-moi en plus swag avec mon faux piercing sur la joue. Si je bée ainsi de la bouche c\'est qu\'il faut absolument que je te montre une astuce, mais \n\n …   </string>
-    <string name="invoice_advice_bottom_menu1">avant de te spoiler, je te dis ce qu'on cherche : comment faire apparaître des options très utiles, comme supprimer un document ? \n\n …    </string>
-    <string name="invoice_advice_bottom_menu2">Solution : clique sur le cercle ○ devant le numéro de la facture, ça la sélectionne et de nouvelles options s\'affichent dans le menu du bas. \n\n 𝕕𝕖 𝕣𝕚𝕖𝕟 𝕔𝕚𝕒𝕠 𝕔𝕚𝕒𝕠</string>
-    <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="invoice_advice_bottom_menu1">avant de te spoiler, je te dis ce qu\'on cherche : comment faire apparaître des options très utiles, comme supprimer un document ? \n\n …    </string>
+    <string name="invoice_advice_bottom_menu2">Solution : clique sur le cercle ○ devant le numéro de la facture, ça la sélectionne et de nouvelles options s\'affichent dans le menu du bas. \n\n 𝕘𝕖𝕟𝕚𝕠𝕦𝕤𝕝𝕪 𝕪𝕠𝕦𝕣𝕤 </string>
+    <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
-    <string name="delivery_note_advice_convert2">Ensuite clique sur «Facturer» dans le menu du bas et rdv dans l\'onglet «Factures» pour voir la pépite. \n\n 𝕒𝕝𝕝𝕖𝕫 𝕔𝕚𝕒𝕠   </string>
+    <string name="delivery_note_advice_convert2">Ensuite clique sur «Facturer» dans le menu du bas et rdv dans l\'onglet «Factures» pour voir la pépite. \n\n Elle apparaîtra en haut de liste avec le numéro
+        incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
         \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.

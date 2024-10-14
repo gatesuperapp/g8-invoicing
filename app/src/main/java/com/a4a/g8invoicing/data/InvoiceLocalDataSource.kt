@@ -223,8 +223,9 @@ class InvoiceLocalDataSource(
                     )
                 )
                 deliveryNotes.forEach {
+                    val deliveryNote = it.copy(documentTag = DocumentTag.DRAFT)
                     saveInfoInOtherTables(
-                        it
+                        deliveryNote
                     )
                 }
             } catch (e: Exception) {
@@ -486,7 +487,7 @@ class InvoiceLocalDataSource(
 
     private suspend fun linkDocumentToDocumentTag(
         documentId: Long,
-        initialTag: DocumentTag,
+        initialTag: DocumentTag? = null,
         newTag: DocumentTag,
         updateCase: TagUpdateOrCreationCase,
     ) {
@@ -580,9 +581,8 @@ class InvoiceLocalDataSource(
                 // Link tag
                 linkDocumentToDocumentTag(
                     id,
-                    initialTag = document.documentTag,
                     newTag = document.documentTag,
-                    TagUpdateOrCreationCase.TAG_CREATION
+                    updateCase = TagUpdateOrCreationCase.TAG_CREATION
                 )
 
                 // Link all products
