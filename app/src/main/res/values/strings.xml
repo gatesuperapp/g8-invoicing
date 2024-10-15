@@ -267,6 +267,7 @@
     <string name="about2">
     Pour contacter l\'assistance, remonter un bug ou toute autre demande :</string>
     <string name="about_terms_of_service_header">En utilisant l\'application, tu acceptes les</string>
+    <string name="about_build_version">Version : </string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>

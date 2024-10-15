@@ -73,8 +73,6 @@ fun About(
             )
         }
     ) { padding ->
-
-
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -171,6 +169,13 @@ fun About(
                 )
 
                 TermsOfService(uriHandler)
+
+                Text(
+                    modifier = Modifier.padding(
+                        bottom = 30.dp
+                    ),
+                    text = stringResource(id = R.string.about) + "1.0"
+                )
             }
             Column(
                 // apply darker background when bottom menu is expanded
@@ -206,6 +211,9 @@ fun TermsOfService(uriHandler: UriHandler) {
     }
 
     ClickableText(
+        modifier = Modifier.padding(
+            bottom = 20.dp
+        ),
         text = annotatedString,
         style = MaterialTheme.typography.bodyLarge,
         onClick = { offset ->

@@ -14,7 +14,7 @@ android {
         applicationId = "com.a4a.g8invoicing"
         minSdk = 26
         targetSdk = 34
-        versionCode = 17
+        versionCode = 19
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
