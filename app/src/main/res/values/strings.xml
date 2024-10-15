@@ -322,7 +322,7 @@
     <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
-        \n\n• Pense à conserver une copie du PDF dans vos mails envoyés ou dans un espace de stockage, en cas de perte du téléphone. </string>
+        \n\n• Pense à conserver une copie du PDF dans tes mails envoyés ou dans un espace de stockage, en cas de perte du téléphone. </string>
     <string name="export_info_popup_validate">okurrr</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n

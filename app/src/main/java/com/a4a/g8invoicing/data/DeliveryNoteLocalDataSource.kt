@@ -7,6 +7,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.screens.shared.calculatePriceWithoutTax
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -30,9 +31,11 @@ class DeliveryNoteLocalDataSource(
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
-    private val linkDocumentClientOrIssuerToAddressQueries = db.linkDocumentClientOrIssuerToAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries =
+        db.linkDocumentClientOrIssuerToAddressQueries
     private val documentProductQueries = db.documentProductQueries
-    private val linkDeliveryNoteToDocumentProductQueries = db.linkDeliveryNoteToDocumentProductQueries
+    private val linkDeliveryNoteToDocumentProductQueries =
+        db.linkDeliveryNoteToDocumentProductQueries
     private val linkDeliveryNoteToDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
 
@@ -422,10 +425,15 @@ class DeliveryNoteLocalDataSource(
 
 fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
     val totalPriceWithoutTax = products.filter { it.priceWithTax != null }.sumOf {
-        (it.priceWithTax!! -
-                it.priceWithTax!!
-                * (it.taxRate ?: BigDecimal(0))
-                / BigDecimal(100)) * (it.quantity)
+        val unitTotal = if (it.taxRate != null) {
+            it.taxRate?.let { taxRate ->
+                it.priceWithTax?.let { priceWithTax ->
+                    calculatePriceWithoutTax(priceWithTax, taxRate)
+                }
+            }
+        } else (it.priceWithTax)
+
+        unitTotal!! * (it.quantity)
     }.setScale(2, RoundingMode.HALF_UP)
 
     // Calculate the total amount of each tax
@@ -437,7 +445,8 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrice
     val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
     groupedItems.values.forEach { documentProduct ->
         val listOfAmounts = documentProduct.filter { it.priceWithTax != null }.map {
-            val value = it.priceWithTax!!.toDouble() / (1.0 + (it.taxRate ?: 0.0).toDouble() / 100.0)
+            val value =
+                it.priceWithTax!!.toDouble() / (1.0 + (it.taxRate ?: 0.0).toDouble() / 100.0)
             val priceWithoutTax = BigDecimal(value)
 
             priceWithoutTax * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
