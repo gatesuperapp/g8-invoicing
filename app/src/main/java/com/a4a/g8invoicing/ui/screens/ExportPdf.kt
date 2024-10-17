@@ -214,13 +214,20 @@ enum class ExportStatus {
 fun Send(context: Context, document: DocumentState, finalFileName: String) {
     Button(onClick = {
         try {
+            val type = when (document.documentType) {
+                DocumentType.INVOICE -> Strings.get(R.string.export_email_subject_invoice)
+                DocumentType.DELIVERY_NOTE -> Strings.get(R.string.export_email_subject_delivery_note)
+                DocumentType.CREDIT_NOTE -> Strings.get(R.string.export_email_subject_credit_note)
+                else -> ""
+            }
+
             val uri = getFileUri(context, finalFileName)
             uri?.let {
                 composeEmail(
                     address = document.documentClient?.email?.text,
                     documentNumber = document.documentNumber.text,
-                    documentType = document.documentType,
-                    emailMessage = Strings.get(R.string.export_send_file_content),
+                    emailSubject = Strings.get(R.string.export_email_subject, type, document.documentNumber.text),
+                    emailMessage = Strings.get(R.string.export_send_file_content, type ?: ""),
                     attachedDocumentUri = it,
                     context = context
                 )
@@ -245,16 +252,11 @@ fun Send(context: Context, document: DocumentState, finalFileName: String) {
 fun composeEmail(
     address: String? = null,
     documentNumber: String? = null,
-    documentType: DocumentType? = null,
+    emailSubject: String,
     emailMessage: String,
     attachedDocumentUri: Uri? = null,
     context: Context,
 ) {
-    val type = when (documentType) {
-        DocumentType.INVOICE -> Strings.get(R.string.export_email_subject_invoice)
-        DocumentType.DELIVERY_NOTE -> Strings.get(R.string.export_email_subject_delivery_note)
-        else -> null
-    }
 
     try {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
@@ -264,7 +266,7 @@ fun composeEmail(
         if (documentNumber != null) {
             intent.putExtra(
                 Intent.EXTRA_SUBJECT,
-                Strings.get(R.string.export_email_subject) + " $type N°$documentNumber"
+                emailSubject
             )
         }
         intent.putExtra(Intent.EXTRA_TEXT, emailMessage)

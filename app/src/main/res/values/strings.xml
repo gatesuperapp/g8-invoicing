@@ -144,7 +144,7 @@
     <string name="product_price_with_tax">TTC</string>
     <string name="product_price_input">3</string>
     <string name="product_tax">TVA</string>
-    <string name="document_product_quantity">Quantité</string>
+    <string name="document_product_quantity">Quantité <sup>*</sup></string>
     <string name="document_product_quantity_input">1</string>
     <string name="tax_rate_screen_title">Taux de TVA</string>
     <string name="tax_rate_change_rates">Modifier les taux</string>
@@ -325,21 +325,21 @@
     <string name="export_info_popup_validate">okurrr</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n
-        Veuillez trouver votre document ci-joint.\n
+        Veuillez trouver votre %s en pièce jointe.\n
         Cordialement\n\n</string>
-    <string name="send_reminder_email_1">Bonjour, \n\n
-        Votre facture </string>
-    <string name="send_reminder_email_2">d\'un montant de </string>
-    <string name="send_reminder_email_3">est arrivée à échéance le </string>
-    <string name="send_reminder_email_4">Nous n\'avons à ce jour pas reçu de paiement
-        et vous remercions de procéder au règlement dès que possible.\n\n
+    <string name="send_reminder_email_content">Bonjour, \n\n
+        Votre facture %s d\'un montant de %s€ est arrivée à échéance le %s. Nous n\'avons à ce jour pas reçu de paiement
+        de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n
         Cordialement\n</string>
+    <string name="send_reminder_email_subject">Relance : facture N°%s</string>
+    <string name="send_reminder_email_subject_invoice">facture</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
     <string name="export_error_sharing">Erreur. Veuillez passer directement par le dossier "téléchargements". </string>
-    <string name="export_email_subject">Votre</string>
+    <string name="export_email_subject">Votre %s N°%s</string>
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
+    <string name="export_email_subject_credit_note">avoir</string>
     <string name="delivery_note_acronym">BL</string>
 
 </resources>

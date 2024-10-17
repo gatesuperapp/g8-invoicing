@@ -146,6 +146,7 @@ fun About(
                         composeEmail(
                             context = context,
                             address = Strings.get(R.string.about_contact_email),
+                            emailSubject = "",
                             emailMessage = ""
                         )
                     }) {

@@ -129,8 +129,8 @@ fun InvoiceList(
                     composeEmail(
                         address = document.documentClient?.email?.text,
                         documentNumber = document.documentNumber.text,
-                        documentType = document.documentType,
                         context = context,
+                        emailSubject = Strings.get(R.string.send_reminder_email_subject, document.documentNumber.text),
                         emailMessage = createReminderTextMessage(document)
                     )
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
@@ -424,15 +424,15 @@ private fun DisplayBatHelperMenuAdvice() {
 
 private fun createReminderTextMessage(document: InvoiceState): String {
     val message =
-        Strings.get(R.string.send_reminder_email_1) + " " + document.documentNumber.text + " " + Strings.get(
-            R.string.send_reminder_email_2
-        ) + " " + (document.documentPrices?.totalPriceWithTax
-            ?: 0) + Strings.get(R.string.currency) + " " + Strings.get(R.string.send_reminder_email_3) + " " + substring(
-            document.dueDate,
-            0,
-            10
-        ) + ".\n\n" + Strings.get(R.string.send_reminder_email_4)
-
+        Strings.get(
+            R.string.send_reminder_email_content, document.documentNumber.text,
+            document.documentPrices?.totalPriceWithTax
+                ?: 0, substring(
+                document.dueDate,
+                0,
+                10
+            )
+        )
     return message
 }
 
