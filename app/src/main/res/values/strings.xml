@@ -91,8 +91,8 @@
     <string name="client_business_name_input">Entreprise X</string>
     <string name="category">Type de client</string>
     <string name="client_first_name">Prénom</string>
-    <string name="client_first_name_input">Rhinolophus</string>
-    <string name="client_name">Nom</string>
+    <string name="client_first_name_input">RhinoCorp</string>
+    <string name="client_name">Nom <sup>*</sup></string>
     <string name="client_name_input">Hipposideros</string>
     <string name="client_block_address">Adresse</string>
     <string name="client_block_identification">Identification</string>
@@ -133,7 +133,7 @@
     <string name="client_detail_total_payment_overdue">En retard</string>
     <string name="currency">€</string>
     <string name="copy">Copie de</string>
-    <string name="product_name">Nom</string>
+    <string name="product_name">Nom <sup>*</sup></string>
     <string name="product_name_input">Betteraves</string>
     <string name="product_description">Description</string>
     <string name="product_unit">Unité</string>
@@ -267,7 +267,7 @@
     <string name="about2">
     Pour contacter l\'assistance, remonter un bug ou toute autre demande :</string>
     <string name="about_terms_of_service_header">En utilisant l\'application, tu acceptes les</string>
-    <string name="about_build_version">Version : </string>
+    <string name="about_build_version">Version de l\'application : &#160;</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
@@ -284,9 +284,8 @@
         Tu peux me cliquer dessus quand tu me vois, souvent plusieurs fois d\'affilée : j\'aime parler.
         \n\n …</string>
     <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des mentions obligatoires pour une facture conforme.
-        Je sais, c\'est pas super funky, mais je ne voudrais pas que tu prennes un péno fiscal et \n\n … </string>
-    <string name="invoice_advice_legal_3">que tu m\'en veuilles après… je suis un être sensible.  \n\n
-        Pour te facilier la vie, j\'ai tout résumé ici : \n</string>
+        \n\n … </string>
+    <string name="invoice_advice_legal_3">Pas forcément le plus funky, alors pour te facilier la vie j\'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
    </string>

@@ -110,6 +110,17 @@ val Typography.textTitle: TextStyle
         )
     }
 
+val Typography.textNormalBold: TextStyle
+    @Composable
+    get() {
+        return TextStyle(
+            fontFamily = uiFontBold,
+            fontSize = 16.sp,
+            platformStyle = PlatformTextStyle(
+                includeFontPadding = false,
+            ),
+        )
+    }
 
 val Typography.textSmall: TextStyle
     @Composable
@@ -122,6 +133,7 @@ val Typography.textSmall: TextStyle
             )
         )
     }
+
 
 val Typography.textVerySmall: TextStyle
     @Composable

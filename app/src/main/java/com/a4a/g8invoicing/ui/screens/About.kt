@@ -4,7 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
@@ -27,7 +30,6 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -36,9 +38,8 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
-import com.a4a.g8invoicing.ui.theme.ColorBlueLink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.textNormalBold
 import com.a4a.g8invoicing.ui.theme.textTitle
 
 @Composable
@@ -97,7 +98,7 @@ fun About(
                     text = stringResource(id = R.string.about_title_tutorials),
                     style = MaterialTheme.typography.textTitle,
                 )
-                
+
                 Text(
                     modifier = Modifier.padding(
                         bottom = 10.dp
@@ -170,12 +171,22 @@ fun About(
 
                 TermsOfService(uriHandler)
 
-                Text(
-                    modifier = Modifier.padding(
-                        bottom = 30.dp
-                    ),
-                    text = stringResource(id = R.string.about) + "1.0"
-                )
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.about_build_version),
+                        style = MaterialTheme.typography.textNormalBold
+                    )
+                    Text(
+                        text = "1.0",
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
             }
             Column(
                 // apply darker background when bottom menu is expanded
@@ -211,9 +222,6 @@ fun TermsOfService(uriHandler: UriHandler) {
     }
 
     ClickableText(
-        modifier = Modifier.padding(
-            bottom = 20.dp
-        ),
         text = annotatedString,
         style = MaterialTheme.typography.bodyLarge,
         onClick = { offset ->
