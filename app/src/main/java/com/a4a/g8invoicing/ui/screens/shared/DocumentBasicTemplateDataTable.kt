@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -47,7 +49,14 @@ fun DocumentBasicTemplateProductsTable(
     val taxColumnWeight = .15f
     val linkedNoteColumnWeight = .100f
 
-    TitleRows(descriptionColumnWeight, quantityColumnWeight)
+    val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
+
+
+    TitleRows(
+        descriptionColumnWeight,
+        quantityColumnWeight,
+        displayUnitColumn
+    )
 
     val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
 
@@ -58,7 +67,8 @@ fun DocumentBasicTemplateProductsTable(
                 products.filter { it.linkedDocNumber == docNumberAndDate.first },
                 descriptionColumnWeight,
                 quantityColumnWeight,
-                taxColumnWeight
+                taxColumnWeight,
+                displayUnitColumn
             )
         }
     } else {
@@ -66,7 +76,8 @@ fun DocumentBasicTemplateProductsTable(
             products,
             descriptionColumnWeight,
             quantityColumnWeight,
-            taxColumnWeight
+            taxColumnWeight,
+            displayUnitColumn
         )
     }
 }
@@ -75,6 +86,7 @@ fun DocumentBasicTemplateProductsTable(
 fun TitleRows(
     descriptionColumnWeight: Float,
     quantityColumnWeight: Float,
+    displayUnitColumn: Boolean,
 ) {
     Row(
         Modifier
@@ -95,11 +107,14 @@ fun TitleRows(
             alignEnd = true,
             isBold = true
         )
-        TableCell(
-            text = stringResource(id = R.string.document_table_unit),
-            alignEnd = true,
-            isBold = true
-        )
+        if (displayUnitColumn) {
+            TableCell(
+                text = stringResource(id = R.string.document_table_unit),
+                alignEnd = true,
+                isBold = true
+            )
+        }
+
         TableCell(
             text = stringResource(id = R.string.document_table_tax_rate),
             weight = quantityColumnWeight,
@@ -161,7 +176,9 @@ fun DocumentProductsRows(
     descriptionColumnWeight: Float,
     quantityColumnWeight: Float,
     taxColumnWeight: Float,
-) {
+    displayUnitColumn: Boolean,
+
+    ) {
     tableData.forEach {
         val priceWithoutTax = it.taxRate?.let { taxRate ->
             it.priceWithTax?.let { priceWithTax ->
@@ -186,10 +203,14 @@ fun DocumentProductsRows(
                 weight = quantityColumnWeight,
                 alignEnd = true
             )
-            TableCell(
-                text = if (!it.unit?.text.isNullOrEmpty()) it.unit?.text!! else " - ",
-                alignEnd = true
-            )
+
+            if (displayUnitColumn) {
+                TableCell(
+                    text = if (!it.unit?.text.isNullOrEmpty()) it.unit?.text!! else " - ",
+                    alignEnd = true
+                )
+            }
+
             TableCell(
                 text = it.taxRate?.let { it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }
                     ?: " - ",

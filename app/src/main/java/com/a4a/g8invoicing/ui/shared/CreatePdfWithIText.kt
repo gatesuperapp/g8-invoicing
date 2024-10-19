@@ -7,10 +7,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
@@ -537,7 +533,11 @@ private fun createProductsTable(
     fontBold: PdfFont,
 ): Table? {
     try {
-        val columnWidth = floatArrayOf(45f, 9f, 13f, 8f, 12f, 13f)
+        val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
+
+        val columnWidth = if (displayUnitColumn) floatArrayOf(45f, 9f, 13f, 8f, 12f, 13f)
+        else floatArrayOf(45f, 9f, 8f, 12f, 13f)
+
         val productsTable = Table(UnitValue.createPercentArray(columnWidth))
             .useAllAvailableWidth()
             .setFixedLayout()
@@ -556,18 +556,22 @@ private fun createProductsTable(
                 fontBold = fontBold,
                 fontRegular = fontRegular
             )
-            .addCustomCell(
+
+        if (displayUnitColumn) {
+            productsTable.addCustomCell(
                 Strings.get(R.string.document_table_unit),
                 isBold = true,
                 fontBold = fontBold,
                 fontRegular = fontRegular
             )
-            .addCustomCell(
-                Strings.get(R.string.document_table_tax_rate),
-                isBold = true,
-                fontBold = fontBold,
-                fontRegular = fontRegular
-            )
+        }
+
+        productsTable.addCustomCell(
+            Strings.get(R.string.document_table_tax_rate),
+            isBold = true,
+            fontBold = fontBold,
+            fontRegular = fontRegular
+        )
             .addCustomCell(
                 Strings.get(R.string.document_table_unit_price_without_tax),
                 isBold = true,
@@ -595,7 +599,8 @@ private fun createProductsTable(
                     products.filter { it.linkedDocNumber == docNumberAndDate.first },
                     productsTable,
                     fontBold = fontBold,
-                    fontRegular = fontRegular
+                    fontRegular = fontRegular,
+                    displayUnitColumn = displayUnitColumn
                 )
             }
         } else {
@@ -604,6 +609,7 @@ private fun createProductsTable(
                 productsTable,
                 fontBold = fontBold,
                 fontRegular = fontRegular,
+                displayUnitColumn = displayUnitColumn
             )
         }
         return productsTable
@@ -634,6 +640,7 @@ private fun addProductsToTable(
     productsTable: Table,
     fontRegular: PdfFont,
     fontBold: PdfFont,
+    displayUnitColumn: Boolean
 ) {
     val spacingBetweenTextLines = 10F
     val spacingBetweenNameAndDescription = 4F
@@ -648,10 +655,10 @@ private fun addProductsToTable(
                     .setItalic()
             ).setFixedLeading(spacingBetweenTextLines)
         }
-        val paragraphs: List<Paragraph?> = listOf(itemName, spacing, itemDescription)
+        val nameAndDescription: List<Paragraph?> = listOf(itemName, spacing, itemDescription)
 
         productsTable.addCustomCell(
-            paragraphs = paragraphs,
+            paragraphs = nameAndDescription,
             alignment = TextAlignment.LEFT,
             fontBold = fontBold,
             fontRegular = fontRegular
@@ -661,11 +668,13 @@ private fun addProductsToTable(
             fontBold = fontBold,
             fontRegular = fontRegular
         )
-        productsTable.addCustomCell(
-            text = it.unit?.text,
-            fontBold = fontBold,
-            fontRegular = fontRegular
-        )
+
+        if (displayUnitColumn)
+            productsTable.addCustomCell(
+                text = it.unit?.text,
+                fontBold = fontBold,
+                fontRegular = fontRegular
+            )
         productsTable.addCustomCell(text = it.taxRate?.let {
             it.setScale(0, RoundingMode.HALF_UP).toString() + "%"
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)

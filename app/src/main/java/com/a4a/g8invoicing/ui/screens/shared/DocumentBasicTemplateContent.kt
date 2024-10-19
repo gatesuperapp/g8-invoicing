@@ -73,7 +73,7 @@ fun DocumentBasicTemplateContent(
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem)
 
-            if(!document.reference?.text.isNullOrEmpty()) {
+            if (!document.reference?.text.isNullOrEmpty()) {
                 document.reference?.let {
                     Spacer(Modifier.height(14.dp))
                     if (it.text.isNotEmpty())
@@ -84,7 +84,7 @@ fun DocumentBasicTemplateContent(
                         )
                 }
             }
-            if(!document.freeField?.text.isNullOrEmpty()) {
+            if (!document.freeField?.text.isNullOrEmpty()) {
                 document.freeField?.let {
                     if (!document.reference?.text.isNullOrEmpty()) {
                         Spacer(modifier = Modifier.height(6.dp))
@@ -98,9 +98,9 @@ fun DocumentBasicTemplateContent(
                 }
             }
 
-            if(document.freeField?.text.isNullOrEmpty() && document.reference?.text.isNullOrEmpty())
-            Spacer(Modifier.height(20.dp))
-            else  Spacer(Modifier.height(10.dp))
+            if (document.freeField?.text.isNullOrEmpty() && document.reference?.text.isNullOrEmpty())
+                Spacer(Modifier.height(20.dp))
+            else Spacer(Modifier.height(10.dp))
 
             Box(
             ) {
