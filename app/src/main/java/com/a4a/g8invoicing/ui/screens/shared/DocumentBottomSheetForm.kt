@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
+import com.a4a.g8invoicing.ui.shared.ModalBottomSheetFork
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.rememberModalBottomSheetState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
@@ -53,12 +55,13 @@ fun DocumentBottomSheetForm(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {},
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden })
     val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
 
 
-    ModalBottomSheet(
+    ModalBottomSheetFork(
         onDismissRequest = onClickCancel,
         sheetState = sheetState,
         dragHandle = null

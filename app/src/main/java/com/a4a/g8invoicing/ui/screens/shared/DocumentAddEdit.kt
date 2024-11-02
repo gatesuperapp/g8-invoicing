@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import android.content.SharedPreferences
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -65,7 +64,6 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import dagger.hilt.android.migration.CustomInjection.inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -74,10 +72,10 @@ import java.util.Calendar
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.BottomSheetScaffoldState
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.BottomSheetScaffoldWithoutBug
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.rememberBottomSheetScaffoldState
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.rememberStandardBottomSheetState
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.BottomSheetScaffoldState
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.BottomSheetScaffoldWithoutBug
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.rememberBottomSheetScaffoldState
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.rememberStandardBottomSheetState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

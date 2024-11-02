@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug
+package com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe
 
 enum class ShapeKeyTokens {
     CornerExtraLarge,

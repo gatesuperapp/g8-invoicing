@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug
+package com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe
 
 /**
  * This is a copy of androidx.compose.foundation.gestures.AnchoredDraggable until that API is

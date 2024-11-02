@@ -1,4 +1,4 @@
-package com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug
+package com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe
 
 
 import androidx.compose.foundation.shape.CircleShape
@@ -77,19 +77,19 @@ class ShapesFork(
  */
 object ShapeDefaults {
     /** Extra small sized corner shape */
-    val ExtraSmall: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeTokens.CornerExtraSmall
+    val ExtraSmall: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeTokens.CornerExtraSmall
 
     /** Small sized corner shape */
-    val Small: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeTokens.CornerSmall
+    val Small: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeTokens.CornerSmall
 
     /** Medium sized corner shape */
-    val Medium: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeTokens.CornerMedium
+    val Medium: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeTokens.CornerMedium
 
     /** Large sized corner shape */
-    val Large: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeTokens.CornerLarge
+    val Large: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeTokens.CornerLarge
 
     /** Extra large sized corner shape */
-    val ExtraLarge: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeTokens.CornerExtraLarge
+    val ExtraLarge: CornerBasedShape = com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeTokens.CornerExtraLarge
 }
 /** Helper function for component shape tokens. Used to grab the top values of a shape parameter. */
 internal fun CornerBasedShape.top(): CornerBasedShape {
@@ -118,19 +118,19 @@ internal fun CornerBasedShape.end(): CornerBasedShape {
  * tokens:
  * ``MaterialTheme.shapes.fromToken(FabPrimarySmallTokens.ContainerShape)``
  */
-internal fun Shapes.fromToken(value: com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens): Shape {
+internal fun Shapes.fromToken(value: com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens): Shape {
     return when (value) {
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerExtraLarge -> extraLarge
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerExtraLargeTop -> extraLarge.top()
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerExtraSmall -> extraSmall
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerExtraSmallTop -> extraSmall.top()
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerFull -> CircleShape
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerLarge -> large
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerLargeEnd -> large.end()
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerLargeTop -> large.top()
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerMedium -> medium
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerNone -> RectangleShape
-        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.CornerSmall -> small
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerExtraLarge -> extraLarge
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerExtraLargeTop -> extraLarge.top()
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerExtraSmall -> extraSmall
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerExtraSmallTop -> extraSmall.top()
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerFull -> CircleShape
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerLarge -> large
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerLargeEnd -> large.end()
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerLargeTop -> large.top()
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerMedium -> medium
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerNone -> RectangleShape
+        com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.CornerSmall -> small
     }
 }
 
@@ -138,7 +138,7 @@ internal fun Shapes.fromToken(value: com.a4a.g8invoicing.ui.shared.bottomSheetSc
  * Converts a shape token key to the local shape provided by the theme
  * The color is subscribed to [LocalShapes] changes
  */
-internal val com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.ShapeKeyTokens.value: Shape
+internal val com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ShapeKeyTokens.value: Shape
     @Composable
     @ReadOnlyComposable
     get() = MaterialTheme.shapes.fromToken(this)
