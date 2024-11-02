@@ -21,13 +21,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -78,8 +74,11 @@ import java.util.Calendar
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.BottomSheetScaffoldState
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.BottomSheetScaffoldWithoutBug
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.rememberBottomSheetScaffoldState
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutBug.rememberStandardBottomSheetState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentAddEdit(
@@ -112,15 +111,10 @@ fun DocumentAddEdit(
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
 ) {
-
-
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            skipHiddenState = false
-        )
+        bottomSheetState = rememberStandardBottomSheetState()
     )
     val bottomSheetType = remember { mutableStateOf(BottomSheetType.ITEMS) }
     val scope = rememberCoroutineScope()
@@ -143,11 +137,9 @@ fun DocumentAddEdit(
         }
     }
 
-    BottomSheetScaffold(
+    BottomSheetScaffoldWithoutBug(
         sheetSwipeEnabled = false,
-        // The bottom sheet is still swipable though because it contains a lazy column
-        // It's due to this bug https://issuetracker.google.com/issues/215403277
-        sheetDragHandle = null, // Disable drag handle
+        sheetDragHandle = null,
         sheetShape = RoundedCornerShape(
             topStart = 0.dp,
             topEnd = 0.dp
@@ -225,12 +217,6 @@ fun DocumentAddEdit(
                     navController = navController,
                     onClickBack = onClickBack,
                     onClickExport = {
-
-                        //AAAAH
-                        // val isFirstRun: Boolean = SettingsManager.isFirstRun(getActivity())
-                        // if(isFirstRun) {
-
-                        // }
                         showPopup = true
                     }
                 )
@@ -290,6 +276,7 @@ fun DocumentAddEdit(
                                     pointerInput: PointerInputChange,
                                     changes: List<PointerInputChange>,
                                 ->
+
 
                                 zoom = (zoom * gestureZoom).coerceIn(
                                     1f,
@@ -374,27 +361,36 @@ fun DocumentAddEdit(
                 DocumentBasicTemplate(
                     uiState = document,
                     onClickElement = {
-                        if (it == ScreenElement.DOCUMENT_HEADER ||
-                            it == ScreenElement.DOCUMENT_NUMBER ||
-                            it == ScreenElement.DOCUMENT_DATE ||
-                            it == ScreenElement.DOCUMENT_ISSUER ||
-                            it == ScreenElement.DOCUMENT_CLIENT ||
-                            it == ScreenElement.DOCUMENT_FOOTER ||
-                            it == ScreenElement.DOCUMENT_REFERENCE
-                        ) {
-                            bottomSheetType.value = BottomSheetType.ELEMENTS
+                        if (scaffoldState.bottomSheetState.currentValue  == SheetValue.Expanded) {
+                            hideBottomSheet(scope, scaffoldState)
                         } else {
-                            bottomSheetType.value = BottomSheetType.ITEMS
+                            if (it == ScreenElement.DOCUMENT_HEADER ||
+                                it == ScreenElement.DOCUMENT_NUMBER ||
+                                it == ScreenElement.DOCUMENT_DATE ||
+                                it == ScreenElement.DOCUMENT_ISSUER ||
+                                it == ScreenElement.DOCUMENT_CLIENT ||
+                                it == ScreenElement.DOCUMENT_FOOTER ||
+                                it == ScreenElement.DOCUMENT_REFERENCE
+                            ) {
+                                bottomSheetType.value = BottomSheetType.ELEMENTS
+                            } else {
+                                bottomSheetType.value = BottomSheetType.ITEMS
+                            }
+                            expandBottomSheet(scope, scaffoldState)
+                            /*                        when(it) {
+                                                        ScreenElement.DOCUMENT_NUMBER ->
+                                                         selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
+                                                        ScreenElement.DOCUMENT_DATE ->
+                                                        ScreenElement.DOCUMENT_ISSUER ->
+                                                        ScreenElement.DOCUMENT_CLIENT ->
+                                                        ScreenElement.DOCUMENT_ORDER_NUMBER ->
+                                                        ScreenElement.DOCUMENT_PRODUCTS ->*/
                         }
-                        expandBottomSheet(scope, scaffoldState)
-                        /*                        when(it) {
-                                                    ScreenElement.DOCUMENT_NUMBER ->
-                                                     selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
-                                                    ScreenElement.DOCUMENT_DATE ->
-                                                    ScreenElement.DOCUMENT_ISSUER ->
-                                                    ScreenElement.DOCUMENT_CLIENT ->
-                                                    ScreenElement.DOCUMENT_ORDER_NUMBER ->
-                                                    ScreenElement.DOCUMENT_PRODUCTS ->*/
+                    },
+                    onClickRestOfThePage = {
+                        if (scaffoldState.bottomSheetState.currentValue  == SheetValue.Expanded) {
+                            hideBottomSheet(scope, scaffoldState)
+                        }
                     },
                 )
             }
@@ -445,13 +441,13 @@ private fun DocumentAddEditBottomBar(
     onClickItems: () -> Unit,
     onClickStyle: () -> Unit,
     onClickSavePayment: () -> Unit = {},
-    ) {
+) {
     DocumentBottomBar(
         actions = arrayOf(
             actionTextElements(onClickElements),
             actionItems(onClickItems),
             //actionStyle(onClickStyle),
-           // actionSavePayment(onClickSavePayment)
+            // actionSavePayment(onClickSavePayment)
         )
     )
 }

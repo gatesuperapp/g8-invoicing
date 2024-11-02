@@ -39,6 +39,7 @@ import com.a4a.g8invoicing.ui.theme.ColorGreenPaidCompl
 fun DocumentBasicTemplateContent(
     document: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
+    onClickRestOfThePage: () -> Unit,
     screenWidth: Dp,
     productArray: List<DocumentProductState>?,
     prices: List<String>,
@@ -57,6 +58,11 @@ fun DocumentBasicTemplateContent(
             )
             .background(Color.White)
             .heightIn(min = screenWidth * 1.28f)
+            .customCombinedClickable(
+                onClick = {
+                    onClickRestOfThePage()
+                }
+            )
         //.aspectRatio(1f / 1.414f)
     ) {
         Column(

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">G8</string>
+    <string name="app_name">g8</string>
     <string name="ic_arrow_back">Back button</string>
     <string name="next">Next</string>
     <string name="start_app">Start using the app</string>
@@ -91,9 +91,9 @@
     <string name="client_business_name_input">Entreprise X</string>
     <string name="category">Type de client</string>
     <string name="client_first_name">Prénom</string>
-    <string name="client_first_name_input">RhinoCorp</string>
+    <string name="client_first_name_input">Hipposideros</string>
     <string name="client_name">Nom <sup>*</sup></string>
-    <string name="client_name_input">Hipposideros</string>
+    <string name="client_name_input">RhinoCorp</string>
     <string name="client_block_address">Adresse</string>
     <string name="client_block_identification">Identification</string>
     <string name="client_address">Adresse</string>
@@ -103,9 +103,9 @@
     <string name="client_address_title_invoicing_placeholder">Adressé à</string>
     <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
     <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
-    <string name="client_address1">Adresse 1</string>
+    <string name="client_address1">Adresse</string>
     <string name="client_address1_input">6 rue de l\'église</string>
-    <string name="client_address2">Adresse 2</string>
+    <string name="client_address2"></string>
     <string name="client_address2_input">Lieu-dit beròi</string>
     <string name="client_city">Ville</string>
     <string name="client_city_input">Écholoc</string>
@@ -134,6 +134,7 @@
     <string name="currency">€</string>
     <string name="copy">Copie de</string>
     <string name="product_name">Nom <sup>*</sup></string>
+    <string name="product_name2">Nom</string>
     <string name="product_name_input">Betteraves</string>
     <string name="product_description">Description</string>
     <string name="product_unit">Unité</string>
@@ -161,6 +162,7 @@
     <string name="credit_note_number">Avoir N°</string>
     <string name="document_number_short">N°</string>
     <string name="document_date">Date</string>
+    <string name="document_date_emitting">Date d\'émission</string>
     <string name="document_due_date">Échéance</string>
     <string name="document_issuer">Émetteur</string>
     <string name="document_client">Client</string>x
@@ -228,7 +230,7 @@
     <string name="document_modal_edit_client">Édition client</string>
     <string name="document_modal_product_cancel">Annuler</string>
     <string name="document_modal_product_save">Valider</string>
-    <string name="document_modal_product_tva_back">Retour</string>
+    <string name="document_modal_product_back">Retour</string>
     <string name="document_modal_product_tva_title">TVA</string>
     <string name="account_label">Mon compte</string>
     <string name="account_project_info">
@@ -285,15 +287,15 @@
         \n\n …</string>
     <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des mentions obligatoires pour une facture conforme.
         \n\n … </string>
-    <string name="invoice_advice_legal_3">Pas forcément le plus funky, alors pour te facilier la vie j\'ai tout résumé ici : \n</string>
+    <string name="invoice_advice_legal_3">Pour te facilier la vie j\'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
    </string>
     <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n
    </string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="invoice_advice_bottom_menu">Hey c\'est re-moi en plus swag avec mon faux piercing sur la joue. Si je bée ainsi de la bouche c\'est qu\'il faut absolument que je te montre une astuce, mais \n\n …   </string>
-    <string name="invoice_advice_bottom_menu1">avant de te spoiler, je te dis ce qu\'on cherche : comment faire apparaître des options très utiles, comme supprimer un document ? \n\n …    </string>
+    <string name="invoice_advice_bottom_menu">Hey c\'est re-moi en plus swag avec mon faux piercing sur la joue. Si je bée ainsi de la bouche c\'est qu\'il faut absolument que je te montre une astuce \n\n …   </string>
+    <string name="invoice_advice_bottom_menu1">comment faire apparaître des options très utiles, comme supprimer un document ? \n\n … spoiler alert…    </string>
     <string name="invoice_advice_bottom_menu2">Solution : clique sur le cercle ○ devant le numéro de la facture, ça la sélectionne et de nouvelles options s\'affichent dans le menu du bas. \n\n 𝕘𝕖𝕟𝕚𝕠𝕦𝕤𝕝𝕪 𝕪𝕠𝕦𝕣𝕤 </string>
     <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
