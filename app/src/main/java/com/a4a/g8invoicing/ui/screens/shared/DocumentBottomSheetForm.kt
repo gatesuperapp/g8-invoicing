@@ -5,15 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,8 +21,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.ModalBottomSheetFork
@@ -57,8 +56,9 @@ fun DocumentBottomSheetForm(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden })
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
+    var showFullScreenText by remember { mutableStateOf(false) }
+    val screenElement by remember { mutableStateOf(ScreenElement.DOCUMENT_PRODUCT_NAME) }
 
 
     ModalBottomSheetFork(
@@ -67,8 +67,6 @@ fun DocumentBottomSheetForm(
         dragHandle = null
     ) {
         Column(
-            modifier = Modifier
-                .padding(bottom = bottomPadding)
         ) {
 
             Row(
@@ -201,6 +199,9 @@ fun DocumentBottomSheetForm(
                         },
                         onClickForward = {
                             isTaxSelectionVisible = true
+                        },
+                        showFullScreenText = {
+                            showFullScreenText = true
                         }
                     )
                 } else {
@@ -214,6 +215,39 @@ fun DocumentBottomSheetForm(
                     )
                 }
             }
+        }
+    }
+
+
+    if(showFullScreenText) {
+        var text by remember { mutableStateOf(TextFieldValue("")) }
+
+        Surface(
+            modifier = Modifier.background(Color.White)
+        ) // disable click on background component
+        {
+            DocumentBottomSheetFormSimple(
+                onClickCancel = { showFullScreenText = false },
+                onClickDone = {
+                    bottomFormOnValueChange(it, text, null)
+                    showFullScreenText = false
+                },
+                bottomSheetTitle = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
+                    Strings.get(R.string.product_name2)
+                else Strings.get(R.string.product_description),
+                content = {
+                    DocumentBottomSheetLargeText(
+                        initialText = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
+                            documentProduct.name
+                        else documentProduct.description
+                            ?: TextFieldValue(""),
+                        onValueChange = {
+                            text = it
+                        }
+                    )
+                },
+                screenElement = screenElement
+            )
         }
     }
 }

@@ -90,6 +90,9 @@ import java.util.UUID
 import kotlin.math.max
 import kotlinx.coroutines.launch
 
+
+// Fork of ModalBottomSheet to disable bottom sheet swipe/drag
+// It's due to this bug https://issuetracker.google.com/issues/215403277
 @Composable
 @ExperimentalMaterial3Api
 fun ModalBottomSheetFork(
@@ -170,13 +173,13 @@ fun ModalBottomSheetFork(
                             )
                         }
                     )*/
-                    .draggable(
+                /*    .draggable(
                         state = sheetState.anchoredDraggableState.draggableState,
                         orientation = Orientation.Vertical,
                         enabled = sheetState.isVisible,
                         startDragImmediately = sheetState.anchoredDraggableState.isAnimationRunning,
                         onDragStopped = { settleToDismiss(it) }
-                    )
+                    )*/
                     .modalBottomSheetAnchors(
                         sheetState = sheetState,
                         fullHeight = fullHeight.toFloat()

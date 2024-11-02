@@ -46,10 +46,9 @@ fun DocumentBottomSheetProductAddEditForm(
     bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickForward: (ScreenElement) -> Unit,
+    showFullScreenText: (ScreenElement) -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
-    var showDescriptionFullScreen by remember { mutableStateOf(false) }
-    var screenElement by remember { mutableStateOf(ScreenElement.DOCUMENT_PRODUCT_NAME) }
 
     Column(
         modifier = Modifier
@@ -184,45 +183,11 @@ fun DocumentBottomSheetProductAddEditForm(
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 errors = documentProduct.errors,
                 onClickExpandFullScreen = {
-                    screenElement = it
-                    showDescriptionFullScreen = true
+                    showFullScreenText(it)
                 }
             )
         }
     }
-
-    if (showDescriptionFullScreen) {
-        var text by remember { mutableStateOf(TextFieldValue("")) }
-
-        Surface(
-            modifier = Modifier.background(Color.White)
-        ) // disable click on background component
-        {
-            DocumentBottomSheetFormSimple(
-                onClickCancel = { showDescriptionFullScreen = false },
-                onClickDone = {
-                    bottomFormOnValueChange(it, text)
-                    showDescriptionFullScreen = false
-                },
-                bottomSheetTitle = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
-                    Strings.get(R.string.product_name2)
-                else Strings.get(R.string.product_description),
-                content = {
-                    DocumentBottomSheetLargeText(
-                        initialText = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
-                            documentProduct.name
-                        else documentProduct.description
-                            ?: TextFieldValue(""),
-                        onValueChange = {
-                            text = it
-                        }
-                    )
-                },
-                screenElement = screenElement
-            )
-        }
-    }
-
 }
 
 fun calculatePriceWithoutTax(priceWithTax: BigDecimal, taxRate: BigDecimal): BigDecimal {
