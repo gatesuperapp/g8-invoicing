@@ -27,9 +27,10 @@ fun FormInputCreatorGoForward(
                 .weight(1F)
                 .fillMaxWidth(),
             text = forwardInput.text,
-            maxLines = if(!forwardInput.isMultiline) 1 else 10,
+            maxLines = if (!forwardInput.isMultiline) 1 else 10,
             overflow = TextOverflow.Ellipsis
         )
+        if(forwardInput.displayArrow)
         Icon(
             modifier = Modifier
                 .width(15.dp)

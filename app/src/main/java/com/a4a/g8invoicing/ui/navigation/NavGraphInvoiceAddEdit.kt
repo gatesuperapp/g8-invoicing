@@ -235,7 +235,6 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 ClientOrIssuerType.DOCUMENT_ISSUER,
                                 documentIssuerUiState
                             )
-
                             showDocumentForm = false
                         }
                     }

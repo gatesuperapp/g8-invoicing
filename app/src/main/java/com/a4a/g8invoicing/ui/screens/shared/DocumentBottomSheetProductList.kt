@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ProductListContent
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
@@ -40,11 +42,17 @@ fun DocumentBottomSheetProducts(
                 )
             }
         }
+
+        Column(
+            Modifier
+                .padding(20.dp)
+        ) {
             // Display the existing list
             ProductListContent(
                 products = list,
                 onProductClick = onProductClick,
                 displayCheckboxes = false
             )
+        }
     }
 }

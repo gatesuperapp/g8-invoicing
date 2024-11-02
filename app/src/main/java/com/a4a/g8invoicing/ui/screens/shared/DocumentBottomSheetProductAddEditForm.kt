@@ -11,7 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -21,6 +26,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.DecimalInput
 import com.a4a.g8invoicing.ui.shared.FormInput
@@ -28,7 +34,6 @@ import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
-import g8invoicing.TaxRate
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -36,13 +41,15 @@ import java.math.RoundingMode
 // but needed as in the documents we must use "DocumentProductState" instead of "ProductState"
 // so the product is not deleted from the doc when deleted from the product list.
 @Composable
-fun DocumentProductAddEditForm(
+fun DocumentBottomSheetProductAddEditForm(
     documentProduct: DocumentProductState,
     bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickForward: (ScreenElement) -> Unit,
 ) {
     val localFocusManager = LocalFocusManager.current
+    var showDescriptionFullScreen by remember { mutableStateOf(false) }
+    var screenElement by remember { mutableStateOf(ScreenElement.DOCUMENT_PRODUCT_NAME) }
 
     Column(
         modifier = Modifier
@@ -88,7 +95,8 @@ fun DocumentProductAddEditForm(
                         placeholder = stringResource(id = R.string.product_name_input),
                         onValueChange = {
                             bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_NAME, it)
-                        }
+                        },
+                        displayFullScreenIcon = true
                     ),
                     pageElement = ScreenElement.DOCUMENT_PRODUCT_NAME
                 ),
@@ -112,7 +120,8 @@ fun DocumentProductAddEditForm(
                         placeholder = stringResource(id = R.string.product_description_input),
                         onValueChange = {
                             bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION, it)
-                        }
+                        },
+                        displayFullScreenIcon = true
                     ),
                     pageElement = ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
                 ),
@@ -173,10 +182,47 @@ fun DocumentProductAddEditForm(
                 localFocusManager = localFocusManager,
                 onClickForward = onClickForward,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                errors = documentProduct.errors
+                errors = documentProduct.errors,
+                onClickExpandFullScreen = {
+                    screenElement = it
+                    showDescriptionFullScreen = true
+                }
             )
         }
     }
+
+    if (showDescriptionFullScreen) {
+        var text by remember { mutableStateOf(TextFieldValue("")) }
+
+        Surface(
+            modifier = Modifier.background(Color.White)
+        ) // disable click on background component
+        {
+            DocumentBottomSheetFormSimple(
+                onClickCancel = { showDescriptionFullScreen = false },
+                onClickDone = {
+                    bottomFormOnValueChange(it, text)
+                    showDescriptionFullScreen = false
+                },
+                bottomSheetTitle = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
+                    Strings.get(R.string.product_name2)
+                else Strings.get(R.string.product_description),
+                content = {
+                    DocumentBottomSheetLargeText(
+                        initialText = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
+                            documentProduct.name
+                        else documentProduct.description
+                            ?: TextFieldValue(""),
+                        onValueChange = {
+                            text = it
+                        }
+                    )
+                },
+                screenElement = screenElement
+            )
+        }
+    }
+
 }
 
 fun calculatePriceWithoutTax(priceWithTax: BigDecimal, taxRate: BigDecimal): BigDecimal {

@@ -17,7 +17,7 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 fun DocumentBottomSheetElementsContent(
     document: DocumentState,
     onValueChange: (ScreenElement, Any) -> Unit,
-    onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
+    onClickElement: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     localFocusManager: FocusManager,
 ) {
@@ -36,7 +36,8 @@ fun DocumentBottomSheetElementsContent(
         FormInput(
             label = stringResource(id = R.string.document_date),
             inputType = ForwardElement(
-                text = document.documentDate.substringBefore(" ")
+                text = document.documentDate.substringBefore(" "),
+                displayArrow = false
             ),
             pageElement = ScreenElement.DOCUMENT_DATE
         ),
@@ -88,7 +89,8 @@ fun DocumentBottomSheetElementsContent(
                 FormInput(
                     label = stringResource(id = R.string.document_due_date),
                     inputType = ForwardElement(
-                        text = document.dueDate.substringBefore(" ")
+                        text = document.dueDate.substringBefore(" "),
+                        displayArrow = false
                     ),
                     pageElement = ScreenElement.DOCUMENT_DUE_DATE
                 )
@@ -98,8 +100,9 @@ fun DocumentBottomSheetElementsContent(
         FormInput(
             label = stringResource(id = R.string.document_footer),
             inputType = ForwardElement(
-                text = document.footerText.text,
-                isMultiline = false
+                text = document.footerText.text.ifEmpty { " - " },
+                isMultiline = false,
+                displayArrow = false
             ),
             pageElement = ScreenElement.DOCUMENT_FOOTER
         )
@@ -109,7 +112,7 @@ fun DocumentBottomSheetElementsContent(
         inputList = inputList,
         keyboard = KeyboardOpt.VALIDATE_INPUT,
         localFocusManager = localFocusManager,
-        onClickForward = onClickForward,
+        onClickForward = onClickElement,
         placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
     )
 }

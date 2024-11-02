@@ -52,7 +52,7 @@ fun ClientOrIssuerAddEditForm(
     isInBottomSheetModal: Boolean = false,
     onClickDeleteAddress: () -> Unit,
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
-    ) {
+) {
     val localFocusManager = LocalFocusManager.current
     var numberOfClientAddresses by remember {
         mutableIntStateOf(
@@ -247,30 +247,32 @@ fun ClientOrIssuerAddEditForm(
                     )
                 )
 
-                var placeholderId = 0
-                when (i) {
-                    1 -> placeholderId = R.string.client_address_title_invoicing_placeholder
-                    2 -> placeholderId = R.string.client_address_title_delivery_placeholder
-                    3 -> placeholderId = R.string.client_address_title_head_office_placeholder
-                }
+                if (numberOfClientAddresses > 1) {
+                    var placeholderId = 0
+                    when (i) {
+                        1 -> placeholderId = R.string.client_address_title_invoicing_placeholder
+                        2 -> placeholderId = R.string.client_address_title_delivery_placeholder
+                        3 -> placeholderId = R.string.client_address_title_head_office_placeholder
+                    }
 
-                inputList.add(0, FormInput(
-                    label = stringResource(id = R.string.client_address_title),
-                    inputType = TextInput(
-                        text = address?.addressTitle,
-                        placeholder = stringResource(placeholderId),
-                        onValueChange = {
-                            onValueChange(
-                                if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
-                                else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i"),
-                                it
-                            )
-                        }
-                    ),
-                    pageElement = if (isInBottomSheetModal)
-                        ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
-                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
-                ))
+                    inputList.add(0, FormInput(
+                        label = stringResource(id = R.string.client_address_title),
+                        inputType = TextInput(
+                            text = address?.addressTitle,
+                            placeholder = stringResource(placeholderId),
+                            onValueChange = {
+                                onValueChange(
+                                    if (isInBottomSheetModal) ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
+                                    else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i"),
+                                    it
+                                )
+                            }
+                        ),
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
+                    ))
+                }
 
 
                 // Create the UI with list items

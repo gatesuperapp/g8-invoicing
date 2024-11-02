@@ -85,5 +85,6 @@ enum class ScreenElement {
     DOCUMENT_PRODUCT_DISCOUNT,
     DOCUMENT_FOOTER,
     SETTINGS_ACCOUNT,
+    ELSE
 
 }

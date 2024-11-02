@@ -178,7 +178,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         saveJob = viewModelScope.launch {
             val stateToSave = when (type) {
                 ClientOrIssuerType.CLIENT -> _clientUiState.value
-                ClientOrIssuerType.ISSUER ->_issuerUiState.value
+                ClientOrIssuerType.ISSUER -> _issuerUiState.value
                 ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
                 ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
             }
@@ -191,8 +191,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateClientOrIssuerInLocalDb(type: ClientOrIssuerType,
-                                      documentClientOrIssuer: ClientOrIssuerState? = null) {
+    fun updateClientOrIssuerInLocalDb(
+        type: ClientOrIssuerType,
+        documentClientOrIssuer: ClientOrIssuerState? = null,
+    ) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
@@ -260,7 +262,15 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     ) {
         when (type) {
             ClientOrIssuerType.CLIENT -> {
-                val newAddresses = _clientUiState.value.addresses?.dropLast(1)
+                var newAddresses: List<AddressState>? = _clientUiState.value.addresses?.dropLast(1)
+                if (newAddresses?.size == 1) {
+                    val onlyAddress = _clientUiState.value.addresses!![0].copy(
+                        addressTitle = null
+                    )
+                    newAddresses = listOf(
+                        onlyAddress
+                    )
+                }
                 _clientUiState.value = _clientUiState.value.copy(
                     addresses = newAddresses
                 )
@@ -274,7 +284,16 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
             }
 
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
-                val newAddresses = _documentClientUiState.value.addresses?.dropLast(1)
+                var newAddresses: List<AddressState>? =
+                    _documentClientUiState.value.addresses?.dropLast(1)
+                if (newAddresses?.size == 1) {
+                    val onlyAddress = _documentClientUiState.value.addresses!![0].copy(
+                        addressTitle = null
+                    )
+                    newAddresses = listOf(
+                        onlyAddress
+                    )
+                }
                 _documentClientUiState.value = _documentClientUiState.value.copy(
                     addresses = newAddresses
                 )

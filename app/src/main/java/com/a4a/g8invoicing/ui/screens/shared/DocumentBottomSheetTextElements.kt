@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -66,7 +64,7 @@ fun DocumentBottomSheetTextElements(
     localFocusManager: FocusManager,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
-    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
 ) {
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -130,7 +128,7 @@ fun DocumentBottomSheetTextElements(
                     DocumentBottomSheetElementsContent(
                         document = document,
                         onValueChange = onValueChange,
-                        onClickForward = {
+                        onClickElement = {
                             keyboardController?.hide()
                             slideOtherComponent.value = it
                         },
@@ -149,10 +147,12 @@ fun DocumentBottomSheetTextElements(
                             document.documentIssuer,
                             issuers
                         )
+
                         ScreenElement.DOCUMENT_CLIENT -> Pair(
                             document.documentClient,
                             clients
                         )
+
                         ScreenElement.DOCUMENT_DATE -> document.documentDate
                         ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
                         ScreenElement.DOCUMENT_FOOTER -> document.footerText
@@ -172,7 +172,9 @@ fun DocumentBottomSheetTextElements(
                     currentIssuerId = currentIssuerId,
                     bottomFormOnValueChange = bottomFormOnValueChange,
                     bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = onClickDoneForm,
+                    onClickDoneForm = {
+                        onClickDoneForm(it)
+                    },
                     onClickCancelForm = onClickCancelForm,
                     onSelectTaxRate = onSelectTaxRate,
                     showDocumentForm = showDocumentForm,

@@ -6,14 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -51,32 +52,37 @@ fun DocumentBottomSheetClientOrIssuerPreview(
             }
         }
 
-        if (clientOrIssuer == null) {
-            ButtonAddOrChoose(
-                onClickNewButton,
-                hasBorder = true,
-                hasBackground = false,
-                stringResource(
-                    id = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
-                        R.string.document_bottom_sheet_list_add_new_client
-                    else R.string.document_bottom_sheet_list_add_new_issuer
-                )
-            )
-            if (!isClientOrIssuerListEmpty) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+        ) {
+            if (clientOrIssuer == null) {
                 ButtonAddOrChoose(
-                    onClickChooseButton,
-                    hasBorder = false,
-                    hasBackground = true,
-                    stringResource(id = R.string.document_bottom_sheet_document_product_add)
+                    onClickNewButton,
+                    hasBorder = true,
+                    isPickerButton = false,
+                    stringResource(
+                        id = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
+                            R.string.document_bottom_sheet_list_add_new_client
+                        else R.string.document_bottom_sheet_list_add_new_issuer
+                    )
+                )
+                if (!isClientOrIssuerListEmpty) {
+                    ButtonAddOrChoose(
+                        onClickChooseButton,
+                        hasBorder = false,
+                        isPickerButton = true,
+                        stringResource(id = R.string.document_bottom_sheet_document_product_add)
+                    )
+                }
+            } else {
+                // Display the existing item
+                DocumentClientOrIssuerContent(
+                    item = clientOrIssuer,
+                    onClickItem = onClickItem,
+                    onClickDelete = onClickDelete
                 )
             }
-        } else {
-            // Display the existing item
-            DocumentClientOrIssuerContent(
-                item = clientOrIssuer,
-                onClickItem = onClickItem,
-                onClickDelete = onClickDelete
-            )
         }
     }
 }

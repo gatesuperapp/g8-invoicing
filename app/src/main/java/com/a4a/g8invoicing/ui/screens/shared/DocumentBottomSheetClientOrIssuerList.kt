@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListContent
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -44,16 +46,23 @@ fun DocumentBottomSheetClientOrIssuerList(
                 )
             }
         }
-        // Display the existing list
-        ClientOrIssuerListContent(
-            clientsOrIssuers = list,
-            onItemClick = onClientOrIssuerClick,
-            isCheckboxDisplayed = false, // Don't display checkboxes
-            currentClientOrIssuerId = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
-                currentClientId
-            } else {
-                currentIssuerId
-            }  // The current client/issuer should be highlighted in the list
+
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
         )
+        {
+            // Display the existing list
+            ClientOrIssuerListContent(
+                clientsOrIssuers = list,
+                onItemClick = onClientOrIssuerClick,
+                isCheckboxDisplayed = false, // Don't display checkboxes
+                currentClientOrIssuerId = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                    currentClientId
+                } else {
+                    currentIssuerId
+                }  // The current client/issuer should be highlighted in the list
+            )
+        }
     }
 }

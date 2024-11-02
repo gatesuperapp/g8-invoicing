@@ -4,25 +4,27 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.shared.icons.IconPlus
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.ninetyninepercent.funfactu.icons.IconArrowRight
 
 @Composable
 fun ButtonAddOrChoose(
     onClickNew: () -> Unit,
     hasBorder: Boolean,
-    hasBackground: Boolean,
+    isPickerButton: Boolean,
     buttonText: String,
 ) {
     var myModifier = Modifier
@@ -44,7 +46,7 @@ fun ButtonAddOrChoose(
             )
         )
     }
-    if (hasBackground) {
+    if (isPickerButton) {
         myModifier = myModifier.then(
             Modifier.background(
                 ColorLightGrey
@@ -53,26 +55,41 @@ fun ButtonAddOrChoose(
     }
 
     Row(
-        modifier = myModifier
+        modifier = myModifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            modifier = Modifier
-                .padding(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 10.dp,
-                    bottom = 10.dp
-                ),
-            imageVector = IconPlus,
-            contentDescription = "Add new"
-        )
         Text(
             modifier = Modifier
+                .weight(1f)
                 .padding(
+                    start = 20.dp,
                     top = 10.dp,
                     bottom = 10.dp
                 ),
             text = buttonText,
         )
+        if (isPickerButton)
+            Icon(
+                modifier = Modifier
+                    .width(32.dp)
+                    .padding(
+                        end = 20.dp,
+                        top = 10.dp,
+                        bottom = 10.dp
+                    ),
+                imageVector = IconArrowRight,
+                contentDescription = "Choose existing"
+            )
+        else Icon(
+                modifier = Modifier
+                    .width(36.dp)
+                    .padding(
+                        end = 20.dp,
+                        top = 10.dp,
+                        bottom = 10.dp
+                    ),
+                imageVector = IconPlus,
+                contentDescription = "Add new"
+            )
     }
 }

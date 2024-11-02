@@ -267,6 +267,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                             showDocumentForm = false
                         }
                     }
+                    else -> null
                 }
             },
             onClickCancelForm = {

@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
@@ -25,15 +27,15 @@ import com.ninetyninepercent.funfactu.icons.IconArrowBack
 import java.util.Date
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.ColorVeryLightGreyo
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DocumentBottomSheetDatePicker(
     initialDate: String,
-    onClickBack: () -> Unit,
-    onValueChange: (ScreenElement, Any) -> Unit,
-    isDueDate: Boolean = false
+    onValueChange: (String) -> Unit,
 ) {
     val formatter = getDateFormatter()
     val currentDate = formatter.parse(initialDate)?.time
@@ -53,10 +55,9 @@ fun DocumentBottomSheetDatePicker(
 
     // Only way i found to execute function when new date is picked..There must be a better way?
     selectedDate =
-        datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: ""
-    if (initialDate != selectedDate) {
+        datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }?.substring(0,10) ?: ""
+    if (initialDate.substring(0,10) != selectedDate) { // Substring to keep only the date, not the time
         onValueChange(
-            if(isDueDate) ScreenElement.DOCUMENT_DUE_DATE else ScreenElement.DOCUMENT_DATE,
             datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: "")
     }
 
@@ -64,23 +65,9 @@ fun DocumentBottomSheetDatePicker(
     // see "rememberDatePickerState" in DocumentAddEdit
     Column(
         modifier = Modifier
-            .background(Color.White)
-            //.fillMaxHeight()
+            .padding(16.dp)
+            .background(color = ColorVeryLightGreyo, shape = RoundedCornerShape(20.dp))
     ) {
-        // Header: display "back" button
-        Row(
-            Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            IconButton(onClick = onClickBack) {
-                Icon(
-                    imageVector = IconArrowBack,
-                    contentDescription = "Validate"
-                )
-            }
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth(),

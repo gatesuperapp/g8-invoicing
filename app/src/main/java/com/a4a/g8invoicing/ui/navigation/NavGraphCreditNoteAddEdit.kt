@@ -268,6 +268,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                             showDocumentForm = false
                         }
                     }
+                    else -> null
                 }
             },
             onClickCancelForm = {

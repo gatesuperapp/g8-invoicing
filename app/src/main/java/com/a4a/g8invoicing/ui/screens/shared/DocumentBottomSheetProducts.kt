@@ -26,7 +26,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -63,7 +63,8 @@ fun DocumentBottomSheetProducts(
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
 ) {
-    Column(
+
+    Box(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
         // If we don't constrain the parent (=this column) width, components that slide in
         // fill the screen full height
@@ -85,119 +86,116 @@ fun DocumentBottomSheetProducts(
 
         val params = parameters as Pair<List<DocumentProductState>?, List<ProductState>?>
 
-        Box(
-            modifier = Modifier.background(Color.Transparent)
+        Column(
+            modifier = Modifier
+                .fillMaxHeight(0.5f)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight(0.5f)
+            Row(
+                Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .height(50.dp)
-                            .width(70.dp)
-                            .clickable {
-                                // Hides keyboard if it was opened
-                                if (keyboard.name == "Opened") {
-                                    keyboardController?.hide()
-                                } else { // Hides bottom sheet
-                                    onDismissBottomSheet()
-                                }
-                            }) {
-                        if (keyboard.name == "Opened") {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(20.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = IconDone,
-                                contentDescription = "Close keyboard"
-                            )
-                        } else { // Hides bottom sheet
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(30.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = IconArrowDropDown,
-                                contentDescription = "Close bottom sheet"
-                            )
-                        }
+                Box(
+                    modifier = Modifier
+                        .height(50.dp)
+                        .width(70.dp)
+                        .clickable {
+                            // Hides keyboard if it was opened
+                            if (keyboard.name == "Opened") {
+                                keyboardController?.hide()
+                            } else { // Hides bottom sheet
+                                onDismissBottomSheet()
+                            }
+                        }) {
+                    if (keyboard.name == "Opened") {
+                        Icon(
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .size(20.dp)
+                                .align(alignment = Alignment.CenterEnd),
+                            imageVector = IconDone,
+                            contentDescription = "Close keyboard"
+                        )
+                    } else { // Hides bottom sheet
+                        Icon(
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .size(30.dp)
+                                .align(alignment = Alignment.CenterEnd),
+                            imageVector = IconArrowDropDown,
+                            contentDescription = "Close bottom sheet"
+                        )
                     }
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    keyboardController?.hide()
-                    slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCT
-                }
             }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                //    keyboardController?.hide()
+                slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCT
+            }
+        }
 
-            DocumentBottomSheetDocumentProductListPreview(
-                list = params.first ?: emptyList(),
-                onClickNew = {
-                    typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
+        DocumentBottomSheetDocumentProductListPreview(
+            list = params.first ?: emptyList(),
+            onClickNew = {
+                typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
+                onShowDocumentForm(true)
+                CoroutineScope(Dispatchers.IO).launch {
+                    delay(TimeUnit.MILLISECONDS.toMillis(500))
+                    isProductListVisible = false
+                }
+                onClickNewProduct()
+            },
+            onClickChooseExisting = {
+                isProductListVisible = true
+            },
+            onClickDocumentProduct = {
+                onClickDocumentProduct(it)
+                typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
+                onShowDocumentForm(true)
+            },
+            onClickDelete = onClickDeleteDocumentProduct,
+            isClientOrIssuerListEmpty = parameters.second.isEmpty()
+        )
+
+        if (isProductListVisible) {
+            DocumentBottomSheetProducts(
+                list = params.second ?: emptyList(),
+                onClickBack = { isProductListVisible = false },
+                onProductClick = {
+                    onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
+                    // so we open bottom document form with the chosen product
+                    typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
                     onShowDocumentForm(true)
                     CoroutineScope(Dispatchers.IO).launch {
                         delay(TimeUnit.MILLISECONDS.toMillis(500))
+                        // Waits for the bottom form to be opened,
+                        // so previous screen change is in background
                         isProductListVisible = false
                     }
-                    onClickNewProduct()
-                },
-                onClickChooseExisting = {
-                    isProductListVisible = true
-                },
-                onClickDocumentProduct = {
-                    onClickDocumentProduct(it)
-                    typeOfCreation = DocumentBottomSheetTypeOfForm.EDIT_PRODUCT
-                    onShowDocumentForm(true)
-                },
-                onClickDelete = onClickDeleteDocumentProduct,
-                isClientOrIssuerListEmpty = parameters.second.isEmpty()
+                }
             )
-
-            if (isProductListVisible) {
-                DocumentBottomSheetProducts(
-                    list = params.second ?: emptyList(),
-                    onClickBack = { isProductListVisible = false },
-                    onProductClick = {
-                        onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
-                        // so we open bottom document form with the chosen product
-                        typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
-                        onShowDocumentForm(true)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            delay(TimeUnit.MILLISECONDS.toMillis(500))
-                            // Waits for the bottom form to be opened,
-                            // so previous screen change is in background
-                            isProductListVisible = false
-                        }
-                    }
-                )
-            }
-            if (showDocumentForm) {
-                DocumentBottomSheetFormModal(
-                    typeOfCreation = typeOfCreation,
-                    documentProduct = documentProductUiState,
-                    taxRates = taxRates,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickCancel = { // Re-initialize
-                        onClickCancelForm()
-                        onShowDocumentForm(false)
-                    },
-                    onClickDone = {
-                        onClickDoneForm(typeOfCreation)
-                    },
-                    onSelectTaxRate = onSelectTaxRate
-                )
-            }
+        }
+        if (showDocumentForm) {
+            DocumentBottomSheetForm(
+                typeOfCreation = typeOfCreation,
+                documentProduct = documentProductUiState,
+                taxRates = taxRates,
+                bottomFormOnValueChange = bottomFormOnValueChange,
+                bottomFormPlaceCursor = bottomFormPlaceCursor,
+                onClickCancel = { // Re-initialize
+                    onClickCancelForm()
+                    onShowDocumentForm(false)
+                },
+                onClickDone = {
+                    onClickDoneForm(typeOfCreation)
+                },
+                onSelectTaxRate = onSelectTaxRate
+            )
         }
     }
+
 }

@@ -21,7 +21,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -36,7 +35,8 @@ fun FormUI(
     localFocusManager: FocusManager,
     onClickForward: (ScreenElement) -> Unit = {},
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
-    errors: MutableList<Pair<ScreenElement, String?>>? = null
+    errors: MutableList<Pair<ScreenElement, String?>>? = null,
+    onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
 ) {
     // handle focus
     val focusManager = LocalFocusManager.current
@@ -126,7 +126,10 @@ fun FormUI(
                         saveFocusForTheRow(focusStates, item.pageElement)
                     }
                 },
-                errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second
+                errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second,
+                onClickExpandFullScreen = {
+                    onClickExpandFullScreen(item.pageElement)
+                } // Used to expand product description field
             )
         }
     }
@@ -153,7 +156,9 @@ fun PageElementCreator(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
-    errorMessage: String?
+    errorMessage: String?,
+    onClickExpandFullScreen: () -> Unit, // Used to expand product description field
+
 ) {
 
     RowWithLabelAndInput(
@@ -163,7 +168,8 @@ fun PageElementCreator(
         focusRequester = focusRequester,
         onClickRow = onClickRow,
         onClickForward = onClickForward,
-        errorMessage = errorMessage
+        errorMessage = errorMessage,
+        onClickExpandFullScreen = onClickExpandFullScreen
     )
 
     if (!isLastInput) {
@@ -179,7 +185,8 @@ fun RowWithLabelAndInput(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
-    errorMessage: String?
+    errorMessage: String?,
+    onClickExpandFullScreen: () -> Unit, // Used to expand product description field
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
@@ -203,13 +210,14 @@ fun RowWithLabelAndInput(
             .fillMaxWidth()
             .padding(
                 start = 16.dp,
-                end = 16.dp,
+                end = if (formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_NAME
+                    || formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
+                ) 0.dp else 16.dp,
                 top = 14.dp,
                 bottom = 14.dp
             )
     ) {
         // Label
-
         when (formInput.label) {
             is String -> Text(
                 modifier = Modifier
@@ -236,6 +244,7 @@ fun RowWithLabelAndInput(
                     formActions = formActions,
                     focusRequester = focusRequester,
                     errorMessage = errorMessage,
+                    onClickExpandFullScreen = onClickExpandFullScreen
                 )
             }
 
@@ -259,7 +268,7 @@ fun RowWithLabelAndInput(
 
             is ForwardElement ->
                 FormInputCreatorGoForward(
-                    formInput.inputType
+                    forwardInput = formInput.inputType
                 )
         }
     }
@@ -269,14 +278,15 @@ class FormInput(
     val label: Any,
     val inputType: Any,
     val inputType2: Any? = null, // Used for DoubleInputCreator
-    val pageElement: ScreenElement
+    val pageElement: ScreenElement,
 )
 
 class TextInput(
     val text: TextFieldValue? = null,
     val placeholder: String? = null,
     val onValueChange: (TextFieldValue) -> Unit = {},
-    val keyboardType: KeyboardType = KeyboardType.Text
+    val keyboardType: KeyboardType = KeyboardType.Text,
+    val displayFullScreenIcon: Boolean = false,
 )
 
 class DecimalInput(
@@ -289,8 +299,10 @@ class DecimalInput(
 
 class ForwardElement(
     val text: String,
-    val isMultiline: Boolean = true
+    val isMultiline: Boolean = true,
+    val displayArrow: Boolean = true,
 )
+
 
 /*
 class DateInput @OptIn(ExperimentalMaterial3Api::class) constructor(

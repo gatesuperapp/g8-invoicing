@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
@@ -38,9 +40,9 @@ fun DocumentBottomSheetElementsAfterSlide(
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
-    onClickDeleteAddress: (ClientOrIssuerType) -> Unit
+    onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
 
-) {
+    ) {
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
         mutableStateOf(
@@ -54,8 +56,10 @@ fun DocumentBottomSheetElementsAfterSlide(
             clientOrIssuer = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
             onClickBack = onClickBack,
             onClickNewButton = {
-                onClickNewDocumentClientOrIssuer(if(pageElement == ScreenElement.DOCUMENT_CLIENT ) ClientOrIssuerType.DOCUMENT_CLIENT
-                    else ClientOrIssuerType.DOCUMENT_ISSUER)
+                onClickNewDocumentClientOrIssuer(
+                    if (pageElement == ScreenElement.DOCUMENT_CLIENT) ClientOrIssuerType.DOCUMENT_CLIENT
+                    else ClientOrIssuerType.DOCUMENT_ISSUER
+                )
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
@@ -98,34 +102,71 @@ fun DocumentBottomSheetElementsAfterSlide(
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DATE) {
-        DocumentBottomSheetDatePicker(
-            initialDate = parameters.let { it as String },
-            onClickBack = onClickBack,
-            onValueChange
+        DocumentBottomSheetFormSimple(
+            onClickCancel = onClickBack,
+            bottomSheetTitle = Strings.get(R.string.document_date_emitting),
+            content = {
+                DocumentBottomSheetDatePicker(
+                    initialDate = parameters.let { it as String },
+                    onValueChange = {
+                        onValueChange(ScreenElement.DOCUMENT_DATE, it)
+                        onClickBack()
+                    }
+                )
+            },
+            isDatePicker = true,
+            screenElement = ScreenElement.DOCUMENT_DATE
         )
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DUE_DATE) {
-            DocumentBottomSheetDatePicker(
-                initialDate = parameters.let { it as String },
-                onClickBack = onClickBack,
-                onValueChange,
-                isDueDate = true
-            )
-    }
-
-    if (pageElement == ScreenElement.DOCUMENT_FOOTER) {
-        DocumentBottomSheetFooter(
-            text = parameters.let { it as TextFieldValue },
-            onValueChange = onValueChange,
-            onClickBack = onClickBack,
+        DocumentBottomSheetFormSimple(
+            onClickCancel = onClickBack,
+            bottomSheetTitle = Strings.get(R.string.document_due_date),
+            content = {
+                DocumentBottomSheetDatePicker(
+                    initialDate = parameters.let { it as String },
+                    onValueChange = {
+                        onValueChange(ScreenElement.DOCUMENT_DUE_DATE, it)
+                        onClickBack()
+                    }
+                )
+            },
+            isDatePicker = true,
+            screenElement = ScreenElement.DOCUMENT_DUE_DATE
         )
     }
 
+    if (pageElement == ScreenElement.DOCUMENT_FOOTER) {
+        var footerText by remember { mutableStateOf(TextFieldValue("")) }
+        var showBottomSheet by remember { mutableStateOf(true) }
 
+        if (showBottomSheet)
+            DocumentBottomSheetFormSimple(
+                onClickCancel = {
+                    onClickBack()
+                    showBottomSheet = false
+                },
+                onClickDone = {
+                    onValueChange(it, footerText)
+                  //  onClickBack()
+                    showBottomSheet = false
+                },
+                bottomSheetTitle = Strings.get(R.string.document_footer),
+                content = {
+                    DocumentBottomSheetLargeText(
+                        initialText = parameters.let { it as TextFieldValue },
+                        onValueChange = {
+                            footerText = it
+                        }
+                    )
+                },
+                screenElement = ScreenElement.DOCUMENT_FOOTER
+            )
+    }
 
     if (showDocumentForm) {
-        DocumentBottomSheetFormModal(
+        DocumentBottomSheetForm(
             typeOfCreation = typeOfCreation,
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,

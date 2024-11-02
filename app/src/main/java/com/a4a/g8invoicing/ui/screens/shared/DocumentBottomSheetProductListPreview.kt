@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +27,7 @@ fun DocumentBottomSheetDocumentProductListPreview(
     Column(
         modifier = Modifier
             .fillMaxHeight(0.5f)
+            .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
     ) {
         // Header: display "back" button
 
@@ -34,14 +36,14 @@ fun DocumentBottomSheetDocumentProductListPreview(
         ButtonAddOrChoose(
             onClickNew,
             hasBorder = true,
-            hasBackground = false,
+            isPickerButton = false,
             stringResource(id = R.string.document_bottom_sheet_list_add_new_product)
         )
         if(!isClientOrIssuerListEmpty) {
             ButtonAddOrChoose( // Choosing a product to add to the document
                 onClickChooseExisting,
                 hasBorder = false,
-                hasBackground = true,
+                isPickerButton = true,
                 stringResource(id = R.string.document_bottom_sheet_document_product_add)
             )
         }
