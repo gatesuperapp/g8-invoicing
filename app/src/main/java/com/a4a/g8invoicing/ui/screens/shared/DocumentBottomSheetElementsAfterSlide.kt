@@ -149,7 +149,7 @@ fun DocumentBottomSheetElementsAfterSlide(
                 },
                 onClickDone = {
                     onValueChange(it, footerText)
-                  //  onClickBack()
+                    onClickBack()
                     showBottomSheet = false
                 },
                 bottomSheetTitle = Strings.get(R.string.document_footer),

@@ -35,7 +35,7 @@ fun DocumentBottomSheetLargeText(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         Column(
             Modifier
-                .padding(start = 30.dp, end = 30.dp, top = 20.dp, bottom = 60.dp)
+                .padding(start = 30.dp, end = 30.dp, top = 20.dp, bottom = 30.dp)
                 .fillMaxWidth()
                 .fillMaxHeight(0.6f)
         ) {

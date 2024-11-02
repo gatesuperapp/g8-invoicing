@@ -17,7 +17,7 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 fun DocumentBottomSheetElementsContent(
     document: DocumentState,
     onValueChange: (ScreenElement, Any) -> Unit,
-    onClickElement: (ScreenElement) -> Unit, // Clicking on client/issuer/items
+    onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     localFocusManager: FocusManager,
 ) {
@@ -80,7 +80,6 @@ fun DocumentBottomSheetElementsContent(
             ),
             pageElement = ScreenElement.DOCUMENT_FREE_FIELD
         )
-
     )
 
     if (document is InvoiceState) {
@@ -112,7 +111,7 @@ fun DocumentBottomSheetElementsContent(
         inputList = inputList,
         keyboard = KeyboardOpt.VALIDATE_INPUT,
         localFocusManager = localFocusManager,
-        onClickForward = onClickElement,
+        onClickForward = onClickForward,
         placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
     )
 }

@@ -37,6 +37,7 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
 import java.math.BigDecimal
+import java.util.concurrent.TimeUnit
 
 
 @Composable
@@ -87,7 +88,7 @@ fun DocumentBottomSheetTextElements(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Box(
+                    Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
                         modifier = Modifier
                             .height(50.dp)
                             .width(70.dp)
@@ -128,7 +129,7 @@ fun DocumentBottomSheetTextElements(
                     DocumentBottomSheetElementsContent(
                         document = document,
                         onValueChange = onValueChange,
-                        onClickElement = {
+                        onClickForward = {
                             keyboardController?.hide()
                             slideOtherComponent.value = it
                         },
@@ -147,18 +148,18 @@ fun DocumentBottomSheetTextElements(
                             document.documentIssuer,
                             issuers
                         )
-
                         ScreenElement.DOCUMENT_CLIENT -> Pair(
                             document.documentClient,
                             clients
                         )
-
                         ScreenElement.DOCUMENT_DATE -> document.documentDate
                         ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
                         ScreenElement.DOCUMENT_FOOTER -> document.footerText
                         else -> {}
                     },
                     onClickBack = {
+                        keyboardController?.hide()
+                        TimeUnit.SECONDS.sleep(1L)
                         slideOtherComponent.value = null
                     },
                     documentClientUiState = documentClientUiState,
@@ -173,6 +174,9 @@ fun DocumentBottomSheetTextElements(
                     bottomFormOnValueChange = bottomFormOnValueChange,
                     bottomFormPlaceCursor = bottomFormPlaceCursor,
                     onClickDoneForm = {
+                        slideOtherComponent.value = null
+                        keyboardController?.hide()
+                        TimeUnit.SECONDS.sleep(1L)
                         onClickDoneForm(it)
                     },
                     onClickCancelForm = onClickCancelForm,
@@ -183,6 +187,8 @@ fun DocumentBottomSheetTextElements(
                     onClickDeleteAddress = onClickDeleteAddress
                 )
             }
+
+
         }
     }
 }
