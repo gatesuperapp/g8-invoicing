@@ -13,6 +13,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.rememberModalBottomSheetState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
 
@@ -57,9 +59,8 @@ fun DocumentBottomSheetForm(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true,
         confirmValueChange = { it != SheetValue.Hidden })
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
-    var showFullScreenText by remember { mutableStateOf(false) }
+    var fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
     val screenElement by remember { mutableStateOf(ScreenElement.DOCUMENT_PRODUCT_NAME) }
-
 
     ModalBottomSheetFork(
         onDismissRequest = onClickCancel,
@@ -72,8 +73,13 @@ fun DocumentBottomSheetForm(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name))
-                        60.dp else 40.dp, end = 30.dp, start = 30.dp)
+                    .padding(
+                        top = if (typeOfCreation?.name
+                                .toString()
+                                .contains(ClientOrIssuerType.CLIENT.name)
+                        )
+                            60.dp else 40.dp, end = 30.dp, start = 30.dp
+                    )
             ) {
                 Box(
                     modifier = Modifier
@@ -201,7 +207,7 @@ fun DocumentBottomSheetForm(
                             isTaxSelectionVisible = true
                         },
                         showFullScreenText = {
-                            showFullScreenText = true
+                            fullScreenElementToShow.value = it
                         }
                     )
                 } else {
@@ -219,35 +225,37 @@ fun DocumentBottomSheetForm(
     }
 
 
-    if(showFullScreenText) {
+    if (fullScreenElementToShow.value != null) {
         var text by remember { mutableStateOf(TextFieldValue("")) }
 
         Surface(
             modifier = Modifier.background(Color.White)
         ) // disable click on background component
         {
-            DocumentBottomSheetFormSimple(
-                onClickCancel = { showFullScreenText = false },
-                onClickDone = {
-                    bottomFormOnValueChange(it, text, null)
-                    showFullScreenText = false
-                },
-                bottomSheetTitle = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
-                    Strings.get(R.string.product_name2)
-                else Strings.get(R.string.product_description),
-                content = {
-                    DocumentBottomSheetLargeText(
-                        initialText = if (screenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
-                            documentProduct.name
-                        else documentProduct.description
-                            ?: TextFieldValue(""),
-                        onValueChange = {
-                            text = it
-                        }
-                    )
-                },
-                screenElement = screenElement
-            )
+            fullScreenElementToShow.value?.let { fullScreenElement ->
+                DocumentBottomSheetFormSimple(
+                    onClickCancel = { fullScreenElementToShow.value = null },
+                    onClickDone = {
+                        bottomFormOnValueChange(it, text, null)
+                        fullScreenElementToShow.value = null
+                    },
+                    bottomSheetTitle = if (fullScreenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
+                        Strings.get(R.string.product_name2)
+                    else Strings.get(R.string.product_description),
+                    content = {
+                        DocumentBottomSheetLargeText(
+                            initialText = if (fullScreenElement == ScreenElement.DOCUMENT_PRODUCT_NAME)
+                                documentProduct.name
+                            else documentProduct.description
+                                ?: TextFieldValue(""),
+                            onValueChange = {
+                                text = it
+                            }
+                        )
+                    },
+                    screenElement = fullScreenElement
+                )
+            }
         }
     }
 }
