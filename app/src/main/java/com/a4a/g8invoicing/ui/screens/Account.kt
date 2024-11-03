@@ -54,7 +54,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.auth.AuthResult
-import com.a4a.g8invoicing.ui.shared.AnimationLottie
+import com.a4a.g8invoicing.ui.shared.BatAnimation
 import com.a4a.g8invoicing.ui.states.AuthState
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
@@ -252,7 +252,7 @@ fun Account(
                             visibleText = !visibleText
                         }
                 ) {
-                    AnimationLottie(
+                    BatAnimation(
                         modifier = Modifier
                             .width(300.dp)
                             .height(200.dp)

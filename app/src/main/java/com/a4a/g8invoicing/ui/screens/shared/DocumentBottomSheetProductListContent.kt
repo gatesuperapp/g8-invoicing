@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 
 @Composable
-fun DocumentProductListContent(
+fun DocumentBottomSheetProductListPreviewContent(
     documentProducts: List<DocumentProductState>,
     onClickItem: (DocumentProductState) -> Unit,
     onClickDelete: (Int) -> Unit,
@@ -27,7 +27,7 @@ fun DocumentProductListContent(
                 documentProduct.id!!
             }
         ) { documentProduct ->
-            DocumentProductListItem(
+            DocumentBottomSheetProductListPreviewItem(
                 documentProduct = documentProduct,
                 onClickDocumentProduct = {
                     onClickItem(documentProduct)

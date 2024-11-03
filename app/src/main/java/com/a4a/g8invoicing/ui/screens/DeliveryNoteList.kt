@@ -40,7 +40,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.AnimationLottie
+import com.a4a.g8invoicing.ui.shared.BatAnimation
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
@@ -212,7 +212,7 @@ private fun DisplayBatHelperAdvice() {
                 numberOfIterations.intValue += 1
             }
         ) {
-            AnimationLottie(
+            BatAnimation(
                 modifier = Modifier
                     .width(130.dp)
                     .height(80.dp)

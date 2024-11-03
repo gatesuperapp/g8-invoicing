@@ -25,7 +25,7 @@ import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import icons.IconDelete
 
 @Composable
-fun DocumentProductListItem(
+fun DocumentBottomSheetProductListPreviewItem(
     documentProduct: DocumentProductState,
     onClickDocumentProduct: () -> Unit,
     onClickDeleteDocumentProduct: () -> Unit,

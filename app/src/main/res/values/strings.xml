@@ -305,6 +305,9 @@
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
         \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.
     </string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur la partie grisée …</string>
+    <string name="document_product_advice_2">La modification s\'applique uniquement à ce document …</string>
+    <string name="document_product_advice_3">Elle n\'impacte pas le produit enregistré dans l\'onglet "Produits".</string>
     <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
     <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
