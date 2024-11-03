@@ -60,18 +60,6 @@ fun FormUI(
     val focusRequesters: List<Pair<ScreenElement, FocusRequester>> =
         remember { inputsWithFocusRequester }
 
-    //  Remember which input element is focused, ex:  inputsAndFocused = listOf(
-    //            Pair(PageElement.DELIVERY_NOTE_NUMBER, Boolean),
-    //            Pair(PageElement.ORDER_NUMBER, Boolean)
-    //        )
-    val inputsWithBoolean: MutableList<Pair<ScreenElement, Boolean>> = mutableListOf()
-    textFieldsInputs.forEach {
-        inputsWithBoolean.add(
-            Pair(it, false) // unfocused by default
-        )
-    }
-    val focusStates: MutableList<Pair<ScreenElement, Boolean>> = remember { inputsWithBoolean }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,37 +103,23 @@ fun FormUI(
                 formActions = formActions,
                 focusRequester = focusRequesters.firstOrNull { it.first == item.pageElement }?.second,
                 onClickRow = {
-                    if (focusStates.any { it.second == true }) { // If any input was focused, we clear all
-                        focusManager.clearFocus()
-                        clearFocusForAllRows(focusStates)
-                    } else { // Else, we focus the cursor in the text input of the clicked row
                         if (item.inputType is TextInput) {
                             placeCursorAtTheEndOfText(item.pageElement)
                         }
                         focusRequesters.firstOrNull { it.first == item.pageElement }?.second?.requestFocus()
-                        saveFocusForTheRow(focusStates, item.pageElement)
-                    }
                 },
                 errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second,
                 onClickExpandFullScreen = {
                     onClickExpandFullScreen(item.pageElement)
-                } // Used to expand product description field
+                }, // Used to expand product description field,
+                clearFocusForAllRows = {
+                    focusManager.clearFocus()
+                }
             )
         }
     }
 }
 
-fun clearFocusForAllRows(list: MutableList<Pair<ScreenElement, Boolean>>) {
-    list.forEachIndexed { index, pair ->
-        list.set(index, Pair(pair.first, false))
-    }
-}
-
-fun saveFocusForTheRow(list: MutableList<Pair<ScreenElement, Boolean>>, element: ScreenElement?) {
-    element?.let { pageElement ->
-        list.set(list.indexOfFirst { it.first == pageElement }, Pair(pageElement, true))
-    }
-}
 
 @Composable
 fun PageElementCreator(
@@ -158,7 +132,7 @@ fun PageElementCreator(
     onClickForward: (ScreenElement) -> Unit,
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
-
+    clearFocusForAllRows: () -> Unit
 ) {
 
     RowWithLabelAndInput(
@@ -169,7 +143,8 @@ fun PageElementCreator(
         onClickRow = onClickRow,
         onClickForward = onClickForward,
         errorMessage = errorMessage,
-        onClickExpandFullScreen = onClickExpandFullScreen
+        onClickExpandFullScreen = onClickExpandFullScreen,
+        clearFocusForAllRows = clearFocusForAllRows
     )
 
     if (!isLastInput) {
@@ -187,6 +162,7 @@ fun RowWithLabelAndInput(
     onClickForward: (ScreenElement) -> Unit,
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
+    clearFocusForAllRows: () -> Unit
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
@@ -200,6 +176,7 @@ fun RowWithLabelAndInput(
                 onClick = {
                     when (formInput.inputType) {
                         is ForwardElement -> {
+                            clearFocusForAllRows()
                             onClickForward(formInput.pageElement)
                         }
 

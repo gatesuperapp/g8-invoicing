@@ -80,6 +80,7 @@ fun DocumentBottomSheetElementsContent(
             ),
             pageElement = ScreenElement.DOCUMENT_FREE_FIELD
         )
+
     )
 
     if (document is InvoiceState) {
