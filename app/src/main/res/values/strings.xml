@@ -283,20 +283,20 @@
     <string name="account_bat_love">𝕚 𝕔𝕒𝕟𝕥 𝕝𝕚𝕧𝕖 𝕨𝕚𝕥𝕙𝕠𝕦𝕥 𝕦</string>
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n
-        Tu peux me cliquer dessus quand tu me vois, souvent plusieurs fois d\'affilée : j\'aime parler.
+        Tu peux me cliquer dessus quand tu me vois, je donne des
         \n\n …</string>
-    <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des mentions obligatoires pour une facture conforme.
+    <string name="invoice_advice_legal_2">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des
         \n\n … </string>
-    <string name="invoice_advice_legal_3">Pour te facilier la vie j\'ai tout résumé ici : \n</string>
+    <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j\'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
    </string>
     <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n
    </string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="invoice_advice_bottom_menu">Hey c\'est re-moi en plus swag avec mon faux piercing sur la joue. Si je bée ainsi de la bouche c\'est qu\'il faut absolument que je te montre une astuce \n\n …   </string>
+    <string name="invoice_advice_bottom_menu">Hey hey, ici ton batmagotchi. Il faut absolument que je te montre une astuce \n\n …   </string>
     <string name="invoice_advice_bottom_menu1">comment faire apparaître des options très utiles, comme supprimer un document ? \n\n … spoiler alert…    </string>
-    <string name="invoice_advice_bottom_menu2">Solution : clique sur le cercle ○ devant le numéro de la facture, ça la sélectionne et de nouvelles options s\'affichent dans le menu du bas. \n\n 𝕘𝕖𝕟𝕚𝕠𝕦𝕤𝕝𝕪 𝕪𝕠𝕦𝕣𝕤 </string>
+    <string name="invoice_advice_bottom_menu2">clique sur le cercle ○ devant le numéro de la facture pour la sélectionner et faire apparaître de nouvelles options. \n\n 𝕕𝕖 𝕟𝕒𝕕𝕒</string>
     <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
     <string name="delivery_note_advice_convert2">Ensuite clique sur «Facturer» dans le menu du bas et rdv dans l\'onglet «Factures» pour voir la pépite. \n\n Elle apparaîtra en haut de liste avec le numéro
@@ -305,7 +305,7 @@
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
         \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.
     </string>
-    <string name="document_product_advice">Pour modifier un produit, clique sur la partie grisée …</string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
     <string name="document_product_advice_2">La modification s\'applique uniquement à ce document …</string>
     <string name="document_product_advice_3">Elle n\'impacte pas le produit enregistré dans l\'onglet "Produits".</string>
     <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>

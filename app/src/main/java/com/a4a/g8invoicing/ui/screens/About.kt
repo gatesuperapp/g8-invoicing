@@ -182,7 +182,7 @@ fun About(
                         style = MaterialTheme.typography.textNormalBold
                     )
                     Text(
-                        text = "1.0",
+                        text = "1.1",
                     )
                 }
 

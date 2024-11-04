@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +35,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.BatAnimation
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
+import com.a4a.g8invoicing.ui.theme.textSmall
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
@@ -108,7 +110,8 @@ private fun DisplayBatHelperAdvice() {
         ) {
             Text(
                 text = Strings.get(R.string.document_product_advice),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.textSmall
             )
         }
 
@@ -125,7 +128,9 @@ private fun DisplayBatHelperAdvice() {
         ) {
             Text(
                 text = Strings.get(R.string.document_product_advice_2),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.textSmall
+
             )
         }
         AnimatedVisibility(
@@ -141,7 +146,9 @@ private fun DisplayBatHelperAdvice() {
         ) {
             Text(
                 text = Strings.get(R.string.document_product_advice_3),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.textSmall
+
             )
         }
 
@@ -158,8 +165,8 @@ private fun DisplayBatHelperAdvice() {
         ) {
             BatAnimation(
                 modifier = Modifier
-                    .width(130.dp)
-                    .height(80.dp)
+                    .width(80.dp)
+                    .height(50.dp)
                     .align(Alignment.Center),
                 file = R.raw.bat_wavy_arms,
                 numberOfIteration = numberOfIterations.intValue
