@@ -24,11 +24,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.SecureFlagPolicy
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.ModalBottomSheetFork
+import com.a4a.g8invoicing.ui.shared.ModalBottomSheetProperties
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.rememberModalBottomSheetState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -60,12 +62,16 @@ fun DocumentBottomSheetForm(
         confirmValueChange = { it != SheetValue.Hidden })
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
     var fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
-    val screenElement by remember { mutableStateOf(ScreenElement.DOCUMENT_PRODUCT_NAME) }
 
     ModalBottomSheetFork(
         onDismissRequest = onClickCancel,
         sheetState = sheetState,
-        dragHandle = null
+        dragHandle = null,
+        properties = ModalBottomSheetProperties(
+            shouldDismissOnBackPress = false,
+            securePolicy = SecureFlagPolicy.Inherit,
+            isFocusable = true
+            )
     ) {
         Column(
         ) {

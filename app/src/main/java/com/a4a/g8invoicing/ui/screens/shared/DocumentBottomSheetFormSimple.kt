@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.SecureFlagPolicy
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ModalBottomSheetFork
+import com.a4a.g8invoicing.ui.shared.ModalBottomSheetProperties
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.rememberModalBottomSheetState
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
@@ -44,7 +46,12 @@ fun DocumentBottomSheetFormSimple(
     ModalBottomSheetFork(
         onDismissRequest = onClickCancel,
         sheetState = sheetState,
-        dragHandle = null
+        dragHandle = null,
+        properties = ModalBottomSheetProperties(
+            shouldDismissOnBackPress = false,
+            securePolicy = SecureFlagPolicy.Inherit,
+            isFocusable = true
+        )
     ) {
         Column() {
             Row(
