@@ -1,0 +1,2 @@
+json_key_file("~/AndroidStudioProjects/g8-invoicing-3d20c514dbf4.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("com.a4a.g8invoicing") # e.g. com.krausefx.app

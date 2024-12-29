@@ -1,0 +1,7 @@
+- créer des bons de livraison et factures
+- convertir un ou plusieurs bons de livraison en une facture
+- envoyer les documents par mail, SMS ou réseaux sociaux et les imprimer,
+- créer des avoirs et factures rectificatives
+- dupliquer un document
+- marquer une facture "payée"
+- relancer en un clic...
