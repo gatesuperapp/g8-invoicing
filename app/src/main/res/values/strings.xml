@@ -295,12 +295,11 @@
    </string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="invoice_advice_bottom_menu">Hey hey, ici ton batmagotchi. Il faut absolument que je te montre une astuce \n\n …   </string>
-    <string name="invoice_advice_bottom_menu1">comment faire apparaître des options très utiles, comme supprimer un document ? \n\n … spoiler alert…    </string>
-    <string name="invoice_advice_bottom_menu2">clique sur le cercle ○ devant le numéro de la facture pour la sélectionner et faire apparaître de nouvelles options. \n\n 𝕕𝕖 𝕟𝕒𝕕𝕒</string>
+    <string name="invoice_advice_bottom_menu1">Pour faire apparaître des options très utiles, comme supprimer un document \n\n …   </string>
+    <string name="invoice_advice_bottom_menu2">clique sur le cercle ○ devant le numéro de la facture. Tu peux même sélectionner plusieurs documents à la fois.\n\n 𝕨𝕚𝕝𝕕 </string>
     <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
-    <string name="delivery_note_advice_convert2">Ensuite clique sur «Facturer» dans le menu du bas et rdv dans l\'onglet «Factures» pour voir la pépite. \n\n Elle apparaîtra en haut de liste avec le numéro
-        incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+    <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l\'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
         \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.

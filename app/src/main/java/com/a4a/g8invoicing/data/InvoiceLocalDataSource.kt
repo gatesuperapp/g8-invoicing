@@ -66,9 +66,8 @@ class InvoiceLocalDataSource(
                 )
             )
         )
-        saveInfoInOtherTables(
-            InvoiceState(documentIssuer = issuer)
-        )
+        saveTag(InvoiceState(documentIssuer = issuer))
+        saveInfoInOtherTables(InvoiceState(documentIssuer = issuer))
         try {
             newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
         } catch (e: Exception) {
@@ -222,10 +221,14 @@ class InvoiceLocalDataSource(
                         footerText = TextFieldValue(getExistingFooter() ?: "")
                     )
                 )
+                // We want to save tag only once for the invoice
+                val deliveryNote = deliveryNotes.first().copy(documentTag = DocumentTag.DRAFT)
+                saveTag(deliveryNote)
+
+                // We want to save other info for each delivery note
                 deliveryNotes.forEach {
-                    var deliveryNote = it.copy(documentTag = DocumentTag.DRAFT)
                     saveInfoInOtherTables(
-                        it
+                        deliveryNote
                     )
                 }
             } catch (e: Exception) {
@@ -275,8 +278,10 @@ class InvoiceLocalDataSource(
                     val invoice = it
                     invoice.documentNumber = TextFieldValue(docNumber)
                     invoice.documentTag = DocumentTag.DRAFT
+                    invoice.paymentStatus = 0
 
                     saveInfoInInvoiceTable(invoice)
+                    saveTag(invoice)
                     saveInfoInOtherTables(invoice)
                 }
             } catch (e: Exception) {
@@ -571,7 +576,7 @@ class InvoiceLocalDataSource(
         }
     }
 
-    private suspend fun saveInfoInOtherTables(document: DocumentState) {
+    private suspend fun saveTag(document: DocumentState) {
         try {
             invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
                 if (document is InvoiceState && isPaymentLate(document.dueDate)) {
@@ -584,7 +589,15 @@ class InvoiceLocalDataSource(
                     newTag = document.documentTag,
                     updateCase = TagUpdateOrCreationCase.TAG_CREATION
                 )
+            }
+        } catch (e: Exception) {
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+    }
 
+    private suspend fun saveInfoInOtherTables(document: DocumentState) {
+        try {
+            invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
                 // Link all products
                 document.documentProducts?.forEach { documentProduct ->
                     saveDocumentProductInDbAndLinkToDocument(
