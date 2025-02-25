@@ -676,7 +676,7 @@ private fun addProductsToTable(
                 fontRegular = fontRegular
             )
         productsTable.addCustomCell(text = it.taxRate?.let {
-            it.setScale(0, RoundingMode.HALF_UP).toString() + "%"
+            it.toString() + "%"
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
         var priceWithoutTax = it.taxRate?.let { taxRate ->

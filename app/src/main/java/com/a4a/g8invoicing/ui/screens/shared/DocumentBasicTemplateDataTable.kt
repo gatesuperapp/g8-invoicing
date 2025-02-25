@@ -212,7 +212,7 @@ fun DocumentProductsRows(
             }
 
             TableCell(
-                text = it.taxRate?.let { it.setScale(0, RoundingMode.HALF_UP).toString() + "%" }
+                text = it.taxRate?.let { "$it%" }
                     ?: " - ",
                 weight = taxColumnWeight,
                 alignEnd = true

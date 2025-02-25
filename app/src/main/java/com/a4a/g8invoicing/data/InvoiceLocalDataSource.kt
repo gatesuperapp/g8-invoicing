@@ -228,7 +228,7 @@ class InvoiceLocalDataSource(
                 // We want to save other info for each delivery note
                 deliveryNotes.forEach {
                     saveInfoInOtherTables(
-                        deliveryNote
+                        it
                     )
                 }
             } catch (e: Exception) {
