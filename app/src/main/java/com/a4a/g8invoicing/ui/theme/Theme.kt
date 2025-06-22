@@ -20,6 +20,7 @@ private val LightColorScheme = lightColorScheme(
     onBackground = ColorLightBlack,
     surface = Color.White,
     surfaceContainer = Color.White,
+    surfaceContainerLow = Color.White,
     onSurface = ColorLightBlack,
     surfaceTint = Color.White,
     outlineVariant = ColorVeryLightGreen,
