@@ -22,10 +22,10 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
 
-        /*
-                // Compulsory to be able to detect keyboard visibility
-                WindowCompat.setDecorFitsSystemWindows(window, false)
-        */
+
+        // Compulsory for the bottom sheet modal to not overlap native navbar
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
 
         setContent {
             MainCompose()
