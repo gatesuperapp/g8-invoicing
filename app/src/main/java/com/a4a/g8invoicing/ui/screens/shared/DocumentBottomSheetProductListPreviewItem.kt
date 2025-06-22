@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,7 +45,7 @@ fun DocumentBottomSheetProductListPreviewItem(
             .background(ColorLightGrey)
             .clickable(
                 interactionSource = interactionSource,
-                indication = rememberRipple(color = Color.Black, bounded = false)
+                indication = ripple(color = Color.Black, bounded = false)
             ) {
                 onClickDocumentProduct()
             }

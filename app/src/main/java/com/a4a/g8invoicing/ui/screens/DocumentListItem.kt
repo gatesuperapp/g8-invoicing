@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,7 +87,7 @@ fun DocumentListItem(
             .clip(RoundedCornerShape(5.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = rememberRipple(color = Color.Black, bounded = false),
+                indication = ripple(color = Color.Black, bounded = false),
             ) {
                 //onItemClick()
             }

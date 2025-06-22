@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,7 +75,7 @@ fun Settings(
                 modifier = Modifier
                     .clickable(
                         interactionSource = interactionSource,
-                        indication = rememberRipple(color = Color.Black, bounded = true),
+                        indication = ripple(color = Color.Black, bounded = true),
                         onClick = {
                         }
                     )
