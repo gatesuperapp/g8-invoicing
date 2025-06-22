@@ -66,33 +66,37 @@ fun CategoriesDropdownMenu(
                 modifier = if (selected) {
                     Modifier
                         .background(MainBackground)
-                        .padding(start = 24.dp)
                 } else {
                     Modifier
                         .background(Color.Transparent)
-                        .padding(start = 24.dp)
                 },
-                text = { Text(stringResource(category.resourceId)) },
+                text = {
+                    Text(
+                        stringResource(category.resourceId),
+                        modifier = Modifier
+                            .padding(start = 24.dp)
+                    )
+                },
                 onClick = {
                     dismissMenu()
                     if (onClickCategory != null) {
                         onClickCategory(category)
                     }
                 },
-              /*  leadingIcon = {
-                    category.icon?.let {
-                        Icon(
-                            modifier = Modifier
-                                .padding(end = 10.dp),
-                            //.size(30.dp),
-                            imageVector = it,
-                            contentDescription = category.iconDescription
-                        )
-                    }
-                }*/
+                /*  leadingIcon = {
+                      category.icon?.let {
+                          Icon(
+                              modifier = Modifier
+                                  .padding(end = 10.dp),
+                              //.size(30.dp),
+                              imageVector = it,
+                              contentDescription = category.iconDescription
+                          )
+                      }
+                  }*/
             )
 
-            if(category is Category.About || category is Category.Products) {
+            if (category is Category.About || category is Category.Products) {
                 HorizontalDivider(
                     modifier = Modifier.padding(start = 24.dp, end = 16.dp),
                     thickness = 1.dp,
