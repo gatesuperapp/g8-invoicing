@@ -46,7 +46,7 @@ fun ProductAddEditForm(
             .background(Color.LightGray.copy(alpha = 0.4f))
             .verticalScroll(rememberScrollState())
             .padding(12.dp)
-            .padding(top = 80.dp)
+            .padding(top = 110.dp, bottom = 60.dp)
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {

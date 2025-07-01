@@ -175,7 +175,7 @@ fun DocumentAddEdit(
                     onClickDeleteAddress = onClickDeleteAddress
                 )
             } else {
-                DocumentBottomSheetProducts(
+                DocumentBottomSheetProductsAvailable(
                     document = document,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState)

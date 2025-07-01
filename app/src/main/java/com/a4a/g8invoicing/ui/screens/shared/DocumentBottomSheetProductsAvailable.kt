@@ -17,9 +17,8 @@ import com.a4a.g8invoicing.ui.screens.ProductListContent
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
-// User can either select an item (client or product) in the list, or add a new item
 @Composable
-fun DocumentBottomSheetProducts(
+fun DocumentBottomSheetProductsAvailable(
     list: List<ProductState>,
     onClickBack: () -> Unit,
     onProductClick: (ProductState) -> Unit, // To select a product
@@ -45,7 +44,7 @@ fun DocumentBottomSheetProducts(
 
         Column(
             Modifier
-                .padding(20.dp)
+                .padding(20.dp, bottom = 60.dp)
         ) {
             // Display the existing list
             ProductListContent(

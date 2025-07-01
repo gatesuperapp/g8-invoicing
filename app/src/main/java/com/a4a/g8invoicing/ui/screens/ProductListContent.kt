@@ -19,7 +19,6 @@ import com.a4a.g8invoicing.ui.shared.CheckboxFace
 fun ProductListContent(
     products: List<ProductState>,
     onProductClick: (ProductState) -> Unit = {},
-    onClickNew: () -> Unit = {}, // Used only in documents, clicking the "Add new" button
     addToSelectedList: (ProductState) -> Unit = {},
     removeFromSelectedList: (ProductState) -> Unit = {},
     displayCheckboxes: Boolean = true, // Will not be displayed when the list is opened from a document

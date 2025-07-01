@@ -37,9 +37,10 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.theme.textSmall
 
-// User can either select an item (client or product) in the list, or add a new item
+// Bottom sheet with "New product" and "Choose in list" buttons
+// And the list of chosen products
 @Composable
-fun DocumentBottomSheetDocumentProductListPreview(
+fun DocumentBottomSheetDocumentProductListChosen(
     list: List<DocumentProductState>,
     onClickNew: () -> Unit, // Add a new product to the document (product list)
     onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)
@@ -54,7 +55,6 @@ fun DocumentBottomSheetDocumentProductListPreview(
             .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
     ) {
         // Header: display "back" button
-
         Spacer(modifier = Modifier.height(50.dp))
 
         ButtonAddOrChoose(
@@ -71,8 +71,8 @@ fun DocumentBottomSheetDocumentProductListPreview(
                 stringResource(id = R.string.document_bottom_sheet_document_product_add)
             )
         }
-        // Display the existing list
-        DocumentBottomSheetProductListPreviewContent(
+        // Display the list of chosen products
+        DocumentBottomSheetProductListChosenContent(
             documentProducts = list,
             onClickItem = onClickDocumentProduct,
             onClickDelete = onClickDelete

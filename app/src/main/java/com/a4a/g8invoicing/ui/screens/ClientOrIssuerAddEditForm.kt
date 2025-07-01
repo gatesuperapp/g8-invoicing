@@ -59,7 +59,7 @@ fun ClientOrIssuerAddEditForm(
             clientOrIssuerUiState.addresses?.size ?: 1
         )
     }
-    val paddingTop = if (isInBottomSheetModal) 10.dp else 80.dp
+    val paddingTop = if (isInBottomSheetModal) 10.dp else 110.dp
 
     Column(
         modifier = Modifier
@@ -67,7 +67,7 @@ fun ClientOrIssuerAddEditForm(
             .background(ColorBackgroundGrey)
             .fillMaxSize()
             .padding(12.dp)
-            .padding(top = paddingTop, bottom = 40.dp)
+            .padding(top = paddingTop, bottom = 60.dp)
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {

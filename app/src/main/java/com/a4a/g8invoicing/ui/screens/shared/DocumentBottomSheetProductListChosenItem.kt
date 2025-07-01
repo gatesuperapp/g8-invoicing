@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -26,7 +25,7 @@ import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import icons.IconDelete
 
 @Composable
-fun DocumentBottomSheetProductListPreviewItem(
+fun DocumentBottomSheetProductListChosenItem(
     documentProduct: DocumentProductState,
     onClickDocumentProduct: () -> Unit,
     onClickDeleteDocumentProduct: () -> Unit,

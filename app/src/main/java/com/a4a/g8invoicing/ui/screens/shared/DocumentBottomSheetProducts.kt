@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,15 +20,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -45,9 +40,10 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
 
-
+// Bottom sheet with "New product" and "Choose in list" buttons
+// And the list of chosen products
 @Composable
-fun DocumentBottomSheetProducts(
+fun DocumentBottomSheetProductsAvailable(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
     documentProductUiState: DocumentProductState,
@@ -140,7 +136,7 @@ fun DocumentBottomSheetProducts(
             }
         }
 
-        DocumentBottomSheetDocumentProductListPreview(
+        DocumentBottomSheetDocumentProductListChosen(
             list = params.first ?: emptyList(),
             onClickNew = {
                 typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
@@ -164,7 +160,7 @@ fun DocumentBottomSheetProducts(
         )
 
         if (isProductListVisible) {
-            DocumentBottomSheetProducts(
+            DocumentBottomSheetProductsAvailable(
                 list = params.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
