@@ -21,6 +21,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceAddEditViewModel
+import com.itextpdf.kernel.pdf.PdfName.a
 
 fun NavGraphBuilder.invoiceAddEdit(
     navController: NavController,
@@ -71,32 +72,40 @@ fun NavGraphBuilder.invoiceAddEdit(
             onValueChange = { pageElement, value ->
                 invoiceViewModel.updateUiState(pageElement, value)
             },
-            onClickProduct = { product ->
+            onSelectProduct = { product ->
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(
                     product,
                 )
             },
-            onClickNewProduct = {
+            onClickNewDocumentProduct = {
                 productAddEditViewModel.clearProductNameAndDescription()
             },
-            onClickClientOrIssuer = {
-                // Initialize to display it in the bottomSheet form
-                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)
-            },
-            onClickDocumentProduct = {// Edit a document product
+            onClickEditDocumentProduct = {// Edit a document product
                 productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                 productAddEditViewModel.setDocumentProductUiState(it)
+            },
+            onClickDeleteDocumentProduct = {
+                invoiceViewModel.removeDocumentProductFromUiState(it)
+                invoiceViewModel.removeDocumentProductFromLocalDb(it)
+            },
+            onSelectClientOrIssuer = { clientOrIssuer ->
+                if(clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
+                    documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
+a                } else {
+                    documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                }
+                invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(clientOrIssuer)
+                invoiceViewModel.saveDocumentClientOrIssuerInUiState(clientOrIssuer)
+
             },
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
             onClickDocumentClientOrIssuer = {// Edit a document product
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
-            },
-            onClickDeleteDocumentProduct = {
-                invoiceViewModel.removeDocumentProductFromUiState(it)
-                invoiceViewModel.removeDocumentProductFromLocalDb(it)
             },
             onClickDeleteDocumentClientOrIssuer = { type ->
                 invoiceViewModel.removeDocumentClientOrIssuerFromUiState(type)
@@ -143,22 +152,6 @@ fun NavGraphBuilder.invoiceAddEdit(
             },
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {
-                    // ADD = choose from existing list
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                            clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(
-                                ClientOrIssuerType.DOCUMENT_CLIENT
-                            )
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentClientUiState
-                            )
-                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(
-                                documentClientUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
                     // NEW = create new & save in clients list too
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                         //documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
@@ -193,19 +186,6 @@ fun NavGraphBuilder.invoiceAddEdit(
                             )
                         }
                         showDocumentForm = false
-                    }
-
-
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentIssuerUiState
-                            )
-                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(
-                                documentIssuerUiState
-                            )
-                            showDocumentForm = false
-                        }
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {

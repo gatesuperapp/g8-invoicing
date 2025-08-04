@@ -271,7 +271,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         )
     }
 
-    fun saveDocumentClientOrIssuerInDeliveryNoteUiState(documentClientOrIssuer: ClientOrIssuerState) {
+    fun saveDocumentClientOrIssuerInUiState(documentClientOrIssuer: ClientOrIssuerState) {
         if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
             _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
                 documentClient = documentClientOrIssuer

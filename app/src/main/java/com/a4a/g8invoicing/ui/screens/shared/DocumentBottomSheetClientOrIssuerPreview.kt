@@ -27,9 +27,9 @@ fun DocumentBottomSheetClientOrIssuerPreview(
     pageElement: ScreenElement,
     clientOrIssuer: ClientOrIssuerState?,
     onClickBack: () -> Unit,
-    onClickNewButton: () -> Unit,
-    onClickChooseButton: () -> Unit,
-    onClickItem: (ClientOrIssuerState) -> Unit,
+    onClickNew: () -> Unit,
+    onClickSelect: () -> Unit,
+    onClickEdit: (ClientOrIssuerState) -> Unit,
     onClickDelete: (ClientOrIssuerType) -> Unit,
     isClientOrIssuerListEmpty: Boolean,
 ) {
@@ -58,7 +58,7 @@ fun DocumentBottomSheetClientOrIssuerPreview(
         ) {
             if (clientOrIssuer == null) {
                 ButtonAddOrChoose(
-                    onClickNewButton,
+                    onClickNew,
                     hasBorder = true,
                     isPickerButton = false,
                     stringResource(
@@ -69,7 +69,7 @@ fun DocumentBottomSheetClientOrIssuerPreview(
                 )
                 if (!isClientOrIssuerListEmpty) {
                     ButtonAddOrChoose(
-                        onClickChooseButton,
+                        onClickSelect,
                         hasBorder = false,
                         isPickerButton = true,
                         stringResource(id = R.string.document_bottom_sheet_document_product_add)
@@ -79,7 +79,7 @@ fun DocumentBottomSheetClientOrIssuerPreview(
                 // Display the existing item
                 DocumentClientOrIssuerContent(
                     item = clientOrIssuer,
-                    onClickItem = onClickItem,
+                    onClickItem = onClickEdit,
                     onClickDelete = onClickDelete
                 )
             }

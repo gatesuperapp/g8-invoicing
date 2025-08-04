@@ -21,6 +21,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.itextpdf.kernel.pdf.PdfName.a
 
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
@@ -71,20 +72,29 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateUiState(pageElement, value)
             },
-            onClickProduct = { product ->
+            onSelectProduct = { product ->
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(
                     product,
                 )
             },
-            onClickNewProduct = {
+            onClickNewDocumentProduct = {
                 productAddEditViewModel.clearProductNameAndDescription()
             },
-            onClickClientOrIssuer = {
-                // Initialize documentProductUiState to display it in the bottomSheet form
-                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)
+            onSelectClientOrIssuer = { clientOrIssuer ->
+                if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
+                    documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    a
+                } else {
+                    documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                }
+                deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(clientOrIssuer)
+                deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(clientOrIssuer)
+
             },
-            onClickDocumentProduct = {// Edit a document product
+            onClickEditDocumentProduct = {// Edit a document product
                 productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
@@ -144,24 +154,15 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {
-                    // ADD = choose from existing list
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentClientUiState
-                            )
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
-                                documentClientUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
                     // NEW = create new & save in clients list too
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            createNewClientOrIssuer(clientOrIssuerAddEditViewModel, ClientOrIssuerType.DOCUMENT_CLIENT)
+                            createNewClientOrIssuer(
+                                clientOrIssuerAddEditViewModel,
+                                ClientOrIssuerType.DOCUMENT_CLIENT
+                            )
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentClientUiState
                             )
                             deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
@@ -186,23 +187,14 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         }
                     }
 
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentIssuerUiState
-                            )
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
-                                documentIssuerUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
-
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            createNewClientOrIssuer(clientOrIssuerAddEditViewModel, ClientOrIssuerType.DOCUMENT_ISSUER)
+                            createNewClientOrIssuer(
+                                clientOrIssuerAddEditViewModel,
+                                ClientOrIssuerType.DOCUMENT_ISSUER
+                            )
                             documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInDeliveryNoteUiState(
+                            deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentIssuerUiState
                             )
                             deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
@@ -230,7 +222,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
 
-                            documentProduct.id  = deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
+                            documentProduct.id =
+                                deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
+                                    documentProduct
+                                )
                             deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
                             // And if a document product is overflowing the page, and page is changed
                             // we want this to be saved in db
@@ -247,10 +242,13 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
 
-                            documentProduct.id  = deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(documentProduct)
+                            documentProduct.id =
+                                deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
+                                    documentProduct
+                                )
                             deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
 
-                          // productAddEditViewModel.clearProductUiState()
+                            // productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
                         }
                     }
@@ -267,6 +265,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                             showDocumentForm = false
                         }
                     }
+
                     else -> null
                 }
             },

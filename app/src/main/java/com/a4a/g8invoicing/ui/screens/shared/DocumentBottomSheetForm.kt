@@ -114,8 +114,6 @@ fun DocumentBottomSheetForm(
                             DocumentBottomSheetTypeOfForm.NEW_CLIENT -> stringResource(id = R.string.document_modal_new_client)
                             DocumentBottomSheetTypeOfForm.NEW_ISSUER -> stringResource(id = R.string.document_modal_new_issuer)
                             DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> stringResource(id = R.string.document_modal_new_product)
-                            DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
-                            DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)
                             DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> stringResource(id = R.string.document_modal_add_product)
                             DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> stringResource(id = R.string.document_modal_edit_client)
                             DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> stringResource(id = R.string.document_modal_edit_issuer)

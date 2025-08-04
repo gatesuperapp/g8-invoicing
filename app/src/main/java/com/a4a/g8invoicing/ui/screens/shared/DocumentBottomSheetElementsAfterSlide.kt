@@ -11,12 +11,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.util.concurrent.TimeUnit
 
 @Composable
 fun DocumentBottomSheetElementsAfterSlide(
@@ -26,9 +21,9 @@ fun DocumentBottomSheetElementsAfterSlide(
     documentClientUiState: ClientOrIssuerState,
     documentIssuerUiState: ClientOrIssuerState,
     taxRates: List<BigDecimal>,
-    onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -55,7 +50,7 @@ fun DocumentBottomSheetElementsAfterSlide(
             pageElement = pageElement,
             clientOrIssuer = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
             onClickBack = onClickBack,
-            onClickNewButton = {
+            onClickNew = {
                 onClickNewDocumentClientOrIssuer(
                     if (pageElement == ScreenElement.DOCUMENT_CLIENT) ClientOrIssuerType.DOCUMENT_CLIENT
                     else ClientOrIssuerType.DOCUMENT_ISSUER
@@ -65,9 +60,9 @@ fun DocumentBottomSheetElementsAfterSlide(
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
                 onShowDocumentForm(true)
             },
-            onClickChooseButton = { isClientOrIssuerListVisible = true },
-            onClickItem = {
-                onClickDocumentClientOrIssuer(it)
+            onClickSelect = { isClientOrIssuerListVisible = true },
+            onClickEdit = {
+                onClickEditDocumentClientOrIssuer(it)
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
                 onShowDocumentForm(true)
@@ -81,10 +76,10 @@ fun DocumentBottomSheetElementsAfterSlide(
                 list = parameters.second,
                 pageElement = pageElement,
                 onClickBack = { isClientOrIssuerListVisible = false },
-                onClientOrIssuerClick = {
-                    onClickClientOrIssuer(it) // Update the AddEditViewModel with the chosen item
-                    // so we open bottom document form with data
-                    typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                onClientOrIssuerSelect = {
+                    onSelectClientOrIssuer(it)
+                    isClientOrIssuerListVisible = false
+                    /*typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                         DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT
                     } else DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER
                     onShowDocumentForm(true)
@@ -93,7 +88,7 @@ fun DocumentBottomSheetElementsAfterSlide(
                         // Waits for the bottom form to be opened,
                         // so previous screen change is in background
                         isClientOrIssuerListVisible = false
-                    }
+                    }*/
                 },
                 currentClientId = currentClientId,
                 currentIssuerId = currentIssuerId

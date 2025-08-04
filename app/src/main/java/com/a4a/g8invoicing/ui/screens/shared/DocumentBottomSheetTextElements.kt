@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,12 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -41,11 +36,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import icons.IconDone
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.util.concurrent.TimeUnit
 
 
 @Composable
@@ -58,9 +49,9 @@ fun DocumentBottomSheetTextElements(
     documentClientUiState: ClientOrIssuerState,
     documentIssuerUiState: ClientOrIssuerState,
     taxRates: List<BigDecimal>,
-    onClickClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -174,9 +165,13 @@ fun DocumentBottomSheetTextElements(
                     documentClientUiState = documentClientUiState,
                     documentIssuerUiState = documentIssuerUiState,
                     taxRates = taxRates,
-                    onClickClientOrIssuer = onClickClientOrIssuer,
+                    onSelectClientOrIssuer = {
+                        keyboardController?.hide()
+                        slideOtherComponent.value = null
+                        onSelectClientOrIssuer(it)
+                    },
                     onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
-                    onClickDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                    onClickEditDocumentClientOrIssuer = onClickEditDocumentClientOrIssuer,
                     onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
                     currentClientId = currentClientId,
                     currentIssuerId = currentIssuerId,

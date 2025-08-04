@@ -24,7 +24,7 @@ fun DocumentBottomSheetClientOrIssuerList(
     list: List<ClientOrIssuerState>,
     pageElement: ScreenElement,
     onClickBack: () -> Unit,
-    onClientOrIssuerClick: (ClientOrIssuerState) -> Unit,
+    onClientOrIssuerSelect: (ClientOrIssuerState) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
 ) {
@@ -55,7 +55,7 @@ fun DocumentBottomSheetClientOrIssuerList(
             // Display the existing list
             ClientOrIssuerListContent(
                 clientsOrIssuers = list,
-                onItemClick = onClientOrIssuerClick,
+                onItemClick = onClientOrIssuerSelect,
                 isCheckboxDisplayed = false, // Don't display checkboxes
                 currentClientOrIssuerId = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     currentClientId

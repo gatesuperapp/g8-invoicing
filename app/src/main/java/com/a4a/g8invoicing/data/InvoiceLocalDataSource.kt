@@ -515,7 +515,7 @@ class InvoiceLocalDataSource(
                             invoice_id = documentId,
                             tag_id = it
                         )
-                    }
+                    } else {}
                 }
             }
         } catch (e: Exception) {

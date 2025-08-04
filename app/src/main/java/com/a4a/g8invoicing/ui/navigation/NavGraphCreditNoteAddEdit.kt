@@ -21,6 +21,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.CreditNoteAddEditViewModel
+import com.itextpdf.kernel.pdf.PdfName.a
 
 fun NavGraphBuilder.creditNoteAddEdit(
     navController: NavController,
@@ -71,21 +72,29 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onValueChange = { pageElement, value ->
                 creditNoteViewModel.updateUiState(pageElement, value)
             },
-            onClickProduct = { product ->
+            onSelectProduct = { product ->
                 val lastDocumentProductPage =
                     // Initialize documentProductUiState to display it in the bottomSheet form
                     productAddEditViewModel.setDocumentProductUiStateWithProduct(
                         product,
                     )
             },
-            onClickNewProduct = {
+            onClickNewDocumentProduct = {
                 productAddEditViewModel.clearProductNameAndDescription()
             },
-            onClickClientOrIssuer = {
-                // Initialize documentProductUiState to display it in the bottomSheet form
-                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiStateWithSelected(it)
+            onSelectClientOrIssuer = { clientOrIssuer ->
+                if(clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
+                    documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    a                } else {
+                    documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                }
+                creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(clientOrIssuer)
+                creditNoteViewModel.saveDocumentClientOrIssuerInUiState(clientOrIssuer)
+
             },
-            onClickDocumentProduct = {// Edit a document product
+            onClickEditDocumentProduct = {// Edit a document product
                 productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
@@ -144,18 +153,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
             },
             onClickDoneForm = { typeOfCreation ->
                 when (typeOfCreation) {
-                    // ADD = choose from existing list
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentClientUiState
-                            )
-                            creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
-                                documentClientUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
                     // NEW = create new & save in clients list too
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                         if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
@@ -183,18 +180,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
                             )
                             clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                 ClientOrIssuerType.DOCUMENT_ISSUER,
-                                documentIssuerUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
-
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentIssuerUiState
-                            )
-                            creditNoteViewModel.saveDocumentClientOrIssuerInUiState(
                                 documentIssuerUiState
                             )
                             showDocumentForm = false

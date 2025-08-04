@@ -4,8 +4,6 @@ enum class DocumentBottomSheetTypeOfForm {
     NEW_PRODUCT,
     NEW_CLIENT,
     NEW_ISSUER,
-    ADD_EXISTING_CLIENT,
-    ADD_EXISTING_ISSUER,
     ADD_EXISTING_PRODUCT,
     EDIT_CLIENT,
     EDIT_PRODUCT,
