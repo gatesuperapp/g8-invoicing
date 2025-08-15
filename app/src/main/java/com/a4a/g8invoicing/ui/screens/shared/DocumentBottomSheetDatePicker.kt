@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
-import com.ninetyninepercent.funfactu.icons.IconArrowBack
 import java.util.Date
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue

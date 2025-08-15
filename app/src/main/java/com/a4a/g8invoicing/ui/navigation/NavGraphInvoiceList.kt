@@ -1,5 +1,8 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -16,8 +19,16 @@ fun NavGraphBuilder.invoiceList(
     onClickListItem: (Int) -> Unit,
     onClickNew: () -> Unit,
     onClickBack: () -> Unit,
+) {
+    composable(
+        route = Screen.InvoiceList.name,
+        enterTransition = { // Define smooth enter transition
+            fadeIn(animationSpec = tween(500))
+        },
+        exitTransition = { // Define smooth exit transition for when navigating away from detail
+            fadeOut(animationSpec = tween(500))
+        },
     ) {
-    composable(route = Screen.InvoiceList.name) {
         val viewModel: InvoiceListViewModel = hiltViewModel()
         val invoicesUiState by viewModel.documentsUiState
             .collectAsStateWithLifecycle()
@@ -36,7 +47,7 @@ fun NavGraphBuilder.invoiceList(
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
-            onClickBack = { onClickBack() }
+            onClickBack = { onClickBack() },
         )
     }
 }

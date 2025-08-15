@@ -28,7 +28,7 @@ data class CreditNoteState(
     override var documentIssuer: ClientOrIssuerState? = null,
     override var documentClient: ClientOrIssuerState? = null,
     override var documentProducts: List<DocumentProductState>? = null,
-    override var documentPrices: DocumentPrices? = null,
+    override var documentTotalPrices: DocumentTotalPrices? = null,
     override var currency: TextFieldValue  = TextFieldValue(),
     var paymentStatus: Int = 0,
     var dueDate: String = getDateFormatter().format(getDateInOneMonth().time) +  " 12:00:00",

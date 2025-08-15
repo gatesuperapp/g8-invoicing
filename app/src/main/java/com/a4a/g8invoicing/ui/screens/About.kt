@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,15 +14,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -37,6 +33,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textNormalBold
@@ -51,15 +48,17 @@ fun About(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     // Add background when bottom menu expanded
-    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-    val backgroundColor = remember { mutableStateOf(transparent) }
+    val isDimActive = remember { mutableStateOf(false) }
 
-    Scaffold(
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         topBar = {
             TopBar(
                 title = R.string.appbar_about,
                 navController = navController,
-                onClickBackArrow = onClickBack
+                onClickBackArrow = onClickBack,
+                isCancelCtaDisplayed = false
             )
         },
         bottomBar = {
@@ -68,8 +67,8 @@ fun About(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    isDimActive.value = !isDimActive.value
+
                 }
             )
         }
@@ -82,7 +81,7 @@ fun About(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        top = 100.dp,
+                        top = 130.dp,
                         bottom = 100.dp,
                         start = 40.dp,
                         end = 40.dp,
@@ -186,15 +185,9 @@ fun About(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(80.dp))
 
             }
-            Column(
-                // apply darker background when bottom menu is expanded
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor.value),
-            ) {}
         }
     }
 }

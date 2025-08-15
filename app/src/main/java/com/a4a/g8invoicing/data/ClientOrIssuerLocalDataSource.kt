@@ -25,20 +25,23 @@ class ClientOrIssuerLocalDataSource(
     private val linkClientOrIssuerToAddressQueries = db.linkClientOrIssuerToAddressQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
-    private val linkDocumentClientOrIssuerToAddressQueries = db.linkDocumentClientOrIssuerToAddressQueries
+    private val linkDocumentClientOrIssuerToAddressQueries =
+        db.linkDocumentClientOrIssuerToAddressQueries
 
-    override fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
-        try {
-            return clientOrIssuerQueries.get(id).executeAsOneOrNull()
-                ?.let {
-                    it.transformIntoEditable(
-                        fetchClientOrIssuerAddresses(it.id)?.toMutableList()
-                    )
-                }
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+    override suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
+        return withContext(Dispatchers.IO) {
+            try {
+                clientOrIssuerQueries.get(id).executeAsOneOrNull()
+                    ?.let {
+                        it.transformIntoEditable(
+                            fetchClientOrIssuerAddresses(it.id)?.toMutableList()
+                        )
+                    }
+            } catch (e: Exception) {
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+            null
         }
-        return null
     }
 
     override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>> {
@@ -196,8 +199,6 @@ class ClientOrIssuerLocalDataSource(
     }
 
 
-
-
     override suspend fun duplicateClients(clientsOrIssuers: List<ClientOrIssuerState>) {
         return withContext(Dispatchers.IO) {
             try {
@@ -307,10 +308,12 @@ class ClientOrIssuerLocalDataSource(
                 }
                 // Addresses to delete
                 val oldAddressesIds = documentClientOrIssuer.id?.toLong()?.let {
-                    linkDocumentClientOrIssuerToAddressQueries.get(it).executeAsList().map { it.address_id }
+                    linkDocumentClientOrIssuerToAddressQueries.get(it).executeAsList()
+                        .map { it.address_id }
                 }
                 val newAddressesIds =
-                    documentClientOrIssuer.addresses?.mapNotNull { it.id?.toLong() } ?: mutableListOf()
+                    documentClientOrIssuer.addresses?.mapNotNull { it.id?.toLong() }
+                        ?: mutableListOf()
 
                 val addressesToDelete = oldAddressesIds?.filterNot { it in newAddressesIds }
                 addressesToDelete?.forEach {
@@ -334,7 +337,10 @@ class ClientOrIssuerLocalDataSource(
                         }
                     }
                     documentClientOrIssuer.id?.let {
-                        saveInfoInDocumentClientOrIssuerAddressTables(it.toLong(), addressesToCreate)
+                        saveInfoInDocumentClientOrIssuerAddressTables(
+                            it.toLong(),
+                            addressesToCreate
+                        )
                     }
                 }
             } catch (cause: Throwable) {
@@ -414,21 +420,21 @@ fun ClientOrIssuer.transformIntoEditable(
         email = clientOrIssuer.email?.let { TextFieldValue(text = it) },
         notes = clientOrIssuer.notes?.let { TextFieldValue(text = it) },
         companyId1Label = clientOrIssuer.company_id1_label?.let {
-                TextFieldValue(
-                    text = it
-                )
+            TextFieldValue(
+                text = it
+            )
         },
         companyId1Number = clientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
         companyId2Label = clientOrIssuer.company_id2_label?.let {
-                TextFieldValue(
-                    text = it
-                )
+            TextFieldValue(
+                text = it
+            )
         },
         companyId2Number = clientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
         companyId3Label = clientOrIssuer.company_id3_label?.let {
-                TextFieldValue(
-                    text = it
-                )
+            TextFieldValue(
+                text = it
+            )
         },
         companyId3Number = clientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
     )

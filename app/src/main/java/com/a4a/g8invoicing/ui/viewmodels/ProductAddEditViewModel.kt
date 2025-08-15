@@ -1,8 +1,9 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import android.util.Log
+import androidx.compose.animation.core.copy
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.geometry.isEmpty
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -14,15 +15,19 @@ import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.calculatePriceWithTax
+import com.a4a.g8invoicing.ui.states.ProductPrice
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import javax.inject.Inject
 
@@ -45,6 +50,10 @@ class ProductAddEditViewModel @Inject constructor(
     private val _productUiState = mutableStateOf(ProductState())
     val productUiState: State<ProductState> = _productUiState
 
+    // État de chargement
+    private val _isLoading = MutableStateFlow(true) // Initialisé à true
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _documentProductUiState = MutableStateFlow(DocumentProductState())
     val documentProductUiState: StateFlow<DocumentProductState> = _documentProductUiState
 
@@ -52,34 +61,45 @@ class ProductAddEditViewModel @Inject constructor(
         // We initialize only if coming from the navigation (NavGraph)
         // Not if calling from a document (to open the bottom sheet form)
         if (type == ProductType.PRODUCT.name.lowercase()) {
-            id?.let {
-                fetchProductFromLocalDb(it.toLong())
+            id?.let { productId ->
+                viewModelScope.launch {
+                    _isLoading.value = true // Démarre le chargement
+                    try {
+                        val productData = dataSource.fetchProduct(productId.toLong())
+                        productData?.let { product ->
+                            _productUiState.value = _productUiState.value.copy(
+                                id = product.id,
+                                name = product.name,
+                                description = product.description,
+                                defaultPriceWithoutTax = product.defaultPriceWithoutTax,
+                                defaultPriceWithTax = product.defaultPriceWithTax,
+                                taxRate = product.taxRate,
+                                unit = product.unit
+                            )
+                        }
+                    } finally {
+                        _isLoading.value =
+                            false // Termine le chargement, que le produit soit trouvé ou non
+                    }
+                }
+            } ?: run {
+                // Si pas d'ID (création de produit), pas de chargement initial depuis la DB nécessaire pour *ce* produit
+                _isLoading.value = false
             }
+        } else {
+            // Si ce n'est pas de type PRODUCT, on ne gère pas le chargement ici
+            // (ou alors il faudrait une logique spécifique pour DocumentProduct si nécessaire)
+            _isLoading.value = false
         }
     }
 
-    fun autoSaveDocumentProductInLocalDb() {
-        autoSaveJob?.cancel()
-        autoSaveJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _documentProductUiState
-                .debounce(300)
-                .collect {
-                    updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-                }
-        }
-    }
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
         super.onCleared()
-        GlobalScope.launch {
+        viewModelScope.launch {
             updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
         }
-    }
-
-    fun stopAutoSaveFormInputsInLocalDb() {
-        autoSaveJob?.cancel()
     }
 
     // Used when sliding the bottom form from documents
@@ -89,28 +109,28 @@ class ProductAddEditViewModel @Inject constructor(
     }
 
     // Used when sliding the bottom form from documents
-       // Choosing a product
-       fun setDocumentProductUiStateWithProduct(product: ProductState) {
-           _documentProductUiState.value = DocumentProductState(
-               id = null,
-               name = product.name,
-               description = product.description,
-               priceWithTax = product.priceWithTax,
-               taxRate = product.taxRate,
-               quantity = BigDecimal(1),
-               unit = product.unit,
-               productId = product.productId,
-           )
-       }
-
-
+    // Choosing a product
+    fun setDocumentProductUiStateWithProduct(product: ProductState) {
+        _documentProductUiState.value = DocumentProductState(
+            id = null,
+            name = product.name,
+            description = product.description,
+            priceWithoutTax = product.defaultPriceWithoutTax,
+            priceWithTax = product.defaultPriceWithTax,
+            taxRate = product.taxRate,
+            quantity = BigDecimal(1),
+            unit = product.unit,
+            productId = product.id,
+        )
+    }
 
     fun setProductUiState() {
         _productUiState.value = ProductState(
-            productId = null,
+            id = null,
             name = _documentProductUiState.value.name,
             description = _documentProductUiState.value.description,
-            priceWithTax = _documentProductUiState.value.priceWithTax,
+            defaultPriceWithoutTax = _documentProductUiState.value.priceWithoutTax,
+            defaultPriceWithTax = _documentProductUiState.value.priceWithTax,
             taxRate = _documentProductUiState.value.taxRate,
             unit = _documentProductUiState.value.unit
         )
@@ -122,29 +142,16 @@ class ProductAddEditViewModel @Inject constructor(
     }
 
     fun clearProductNameAndDescription() { // Used when sliding the form in documents
-        _productUiState.value =  _productUiState.value.copy(
+        _productUiState.value = _productUiState.value.copy(
             name = TextFieldValue(),
             description = TextFieldValue(),
-            priceWithTax = null
+            defaultPriceWithoutTax = null
         )
 
         _documentProductUiState.value = _documentProductUiState.value.copy(
             name = TextFieldValue(),
             description = TextFieldValue(),
-            priceWithTax = null
-        )
-    }
-
-    private fun fetchProductFromLocalDb(id: Long) {
-        val product = dataSource.fetchProduct(id)
-
-        _productUiState.value = _productUiState.value.copy(
-            productId = product?.productId,
-            name = product?.name ?: TextFieldValue(),
-            description = product?.description,
-            priceWithTax = product?.priceWithTax,
-            taxRate = product?.taxRate,
-            unit = product?.unit
+            priceWithoutTax = null
         )
     }
 
@@ -153,11 +160,21 @@ class ProductAddEditViewModel @Inject constructor(
     fun updateTaxRate(taxRate: BigDecimal?, type: ProductType) {
         if (type == ProductType.PRODUCT) {
             _productUiState.value = _productUiState.value.copy(
-                taxRate = taxRate
+                taxRate = taxRate,
+                defaultPriceWithTax = _productUiState.value.defaultPriceWithoutTax?.let { priceWithoutTax ->
+                    taxRate?.let { tax ->
+                        calculatePriceWithTax(priceWithoutTax, tax)
+                    } ?: BigDecimal(0)
+                }
             )
         } else {
             _documentProductUiState.value = _documentProductUiState.value.copy(
-                taxRate = taxRate
+                taxRate = taxRate,
+                priceWithTax = _documentProductUiState.value.priceWithoutTax?.let { priceWithoutTax ->
+                    taxRate?.let { tax ->
+                        calculatePriceWithTax(priceWithoutTax, tax)
+                    } ?: BigDecimal(0)
+                }
             )
         }
     }
@@ -200,20 +217,15 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateProductState(pageElement: ScreenElement, value: Any, productType: ProductType) {
+    fun updateProductState(pageElement: ScreenElement, value: Any, productType: ProductType, idStr: String? = null) {
         if (productType == ProductType.PRODUCT) {
-            _productUiState.value = updateProductUiState(_productUiState.value, pageElement, value)
+            _productUiState.value = updateProductUiState(_productUiState.value, pageElement, value, idStr)
         } else {
             _documentProductUiState.value =
                 updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
         }
     }
 
-/*    fun updateDocumentProductUiStateWithIncrementedPage() {
-        _documentProductUiState.value = _documentProductUiState.value.copy(
-            page = _documentProductUiState.value.page + 1
-        )
-    }*/
 
     fun updateCursor(pageElement: ScreenElement, productType: ProductType) {
         if (productType == ProductType.PRODUCT) {
@@ -241,7 +253,9 @@ class ProductAddEditViewModel @Inject constructor(
         val input = when (pageElement) {
             ScreenElement.DOCUMENT_PRODUCT_NAME -> documentProductUiState.value.name.text
             ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> documentProductUiState.value.quantity
-            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description?.text ?: ""
+            ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description?.text
+                ?: ""
+
             ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit?.text
             else -> ""
         }
@@ -257,7 +271,7 @@ class ProductAddEditViewModel @Inject constructor(
 
     fun validateInputs(type: ProductType): Boolean {
         val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
-        when(type) {
+        when (type) {
             ProductType.PRODUCT -> {
                 FormInputsValidator.validateName(_productUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.PRODUCT_NAME, it))
@@ -266,6 +280,7 @@ class ProductAddEditViewModel @Inject constructor(
                     errors = listOfErrors
                 )
             }
+
             ProductType.DOCUMENT_PRODUCT -> {
                 FormInputsValidator.validateName(_documentProductUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_PRODUCT_NAME, it))
@@ -282,39 +297,121 @@ class ProductAddEditViewModel @Inject constructor(
     fun clearValidateInputErrors(type: ProductType) {
         when (type) {
             ProductType.PRODUCT -> productUiState.value.errors.clear()
-            ProductType.DOCUMENT_PRODUCT  -> documentProductUiState.value.errors.clear()
+            ProductType.DOCUMENT_PRODUCT -> documentProductUiState.value.errors.clear()
         }
     }
+
+    // Ajouter ou supprimer des prix additionnels
+    fun addPrice() {
+        val currentProduct = _productUiState.value // Supposons que vous avez un _uiState
+        val newPrices =
+            currentProduct.additionalPrices?.plus(ProductPrice()) ?: listOf(ProductPrice()) // Ajoute un nouveau prix vide
+        _productUiState.value = _productUiState.value.copy(
+            additionalPrices = newPrices
+        )
+    }
+
+    fun deletePrice(priceId: String) {
+        val currentProduct = _productUiState.value
+        val updatedPrices = currentProduct.additionalPrices?.filterNot { it.idStr == priceId }
+        val finalPrices = if (updatedPrices.isNullOrEmpty()) null else updatedPrices
+        _productUiState.value = _productUiState.value.copy(
+            additionalPrices = finalPrices
+        )
+    }
+
 }
 
 private fun updateProductUiState(
-    product: ProductState,
+    currentProductState: ProductState,
     element: ScreenElement,
-    value: Any
+    value: Any,
+    priceId: String? = null
 ): ProductState {
-    var product = product
+    var updatedProductState = currentProductState
     when (element) {
         ScreenElement.PRODUCT_NAME -> {
-            product = product.copy(name = value as TextFieldValue)
+            updatedProductState = updatedProductState.copy(name = value as TextFieldValue)
         }
 
         ScreenElement.PRODUCT_DESCRIPTION -> {
-            product = product.copy(description = value as TextFieldValue)
+            updatedProductState = updatedProductState.copy(description = value as TextFieldValue)
         }
 
-        ScreenElement.PRODUCT_FINAL_PRICE -> {
-            product =
-                product.copy(priceWithTax = (value as String).replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0))
+        ScreenElement.PRODUCT_DEFAULT_PRICE_WITHOUT_TAX -> {
+            val priceWithoutTax = value as String
+            updatedProductState = if (priceWithoutTax.isNotEmpty()) {
+                updatedProductState.copy(
+                    defaultPriceWithoutTax = priceWithoutTax.replace(",", ".")
+                        .toBigDecimalOrNull()
+                        ?: BigDecimal(0)
+                )
+            } else updatedProductState.copy(
+                defaultPriceWithoutTax = null
+            )
+        }
+
+        ScreenElement.PRODUCT_DEFAULT_PRICE_WITH_TAX -> {
+            val priceWithTax = value as String
+            updatedProductState = if (priceWithTax.isNotEmpty()) {
+                updatedProductState.copy(
+                    defaultPriceWithTax = priceWithTax.replace(",", ".")
+                        .toBigDecimalOrNull()
+                        ?: BigDecimal(0)
+                )
+            } else updatedProductState.copy(
+                defaultPriceWithTax = null
+            )
+        }
+
+        ScreenElement.PRODUCT_OTHER_PRICE_WITHOUT_TAX -> {
+            if (priceId != null) {
+                val priceWithoutTaxStr = value as String
+                val newPrices = updatedProductState.additionalPrices?.map { price ->
+                    if (price.idStr == priceId) {
+                        price.copy(
+                            priceWithoutTax = if (priceWithoutTaxStr.isNotEmpty()) {
+                                priceWithoutTaxStr.replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0)
+                            } else {
+                                null
+                            }
+                        )
+                    } else {
+                        price
+                    }
+                }
+                updatedProductState = updatedProductState.copy(additionalPrices = newPrices)
+            }
+        }
+        ScreenElement.PRODUCT_OTHER_PRICE_WITH_TAX -> {
+            if (priceId != null) {
+                val priceWithTaxStr = value as String
+                val newPrices = updatedProductState.additionalPrices?.map { price ->
+                    if (price.idStr == priceId) {
+                        price.copy(
+                            priceWithTax = if (priceWithTaxStr.isNotEmpty()) {
+                                priceWithTaxStr.replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0)
+                            } else {
+                                null
+                            }
+                        )
+                    } else {
+                        price
+                    }
+                }
+                updatedProductState = updatedProductState.copy(additionalPrices = newPrices)
+            }
         }
 
         ScreenElement.PRODUCT_UNIT -> {
-            product = product.copy(unit = value as TextFieldValue)
+            updatedProductState = updatedProductState.copy(unit = value as TextFieldValue)
         }
 
         else -> null
     }
-    return product
+    return updatedProductState
 }
+
 
 
 enum class ProductType {
@@ -343,9 +440,29 @@ private fun updateDocumentProductUiState(
             documentProduct = documentProduct.copy(description = value as TextFieldValue)
         }
 
-        ScreenElement.DOCUMENT_PRODUCT_FINAL_PRICE -> {
-            documentProduct = documentProduct.copy(
-                priceWithTax = (value as String).replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0)
+        ScreenElement.DOCUMENT_PRODUCT_PRICE_WITHOUT_TAX -> {
+            val priceWithoutTax = value as String
+            documentProduct = if (priceWithoutTax.isNotEmpty()) {
+                documentProduct.copy(
+                    priceWithoutTax = priceWithoutTax.replace(",", ".")
+                        .toBigDecimalOrNull()
+                        ?: BigDecimal(0)
+                )
+            } else documentProduct.copy(
+                priceWithoutTax = null
+            )
+        }
+
+        ScreenElement.DOCUMENT_PRODUCT_PRICE_WITH_TAX -> {
+            val priceWithTax = value as String
+            documentProduct = if (priceWithTax.isNotEmpty()) {
+                documentProduct.copy(
+                    priceWithTax = priceWithTax.replace(",", ".")
+                        .toBigDecimalOrNull()
+                        ?: BigDecimal(0)
+                )
+            } else documentProduct.copy(
+                priceWithTax = null
             )
         }
 

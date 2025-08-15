@@ -34,7 +34,7 @@ fun NavGraphBuilder.invoiceAddEdit(
         )
     ) {
         val invoiceViewModel: InvoiceAddEditViewModel = hiltViewModel()
-        val uiState by invoiceViewModel.documentUiState.collectAsStateWithLifecycle()
+        val document by invoiceViewModel.documentUiState.collectAsStateWithLifecycle()
 
         val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = hiltViewModel()
         val clientListUiState by clientOrIssuerListViewModel.clientsUiState
@@ -46,21 +46,22 @@ fun NavGraphBuilder.invoiceAddEdit(
         val documentClientUiState by clientOrIssuerAddEditViewModel.documentClientUiState.collectAsState()
         val documentIssuerUiState by clientOrIssuerAddEditViewModel.documentIssuerUiState.collectAsState()
 
+        // all available products
         val productListViewModel: ProductListViewModel = hiltViewModel()
         val productListUiState by productListViewModel.productsUiState
             .collectAsStateWithLifecycle()
 
+        // when adding a product to the document
         val productAddEditViewModel: ProductAddEditViewModel = hiltViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
 
         var showDocumentForm by remember { mutableStateOf(false) }
-        var moveDocumentPagerToLastPage by remember { mutableStateOf(false) }
 
         // Get result from "Add new" screen, to know if it's
         // a client or issuer that has been added
         DocumentAddEdit(
             navController = navController,
-            document = uiState,
+            document = document,
             onClickBack = onClickBack,
             clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
             issuerList = issuerListUiState.clientsOrIssuerList.toMutableList(),
@@ -82,7 +83,6 @@ fun NavGraphBuilder.invoiceAddEdit(
                 productAddEditViewModel.clearProductNameAndDescription()
             },
             onClickEditDocumentProduct = {// Edit a document product
-                productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
             onClickDeleteDocumentProduct = {
@@ -220,7 +220,6 @@ a                } else {
                     }
 
                     DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
-                        moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             documentProduct.id =
                                 invoiceViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
@@ -228,17 +227,12 @@ a                } else {
                                 )
                             invoiceViewModel.saveDocumentProductInUiState(documentProduct)
 
-                            // And if a document product is overflowing the page, and page is changed
-                            // we want this to be saved in db
-                            productAddEditViewModel.autoSaveDocumentProductInLocalDb()
-
                             //  productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
                         }
                     }
 
                     DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
-                        moveDocumentPagerToLastPage = true
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                             productAddEditViewModel.setProductUiState()
                             productAddEditViewModel.saveProductInLocalDb()
@@ -248,9 +242,6 @@ a                } else {
                                 )
                             invoiceViewModel.saveDocumentProductInUiState(documentProduct)
 
-                            // And if a document product is overflowing the page, and page is changed
-                            // we want this to be saved in db
-                            productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                             // productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
                         }
@@ -258,7 +249,6 @@ a                } else {
 
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                            productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
                             invoiceViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_PRODUCT,
                                 documentProduct
@@ -284,7 +274,8 @@ a                } else {
             },
             onClickDeleteAddress = {
                 clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
-            }
+            },
+            onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb
         )
     }
 }

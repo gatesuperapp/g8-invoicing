@@ -20,7 +20,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Composable
-fun DocumentBasicTemplatePrices(
+fun DocumentBasicTemplateTotalPrices(
     uiState: DocumentState,
     footerArray: List<String>,
 ) {
@@ -64,14 +64,14 @@ fun DocumentBasicTemplatePrices(
                 }
 
                 taxesAmount.forEach { tax ->
-                    uiState.documentPrices?.totalAmountsOfEachTax?.firstOrNull {
-                        it.first.stripTrailingZeros() == tax.stripTrailingZeros()
+                    uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
+                        tax.stripTrailingZeros().toString() in it.first.stripTrailingZeros().toString()
                     }?.let {
                         Text(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(id = R.string.document_tax) + " " + it.first.setScale(0, RoundingMode.HALF_UP).toString().replace(".", ",") + "% : "
+                            text = stringResource(id = R.string.document_tax) + " " + it.first.toString().replace(".", ",") + "% : "
                         )
                     }
                 }
@@ -86,17 +86,17 @@ fun DocumentBasicTemplatePrices(
         Column(
             horizontalAlignment = Alignment.End
         ) {
-            // Will display the values as follows:
-            // Total HT : 12€
-            // TVA 20% : 1€
-             // TVA 5% : 1€
-            // Total TTC : 14€
+            // Will display the values:
+            //  12€
+            //  1€
+             // 1€
+            //  14€
             if (footerArray.any { it == PricesRowName.TOTAL_WITHOUT_TAX.name }) {
                 Text(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentPrices?.totalPriceWithoutTax?.toString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toString()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
@@ -111,8 +111,8 @@ fun DocumentBasicTemplatePrices(
                 }
 
                 taxesAmount.forEach { tax ->
-                    uiState.documentPrices?.totalAmountsOfEachTax?.firstOrNull {
-                        it.first.stripTrailingZeros() == tax.stripTrailingZeros()
+                    uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
+                        tax.stripTrailingZeros().toString() in it.first.stripTrailingZeros().toString()
                     }?.let {
                         Text(
                             modifier = Modifier
@@ -126,7 +126,7 @@ fun DocumentBasicTemplatePrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = (uiState.documentPrices?.totalPriceWithTax?.toString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toString()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }

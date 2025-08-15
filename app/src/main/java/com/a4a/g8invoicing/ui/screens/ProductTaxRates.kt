@@ -52,7 +52,7 @@ fun ProductTaxRates(
                 .verticalScroll(scrollState)
                 .imePadding()
                 .padding(
-                    top = 80.dp,
+                    top = 110.dp,
                 )
         ) {
             ProductTaxRatesContent(taxRates, currentTaxRate, onSelectTaxRate)
@@ -70,7 +70,8 @@ private fun TaxRatesTopBar(
     TopBar(
         title = R.string.tax_rate_screen_title,
         navController = navController,
-        onClickBackArrow = onClickBackArrow
+        onClickBackArrow = onClickBackArrow,
+        isCancelCtaDisplayed = false
     )
 }
 

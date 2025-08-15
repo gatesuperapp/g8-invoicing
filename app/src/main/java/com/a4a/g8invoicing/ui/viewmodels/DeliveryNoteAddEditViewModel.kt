@@ -15,7 +15,6 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,8 +39,8 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     // Getting the argument in "DeliveryNoteAddEdit?itemId={itemId}" with savedStateHandle
     private var id: String? = savedStateHandle["itemId"]
 
-    private val _deliveryNoteUiState = MutableStateFlow(DeliveryNoteState())
-    val deliveryNoteUiState: StateFlow<DeliveryNoteState> = _deliveryNoteUiState
+    private val _documentUiState = MutableStateFlow(DeliveryNoteState())
+    val deliveryNoteUiState: StateFlow<DeliveryNoteState> = _documentUiState
 
     init {
         autoSaveInLocalDb()
@@ -62,7 +61,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         autoSaveJob?.cancel()
         autoSaveJob = viewModelScope.launch {
             @OptIn(FlowPreview::class)
-            _deliveryNoteUiState.debounce(300)
+            _documentUiState.debounce(300)
                 .collect { updateDeliveryNoteInLocalDb() }
         }
     }
@@ -72,7 +71,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 deliveryNoteDataSource.fetchDeliveryNote(id)?.let {
-                    _deliveryNoteUiState.value = it
+                    _documentUiState.value = it
                 }
             } catch (e: Exception) {
                 //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
@@ -94,8 +93,8 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
     }
 
     fun updateUiState(screenElement: ScreenElement, value: Any) {
-        _deliveryNoteUiState.value =
-            updateDeliveryNoteUiState(_deliveryNoteUiState.value, screenElement, value)
+        _documentUiState.value =
+            updateDeliveryNoteUiState(_documentUiState.value, screenElement, value)
     }
 
     private suspend fun updateDeliveryNoteInLocalDb() {
@@ -111,7 +110,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        GlobalScope.launch {
+        viewModelScope.launch {
             updateDeliveryNoteInLocalDb()
         }
     }
@@ -123,7 +122,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
                 deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    documentId = _deliveryNoteUiState.value.documentId?.toLong()
+                    documentId = _documentUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
                 //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
@@ -137,7 +136,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                _deliveryNoteUiState.value.documentId?.let {
+                _documentUiState.value.documentId?.let {
                     deliveryNoteDataSource.deleteDocumentProduct(
                         it.toLong(),
                         documentProductId.toLong()
@@ -165,9 +164,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     fun removeDocumentProductFromUiState(documentProductId: Int) {
         try {
-            val list = _deliveryNoteUiState.value.documentProducts
+            val list = _documentUiState.value.documentProducts
                 ?.filterNot { it.id == documentProductId }?.toMutableList()
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentProducts = list
             )
 
@@ -185,9 +184,9 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
              }*/
 
             // Recalculate the prices
-            _deliveryNoteUiState.value.documentProducts?.let {
-                _deliveryNoteUiState.value =
-                    _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+            _documentUiState.value.documentProducts?.let {
+                _documentUiState.value =
+                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
 
 
@@ -198,7 +197,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     fun saveDocumentProductInUiState(documentProduct: DocumentProductState) {
         try {
-            val list = _deliveryNoteUiState.value.documentProducts
+            val list = _documentUiState.value.documentProducts
             var maxId = 1
 
             if (!list.isNullOrEmpty()) {
@@ -211,13 +210,13 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
             val newList: List<DocumentProductState> = (list ?: emptyList()) + documentProduct
 
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentProducts = newList
             )
             // Recalculate the prices
-            _deliveryNoteUiState.value.documentProducts?.let {
-                _deliveryNoteUiState.value =
-                    _deliveryNoteUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+            _documentUiState.value.documentProducts?.let {
+                _documentUiState.value =
+                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
         } catch (e: Exception) {
             //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
@@ -230,7 +229,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             try {
                 deliveryNoteDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
-                    documentId = _deliveryNoteUiState.value.documentId?.toLong()
+                    documentId = _documentUiState.value.documentId?.toLong()
                 )
 
             } catch (e: Exception) {
@@ -243,7 +242,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                _deliveryNoteUiState.value.documentId?.let {
+                _documentUiState.value.documentId?.let {
                     deliveryNoteDataSource.deleteDocumentClientOrIssuer(
                         it.toLong(),
                         type
@@ -251,7 +250,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 }
 
                 // useless??
-                _deliveryNoteUiState.value.documentId?.let {
+                _documentUiState.value.documentId?.let {
                     fetchDeliveryNoteFromLocalDb(it.toLong())
                 }
 
@@ -263,20 +262,20 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
 
     fun removeDocumentClientOrIssuerFromUiState(type: ClientOrIssuerType) {
         if (type == ClientOrIssuerType.DOCUMENT_CLIENT)
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentClient = null
             )
-        else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+        else _documentUiState.value = _documentUiState.value.copy(
             documentIssuer = null
         )
     }
 
     fun saveDocumentClientOrIssuerInUiState(documentClientOrIssuer: ClientOrIssuerState) {
         if (documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT)
-            _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+            _documentUiState.value = _documentUiState.value.copy(
                 documentClient = documentClientOrIssuer
             )
-        else _deliveryNoteUiState.value = _deliveryNoteUiState.value.copy(
+        else _documentUiState.value = _documentUiState.value.copy(
             documentIssuer = documentClientOrIssuer
         )
     }
@@ -288,12 +287,22 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             else -> null
         }
 
-        _deliveryNoteUiState.value = updateDeliveryNoteUiState(
-            _deliveryNoteUiState.value, pageElement, TextFieldValue(
+        _documentUiState.value = updateDeliveryNoteUiState(
+            _documentUiState.value, pageElement, TextFieldValue(
                 text = text ?: "",
                 selection = TextRange(text?.length ?: 0)
             )
         )
+    }
+
+    fun updateProductOrderInUiState(updatedProducts: List<DocumentProductState>) {
+        try {
+            _documentUiState.value = _documentUiState.value.copy(
+                documentProducts = updatedProducts.sortedBy { it.sortOrder } // S'assurer qu'elle est triée
+            )
+        } catch (e: Exception) {
+            // Log.e("InvoiceViewModel", "Failed to update product order in UI state", e)
+        }
     }
 
 }
@@ -335,7 +344,7 @@ fun updateDeliveryNoteUiState(
                 doc
             )?.let {
                 doc = doc.copy(documentProducts = it)
-                doc = doc.copy(documentPrices = calculateDocumentPrices(it))
+                doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
         }
 

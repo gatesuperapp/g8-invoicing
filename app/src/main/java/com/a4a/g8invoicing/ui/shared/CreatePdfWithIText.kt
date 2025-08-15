@@ -12,11 +12,10 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.PricesRowName
-import com.a4a.g8invoicing.ui.screens.shared.calculatePriceWithoutTax
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentPrices
+import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -157,7 +156,7 @@ fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
         }
 
     }
-    inputDocument.documentPrices?.let {
+    inputDocument.documentTotalPrices?.let {
         document.add(
             createPrices(
                 fontBold,
@@ -640,7 +639,7 @@ private fun addProductsToTable(
     productsTable: Table,
     fontRegular: PdfFont,
     fontBold: PdfFont,
-    displayUnitColumn: Boolean
+    displayUnitColumn: Boolean,
 ) {
     val spacingBetweenTextLines = 10F
     val spacingBetweenNameAndDescription = 4F
@@ -652,7 +651,7 @@ private fun addProductsToTable(
         it.description?.let {
             itemDescription = Paragraph(
                 Text(it.text)
-                    .setItalic()
+                    .simulateItalic()
             ).setFixedLeading(spacingBetweenTextLines)
         }
         val nameAndDescription: List<Paragraph?> = listOf(itemName, spacing, itemDescription)
@@ -679,20 +678,17 @@ private fun addProductsToTable(
             it.toString() + "%"
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
-        var priceWithoutTax = it.taxRate?.let { taxRate ->
-            it.priceWithTax?.let { priceWithTax ->
-                calculatePriceWithoutTax(priceWithTax, taxRate)
-            }
-        } ?: it.priceWithTax ?: BigDecimal(0)
 
         productsTable.addCustomCell(
-            text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
+            text = it.priceWithoutTax?.setScale(2, RoundingMode.HALF_UP)
                 .toString().replace(".", ",") + Strings.get(R.string.currency),
             fontBold = fontBold,
             fontRegular = fontRegular
         )
         productsTable.addCustomCell(
-            text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
+            text = it.priceWithoutTax?.let { price ->
+                price * it.quantity
+            }?.setScale(2, RoundingMode.HALF_UP)
                 .toString().replace(".", ",") + Strings.get(R.string.currency),
             fontBold = fontBold,
             fontRegular = fontRegular
@@ -700,7 +696,11 @@ private fun addProductsToTable(
     }
 }
 
-private fun createPrices(font: PdfFont, documentPrices: DocumentPrices, fontSize: Float): Table {
+private fun createPrices(
+    font: PdfFont,
+    documentPrices: DocumentTotalPrices,
+    fontSize: Float,
+): Table {
     val pricesArray = listOf(
         PriceRow(
             rowDescription = "TOTAL_WITHOUT_TAX"

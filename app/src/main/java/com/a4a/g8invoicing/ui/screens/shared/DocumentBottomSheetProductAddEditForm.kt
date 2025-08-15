@@ -4,21 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -28,20 +24,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.DecimalInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import java.math.BigDecimal
-import java.math.RoundingMode
 
-// It's a bit of a duplicate of ProductAddEditForm (the quantity has been added & there's some styling diff),
-// but needed as in the documents we must use "DocumentProductState" instead of "ProductState"
-// so the product is not deleted from the doc when deleted from the product list.
+// It's a bit different from ProductAddEditForm: user can choose the quantity; there's some styling diff;
+// and it's not possible to add several prices from here.
 @Composable
 fun DocumentBottomSheetProductAddEditForm(
     documentProduct: DocumentProductState,
@@ -51,6 +44,20 @@ fun DocumentBottomSheetProductAddEditForm(
     showFullScreenText: (ScreenElement) -> Unit
 ) {
     val localFocusManager = LocalFocusManager.current
+
+    // Hoist stringResource calls to the composable scope
+    val productNameLabel = stringResource(id = R.string.product_name)
+    val productNamePlaceholder = stringResource(id = R.string.product_name_input)
+    val quantityLabel = stringResource(id = R.string.document_product_quantity)
+    val quantityPlaceholder = stringResource(id = R.string.document_product_quantity_input)
+    val descriptionLabel = stringResource(id = R.string.product_description)
+    val descriptionPlaceholder = stringResource(id = R.string.product_description_input)
+    val unitLabel = stringResource(id = R.string.product_unit)
+    val unitPlaceholder = stringResource(id = R.string.product_unit_input)
+    val taxLabel = stringResource(id = R.string.product_tax)
+    val priceLabel = stringResource(id = R.string.product_price)
+    val pricePlaceholder = stringResource(id = R.string.product_price_input)
+
 
     Column(
         modifier = Modifier
@@ -77,104 +84,104 @@ fun DocumentBottomSheetProductAddEditForm(
             verticalArrangement = Arrangement.spacedBy(10.dp)
 
         ) {
-            var priceWithoutTax: BigDecimal? = null
 
-            documentProduct.let { productState ->
-                productState.taxRate?.let { taxRate ->
-                    productState.priceWithTax?.let { priceWithTax ->
-                        priceWithoutTax = calculatePriceWithoutTax(priceWithTax, taxRate)
-                    }
-                }
-            }
             // Create the list with all fields
-            val inputList = listOfNotNull(
-                FormInput(
-                    label = stringResource(id = R.string.product_name),
-                    inputType = TextInput(
-                        text = documentProduct.name,
-                        placeholder = stringResource(id = R.string.product_name_input),
-                        onValueChange = {
-                            bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_NAME, it)
-                        },
-                        displayFullScreenIcon = true
+            val inputList = remember(
+                documentProduct.name,
+                documentProduct.quantity,
+                documentProduct.description,
+                documentProduct.unit,
+                documentProduct.taxRate,
+                documentProduct.priceWithoutTax,
+                documentProduct.priceWithTax
+            ) {
+                listOfNotNull(
+                    FormInput(
+                        label = productNameLabel,
+                        inputType = TextInput(
+                            text = documentProduct.name,
+                            placeholder = productNamePlaceholder,
+                            onValueChange = {
+                                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_NAME, it)
+                            },
+                            displayFullScreenIcon = true
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_NAME
                     ),
-                    pageElement = ScreenElement.DOCUMENT_PRODUCT_NAME
-                ),
-                FormInput(
-                    label = stringResource(id = R.string.document_product_quantity),
-                    inputType = DecimalInput(
-                        text = documentProduct.quantity
-                            .toString(),
-                        placeholder = stringResource(id = R.string.document_product_quantity_input),
-                        onValueChange = {
-                            bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_QUANTITY, it)
-                        },
-                        keyboardType = KeyboardType.Decimal
+                    FormInput(
+                        label = quantityLabel,
+                        inputType = DecimalInput(
+                            text = documentProduct.quantity
+                                .toString(),
+                            placeholder = quantityPlaceholder,
+                            onValueChange = {
+                                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_QUANTITY, it)
+                            },
+                            keyboardType = KeyboardType.Decimal
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_QUANTITY
                     ),
-                    pageElement = ScreenElement.DOCUMENT_PRODUCT_QUANTITY
-                ),
-                FormInput(
-                    label = stringResource(id = R.string.product_description),
-                    inputType = TextInput(
-                        text = documentProduct.description ?: TextFieldValue(""),
-                        placeholder = stringResource(id = R.string.product_description_input),
-                        onValueChange = {
-                            bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION, it)
-                        },
-                        displayFullScreenIcon = true
+                    FormInput(
+                        label = descriptionLabel,
+                        inputType = TextInput(
+                            text = documentProduct.description ?: TextFieldValue(""),
+                            placeholder = descriptionPlaceholder,
+                            onValueChange = {
+                                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION, it)
+                            },
+                            displayFullScreenIcon = true
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
                     ),
-                    pageElement = ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
-                ),
-                FormInput(
-                    label = stringResource(
-                        id = R.string.product_price
-                    ),
-                    inputType = DecimalInput(
-                        text = (documentProduct.priceWithTax?.setScale(2, RoundingMode.HALF_UP)
-                            ?: "")
-                            .toString(),
-                        taxRate = documentProduct.taxRate,
-                        placeholder = stringResource(id = R.string.product_price_input),
-                        onValueChange = {
-                            bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_FINAL_PRICE, it)
-                        },
-                        keyboardType = KeyboardType.Decimal
-                    ),
-                    inputType2 = DecimalInput(
-                        text = (priceWithoutTax?.setScale(2, RoundingMode.HALF_UP) ?: "")
-                            .toString(),
-                        placeholder = documentProduct.taxRate?.let {
-                            (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
-                        } ?: "",
-                        keyboardType = KeyboardType.Decimal
-                    ),
-                    pageElement = ScreenElement.DOCUMENT_PRODUCT_PRICE
-                ),
-                FormInput(
-                    label = stringResource(id = R.string.product_tax),
-                    inputType = ForwardElement(
-                        text = documentProduct.taxRate.let { taxRate ->
-                            if (taxRate == null) {
-                                "-"
-                            } else {
-                                "$taxRate%"
+                    FormInput(
+                        label = unitLabel,
+                        inputType = TextInput(
+                            text = documentProduct.unit ?: TextFieldValue(""),
+                            placeholder = unitPlaceholder,
+                            onValueChange = {
+                                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT, it)
                             }
-                        },
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT
                     ),
-                    pageElement = ScreenElement.DOCUMENT_PRODUCT_TAX_RATE
-                ),
-                FormInput(
-                    label = stringResource(id = R.string.product_unit),
-                    inputType = TextInput(
-                        text = documentProduct.unit ?: TextFieldValue(""),
-                        placeholder = stringResource(id = R.string.product_unit_input),
-                        onValueChange = {
-                            bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT, it)
-                        }
+                    FormInput(
+                        label = taxLabel,
+                        inputType = ForwardElement(
+                            text = documentProduct.taxRate.let { taxRate ->
+                                if (taxRate == null) {
+                                    "-"
+                                } else {
+                                    "$taxRate%"
+                                }
+                            },
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_TAX_RATE
                     ),
-                    pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT
-                ),
-            )
+                    FormInput(
+                        label = priceLabel,
+                        inputType = DecimalInput(
+                            text = (documentProduct.priceWithoutTax ?: "").toString(),
+                            taxRate = documentProduct.taxRate,
+                            placeholder = pricePlaceholder,
+                            keyboardType = KeyboardType.Decimal,
+                            onValueChange = {
+                                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_PRICE_WITHOUT_TAX, it)
+                            }
+                        ),
+                        inputType2 = DecimalInput(
+                            text = (documentProduct.priceWithTax ?: "").toString(),
+                            placeholder = documentProduct.taxRate?.let {
+                                (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
+                            } ?: "",
+                            keyboardType = KeyboardType.Decimal,
+                            onValueChange = {
+                                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_PRICE_WITH_TAX, it)
+                            }
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_PRICE_WITHOUT_TAX
+                    ),
+                )
+            }
 
             // Create the UI with list items
             FormUI(
@@ -190,9 +197,4 @@ fun DocumentBottomSheetProductAddEditForm(
         }
     }
 }
-
-fun calculatePriceWithoutTax(priceWithTax: BigDecimal, taxRate: BigDecimal): BigDecimal {
-    return BigDecimal(priceWithTax.toDouble() / (1.0 + taxRate.toDouble() / 100.0))
-}
-
 

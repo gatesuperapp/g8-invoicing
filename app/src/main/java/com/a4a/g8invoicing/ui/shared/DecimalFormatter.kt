@@ -18,7 +18,7 @@ class DecimalFormatter(
     fun cleanup(input: String): String {
 
         if (input.matches("\\D".toRegex())) return ""
-        if (input.matches("0+".toRegex())) return "0"
+        if (input.isNotEmpty() && input.matches("0+".toRegex())) return "0"
 
         val sb = StringBuilder()
 

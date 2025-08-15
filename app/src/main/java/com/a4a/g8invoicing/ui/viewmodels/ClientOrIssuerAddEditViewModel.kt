@@ -166,10 +166,16 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
 
 
     private fun fetchFromLocalDb(id: Long) {
-        val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
+        viewModelScope.launch {
+            try {
+                val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
 
-        clientOrIssuer?.let {
-            _clientUiState.value = it
+                clientOrIssuer?.let {
+                    _clientUiState.value = it
+                }
+            } catch (e: Exception) {
+                println("Fetching client/issuer failed with exception: ${e.localizedMessage}")
+            }
         }
     }
 
@@ -276,13 +282,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 )
             }
 
-            ClientOrIssuerType.ISSUER -> {
-                val newAddresses = _issuerUiState.value.addresses?.dropLast(1)
-                _issuerUiState.value = _issuerUiState.value.copy(
-                    addresses = newAddresses
-                )
-            }
-
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
                 var newAddresses: List<AddressState>? =
                     _documentClientUiState.value.addresses?.dropLast(1)
@@ -299,12 +298,7 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 )
             }
 
-            ClientOrIssuerType.DOCUMENT_ISSUER -> {
-                val newAddresses = _documentIssuerUiState.value.addresses?.dropLast(1)
-                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
-                    addresses = newAddresses
-                )
-            }
+            else -> {}
         }
     }
 

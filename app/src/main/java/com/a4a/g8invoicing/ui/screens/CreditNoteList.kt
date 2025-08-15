@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.CreditNoteState
@@ -50,15 +51,17 @@ fun CreditNoteList(
     val checkIfAutoSaveDialogMustBeOpened = remember { mutableStateOf(false) }
 
     // Add background when bottom menu expanded
-    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-    val backgroundColor = remember { mutableStateOf(transparent) }
+    val isDimActive = remember { mutableStateOf(false) }
 
-    Scaffold(
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = R.string.appbar_credit_notes,
                 navController = navController,
-                onClickBackArrow = onClickBack
+                onClickBackArrow = onClickBack,
+                isCancelCtaDisplayed = false
             )
         },
         bottomBar = {
@@ -66,13 +69,11 @@ fun CreditNoteList(
                 navController = navController,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    isDimActive.value = !isDimActive.value
                     openAlertDialog.value = true
                 },
                 onClickDuplicate = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    isDimActive.value = !isDimActive.value
                     onClickDuplicate(selectedItems.toList())
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
@@ -86,8 +87,7 @@ fun CreditNoteList(
                 onClickNew = { onClickNew() },
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    isDimActive.value = !isDimActive.value
                 }
             )
         }
@@ -122,12 +122,6 @@ fun CreditNoteList(
                     },
                     keyToResetCheckboxes = keyToResetCheckboxes.value
                 )
-                Column(
-                    // apply darker background when bottom menu is expanded
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(backgroundColor.value),
-                ) {}
             }
         }
 
@@ -136,15 +130,14 @@ fun CreditNoteList(
                 AlertDialogDeleteDocument(
                     onDismissRequest = {
                         openAlertDialog.value = false
-                        backgroundColor.value =
-                            changeBackgroundWithVerticalGradient(backgroundColor.value)},
+                        isDimActive.value = !isDimActive.value
+                    },
                     onConfirmation = {
                         openAlertDialog.value = false
                         onClickDelete(selectedItems.toList())
                         selectedItems.clear()
                         selectedMode.value = false
-                        backgroundColor.value =
-                            changeBackgroundWithVerticalGradient(backgroundColor.value)
+                        isDimActive.value = !isDimActive.value
                     }
                 )
             }

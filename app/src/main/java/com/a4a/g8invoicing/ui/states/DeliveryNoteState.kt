@@ -1,16 +1,10 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.shared.DocumentType
-import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 
 // This Client is created to manipulate client data,
@@ -31,7 +25,7 @@ data class DeliveryNoteState(
     override var documentIssuer: ClientOrIssuerState? = null,
     override var documentClient: ClientOrIssuerState? = null,
     override var documentProducts: List<DocumentProductState>? = null,
-    override var documentPrices: DocumentPrices? = null,
+    override var documentTotalPrices: DocumentTotalPrices? = null,
     override var currency: TextFieldValue = TextFieldValue(),
     override var footerText: TextFieldValue = TextFieldValue(),
     override var createdDate: String? = null,

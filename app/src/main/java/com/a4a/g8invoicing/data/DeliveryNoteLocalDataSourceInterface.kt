@@ -33,5 +33,6 @@ interface DeliveryNoteLocalDataSourceInterface {
     suspend fun duplicate(documents: List<DeliveryNoteState>)
     suspend fun update(document: DeliveryNoteState)
     suspend fun deleteDeliveryNotes(documents: List<DeliveryNoteState>)
-    fun addDocumentProduct(documentId: Long, documentProductId: Long)
+    suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+
 }

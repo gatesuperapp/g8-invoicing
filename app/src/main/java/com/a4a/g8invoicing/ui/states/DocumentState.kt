@@ -21,13 +21,13 @@ abstract class DocumentState {
     abstract var documentIssuer: ClientOrIssuerState?
     abstract var documentClient: ClientOrIssuerState?
     abstract var documentProducts: List<DocumentProductState>?
-    abstract var documentPrices: DocumentPrices?
+    abstract var documentTotalPrices: DocumentTotalPrices?
     abstract var currency: TextFieldValue
     abstract var footerText: TextFieldValue
     abstract var createdDate: String?
 }
 
-data class DocumentPrices(
+data class DocumentTotalPrices(
     var totalPriceWithoutTax: BigDecimal? = null,
     var totalAmountsOfEachTax: MutableList<Pair<BigDecimal, BigDecimal>>? = null, //ex:  [(20.0, 7.2), (10.0, 2.4)]
     var totalPriceWithTax: BigDecimal? = null,

@@ -1,4 +1,4 @@
-package com.ninetyninepercent.funfactu.icons
+package com.a4a.g8invoicing.ui.shared.icons
 
 import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.materialPath

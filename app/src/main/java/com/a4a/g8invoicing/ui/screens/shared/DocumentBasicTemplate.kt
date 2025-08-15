@@ -33,7 +33,6 @@ fun DocumentBasicTemplate(
     onClickElement: (ScreenElement) -> Unit,
     onClickRestOfThePage: () -> Unit,
 ) {
-
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
     val productArray = uiState.documentProducts

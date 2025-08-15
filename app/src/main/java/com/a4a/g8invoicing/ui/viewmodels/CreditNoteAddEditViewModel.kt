@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -107,7 +105,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        GlobalScope.launch {
+        viewModelScope.launch {
             updateCreditNoteInLocalDb()
         }
     }
@@ -156,7 +154,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
-                    _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
 
 
@@ -186,7 +184,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
-                    _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
         } catch (e: Exception) {
             //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
@@ -269,6 +267,16 @@ class CreditNoteAddEditViewModel @Inject constructor(
             )
         )
     }
+
+    fun updateProductOrderInUiState(updatedProducts: List<DocumentProductState>) {
+        try {
+            _documentUiState.value = _documentUiState.value.copy(
+                documentProducts = updatedProducts.sortedBy { it.sortOrder } // S'assurer qu'elle est triée
+            )
+        } catch (e: Exception) {
+            // Log.e("InvoiceViewModel", "Failed to update product order in UI state", e)
+        }
+    }
 }
 
 fun updateCreditNoteUiState(
@@ -308,7 +316,7 @@ fun updateCreditNoteUiState(
                 doc
             )?.let {
                 doc = doc.copy(documentProducts = it)
-                doc = doc.copy(documentPrices = calculateDocumentPrices(it))
+                doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
         }
 

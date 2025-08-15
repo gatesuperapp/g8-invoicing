@@ -1,9 +1,12 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -13,9 +16,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.sortedBy
 
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
+    private val application: Application, // For context
     private val productDataSource: ProductLocalDataSourceInterface,
 ) : ViewModel() {
 
@@ -52,7 +57,7 @@ class ProductListViewModel @Inject constructor(
         deleteJob = viewModelScope.launch {
             try {
                 selectedProducts.forEach { selectedProduct ->
-                    selectedProduct.productId?.let {
+                    selectedProduct.id?.let {
                         productDataSource.deleteProduct(it.toLong())
                     }
                 }
@@ -63,13 +68,17 @@ class ProductListViewModel @Inject constructor(
     }
 
     fun duplicateProducts(selectedProducts: List<ProductState>) {
+        // Get the string from resources
+        val suffix = application.getString(R.string.product_duplicate_suffix) // Or context.getString(...)
+
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {
             try {
-                productDataSource.duplicateProducts(selectedProducts)
+                productDataSource.duplicateProducts(selectedProducts, suffix)
             } catch (e: Exception) {
                 //println("Duplicating products failed with exception: ${e.localizedMessage}")
             }
         }
     }
+
 }

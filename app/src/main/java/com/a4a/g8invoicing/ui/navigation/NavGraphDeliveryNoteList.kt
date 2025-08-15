@@ -1,5 +1,9 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,7 +21,9 @@ fun NavGraphBuilder.deliveryNoteList(
     onClickNew: () -> Unit,
     onClickBack: () -> Unit,
 ) {
-    composable(route = Screen.DeliveryNoteList.name) {
+    composable(
+        route = Screen.DeliveryNoteList.name,
+    ) {
         val viewModel: DeliveryNoteListViewModel = hiltViewModel()
         val deliveryNotesUiState by viewModel.deliveryNotesUiState
             .collectAsStateWithLifecycle()

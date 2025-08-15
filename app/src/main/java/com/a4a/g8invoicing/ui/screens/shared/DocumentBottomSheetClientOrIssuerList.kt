@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListContent
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.ninetyninepercent.funfactu.icons.IconArrowBack
+import com.a4a.g8invoicing.ui.shared.icons.IconArrowBack
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable

@@ -1,11 +1,6 @@
 package com.a4a.g8invoicing.ui.shared
 
-import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.contentColorFor
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.rememberSheetState
+import android.R
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
@@ -21,14 +16,11 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,16 +28,19 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.SheetValue.Expanded
 import androidx.compose.material3.SheetValue.Hidden
 import androidx.compose.material3.SheetValue.PartiallyExpanded
 import androidx.compose.material3.Surface
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,11 +54,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.isSpecified
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.AbstractComposeView
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.ViewRootForInspector
@@ -86,9 +79,10 @@ import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.DraggableAnchors
 import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.SheetState
+import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.rememberSheetState
+import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.math.max
-import kotlinx.coroutines.launch
 
 
 // Fork of ModalBottomSheet to disable bottom sheet swipe/drag
@@ -107,14 +101,9 @@ fun ModalBottomSheetFork(
     scrimColor: Color = BottomSheetDefaults.ScrimColor,
     dragHandle: @Composable (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
     windowInsets: WindowInsets = BottomSheetDefaults.windowInsets,
-    properties: ModalBottomSheetProperties = ModalBottomSheetDefaults.properties(),
+    properties: ModalBottomSheetProperties,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    // b/291735717 Remove this once deprecated methods without density are removed
-    val density = LocalDensity.current
-    SideEffect {
-        sheetState.density = density
-    }
     val scope = rememberCoroutineScope()
     val animateToDismiss: () -> Unit = {
         if (sheetState.anchoredDraggableState.confirmValueChange(Hidden)) {
@@ -132,14 +121,8 @@ fun ModalBottomSheetFork(
     }
 
     ModalBottomSheetPopup(
-        properties = properties,
-        onDismissRequest = {
-            if (sheetState.currentValue == Expanded && sheetState.hasPartiallyExpandedState) {
-                scope.launch { sheetState.partialExpand() }
-            } else { // Is expanded without collapsed state or is collapsed.
-                scope.launch { sheetState.hide() }.invokeOnCompletion { onDismissRequest() }
-            }
-        },
+        properties = properties, // Crucially, properties.shouldDismissOnBackPress should be false
+        onDismissRequest = { onDismissRequest() },
         windowInsets = windowInsets,
     ) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -160,27 +143,14 @@ fun ModalBottomSheetFork(
                         IntOffset(
                             0,
                             sheetState
-                                .requireOffset()
+                                .requireOffset() // This comes from official M3 SheetState. Your custom one needs similar.
                                 .toInt()
                         )
                     }
-                /*    .nestedScroll(
-                        remember(sheetState) {
-                            ConsumeSwipeWithinBottomSheetBoundsNestedScrollConnection(
-                                sheetState = sheetState,
-                                orientation = Orientation.Vertical,
-                                onFling = settleToDismiss
-                            )
-                        }
-                    )*/
-                /*    .draggable(
-                        state = sheetState.anchoredDraggableState.draggableState,
-                        orientation = Orientation.Vertical,
-                        enabled = sheetState.isVisible,
-                        startDragImmediately = sheetState.anchoredDraggableState.isAnimationRunning,
-                        onDragStopped = { settleToDismiss(it) }
-                    )*/
-                    .modalBottomSheetAnchors(
+                    // Draggable and nestedScroll modifiers are commented out as per your fork's intention
+                    // .nestedScroll(...)
+                    // .draggable(...)
+                    .modalBottomSheetAnchors( // This seems to be from your custom setup
                         sheetState = sheetState,
                         fullHeight = fullHeight.toFloat()
                     ),
@@ -238,9 +208,12 @@ fun ModalBottomSheetFork(
             }
         }
     }
-    if (sheetState.hasExpandedState) {
+
+    // This effect is typically to show the sheet when it's first composed,
+    // if its initial value is Hidden but it's meant to be shown.
+    if (sheetState.hasExpandedState) { // Or a similar check for your custom SheetState
         LaunchedEffect(sheetState) {
-            sheetState.show()
+            sheetState.show() // Or expand(), depending on your SheetState API
         }
     }
 }
@@ -349,7 +322,6 @@ private fun Scrim(
         Canvas(
             Modifier
                 .fillMaxSize()
-                .then(dismissSheet)
         ) {
             drawRect(color = color, alpha = alpha)
         }
@@ -454,7 +426,7 @@ private class ModalBottomSheetWindow(
     private var backCallback: Any? = null
 
     init {
-        id = android.R.id.content
+        id = R.id.content
         // Set up view owners
         setViewTreeLifecycleOwner(composeView.findViewTreeLifecycleOwner())
         setViewTreeViewModelStoreOwner(composeView.findViewTreeViewModelStoreOwner())
@@ -571,7 +543,6 @@ private class ModalBottomSheetWindow(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
-        maybeRegisterBackCallback()
     }
 
     override fun onDetachedFromWindow() {

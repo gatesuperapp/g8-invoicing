@@ -64,7 +64,7 @@
     <string name="appbar_client_edit">Modifier client</string>
     <string name="appbar_product_edit">Modifier produit</string>
     <string name="drawer_settings">Réglages</string>
-    <string name="appbar_account">Abonnement</string>
+    <string name="appbar_account">Contribuer</string>
     <string name="drawer_about">Aide </string>
     <string name="appbar_about">Aide </string>
     <string name="drawer_menu_description">Menu navigation button</string>
@@ -78,6 +78,7 @@
     <string name="my_info">Mes informations</string>
     <string name="client">Client</string>
     <string name="products">Produits</string>
+    <string name="product_duplicate_suffix"> - Copie</string>
     <string name="total_amount">Montant total</string>
     <string name="total_amount_without_tax">Montant HT</string>
     <string name="discount">Réduction</string>
@@ -145,6 +146,8 @@
     <string name="product_price_with_tax">TTC</string>
     <string name="product_price_input">3</string>
     <string name="product_tax">TVA</string>
+    <string name="product_add_price">+ Ajouter un prix</string>
+    <string name="product_delete_price">Supprimer ce prix</string>
     <string name="document_product_quantity">Quantité <sup>*</sup></string>
     <string name="document_product_quantity_input">1</string>
     <string name="tax_rate_screen_title">Taux de TVA</string>

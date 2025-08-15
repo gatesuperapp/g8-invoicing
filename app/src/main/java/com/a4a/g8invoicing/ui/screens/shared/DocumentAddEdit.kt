@@ -108,7 +108,11 @@ fun DocumentAddEdit(
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
+    onOrderChange: (List<DocumentProductState>) -> Unit,
 ) {
+    // Know if a category in the bottom bar has been selected
+    val sheetVisible = remember { mutableStateOf(false) }
+
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -145,56 +149,59 @@ fun DocumentAddEdit(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
-            if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
-                DocumentBottomSheetTextElements(
-                    document = document,
-                    onDismissBottomSheet = {
-                        hideBottomSheet(scope, scaffoldState)
-                    },
-                    clients = clientList,
-                    issuers = issuerList,
-                    documentClientUiState = documentClientUiState,
-                    documentIssuerUiState = documentIssuerUiState,
-                    taxRates = taxRates,
-                    onValueChange = onValueChange,
-                    onSelectClientOrIssuer = onSelectClientOrIssuer,
-                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
-                    onClickEditDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
-                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    currentClientId = document.documentClient?.id,
-                    currentIssuerId = document.documentIssuer?.id,
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = onClickDoneForm,
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    localFocusManager = LocalFocusManager.current,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm,
-                    onClickDeleteAddress = onClickDeleteAddress
-                )
-            } else {
-                DocumentBottomSheetProductsAvailable(
-                    document = document,
-                    onDismissBottomSheet = {
-                        hideBottomSheet(scope, scaffoldState)
-                    },
-                    documentProductUiState = documentProductUiState,
-                    products = products,
-                    taxRates = taxRates,
-                    onClickProduct = onSelectProduct,
-                    onClickNewProduct = onClickNewDocumentProduct,
-                    onClickDocumentProduct = onClickEditDocumentProduct,
-                    onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = onClickDoneForm,
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm
-                )
+            if (sheetVisible.value) {
+                if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
+                    DocumentBottomSheetTextElements(
+                        document = document,
+                        onDismissBottomSheet = {
+                            hideBottomSheet(scope, scaffoldState)
+                        },
+                        clients = clientList,
+                        issuers = issuerList,
+                        documentClientUiState = documentClientUiState,
+                        documentIssuerUiState = documentIssuerUiState,
+                        taxRates = taxRates,
+                        onValueChange = onValueChange,
+                        onSelectClientOrIssuer = onSelectClientOrIssuer,
+                        onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
+                        onClickEditDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                        onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+                        currentClientId = document.documentClient?.id,
+                        currentIssuerId = document.documentIssuer?.id,
+                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                        bottomFormOnValueChange = bottomFormOnValueChange,
+                        bottomFormPlaceCursor = bottomFormPlaceCursor,
+                        onClickDoneForm = onClickDoneForm,
+                        onClickCancelForm = onClickCancelForm,
+                        onSelectTaxRate = onSelectTaxRate,
+                        localFocusManager = LocalFocusManager.current,
+                        showDocumentForm = showDocumentForm,
+                        onShowDocumentForm = onShowDocumentForm,
+                        onClickDeleteAddress = onClickDeleteAddress
+                    )
+                } else {
+                    DocumentBottomSheetProducts(
+                        document = document,
+                        onDismissBottomSheet = {
+                            hideBottomSheet(scope, scaffoldState)
+                        },
+                        documentProductUiState = documentProductUiState,
+                        products = products,
+                        taxRates = taxRates,
+                        onClickProduct = onSelectProduct,
+                        onClickNewProduct = onClickNewDocumentProduct,
+                        onClickDocumentProduct = onClickEditDocumentProduct,
+                        onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
+                        bottomFormOnValueChange = bottomFormOnValueChange,
+                        bottomFormPlaceCursor = bottomFormPlaceCursor,
+                        onClickDoneForm = onClickDoneForm,
+                        onClickCancelForm = onClickCancelForm,
+                        onSelectTaxRate = onSelectTaxRate,
+                        showDocumentForm = showDocumentForm,
+                        onShowDocumentForm = onShowDocumentForm,
+                        onOrderChange = onOrderChange
+                    )
+                }
             }
         },
         sheetShadowElevation = 30.dp
@@ -222,10 +229,12 @@ fun DocumentAddEdit(
             bottomBar = {
                 DocumentAddEditBottomBar(
                     onClickElements = {
+                        sheetVisible.value = true
                         bottomSheetType.value = BottomSheetType.ELEMENTS
                         expandBottomSheet(scope, scaffoldState)
                     },
                     onClickItems = {
+                        sheetVisible.value = true
                         bottomSheetType.value = BottomSheetType.ITEMS
                         expandBottomSheet(scope, scaffoldState)
                     },
@@ -359,7 +368,7 @@ fun DocumentAddEdit(
                 DocumentBasicTemplate(
                     uiState = document,
                     onClickElement = {
-                        if (scaffoldState.bottomSheetState.currentValue  == SheetValue.Expanded) {
+                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
                             hideBottomSheet(scope, scaffoldState)
                         } else {
                             if (it == ScreenElement.DOCUMENT_HEADER ||
@@ -386,7 +395,7 @@ fun DocumentAddEdit(
                         }
                     },
                     onClickRestOfThePage = {
-                        if (scaffoldState.bottomSheetState.currentValue  == SheetValue.Expanded) {
+                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
                             hideBottomSheet(scope, scaffoldState)
                         }
                     },
@@ -429,7 +438,8 @@ private fun DeliveryNoteAddEditTopBar(
             onClick = onClickExport
         ),
         navController = navController,
-        onClickBackArrow = onClickBack
+        onClickBackArrow = onClickBack,
+        isCancelCtaDisplayed = false
     )
 }
 

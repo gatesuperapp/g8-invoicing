@@ -1,5 +1,10 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +34,12 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 ) {
     composable(
         route = Screen.DeliveryNoteAddEdit.name + "?itemId={itemId}",
+        enterTransition = { // Define smooth enter transition
+            fadeIn(animationSpec = tween(500))
+        },
+        exitTransition = { // Define smooth exit transition for when navigating away from detail
+            fadeOut(animationSpec = tween(500))
+        },
         arguments = listOf(
             navArgument("itemId") { nullable = true },
         )
@@ -95,7 +106,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
             },
             onClickEditDocumentProduct = {// Edit a document product
-                productAddEditViewModel.autoSaveDocumentProductInLocalDb()
                 productAddEditViewModel.setDocumentProductUiState(it)
             },
 
@@ -227,9 +237,6 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                     documentProduct
                                 )
                             deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
-                            // And if a document product is overflowing the page, and page is changed
-                            // we want this to be saved in db
-                            productAddEditViewModel.autoSaveDocumentProductInLocalDb()
 
                             //  productAddEditViewModel.clearProductUiState()
                             showDocumentForm = false
@@ -255,8 +262,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
                         if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                            productAddEditViewModel.stopAutoSaveFormInputsInLocalDb()
-                            deliveryNoteViewModel.updateUiState(
+                                deliveryNoteViewModel.updateUiState(
                                 ScreenElement.DOCUMENT_PRODUCT,
                                 documentProduct
                             )
@@ -283,7 +289,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickDeleteAddress = {
                 clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
-            }
+            },
+            onOrderChange = deliveryNoteViewModel::updateProductOrderInUiState
         )
     }
 }

@@ -39,6 +39,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.BatAnimation
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
@@ -67,18 +68,19 @@ fun DeliveryNoteList(
 
     // Alert dialogs
     val openAlertDialog = remember { mutableStateOf(false) }
-    val checkIfAutoSaveDialogMustBeOpened = remember { mutableStateOf(false) }
 
     // Add background when bottom menu expanded
-    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-    val backgroundColor = remember { mutableStateOf(transparent) }
+    val isDimActive = remember { mutableStateOf(false) }
 
-    Scaffold(
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         topBar = {
             TopBar(
                 title = R.string.appbar_delivery_notes,
                 navController = navController,
-                onClickBackArrow = onClickBack
+                onClickBackArrow = onClickBack,
+                isCancelCtaDisplayed = false
             )
         },
         bottomBar = {
@@ -86,8 +88,7 @@ fun DeliveryNoteList(
                 navController = navController,
                 numberOfItemsSelected = selectedItems.size,
                 onClickDelete = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    isDimActive.value = !isDimActive.value
                     openAlertDialog.value = true
                 },
                 onClickDuplicate = {
@@ -105,8 +106,7 @@ fun DeliveryNoteList(
                 onClickCategory = onClickCategory,
                 isConvertible = true,
                 onChangeBackground = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    isDimActive.value = !isDimActive.value
                 }
             )
         }
@@ -148,13 +148,6 @@ fun DeliveryNoteList(
                     if (documentsUiState.deliveryNoteStates.size == 1)
                         DisplayBatHelperAdvice()
                 }
-
-                Column(
-                    // apply darker background when bottom menu is expanded
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(backgroundColor.value),
-                ) {}
             }
         }
 
@@ -163,23 +156,19 @@ fun DeliveryNoteList(
                 AlertDialogDeleteDocument(
                     onDismissRequest = {
                         openAlertDialog.value = false
-                        backgroundColor.value =
-                            changeBackgroundWithVerticalGradient(backgroundColor.value)
+                        isDimActive.value = !isDimActive.value
                     },
                     onConfirmation = {
                         openAlertDialog.value = false
                         onClickDelete(selectedItems.toList())
                         selectedItems.clear()
                         selectedMode.value = false
-                        backgroundColor.value =
-                            changeBackgroundWithVerticalGradient(backgroundColor.value)
+                        isDimActive.value = !isDimActive.value
                     }
                 )
             }
         }
     }
-
-
 }
 
 @Composable

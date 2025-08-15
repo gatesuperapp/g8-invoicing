@@ -14,11 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ProductListContent
+import com.a4a.g8invoicing.ui.shared.icons.IconArrowBack
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.ninetyninepercent.funfactu.icons.IconArrowBack
 
 @Composable
-fun DocumentBottomSheetProductsAvailable(
+fun DocumentBottomSheetProducts(
     list: List<ProductState>,
     onClickBack: () -> Unit,
     onProductClick: (ProductState) -> Unit, // To select a product

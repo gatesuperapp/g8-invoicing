@@ -77,8 +77,7 @@ fun Account(
     val uriHandler = LocalUriHandler.current
 
     // Add background when bottom menu expanded
-    val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-    val backgroundColor = remember { mutableStateOf(transparent) }
+    val isDimActive = remember { mutableStateOf(false) }
 
     // Animation around button
     val infiniteTransition = rememberInfiniteTransition(label = "border")
@@ -138,7 +137,8 @@ fun Account(
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = R.string.appbar_account,
                 navController = navController,
-                onClickBackArrow = onClickBack
+                onClickBackArrow = onClickBack,
+                isCancelCtaDisplayed = false
             )
         },
         //   private val _uiState = MutableStateFlow(ClientsUiState())
@@ -148,9 +148,9 @@ fun Account(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
-                }
+                    isDimActive.value = !isDimActive.value
+                },
+                isButtonNewDisplayed = false
             )
         }
     ) { padding ->
@@ -205,6 +205,7 @@ fun Account(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(padding)
+                    .padding(top=110.dp)
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -279,13 +280,6 @@ fun Account(
                     )
                 }
             }
-
-            Column(
-                // apply darker background when bottom menu is expanded
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor.value),
-            ) {}
         }
     }
 }

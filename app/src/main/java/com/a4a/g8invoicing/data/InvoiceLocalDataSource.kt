@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import android.util.Log.e
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -7,13 +8,14 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
+import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.states.AddressState
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerAddressQueries
 import g8invoicing.DocumentClientOrIssuerQueries
@@ -52,30 +54,36 @@ class InvoiceLocalDataSource(
         db.linkInvoiceToDocumentClientOrIssuerQueries
 
 
+    // --- createNew ---
+    // Called from ViewModel
+    // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        var newInvoiceId: Long? = null
-        val issuer = getExistingIssuer()?.transformIntoEditable()
-        saveInfoInInvoiceTable(
-            InvoiceState(
-                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
-                    incrementDocumentNumber(it)
-                } ?: Strings.get(R.string.invoice_default_number)),
-                documentIssuer = issuer,
+        return withContext(Dispatchers.IO) {
+            val newInvoiceState = InvoiceState(
+                documentNumber = TextFieldValue(
+                    getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
+                        ?: Strings.get(R.string.invoice_default_number)
+                ),
+                documentIssuer = getExistingIssuer()?.transformIntoEditable(), // DB call
                 footerText = TextFieldValue(
-                    getExistingFooter() ?: Strings.get(R.string.document_default_footer)
+                    getExistingFooter() ?: Strings.get(R.string.document_default_footer) // DB call
                 )
             )
-        )
-        saveTag(InvoiceState(documentIssuer = issuer))
-        saveInfoInOtherTables(InvoiceState(documentIssuer = issuer))
-        try {
-            newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+
+            saveInfoInInvoiceTable(newInvoiceState)
+
+            val newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+
+            newInvoiceId?.let { id ->
+                // Pass the obtained ID explicitly to helper functions
+                saveTag(id, newInvoiceState) // saveTag is suspend
+                saveInfoInOtherTables(id, newInvoiceState) // saveInfoInOtherTables is suspend
+            }
+            newInvoiceId // Return the ID
         }
-        return newInvoiceId
     }
 
+    // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---
     private fun getLastDocumentNumber(): String? {
         try {
             return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
@@ -85,33 +93,65 @@ class InvoiceLocalDataSource(
         return null
     }
 
-    override fun fetch(id: Long): InvoiceState? {
+
+    private fun getExistingIssuer(): DocumentClientOrIssuer? {
+        var issuer: DocumentClientOrIssuer? = null
         try {
-            return invoiceQueries.get(id).executeAsOneOrNull()
-                ?.let {
-                    it.transformIntoEditableInvoice(
-                        fetchDocumentProducts(it.invoice_id),
-                        fetchClientAndIssuer(
-                            it.invoice_id,
-                            linkInvoiceToDocumentClientOrIssuerQueries,
-                            linkDocumentClientOrIssuerToAddressQueries,
-                            documentClientOrIssuerQueries,
-                            documentClientOrIssuerAddressQueries
-                        ),
-                        fetchTag(it.invoice_id)
-                    )
-                }
+            issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
-        return null
+        return issuer
     }
 
+    private fun getExistingFooter(): String? {
+        var footer: String? = null
+        try {
+            footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull()?.footer
+        } catch (e: Exception) {
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return footer
+    }
+
+    // --- fetch ---
+    // Correctly uses withContext(Dispatchers.IO).
+    // Internal fetch* helpers are synchronous and will run on this IO context.
+    override suspend fun fetch(id: Long): InvoiceState? {
+        return withContext(Dispatchers.IO) {
+            try {
+                invoiceQueries.get(id).executeAsOneOrNull()
+                    ?.let {
+                        it.transformIntoEditableInvoice(
+                            fetchDocumentProducts(it.invoice_id),// Synchronous, runs on this IO context
+                            fetchClientAndIssuer( // Synchronous, runs on this IO context
+                                it.invoice_id,
+                                linkInvoiceToDocumentClientOrIssuerQueries,
+                                linkDocumentClientOrIssuerToAddressQueries,
+                                documentClientOrIssuerQueries,
+                                documentClientOrIssuerAddressQueries
+                            ),
+                            fetchTag(it.invoice_id)  // Synchronous, runs on this IO context
+                        )
+                    }
+            } catch (e: Exception) {
+                //Log.e("InvoiceDS", "Error fetch id $id: ${e.message}")
+                null
+            }
+        }
+    }
+
+
+    // --- fetchAll (returning Flow) ---
+    // Flow construction is fine.
+    // The .map block executes on the collector's context.
+    // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
+    // because internal fetch* helpers are synchronous DB calls.
     override fun fetchAll(): Flow<List<InvoiceState>>? {
         try {
             return invoiceQueries.getAll()
                 .asFlow()
-                .map {
+                .map { // This .map runs on the collector's dispatcher
                     it.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.invoice_id)
@@ -132,36 +172,42 @@ class InvoiceLocalDataSource(
                         }
                 }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error fetchAll: ${e.message}")
         }
         return null
     }
 
+    // --- fetchDocumentProducts ---
+    // Synchronous private helper, performs DB IO.
+    // Must be called from a Dispatchers.IO context.
     private fun fetchDocumentProducts(id: Long): MutableList<DocumentProductState>? {
         try {
             val listOfIds =
                 linkInvoiceToDocumentProductQueries.getDocumentProductsLinkedToInvoice(id)
-                    .executeAsList()
+                    .executeAsList() // DB call
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
                     val additionalInfo = linkInvoiceDocumentProductToDeliveryNoteQueries
                         .getInfoLinkedToDocumentProduct(it.document_product_id)
-                        .executeAsOneOrNull()
+                        .executeAsOneOrNull()// DB call
                     documentProductQueries.getDocumentProduct(it.document_product_id)
-                        .executeAsOne()
+                        .executeAsOne()// DB call
                         .transformIntoEditableDocumentProduct(
                             additionalInfo?.delivery_date,
-                            additionalInfo?.delivery_note_number
+                            additionalInfo?.delivery_note_number,
+                            sortOrder = it.sort_order?.toInt() // Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error fetchDocumentProducts for id $id: ${e.message}")
         }
         return null
     }
 
-
+    // --- fetchTag ---
+    // Synchronous private helper, performs DB IO.
+    // Called from a Dispatchers.IO context.
     private fun fetchTag(documentId: Long): DocumentTag? {
         try {
             val tagId =
@@ -173,74 +219,83 @@ class InvoiceLocalDataSource(
                 }
             }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error fetchTag for documentId $documentId: ${e.message}")
         }
         return null
     }
 
+    // --- transformIntoEditableInvoice ---
+    // Pure transformation function, no IO, no suspend/withContext needed.
     private fun Invoice.transformIntoEditableInvoice(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
     ): InvoiceState {
-        this.let {
-            return InvoiceState(
-                documentId = it.invoice_id.toInt(),
-                documentTag = documentTag ?: DocumentTag.DRAFT,
-                documentNumber = TextFieldValue(text = it.number ?: ""),
-                documentDate = it.issuing_date ?: "",
-                reference = it.reference?.let { TextFieldValue(text = it) },
-                freeField = it.free_field?.let { TextFieldValue(text = it) },
-                documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
-                documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
-                documentProducts = documentProducts,
-                documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(Strings.get(R.string.currency)),
-                dueDate = it.due_date ?: "",
-                paymentStatus = it.payment_status.toInt(),
-                footerText = TextFieldValue(text = it.footer ?: ""),
-                createdDate = it.created_at
-            )
-        }
+        return InvoiceState(
+            documentId = this.invoice_id.toInt(),
+            documentTag = documentTag ?: DocumentTag.DRAFT,
+            documentNumber = TextFieldValue(text = this.number ?: ""),
+            documentDate = this.issuing_date ?: "",
+            reference = this.reference?.let { TextFieldValue(text = it) },
+            freeField = this.free_field?.let { TextFieldValue(text = it) },
+            documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
+            documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
+            documentProducts = documentProducts?.sortedBy { it.sortOrder },
+            documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
+            currency = TextFieldValue(Strings.get(R.string.currency)),
+            dueDate = this.due_date ?: "",
+            paymentStatus = this.payment_status.toInt(),
+            footerText = TextFieldValue(text = this.footer ?: ""),
+            createdDate = this.created_at
+        )
     }
 
+
+    // --- convertDeliveryNotesToInvoice ---
+    // Uses withContext(Dispatchers.IO).
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
         withContext(Dispatchers.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
             } ?: Strings.get(R.string.invoice_default_number)
 
-            try {
-                saveInfoInInvoiceTable(
-                    InvoiceState(
-                        documentNumber = TextFieldValue(docNumber),
-                        reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
-                        freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
-                        documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
-                        documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
-                        footerText = TextFieldValue(getExistingFooter() ?: "")
-                    )
-                )
-                // We want to save tag only once for the invoice
-                val deliveryNote = deliveryNotes.first().copy(documentTag = DocumentTag.DRAFT)
-                saveTag(deliveryNote)
 
-                // We want to save other info for each delivery note
-                deliveryNotes.forEach {
-                    saveInfoInOtherTables(
-                        it
-                    )
+            try {
+                val newInvoiceState = InvoiceState(
+                    documentNumber = TextFieldValue(docNumber),
+                    reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
+                    freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
+                    documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
+                    footerText = TextFieldValue(getExistingFooter() ?: "") // DB call
+                )
+                saveInfoInInvoiceTable(newInvoiceState) // DB call
+
+                val newInvoiceId = invoiceQueries.getLastInsertedRowId()
+                    .executeAsOneOrNull() // Get ID after main insert
+                newInvoiceId?.let { id ->
+                    // For simplicity, we take the tag of the first Delivery Note
+                    val firstDeliveryNoteForTag = deliveryNotes.first()
+                        .copy(documentTag = DocumentTag.DRAFT) // Or use newInvoiceState
+                    saveTag(id, firstDeliveryNoteForTag) // saveTag is suspend
+
+                    // saveInfoInOtherTables iterates deliveryNotes and link their products/clients to the new invoiceId
+                    deliveryNotes.forEach { deliveryNote ->
+                        saveInfoInOtherTables(id, deliveryNote)
+                    }
                 }
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e("InvoiceDS", "Error convertDeliveryNotes: ${e.message}")
             }
         }
     }
 
+    // --- update ---
+    // Uses withContext(Dispatchers.IO).
     override suspend fun update(document: InvoiceState) {
         return withContext(Dispatchers.IO) {
             try {
-                invoiceQueries.update(
+                invoiceQueries.update( // DB Call
                     invoice_id = document.documentId?.toLong() ?: 0,
                     number = document.documentNumber.text,
                     issuing_date = document.documentDate,
@@ -253,8 +308,8 @@ class InvoiceLocalDataSource(
                     updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
                 )
                 // Update tag if payment is late (due date expired)
-                if (isPaymentLate(document.dueDate)) {
-                    linkDocumentToDocumentTag(
+                if (isPaymentLate(document.dueDate)) { // isPaymentLate is pure
+                    linkDocumentToDocumentTag( // linkDocumentToDocumentTag is suspend
                         document.documentId?.toLong() ?: 0,
                         initialTag = document.documentTag,
                         newTag = DocumentTag.LATE,
@@ -263,33 +318,49 @@ class InvoiceLocalDataSource(
                 }
 
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e("InvoiceDS", "Error update: ${e.message}")
             }
         }
     }
 
+    // --- duplicate ---
+    // Correctly uses withContext(Dispatchers.IO).
     override suspend fun duplicate(documents: List<InvoiceState>) {
         withContext(Dispatchers.IO) {
             try {
-                documents.forEach {
-                    val docNumber = getLastDocumentNumber()?.let {
+                documents.forEach { originalDocument ->
+                    val docNumber = getLastDocumentNumber()?.let { // DB Call
                         incrementDocumentNumber(it)
                     } ?: Strings.get(R.string.invoice_default_number)
-                    val invoice = it
-                    invoice.documentNumber = TextFieldValue(docNumber)
-                    invoice.documentTag = DocumentTag.DRAFT
-                    invoice.paymentStatus = 0
 
-                    saveInfoInInvoiceTable(invoice)
-                    saveTag(invoice)
-                    saveInfoInOtherTables(invoice)
+                    val duplicatedInvoiceState = originalDocument.copy(
+                        // Assuming InvoiceState is a data class
+                        documentNumber = TextFieldValue(docNumber),
+                        documentTag = DocumentTag.DRAFT,
+                        paymentStatus = 0,
+                    )
+
+                    saveInfoInInvoiceTable(duplicatedInvoiceState) // DB Call
+
+                    val newInvoiceId = invoiceQueries.getLastInsertedRowId()
+                        .executeAsOneOrNull() // Get ID after main insert
+                    newInvoiceId?.let { id ->
+                        saveTag(id, duplicatedInvoiceState) // saveTag is suspend
+                        saveInfoInOtherTables(
+                            id,
+                            originalDocument.copy(documentId = id.toInt())
+                        ) // Pass new ID and original document's children context
+                    }
                 }
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e("InvoiceDS", "Error duplicate: ${e.message}")
             }
         }
     }
 
+    // --- setTag ---
+    // Uses withContext(Dispatchers.IO).
+    // linkDocumentToDocumentTag is called from IO and is suspend.
     override suspend fun setTag(
         documents: List<InvoiceState>,
         tag: DocumentTag,
@@ -299,7 +370,7 @@ class InvoiceLocalDataSource(
             try {
                 documents.forEach { invoice ->
                     invoice.documentId?.toLong()?.let { invoiceId ->
-                        linkDocumentToDocumentTag(
+                        linkDocumentToDocumentTag(  // linkDocumentToDocumentTag is suspend
                             invoiceId,
                             initialTag = invoice.documentTag,
                             newTag = tag,
@@ -308,59 +379,72 @@ class InvoiceLocalDataSource(
                     }
                 }
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e("InvoiceDS", "Error setTag: ${e.message}")
             }
         }
     }
 
+
+    // --- markAsPaid ---
+    // Added withContext(Dispatchers.IO).
     override suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag) {
-        try {
-            documents.forEach {
-                it.documentId?.toLong()?.let {
-                    invoiceQueries.updatePaymentStatus(
-                        invoice_id = it,
-                        payment_status = if (tag == DocumentTag.PAID) 2 else 0,
-                        updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(
-                            Calendar.getInstance().time
+        withContext(Dispatchers.IO) {
+            try {
+                documents.forEach {
+                    it.documentId?.toLong()?.let {
+                        invoiceQueries.updatePaymentStatus(
+                            invoice_id = it,
+                            payment_status = if (tag == DocumentTag.PAID) 2 else 0,
+                            updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(
+                                Calendar.getInstance().time
+                            )
                         )
-                    )
+                    }
                 }
+            } catch (e: Exception) {
+                //Log.e("InvoiceDS", "Error markAsPaid: ${e.message}")
             }
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
 
-
+    // --- saveDocumentProductInDbAndLinkToDocument ---
+    // Correctly uses withContext(Dispatchers.IO) and transaction.
+    // The global saveDocumentProductInDbAndLink is called from this IO context.
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        documentId: Long?,
+        documentId: Long?, // This is the parent document ID (e.g., invoiceId)
         deliveryNoteDate: String?,
         deliveryNoteNumber: String?,
     ) {
         withContext(Dispatchers.IO) {
-            try {
-                saveDocumentProductInDbAndLink(
-                    documentProductQueries,
-                    linkInvoiceToDocumentProductQueries,
-                    linkInvoiceDocumentProductToDeliveryNoteQueries,
-                    documentProduct,
-                    documentId,
-                    deliveryNoteDate,
-                    deliveryNoteNumber
-                )
+            documentProductQueries.transaction {
+                try {
+                    // This global function performs synchronous DB operations
+                    saveDocumentProductInDbAndLink(
+                        documentProductQueries,
+                        linkInvoiceToDocumentProductQueries,
+                        linkInvoiceDocumentProductToDeliveryNoteQueries,
+                        documentProduct,
+                        documentId,
+                        deliveryNoteDate,
+                        deliveryNoteNumber
+                    )
 
-            } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                } catch (e: Exception) {
+                    //Log.e("InvoiceDS", "Error saveDocProdAndLink: ${e.message}")
+                }
             }
         }
     }
 
+    // --- saveDocumentClientOrIssuerInDbAndLinkToDocument ---
+    // Uses withContext(Dispatchers.IO).
+    // The global saveDocumentClientOrIssuerInDbAndLink is suspend and called from here.
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
         documentClientOrIssuer: ClientOrIssuerState,
-        documentId: Long?,
+        documentId: Long?, // This is the parent document ID (e.g., invoiceId)
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) { // This IO context is inherited by the suspend call below
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
@@ -371,26 +455,31 @@ class InvoiceLocalDataSource(
                     documentId
                 )
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e("InvoiceDS", "Error saveClientOrIssuerAndLink: ${e.message}")
             }
         }
     }
 
-
+    // --- delete ---
+    // Correctly uses withContext(Dispatchers.IO).
+    // All internal DB operations will run on this IO context.
     override suspend fun delete(documents: List<InvoiceState>) {
         withContext(Dispatchers.IO) {
             try {
                 documents.filter { it.documentId != null }.forEach { document ->
+                    // Delete linked products and their specific links
                     document.documentProducts?.mapNotNull { it.id }?.forEach {
                         documentProductQueries.deleteDocumentProduct(it.toLong())
                         linkInvoiceDocumentProductToDeliveryNoteQueries.deleteInfoLinkedToDocumentProduct(
-                            it.toLong()
+                            it.toLong() // DB call
                         )
                     }
-                    invoiceQueries.delete(id = document.documentId!!.toLong())
+
+                    // Delete linked products
                     linkInvoiceToDocumentProductQueries.deleteAllProductsLinkedToInvoice(
                         document.documentId!!.toLong()
                     )
+                    // Delete linked client/issuer
                     linkInvoiceToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToInvoice(
                         document.documentId!!.toLong()
                     )
@@ -406,6 +495,7 @@ class InvoiceLocalDataSource(
                             it
                         )
                     }
+                    // Delete client/issuer addresses
                     document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
                         documentClientOrIssuerAddressQueries.delete(it.toLong())
                         linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
@@ -418,16 +508,22 @@ class InvoiceLocalDataSource(
                             )
                         }
                     }
-                    document.documentId?.let {
-                        deleteTag(it)
+                    // Delete linked tag
+                    document.documentId?.let { docId ->
+                        deleteTag(docId.toLong())
                     }
+                    // Delete the main invoice
+                    invoiceQueries.delete(id = document.documentId!!.toLong())
                 }
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                //Log.e("InvoiceDS", "Error delete: ${e.message}")
             }
         }
     }
 
+    // --- deleteDocumentProduct (from an Invoice context) ---
+    // Specific helper for deleting a product linked to an invoice.
+    // Correctly uses withContext(Dispatchers.IO).
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
             return withContext(Dispatchers.IO) {
@@ -440,15 +536,17 @@ class InvoiceLocalDataSource(
                 )
             }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error deleteDocumentProduct: ${e.message}")
         }
     }
 
-    override suspend fun deleteTag(invoiceId: Int) {
+    // --- deleteTag (from an Invoice context) ---
+    // Uses withContext(Dispatchers.IO).
+    override suspend fun deleteTag(invoiceId: Long) {
         try {
             return withContext(Dispatchers.IO) {
                 linkInvoiceToTagQueries.delete(
-                    invoiceId.toLong()
+                    invoiceId  // DB call
                 )
             }
         } catch (e: Exception) {
@@ -456,40 +554,47 @@ class InvoiceLocalDataSource(
         }
     }
 
+
+    // --- deleteDocumentClientOrIssuer (from an Invoice context) ---
+    // Uses withContext(Dispatchers.IO).
     override suspend fun deleteDocumentClientOrIssuer(
         documentId: Long,
         type: ClientOrIssuerType,
     ) {
         try {
             return withContext(Dispatchers.IO) {
-                // As it was saved automatically, we have to go fetch
-                // the id now
+                // Fetch the specific client/issuer linked to THIS invoice
+                val clientOrIssuerToDelete =
+                    fetchClientAndIssuer( // Synchronous, runs on this IO context
+                        documentId,
+                        linkInvoiceToDocumentClientOrIssuerQueries,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentClientOrIssuerQueries,
+                        documentClientOrIssuerAddressQueries
+                    )?.firstOrNull { it.type == type }
 
-                fetchClientAndIssuer(
-                    documentId,
-                    linkInvoiceToDocumentClientOrIssuerQueries,
-                    linkDocumentClientOrIssuerToAddressQueries,
-                    documentClientOrIssuerQueries,
-                    documentClientOrIssuerAddressQueries
-                )?.firstOrNull { it.type == type }
-                    ?.let { documentClientOrIssuer ->
-                        documentClientOrIssuer.id?.let {
-                            linkInvoiceToDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToInvoice(
-                                it.toLong()
-                            )
-                            documentClientOrIssuerQueries.delete(it.toLong())
-                            linkDocumentClientOrIssuerToAddressQueries.deleteWithClientId(it.toLong())
-                            documentClientOrIssuer.addresses?.filter { it.id != null }?.forEach {
-                                documentClientOrIssuerAddressQueries.delete(it.id!!.toLong())
-                            }
-                        }
+
+                clientOrIssuerToDelete?.id?.let { entityId ->
+                    // 1. Delete the link between invoice and the client/issuer entity
+                    linkInvoiceToDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToInvoice(
+                        entityId.toLong()
+                    )
+                    //2. Delete the client/issuer entity and its addresses
+                    documentClientOrIssuerQueries.delete(entityId.toLong())
+                    linkDocumentClientOrIssuerToAddressQueries.deleteWithClientId(entityId.toLong())
+                    clientOrIssuerToDelete.addresses?.mapNotNull { it.id }?.forEach { addressId ->
+                        documentClientOrIssuerAddressQueries.delete(addressId.toLong())
                     }
+                }
             }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error deleteDocClientOrIssuer: ${e.message}")
         }
     }
 
+
+    // --- linkDocumentToDocumentTag ---
+    // Private suspend helper, uses withContext(Dispatchers.IO).
     private suspend fun linkDocumentToDocumentTag(
         documentId: Long,
         initialTag: DocumentTag? = null,
@@ -515,53 +620,21 @@ class InvoiceLocalDataSource(
                             invoice_id = documentId,
                             tag_id = it
                         )
-                    } else {}
+                    }
                 }
             }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error linkDocToDocTag: ${e.message}")
         }
     }
 
-    private fun linkDocumentClientOrIssuerToDocument(
-        documentId: Long,
-        documentClientOrIssuerId: Long,
-    ) {
-        try {
-            linkInvoiceToDocumentClientOrIssuerQueries.saveDocumentClientOrIssuerLinkedToInvoice(
-                id = null,
-                invoice_id = documentId,
-                document_client_or_issuer_id = documentClientOrIssuerId
-            )
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-    }
-
-    private fun getExistingIssuer(): DocumentClientOrIssuer? {
-        var issuer: DocumentClientOrIssuer? = null
-        try {
-            issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return issuer
-    }
-
-    private fun getExistingFooter(): String? {
-        var footer: String? = null
-        try {
-            footer = invoiceQueries.getLastInsertedInvoiceFooter().executeAsOneOrNull()?.footer
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return footer
-    }
-
+    // --- saveInfoInInvoiceTable ---
+    // Synchronous private helper, performs DB IO.
+    // Must be called from a Dispatchers.IO context
     private fun saveInfoInInvoiceTable(document: InvoiceState) {
         try {
-            invoiceQueries.save(
-                invoice_id = null,
+            invoiceQueries.save( // DB call
+                invoice_id = null, // Auto-incremented by DB
                 number = document.documentNumber.text,
                 issuing_date = document.documentDate,
                 reference = document.reference?.text,
@@ -572,64 +645,69 @@ class InvoiceLocalDataSource(
                 footer = document.footerText.text
             )
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")
         }
     }
 
-    private suspend fun saveTag(document: DocumentState) {
-        try {
-            invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
-                if (document is InvoiceState && isPaymentLate(document.dueDate)) {
-                    document.documentTag = DocumentTag.CANCELLED
-                }
 
-                // Link tag
-                linkDocumentToDocumentTag(
-                    id,
-                    newTag = document.documentTag,
-                    updateCase = TagUpdateOrCreationCase.TAG_CREATION
+    // --- saveTag ---
+    // Private suspend helper. Called with an explicit invoiceId.
+    // Calls linkDocumentToDocumentTag which is suspend and handles its own IO.
+    private suspend fun saveTag(invoiceId: Long, document: DocumentState) {
+        try {
+            if (document is InvoiceState && isPaymentLate(document.dueDate)) {
+                document.documentTag = DocumentTag.CANCELLED
+            }
+
+            // Link tag
+            linkDocumentToDocumentTag( // This is suspend
+                invoiceId,
+                newTag = document.documentTag,
+                updateCase = TagUpdateOrCreationCase.TAG_CREATION
+            )
+
+        } catch (e: Exception) {
+            //Log.e("InvoiceDS", "Error saveTag for invoiceId $invoiceId: ${e.message}")
+        }
+    }
+
+    // --- saveInfoInOtherTables ---
+    // Private suspend helper. Called with an explicit parentId (invoiceId).
+    // Calls other suspend functions that manage their own IO.
+    private suspend fun saveInfoInOtherTables(documentId: Long, document: DocumentState) {
+        try {
+            // Link all products to the new parentId
+            document.documentProducts?.forEach { documentProduct ->
+                saveDocumentProductInDbAndLinkToDocument( // This is suspend
+                    documentProduct = documentProduct,
+                    documentId = documentId,
+                    deliveryNoteDate = if (document is DeliveryNoteState) document.documentDate else null,
+                    deliveryNoteNumber = if (document is DeliveryNoteState) document.documentNumber.text else null
+                )
+            }
+
+            // Link client
+            document.documentClient?.let {
+                saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                    documentClientOrIssuer = it,
+                    documentId = documentId
+                )
+            }
+
+            // Link issuer
+            document.documentIssuer?.let {
+                saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                    documentClientOrIssuer = it,
+                    documentId = documentId
                 )
             }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("InvoiceDS", "Error saveInfoInOtherTables for parentId $parentId: ${e.message}")
         }
     }
 
-    private suspend fun saveInfoInOtherTables(document: DocumentState) {
-        try {
-            invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
-                // Link all products
-                document.documentProducts?.forEach { documentProduct ->
-                    saveDocumentProductInDbAndLinkToDocument(
-                        documentProduct = documentProduct,
-                        documentId = id,
-                        deliveryNoteDate = if (document is DeliveryNoteState) document.documentDate else null,
-                        deliveryNoteNumber = if (document is DeliveryNoteState) document.documentNumber.text else null
-                    )
-                }
-
-                // Link client
-                document.documentClient?.let {
-                    saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                        documentClientOrIssuer = it,
-                        documentId = id
-                    )
-                }
-
-                // Link issuer
-                document.documentIssuer?.let {
-                    saveDocumentClientOrIssuerInDbAndLinkToDocument(
-                        documentClientOrIssuer = it,
-                        documentId = id
-                    )
-                }
-
-            }
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-    }
-
+    // --- isPaymentLate ---
+    // Pure utility function.
     private fun isPaymentLate(dueDate: String): Boolean {
         val formatter = getDateFormatter()
         val dueDate = formatter.parse(dueDate)?.time
@@ -637,8 +715,33 @@ class InvoiceLocalDataSource(
         val isLatePayment = dueDate != null && dueDate < currentDate
         return isLatePayment
     }
-}
 
+    /**
+     * Updates the sort_order for a list of document products linked to a parent document.
+     */
+    override suspend fun updateDocumentProductsOrderInDb(
+        documentId: Long,
+        orderedProducts: List<DocumentProductState>,
+    ) {
+        withContext(Dispatchers.IO) {
+            try {
+                documentProductQueries.transaction {
+                    updateDocumentProductsOrderInDb(documentId, orderedProducts, linkInvoiceToDocumentProductQueries)
+                }
+            } catch (e: Exception) {
+                // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
+                throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
+            }
+        }
+    }
+
+} // End of InvoiceLocalDataSource
+
+// --- Global helper functions (outside the class) ---
+// These should ideally be part of a relevant DataSource or utility class,
+
+// --- incrementDocumentNumber ---
+//  Pure utility function.
 fun incrementDocumentNumber(docNumber: String): String {
     val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
     if (numberToIncrement.isNotEmpty()) {
@@ -654,6 +757,9 @@ enum class TagUpdateOrCreationCase {
     DUE_DATE_EXPIRED
 }
 
+
+// This function performs synchronous DB IO.
+// It must be called from a Dispatchers.IO context.
 fun saveDocumentProductInDbAndLink(
     documentProductQueries: DocumentProductQueries,
     linkToDocumentProductQueries: Any,
@@ -664,12 +770,12 @@ fun saveDocumentProductInDbAndLink(
     deliveryNoteNumber: String?,
 ): Int? {
     var documentProductId: Int? = null
-    documentProductQueries.saveDocumentProduct(
-        document_product_id = null,
+    documentProductQueries.saveDocumentProduct(  // DB call
+        id = null,
         name = documentProduct.name.text,
         quantity = documentProduct.quantity.toDouble(),
         description = documentProduct.description?.text,
-        final_price = documentProduct.priceWithTax?.toDouble(),
+        price_without_tax = documentProduct.priceWithoutTax?.toDouble(),
         tax_rate = documentProduct.taxRate?.toDouble(),
         unit = documentProduct.unit?.text,
         product_id = documentProduct.productId?.toLong()
@@ -680,10 +786,11 @@ fun saveDocumentProductInDbAndLink(
             ?.let { id ->
                 documentProductId = id
 
-                linkDocumentProductToDocument(
+                linkDocumentProductToParentDocument(
                     linkToDocumentProductQueries,
                     documentId,
-                    id.toLong()
+                    id.toLong(),
+                    documentProduct.sortOrder
                 )
                 if (!deliveryNoteDate.isNullOrEmpty()) {
                     linkDocumentProductToDeliveryNoteInfo(
@@ -698,36 +805,8 @@ fun saveDocumentProductInDbAndLink(
     return documentProductId
 }
 
-fun linkDocumentProductToDocument(
-    linkQueries: Any,
-    documentId: Long,
-    documentProductId: Long,
-) {
-    try {
-        if (linkQueries is LinkCreditNoteToDocumentProductQueries) {
-            linkQueries.saveProductLinkedToCreditNote(
-                id = null,
-                credit_note_id = documentId,
-                document_product_id = documentProductId
-            )
-        } else if (linkQueries is LinkDeliveryNoteToDocumentProductQueries) {
-            linkQueries.saveProductLinkedToDeliveryNote(
-                id = null,
-                delivery_note_id = documentId,
-                document_product_id = documentProductId
-            )
-        } else if (linkQueries is LinkInvoiceToDocumentProductQueries) {
-            linkQueries.saveProductLinkedToInvoice(
-                id = null,
-                invoice_id = documentId,
-                document_product_id = documentProductId
-            )
-        }
-    } catch (e: Exception) {
-        //Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
-}
 
+// Synchronous DB access. Must be called from an IO context.
 fun linkDocumentProductToDeliveryNoteInfo(
     linkToDeliveryNotesQueries: Any,
     documentProductId: Long,
@@ -736,23 +815,95 @@ fun linkDocumentProductToDeliveryNoteInfo(
 ) {
     try {
         if (linkToDeliveryNotesQueries is LinkCreditNoteDocumentProductToDeliveryNoteQueries) {
-            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
+            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct( // DB call
                 document_product_id = documentProductId,
                 delivery_note_number = deliveryNoteNumber,
                 delivery_note_date = deliveryNoteDate
             )
         } else if (linkToDeliveryNotesQueries is LinkInvoiceDocumentProductToDeliveryNoteQueries) {
-            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct(
+            linkToDeliveryNotesQueries.saveInfoLinkedToDocumentProduct( // DB call
                 document_product_id = documentProductId,
                 delivery_note_number = deliveryNoteNumber,
                 delivery_date = deliveryNoteDate
             )
+        } else {
+            //Log.w("GlobalHelpers", "Unsupported query type for linkDocumentProductToDeliveryNoteInfo: ${linkQueries::class.simpleName}")
         }
     } catch (e: Exception) {
-        //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e("GlobalHelpers", "Error in linkDocumentProductToDeliveryNoteInfo: ${e.message}")
     }
 }
 
+// Synchronous DB access. Must be called from an IO context.
+fun linkDocumentProductToParentDocument(
+    linkQueries: Any,
+    parentId: Long,
+    documentProductId: Long,
+    sortOrder: Int?,
+) {
+    try {
+        val newSortOrder: Long = when (linkQueries) {
+            is LinkInvoiceToDocumentProductQueries -> {
+                val result =
+                    linkQueries.getMaxSortOrderForInvoice(parentId).executeAsOneOrNull() // DB call
+                (result?.maxOrder ?: -1L) + 1L
+            }
+
+            is LinkDeliveryNoteToDocumentProductQueries -> {
+                val result = linkQueries.getMaxSortOrderForDeliveryNote(parentId)
+                    .executeAsOneOrNull() // DB call
+                (result?.maxOrder ?: -1L) + 1L
+            }
+
+            is LinkCreditNoteToDocumentProductQueries -> {
+                val result = linkQueries.getMaxSortOrderForCreditNote(parentId)
+                    .executeAsOneOrNull() // DB call
+                (result?.maxOrder ?: -1L) + 1L
+            }
+
+            else -> {
+                //Log.w("GlobalHelpers", "Unsupported query type for linkDocumentProductToParentDocument (sort order): ${linkQueries::class.simpleName}")
+                0L // Default sort order if type is unknown, or handle error
+            }
+        }
+
+        val finalSortOrder = sortOrder?.toLong() ?: newSortOrder
+
+        when (linkQueries) {
+            is LinkInvoiceToDocumentProductQueries -> {
+                linkQueries.saveProductLinkedToInvoice( // DB call
+                    id = null, // Auto-incremented
+                    invoice_id = parentId,
+                    document_product_id = documentProductId,
+                    sort_order = finalSortOrder
+                )
+            }
+
+            is LinkDeliveryNoteToDocumentProductQueries -> {
+                linkQueries.saveProductLinkedToDeliveryNote( // DB call
+                    id = null,
+                    delivery_note_id = parentId,
+                    document_product_id = documentProductId,
+                    sort_order = finalSortOrder
+                )
+            }
+
+            is LinkCreditNoteToDocumentProductQueries -> {
+                linkQueries.saveProductLinkedToCreditNote( // DB call
+                    id = null,
+                    credit_note_id = parentId,
+                    document_product_id = documentProductId,
+                    sort_order = finalSortOrder
+                )
+            }
+            // else case already handled for sort order, no insert if type is unknown
+        }
+    } catch (e: Exception) {
+        //Log.e("GlobalHelpers", "Error in linkDocumentProductToParentDocument: ${e.message}")
+    }
+}
+
+// This function is suspend.It calls other suspend functions or synchronous DB calls that should be wrapped.
 suspend fun saveDocumentClientOrIssuerInDbAndLink(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
@@ -781,6 +932,7 @@ suspend fun saveDocumentClientOrIssuerInDbAndLink(
     }
 }
 
+// Synchronous DB access. Must be called from an IO context.
 fun linkDocumentClientOrIssuerToDocument(
     linkQueries: Any,
     documentId: Long,
@@ -811,92 +963,108 @@ fun linkDocumentClientOrIssuerToDocument(
                     document_client_or_issuer_id = documentClientOrIssuerId
                 )
             }
+
+            else -> {
+                //Log.w("GlobalHelpers", "Unsupported query type for linkDocumentClientOrIssuerToDocument: ${linkQueries::class.simpleName}")
+            }
         }
     } catch (e: Exception) {
-        //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        //Log.e("GlobalHelpers", "Error in linkDocumentClientOrIssuerToDocument: ${e.message}")
     }
 }
 
+
+// This function is suspend and wraps its DB operations in Dispatchers.IO.
+// It returns the ID of the saved/updated ClientOrIssuer.
 private suspend fun saveDocumentClientOrIssuer(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
-    documentClientOrIssuer: ClientOrIssuerState,
-) {
-    saveInfoInDocumentClientOrIssuerTable(documentClientOrIssuerQueries, documentClientOrIssuer)
-    documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-        ?.let { documentClientId ->
-            saveInfoInDocumentClientOrIssuerAddressTables(
-                documentClientOrIssuerAddressQueries,
-                linkDocumentClientOrIssuerToAddressQueries,
-                documentClientId,
-                documentClientOrIssuer.addresses
-            )
-        }
-}
-
-private suspend fun saveInfoInDocumentClientOrIssuerTable(
-    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
-    documentClientOrIssuer: ClientOrIssuerState,
-) {
-    withContext(Dispatchers.IO) {
+    clientOrIssuerState: ClientOrIssuerState,
+): Long? { // Return the ID of the saved client/issuer
+    return withContext(Dispatchers.IO) {
         try {
-            documentClientOrIssuerQueries.save(
-                id = null,
-                type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                    documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-                ) ClientOrIssuerType.CLIENT.name.lowercase()
-                else ClientOrIssuerType.ISSUER.name.lowercase(),
-                documentClientOrIssuer.firstName?.text,
-                documentClientOrIssuer.name.text,
-                documentClientOrIssuer.phone?.text,
-                documentClientOrIssuer.email?.text,
-                documentClientOrIssuer.notes?.text,
-                documentClientOrIssuer.companyId1Label?.text,
-                documentClientOrIssuer.companyId1Number?.text,
-                documentClientOrIssuer.companyId2Label?.text,
-                documentClientOrIssuer.companyId2Number?.text,
-                documentClientOrIssuer.companyId3Label?.text,
-                documentClientOrIssuer.companyId3Number?.text,
-            )
-        } catch (cause: Throwable) {
+            saveInfoInDocumentClientOrIssuerTable(
+                documentClientOrIssuerQueries,
+                clientOrIssuerState
+            ) // Synchronous DB call
+            val savedClientOrIssuerId =
+                documentClientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull() // DB call
+
+            savedClientOrIssuerId?.let { id ->
+                saveInfoInDocumentClientOrIssuerAddressTables( // Synchronous DB call
+                    documentClientOrIssuerAddressQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
+                    id,
+                    clientOrIssuerState.addresses
+                )
+            }
+            savedClientOrIssuerId
+        } catch (e: Exception) {
+            //Log.e("GlobalHelpers", "Error in saveDocumentClientOrIssuer: ${e.message}")
+            null
         }
     }
 }
 
-private suspend fun saveInfoInDocumentClientOrIssuerAddressTables(
+
+// Synchronous private helper, performs DB IO.
+// Must be called from a Dispatchers.IO context.
+private fun saveInfoInDocumentClientOrIssuerTable(
+    documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
+    documentClientOrIssuer: ClientOrIssuerState,
+) {
+    documentClientOrIssuerQueries.save(
+        // DB call
+        id = null,
+        type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+        ) ClientOrIssuerType.CLIENT.name.lowercase()
+        else ClientOrIssuerType.ISSUER.name.lowercase(),
+        documentClientOrIssuer.firstName?.text,
+        documentClientOrIssuer.name.text,
+        documentClientOrIssuer.phone?.text,
+        documentClientOrIssuer.email?.text,
+        documentClientOrIssuer.notes?.text,
+        documentClientOrIssuer.companyId1Label?.text,
+        documentClientOrIssuer.companyId1Number?.text,
+        documentClientOrIssuer.companyId2Label?.text,
+        documentClientOrIssuer.companyId2Number?.text,
+        documentClientOrIssuer.companyId3Label?.text,
+        documentClientOrIssuer.companyId3Number?.text,
+    )
+}
+
+// Synchronous private helper, performs DB IO.
+// Must be called from a Dispatchers.IO context.
+private fun saveInfoInDocumentClientOrIssuerAddressTables(
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
     documentClientOrIssuerId: Long,
     addresses: List<AddressState>?,
 ) {
-    return withContext(Dispatchers.IO) {
-        try {
-            addresses?.forEach { address ->
-                documentClientOrIssuerAddressQueries.save(
-                    id = null,
-                    address_title = address.addressTitle?.text,
-                    address_line_1 = address.addressLine1?.text,
-                    address_line_2 = address.addressLine2?.text,
-                    zip_code = address.zipCode?.text,
-                    city = address.city?.text,
-                )
+    addresses?.forEach { address ->
+        documentClientOrIssuerAddressQueries.save(
+            id = null,
+            address_title = address.addressTitle?.text,
+            address_line_1 = address.addressLine1?.text,
+            address_line_2 = address.addressLine2?.text,
+            zip_code = address.zipCode?.text,
+            city = address.city?.text,
+        )
 
-                documentClientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
-                    ?.let { addressId ->
-                        linkClientOrIssuerToAddress(
-                            linkDocumentClientOrIssuerToAddressQueries,
-                            documentClientOrIssuerId,
-                            addressId
-                        )
-                    }
+        documentClientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
+            ?.let { addressId ->
+                linkClientOrIssuerToAddress(
+                    linkDocumentClientOrIssuerToAddressQueries,
+                    documentClientOrIssuerId,
+                    addressId
+                )
             }
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
     }
 }
 
+// Pure transformation function for DocumentClientOrIssuer.
 fun DocumentClientOrIssuer.transformIntoEditable(
     addresses: List<AddressState>? = null,
 ): ClientOrIssuerState {
@@ -940,6 +1108,8 @@ fun DocumentClientOrIssuer.transformIntoEditable(
     )
 }
 
+// Synchronous function, performs multiple DB accesses.
+// MUST be called from a Dispatchers.IO context.
 fun fetchClientAndIssuer(
     documentId: Long,
     linkQueries: Any,
@@ -990,6 +1160,8 @@ fun fetchClientAndIssuer(
     return null
 }
 
+// Synchronous function, performs DB access.
+// Must be called from a Dispatchers.IO context.
 fun fetchDocumentClientOrIssuerAddresses(
     id: Long,
     linkQueries: LinkDocumentClientOrIssuerToAddressQueries,
@@ -1009,4 +1181,48 @@ fun fetchDocumentClientOrIssuerAddresses(
         //Log.e(ContentValues.TAG, "Error: ${e.message}")
     }
     return null
+}
+
+// This function should be called from a Dispatchers.IO context
+fun updateDocumentProductsOrderInDb(
+    documentId: Long,
+    orderedProducts: List<DocumentProductState>,
+    linkQueries: Any
+) {
+
+    orderedProducts.forEach { product ->
+        val productId = product.id?.toLong()
+        val newSortOrder = product.sortOrder?.toLong()
+
+        if (productId != null) {
+            when (linkQueries) {
+                is LinkInvoiceToDocumentProductQueries -> {
+                    linkQueries.updateSortOrderForDocumentProduct( // DB Call
+                        sort_order = newSortOrder,
+                        id = documentId,
+                        document_product_id = productId
+                    )
+                }
+
+                is LinkDeliveryNoteToDocumentProductQueries -> {
+                    linkQueries.updateSortOrderForDocumentProduct( // DB Call
+                        sort_order = newSortOrder,
+                        id = documentId,
+                        document_product_id = productId
+                    )
+                }
+
+                is LinkCreditNoteToDocumentProductQueries -> {
+                    linkQueries.updateSortOrderForDocumentProduct( // DB Call
+                        sort_order = newSortOrder,
+                        id = documentId,
+                        document_product_id = productId
+                    )
+                }
+                // else -> Log.w("InvoiceLocalDataSource", "Unsupported document type for updating sort order: $documentType")
+            }
+        } else {
+            // Log.w("InvoiceLocalDataSource", "Product ID is null for product: ${product.name.text}, cannot update sort order.")
+        }
+    }
 }

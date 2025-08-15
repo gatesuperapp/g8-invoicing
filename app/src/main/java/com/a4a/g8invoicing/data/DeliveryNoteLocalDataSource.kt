@@ -1,18 +1,17 @@
 package com.a4a.g8invoicing.data
 
-import android.content.ContentValues
-import android.util.Log
+
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.screens.shared.calculatePriceWithoutTax
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
+import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentPrices
+import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.text.DecimalFormat
 import java.util.Calendar
 
 class DeliveryNoteLocalDataSource(
@@ -135,7 +133,7 @@ class DeliveryNoteLocalDataSource(
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
                     documentProductQueries.getDocumentProduct(it.document_product_id)
-                        .executeAsOne().transformIntoEditableDocumentProduct()
+                        .executeAsOne().transformIntoEditableDocumentProduct(sortOrder = it.sort_order?.toInt())
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
@@ -159,7 +157,7 @@ class DeliveryNoteLocalDataSource(
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
-                documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
+                documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency)),
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at
@@ -222,11 +220,11 @@ class DeliveryNoteLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.saveDocumentProduct(
-                    document_product_id = null,
+                    id = null,
                     name = documentProduct.name.text,
                     quantity = documentProduct.quantity.toDouble(),
                     description = documentProduct.description?.text,
-                    final_price = documentProduct.priceWithTax?.toDouble(),
+                    price_without_tax = documentProduct.priceWithoutTax?.toDouble(),
                     tax_rate = documentProduct.taxRate?.toDouble(),
                     unit = documentProduct.unit?.text,
                     product_id = documentProduct.productId?.toLong()
@@ -236,9 +234,12 @@ class DeliveryNoteLocalDataSource(
                     documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
                         ?.let { id ->
                             documentProductId = id
-                            addDocumentProduct(
+
+                            linkDocumentProductToParentDocument(
+                                linkDeliveryNoteToDocumentProductQueries,
                                 deliveryNoteId,
-                                id.toLong()
+                                id.toLong(),
+                                documentProduct.sortOrder
                             )
                         }
                 }
@@ -352,18 +353,6 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override fun addDocumentProduct(deliveryNoteId: Long, documentProductId: Long) {
-        try {
-            linkDeliveryNoteToDocumentProductQueries.saveProductLinkedToDeliveryNote(
-                id = null,
-                delivery_note_id = deliveryNoteId,
-                document_product_id = documentProductId
-            )
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-    }
-
 
     private fun getExistingIssuer(): DocumentClientOrIssuer? {
         var issuer: DocumentClientOrIssuer? = null
@@ -420,20 +409,31 @@ class DeliveryNoteLocalDataSource(
             }
         }
     }
+
+    /**
+     * Updates the sort_order for a list of document products linked to a parent document.
+     */
+    override suspend fun updateDocumentProductsOrderInDb(
+        documentId: Long,
+        orderedProducts: List<DocumentProductState>,
+    ) {
+        withContext(Dispatchers.IO) {
+            try {
+                documentProductQueries.transaction {
+                    updateDocumentProductsOrderInDb(documentId, orderedProducts, linkDeliveryNoteToDocumentProductQueries)
+                }
+            } catch (e: Exception) {
+                // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
+                throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
+            }
+        }
+    }
 }
 
 
-fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrices {
-    val totalPriceWithoutTax = products.filter { it.priceWithTax != null }.sumOf {
-        val unitTotal = if (it.taxRate != null) {
-            it.taxRate?.let { taxRate ->
-                it.priceWithTax?.let { priceWithTax ->
-                    calculatePriceWithoutTax(priceWithTax, taxRate)
-                }
-            }
-        } else (it.priceWithTax)
-
-        unitTotal!! * (it.quantity)
+fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotalPrices {
+    val totalPriceWithoutTax = products.filter { it.priceWithoutTax != null }.sumOf {
+        it.priceWithoutTax!! * (it.quantity)
     }.setScale(2, RoundingMode.HALF_UP)
 
     // Calculate the total amount of each tax
@@ -444,12 +444,8 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrice
 
     val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
     groupedItems.values.forEach { documentProduct ->
-        val listOfAmounts = documentProduct.filter { it.priceWithTax != null }.map {
-            val value =
-                it.priceWithTax!!.toDouble() / (1.0 + (it.taxRate ?: 0.0).toDouble() / 100.0)
-            val priceWithoutTax = BigDecimal(value)
-
-            priceWithoutTax * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
+        val listOfAmounts = documentProduct.filter { it.priceWithoutTax != null }.map {
+            BigDecimal(it.priceWithoutTax!!.toDouble()) * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
         }
         val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
         amounts.add(
@@ -461,7 +457,7 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentPrice
         amountsPerTaxRate.add(Pair(key, amounts[index]))
     } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
 
-    return DocumentPrices(
+    return DocumentTotalPrices(
         totalPriceWithoutTax = totalPriceWithoutTax,
         totalAmountsOfEachTax = amountsPerTaxRate,
         totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }

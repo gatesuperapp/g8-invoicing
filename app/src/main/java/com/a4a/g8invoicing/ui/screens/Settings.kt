@@ -45,7 +45,8 @@ fun Settings(
             TopBar(
                 title = R.string.appbar_about,
                 navController = navController,
-                onClickBackArrow = onClickBack
+                onClickBackArrow = onClickBack,
+                isCancelCtaDisplayed = false
             )
         },
         //   private val _uiState = MutableStateFlow(ClientsUiState())
@@ -55,8 +56,7 @@ fun Settings(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
-                    backgroundColor.value =
-                        changeBackgroundWithVerticalGradient(backgroundColor.value)
+                    //
                 }
             )
         }

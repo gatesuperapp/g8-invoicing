@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit
 // Bottom sheet with "New product" and "Choose in list" buttons
 // And the list of chosen products
 @Composable
-fun DocumentBottomSheetProductsAvailable(
+fun DocumentBottomSheetProducts(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
     documentProductUiState: DocumentProductState,
@@ -60,6 +60,7 @@ fun DocumentBottomSheetProductsAvailable(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
+    onOrderChange: (List<DocumentProductState>) -> Unit
 ) {
 
     Box(
@@ -156,11 +157,12 @@ fun DocumentBottomSheetProductsAvailable(
                 onShowDocumentForm(true)
             },
             onClickDelete = onClickDeleteDocumentProduct,
-            isClientOrIssuerListEmpty = parameters.second.isEmpty()
+            isClientOrIssuerListEmpty = parameters.second.isEmpty(),
+            onOrderChange = onOrderChange
         )
 
         if (isProductListVisible) {
-            DocumentBottomSheetProductsAvailable(
+            DocumentBottomSheetProducts(
                 list = params.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {

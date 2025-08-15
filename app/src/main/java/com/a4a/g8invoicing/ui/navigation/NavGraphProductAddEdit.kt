@@ -1,6 +1,13 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -9,18 +16,27 @@ import com.a4a.g8invoicing.ui.screens.ProductAddEdit
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.states.ProductState
 
 fun NavGraphBuilder.productAddEdit(
     navController: NavController,
     onClickBack: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
 ) {
+
     composable(
         route = Screen.ProductAddEdit.name + "?itemId={itemId}&type={type}",
         arguments = listOf(
             navArgument("itemId") { nullable = true },
             navArgument("type") { nullable = true },
-        )
+        ),
+        enterTransition = {
+            fadeIn(animationSpec = tween(500))
+        },
+        exitTransition = {
+            fadeOut(animationSpec = tween(300))
+        }
+
     ) { backStackEntry ->
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
         val productUiState by viewModel.productUiState
@@ -29,8 +45,8 @@ fun NavGraphBuilder.productAddEdit(
         ProductAddEdit(
             navController = navController,
             product = productUiState,
-            onValueChange = { pageElement, value ->
-                viewModel.updateProductState(pageElement, value, ProductType.PRODUCT)
+            onValueChange = { pageElement, value, idStr ->
+                viewModel.updateProductState(pageElement, value, ProductType.PRODUCT, idStr)
             },
             placeCursorAtTheEndOfText = { pageElement ->
                 viewModel.updateCursor(pageElement, ProductType.PRODUCT)
@@ -44,7 +60,9 @@ fun NavGraphBuilder.productAddEdit(
                 onClickBack()
             },
             onClickBack = onClickBack,
-            onClickForward = onClickForward
+            onClickForward = onClickForward,
+            onClickDeletePrice = { viewModel.deletePrice(it) },
+            onClickAddPrice = { viewModel.addPrice() }
         )
     }
 }

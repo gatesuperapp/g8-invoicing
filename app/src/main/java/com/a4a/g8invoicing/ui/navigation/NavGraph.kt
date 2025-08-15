@@ -2,6 +2,10 @@ package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,132 +35,131 @@ fun NavGraph(navController: NavHostController) {
         navController,
         // startDestination = (Screen.About.name),
         //  startDestination = (Screen.Account.name),
-         startDestination = (Screen.InvoiceList.name),
+          startDestination = (Screen.InvoiceList.name),
         // startDestination = (Screen.CreditNoteList.name),
         //     startDestination = (Screen.DeliveryNoteList.name),
-        //   startDestination = (Screen.ProductList.name),
+        // startDestination = (Screen.ProductList.name),
         // startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
         //  startDestination = (Screen.ClientOrIssuerList.name),
-        enterTransition = { EnterTransition.None },
-        exitTransition = { ExitTransition.None }
+
     ) {
-        about(
-            navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        account(
-            navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
+             about(
+                 navController = navController,
+                 onClickCategory = {
+                     navController.navigateAndReplaceStartDestination(it)
+                 },
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             account(
+                 navController = navController,
+                 onClickCategory = {
+                     navController.navigateAndReplaceStartDestination(it)
+                 },
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
 
-        deliveryNoteList(
-            navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
-            onClickListItem = {
-                val params = ("?itemId=${it}")
-                navController.navigate(Screen.DeliveryNoteAddEdit.name + params)
-            },
-            onClickNew = {
+             deliveryNoteList(
+                 navController = navController,
+                 onClickCategory = {
+                     navController.navigateAndReplaceStartDestination(it)
+                 },
+                 onClickListItem = {
+                     val params = ("?itemId=${it}")
+                     navController.navigate(Screen.DeliveryNoteAddEdit.name + params)
+                 },
+                 onClickNew = {
 
-                navController.navigate(Screen.DeliveryNoteAddEdit.name)
-            },
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        invoiceList(
-            navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
-            onClickListItem = {
-                val params = ("?itemId=${it}")
-                navController.navigate(Screen.InvoiceAddEdit.name + params)
-            },
-            onClickNew = {
-                navController.navigate(Screen.InvoiceAddEdit.name)
-            },
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        creditNoteList(
-            navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
-            onClickListItem = {
-                val params = ("?itemId=${it}")
-                navController.navigate(Screen.CreditNoteAddEdit.name + params)
-            },
-            onClickNew = {
-                navController.navigate(Screen.CreditNoteAddEdit.name)
-            },
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        clientOrIssuerList(
-            navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
-            onClickListItem = {
-                val params = ("?itemId=${it.id}&type=client")
-                navController.navigate(Screen.ClientAddEdit.name + params)
-            },
-            onClickNew = {
-                val params = ("?type=client")
-                navController.navigate(Screen.ClientAddEdit.name + params)
-            },
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        clientAddEdit(
-            navController = navController,
-            goToPreviousScreen = { key, result ->
-                navigateBackWithResult(navController, key, result)
-            }
-        )
-        deliveryNoteAddEdit(
-            navController = navController,
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        invoiceAddEdit(
-            navController = navController,
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
-        creditNoteAddEdit(
-            navController = navController,
-            onClickBack = {
-                navigateBack(navController)
-            }
-        )
+                     navController.navigate(Screen.DeliveryNoteAddEdit.name)
+                 },
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             invoiceList(
+                 navController = navController,
+                 onClickCategory = {
+                     navController.navigateAndReplaceStartDestination(it)
+                 },
+                 onClickListItem = {
+                     val params = ("?itemId=${it}")
+                     navController.navigate(Screen.InvoiceAddEdit.name + params)
+                 },
+                 onClickNew = {
+                     navController.navigate(Screen.InvoiceAddEdit.name)
+                 },
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             creditNoteList(
+                 navController = navController,
+                 onClickCategory = {
+                     navController.navigateAndReplaceStartDestination(it)
+                 },
+                 onClickListItem = {
+                     val params = ("?itemId=${it}")
+                     navController.navigate(Screen.CreditNoteAddEdit.name + params)
+                 },
+                 onClickNew = {
+                     navController.navigate(Screen.CreditNoteAddEdit.name)
+                 },
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             clientOrIssuerList(
+                 navController = navController,
+                 onClickCategory = {
+                     navController.navigateAndReplaceStartDestination(it)
+                 },
+                 onClickListItem = {
+                     val params = ("?itemId=${it.id}&type=client")
+                     navController.navigate(Screen.ClientAddEdit.name + params)
+                 },
+                 onClickNew = {
+                     val params = ("?type=client")
+                     navController.navigate(Screen.ClientAddEdit.name + params)
+                 },
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             clientAddEdit(
+                 navController = navController,
+                 goToPreviousScreen = { key, result ->
+                     navigateBackWithResult(navController, key, result)
+                 }
+             )
+             deliveryNoteAddEdit(
+                 navController = navController,
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             invoiceAddEdit(
+                 navController = navController,
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
+             creditNoteAddEdit(
+                 navController = navController,
+                 onClickBack = {
+                     navigateBack(navController)
+                 }
+             )
         productList(
             navController = navController,
             onClickCategory = {
                 navController.navigateAndReplaceStartDestination(it)
             },
             onClickListItem = {
-                val params = ("?itemId=${it.productId}&type=product")
+                val params = ("?itemId=${it.id}&type=product")
                 //TODO remove as useless, the start destination is already the product dest..
                 navController.navigate("ProductCreation$params") {
                     // Pop up to the start destination of the graph to
@@ -174,24 +177,18 @@ fun NavGraph(navController: NavHostController) {
             },
             onClickNew = {
                 navController.navigate("ProductCreation") {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        saveState = true
-                    }
-                    launchSingleTop = true
-                    restoreState = true
+
                 }
             },
             onClickBack = {
-                navigateBack(navController)
+                // navigateBack(navController)
             }
         )
 
         // Product Add/Edit NESTED NAVIGATION.
-        // ****The parent/start destination route is named "ProductCreation"****
+        // ****The route is named "ProductCreation"****
         // and contains "ProductAddEdit" & "TaxRates"
         // The goal is to share the ViewModel between those 2 screens
-        // The argument "isNewProduct" indicates if it's accessed through the "Add new" button,
-        // or if it's an update of an existing product
         navigation(
             startDestination = Screen.ProductAddEdit.name + "?itemId={itemId}&type={type}",
             route = "ProductCreation?itemId={itemId}&type={type}",

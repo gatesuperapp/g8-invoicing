@@ -19,10 +19,12 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.migration.CustomInjection
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,7 +57,9 @@ class InvoiceListViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                invoiceDataSource.fetchAll()?.collect {
+                invoiceDataSource.fetchAll()
+                ?.flowOn(Dispatchers.IO)
+                ?.collect {
                     _documentsUiState.update { uiState ->
                         //Log.e(ContentValues.TAG, "clientAndIssuer _documentsUiState" + _documentsUiState)
 

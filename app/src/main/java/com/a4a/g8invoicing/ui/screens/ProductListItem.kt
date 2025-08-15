@@ -135,7 +135,7 @@ fun ProductListItem(
                     )
 
                     Text(
-                        text = product.priceWithTax?.let {
+                        text = product.defaultPriceWithTax?.let {
                             it.toString() + stringResource(R.string.currency)
                         } ?: " - "
                     )

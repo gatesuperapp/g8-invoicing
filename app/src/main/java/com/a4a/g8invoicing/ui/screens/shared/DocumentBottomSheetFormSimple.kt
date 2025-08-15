@@ -48,7 +48,7 @@ fun DocumentBottomSheetFormSimple(
         sheetState = sheetState,
         dragHandle = null,
         properties = ModalBottomSheetProperties(
-            shouldDismissOnBackPress = false,
+            shouldDismissOnBackPress = true,
             securePolicy = SecureFlagPolicy.Inherit,
             isFocusable = true
         )

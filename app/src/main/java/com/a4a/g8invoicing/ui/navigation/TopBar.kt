@@ -17,14 +17,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.ui.shared.icons.IconArrowBack
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
-import com.ninetyninepercent.funfactu.icons.IconArrowBack
 import icons.IconMenu
 import kotlinx.coroutines.launch
 
-/**
- * [TopBar] provides back arrow navigation and eventually screen titles.
- */
+//Provides back arrow navigation and eventually screen titles.
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +35,7 @@ fun TopBar(
     onClickCtaValidate: () -> Unit = {},
     iconSize: Dp = 24.dp,
     navController: NavController,
-    isCancelCtaDisplayed: Boolean = false,
+    isCancelCtaDisplayed: Boolean,
     onClickBackArrow: () -> Unit,
 ) {
     TopAppBar(
@@ -86,13 +85,14 @@ private fun BackArrow(
     onClickBackArrow: () -> Unit,
 ) {
 
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    //Adding this check to avoid the back arrow flicker when opening a detail screen
+    // from a list (The back arrows was showing in the top bar while the new screen is loaded)
+    val previousRoute = navController.previousBackStackEntry?.destination?.route
+    val noBackArrowScreens = listOf(Screen.ProductList.name, Screen.ClientOrIssuerList.name)
 
-    val showBackButton by remember(currentBackStackEntry) {
-        derivedStateOf {
-            navController.previousBackStackEntry != null
-        }
-    }
+    val showBackButton = navController.previousBackStackEntry != null &&
+            previousRoute != null &&
+            noBackArrowScreens.none { previousRoute.startsWith(it) }
 
     if (showBackButton) {
         IconButton(onClick = onClickBackArrow) {
@@ -101,7 +101,6 @@ private fun BackArrow(
                 contentDescription = "back button"
             )
         }
-    } else {
     }
 }
 

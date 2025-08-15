@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.ui.screens.shared.TableCell
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
@@ -179,12 +180,7 @@ fun DocumentProductsRows(
     displayUnitColumn: Boolean,
 
     ) {
-    tableData.forEach {
-        val priceWithoutTax = it.taxRate?.let { taxRate ->
-            it.priceWithTax?.let { priceWithTax ->
-                calculatePriceWithoutTax(priceWithTax, taxRate)
-            }
-        } ?: it.priceWithTax ?: BigDecimal(0)
+    tableData.forEach { data ->
 
         Row(
             Modifier
@@ -193,38 +189,42 @@ fun DocumentProductsRows(
             horizontalArrangement = Arrangement.End
         ) {
             TableCell(
-                text = it.name.text,
+                text = data.name.text,
                 weight = descriptionColumnWeight,
                 alignEnd = false,
-                subText = it.description?.text
+                subText = data.description?.text
             )
             TableCell(
-                text = it.quantity.stripTrailingZeros().toPlainString().replace(".", ",") + " ",
+                text = data.quantity.stripTrailingZeros().toPlainString().replace(".", ",") + " ",
                 weight = quantityColumnWeight,
                 alignEnd = true
             )
 
             if (displayUnitColumn) {
                 TableCell(
-                    text = if (!it.unit?.text.isNullOrEmpty()) it.unit?.text!! else " - ",
+                    text = if (!data.unit?.text.isNullOrEmpty()) data.unit?.text!! else " - ",
                     alignEnd = true
                 )
             }
 
             TableCell(
-                text = it.taxRate?.let { "$it%" }
+                text = data.taxRate?.let { "$it%" }
                     ?: " - ",
                 weight = taxColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = priceWithoutTax.setScale(2, RoundingMode.HALF_UP)
-                    .toString().replace(".", ",") + stringResource(id = R.string.currency),
+                text = data.priceWithoutTax?.let {
+                    it.setScale(2, RoundingMode.HALF_UP)
+                        .toString().replace(".", ",") + stringResource(id = R.string.currency)
+                } ?: "",
                 alignEnd = true
             )
             TableCell(
-                text = (priceWithoutTax * it.quantity).setScale(2, RoundingMode.HALF_UP)
-                    .toString().replace(".", ",") + stringResource(id = R.string.currency),
+                text = data.priceWithoutTax?.let {
+                    (it * data.quantity).setScale(2, RoundingMode.HALF_UP)
+                        .toString().replace(".", ",") + stringResource(id = R.string.currency)
+                } ?: "",
                 alignEnd = true
             )
 

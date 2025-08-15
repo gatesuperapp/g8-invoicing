@@ -1,5 +1,9 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,7 +21,14 @@ fun NavGraphBuilder.productList(
     onClickNew: () -> Unit,
     onClickBack: () -> Unit,
 ) {
-    composable(route = Screen.ProductList.name) {
+    composable(
+        route = Screen.ProductList.name,
+        exitTransition = {
+            fadeOut(
+                animationSpec = tween(100) // Adjust duration as needed
+            )
+        }
+    ) {
         val viewModel: ProductListViewModel = hiltViewModel()
         val productsUiState by viewModel.productsUiState
             .collectAsStateWithLifecycle()

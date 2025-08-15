@@ -67,8 +67,8 @@ fun ProductTaxRatesContent(
             taxRatesIncludingNoTax?.forEach { taxRate ->
 
                 val isCurrentTaxRate = if(currentTaxRate == null) {
-                    taxRatesIncludingNoTax == BigDecimal(0)
-                } else taxRate.compareTo(chosenOption) == 0
+                    taxRate == BigDecimal(0)
+                } else chosenOption != null && taxRate.compareTo(chosenOption) == 0
                 //We use compareTo() because if we use taxRate == chosenOption it compares 20 with 20.0 and returns false
 
                 Row(

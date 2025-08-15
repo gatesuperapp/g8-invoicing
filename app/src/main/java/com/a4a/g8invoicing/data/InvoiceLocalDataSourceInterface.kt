@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
@@ -10,11 +11,12 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface InvoiceLocalDataSourceInterface {
-    fun fetch(id: Long): InvoiceState?
+    suspend fun fetch(id: Long): InvoiceState?
     fun fetchAll(): Flow<List<InvoiceState>>?
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(
-        documentProduct: DocumentProductState, id: Long?,
+        documentProduct: DocumentProductState,
+        documentId: Long?,
         deliveryNoteDate: String? = null,
         deliveryNoteNumber: String? = null,
     )
@@ -31,6 +33,7 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun update(document: InvoiceState)
     suspend fun delete(documents: List<InvoiceState>)
     suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase)
-    suspend fun deleteTag(invoiceId: Int)
+    suspend fun deleteTag(invoiceId: Long)
     suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag)
+    suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
 }

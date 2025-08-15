@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.data
 
-import android.content.ContentValues
-import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -18,10 +16,8 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
@@ -34,7 +30,7 @@ class CreditNoteLocalDataSource(
     private val linkDocumentClientOrIssuerToAddressQueries =
         db.linkDocumentClientOrIssuerToAddressQueries
     private val documentProductQueries = db.documentProductQueries
-    private val linkCreditNoteToDocumentProductQueries = db.linkCreditNoteToDocumentProductQueries
+    private val linkDocumentProductToCreditNoteQueries = db.linkCreditNoteToDocumentProductQueries
     private val linkCreditNoteDocumentProductToDeliveryNoteQueries =
         db.linkCreditNoteDocumentProductToDeliveryNoteQueries
     private val linkCreditNoteToDocumentClientOrIssuerQueries =
@@ -70,25 +66,28 @@ class CreditNoteLocalDataSource(
         return null
     }
 
-    override fun fetch(id: Long): CreditNoteState? {
-        try {
-            return creditNoteQueries.get(id).executeAsOneOrNull()
-                ?.let {
-                    it.transformIntoEditableCreditNote(
-                        fetchDocumentProducts(it.credit_note_id),
-                        fetchClientAndIssuer(
-                            it.credit_note_id,
-                            linkCreditNoteToDocumentClientOrIssuerQueries,
-                            linkDocumentClientOrIssuerToAddressQueries,
-                            documentClientOrIssuerQueries,
-                            documentClientOrIssuerAddressQueries
+    override suspend fun fetch(id: Long): CreditNoteState? {
+
+        return withContext(Dispatchers.IO) {
+            try {
+                creditNoteQueries.get(id).executeAsOneOrNull()
+                    ?.let {
+                        it.transformIntoEditableCreditNote(
+                            fetchDocumentProducts(it.credit_note_id),
+                            fetchClientAndIssuer(
+                                it.credit_note_id,
+                                linkCreditNoteToDocumentClientOrIssuerQueries,
+                                linkDocumentClientOrIssuerToAddressQueries,
+                                documentClientOrIssuerQueries,
+                                documentClientOrIssuerAddressQueries
+                            )
                         )
-                    )
-                }
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                    }
+            } catch (e: Exception) {
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            }
+            null
         }
-        return null
     }
 
     override fun fetchAll(): Flow<List<CreditNoteState>>? {
@@ -122,7 +121,7 @@ class CreditNoteLocalDataSource(
     private fun fetchDocumentProducts(id: Long): MutableList<DocumentProductState>? {
         try {
             val listOfIds =
-                linkCreditNoteToDocumentProductQueries.getDocumentProductsLinkedToCreditNote(id)
+                linkDocumentProductToCreditNoteQueries.getDocumentProductsLinkedToCreditNote(id)
                     .executeAsList()
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
@@ -133,7 +132,8 @@ class CreditNoteLocalDataSource(
                         .executeAsOne()
                         .transformIntoEditableDocumentProduct(
                             additionalInfo?.delivery_note_date,
-                            additionalInfo?.delivery_note_number
+                            additionalInfo?.delivery_note_number,
+                            it.sort_order?.toInt() // << Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
             } else null
@@ -158,7 +158,7 @@ class CreditNoteLocalDataSource(
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts,
-                documentPrices = documentProducts?.let { calculateDocumentPrices(it) },
+                documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency)),
                 dueDate = it.due_date ?: "",
                 footerText = TextFieldValue(text = it.footer ?: ""),
@@ -242,20 +242,20 @@ class CreditNoteLocalDataSource(
     ): Int? {
         var documentProductId: Int? = null
         withContext(Dispatchers.IO) {
-                try {
-                    documentProductId = saveDocumentProductInDbAndLink(
-                        documentProductQueries,
-                        linkCreditNoteToDocumentProductQueries,
-                        linkDocumentClientOrIssuerToAddressQueries,
-                        documentProduct,
-                        documentId,
-                        deliveryNoteDate,
-                        deliveryNoteNumber
-                    )
-                } catch (e: Exception) {
-                    //Log.e(ContentValues.TAG, "Error: ${e.message}")
-                }
+            try {
+                documentProductId = saveDocumentProductInDbAndLink(
+                    documentProductQueries,
+                    linkDocumentProductToCreditNoteQueries,
+                    linkDocumentClientOrIssuerToAddressQueries,
+                    documentProduct,
+                    documentId,
+                    deliveryNoteDate,
+                    deliveryNoteNumber
+                )
+            } catch (e: Exception) {
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
+        }
         return documentProductId
     }
 
@@ -290,7 +290,7 @@ class CreditNoteLocalDataSource(
                         )
                     }
                     creditNoteQueries.delete(id = document.documentId!!.toLong())
-                    linkCreditNoteToDocumentProductQueries.deleteAllProductsLinkedToCreditNote(
+                    linkDocumentProductToCreditNoteQueries.deleteAllProductsLinkedToCreditNote(
                         document.documentId!!.toLong()
                     )
                     linkCreditNoteToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToCreditNote(
@@ -334,7 +334,7 @@ class CreditNoteLocalDataSource(
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
             return withContext(Dispatchers.IO) {
-                linkCreditNoteToDocumentProductQueries.deleteProductLinkedToCreditNote(
+                linkDocumentProductToCreditNoteQueries.deleteProductLinkedToCreditNote(
                     documentId,
                     documentProductId
                 )
@@ -441,6 +441,25 @@ class CreditNoteLocalDataSource(
             }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+    }
+
+    /**
+     * Updates the sort_order for a list of document products linked to a parent document.
+     */
+    override suspend fun updateDocumentProductsOrderInDb(
+        documentId: Long,
+        orderedProducts: List<DocumentProductState>,
+    ) {
+        withContext(Dispatchers.IO) {
+            try {
+                documentProductQueries.transaction {
+                    updateDocumentProductsOrderInDb(documentId, orderedProducts, linkCreditNoteDocumentProductToDeliveryNoteQueries)
+                }
+            } catch (e: Exception) {
+                // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
+                throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
+            }
         }
     }
 }

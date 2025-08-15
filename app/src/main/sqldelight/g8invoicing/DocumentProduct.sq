@@ -1,23 +1,24 @@
 CREATE TABLE DocumentProduct (
-  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  id INTEGER PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   quantity REAL NOT NULL,
   description TEXT,
-  final_price REAL,
+  price_without_tax REAL,
   tax_rate REAL,
   unit TEXT,
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
   product_id INTEGER,
-    FOREIGN KEY(product_id)
-            REFERENCES Product(product_id)
+
+  FOREIGN KEY(product_id)
+            REFERENCES Product(id)
             ON DELETE CASCADE
 );
 
 getDocumentProduct:
 SELECT *
 FROM DocumentProduct
-WHERE document_product_id = :id;
+WHERE id = :id;
 
 getAllDocumentProducts:
 SELECT *
@@ -25,7 +26,7 @@ FROM DocumentProduct;
 
 saveDocumentProduct:
 INSERT
-INTO DocumentProduct (document_product_id, name, quantity, description, final_price, tax_rate, unit, product_id)
+INTO DocumentProduct (id, name, quantity, description, price_without_tax, tax_rate, unit, product_id)
 VALUES (?, ?, ?, ?, ?, ?,?, ?);
 
 updateDocumentProduct:
@@ -33,18 +34,18 @@ UPDATE DocumentProduct
 SET name = :name,
     quantity = :quantity,
     description = :description,
-    final_price = :price_with_tax,
+    price_without_tax = :price_without_tax,
     tax_rate = :tax_rate,
     unit = :unit
 WHERE
-    document_product_id = :document_product_id;
+    id = :document_product_id;
 
 deleteDocumentProduct:
 DELETE FROM DocumentProduct
-WHERE document_product_id = :id;
+WHERE id = :id;
 
 getLastInsertedRowId:
-SELECT document_product_id
+SELECT id
 FROM DocumentProduct
-ORDER BY document_product_id DESC
+ORDER BY id DESC
 LIMIT 1;

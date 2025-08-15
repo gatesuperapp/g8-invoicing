@@ -11,6 +11,7 @@ data class DocumentProductState(
     var id: Int? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var description: TextFieldValue? = null,
+    var priceWithoutTax: BigDecimal? = null,
     var priceWithTax: BigDecimal? = null,
     var taxRate: BigDecimal? = null,
     var quantity: BigDecimal = BigDecimal(1),
@@ -19,4 +20,5 @@ data class DocumentProductState(
     val linkedDate: String? = null,
     val linkedDocNumber: String? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
+    var sortOrder: Int? = null // remember product sorting in document
 )

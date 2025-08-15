@@ -1,27 +1,22 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import android.content.ContentValues
-import android.util.Log
+import androidx.compose.animation.core.copy
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,7 +49,7 @@ class InvoiceAddEditViewModel @Inject constructor(
             id?.let {
                 fetchInvoiceFromLocalDb(it.toLong())
             } ?: viewModelScope.launch(context = Dispatchers.Default) {
-                createNewInvoice()?.let {
+                createNewInvoiceInVM()?.let {
                     fetchInvoiceFromLocalDb(it)
                 }
             }
@@ -87,7 +82,7 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
-    private suspend fun createNewInvoice(): Long? {
+    private suspend fun createNewInvoiceInVM(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
             try {
@@ -105,7 +100,7 @@ class InvoiceAddEditViewModel @Inject constructor(
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
-    private suspend fun updateInvoiceInLocalDb() {
+    private fun updateInvoiceInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
@@ -118,7 +113,7 @@ class InvoiceAddEditViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        GlobalScope.launch {
+        viewModelScope.launch {
             updateInvoiceInLocalDb()
         }
     }
@@ -129,7 +124,7 @@ class InvoiceAddEditViewModel @Inject constructor(
             try {
                 documentDataSource.saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    id = _documentUiState.value.documentId?.toLong()
+                    documentId = _documentUiState.value.documentId?.toLong()
                 )
             } catch (e: Exception) {
                 //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
@@ -166,7 +161,7 @@ class InvoiceAddEditViewModel @Inject constructor(
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
-                    _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
 
 
@@ -196,12 +191,49 @@ class InvoiceAddEditViewModel @Inject constructor(
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
-                    _documentUiState.value.copy(documentPrices = calculateDocumentPrices(it))
+                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
         } catch (e: Exception) {
             //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
+
+    fun updateDocumentProductsOrderInUiStateAndDb(updatedProducts: List<DocumentProductState>) {
+        viewModelScope.launch {
+            try {
+                // 1. Mettre à jour sortOrder dans la liste pour l'UI et pour la BDD
+                val productsWithUpdatedSortOrder = updatedProducts.mapIndexed { index, product ->
+                    product.copy(sortOrder = index)
+                }
+
+                // 2. Mettre à jour l'état de l'UI
+                _documentUiState.value = _documentUiState.value.copy(
+                    documentProducts = productsWithUpdatedSortOrder
+                )
+
+                // 3. Mettre à jour l'ordre dans la base de données locale
+                val documentId = _documentUiState.value.documentId?.toLong()
+                if (documentId != null) {
+                    documentDataSource.updateDocumentProductsOrderInDb(
+                        documentId = documentId,
+                        orderedProducts = productsWithUpdatedSortOrder
+                    )
+                } else {
+                    // Log.w("InvoiceViewModel", "Document ID or Document Type is null, cannot update sort order in DB.")
+                }
+
+                // Optionnel : Recalculer les prix si nécessaire après changement d'ordre
+                _documentUiState.value.documentProducts?.let {
+                    _documentUiState.value =
+                        _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
+                }
+
+            } catch (e: Exception) {
+                // Log.e("InvoiceViewModel", "Failed to update product order", e)
+            }
+        }
+    }
+
 
     fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: ClientOrIssuerState) {
         saveJob?.cancel()
@@ -311,7 +343,7 @@ class InvoiceAddEditViewModel @Inject constructor(
                     doc
                 )?.let {
                     doc = doc.copy(documentProducts = it)
-                    doc = doc.copy(documentPrices = calculateDocumentPrices(it))
+                    doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it))
                 }
             }
 

@@ -46,9 +46,9 @@ fun DocumentBottomSheetDocumentProductListChosen(
     onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)
     onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
     onClickDelete: (Int) -> Unit, // Delete a document product,
-    isClientOrIssuerListEmpty: Boolean
-
-) {
+    isClientOrIssuerListEmpty: Boolean,
+    onOrderChange: (List<DocumentProductState>) -> Unit
+    ) {
     Column(
         modifier = Modifier
             .fillMaxHeight(0.5f)
@@ -75,7 +75,8 @@ fun DocumentBottomSheetDocumentProductListChosen(
         DocumentBottomSheetProductListChosenContent(
             documentProducts = list,
             onClickItem = onClickDocumentProduct,
-            onClickDelete = onClickDelete
+            onClickDelete = onClickDelete,
+            onOrderChange = onOrderChange
         )
 
         if(list.size == 1) {

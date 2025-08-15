@@ -9,7 +9,7 @@ import dagger.Binds
 import kotlinx.coroutines.flow.Flow
 
 interface CreditNoteLocalDataSourceInterface {
-    fun fetch(id: Long): CreditNoteState?
+    suspend fun fetch(id: Long): CreditNoteState?
     fun fetchAll(): Flow<List<CreditNoteState>>?
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(documentProduct: DocumentProductState, id: Long?,
@@ -22,4 +22,6 @@ interface CreditNoteLocalDataSourceInterface {
     suspend fun convertInvoiceToCreditNote(documents: List<InvoiceState>)
     suspend fun update(document: CreditNoteState)
     suspend fun delete(documents: List<CreditNoteState>)
+    suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+
 }
