@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -27,6 +28,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.itextpdf.kernel.pdf.PdfName.a
+import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.deliveryNoteAddEdit(
     navController: NavController,
@@ -44,6 +46,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             navArgument("itemId") { nullable = true },
         )
     ) { backStackEntry ->
+        val scope = rememberCoroutineScope()
+
         val deliveryNoteViewModel: DeliveryNoteAddEditViewModel = hiltViewModel()
         val deliveryNoteUiState by deliveryNoteViewModel.deliveryNoteUiState.collectAsStateWithLifecycle()
 
@@ -163,116 +167,132 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 }
             },
             onClickDoneForm = { typeOfCreation ->
-                when (typeOfCreation) {
-                    // NEW = create new & save in clients list too
-                    DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            createNewClientOrIssuer(
-                                clientOrIssuerAddEditViewModel,
-                                ClientOrIssuerType.DOCUMENT_CLIENT
-                            )
-                            documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(
-                                documentClientUiState
-                            )
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentClientUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
-                    // EDIT = edit the chosen item (will only impact the document, doesn't change
-                    // the initial object)
-                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                            deliveryNoteViewModel.updateUiState(
-                                ScreenElement.DOCUMENT_CLIENT,
-                                documentClientUiState
-                            )
-                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                ClientOrIssuerType.DOCUMENT_CLIENT,
-                                documentClientUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
-
-                    DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            createNewClientOrIssuer(
-                                clientOrIssuerAddEditViewModel,
-                                ClientOrIssuerType.DOCUMENT_ISSUER
-                            )
-                            documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(
-                                documentIssuerUiState
-                            )
-                            deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                documentIssuerUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
-
-                    DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
-                        if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                            deliveryNoteViewModel.updateUiState(
-                                ScreenElement.DOCUMENT_ISSUER,
-                                documentIssuerUiState
-                            )
-                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                ClientOrIssuerType.DOCUMENT_ISSUER,
-                                documentIssuerUiState
-                            )
-                            showDocumentForm = false
-                        }
-                    }
-
-                    DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
-                        moveDocumentPagerToLastPage = true
-                        if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-
-                            documentProduct.id =
-                                deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
-                                    documentProduct
+                scope.launch {
+                    when (typeOfCreation) {
+                        // NEW = create new & save in clients list too
+                        DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                createNewClientOrIssuer(
+                                    clientOrIssuerAddEditViewModel,
+                                    ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
-                            deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
-
-                            //  productAddEditViewModel.clearProductUiState()
-                            showDocumentForm = false
-                        }
-                    }
-
-                    DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
-                        moveDocumentPagerToLastPage = true
-                        if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                            productAddEditViewModel.setProductUiState()
-                            productAddEditViewModel.saveProductInLocalDb()
-
-                            documentProduct.id =
-                                deliveryNoteViewModel.saveDocumentProductInLocalDbAndWaitForTheId(
-                                    documentProduct
+                                documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                                deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(
+                                    documentClientUiState
                                 )
-                            deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct)
-
-                            // productAddEditViewModel.clearProductUiState()
-                            showDocumentForm = false
+                                deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                    documentClientUiState
+                                )
+                                showDocumentForm = false
+                            }
                         }
-                    }
-
-                    DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
-                        if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                        // EDIT = edit the chosen item (will only impact the document, doesn't change
+                        // the initial object)
+                        DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
                                 deliveryNoteViewModel.updateUiState(
-                                ScreenElement.DOCUMENT_PRODUCT,
-                                documentProduct
-                            )
-                            productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-                            productAddEditViewModel.clearProductUiState()
-                            showDocumentForm = false
+                                    ScreenElement.DOCUMENT_CLIENT,
+                                    documentClientUiState
+                                )
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_CLIENT,
+                                    documentClientUiState
+                                )
+                                showDocumentForm = false
+                            }
                         }
-                    }
 
-                    else -> null
+                        DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                createNewClientOrIssuer(
+                                    clientOrIssuerAddEditViewModel,
+                                    ClientOrIssuerType.DOCUMENT_ISSUER
+                                )
+                                documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                                deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(
+                                    documentIssuerUiState
+                                )
+                                deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                    documentIssuerUiState
+                                )
+                                showDocumentForm = false
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                deliveryNoteViewModel.updateUiState(
+                                    ScreenElement.DOCUMENT_ISSUER,
+                                    documentIssuerUiState
+                                )
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_ISSUER,
+                                    documentIssuerUiState
+                                )
+                                showDocumentForm = false
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
+                            if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                                // 1. Save DocumentProduct in db and get the id
+                                val documentProductId =
+                                    deliveryNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
+                                // 2. Update UI only if ID is obtained
+                                if (documentProductId != null) {
+                                    deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+
+                                    // 5. Close bottom sheet
+                                    showDocumentForm = false
+                                } else {
+                                    // Les validations ont échoué
+                                    //println("Validation failed for new product.")
+                                    // Le message d'erreur de validation devrait déjà être affiché dans le formulaire
+                                    // Ne pas fermer le formulaire.
+                                }
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
+                            if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                                // 1. Updating product viewModel
+                                productAddEditViewModel.setProductUiState()
+                                productAddEditViewModel.saveProductInLocalDb()
+
+                                // 2. Save DocumentProduct in db and get the id
+                                val documentProductId =
+                                    deliveryNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
+                                // 3. Update UI only if ID is obtained
+                                if (documentProductId != null) {
+                                    deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    // 4. Clear product viewModel
+                                    productAddEditViewModel.clearProductUiState()
+
+                                    // 5. Close bottom sheet
+                                    showDocumentForm = false
+                                } else {
+                                    // Les validations ont échoué
+                                    //println("Validation failed for new product.")
+                                    // Le message d'erreur de validation devrait déjà être affiché dans le formulaire
+                                    // Ne pas fermer le formulaire.
+                                }
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
+                            if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                                deliveryNoteViewModel.updateUiState(
+                                    ScreenElement.DOCUMENT_PRODUCT,
+                                    documentProduct
+                                )
+                                productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                                productAddEditViewModel.clearProductUiState()
+                                showDocumentForm = false
+                            }
+                        }
+
+                        else -> null
+                    }
                 }
             },
             onClickCancelForm = {
@@ -290,7 +310,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onClickDeleteAddress = {
                 clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
             },
-            onOrderChange = deliveryNoteViewModel::updateProductOrderInUiState
+            onOrderChange = deliveryNoteViewModel::updateDocumentProductsOrderInUiStateAndDb
         )
     }
 }

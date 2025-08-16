@@ -30,10 +30,10 @@ WHERE  delivery_note_id = :delivery_note_id;
 
 getMaxSortOrderForDeliveryNote:
 SELECT MAX(sort_order) AS maxOrder
-FROM LinkCreditNoteToDocumentProduct
-WHERE credit_note_id = :credit_note_id;
+FROM LinkDeliveryNoteToDocumentProduct
+WHERE delivery_note_id = :delivery_note_id;
 
 updateSortOrderForDocumentProduct:
-UPDATE LinkInvoiceToDocumentProduct
+UPDATE LinkDeliveryNoteToDocumentProduct
 SET sort_order = :sort_order
-WHERE invoice_id = :id AND document_product_id = :document_product_id;
+WHERE delivery_note_id = :id AND document_product_id = :document_product_id;

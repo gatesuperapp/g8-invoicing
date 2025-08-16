@@ -37,7 +37,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.fetchAllDeliveryNotes()?.collect {
+                deliveryNoteDataSource.fetchAll()?.collect {
                     _deliveryNotesUiState.update { deliveryNotesUiState ->
                         deliveryNotesUiState.copy(
                             deliveryNoteStates = it
@@ -54,7 +54,7 @@ class DeliveryNoteListViewModel @Inject constructor(
         deleteJob?.cancel()
         deleteJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.deleteDeliveryNotes(selectedDeliveryNotes)
+                deliveryNoteDataSource.delete(selectedDeliveryNotes)
             } catch (e: Exception) {
                 //println("Duplicating deliveryNotes failed with exception: ${e.localizedMessage}")
             }

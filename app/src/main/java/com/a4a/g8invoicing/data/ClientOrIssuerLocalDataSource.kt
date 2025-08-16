@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import androidx.compose.foundation.text.input.insert
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -39,8 +40,8 @@ class ClientOrIssuerLocalDataSource(
                     }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
             }
-            null
         }
     }
 
@@ -76,37 +77,34 @@ class ClientOrIssuerLocalDataSource(
         return null
     }
 
-    private fun fetchDocumentClientOrIssuerAddresses(id: Long): MutableList<AddressState>? {
-        try {
-            val listOfIds = linkDocumentClientOrIssuerToAddressQueries.get(id)
-                .executeAsList()
-            return if (listOfIds.isNotEmpty()) {
-                listOfIds.map {
-                    documentClientOrIssuerAddressQueries.get(it.id)
-                        .executeAsOne()
-                        .transformIntoEditable()
-                }.toMutableList()
-            } else null
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return null
-    }
 
-    override suspend fun createNew(
-        clientOrIssuer: ClientOrIssuerState,
-    ): Long? {
-        var id: Long? = null
-        saveInfoInClientOrIssuerTable(clientOrIssuer)
-        try {
-            id = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-            id?.let {
-                saveInfoInClientOrIssuerAddressTables(it, clientOrIssuer.addresses)
+    override suspend fun createNew(clientOrIssuer: ClientOrIssuerState): Boolean {
+        return withContext(Dispatchers.IO) { // Assure que tout s'exécute sur un thread IO
+            try {
+                // 1: Save main info
+                saveInfoInClientOrIssuerTable(clientOrIssuer)
+
+                // 2: Get the entity ID
+                val newEntityId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                    ?: run {
+                        // Log.e(TAG, "Failed to retrieve last inserted ID after saving client/issuer.")
+                        return@withContext false // Échec si l'ID n'est pas trouvé
+                    }
+
+                // 3: Save linked addresses
+                val addressesSavedSuccessfully = saveInfoInClientOrIssuerAddressTables(newEntityId, clientOrIssuer.addresses)
+                if (!addressesSavedSuccessfully) {
+                    // Log.e(TAG, "Failed to save one or more addresses for client/issuer ID: $newEntityId")
+                    // Global fail if one of the address not saved
+                    return@withContext false
+                }
+
+                true // Success if all steps succeed
+            } catch (e: Exception) {
+                // Log.e(TAG, "Error creating new client or issuer: ${e.message}", e)
+                false
             }
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
-        return id
     }
 
     private suspend fun saveInfoInClientOrIssuerTable(clientOrIssuer: ClientOrIssuerState) {
@@ -139,10 +137,16 @@ class ClientOrIssuerLocalDataSource(
     private suspend fun saveInfoInClientOrIssuerAddressTables(
         clientOrIssuerId: Long,
         addresses: List<AddressState>?,
-    ) {
+    ): Boolean {
+        // If no addresses -> success
+        if (addresses.isNullOrEmpty()) {
+            return true
+        }
+
         return withContext(Dispatchers.IO) {
             try {
-                addresses?.forEach { address ->
+                for (address in addresses) {
+                    // Save address
                     clientOrIssuerAddressQueries.save(
                         id = null,
                         address_title = address.addressTitle?.text,
@@ -152,17 +156,24 @@ class ClientOrIssuerLocalDataSource(
                         city = address.city?.text,
                     )
 
-                    clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
-                        ?.let { addressId ->
-                            linkClientOrIssuerToAddress(
-                                linkClientOrIssuerToAddressQueries,
-                                clientOrIssuerId,
-                                addressId
-                            )
-                        }
+                    // Get inserted address id
+                    val newAddressId = clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
+                    if (newAddressId == null) {
+                        // Log.e(TAG, "Failed to retrieve last inserted ID for address for clientOrIssuer ID: $clientOrIssuerId")
+                        return@withContext false // Fail if insertion failed
+                    }
+
+                    // Link address to entity
+                    linkClientOrIssuerToAddressQueries.save(
+                        id = null,
+                        client_or_issuer_id = clientOrIssuerId,
+                        address_id = newAddressId
+                    ) // if fail, will be catched by the external catch
                 }
+                true // All addresses successfully saved
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                // Log.e(TAG, "Error saving addresses for clientOrIssuer ID $clientOrIssuerId: ${e.message}", e)
+                false // Fail
             }
         }
     }
@@ -184,11 +195,11 @@ class ClientOrIssuerLocalDataSource(
                     )
 
                     documentClientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
-                        ?.let { addressId ->
-                            linkClientOrIssuerToAddress(
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                clientOrIssuerId,
-                                addressId
+                        ?.let { newAddressId ->
+                            linkClientOrIssuerToAddressQueries.save(
+                                id = null,
+                                client_or_issuer_id = clientOrIssuerId,
+                                address_id = newAddressId
                             )
                         }
                 }
@@ -451,28 +462,4 @@ fun DocumentClientOrIssuerAddress.transformIntoEditable(): AddressState {
         zipCode = address.zip_code?.let { TextFieldValue(text = it) },
         city = address.city?.let { TextFieldValue(text = it) },
     )
-}
-
-fun linkClientOrIssuerToAddress(
-    linkQueries: Any,
-    clientOrIssuerId: Long,
-    addressId: Long,
-) {
-    try {
-        if (linkQueries is LinkClientOrIssuerToAddressQueries) {
-            linkQueries.save(
-                id = null,
-                client_or_issuer_id = clientOrIssuerId,
-                address_id = addressId
-            )
-        } else if (linkQueries is LinkDocumentClientOrIssuerToAddressQueries) {
-            linkQueries.save(
-                id = null,
-                document_client_or_issuer_id = clientOrIssuerId,
-                address_id = addressId
-            )
-        }
-    } catch (e: Exception) {
-        //Log.e(ContentValues.TAG, "Error: ${e.message}")
-    }
 }

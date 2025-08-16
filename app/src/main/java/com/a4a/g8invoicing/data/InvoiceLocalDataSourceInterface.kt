@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.data
 
-import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
@@ -16,10 +15,10 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        documentId: Long?,
+        documentId: Long,
         deliveryNoteDate: String? = null,
         deliveryNoteNumber: String? = null,
-    )
+    ): Int?
 
     suspend fun deleteDocumentProduct(id: Long, documentProductId: Long)
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(

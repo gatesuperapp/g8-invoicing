@@ -34,6 +34,6 @@ FROM LinkCreditNoteToDocumentProduct
 WHERE credit_note_id = :credit_note_id;
 
 updateSortOrderForDocumentProduct:
-UPDATE LinkInvoiceToDocumentProduct
+UPDATE LinkCreditNoteToDocumentProduct
 SET sort_order = :sort_order
-WHERE invoice_id = :id AND document_product_id = :document_product_id;
+WHERE credit_note_id = :id AND document_product_id = :document_product_id;

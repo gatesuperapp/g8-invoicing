@@ -5,13 +5,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
-import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -20,12 +20,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
 class DeliveryNoteAddEditViewModel @Inject constructor(
-    private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
+    private val documentDataSource: DeliveryNoteLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -48,7 +47,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             id?.let {
                 fetchDeliveryNoteFromLocalDb(it.toLong())
             } ?: viewModelScope.launch(context = Dispatchers.Default) {
-                createNewDeliveryNote()?.let {
+                createNewDeliveryNoteInVM()?.let {
                     fetchDeliveryNoteFromLocalDb(it)
                 }
             }
@@ -70,7 +69,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.fetchDeliveryNote(id)?.let {
+                documentDataSource.fetch(id)?.let {
                     _documentUiState.value = it
                 }
             } catch (e: Exception) {
@@ -79,11 +78,11 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    private suspend fun createNewDeliveryNote(): Long? {
+    private suspend fun createNewDeliveryNoteInVM(): Long? {
         var deliveryNoteId: Long? = null
         val createNewJob = viewModelScope.launch {
             try {
-                deliveryNoteId = deliveryNoteDataSource.createNew()
+                deliveryNoteId = documentDataSource.createNew()
             } catch (e: Exception) {
                 //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
             }
@@ -97,11 +96,11 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
             updateDeliveryNoteUiState(_documentUiState.value, screenElement, value)
     }
 
-    private suspend fun updateDeliveryNoteInLocalDb() {
+    private fun updateDeliveryNoteInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.update(deliveryNoteUiState.value)
+                documentDataSource.update(deliveryNoteUiState.value)
             } catch (e: Exception) {
                 //println("Saving deliveryNote failed with exception: ${e.localizedMessage}")
             }
@@ -115,20 +114,51 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInLocalDbAndWaitForTheId(documentProduct: DocumentProductState): Int?  {
-        var documentProductId: Int? = null
-        runBlocking {
-            try {
+    suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
+        val currentDocumentId = _documentUiState.value.documentId?.toLong()
+        if (currentDocumentId == null) {
+            //println("Error: documentId is null, cannot save document product")
+            return null
+        }
 
-                deliveryNoteDataSource.saveDocumentProductInDbAndLinkToDocument(
-                    documentProduct = documentProduct,
-                    documentId = _documentUiState.value.documentId?.toLong()
+        return try {
+            documentDataSource.saveDocumentProductInDbAndLinkToDocument(
+                documentProduct = documentProduct,
+                documentId = currentDocumentId
+            )
+        } catch (e: Exception) {
+            //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+            null
+        }
+    }
+
+    fun updateDocumentProductsOrderInUiStateAndDb(updatedProducts: List<DocumentProductState>) {
+        viewModelScope.launch {
+            try {
+                // 1. Mettre à jour sortOrder dans la liste pour l'UI et pour la BDD
+                val productsWithUpdatedSortOrder = updatedProducts.mapIndexed { index, product ->
+                    product.copy(sortOrder = index)
+                }
+
+                // 2. Mettre à jour l'état de l'UI
+                _documentUiState.value = _documentUiState.value.copy(
+                    documentProducts = productsWithUpdatedSortOrder
                 )
+
+                // 3. Mettre à jour l'ordre dans la base de données locale
+                val documentId = _documentUiState.value.documentId?.toLong()
+                if (documentId != null) {
+                    documentDataSource.updateDocumentProductsOrderInDb(
+                        documentId = documentId,
+                        orderedProducts = productsWithUpdatedSortOrder
+                    )
+                } else {
+                    // Log.w("InvoiceViewModel", "Document ID or Document Type is null, cannot update sort order in DB.")
+                }
             } catch (e: Exception) {
-                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+                // Log.e("InvoiceViewModel", "Failed to update product order", e)
             }
         }
-        return documentProductId
     }
 
 
@@ -137,25 +167,12 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob = viewModelScope.launch {
             try {
                 _documentUiState.value.documentId?.let {
-                    deliveryNoteDataSource.deleteDocumentProduct(
+                    documentDataSource.deleteDocumentProduct(
                         it.toLong(),
                         documentProductId.toLong()
                     )
                 }
                 documentProductDataSource.deleteDocumentProducts(listOf(documentProductId.toLong()))
-
-                /* // If several pages, decrement page of next element
-                 val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
-                 numberOfPages?.let {numberOfPages ->
-                     if(numberOfPages > 1) {
-                         for(i in 2..numberOfPages) {
-                             _deliveryNoteUiState.value.documentProducts
-                                 ?.first { it.page == i }?.id?.let {
-                                     updateDeliveryNoteStateWithDecrementedValue(it)
-                                 }
-                         }
-                     }
-                 }*/
             } catch (e: Exception) {
                 //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
             }
@@ -170,26 +187,11 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 documentProducts = list
             )
 
-            /* // If several pages, decrement page of next element
-             val numberOfPages = _deliveryNoteUiState.value.documentProducts?.last()?.page
-             numberOfPages?.let {numberOfPages ->
-                 if(numberOfPages > 1) {
-                     for(i in 2..numberOfPages) {
-                         _deliveryNoteUiState.value.documentProducts
-                             ?.first { it.page == i }?.id?.let {
-                                 updateDeliveryNoteStateWithDecrementedValue(it)
-                             }
-                     }
-                 }
-             }*/
-
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
                     _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
-
-
         } catch (e: Exception) {
             //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
         }
@@ -227,7 +229,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
-                deliveryNoteDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                documentDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
                     documentId = _documentUiState.value.documentId?.toLong()
                 )
@@ -243,7 +245,7 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
         deleteJob = viewModelScope.launch {
             try {
                 _documentUiState.value.documentId?.let {
-                    deliveryNoteDataSource.deleteDocumentClientOrIssuer(
+                    documentDataSource.deleteDocumentClientOrIssuer(
                         it.toLong(),
                         type
                     )
@@ -293,16 +295,6 @@ class DeliveryNoteAddEditViewModel @Inject constructor(
                 selection = TextRange(text?.length ?: 0)
             )
         )
-    }
-
-    fun updateProductOrderInUiState(updatedProducts: List<DocumentProductState>) {
-        try {
-            _documentUiState.value = _documentUiState.value.copy(
-                documentProducts = updatedProducts.sortedBy { it.sortOrder } // S'assurer qu'elle est triée
-            )
-        } catch (e: Exception) {
-            // Log.e("InvoiceViewModel", "Failed to update product order in UI state", e)
-        }
     }
 
 }

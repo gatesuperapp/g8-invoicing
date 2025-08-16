@@ -62,13 +62,13 @@ fun DocumentBottomSheetProductListChosenContent(
     }
 
     LazyColumn(
-        modifier =  Modifier
+        modifier = Modifier
             .padding(
                 top = 20.dp,
                 bottom = 30.dp
             ),
         state = lazyListState,
-        contentPadding = PaddingValues(8.dp),
+        contentPadding = PaddingValues(start = 22.dp, end = 22.dp, bottom = 22.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(list, key = { it.id!! }) { item ->
@@ -76,33 +76,19 @@ fun DocumentBottomSheetProductListChosenContent(
                 val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
 
                 Surface(shadowElevation = elevation) {
-                    Row {
-                        IconButton(
-                            modifier = Modifier.draggableHandle(
-                                onDragStarted = {
-                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-                                },
-                                onDragStopped = {
-                                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                                },
-                            ),
-                            onClick = {},
-                        ) {
-                            Icon(Icons.Rounded.ArrowDropDown, contentDescription = "Reorder")
-                        }
-
-                        DocumentBottomSheetProductListChosenItem(
-                            documentProduct = item,
-                            onClickDocumentProduct = {
-                                onClickItem(item)
-                            },
-                            onClickDeleteDocumentProduct = {
-                                item.id?.let {
-                                    onClickDelete(it)
-                                }
+                    DocumentBottomSheetProductListChosenItem(
+                        documentProduct = item,
+                        onClickDocumentProduct = {
+                            onClickItem(item)
+                        },
+                        onClickDeleteDocumentProduct = {
+                            item.id?.let {
+                                onClickDelete(it)
                             }
-                        )
-                    }
+                        },
+                        this
+                    )
+
                 }
             }
         }

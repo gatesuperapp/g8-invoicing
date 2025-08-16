@@ -15,12 +15,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface DeliveryNoteLocalDataSourceInterface {
     // fun fetchDeliveryNoteFlow(id: Long): Flow<DeliveryNoteState?>
-    fun fetchDeliveryNote(id: Long): DeliveryNoteState?
-    fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>?
+    suspend fun fetch(id: Long): DeliveryNoteState?
+    fun fetchAll(): Flow<List<DeliveryNoteState>>?
     suspend fun createNew(): Long?
     suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        documentId: Long?,
+        documentId: Long
     ): Int?
 
     suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long)
@@ -32,7 +32,7 @@ interface DeliveryNoteLocalDataSourceInterface {
     suspend fun deleteDocumentClientOrIssuer(documentId: Long, type: ClientOrIssuerType)
     suspend fun duplicate(documents: List<DeliveryNoteState>)
     suspend fun update(document: DeliveryNoteState)
-    suspend fun deleteDeliveryNotes(documents: List<DeliveryNoteState>)
+    suspend fun delete(documents: List<DeliveryNoteState>)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
 
 }

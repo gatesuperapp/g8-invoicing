@@ -13,13 +13,10 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,9 +24,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     private val dataSource: ClientOrIssuerLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private var saveJob: Job? = null
-    private var updateJob: Job? = null
-    private var autoSaveJob: Job? = null
 
     // Getting the argument in "ClientAddEdit?itemId={itemId}" with savedStateHandle
     private val id: String? = savedStateHandle["itemId"]
@@ -179,58 +173,78 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         }
     }
 
-    fun createNew(type: ClientOrIssuerType) {
-        saveJob?.cancel()
-        saveJob = viewModelScope.launch {
-            val stateToSave = when (type) {
-                ClientOrIssuerType.CLIENT -> _clientUiState.value
-                ClientOrIssuerType.ISSUER -> _issuerUiState.value
-                ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
-                ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
-            }
+    suspend fun createNew(type: ClientOrIssuerType): Boolean {
+        val stateToSave = when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+        }
 
-            try {
-                dataSource.createNew(stateToSave)
-            } catch (e: Exception) {
-                //println("Saving clients failed with exception: ${e.localizedMessage}")
-            }
+        return try {
+            dataSource.createNew(stateToSave)
+            true // Succes si no exception raised
+        } catch (e: Exception) {
+            //println("Saving ${type.name.lowercase()} failed with exception: ${e.localizedMessage}")
+            false // Fail if inserting in db failed
         }
     }
 
-    fun updateClientOrIssuerInLocalDb(
+    suspend fun updateClientOrIssuerInLocalDb(
         type: ClientOrIssuerType,
         documentClientOrIssuer: ClientOrIssuerState? = null,
-    ) {
-        updateJob?.cancel()
-        updateJob = viewModelScope.launch {
-            try {
-                when (type) {
-                    ClientOrIssuerType.CLIENT -> {
-                        dataSource.updateClientOrIssuer(clientUiState.value)
+    ): Boolean {
+        return try {
+            when (type) {
+                ClientOrIssuerType.CLIENT -> {
+                    if (clientUiState.value.id == null) {
+                        // Log.e(TAG, "Cannot update client, ID is null.")
+                        return false // Échec logique avant l'appel à la dataSource
                     }
+                    dataSource.updateClientOrIssuer(clientUiState.value)
 
-                    ClientOrIssuerType.DOCUMENT_CLIENT -> {
-                        documentClientOrIssuer?.let {
-                            dataSource.updateDocumentClientOrIssuer(it)
-                        }
-                    }
-
-                    ClientOrIssuerType.DOCUMENT_ISSUER -> {
-                        documentClientOrIssuer?.let {
-                            dataSource.updateDocumentClientOrIssuer(it)
-                        }
-                    }
-
-                    ClientOrIssuerType.ISSUER -> {
-                        dataSource.updateClientOrIssuer(issuerUiState.value)
-                    }
                 }
 
-            } catch (e: Exception) {
-                //println("Updating clients failed with exception: ${e.localizedMessage}")
+                ClientOrIssuerType.ISSUER -> {
+                    if (issuerUiState.value.id == null) {
+                        // Log.e(TAG, "Cannot update issuer, ID is null.")
+                        return false
+                    }
+                    dataSource.updateClientOrIssuer(issuerUiState.value)
+                }
+
+                ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                    if (documentClientOrIssuer == null) {
+                        // Log.w(TAG, "Attempted to update DOCUMENT_CLIENT with null data.")
+                        return false // Échec logique si les données nécessaires sont null
+                    }
+                    // Assurez-vous que documentClientOrIssuer.id n'est pas null
+                    if (documentClientOrIssuer.id == null) {
+                        // Log.e(TAG, "Cannot update document client, ID is null in provided data.")
+                        return false
+                    }
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer)
+                }
+
+                ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                    if (documentClientOrIssuer == null) {
+                        // Log.w(TAG, "Attempted to update DOCUMENT_ISSUER with null data.")
+                        return false
+                    }
+                    if (documentClientOrIssuer.id == null) {
+                        // Log.e(TAG, "Cannot update document issuer, ID is null in provided data.")
+                        return false
+                    }
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer)
+                }
             }
+            true
+        } catch (e: Exception) {
+            false
+            //println("Updating clients failed with exception: ${e.localizedMessage}")
         }
     }
+
 
     fun updateClientOrIssuerState(
         pageElement: ScreenElement,
@@ -268,7 +282,8 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     ) {
         when (type) {
             ClientOrIssuerType.CLIENT -> {
-                var newAddresses: List<AddressState>? = _clientUiState.value.addresses?.dropLast(1)
+                var newAddresses: List<AddressState>? =
+                    _clientUiState.value.addresses?.dropLast(1)
                 if (newAddresses?.size == 1) {
                     val onlyAddress = _clientUiState.value.addresses!![0].copy(
                         addressTitle = null
@@ -668,21 +683,6 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
         return text
     }
 
-    fun getLastCreatedClientId(): Long? {
-        var lastClientId: Long? = null
-        runBlocking {
-            val getLastItemIdJob = launch {
-                try {
-                    lastClientId = dataSource.getLastCreatedClientId()
-                } catch (e: Exception) {
-                    //println("Getting last client failed with exception: ${e.localizedMessage}")
-                }
-            }
-            getLastItemIdJob.join() // Waiting for the coroutine to complete
-        }
-        return lastClientId
-    }
-
     private fun updateClientOrIssuerUiState(
         clientOrIssuer: ClientOrIssuerState,
         element: ScreenElement,
@@ -710,105 +710,120 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
                     ?: AddressState(addressTitle = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
                 val newAddress = firstAddress?.copy(addressLine1 = value as TextFieldValue)
                     ?: AddressState(addressLine1 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
                 val newAddress = firstAddress?.copy(addressLine2 = value as TextFieldValue)
                     ?: AddressState(addressLine2 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ZIP_1 -> {
                 val newAddress = firstAddress?.copy(zipCode = value as TextFieldValue)
                     ?: AddressState(zipCode = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_CITY_1 -> {
                 val newAddress = firstAddress?.copy(city = value as TextFieldValue)
                     ?: AddressState(city = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
                 val newAddress = secondAddress?.copy(addressTitle = value as TextFieldValue)
                     ?: AddressState(addressTitle = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
                 val newAddress = secondAddress?.copy(addressLine1 = value as TextFieldValue)
                     ?: AddressState(addressLine1 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
                 val newAddress = secondAddress?.copy(addressLine2 = value as TextFieldValue)
                     ?: AddressState(addressLine2 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ZIP_2 -> {
                 val newAddress = secondAddress?.copy(zipCode = value as TextFieldValue)
                     ?: AddressState(zipCode = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_CITY_2 -> {
                 val newAddress = secondAddress?.copy(city = value as TextFieldValue)
                     ?: AddressState(city = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
                 val newAddress = thirdAddress?.copy(addressTitle = value as TextFieldValue)
                     ?: AddressState(addressTitle = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine1 = value as TextFieldValue)
                     ?: AddressState(addressLine1 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine2 = value as TextFieldValue)
                     ?: AddressState(addressLine2 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ZIP_3 -> {
                 val newAddress = thirdAddress?.copy(zipCode = value as TextFieldValue)
                     ?: AddressState(zipCode = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_CITY_3 -> {
                 val newAddress = thirdAddress?.copy(city = value as TextFieldValue)
                     ?: AddressState(city = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_NOTES -> person =
@@ -876,105 +891,120 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
                     ?: AddressState(addressTitle = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
                 val newAddress = firstAddress?.copy(addressLine1 = value as TextFieldValue)
                     ?: AddressState(addressLine1 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
                 val newAddress = firstAddress?.copy(addressLine2 = value as TextFieldValue)
                     ?: AddressState(addressLine2 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_1 -> {
                 val newAddress = firstAddress?.copy(zipCode = value as TextFieldValue)
                     ?: AddressState(zipCode = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_1 -> {
                 val newAddress = firstAddress?.copy(city = value as TextFieldValue)
                     ?: AddressState(city = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
                 val newAddress = secondAddress?.copy(addressTitle = value as TextFieldValue)
                     ?: AddressState(addressTitle = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
                 val newAddress = secondAddress?.copy(addressLine1 = value as TextFieldValue)
                     ?: AddressState(addressLine1 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
                 val newAddress = secondAddress?.copy(addressLine2 = value as TextFieldValue)
                     ?: AddressState(addressLine2 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_2 -> {
                 val newAddress = secondAddress?.copy(zipCode = value as TextFieldValue)
                     ?: AddressState(zipCode = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_2 -> {
                 val newAddress = secondAddress?.copy(city = value as TextFieldValue)
                     ?: AddressState(city = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
                 val newAddress = thirdAddress?.copy(addressTitle = value as TextFieldValue)
                     ?: AddressState(addressTitle = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine1 = value as TextFieldValue)
                     ?: AddressState(addressLine1 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine2 = value as TextFieldValue)
                     ?: AddressState(addressLine2 = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_3 -> {
                 val newAddress = thirdAddress?.copy(zipCode = value as TextFieldValue)
                     ?: AddressState(zipCode = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_3 -> {
                 val newAddress = thirdAddress?.copy(city = value as TextFieldValue)
                     ?: AddressState(city = value as TextFieldValue)
 
-                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+                person =
+                    person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
 
@@ -1035,9 +1065,15 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 FormInputsValidator.validateName(_documentClientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
-                FormInputsValidator.validateEmail(_documentClientUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
-                }
+                FormInputsValidator.validateEmail(_documentClientUiState.value.email?.text)
+                    ?.let {
+                        listOfErrors.add(
+                            Pair(
+                                ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL,
+                                it
+                            )
+                        )
+                    }
                 _documentClientUiState.value = _documentClientUiState.value.copy(
                     errors = listOfErrors
                 )
@@ -1047,9 +1083,15 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 FormInputsValidator.validateName(_documentIssuerUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
-                FormInputsValidator.validateEmail(_documentIssuerUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
-                }
+                FormInputsValidator.validateEmail(_documentIssuerUiState.value.email?.text)
+                    ?.let {
+                        listOfErrors.add(
+                            Pair(
+                                ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL,
+                                it
+                            )
+                        )
+                    }
                 _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
                     errors = listOfErrors
                 )

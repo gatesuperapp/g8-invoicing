@@ -12,7 +12,8 @@ interface CreditNoteLocalDataSourceInterface {
     suspend fun fetch(id: Long): CreditNoteState?
     fun fetchAll(): Flow<List<CreditNoteState>>?
     suspend fun createNew(): Long?
-    suspend fun saveDocumentProductInDbAndLinkToDocument(documentProduct: DocumentProductState, id: Long?,
+    suspend fun saveDocumentProductInDbAndLinkToDocument(documentProduct: DocumentProductState,
+                                                         documentId: Long,
                                                          deliveryNoteDate: String? = null,
                                                          deliveryNoteNumber: String? = null): Int?
     suspend fun deleteDocumentProduct(id:Long, documentProductId: Long)

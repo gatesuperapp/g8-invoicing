@@ -7,20 +7,16 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
-import com.a4a.g8invoicing.ui.shared.DocumentType
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
+import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.math.RoundingMode
 import java.util.Calendar
 
 class DeliveryNoteLocalDataSource(
@@ -37,81 +33,49 @@ class DeliveryNoteLocalDataSource(
     private val linkDeliveryNoteToDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
 
+    // --- createNew ---
+    // Called from ViewModel
+    // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        var newDeliveryNoteId: Long? = null
-        val docNumber = getLastDocumentNumber()?.let {
-            incrementDocumentNumber(it)
-        } ?: Strings.get(R.string.delivery_note_default_number)
-        val issuer = getExistingIssuer()?.transformIntoEditable()
+        return withContext(Dispatchers.IO) {
 
-        saveInfoInDocumentTable(
-            DeliveryNoteState(
-                documentNumber = TextFieldValue(docNumber),
-                documentIssuer = issuer,
+            val newDeliveryNoteState = DeliveryNoteState(
+                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                    incrementDocumentNumber(it)
+                } ?: Strings.get(R.string.delivery_note_default_number)),
+                documentIssuer = getExistingIssuer()?.transformIntoEditable(),
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )
-        )
-        saveInfoInOtherTables(
-            DeliveryNoteState(documentIssuer = issuer)
-        )
 
-        try {
-            newDeliveryNoteId = deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            saveInfoInDocumentTable(newDeliveryNoteState)
+
+            var newDeliveryNoteId = deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+
+            newDeliveryNoteId?.let { id ->
+                saveInfoInOtherTables(id, newDeliveryNoteState)
+            }
+            newDeliveryNoteId
         }
-        return newDeliveryNoteId
     }
 
-
-    override fun fetchDeliveryNote(id: Long): DeliveryNoteState? {
+    // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---
+    private fun getLastDocumentNumber(): String? {
         try {
-            return deliveryNoteQueries.get(id).executeAsOneOrNull()
-                ?.let {
-                    it.transformIntoEditableNote(
-                        fetchDocumentProducts(it.delivery_note_id),
-                        fetchClientAndIssuer(
-                            it.delivery_note_id,
-                            linkDeliveryNoteToDocumentClientOrIssuerQueries,
-                            linkDocumentClientOrIssuerToAddressQueries,
-                            documentClientOrIssuerQueries,
-                            documentClientOrIssuerAddressQueries
-                        )
-                    )
-                }
+            return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
     }
 
-    override fun fetchAllDeliveryNotes(): Flow<List<DeliveryNoteState>>? {
+    private fun getExistingIssuer(): DocumentClientOrIssuer? {
+        var issuer: DocumentClientOrIssuer? = null
         try {
-            return deliveryNoteQueries.getAll()
-                .asFlow()
-                .map {
-                    it.executeAsList()
-                        .map { deliveryNote ->
-                            val products = fetchDocumentProducts(deliveryNote.delivery_note_id)
-                            val clientAndIssuer =
-                                fetchClientAndIssuer(
-                                    deliveryNote.delivery_note_id,
-                                    linkDeliveryNoteToDocumentClientOrIssuerQueries,
-                                    linkDocumentClientOrIssuerToAddressQueries,
-                                    documentClientOrIssuerQueries,
-                                    documentClientOrIssuerAddressQueries
-                                )
-
-                            deliveryNote.transformIntoEditableNote(
-                                products,
-                                clientAndIssuer
-                            )
-                        }
-                }
+            issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
-        return null
+        return issuer
     }
 
     private fun getExistingFooter(): String? {
@@ -124,6 +88,68 @@ class DeliveryNoteLocalDataSource(
         return footer
     }
 
+    // --- fetch ---
+    // Correctly uses withContext(Dispatchers.IO).
+    // Internal fetch* helpers are synchronous and will run on this IO context.
+    override suspend fun fetch(id: Long): DeliveryNoteState? {
+        return withContext(Dispatchers.IO) {
+            try {
+                deliveryNoteQueries.get(id).executeAsOneOrNull()
+                    ?.let {
+                        it.transformIntoEditableDeliveryNote(
+                            fetchDocumentProducts(it.delivery_note_id),
+                            fetchClientAndIssuer(
+                                it.delivery_note_id,
+                                linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                                linkDocumentClientOrIssuerToAddressQueries,
+                                documentClientOrIssuerQueries,
+                                documentClientOrIssuerAddressQueries
+                            )
+                        )
+                    }
+            } catch (e: Exception) {
+                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
+            }
+        }
+    }
+
+    // --- fetchAll (returning Flow) ---
+    // Flow construction
+    // The .map block executes on the collector's context.
+    // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
+    // because internal fetch* helpers are synchronous DB calls.
+    override fun fetchAll(): Flow<List<DeliveryNoteState>>? {
+        try {
+            return deliveryNoteQueries.getAll()
+                .asFlow()
+                .map {
+                    it.executeAsList()
+                        .map { document ->
+                            val products = fetchDocumentProducts(document.delivery_note_id)
+                            val clientAndIssuer = fetchClientAndIssuer(
+                                document.delivery_note_id,
+                                linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                                linkDocumentClientOrIssuerToAddressQueries,
+                                documentClientOrIssuerQueries,
+                                documentClientOrIssuerAddressQueries
+                            )
+
+                            document.transformIntoEditableDeliveryNote(
+                                products,
+                                clientAndIssuer
+                            )
+                        }
+                }
+        } catch (e: Exception) {
+            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+        }
+        return null
+    }
+
+    // --- fetchDocumentProducts ---
+    // Synchronous private helper, performs DB IO.
+    // Must be called from a Dispatchers.IO context.
     private fun fetchDocumentProducts(deliveryNoteId: Long): MutableList<DocumentProductState>? {
         try {
             val listOfIds =
@@ -133,7 +159,10 @@ class DeliveryNoteLocalDataSource(
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
                     documentProductQueries.getDocumentProduct(it.document_product_id)
-                        .executeAsOne().transformIntoEditableDocumentProduct(sortOrder = it.sort_order?.toInt())
+                        .executeAsOne()
+                        .transformIntoEditableDocumentProduct(
+                            sortOrder = it.sort_order?.toInt()
+                        )
                 }.toMutableList()
             } else null
         } catch (e: Exception) {
@@ -142,8 +171,9 @@ class DeliveryNoteLocalDataSource(
         return null
     }
 
-
-    private fun DeliveryNote.transformIntoEditableNote(
+    // --- transformIntoEditableDeliveryNote ---
+    // Pure transformation function, no IO, no suspend/withContext needed.
+    private fun DeliveryNote.transformIntoEditableDeliveryNote(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
     ): DeliveryNoteState {
@@ -156,7 +186,7 @@ class DeliveryNoteLocalDataSource(
                 freeField = TextFieldValue(text = it.free_field ?: ""),
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
-                documentProducts = documentProducts,
+                documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency)),
                 footerText = TextFieldValue(text = it.footer ?: ""),
@@ -165,6 +195,8 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
+    // --- update ---
+    // Uses withContext(Dispatchers.IO)
     override suspend fun update(document: DeliveryNoteState) {
         return withContext(Dispatchers.IO) {
             try {
@@ -184,18 +216,31 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
+    // --- duplicate ---
+    // Uses withContext(Dispatchers.IO).
     override suspend fun duplicate(documents: List<DeliveryNoteState>) {
         withContext(Dispatchers.IO) {
             try {
-                documents.forEach {
+                documents.forEach { originalDocument ->
                     val docNumber = getLastDocumentNumber()?.let {
                         incrementDocumentNumber(it)
                     } ?: Strings.get(R.string.delivery_note_default_number)
-                    val document = it
-                    document.documentNumber = TextFieldValue(docNumber)
 
-                    saveInfoInDocumentTable(document)
-                    saveInfoInOtherTables(document)
+                    val duplicatedDocumentState = originalDocument.copy(
+                        documentNumber = TextFieldValue(docNumber),
+                    )
+
+                    saveInfoInDocumentTable(duplicatedDocumentState)
+
+                    val newDeliveryNoteId = deliveryNoteQueries.getLastInsertedRowId()
+                        .executeAsOneOrNull()
+
+                    newDeliveryNoteId?.let { id ->
+                        saveInfoInOtherTables(
+                            id,
+                            duplicatedDocumentState
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -203,53 +248,32 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    private fun getLastDocumentNumber(): String? {
-        try {
-            return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return null
-    }
-
+    // --- saveDocumentProductInDbAndLinkToDocument ---
+    // Uses withContext(Dispatchers.IO) and transaction.
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        deliveryNoteId: Long?,
+        documentId: Long
     ): Int? {
-        var documentProductId: Int? = null
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             try {
-                documentProductQueries.saveDocumentProduct(
-                    id = null,
-                    name = documentProduct.name.text,
-                    quantity = documentProduct.quantity.toDouble(),
-                    description = documentProduct.description?.text,
-                    price_without_tax = documentProduct.priceWithoutTax?.toDouble(),
-                    tax_rate = documentProduct.taxRate?.toDouble(),
-                    unit = documentProduct.unit?.text,
-                    product_id = documentProduct.productId?.toLong()
-                )
-
-                deliveryNoteId?.let { deliveryNoteId ->
-                    documentProductQueries.getLastInsertedRowId().executeAsOneOrNull()?.toInt()
-                        ?.let { id ->
-                            documentProductId = id
-
-                            linkDocumentProductToParentDocument(
-                                linkDeliveryNoteToDocumentProductQueries,
-                                deliveryNoteId,
-                                id.toLong(),
-                                documentProduct.sortOrder
-                            )
-                        }
+                documentProductQueries.transactionWithResult {
+                    // This global function performs synchronous DB operations
+                    saveDocumentProductInDbAndLink(
+                        documentProductQueries = documentProductQueries,
+                        linkToDocumentProductQueries = linkDeliveryNoteToDocumentProductQueries,
+                        documentProduct = documentProduct,
+                        documentId = documentId
+                    )
                 }
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
+                //Log.e("InvoiceDS", "Error saveDocProdAndLink: ${e.message}")
             }
         }
-        return documentProductId
     }
 
+    // --- saveDocumentClientOrIssuerInDbAndLinkToDocument ---
+    // Uses withContext(Dispatchers.IO)
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
         documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
@@ -270,41 +294,55 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun deleteDeliveryNotes(deliveryNotes: List<DeliveryNoteState>) {
+    // --- delete ---
+    // Uses withContext(Dispatchers.IO).
+    override suspend fun delete(documents: List<DeliveryNoteState>) {
         withContext(Dispatchers.IO) {
             try {
-                deliveryNotes.filter { it.documentId != null }.forEach { deliveryNote ->
-                    deliveryNote.documentProducts?.mapNotNull { it.id }?.forEach {
+                documents.filter { it.documentId != null }.forEach { document ->
+                    document.documentProducts?.mapNotNull { it.id }?.forEach {
                         documentProductQueries.deleteDocumentProduct(it.toLong())
                     }
 
-                    deliveryNoteQueries.delete(id = deliveryNote.documentId!!.toLong())
+                    // Delete linked products
                     linkDeliveryNoteToDocumentProductQueries.deleteAllProductsLinkedToADeliveryNote(
-                        deliveryNote.documentId!!.toLong()
+                        document.documentId!!.toLong()
                     )
-                    linkDeliveryNoteToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToADeliveryNote(
-                        deliveryNote.documentId!!.toLong()
-                    )
-                    deliveryNote.documentClient?.type?.let {
-                        deleteDocumentClientOrIssuer(
-                            deliveryNote.documentId!!.toLong(),
-                            it
-                        )
-                    }
-                    deliveryNote.documentIssuer?.type?.let {
-                        deleteDocumentClientOrIssuer(
-                            deliveryNote.documentId!!.toLong(),
-                            it
-                        )
-                    }
-                    deliveryNote.documentProducts?.filter { it.id != null }?.let {
+                    document.documentProducts?.filter { it.id != null }?.let {
                         it.forEach { documentProduct ->
                             deleteDocumentProduct(
-                                deliveryNote.documentId!!.toLong(),
+                                document.documentId!!.toLong(),
                                 documentProduct.id!!.toLong()
                             )
                         }
                     }
+
+                    // Delete linked client/issuer
+                    linkDeliveryNoteToDocumentClientOrIssuerQueries.deleteAllDocumentClientOrIssuerLinkedToADeliveryNote(
+                        document.documentId!!.toLong()
+                    )
+                    document.documentClient?.type?.let {
+                        deleteDocumentClientOrIssuer(
+                            document.documentId!!.toLong(),
+                            it
+                        )
+                    }
+                    document.documentIssuer?.type?.let {
+                        deleteDocumentClientOrIssuer(
+                            document.documentId!!.toLong(),
+                            it
+                        )
+                    }
+                    // Delete client/issuer addresses
+                    document.documentClient?.addresses?.mapNotNull { it.id }?.forEach {
+                        documentClientOrIssuerAddressQueries.delete(it.toLong())
+                        linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
+                    }
+
+
+                    // Delete the main document
+                    deliveryNoteQueries.delete(id = document.documentId!!.toLong())
+
                 }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -312,11 +350,14 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-    override suspend fun deleteDocumentProduct(deliveryNoteId: Long, documentProductId: Long) {
+    // --- deleteDocumentProduct (from an Invoice context) ---
+    // Specific helper for deleting a product linked to an invoice.
+    // Uses withContext(Dispatchers.IO).
+    override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
             return withContext(Dispatchers.IO) {
                 linkDeliveryNoteToDocumentProductQueries.deleteProductLinkedToDeliveryNote(
-                    deliveryNoteId,
+                    documentId,
                     documentProductId
                 )
             }
@@ -325,27 +366,35 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
+    // --- deleteDocumentClientOrIssuer ---
+    // Uses withContext(Dispatchers.IO)
     override suspend fun deleteDocumentClientOrIssuer(
-        deliveryNoteId: Long,
+        documentId: Long,
         type: ClientOrIssuerType,
     ) {
         try {
             return withContext(Dispatchers.IO) {
-                val documentClientOrIssuer =
+                val clientOrIssuerToDelete =
                     fetchClientAndIssuer(
-                        deliveryNoteId,
+                        documentId,
                         linkDeliveryNoteToDocumentClientOrIssuerQueries,
                         linkDocumentClientOrIssuerToAddressQueries,
                         documentClientOrIssuerQueries,
                         documentClientOrIssuerAddressQueries
                     )?.firstOrNull { it.type == type }
 
-                documentClientOrIssuer?.id?.let {
+                clientOrIssuerToDelete?.id?.let { entityId ->
+                    // 1. Delete the link between invoice and the client/issuer entity
                     linkDeliveryNoteToDocumentClientOrIssuerQueries.deleteDocumentClientOrIssuerLinkedToDeliveryNote(
-                        deliveryNoteId,
-                        it.toLong()
+                        documentId,
+                        entityId.toLong()
                     )
-                    documentClientOrIssuerQueries.delete(it.toLong())
+                    //2. Delete the client/issuer entity and its addresses
+                    documentClientOrIssuerQueries.delete(entityId.toLong())
+                    linkDocumentClientOrIssuerToAddressQueries.deleteWithClientId(entityId.toLong())
+                    clientOrIssuerToDelete.addresses?.mapNotNull { it.id }?.forEach { addressId ->
+                        documentClientOrIssuerAddressQueries.delete(addressId.toLong())
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -353,17 +402,9 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
-
-    private fun getExistingIssuer(): DocumentClientOrIssuer? {
-        var issuer: DocumentClientOrIssuer? = null
-        try {
-            issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return issuer
-    }
-
+    // --- saveInfoInDocumentTable ---
+    // Synchronous private helper, performs DB IO.
+    // Must be called from a Dispatchers.IO context
     private fun saveInfoInDocumentTable(document: DeliveryNoteState) {
         try {
             deliveryNoteQueries.save(
@@ -380,15 +421,19 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
+    // --- saveInfoInOtherTables ---
+    // Private suspend helper. Called with an explicit parentId (invoiceId).
+    // Calls other suspend functions that manage their own IO.
     private suspend fun saveInfoInOtherTables(
+        documentId: Long,
         deliveryNote: DeliveryNoteState,
     ) {
-        deliveryNoteQueries.getLastInsertedRowId().executeAsOneOrNull()?.let { id ->
-            // Link all products
+        try {
+            // Link all products to the new parentId
             deliveryNote.documentProducts?.forEach { documentProduct ->
                 saveDocumentProductInDbAndLinkToDocument(
                     documentProduct = documentProduct,
-                    deliveryNoteId = id
+                    documentId = documentId
                 )
             }
 
@@ -396,7 +441,7 @@ class DeliveryNoteLocalDataSource(
             deliveryNote.documentClient?.let {
                 saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = it,
-                    documentId = id
+                    documentId = documentId
                 )
             }
 
@@ -404,9 +449,11 @@ class DeliveryNoteLocalDataSource(
             deliveryNote.documentIssuer?.let {
                 saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = it,
-                    documentId = id
+                    documentId = documentId
                 )
             }
+        } catch (e: Exception) {
+            //Log.e("InvoiceDS", "Error saveInfoInOtherTables for parentId $parentId: ${e.message}")
         }
     }
 
@@ -420,7 +467,11 @@ class DeliveryNoteLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.transaction {
-                    updateDocumentProductsOrderInDb(documentId, orderedProducts, linkDeliveryNoteToDocumentProductQueries)
+                    updateDocumentProductsOrderInDb(
+                        documentId,
+                        orderedProducts,
+                        linkDeliveryNoteToDocumentProductQueries
+                    )
                 }
             } catch (e: Exception) {
                 // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
@@ -430,36 +481,3 @@ class DeliveryNoteLocalDataSource(
     }
 }
 
-
-fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotalPrices {
-    val totalPriceWithoutTax = products.filter { it.priceWithoutTax != null }.sumOf {
-        it.priceWithoutTax!! * (it.quantity)
-    }.setScale(2, RoundingMode.HALF_UP)
-
-    // Calculate the total amount of each tax
-    val groupedItems = products.groupBy {
-        it.taxRate
-    }
-    val taxes = groupedItems.keys.filterNotNull().distinct().toMutableList() // ex: taxes= [10, 20]
-
-    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
-    groupedItems.values.forEach { documentProduct ->
-        val listOfAmounts = documentProduct.filter { it.priceWithoutTax != null }.map {
-            BigDecimal(it.priceWithoutTax!!.toDouble()) * it.quantity * (it.taxRate ?: BigDecimal(0)) / BigDecimal(100)
-        }
-        val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
-        amounts.add(
-            sumOfAmounts
-        )
-    }
-    val amountsPerTaxRate: MutableList<Pair<BigDecimal, BigDecimal>> = mutableListOf()
-    taxes.forEachIndexed { index, key ->
-        amountsPerTaxRate.add(Pair(key, amounts[index]))
-    } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
-
-    return DocumentTotalPrices(
-        totalPriceWithoutTax = totalPriceWithoutTax,
-        totalAmountsOfEachTax = amountsPerTaxRate,
-        totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }
-    )
-}

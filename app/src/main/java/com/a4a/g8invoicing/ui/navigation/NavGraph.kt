@@ -37,7 +37,7 @@ fun NavGraph(navController: NavHostController) {
         //  startDestination = (Screen.Account.name),
           startDestination = (Screen.InvoiceList.name),
         // startDestination = (Screen.CreditNoteList.name),
-        //     startDestination = (Screen.DeliveryNoteList.name),
+        //   startDestination = (Screen.DeliveryNoteList.name),
         // startDestination = (Screen.ProductList.name),
         // startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
@@ -131,8 +131,8 @@ fun NavGraph(navController: NavHostController) {
              )
              clientAddEdit(
                  navController = navController,
-                 goToPreviousScreen = { key, result ->
-                     navigateBackWithResult(navController, key, result)
+                 goToPreviousScreen = {
+                     navigateBack(navController)
                  }
              )
              deliveryNoteAddEdit(

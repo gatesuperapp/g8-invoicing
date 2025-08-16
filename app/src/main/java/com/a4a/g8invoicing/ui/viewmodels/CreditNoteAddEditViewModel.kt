@@ -5,23 +5,22 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
-import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.CreditNoteState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -110,19 +109,22 @@ class CreditNoteAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInLocalDbAndWaitForTheId(documentProduct: DocumentProductState): Int? {
-        var documentProductId: Int? = null
-        runBlocking {  // launch a new coroutine and keep a reference to its Job
-            try {
-                documentProductId = documentDataSource.saveDocumentProductInDbAndLinkToDocument(
-                    documentProduct = documentProduct,
-                    id = _documentUiState.value.documentId?.toLong()
-                )
-            } catch (e: Exception) {
-                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
-            }
+    suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
+        val currentDocumentId = _documentUiState.value.documentId?.toLong()
+        if (currentDocumentId == null) {
+            //println("Error: documentId is null, cannot save document product")
+            return null
         }
-        return documentProductId
+
+        return try {
+            documentDataSource.saveDocumentProductInDbAndLinkToDocument(
+                documentProduct = documentProduct,
+                documentId = currentDocumentId
+            )
+        } catch (e: Exception) {
+            //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+            null
+        }
     }
 
 
@@ -164,30 +166,50 @@ class CreditNoteAddEditViewModel @Inject constructor(
     }
 
     fun saveDocumentProductInUiState(documentProduct: DocumentProductState) {
-        try {
-            val list = _documentUiState.value.documentProducts
-            var maxId = 1
+        if (documentProduct.id == null) {
+            println("Warning: Attempting to save DocumentProduct in db.")
+        }
 
-            if (!list.isNullOrEmpty()) {
-                maxId = list.mapNotNull { it.id }.max()
-            }
+        val currentList = _documentUiState.value.documentProducts ?: emptyList()
+        val newList = ArrayList(currentList)
 
-            if (documentProduct.id == null) {
-                documentProduct.id = maxId + 1
-            }
+        // Ajouter comme nouveau produit
+        newList.add(documentProduct)
 
-            val newList: List<DocumentProductState> = (list ?: emptyList()) + documentProduct
-
-            _documentUiState.value = _documentUiState.value.copy(
-                documentProducts = newList
+        _documentUiState.update { currentState ->
+            currentState.copy(
+                documentProducts = newList.toList(),
+                documentTotalPrices = calculateDocumentPrices(newList.toList())
             )
-            // Recalculate the prices
-            _documentUiState.value.documentProducts?.let {
-                _documentUiState.value =
-                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
+        }
+    }
+
+    fun updateDocumentProductsOrderInUiStateAndDb(updatedProducts: List<DocumentProductState>) {
+        viewModelScope.launch {
+            try {
+                // 1. Mettre à jour sortOrder dans la liste pour l'UI et pour la BDD
+                val productsWithUpdatedSortOrder = updatedProducts.mapIndexed { index, product ->
+                    product.copy(sortOrder = index)
+                }
+
+                // 2. Mettre à jour l'état de l'UI
+                _documentUiState.value = _documentUiState.value.copy(
+                    documentProducts = productsWithUpdatedSortOrder
+                )
+
+                // 3. Mettre à jour l'ordre dans la base de données locale
+                val documentId = _documentUiState.value.documentId?.toLong()
+                if (documentId != null) {
+                    documentDataSource.updateDocumentProductsOrderInDb(
+                        documentId = documentId,
+                        orderedProducts = productsWithUpdatedSortOrder
+                    )
+                } else {
+                    // Log.w("InvoiceViewModel", "Document ID or Document Type is null, cannot update sort order in DB.")
+                }
+            } catch (e: Exception) {
+                // Log.e("InvoiceViewModel", "Failed to update product order", e)
             }
-        } catch (e: Exception) {
-            //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
@@ -266,16 +288,6 @@ class CreditNoteAddEditViewModel @Inject constructor(
                 selection = TextRange(text?.length ?: 0)
             )
         )
-    }
-
-    fun updateProductOrderInUiState(updatedProducts: List<DocumentProductState>) {
-        try {
-            _documentUiState.value = _documentUiState.value.copy(
-                documentProducts = updatedProducts.sortedBy { it.sortOrder } // S'assurer qu'elle est triée
-            )
-        } catch (e: Exception) {
-            // Log.e("InvoiceViewModel", "Failed to update product order in UI state", e)
-        }
     }
 }
 

@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import android.util.Log.e
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
@@ -157,7 +158,7 @@ class CreditNoteLocalDataSource(
                 freeField = it.free_field?.let { TextFieldValue(text = it) },
                 documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
-                documentProducts = documentProducts,
+                documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(Strings.get(R.string.currency)),
                 dueDate = it.due_date ?: "",
@@ -236,27 +237,28 @@ class CreditNoteLocalDataSource(
 
     override suspend fun saveDocumentProductInDbAndLinkToDocument(
         documentProduct: DocumentProductState,
-        documentId: Long?,
+        documentId: Long,
         deliveryNoteDate: String?,
         deliveryNoteNumber: String?,
     ): Int? {
-        var documentProductId: Int? = null
-        withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             try {
-                documentProductId = saveDocumentProductInDbAndLink(
-                    documentProductQueries,
-                    linkDocumentProductToCreditNoteQueries,
-                    linkDocumentClientOrIssuerToAddressQueries,
-                    documentProduct,
-                    documentId,
-                    deliveryNoteDate,
-                    deliveryNoteNumber
-                )
+                documentProductQueries.transactionWithResult {
+                    saveDocumentProductInDbAndLink(
+                        documentProductQueries,
+                        linkDocumentProductToCreditNoteQueries,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentProduct,
+                        documentId,
+                        deliveryNoteDate,
+                        deliveryNoteNumber
+                    )
+                }
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
+                //Log.e("InvoiceDS", "Error saveDocProdAndLink: ${e.message}")
             }
         }
-        return documentProductId
     }
 
     override suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(
@@ -454,7 +456,11 @@ class CreditNoteLocalDataSource(
         withContext(Dispatchers.IO) {
             try {
                 documentProductQueries.transaction {
-                    updateDocumentProductsOrderInDb(documentId, orderedProducts, linkCreditNoteDocumentProductToDeliveryNoteQueries)
+                    updateDocumentProductsOrderInDb(
+                        documentId,
+                        orderedProducts,
+                        linkCreditNoteDocumentProductToDeliveryNoteQueries
+                    )
                 }
             } catch (e: Exception) {
                 // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)

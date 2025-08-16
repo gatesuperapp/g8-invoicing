@@ -1,19 +1,18 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import androidx.compose.animation.core.copy
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
-import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -21,8 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -118,19 +117,22 @@ class InvoiceAddEditViewModel @Inject constructor(
         }
     }
 
-    fun saveDocumentProductInLocalDbAndWaitForTheId(documentProduct: DocumentProductState): Int? {
-        var documentProductId: Int? = null
-        runBlocking {
-            try {
-                documentDataSource.saveDocumentProductInDbAndLinkToDocument(
-                    documentProduct = documentProduct,
-                    documentId = _documentUiState.value.documentId?.toLong()
-                )
-            } catch (e: Exception) {
-                //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
-            }
+    suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
+        val currentDocumentId = _documentUiState.value.documentId?.toLong()
+        if (currentDocumentId == null) {
+            //println("Error: documentId is null, cannot save document product")
+            return null
         }
-        return documentProductId
+
+        return try {
+            documentDataSource.saveDocumentProductInDbAndLinkToDocument(
+                documentProduct = documentProduct,
+                documentId = currentDocumentId
+            )
+        } catch (e: Exception) {
+            //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+            null
+        }
     }
 
     fun removeDocumentProductFromLocalDb(documentProductId: Int) {
@@ -163,38 +165,27 @@ class InvoiceAddEditViewModel @Inject constructor(
                 _documentUiState.value =
                     _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
             }
-
-
         } catch (e: Exception) {
             //println("Deleting delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
     fun saveDocumentProductInUiState(documentProduct: DocumentProductState) {
-        try {
-            val list = _documentUiState.value.documentProducts
-            var maxId = 1
+        if (documentProduct.id == null) {
+            println("Warning: Attempting to save DocumentProduct in db.")
+        }
 
-            if (!list.isNullOrEmpty()) {
-                maxId = list.mapNotNull { it.id }.max()
-            }
+        val currentList = _documentUiState.value.documentProducts ?: emptyList()
+        val newList = ArrayList(currentList)
 
-            if (documentProduct.id == null) {
-                documentProduct.id = maxId + 1
-            }
+        // Ajouter comme nouveau produit
+        newList.add(documentProduct)
 
-            val newList: List<DocumentProductState> = (list ?: emptyList()) + documentProduct
-
-            _documentUiState.value = _documentUiState.value.copy(
-                documentProducts = newList
+        _documentUiState.update { currentState ->
+            currentState.copy(
+                documentProducts = newList.toList(),
+                documentTotalPrices = calculateDocumentPrices(newList.toList())
             )
-            // Recalculate the prices
-            _documentUiState.value.documentProducts?.let {
-                _documentUiState.value =
-                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
-            }
-        } catch (e: Exception) {
-            //println("Saving delivery note product failed with exception: ${e.localizedMessage}")
         }
     }
 
@@ -221,19 +212,11 @@ class InvoiceAddEditViewModel @Inject constructor(
                 } else {
                     // Log.w("InvoiceViewModel", "Document ID or Document Type is null, cannot update sort order in DB.")
                 }
-
-                // Optionnel : Recalculer les prix si nécessaire après changement d'ordre
-                _documentUiState.value.documentProducts?.let {
-                    _documentUiState.value =
-                        _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
-                }
-
             } catch (e: Exception) {
                 // Log.e("InvoiceViewModel", "Failed to update product order", e)
             }
         }
     }
-
 
     fun saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer: ClientOrIssuerState) {
         saveJob?.cancel()
