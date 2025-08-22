@@ -38,7 +38,7 @@ fun FormUI(
     errors: MutableList<Pair<ScreenElement, String?>>? = null,
     onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
 ) {
-    // handle focus
+// handle focus
     val focusManager = LocalFocusManager.current
 
     val textFieldsInputs: List<ScreenElement> = inputList.filter {
@@ -51,9 +51,15 @@ fun FormUI(
     //            Pair(PageElement.DELIVERY_NOTE_NUMBER, FocusRequester()),
     //            Pair(PageElement.ORDER_NUMBER, FocusRequester())
     //        )
-    val focusRequesters = remember {
-        inputList.map { it.pageElement to FocusRequester() }
+    val inputsWithFocusRequester: MutableList<Pair<ScreenElement, FocusRequester>> = mutableListOf()
+    textFieldsInputs.forEach {
+        inputsWithFocusRequester.add(
+            Pair(it, FocusRequester())
+        )
     }
+    val focusRequesters: List<Pair<ScreenElement, FocusRequester>> =
+        remember { inputsWithFocusRequester }
+
 
     Column(
         modifier = Modifier
@@ -285,3 +291,4 @@ enum class KeyboardOpt {
     VALIDATE_INPUT,
     GO_TO_NEXT_INPUT
 }
+

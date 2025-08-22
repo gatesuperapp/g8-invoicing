@@ -141,6 +141,7 @@ fun DocumentAddEdit(
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
+            initialValue = SheetValue.Hidden,
             skipHiddenState = false
         )
     )

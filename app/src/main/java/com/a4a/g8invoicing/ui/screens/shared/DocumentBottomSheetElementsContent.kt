@@ -129,29 +129,15 @@ fun DocumentBottomSheetElementsContent(
         )
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 10.dp,
-                bottom = 8.dp
-            )
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    localFocusManager.clearFocus()
-                })
-            }
-    ) {
 
-        FormUI(
-            inputList = inputList,
-            keyboard = KeyboardOpt.VALIDATE_INPUT,
-            localFocusManager = localFocusManager,
-            onClickForward = onClickForward,
-            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
-        )
+    FormUI(
+        inputList = inputList,
+        keyboard = KeyboardOpt.VALIDATE_INPUT,
+        localFocusManager = localFocusManager,
+        onClickForward = onClickForward,
+        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+    )
 
-    }
 }
 
 
