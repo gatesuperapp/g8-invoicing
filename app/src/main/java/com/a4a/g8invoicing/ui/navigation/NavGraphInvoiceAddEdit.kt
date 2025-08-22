@@ -103,268 +103,261 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showDocumentForm by remember { mutableStateOf(false) }
 
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        /*    Hey(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )*/
+        // Get result from "Add new" screen, to know if it's
+        // a client or issuer that has been added
+        DocumentAddEdit(
+            navController = navController,
+            document = document,
+            onClickBack = onClickBack,
+            clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
+            issuerList = issuerListUiState.clientsOrIssuerList.toMutableList(),
+            documentClientUiState = documentClientUiState,
+            documentIssuerUiState = documentIssuerUiState,
+            documentProductUiState = documentProduct, // Used when choosing a product or creating new product from the bottom sheet
+            taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
+            products = productListUiState.products.toMutableList(), // The list of products to display when adding a product
+            onValueChange = { pageElement, value ->
+                invoiceViewModel.updateUiState(pageElement, value)
+            },
+            onSelectProduct = { product ->
+                // Initialize documentProductUiState to display it in the bottomSheet form
+                productAddEditViewModel.setDocumentProductUiStateWithProduct(
+                    product,
+                )
+            },
+            onClickNewDocumentProduct = {
+                productAddEditViewModel.clearProductNameAndDescription()
+            },
+            onClickEditDocumentProduct = {// Edit a document product
+                productAddEditViewModel.setDocumentProductUiState(it)
+            },
+            onClickDeleteDocumentProduct = {
+                invoiceViewModel.removeDocumentProductFromUiState(it)
+                invoiceViewModel.removeDocumentProductFromLocalDb(it)
+            },
+            onSelectClientOrIssuer = { clientOrIssuer ->
+                if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
+                    documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    a
+                } else {
+                    documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                }
+                invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(clientOrIssuer)
+                invoiceViewModel.saveDocumentClientOrIssuerInUiState(clientOrIssuer)
 
-            // Get result from "Add new" screen, to know if it's
-            // a client or issuer that has been added
-            DocumentAddEdit(
-                navController = navController,
-                document = document,
-                onClickBack = onClickBack,
-                clientList = clientListUiState.clientsOrIssuerList.toMutableList(),
-                issuerList = issuerListUiState.clientsOrIssuerList.toMutableList(),
-                documentClientUiState = documentClientUiState,
-                documentIssuerUiState = documentIssuerUiState,
-                documentProductUiState = documentProduct, // Used when choosing a product or creating new product from the bottom sheet
-                taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
-                products = productListUiState.products.toMutableList(), // The list of products to display when adding a product
-                onValueChange = { pageElement, value ->
-                    invoiceViewModel.updateUiState(pageElement, value)
-                },
-                onSelectProduct = { product ->
-                    // Initialize documentProductUiState to display it in the bottomSheet form
-                    productAddEditViewModel.setDocumentProductUiStateWithProduct(
-                        product,
-                    )
-                },
-                onClickNewDocumentProduct = {
-                    productAddEditViewModel.clearProductNameAndDescription()
-                },
-                onClickEditDocumentProduct = {// Edit a document product
-                    productAddEditViewModel.setDocumentProductUiState(it)
-                },
-                onClickDeleteDocumentProduct = {
-                    invoiceViewModel.removeDocumentProductFromUiState(it)
-                    invoiceViewModel.removeDocumentProductFromLocalDb(it)
-                },
-                onSelectClientOrIssuer = { clientOrIssuer ->
-                    if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
-                        documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                        clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                        a
-                    } else {
-                        documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
-                        clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER
-                    }
-                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(clientOrIssuer)
-                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(clientOrIssuer)
-
-                },
-                onClickNewDocumentClientOrIssuer = {
-                    clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
-                },
-                onClickDocumentClientOrIssuer = {// Edit a document product
-                    clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
-                },
-                onClickDeleteDocumentClientOrIssuer = { type ->
-                    invoiceViewModel.removeDocumentClientOrIssuerFromUiState(type)
-                    invoiceViewModel.removeDocumentClientOrIssuerFromLocalDb(type)
-                },
-                placeCursorAtTheEndOfText = { pageElement ->
-                    if (pageElement == ScreenElement.DOCUMENT_NUMBER ||
-                        pageElement == ScreenElement.DOCUMENT_REFERENCE
-                    ) {
-                        invoiceViewModel.updateTextFieldCursorOfInvoiceState(pageElement)
-                    }
-                },
-                bottomFormOnValueChange = { pageElement, value, type ->
-                    if (pageElement.name.contains("PRODUCT")) {
-                        productAddEditViewModel.updateProductState(
-                            pageElement,
-                            value,
-                            ProductType.DOCUMENT_PRODUCT
-                        )
-                    } else {
-                        type?.let {
-                            clientOrIssuerAddEditViewModel.updateClientOrIssuerState(
-                                pageElement,
-                                value,
-                                it
-                            )
-                        }
-                    }
-                },
-                bottomFormPlaceCursor = { pageElement, clientOrIssuer ->
-                    if (pageElement.name.contains(ProductType.DOCUMENT_PRODUCT.name)) {
-                        productAddEditViewModel.updateCursor(
-                            pageElement,
-                            ProductType.DOCUMENT_PRODUCT
-                        )
-                    } else if (clientOrIssuer == ClientOrIssuerType.DOCUMENT_ISSUER) {
-                        clientOrIssuerAddEditViewModel.updateCursor(
-                            pageElement,
-                            ClientOrIssuerType.DOCUMENT_ISSUER
-                        )
-                    } else if (clientOrIssuer == ClientOrIssuerType.DOCUMENT_CLIENT) {
-                        clientOrIssuerAddEditViewModel.updateCursor(
-                            pageElement,
-                            ClientOrIssuerType.DOCUMENT_CLIENT
-                        )
-                    }
-                },
-                onClickDoneForm = { typeOfCreation ->
-                    scope.launch {
-                        when (typeOfCreation) {
-                            // NEW = create new & save in clients list too
-                            DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
-                                //documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                                if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                                    createNewClientOrIssuer(
-                                        clientOrIssuerAddEditViewModel,
-                                        ClientOrIssuerType.DOCUMENT_CLIENT
-                                    )
-                                    documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-
-                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(
-                                        documentClientUiState
-                                    )
-                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                        documentClientUiState
-                                    )
-                                    showDocumentForm = false
-                                }
-                            }
-                            // EDIT = edit the chosen item (will only impact the document, doesn't change
-                            // the initial object)
-                            DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
-                                documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                                if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                                    invoiceViewModel.updateUiState(
-                                        ScreenElement.DOCUMENT_CLIENT,
-                                        documentClientUiState
-                                    )
-                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                        ClientOrIssuerType.DOCUMENT_CLIENT,
-                                        documentClientUiState
-                                    )
-                                }
-                                showDocumentForm = false
-                            }
-
-                            DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
-                                if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                                    createNewClientOrIssuer(
-                                        clientOrIssuerAddEditViewModel,
-                                        ClientOrIssuerType.DOCUMENT_ISSUER
-                                    )
-                                    documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
-                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(
-                                        documentIssuerUiState
-                                    )
-                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
-                                        documentIssuerUiState
-                                    )
-                                    showDocumentForm = false
-                                }
-                            }
-
-                            DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
-                                if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                                    invoiceViewModel.updateUiState(
-                                        ScreenElement.DOCUMENT_ISSUER,
-                                        documentIssuerUiState
-                                    )
-                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                        ClientOrIssuerType.DOCUMENT_ISSUER,
-                                        documentIssuerUiState
-                                    )
-                                    showDocumentForm = false
-                                }
-                            }
-
-                            DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
-                                if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                                    // 1. Save DocumentProduct in db and get the id
-                                    val documentProductId =
-                                        invoiceViewModel.saveDocumentProductInLocalDbAndGetId(
-                                            documentProduct
-                                        )
-                                    // 2. Update UI only if ID is obtained
-                                    if (documentProductId != null) {
-                                        invoiceViewModel.saveDocumentProductInUiState(
-                                            documentProduct.copy(id = documentProductId)
-                                        )
-
-                                        // 5. Close bottom sheet
-                                        showDocumentForm = false
-                                    } else {
-                                        // Les validations ont échoué
-                                        //println("Validation failed for new product.")
-                                        // Le message d'erreur de validation devrait déjà être affiché dans le formulaire
-                                        // Ne pas fermer le formulaire.
-                                    }
-                                }
-                            }
-
-                            DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
-                                if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                                    // 1. Updating product viewModel
-                                    productAddEditViewModel.setProductUiState()
-                                    productAddEditViewModel.saveProductInLocalDb()
-
-                                    // 2. Save DocumentProduct in db and get the id
-                                    val documentProductId =
-                                        invoiceViewModel.saveDocumentProductInLocalDbAndGetId(
-                                            documentProduct
-                                        )
-                                    // 3. Update UI only if ID is obtained
-                                    if (documentProductId != null) {
-                                        invoiceViewModel.saveDocumentProductInUiState(
-                                            documentProduct.copy(id = documentProductId)
-                                        )
-                                        // 4. Clear product viewModel
-                                        productAddEditViewModel.clearProductUiState()
-
-                                        // 5. Close bottom sheet
-                                        showDocumentForm = false
-                                    } else {
-                                        // Les validations ont échoué
-                                        //println("Validation failed for new product.")
-                                        // Le message d'erreur de validation devrait déjà être affiché dans le formulaire
-                                        // Ne pas fermer le formulaire.
-                                    }
-                                }
-                            }
-
-                            DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
-                                if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
-                                    invoiceViewModel.updateUiState(
-                                        ScreenElement.DOCUMENT_PRODUCT,
-                                        documentProduct
-                                    )
-                                    productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
-                                    productAddEditViewModel.clearProductUiState()
-                                    showDocumentForm = false
-                                }
-                            }
-                        }
-                    }
-                },
-                onClickCancelForm = {
-                },
-                onSelectTaxRate = {
-                    productAddEditViewModel.updateTaxRate(
-                        it,
+            },
+            onClickNewDocumentClientOrIssuer = {
+                clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
+            },
+            onClickDocumentClientOrIssuer = {// Edit a document product
+                clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(it)
+            },
+            onClickDeleteDocumentClientOrIssuer = { type ->
+                invoiceViewModel.removeDocumentClientOrIssuerFromUiState(type)
+                invoiceViewModel.removeDocumentClientOrIssuerFromLocalDb(type)
+            },
+            placeCursorAtTheEndOfText = { pageElement ->
+                if (pageElement == ScreenElement.DOCUMENT_NUMBER ||
+                    pageElement == ScreenElement.DOCUMENT_REFERENCE
+                ) {
+                    invoiceViewModel.updateTextFieldCursorOfInvoiceState(pageElement)
+                }
+            },
+            bottomFormOnValueChange = { pageElement, value, type ->
+                if (pageElement.name.contains("PRODUCT")) {
+                    productAddEditViewModel.updateProductState(
+                        pageElement,
+                        value,
                         ProductType.DOCUMENT_PRODUCT
                     )
-                },
-                showDocumentForm = showDocumentForm,
-                onShowDocumentForm = {
-                    showDocumentForm = it
-                },
-                onClickDeleteAddress = {
-                    clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
-                },
-                onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb
-            )
-        }
+                } else {
+                    type?.let {
+                        clientOrIssuerAddEditViewModel.updateClientOrIssuerState(
+                            pageElement,
+                            value,
+                            it
+                        )
+                    }
+                }
+            },
+            bottomFormPlaceCursor = { pageElement, clientOrIssuer ->
+                if (pageElement.name.contains(ProductType.DOCUMENT_PRODUCT.name)) {
+                    productAddEditViewModel.updateCursor(
+                        pageElement,
+                        ProductType.DOCUMENT_PRODUCT
+                    )
+                } else if (clientOrIssuer == ClientOrIssuerType.DOCUMENT_ISSUER) {
+                    clientOrIssuerAddEditViewModel.updateCursor(
+                        pageElement,
+                        ClientOrIssuerType.DOCUMENT_ISSUER
+                    )
+                } else if (clientOrIssuer == ClientOrIssuerType.DOCUMENT_CLIENT) {
+                    clientOrIssuerAddEditViewModel.updateCursor(
+                        pageElement,
+                        ClientOrIssuerType.DOCUMENT_CLIENT
+                    )
+                }
+            },
+            onClickDoneForm = { typeOfCreation ->
+                scope.launch {
+                    when (typeOfCreation) {
+                        // NEW = create new & save in clients list too
+                        DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
+                            //documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                createNewClientOrIssuer(
+                                    clientOrIssuerAddEditViewModel,
+                                    ClientOrIssuerType.DOCUMENT_CLIENT
+                                )
+                                documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
 
+                                invoiceViewModel.saveDocumentClientOrIssuerInUiState(
+                                    documentClientUiState
+                                )
+                                invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                    documentClientUiState
+                                )
+                                showDocumentForm = false
+                            }
+                        }
+                        // EDIT = edit the chosen item (will only impact the document, doesn't change
+                        // the initial object)
+                        DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
+                            documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                invoiceViewModel.updateUiState(
+                                    ScreenElement.DOCUMENT_CLIENT,
+                                    documentClientUiState
+                                )
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_CLIENT,
+                                    documentClientUiState
+                                )
+                            }
+                            showDocumentForm = false
+                        }
+
+                        DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                createNewClientOrIssuer(
+                                    clientOrIssuerAddEditViewModel,
+                                    ClientOrIssuerType.DOCUMENT_ISSUER
+                                )
+                                documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                                invoiceViewModel.saveDocumentClientOrIssuerInUiState(
+                                    documentIssuerUiState
+                                )
+                                invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(
+                                    documentIssuerUiState
+                                )
+                                showDocumentForm = false
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
+                            if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                invoiceViewModel.updateUiState(
+                                    ScreenElement.DOCUMENT_ISSUER,
+                                    documentIssuerUiState
+                                )
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_ISSUER,
+                                    documentIssuerUiState
+                                )
+                                showDocumentForm = false
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
+                            if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                                // 1. Save DocumentProduct in db and get the id
+                                val documentProductId =
+                                    invoiceViewModel.saveDocumentProductInLocalDbAndGetId(
+                                        documentProduct
+                                    )
+                                // 2. Update UI only if ID is obtained
+                                if (documentProductId != null) {
+                                    invoiceViewModel.saveDocumentProductInUiState(
+                                        documentProduct.copy(id = documentProductId)
+                                    )
+
+                                    // 5. Close bottom sheet
+                                    showDocumentForm = false
+                                } else {
+                                    // Les validations ont échoué
+                                    //println("Validation failed for new product.")
+                                    // Le message d'erreur de validation devrait déjà être affiché dans le formulaire
+                                    // Ne pas fermer le formulaire.
+                                }
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
+                            if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                                // 1. Updating product viewModel
+                                productAddEditViewModel.setProductUiState()
+                                productAddEditViewModel.saveProductInLocalDb()
+
+                                // 2. Save DocumentProduct in db and get the id
+                                val documentProductId =
+                                    invoiceViewModel.saveDocumentProductInLocalDbAndGetId(
+                                        documentProduct
+                                    )
+                                // 3. Update UI only if ID is obtained
+                                if (documentProductId != null) {
+                                    invoiceViewModel.saveDocumentProductInUiState(
+                                        documentProduct.copy(id = documentProductId)
+                                    )
+                                    // 4. Clear product viewModel
+                                    productAddEditViewModel.clearProductUiState()
+
+                                    // 5. Close bottom sheet
+                                    showDocumentForm = false
+                                } else {
+                                    // Les validations ont échoué
+                                    //println("Validation failed for new product.")
+                                    // Le message d'erreur de validation devrait déjà être affiché dans le formulaire
+                                    // Ne pas fermer le formulaire.
+                                }
+                            }
+                        }
+
+                        DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> {
+                            if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
+                                invoiceViewModel.updateUiState(
+                                    ScreenElement.DOCUMENT_PRODUCT,
+                                    documentProduct
+                                )
+                                productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                                productAddEditViewModel.clearProductUiState()
+                                showDocumentForm = false
+                            }
+                        }
+                    }
+                }
+            },
+            onClickCancelForm = {
+            },
+            onSelectTaxRate = {
+                productAddEditViewModel.updateTaxRate(
+                    it,
+                    ProductType.DOCUMENT_PRODUCT
+                )
+            },
+            showDocumentForm = showDocumentForm,
+            onShowDocumentForm = {
+                showDocumentForm = it
+            },
+            onClickDeleteAddress = {
+                clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
+            },
+            onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb
+        )
     }
 }
+
 
 suspend fun createNewClientOrIssuer(
     clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel,
@@ -374,241 +367,3 @@ suspend fun createNewClientOrIssuer(
     clientOrIssuerAddEditViewModel.createNew(type)
 }
 
-
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Hey(name: String, modifier: Modifier = Modifier) {
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            skipHiddenState = false
-        )
-    )
-    val scope = rememberCoroutineScope()
-
-
-
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = 0.dp,
-        sheetContent = {
-            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                Greeting(LocalFocusManager.current)
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = {
-                scope.launch {
-                    scaffoldState.bottomSheetState.expand()
-                }
-            }) {
-                Text("Ouvrir la BottomSheet")
-            }
-        }
-    }
-
-}
-
-@Composable
-fun Greeting(localFocusManager: FocusManager) {
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            // limite la hauteur à 50% de l’écran max
-            .heightIn(max = screenHeight * 0.5f)
-            .verticalScroll(rememberScrollState())
-            .imePadding() // décale quand le clavier sort
-            .navigationBarsPadding()
-            .padding(16.dp)
-    ) {
-        DocumentBottomSheetElementsContent(localFocusManager)
-    }
-}
-
-@Composable
-fun DocumentBottomSheetElementsContent(localFocusManager: FocusManager) {
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = 10.dp,
-                bottom = 8.dp
-            )
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    localFocusManager.clearFocus()
-                })
-            }
-    ) {
-
-        var text by remember { mutableStateOf("") }
-
-
-        FormInputCreatorText(
-            input = TextInput(),
-            isEditableLabel = true
-        )
-
-
-        /*        TextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = { Text("Écris quelque chose") },
-                    modifier = Modifier.fillMaxWidth()
-                )*/
-
-    }
-}
-
-
-@Composable
-fun FormInputCreatorText(
-    input: TextInput,
-    isEditableLabel: Boolean = false, // Used for editable labels,
-    onClickExpandFullScreen: () -> Unit = {},  // Used to expand product description field
-) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Yellow)
-    ) {
-
-        var textState by remember { mutableStateOf(input.text ?: TextFieldValue("")) }
-        // BasicTextField corrigé
-        BasicTextField(
-            value = textState, // Utilisez l'état
-            onValueChange = { newValue ->
-                textState = newValue // Mettez à jour l'état
-                input.onValueChange(newValue) // Appelez également le onValueChange du TextInput si nécessaire
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.LightGray) // Ajoutez un fond pour le voir
-                .padding(8.dp), // Ajoutez du padding
-            textStyle = LocalTextStyle.current.copy(color = Color.Black), // Style de texte pour la visibilité
-            keyboardOptions = KeyboardOptions(keyboardType = input.keyboardType),
-        ) { innerTextField ->
-            // Vous devez afficher innerTextField ici.
-            // Vous pouvez l'entourer d'autres composables pour la décoration.
-            // Par exemple, un simple placeholder :
-            if (textState.text.isEmpty() && input.placeholder != null) {
-                Text(
-                    text = input.placeholder,
-                    color = Color.Gray
-                )
-            }
-            innerTextField() // C'est la partie qui rend le champ de texte
-        }
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aeaaeea") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        TextField(
-            value = textState, // Utilisez le même état si c'est intentionnel
-            onValueChange = { newValue ->
-                textState = newValue
-                input.onValueChange(newValue)
-            },
-            label = { Text("aaaaa") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-
-    }
-
-}
-
-
-class TextInput(
-    val text: TextFieldValue? = null,
-    val placeholder: String? = null,
-    val onValueChange: (TextFieldValue) -> Unit = {},
-    val keyboardType: KeyboardType = KeyboardType.Text,
-    val displayFullScreenIcon: Boolean = false,
-)

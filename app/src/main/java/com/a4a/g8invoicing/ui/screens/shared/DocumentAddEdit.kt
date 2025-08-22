@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import android.R.attr.scaleX
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -78,14 +79,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.ui.navigation.DocumentBottomBar
-import com.a4a.g8invoicing.ui.navigation.Greeting
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -93,7 +92,6 @@ import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
@@ -136,10 +134,15 @@ fun DocumentAddEdit(
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
 ) {
+    // Know if a category in the bottom bar has been selected
+    val sheetVisible = remember { mutableStateOf(false) }
+
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState()
+        bottomSheetState = rememberStandardBottomSheetState(
+            skipHiddenState = false
+        )
     )
     val bottomSheetType = remember { mutableStateOf(BottomSheetType.ITEMS) }
     val scope = rememberCoroutineScope()
@@ -157,104 +160,29 @@ fun DocumentAddEdit(
         // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
         // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-            hideBottomSheet(scope, scaffoldState, keyboardController)
+            hideBottomSheet(scope, scaffoldState)
         } else {
             onClickBack()
         }
     }
 
-
-
     BottomSheetScaffold(
+        sheetSwipeEnabled = false,
+        sheetDragHandle = null,
+        sheetShape = RoundedCornerShape(
+            topStart = 0.dp,
+            topEnd = 0.dp
+        ),// Remove rounded corners (must be a better way..)
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
-            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                DocumentBottomSheetTextElements(
-                    document = document,
-                    onDismissBottomSheet = {
-                        hideBottomSheet(
-                            scope,
-                            scaffoldState,
-                            keyboardController
-                        )
-                    },
-                    clients = clientList,
-                    issuers = issuerList,
-                    documentClientUiState = documentClientUiState,
-                    documentIssuerUiState = documentIssuerUiState,
-                    taxRates = taxRates,
-                    onValueChange = onValueChange,
-                    onSelectClientOrIssuer = onSelectClientOrIssuer,
-                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
-                    onClickEditDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
-                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    currentClientId = document.documentClient?.id,
-                    currentIssuerId = document.documentIssuer?.id,
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = onClickDoneForm,
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    localFocusManager = LocalFocusManager.current,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm,
-                    onClickDeleteAddress = onClickDeleteAddress
-                )
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(onClick = {
-                scope.launch {
-                    scaffoldState.bottomSheetState.expand()
-                }
-            }) {
-                Text("Ouvrir la BottomSheet")
-            }
-        }
-    }
-
-
-    /* // For the clickable scrim
-     BottomSheetScaffold(
-         sheetSwipeEnabled = false,
-         sheetDragHandle = null,
-         sheetShape = RoundedCornerShape(
-             topStart = 0.dp,
-             topEnd = 0.dp
-         ),// Remove rounded corners (must be a better way..)
-         scaffoldState = scaffoldState,
-         sheetPeekHeight = 0.dp,
-         sheetContent = {
-
-             if (sheetVisible.value) {
-                 // BoxWith
-                 *//*       BoxWithConstraints() {
-                           val sheetMaxHeight = this.maxHeight
-                           Box(
-                               modifier = Modifier
-                                   .fillMaxWidth()
-                                   .height(sheetMaxHeight * 0.5f)
-                           ) {*//*
+            if (sheetVisible.value) {
                 if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
 
                     DocumentBottomSheetTextElements(
                         document = document,
                         onDismissBottomSheet = {
-                            hideBottomSheet(
-                                scope,
-                                scaffoldState,
-                                keyboardController
-                            )
+                            hideBottomSheet(scope, scaffoldState)
                         },
                         clients = clientList,
                         issuers = issuerList,
@@ -279,12 +207,11 @@ fun DocumentAddEdit(
                         onShowDocumentForm = onShowDocumentForm,
                         onClickDeleteAddress = onClickDeleteAddress
                     )
-
                 } else {
                     DocumentBottomSheetProducts(
                         document = document,
                         onDismissBottomSheet = {
-                            hideBottomSheet(scope, scaffoldState, keyboardController)
+                            hideBottomSheet(scope, scaffoldState)
                         },
                         documentProductUiState = documentProductUiState,
                         products = products,
@@ -458,9 +385,9 @@ fun DocumentAddEdit(
                     .graphicsLayer {
                         translationX = animatableOffsetX.value
                         translationY = animatableOffsetY.value
-                        *//*    if (zoom > 1f) { // Y translation disabled when no zoom
+                        /*    if (zoom > 1f) { // Y translation disabled when no zoom
                                 translationY = offsetY
-                            }*//*
+                            }*/
                         scaleX = zoom
                         scaleY = zoom
                     }
@@ -470,7 +397,7 @@ fun DocumentAddEdit(
                     uiState = document,
                     onClickElement = {
                         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            hideBottomSheet(scope, scaffoldState, keyboardController)
+                            hideBottomSheet(scope, scaffoldState)
                         } else {
                             if (it == ScreenElement.DOCUMENT_HEADER ||
                                 it == ScreenElement.DOCUMENT_NUMBER ||
@@ -485,25 +412,25 @@ fun DocumentAddEdit(
                                 bottomSheetType.value = BottomSheetType.ITEMS
                             }
                             expandBottomSheet(scope, scaffoldState)
-                            *//*                        when(it) {
+                            /*                        when(it) {
                                                         ScreenElement.DOCUMENT_NUMBER ->
                                                          selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
                                                         ScreenElement.DOCUMENT_DATE ->
                                                         ScreenElement.DOCUMENT_ISSUER ->
                                                         ScreenElement.DOCUMENT_CLIENT ->
                                                         ScreenElement.DOCUMENT_ORDER_NUMBER ->
-                                                        ScreenElement.DOCUMENT_PRODUCTS ->*//*
+                                                        ScreenElement.DOCUMENT_PRODUCTS ->*/
                         }
                     },
                     onClickRestOfThePage = {
                         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            hideBottomSheet(scope, scaffoldState, keyboardController)
+                            hideBottomSheet(scope, scaffoldState)
                         }
                     },
                 )
             }
         }
-    }*/
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -515,11 +442,11 @@ private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetS
 private fun hideBottomSheet(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    keyboardController: SoftwareKeyboardController?,
+  //  keyboardController: SoftwareKeyboardController?,
 ) {
     scope.launch {
         scaffoldState.bottomSheetState.hide()
-        keyboardController?.hide()
+     //   keyboardController?.hide()
     }
 }
 
