@@ -4,10 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -24,12 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.a4a.g8invoicing.ui.shared.icons.IconDragHandle
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
-import icons.IconDelete
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 @Composable
@@ -39,7 +42,13 @@ fun DocumentBottomSheetProductListChosenItem(
     onClickDeleteDocumentProduct: () -> Unit,
     scope: ReorderableCollectionItemScope,
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    // Interaction source for the Row: ripple on the Row itself
+    val rowInteractionSource = remember { MutableInteractionSource() }
+
+    // Separate Interaction source specifically for the IconButton, if needed for other reasons,
+    // but for simply disabling ripple, it's not strictly necessary if you apply clickable directly.
+    val iconButtonInteractionSource = remember { MutableInteractionSource() }
+
     val hapticFeedback = LocalHapticFeedback.current
     var isDragging by remember { mutableStateOf(false) }
 
@@ -54,14 +63,14 @@ fun DocumentBottomSheetProductListChosenItem(
                 }
             )
             .clickable(
-                interactionSource = interactionSource,
+                interactionSource = rowInteractionSource,
                 indication = ripple(color = Color.Black, bounded = false)
             ) {
                 onClickDocumentProduct()
             }
 
     ) {
-        IconButton(
+        Box(
             modifier = with(scope) {
                 Modifier
                     .draggableHandle(
@@ -74,12 +83,18 @@ fun DocumentBottomSheetProductListChosenItem(
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
                         },
                     )
-            },
-            onClick = {
-            },
-            interactionSource = interactionSource, // 🔑 partage la même interactionSource que la Row
+                    .clickable(
+                        interactionSource = rowInteractionSource, // 🔑 partage la même interactionSource que la Row
+                        indication = null, // 🚀 pas de ripple local sur l'icône
+                        onClick = {} // pas d’action locale, la Row gère déjà le clic
+                    )
+                    .padding(8.dp) // IconButton par défaut applique un padding interne → on le refait ici
+            }
         ) {
-            Icon(IconDragHandle, contentDescription = "Reorder")
+            Icon(
+                imageVector = Icons.Outlined.DragHandle,
+                contentDescription = "Reorder"
+            )
         }
 
         // Adding padding in the inside row, to keep the click & the ripple in all row
@@ -105,6 +120,8 @@ fun DocumentBottomSheetProductListChosenItem(
                 text = documentProduct.name.text,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Icon(
                 modifier = Modifier
@@ -112,7 +129,7 @@ fun DocumentBottomSheetProductListChosenItem(
                     .clickable(
                         onClick = onClickDeleteDocumentProduct
                     ),
-                imageVector = IconDelete,
+                imageVector = Icons.Outlined.DeleteOutline,
                 contentDescription = "Delete line item"
             )
         }

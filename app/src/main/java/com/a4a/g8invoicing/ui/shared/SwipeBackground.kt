@@ -18,8 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.theme.ColorLightGreen
 import com.a4a.g8invoicing.ui.theme.ColorSeashell
-import com.ninetyninepercent.funfactu.icons.IconDollar
-import icons.IconDone
+
 
 // Background used when swiping items in a list
 

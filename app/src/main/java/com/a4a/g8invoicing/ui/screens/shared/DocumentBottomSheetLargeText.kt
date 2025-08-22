@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
+import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorVeryLightGreyo
 
 // User can either select an item (client or product) in the list, or add a new item
@@ -35,15 +36,15 @@ fun DocumentBottomSheetLargeText(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         Column(
             Modifier
+                .background(ColorLightGreyo)
                 .padding(start = 30.dp, end = 30.dp, top = 20.dp, bottom = 30.dp)
-                .fillMaxWidth()
-                .fillMaxHeight(0.6f)
+                .fillMaxHeight(0.5f)
         ) {
             BasicTextField(
                 modifier = Modifier
+                    .background(Color.White)
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .background(ColorVeryLightGreyo)
                     .padding(30.dp),
                 value = text,
                 onValueChange = {

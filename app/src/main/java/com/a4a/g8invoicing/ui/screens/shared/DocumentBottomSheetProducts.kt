@@ -14,31 +14,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import icons.IconDone
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.util.concurrent.TimeUnit
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
 
 // Bottom sheet with "New product" and "Choose in list" buttons
 // And the list of chosen products
@@ -62,6 +62,8 @@ fun DocumentBottomSheetProducts(
     onShowDocumentForm: (Boolean) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboard by keyboardAsState()
 
     Box(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
@@ -69,8 +71,6 @@ fun DocumentBottomSheetProducts(
         // fill the screen full height
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        val keyboard by keyboardAsState()
         var isProductListVisible by remember { mutableStateOf(false) }
         var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
             mutableStateOf(
@@ -106,7 +106,7 @@ fun DocumentBottomSheetProducts(
                                 onDismissBottomSheet()
                             }
                         }) {
-                    if (keyboard.name == "Opened") {
+/*                    if (keyboard.name == "Opened") {
                         Icon(
                             modifier = Modifier
                                 .padding(end = 10.dp)
@@ -115,16 +115,16 @@ fun DocumentBottomSheetProducts(
                             imageVector = IconDone,
                             contentDescription = "Close keyboard"
                         )
-                    } else { // Hides bottom sheet
+                    } else {*/ // Hides bottom sheet
                         Icon(
                             modifier = Modifier
                                 .padding(end = 10.dp)
                                 .size(30.dp)
                                 .align(alignment = Alignment.CenterEnd),
-                            imageVector = IconArrowDropDown,
+                            imageVector = Icons.Outlined.ArrowDropDown,
                             contentDescription = "Close bottom sheet"
                         )
-                    }
+                   // }
                 }
             }
             Column(
@@ -137,7 +137,8 @@ fun DocumentBottomSheetProducts(
             }
         }
 
-        DocumentBottomSheetDocumentProductListChosen(
+        // List of selected products
+        DocumentBottomSheetProductsChosen(
             list = params.first ?: emptyList(),
             onClickNew = {
                 typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
@@ -160,9 +161,9 @@ fun DocumentBottomSheetProducts(
             isClientOrIssuerListEmpty = parameters.second.isEmpty(),
             onOrderChange = onOrderChange
         )
-
+        // List of all products to chose from
         if (isProductListVisible) {
-            DocumentBottomSheetProducts(
+            DocumentBottomSheetProductsAvailable(
                 list = params.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
@@ -179,6 +180,7 @@ fun DocumentBottomSheetProducts(
                 }
             )
         }
+        // Add new product or edit chosen product
         if (showDocumentForm) {
             DocumentBottomSheetForm(
                 typeOfCreation = typeOfCreation,

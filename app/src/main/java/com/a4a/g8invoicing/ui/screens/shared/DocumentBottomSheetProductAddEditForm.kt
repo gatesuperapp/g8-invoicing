@@ -62,7 +62,7 @@ fun DocumentBottomSheetProductAddEditForm(
     Column(
         modifier = Modifier
             .fillMaxHeight(0.5f)
-            .background(Color.LightGray.copy(alpha = 0.4f))
+            .background(Color.LightGray)
             .verticalScroll(rememberScrollState())
             .padding(12.dp)
             .imePadding()

@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -13,16 +14,36 @@ import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -34,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -42,8 +64,12 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEach
@@ -52,12 +78,14 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.ui.navigation.DocumentBottomBar
+import com.a4a.g8invoicing.ui.navigation.Greeting
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -65,6 +93,7 @@ import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
@@ -72,10 +101,7 @@ import java.util.Calendar
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.BottomSheetScaffoldState
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.BottomSheetScaffoldWithoutBug
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.rememberBottomSheetScaffoldState
-import com.a4a.g8invoicing.ui.shared.bottomSheetScaffoldWithoutSwipe.rememberStandardBottomSheetState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,9 +136,6 @@ fun DocumentAddEdit(
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
 ) {
-    // Know if a category in the bottom bar has been selected
-    val sheetVisible = remember { mutableStateOf(false) }
-
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -121,40 +144,117 @@ fun DocumentAddEdit(
     val bottomSheetType = remember { mutableStateOf(BottomSheetType.ITEMS) }
     val scope = rememberCoroutineScope()
 
-    /*    // Keyboard: if it was open and the user swipes down the bottom sheet:
+       /*    // Keyboard: if it was open and the user swipes down the bottom sheet:
         // close the keyboard (if we close keyboard before sheet, there is a weird effect)
         val keyboardController = LocalSoftwareKeyboardController.current
         if (!scaffoldState.bottomSheetState.isVisible) {
             keyboardController?.hide()
         }*/
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     // Handling native navigation back action
     BackHandler {
         // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
         // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-            hideBottomSheet(scope, scaffoldState)
+            hideBottomSheet(scope, scaffoldState, keyboardController)
         } else {
             onClickBack()
         }
     }
 
-    BottomSheetScaffoldWithoutBug(
-        sheetSwipeEnabled = false,
-        sheetDragHandle = null,
-        sheetShape = RoundedCornerShape(
-            topStart = 0.dp,
-            topEnd = 0.dp
-        ),// Remove rounded corners (must be a better way..)
+
+
+    BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 0.dp,
         sheetContent = {
-            if (sheetVisible.value) {
+            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                DocumentBottomSheetTextElements(
+                    document = document,
+                    onDismissBottomSheet = {
+                        hideBottomSheet(
+                            scope,
+                            scaffoldState,
+                            keyboardController
+                        )
+                    },
+                    clients = clientList,
+                    issuers = issuerList,
+                    documentClientUiState = documentClientUiState,
+                    documentIssuerUiState = documentIssuerUiState,
+                    taxRates = taxRates,
+                    onValueChange = onValueChange,
+                    onSelectClientOrIssuer = onSelectClientOrIssuer,
+                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
+                    onClickEditDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+                    currentClientId = document.documentClient?.id,
+                    currentIssuerId = document.documentIssuer?.id,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    bottomFormOnValueChange = bottomFormOnValueChange,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
+                    onClickDoneForm = onClickDoneForm,
+                    onClickCancelForm = onClickCancelForm,
+                    onSelectTaxRate = onSelectTaxRate,
+                    localFocusManager = LocalFocusManager.current,
+                    showDocumentForm = showDocumentForm,
+                    onShowDocumentForm = onShowDocumentForm,
+                    onClickDeleteAddress = onClickDeleteAddress
+                )
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = {
+                scope.launch {
+                    scaffoldState.bottomSheetState.expand()
+                }
+            }) {
+                Text("Ouvrir la BottomSheet")
+            }
+        }
+    }
+
+
+    /* // For the clickable scrim
+     BottomSheetScaffold(
+         sheetSwipeEnabled = false,
+         sheetDragHandle = null,
+         sheetShape = RoundedCornerShape(
+             topStart = 0.dp,
+             topEnd = 0.dp
+         ),// Remove rounded corners (must be a better way..)
+         scaffoldState = scaffoldState,
+         sheetPeekHeight = 0.dp,
+         sheetContent = {
+
+             if (sheetVisible.value) {
+                 // BoxWith
+                 *//*       BoxWithConstraints() {
+                           val sheetMaxHeight = this.maxHeight
+                           Box(
+                               modifier = Modifier
+                                   .fillMaxWidth()
+                                   .height(sheetMaxHeight * 0.5f)
+                           ) {*//*
                 if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
+
                     DocumentBottomSheetTextElements(
                         document = document,
                         onDismissBottomSheet = {
-                            hideBottomSheet(scope, scaffoldState)
+                            hideBottomSheet(
+                                scope,
+                                scaffoldState,
+                                keyboardController
+                            )
                         },
                         clients = clientList,
                         issuers = issuerList,
@@ -179,11 +279,12 @@ fun DocumentAddEdit(
                         onShowDocumentForm = onShowDocumentForm,
                         onClickDeleteAddress = onClickDeleteAddress
                     )
+
                 } else {
                     DocumentBottomSheetProducts(
                         document = document,
                         onDismissBottomSheet = {
-                            hideBottomSheet(scope, scaffoldState)
+                            hideBottomSheet(scope, scaffoldState, keyboardController)
                         },
                         documentProductUiState = documentProductUiState,
                         products = products,
@@ -216,7 +317,7 @@ fun DocumentAddEdit(
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
         Scaffold(
-            modifier = Modifier.background(Color.LightGray.copy(alpha = 0.4f)),
+            modifier = Modifier.background(ColorLightGreyo),
             topBar = {
                 DeliveryNoteAddEditTopBar(
                     navController = navController,
@@ -357,9 +458,9 @@ fun DocumentAddEdit(
                     .graphicsLayer {
                         translationX = animatableOffsetX.value
                         translationY = animatableOffsetY.value
-                        /*    if (zoom > 1f) { // Y translation disabled when no zoom
+                        *//*    if (zoom > 1f) { // Y translation disabled when no zoom
                                 translationY = offsetY
-                            }*/
+                            }*//*
                         scaleX = zoom
                         scaleY = zoom
                     }
@@ -369,7 +470,7 @@ fun DocumentAddEdit(
                     uiState = document,
                     onClickElement = {
                         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            hideBottomSheet(scope, scaffoldState)
+                            hideBottomSheet(scope, scaffoldState, keyboardController)
                         } else {
                             if (it == ScreenElement.DOCUMENT_HEADER ||
                                 it == ScreenElement.DOCUMENT_NUMBER ||
@@ -384,25 +485,25 @@ fun DocumentAddEdit(
                                 bottomSheetType.value = BottomSheetType.ITEMS
                             }
                             expandBottomSheet(scope, scaffoldState)
-                            /*                        when(it) {
+                            *//*                        when(it) {
                                                         ScreenElement.DOCUMENT_NUMBER ->
                                                          selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
                                                         ScreenElement.DOCUMENT_DATE ->
                                                         ScreenElement.DOCUMENT_ISSUER ->
                                                         ScreenElement.DOCUMENT_CLIENT ->
                                                         ScreenElement.DOCUMENT_ORDER_NUMBER ->
-                                                        ScreenElement.DOCUMENT_PRODUCTS ->*/
+                                                        ScreenElement.DOCUMENT_PRODUCTS ->*//*
                         }
                     },
                     onClickRestOfThePage = {
                         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            hideBottomSheet(scope, scaffoldState)
+                            hideBottomSheet(scope, scaffoldState, keyboardController)
                         }
                     },
                 )
             }
         }
-    }
+    }*/
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -414,15 +515,11 @@ private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetS
 private fun hideBottomSheet(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-    //  keyboardController: SoftwareKeyboardController?,
+    keyboardController: SoftwareKeyboardController?,
 ) {
     scope.launch {
-        /*     keyboardController?.let {// If the keyboard was open, must hide it
-                 it.hide()
-                 delay(200L) // Small delay because it's janky without it,
-                 // added here because we can't access bottomsheet ".animate" (it's not public)
-             }*/
         scaffoldState.bottomSheetState.hide()
+        keyboardController?.hide()
     }
 }
 
@@ -602,3 +699,5 @@ fun getDateFormatter(pattern: String = "dd/MM/yyyy HH:mm:ss"): SimpleDateFormat 
     formatter.timeZone = calendar.timeZone
     return formatter
 }
+
+

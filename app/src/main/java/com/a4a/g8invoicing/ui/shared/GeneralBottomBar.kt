@@ -8,7 +8,7 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionCategories
 import com.a4a.g8invoicing.ui.navigation.actionConvert
 import com.a4a.g8invoicing.ui.navigation.actionCreateCorrectedInvoice
-import com.a4a.g8invoicing.ui.navigation.actionCreateCreditNote
+import com.a4a.g8invoicing.ui.navigation.actionArrowRight
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionNew
@@ -52,7 +52,7 @@ fun GeneralBottomBar(
                 actionUnselectAll(onClickUnselectAll),
                 actionDuplicate(onClickDuplicate),
                 actionDelete(onClickDelete),
-                actionCreateCreditNote(onClickCreateCreditNote),
+                actionArrowRight(onClickCreateCreditNote),
                 actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
                 actionTag()
             )
@@ -61,7 +61,7 @@ fun GeneralBottomBar(
                 actionUnselectAll(onClickUnselectAll),
                 actionDuplicate(onClickDuplicate),
                 actionDelete(onClickDelete),
-                actionCreateCreditNote(onClickCreateCreditNote),
+                actionArrowRight(onClickCreateCreditNote),
                 actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
                 actionTag(),
                 actionSendReminder(onClickSendReminder)

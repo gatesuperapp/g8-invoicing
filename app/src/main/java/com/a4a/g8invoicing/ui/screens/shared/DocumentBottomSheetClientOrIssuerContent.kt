@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -24,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import icons.IconDelete
 
 @Composable
 fun DocumentClientOrIssuerContent(
@@ -79,7 +80,7 @@ fun DocumentClientOrIssuerContent(
                                 }
                         }
                     ),
-                imageVector = IconDelete,
+                imageVector = Icons.Outlined.DeleteOutline,
                 contentDescription = "Delete line item"
             )
         }

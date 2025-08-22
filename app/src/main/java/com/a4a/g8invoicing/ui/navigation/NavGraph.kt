@@ -216,11 +216,13 @@ fun NavGraph(navController: NavHostController) {
             productTaxRates(
                 navController = navController,
                 onClickBackOrSelect = {
-                    navigateToPreviousNestedScreen(
-                        navController,
-                        Screen.ProductAddEdit.name,
-                        "ProductCreation"
-                    )
+                    navController.navigate(Screen.ProductAddEdit.name) {
+                        popUpTo("ProductCreation") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -240,20 +242,6 @@ private fun navigateBackWithResult(
         ?.savedStateHandle
         ?.set(key, value)
     navController.popBackStack()
-}
-
-private fun navigateToPreviousNestedScreen(
-    navController: NavController,
-    previousScreen: String,
-    route: String,
-) {
-    navController.navigate(previousScreen) {
-        popUpTo(route) {
-            saveState = true
-        }
-        launchSingleTop = true
-        restoreState = true
-    }
 }
 
 private fun NavHostController.navigateAndReplaceStartDestination(

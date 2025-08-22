@@ -1,10 +1,14 @@
+import org.gradle.internal.impldep.org.jsoup.nodes.Entities
+import org.gradle.kotlin.dsl.implementation
+
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
     id("app.cash.sqldelight") version "2.1.0"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10"
 }
 
 android {
@@ -66,20 +70,20 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.16.0")
+    implementation("androidx.core:core-ktx:1.17.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.2")
     implementation("androidx.activity:activity-compose:1.10.1")
-    implementation(platform("androidx.compose:compose-bom:2025.07.00"))
-    implementation("androidx.compose.material3:material3:1.3.2")
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.8.3")
-    implementation("androidx.compose.runtime:runtime-livedata:1.8.3")
+    implementation(platform("androidx.compose:compose-bom:2025.08.00"))
+    implementation("androidx.compose.material3:material3:1.5.0-alpha02")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.9.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.9.3")
     implementation("androidx.wear.compose:compose-foundation:1.4.1")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2025.07.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2025.08.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
@@ -93,8 +97,9 @@ dependencies {
     implementation("app.cash.sqldelight:android-driver:2.1.0")
     implementation("app.cash.sqldelight:coroutines-extensions-jvm:2.1.0")
 
-/*    // Leak Canary (memory leaks)
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")*/
+    // Leak Canary (memory leaks)
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")
+
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.1.7")
@@ -120,4 +125,6 @@ dependencies {
     // Drag & drop
     implementation("sh.calvin.reorderable:reorderable:2.5.1")
 
+    //Icons
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 }

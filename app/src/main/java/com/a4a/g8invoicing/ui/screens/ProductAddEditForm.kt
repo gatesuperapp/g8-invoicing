@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +47,6 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActions
-import icons.IconDelete
 import java.math.BigDecimal
 
 @Composable
@@ -73,6 +76,7 @@ fun ProductAddEditForm(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.LightGray.copy(alpha = 0.4f))
+            .verticalScroll(rememberScrollState())
             .padding(12.dp)
             .padding(top = 110.dp, bottom = 60.dp)
             .imePadding()
@@ -312,7 +316,7 @@ fun DeletePriceButton(onClick: () -> Unit) {
         Icon(
             modifier = Modifier
                 .size(22.dp),
-            imageVector = IconDelete,
+            imageVector = Icons.Outlined.DeleteOutline,
             tint = ColorDarkGray,
             contentDescription = Strings.get(R.string.product_delete_price)
         )

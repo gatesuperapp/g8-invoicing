@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import android.R.attr.text
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,32 +11,41 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.shared.Keyboard
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.icons.IconArrowDropDown
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import icons.IconDone
 import java.math.BigDecimal
 
 
@@ -66,134 +76,140 @@ fun DocumentBottomSheetTextElements(
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
 ) {
+    val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboard by keyboardAsState()
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+
+
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
         // If we don't constrain the parent (=this column) width, components that slide in
         // fill the screen full height
+        modifier = Modifier
+            .fillMaxWidth()
+            // limite la hauteur à 50% de l’écran max
+            .heightIn(max = screenHeight * 0.5f)
+            .verticalScroll(rememberScrollState())
+            .imePadding() // décale quand le clavier sort
+            .navigationBarsPadding()
+            .padding(16.dp)
     ) {
-        val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        val keyboard by keyboardAsState()
 
-        Box(
-            modifier = Modifier.background(Color.Transparent)
+        var text by remember { mutableStateOf("") }
+
+
+   /*     Row(
+            Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
         ) {
-            Column(
+            Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
                 modifier = Modifier
-                    .fillMaxHeight(0.5f)
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
-                        modifier = Modifier
-                            .height(50.dp)
-                            .width(70.dp)
-                            .clickable {
-                                // Hides keyboard if it was opened
-                                if (keyboard.name == "Opened") {
-                                    keyboardController?.hide()
-                                } else { // Hides bottom sheet
-                                    onDismissBottomSheet()
-                                }
-                            }) {
+                    .height(50.dp)
+                    .width(70.dp)
+                    .clickable {
+                        // Hides keyboard if it was opened
                         if (keyboard.name == "Opened") {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(20.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = IconDone,
-                                contentDescription = "Close keyboard"
-                            )
-                        } else { // Hides bottom sheet
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(30.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = IconArrowDropDown,
-                                contentDescription = "Close bottom sheet"
-                            )
-                        }
-                    }
-                }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    DocumentBottomSheetElementsContent(
-                        document = document,
-                        onValueChange = onValueChange,
-                        onClickForward = {
                             keyboardController?.hide()
-                            slideOtherComponent.value = it
-                        },
-                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                        localFocusManager = localFocusManager
-                    )
-                }
-            }
-
-            Surface() // disable click on background component
-            {
-                DocumentBottomSheetElementsAfterSlide(
-                    pageElement = slideOtherComponent.value,
-                    parameters = when (slideOtherComponent.value) {
-                        ScreenElement.DOCUMENT_ISSUER -> Pair(
-                            document.documentIssuer,
-                            issuers
-                        )
-                        ScreenElement.DOCUMENT_CLIENT -> Pair(
-                            document.documentClient,
-                            clients
-                        )
-                        ScreenElement.DOCUMENT_DATE -> document.documentDate
-                        ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
-                        ScreenElement.DOCUMENT_FOOTER -> {
-                            document.footerText
+                        } else { // Hides bottom sheet
+                            onDismissBottomSheet()
                         }
-                        else -> {}
-                    },
-                    onClickBack = {
-                        keyboardController?.hide()
-                        slideOtherComponent.value = null
-                    },
-                    documentClientUiState = documentClientUiState,
-                    documentIssuerUiState = documentIssuerUiState,
-                    taxRates = taxRates,
-                    onSelectClientOrIssuer = {
-                        keyboardController?.hide()
-                        slideOtherComponent.value = null
-                        onSelectClientOrIssuer(it)
-                    },
-                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
-                    onClickEditDocumentClientOrIssuer = onClickEditDocumentClientOrIssuer,
-                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    currentClientId = currentClientId,
-                    currentIssuerId = currentIssuerId,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = {
-                        keyboardController?.hide()
-                        slideOtherComponent.value = null
-                        onClickDoneForm(it)
-                    },
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm,
-                    onValueChange = onValueChange,
-                    onClickDeleteAddress = onClickDeleteAddress
+                    }) {
+                *//*    if (keyboard.name == "Opened") {
+                        Icon(
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .size(20.dp)
+                                .align(alignment = Alignment.CenterEnd),
+                            imageVector = IconDone,
+                            contentDescription = "Close keyboard"
+                        )
+                    } else {*//*
+                Icon(
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .size(30.dp)
+                        .align(alignment = Alignment.CenterEnd),
+                    imageVector = Icons.Outlined.ArrowDropDown,
+                    contentDescription = "Close bottom sheet"
                 )
+                // }
             }
-        }
-    }
-}
+        }*/
 
+
+
+        DocumentBottomSheetElementsContent(
+            document = document,
+            onValueChange = onValueChange,
+            onClickForward = {
+                keyboardController?.hide()
+                slideOtherComponent.value = it
+            },
+            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+            localFocusManager = localFocusManager
+        )
+
+    }
+
+    /*Surface() // disable click on background component
+    {
+        DocumentBottomSheetElementsAfterSlide(
+            pageElement = slideOtherComponent.value,
+            parameters = when (slideOtherComponent.value) {
+                ScreenElement.DOCUMENT_ISSUER -> Pair(
+                    document.documentIssuer,
+                    issuers
+                )
+
+                ScreenElement.DOCUMENT_CLIENT -> Pair(
+                    document.documentClient,
+                    clients
+                )
+
+                ScreenElement.DOCUMENT_DATE -> document.documentDate
+                ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
+                ScreenElement.DOCUMENT_FOOTER -> {
+                    document.footerText
+                }
+
+                else -> {}
+            },
+            onClickBack = {
+                keyboardController?.hide()
+                slideOtherComponent.value = null
+            },
+            documentClientUiState = documentClientUiState,
+            documentIssuerUiState = documentIssuerUiState,
+            taxRates = taxRates,
+            onSelectClientOrIssuer = {
+                keyboardController?.hide()
+                slideOtherComponent.value = null
+                onSelectClientOrIssuer(it)
+            },
+            onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
+            onClickEditDocumentClientOrIssuer = onClickEditDocumentClientOrIssuer,
+            onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+            currentClientId = currentClientId,
+            currentIssuerId = currentIssuerId,
+            bottomFormOnValueChange = bottomFormOnValueChange,
+            bottomFormPlaceCursor = bottomFormPlaceCursor,
+            onClickDoneForm = {
+                keyboardController?.hide()
+                slideOtherComponent.value = null
+                onClickDoneForm(it)
+            },
+            onClickCancelForm = onClickCancelForm,
+            onSelectTaxRate = onSelectTaxRate,
+            showDocumentForm = showDocumentForm,
+            onShowDocumentForm = onShowDocumentForm,
+            onValueChange = onValueChange,
+            onClickDeleteAddress = onClickDeleteAddress
+        )
+    }*/
+}
 
 
 //TODO animation: slide elements from right to left on open, and left to right on close

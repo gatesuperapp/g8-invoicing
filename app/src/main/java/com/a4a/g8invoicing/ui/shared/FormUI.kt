@@ -1,18 +1,36 @@
 package com.a4a.g8invoicing.ui.shared
 
+import android.R.attr.text
+import android.R.id.input
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -25,8 +43,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.size
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import java.math.BigDecimal
+import kotlin.collections.filter
+import kotlin.collections.map
 
 @Composable
 fun FormUI(
@@ -38,6 +59,7 @@ fun FormUI(
     errors: MutableList<Pair<ScreenElement, String?>>? = null,
     onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
 ) {
+
     // handle focus
     val focusManager = LocalFocusManager.current
 
@@ -51,73 +73,233 @@ fun FormUI(
     //            Pair(PageElement.DELIVERY_NOTE_NUMBER, FocusRequester()),
     //            Pair(PageElement.ORDER_NUMBER, FocusRequester())
     //        )
-    val inputsWithFocusRequester: MutableList<Pair<ScreenElement, FocusRequester>> = mutableListOf()
-    textFieldsInputs.forEach {
-        inputsWithFocusRequester.add(
-            Pair(it, FocusRequester())
+    val focusRequesters = remember {
+        inputList.map { it.pageElement to FocusRequester() }
+    }
+    var textState by remember { mutableStateOf(TextFieldValue("")) }
+
+    var text by remember { mutableStateOf("") }
+
+    /*
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Yellow)
+        ) {
+
+
+            var textState by remember { mutableStateOf(TextFieldValue("")) }
+            // BasicTextField corrigé
+            BasicTextField(
+                value = textState, // Utilisez l'état
+                onValueChange = { newValue ->
+                    textState = newValue // Mettez à jour l'état
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.LightGray) // Ajoutez un fond pour le voir
+                    .padding(8.dp), // Ajoutez du padding
+                textStyle = LocalTextStyle.current.copy(color = Color.Black), // Style de texte pour la visibilité
+            ) { innerTextField ->
+
+                innerTextField() // C'est la partie qui rend le champ de texte
+            }
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aeaaeea") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            TextField(
+                value = textState, // Utilisez le même état si c'est intentionnel
+                onValueChange = { newValue ->
+                    textState = newValue
+                },
+                label = { Text("aaaaa") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+
+        }
+    */
+
+
+    inputList.forEach { item ->
+        // Keyboard actions and options
+        val isLastInput = item == inputList.last()
+        val imeAction = if (isLastInput || keyboard == KeyboardOpt.VALIDATE_INPUT) {
+            ImeAction.Done
+        } else {
+            ImeAction.Next
+        }
+        val formActions = if (!isLastInput) {
+            KeyboardActions(
+                onNext = {
+                    localFocusManager.moveFocus(FocusDirection.Down)
+                }
+            )
+        } else {
+            KeyboardActions(
+                onGo = {
+                    localFocusManager.clearFocus()
+                }
+            )
+        }
+
+        PageElementCreator(
+            item = item,
+            isLastInput = item == inputList.last(),
+            imeAction = imeAction,
+            onClickForward = onClickForward,
+            formActions = formActions,
+            focusRequester = focusRequesters.firstOrNull { it.first == item.pageElement }?.second,
+            onClickRow = {
+                if (item.inputType is TextInput) {
+                    placeCursorAtTheEndOfText(item.pageElement)
+                }
+                focusRequesters.firstOrNull { it.first == item.pageElement }?.second?.requestFocus()
+            },
+            errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second,
+            onClickExpandFullScreen = {
+                onClickExpandFullScreen(item.pageElement)
+            }, // Used to expand product description field,
+            clearFocusForAllRows = {
+                focusManager.clearFocus()
+            }
         )
     }
-    val focusRequesters: List<Pair<ScreenElement, FocusRequester>> =
-        remember { inputsWithFocusRequester }
 
-    Column(
+    /*LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
+            .imePadding()
+            .navigationBarsPadding()
             .padding(
                 start = 10.dp,
                 bottom = 8.dp
             )
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
-                    localFocusManager.clearFocus()
+                    focusManager.clearFocus()
                 })
             }
     ) {
-        inputList.forEach { item ->
-            // Keyboard actions and options
-            val isLastInput = item == inputList.last()
-            val imeAction = if (isLastInput || keyboard == KeyboardOpt.VALIDATE_INPUT) {
-                ImeAction.Done
-            } else {
-                ImeAction.Next
-            }
-            val formActions = if (!isLastInput) {
-                KeyboardActions(
-                    onNext = {
-                        localFocusManager.moveFocus(FocusDirection.Down)
-                    }
-                )
-            } else {
-                KeyboardActions(
-                    onGo = {
-                        localFocusManager.clearFocus()
-                    }
-                )
-            }
+        itemsIndexed(inputList, key = { _, item -> item.pageElement }) { index, item ->
 
-            PageElementCreator(
-                item = item,
-                isLastInput = item == inputList.last(),
-                imeAction = imeAction,
-                onClickForward = onClickForward,
-                formActions = formActions,
-                focusRequester = focusRequesters.firstOrNull { it.first == item.pageElement }?.second,
-                onClickRow = {
+            TextField(
+                value = text,
+                onValueChange = { },
+                label = { Text("Écris quelque chose") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+
+            *//*itemsIndexed(inputList, key = { _, item -> item.pageElement }) { index, item ->
+                val isLastInput = index == inputList.size - 1
+                val imeAction = if (isLastInput || keyboard == KeyboardOpt.VALIDATE_INPUT) {
+                    ImeAction.Done
+                } else {
+                    ImeAction.Next
+                }
+                val formActions = if (!isLastInput) {
+                    KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Down)
+                        }
+                    )
+                } else {
+                    KeyboardActions(
+                        onDone = { // Changed from onGo for clarity with ImeAction.Done
+                            focusManager.clearFocus()
+                        }
+                    )
+                }
+
+                // Find the correct focus requester for the current item
+                val currentFocusRequester = focusRequesters.find { it.first == item.pageElement }?.second
+
+                PageElementCreator(
+                    item = item,
+                    isLastInput = isLastInput, // You might not need this if formActions handle it
+                    imeAction = imeAction,
+                    onClickForward = onClickForward,
+                    formActions = formActions,
+                    focusRequester = currentFocusRequester,
+                    onClickRow = {
                         if (item.inputType is TextInput) {
                             placeCursorAtTheEndOfText(item.pageElement)
                         }
-                        focusRequesters.firstOrNull { it.first == item.pageElement }?.second?.requestFocus()
-                },
-                errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second,
-                onClickExpandFullScreen = {
-                    onClickExpandFullScreen(item.pageElement)
-                }, // Used to expand product description field,
-                clearFocusForAllRows = {
-                    focusManager.clearFocus()
-                }
-            )
+                        currentFocusRequester?.requestFocus()
+                    },
+                    errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second,
+                    onClickExpandFullScreen = {
+                        onClickExpandFullScreen(item.pageElement)
+                    },
+                    clearFocusForAllRows = { // This might still be useful
+                        focusManager.clearFocus()
+                    }
+                )
+            }*//*
         }
-    }
+    }*/
 }
 
 
@@ -132,7 +314,7 @@ fun PageElementCreator(
     onClickForward: (ScreenElement) -> Unit,
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
-    clearFocusForAllRows: () -> Unit
+    clearFocusForAllRows: () -> Unit,
 ) {
 
     RowWithLabelAndInput(
@@ -162,7 +344,7 @@ fun RowWithLabelAndInput(
     onClickForward: (ScreenElement) -> Unit,
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
-    clearFocusForAllRows: () -> Unit
+    clearFocusForAllRows: () -> Unit,
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
