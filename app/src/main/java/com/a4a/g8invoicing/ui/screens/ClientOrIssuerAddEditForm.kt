@@ -163,7 +163,7 @@ fun ClientOrIssuerAddEditForm(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                errors = clientOrIssuerUiState.errors
+                errors = clientOrIssuerUiState.errors,
             )
         }
 
@@ -282,7 +282,7 @@ fun ClientOrIssuerAddEditForm(
                     inputList = inputList,
                     localFocusManager = localFocusManager,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    errors = clientOrIssuerUiState.errors
+                    errors = clientOrIssuerUiState.errors,
                 )
             }
 
@@ -405,7 +405,7 @@ fun ClientOrIssuerAddEditForm(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                errors = clientOrIssuerUiState.errors
+                errors = clientOrIssuerUiState.errors,
             )
         }
 
@@ -441,7 +441,7 @@ fun ClientOrIssuerAddEditForm(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                errors = clientOrIssuerUiState.errors
+                errors = clientOrIssuerUiState.errors,
             )
         }
     }

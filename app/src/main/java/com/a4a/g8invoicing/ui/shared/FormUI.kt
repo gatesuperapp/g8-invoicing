@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +39,7 @@ fun FormUI(
     errors: MutableList<Pair<ScreenElement, String?>>? = null,
     onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
 ) {
-// handle focus
+    // handle focus
     val focusManager = LocalFocusManager.current
 
     val textFieldsInputs: List<ScreenElement> = inputList.filter {
@@ -70,7 +71,7 @@ fun FormUI(
             )
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
-                    localFocusManager.clearFocus()
+                    focusManager.clearFocus()
                 })
             }
     ) {
@@ -85,13 +86,13 @@ fun FormUI(
             val formActions = if (!isLastInput) {
                 KeyboardActions(
                     onNext = {
-                        localFocusManager.moveFocus(FocusDirection.Down)
+                        focusManager.moveFocus(FocusDirection.Down)
                     }
                 )
             } else {
                 KeyboardActions(
                     onGo = {
-                        localFocusManager.clearFocus()
+                        focusManager.clearFocus()
                     }
                 )
             }
@@ -114,7 +115,8 @@ fun FormUI(
                     onClickExpandFullScreen(item.pageElement)
                 }, // Used to expand product description field,
                 clearFocusForAllRows = {
-                    focusManager.clearFocus()
+                    focusManager.clearFocus(force = true)
+
                 }
             )
         }

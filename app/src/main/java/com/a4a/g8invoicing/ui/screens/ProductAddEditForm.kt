@@ -200,7 +200,7 @@ fun ProductAddEditForm(
                     localFocusManager = localFocusManager,
                     onClickForward = onClickForward,
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    errors = product.errors
+                    errors = product.errors,
                 )
             }
 
@@ -268,7 +268,7 @@ fun ProductAddEditForm(
                             inputList = priceInputList,
                             localFocusManager = localFocusManager,
                             placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                            errors = product.errors
+                            errors = product.errors,
                         )
                     }
 

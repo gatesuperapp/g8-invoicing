@@ -12,8 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -192,7 +190,7 @@ fun DocumentBottomSheetProductAddEditForm(
                 errors = documentProduct.errors,
                 onClickExpandFullScreen = {
                     showFullScreenText(it)
-                }
+                },
             )
         }
     }

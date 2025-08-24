@@ -340,7 +340,7 @@ private fun DocumentBottomSheetContent(
         }
 
         else -> { // Product related content
-            // The order of these conditions is important for clarity and correctness
+            // The order of these conditions is important!!
             if (isTaxSelectionVisible) {
                 // If tax selection is active, it takes precedence
                 DocumentBottomSheetTaxSelection(

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,49 +68,42 @@ fun DocumentBottomSheetTextElements(
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboard by keyboardAsState()
+
     Column(
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
         // If we don't constrain the parent (=this column) width, components that slide in
         // fill the screen full height
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        val keyboard by keyboardAsState()
 
         Box(
             modifier = Modifier.background(Color.Transparent)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight(0.5f)
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+            // The order of these conditions is important for the focus requesters
+            if (slideOtherComponent.value == null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight(0.5f)
                 ) {
-                    Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
-                        modifier = Modifier
-                            .height(50.dp)
-                            .width(70.dp)
-                            .clickable {
-                                // Hides keyboard if it was opened
-                                if (keyboard.name == "Opened") {
-                                    keyboardController?.hide()
-                                } else { // Hides bottom sheet
-                                    onDismissBottomSheet()
-                                }
-                            }) {
-  /*                      if (keyboard.name == "Opened") {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(20.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = IconDone,
-                                contentDescription = "Close keyboard"
-                            )
-                        } else { // Hides bottom sheet*/
+                    Row(
+                        Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(70.dp)
+                                .clickable {
+                                    // Hides keyboard if it was opened
+                                    if (keyboard.name == "Opened") {
+                                        keyboardController?.hide()
+                                    } else { // Hides bottom sheet
+                                        onDismissBottomSheet()
+                                    }
+                                }) {
                             Icon(
                                 modifier = Modifier
                                     .padding(end = 10.dp)
@@ -118,29 +112,30 @@ fun DocumentBottomSheetTextElements(
                                 imageVector = Icons.Filled.ArrowDropDown,
                                 contentDescription = "Close bottom sheet"
                             )
-                       // }
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        // MAIN ELEMENTS
+                        DocumentBottomSheetElementsContent(
+                            document = document,
+                            onValueChange = onValueChange,
+                            onClickForward = {
+                                //  localFocusManager.clearFocus(force = true)
+                                slideOtherComponent.value = it
+                            },
+                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                            localFocusManager = localFocusManager
+                        )
                     }
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    DocumentBottomSheetElementsContent(
-                        document = document,
-                        onValueChange = onValueChange,
-                        onClickForward = {
-                            keyboardController?.hide()
-                            slideOtherComponent.value = it
-                        },
-                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                        localFocusManager = localFocusManager
-                    )
-                }
-            }
 
-            Surface() // disable click on background component
-            {
+
+            } else {
+                // SLIDING ELEMENTS (ISSUER, SENDER, DATE..)
                 DocumentBottomSheetElementsAfterSlide(
                     pageElement = slideOtherComponent.value,
                     parameters = when (slideOtherComponent.value) {
@@ -148,26 +143,27 @@ fun DocumentBottomSheetTextElements(
                             document.documentIssuer,
                             issuers
                         )
+
                         ScreenElement.DOCUMENT_CLIENT -> Pair(
                             document.documentClient,
                             clients
                         )
+
                         ScreenElement.DOCUMENT_DATE -> document.documentDate
                         ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
                         ScreenElement.DOCUMENT_FOOTER -> {
                             document.footerText
                         }
+
                         else -> {}
                     },
                     onClickBack = {
-                        keyboardController?.hide()
                         slideOtherComponent.value = null
                     },
                     documentClientUiState = documentClientUiState,
                     documentIssuerUiState = documentIssuerUiState,
                     taxRates = taxRates,
                     onSelectClientOrIssuer = {
-                        keyboardController?.hide()
                         slideOtherComponent.value = null
                         onSelectClientOrIssuer(it)
                     },
@@ -179,7 +175,6 @@ fun DocumentBottomSheetTextElements(
                     bottomFormOnValueChange = bottomFormOnValueChange,
                     bottomFormPlaceCursor = bottomFormPlaceCursor,
                     onClickDoneForm = {
-                        keyboardController?.hide()
                         slideOtherComponent.value = null
                         onClickDoneForm(it)
                     },
@@ -193,8 +188,9 @@ fun DocumentBottomSheetTextElements(
             }
         }
     }
-}
 
+
+}
 
 
 //TODO animation: slide elements from right to left on open, and left to right on close
