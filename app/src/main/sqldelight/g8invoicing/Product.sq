@@ -2,6 +2,8 @@ CREATE TABLE Product (
   id INTEGER PRIMARY KEY NOT NULL,
   name TEXT NOT NULL,
   description TEXT,
+  final_price REAL,
+  price_without_tax REAL,
   unit TEXT,
   product_tax_id INTEGER,
 
@@ -47,3 +49,6 @@ SELECT id
 FROM Product
 ORDER BY id DESC
 LIMIT 1;
+
+countAll:
+SELECT COUNT(*) FROM Product;

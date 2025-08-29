@@ -15,4 +15,5 @@
     <files-path
         name="files"
         path="." />
+    <databases-path name="databases" path="." />
 </paths>

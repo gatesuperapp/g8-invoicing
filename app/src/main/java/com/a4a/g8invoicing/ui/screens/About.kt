@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,15 +13,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -36,8 +45,10 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textNormalBold
 import com.a4a.g8invoicing.ui.theme.textTitle
+import java.io.File
 
 @Composable
 fun About(
@@ -49,6 +60,12 @@ fun About(
     val uriHandler = LocalUriHandler.current
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
+
+    //Export db popup
+    var exportedFile: File? = null
+    var exportErrorMessage: String? = null
+    var showExportErrorDialog by remember { mutableStateOf(false) }
+    var showSendDatabaseByEmailDialog by remember { mutableStateOf(false) }
 
     ScaffoldWithDimmedOverlay(
         isDimmed = isDimActive.value,
@@ -185,9 +202,56 @@ fun About(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(80.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
+                // Lien "Télécharger la BDD"
+                Text(
+                    text = stringResource(id = R.string.about_download_database),
+                    color = ColorVioletLink,
+                    style = MaterialTheme.typography.textNormalBold,
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                        .clickable {
+                            exportedFile = try {
+                                exportDatabaseToDownloads(context)
+                            } catch (e: Exception) {
+                                exportErrorMessage = context.getString(
+                                    R.string.about_download_database_error,
+                                    e.message ?: ""
+                                )
+                                showExportErrorDialog = true
+                                null
+                            }
+
+                            if (exportedFile != null) showSendDatabaseByEmailDialog = true
+                        }
+                )
             }
+        }
+        if (showSendDatabaseByEmailDialog) {
+            exportedFile?.let {
+                DatabaseEmailDialog(
+                    context = context,
+                    onDismiss = {
+                        showSendDatabaseByEmailDialog = false
+                    },
+                    file = it
+                )
+            }
+        }
+
+        if (showExportErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showExportErrorDialog = false },
+                text = { Text(exportErrorMessage ?: "") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showExportErrorDialog = false
+                    }) {
+                        Text(stringResource(id = R.string.ok), color = ColorVioletLink)
+                    }
+                }
+            )
         }
     }
 }

@@ -18,6 +18,7 @@ android {
     defaultConfig {
         applicationId = "com.a4a.g8invoicing"
         minSdk = 26
+        targetSdk = 36
         versionCode = 24
         versionName = "1.1"
 
