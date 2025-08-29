@@ -25,7 +25,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.theme.ColorBlueLink
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import icons.IconDelete
 
 @Composable
@@ -74,7 +74,7 @@ fun DeleteInvoiceLink(uriHandler: UriHandler) {
             tag = "link",
             annotation = Strings.get(R.string.alert_dialog_delete_url)
         )
-        withStyle(style = SpanStyle(color = ColorBlueLink)) {
+        withStyle(style = SpanStyle(color = ColorVioletLink)) {
             append(Strings.get(R.string.alert_dialog_delete_invoice_2))
         }
         // pop()

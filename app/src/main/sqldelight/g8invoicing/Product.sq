@@ -45,3 +45,6 @@ WHERE product_id = :id;
 
 checkIfEmpty:
 SELECT count(*) FROM ClientOrIssuer LIMIT 1;
+
+countAll:
+SELECT COUNT(*) FROM Product;

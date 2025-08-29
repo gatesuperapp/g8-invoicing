@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
 import android.text.TextUtils.substring
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -54,8 +55,12 @@ import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
+import com.a4a.g8invoicing.data.hasSeenPopup
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import java.io.File
 
 @Composable
 fun InvoiceList(
@@ -70,6 +75,7 @@ fun InvoiceList(
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
     onClickBack: () -> Unit,
+    hasUserData: Boolean,
 ) {
     // Main list to handle actions with selected items
     val selectedItems = remember { mutableStateListOf<InvoiceState>() }
@@ -87,6 +93,51 @@ fun InvoiceList(
     // Add background when bottom menu expanded
     val transparent = Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
     val backgroundColor = remember { mutableStateOf(transparent) }
+
+
+    //Launch download db popup
+    val hasSeenPopup by hasSeenPopup(context).collectAsState(initial = null)
+    var showExportDatabaseDialog by remember { mutableStateOf(false) }
+    var showSendDatabaseByEmail by remember { mutableStateOf(false) }
+    var exportedFile: File? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(hasSeenPopup, hasUserData) {
+        val loaded = hasSeenPopup ?: return@LaunchedEffect // wait until the DataStore emits
+        if (!loaded && hasUserData ) {
+            showExportDatabaseDialog = true
+        }
+    }
+
+    // Show second popup when file has been exported
+    LaunchedEffect(exportedFile) {
+        if (exportedFile != null) {
+            showSendDatabaseByEmail = true
+        }
+    }
+
+    if (showExportDatabaseDialog) {
+        DatabaseExportDialog(
+            context = context,
+            onDismiss = {
+                showExportDatabaseDialog = false
+            },
+            onResult = {
+                showExportDatabaseDialog = false
+                exportedFile = it
+            }
+        )
+    }
+    if (showSendDatabaseByEmail) {
+        exportedFile?.let {
+            DatabaseEmailDialog(
+                context = context,
+                onDismiss = {
+                    showSendDatabaseByEmail = false
+                },
+                file = it
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -130,7 +181,10 @@ fun InvoiceList(
                         address = document.documentClient?.email?.text,
                         documentNumber = document.documentNumber.text,
                         context = context,
-                        emailSubject = Strings.get(R.string.send_reminder_email_subject, document.documentNumber.text),
+                        emailSubject = Strings.get(
+                            R.string.send_reminder_email_subject,
+                            document.documentNumber.text
+                        ),
                         emailMessage = createReminderTextMessage(document)
                     )
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)

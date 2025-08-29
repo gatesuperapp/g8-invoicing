@@ -22,6 +22,7 @@ fun NavGraphBuilder.invoiceList(
         val invoicesUiState by viewModel.documentsUiState
             .collectAsStateWithLifecycle()
 
+
         InvoiceList(
             navController = navController,
             documentsUiState = invoicesUiState,
@@ -36,7 +37,8 @@ fun NavGraphBuilder.invoiceList(
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
-            onClickBack = { onClickBack() }
+            onClickBack = { onClickBack() },
+            hasUserData = viewModel.hasUserData()
         )
     }
 }

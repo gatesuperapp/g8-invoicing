@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
@@ -19,6 +20,10 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.migration.CustomInjection
+import g8invoicing.ClientOrIssuerQueries
+import g8invoicing.DeliveryNoteQueries
+import g8invoicing.InvoiceQueries
+import g8invoicing.ProductQueries
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +36,10 @@ import javax.inject.Inject
 class InvoiceListViewModel @Inject constructor(
     private val invoiceDataSource: InvoiceLocalDataSourceInterface,
     private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
+    private val invoiceQueries: InvoiceQueries,
+    private val productQueries: ProductQueries,
+    private val deliveryNoteQueries: DeliveryNoteQueries,
+    private val clientOrIssuerQueries: ClientOrIssuerQueries
     ) : ViewModel() {
 
     private val _documentsUiState = MutableStateFlow(InvoicesUiState())
@@ -48,6 +57,7 @@ class InvoiceListViewModel @Inject constructor(
     init {
         fetch()
     }
+
 
     private fun fetch() {
         //Log.e(ContentValues.TAG, "clientAndIssuer" + "fetchJob?.cancel()")
@@ -143,6 +153,14 @@ class InvoiceListViewModel @Inject constructor(
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
+    }
+
+    // Used to display download db popup to existing users
+    fun hasUserData(): Boolean {
+        return invoiceQueries.countAll().executeAsOne() > 3 ||
+                deliveryNoteQueries.countAll().executeAsOne() > 3 ||
+                productQueries.countAll().executeAsOne() > 3 ||
+                clientOrIssuerQueries.countAll().executeAsOne() > 3
     }
 }
 

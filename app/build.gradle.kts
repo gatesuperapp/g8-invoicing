@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.a4a.g8invoicing"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.a4a.g8invoicing"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 24
-        versionName = "1.1"
+        targetSdk = 36
+        versionCode = 33
+        versionName = "1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -92,8 +92,8 @@ dependencies {
     implementation("app.cash.sqldelight:android-driver:2.0.0")
     implementation("app.cash.sqldelight:coroutines-extensions-jvm:2.0.0")
 
-/*    // Leak Canary (memory leaks)
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")*/
+    /*    // Leak Canary (memory leaks)
+        debugImplementation("com.squareup.leakcanary:leakcanary-android:2.12")*/
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
@@ -115,5 +115,8 @@ dependencies {
 
     // Lottie
     implementation("com.airbnb.android:lottie-compose:4.0.0")
+
+    // Popup
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
 }

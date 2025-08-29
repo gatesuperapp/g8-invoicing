@@ -85,3 +85,5 @@ WHERE type = 'client'
 ORDER BY id DESC
 LIMIT 1;
 
+countAll:
+SELECT COUNT(*) FROM ClientOrIssuer;
