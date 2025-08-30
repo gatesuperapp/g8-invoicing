@@ -3,8 +3,6 @@ package com.a4a.g8invoicing.ui.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,16 +15,16 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEdit
+import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEdit
 import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
-import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
-import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.itextpdf.kernel.pdf.PdfName.a
 import kotlinx.coroutines.launch
 

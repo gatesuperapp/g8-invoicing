@@ -1,13 +1,11 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import android.R.attr.scaleX
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
@@ -15,34 +13,18 @@ import androidx.compose.foundation.gestures.calculateCentroidSize
 import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -58,16 +40,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -148,20 +127,16 @@ fun DocumentAddEdit(
     val bottomSheetType = remember { mutableStateOf(BottomSheetType.ITEMS) }
     val scope = rememberCoroutineScope()
 
-       /*    // Keyboard: if it was open and the user swipes down the bottom sheet:
-        // close the keyboard (if we close keyboard before sheet, there is a weird effect)
-        val keyboardController = LocalSoftwareKeyboardController.current
-        if (!scaffoldState.bottomSheetState.isVisible) {
-            keyboardController?.hide()
-        }*/
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current // Obtenir le FocusManager
+    val keyboardController =
+        LocalSoftwareKeyboardController.current // Obtenir le KeyboardController
 
     // Handling native navigation back action
     BackHandler {
         // We check on bottomSheetState == "Expanded" and not on "bottomSheetState.isVisible"
         // Because of a bug: even when the bottomSheet is hidden, its state is "PartiallyExpanded"
         if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-            hideBottomSheet(scope, scaffoldState)
+            hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
         } else {
             onClickBack()
         }
@@ -183,7 +158,8 @@ fun DocumentAddEdit(
                     DocumentBottomSheetTextElements(
                         document = document,
                         onDismissBottomSheet = {
-                            hideBottomSheet(scope, scaffoldState)
+                            hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+
                         },
                         clients = clientList,
                         issuers = issuerList,
@@ -212,7 +188,8 @@ fun DocumentAddEdit(
                     DocumentBottomSheetProducts(
                         document = document,
                         onDismissBottomSheet = {
-                            hideBottomSheet(scope, scaffoldState)
+                            hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+
                         },
                         documentProductUiState = documentProductUiState,
                         products = products,
@@ -235,17 +212,15 @@ fun DocumentAddEdit(
         },
         sheetShadowElevation = 30.dp
     )
-    {
+    { paddingValues ->
+
         val context = LocalContext.current
         var showPopup by rememberSaveable {
             mutableStateOf(false)
         }
-
-
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
         Scaffold(
-            modifier = Modifier.background(ColorLightGreyo),
             topBar = {
                 DeliveryNoteAddEditTopBar(
                     navController = navController,
@@ -290,149 +265,166 @@ fun DocumentAddEdit(
             var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
             var newOffsetY by remember { mutableFloatStateOf(0f) }
 
-            Column(
+            Box(
                 modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .background(ColorLightGreyo)
                     .fillMaxSize()
-                    .padding(
-                        innerPadding
-                    )
-                    .pointerInput(Unit) {
-                        customTransformGestures(
-                            pass = PointerEventPass.Initial,
-                            onDoubleTouch = { // Disable clicking 2 items at the same time
-                                clickEnabled = false
-                            },
-                            onGesture = {
-                                    centroid,
-                                    pan,
-                                    gestureZoom,
-                                    _,
-                                    pointerInput: PointerInputChange,
-                                    changes: List<PointerInputChange>,
-                                ->
-
-
-                                zoom = (zoom * gestureZoom).coerceIn(
-                                    1f,
-                                    3f
-                                )  // Zoom limits: min 100%, max 200%
-
-                                var newOffsetX = animatableOffsetX.value + pan.x.times(zoom)
-                                newOffsetY = animatableOffsetY.value + pan.y.times(zoom)
-
-                                val maxX = (size.width * (zoom - 1) / 2f)
-                                val maxY = (size.height * (zoom - 1) / 2f)
-                                val minY = -(size.height * (zoom - 1))
-
-                                if (zoom > 1f) {
-                                    newOffsetX = newOffsetX.coerceIn(-maxX, maxX)
-                                    // coerceIn limits dragging in bounds
-                                    newOffsetY = newOffsetY.coerceIn(minY, maxY)
-                                }
-
-                                animatableOffsetX = Animatable(newOffsetX)
-                                animatableOffsetY = Animatable(newOffsetY)
-                                //offsetY = newOffsetY
-
-                                // 🔥Consume touch when multiple fingers down
-                                // This prevents click and long click if your finger touches a
-                                // button while pinch gesture is being invoked
-                                val size = changes.size
-                                if (size > 1) {
-                                    changes.forEach { it.consume() }
-                                }
-                            },
-                            onGestureEnd = {
-                                // When no zoom only, do an animation to bring
-                                // back to center when dragged along X axis
-                                if (zoom == 1f) {
-                                    coroutineScope.launch {
-                                        animatableOffsetX.animateTo(
-                                            0f, animationSpec = spring(
-                                                //dampingRatio = 0.4f,
-                                                stiffness = Spring.StiffnessLow
-                                            )
-                                        )
-                                    }
-                                }
-
-                                if (zoom == 1f && animatableOffsetY.value > 0f) { // dragging above the document
-                                    coroutineScope.launch {
-                                        animatableOffsetY.animateTo(
-                                            0f, animationSpec = spring(
-                                                //dampingRatio = 0.4f,
-                                                stiffness = Spring.StiffnessLow
-                                            )
-                                        )
-                                    }
-                                }
-
-                                if (zoom == 1f && -animatableOffsetY.value > size.height.toFloat()) { // dragging below the document
-                                    coroutineScope.launch {
-                                        animatableOffsetY.animateTo(
-                                            -size.height.toFloat() + size.height.toFloat() / 2f,
-                                            animationSpec = spring(
-                                                //dampingRatio = 0.4f,
-                                                stiffness = Spring.StiffnessLow
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        )
-                    }
-                    .graphicsLayer {
-                        translationX = animatableOffsetX.value
-                        translationY = animatableOffsetY.value
-                        /*    if (zoom > 1f) { // Y translation disabled when no zoom
-                                translationY = offsetY
-                            }*/
-                        scaleX = zoom
-                        scaleY = zoom
-                    }
-
+                    .background(ColorLightGreyo)
             ) {
-                DocumentBasicTemplate(
-                    uiState = document,
-                    onClickElement = {
-                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            hideBottomSheet(scope, scaffoldState)
-                        } else {
-                            if (it == ScreenElement.DOCUMENT_HEADER ||
-                                it == ScreenElement.DOCUMENT_NUMBER ||
-                                it == ScreenElement.DOCUMENT_DATE ||
-                                it == ScreenElement.DOCUMENT_ISSUER ||
-                                it == ScreenElement.DOCUMENT_CLIENT ||
-                                it == ScreenElement.DOCUMENT_FOOTER ||
-                                it == ScreenElement.DOCUMENT_REFERENCE
-                            ) {
-                                bottomSheetType.value = BottomSheetType.ELEMENTS
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxSize()
+                        .padding(
+                            innerPadding
+                        )
+                        .pointerInput(Unit) {
+                            customTransformGestures(
+                                pass = PointerEventPass.Initial,
+                                onDoubleTouch = { // Disable clicking 2 items at the same time
+                                    clickEnabled = false
+                                },
+                                onGesture = {
+                                        centroid,
+                                        pan,
+                                        gestureZoom,
+                                        _,
+                                        pointerInput: PointerInputChange,
+                                        changes: List<PointerInputChange>,
+                                    ->
+
+
+                                    zoom = (zoom * gestureZoom).coerceIn(
+                                        1f,
+                                        3f
+                                    )  // Zoom limits: min 100%, max 200%
+
+                                    var newOffsetX = animatableOffsetX.value + pan.x.times(zoom)
+                                    newOffsetY = animatableOffsetY.value + pan.y.times(zoom)
+
+                                    val maxX = (size.width * (zoom - 1) / 2f)
+                                    val maxY = (size.height * (zoom - 1) / 2f)
+                                    val minY = -(size.height * (zoom - 1))
+
+                                    if (zoom > 1f) {
+                                        newOffsetX = newOffsetX.coerceIn(-maxX, maxX)
+                                        // coerceIn limits dragging in bounds
+                                        newOffsetY = newOffsetY.coerceIn(minY, maxY)
+                                    }
+
+                                    animatableOffsetX = Animatable(newOffsetX)
+                                    animatableOffsetY = Animatable(newOffsetY)
+                                    //offsetY = newOffsetY
+
+                                    // 🔥Consume touch when multiple fingers down
+                                    // This prevents click and long click if your finger touches a
+                                    // button while pinch gesture is being invoked
+                                    val size = changes.size
+                                    if (size > 1) {
+                                        changes.forEach { it.consume() }
+                                    }
+                                },
+                                onGestureEnd = {
+                                    // When no zoom only, do an animation to bring
+                                    // back to center when dragged along X axis
+                                    if (zoom == 1f) {
+                                        coroutineScope.launch {
+                                            animatableOffsetX.animateTo(
+                                                0f, animationSpec = spring(
+                                                    //dampingRatio = 0.4f,
+                                                    stiffness = Spring.StiffnessLow
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    if (zoom == 1f && animatableOffsetY.value > 0f) { // dragging above the document
+                                        coroutineScope.launch {
+                                            animatableOffsetY.animateTo(
+                                                0f, animationSpec = spring(
+                                                    //dampingRatio = 0.4f,
+                                                    stiffness = Spring.StiffnessLow
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    if (zoom == 1f && -animatableOffsetY.value > size.height.toFloat()) { // dragging below the document
+                                        coroutineScope.launch {
+                                            animatableOffsetY.animateTo(
+                                                -size.height.toFloat() + size.height.toFloat() / 2f,
+                                                animationSpec = spring(
+                                                    //dampingRatio = 0.4f,
+                                                    stiffness = Spring.StiffnessLow
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        .graphicsLayer {
+                            translationX = animatableOffsetX.value
+                            translationY = animatableOffsetY.value
+                            /*    if (zoom > 1f) { // Y translation disabled when no zoom
+                        translationY = offsetY
+                    }*/
+                            scaleX = zoom
+                            scaleY = zoom
+                        }
+
+                ) {
+                    DocumentBasicTemplate(
+                        uiState = document,
+                        onClickElement = {
+                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                hideBottomSheet(
+                                    scope,
+                                    scaffoldState,
+                                    focusManager,
+                                    keyboardController
+                                )
+
                             } else {
-                                bottomSheetType.value = BottomSheetType.ITEMS
+                                if (it == ScreenElement.DOCUMENT_HEADER ||
+                                    it == ScreenElement.DOCUMENT_NUMBER ||
+                                    it == ScreenElement.DOCUMENT_DATE ||
+                                    it == ScreenElement.DOCUMENT_ISSUER ||
+                                    it == ScreenElement.DOCUMENT_CLIENT ||
+                                    it == ScreenElement.DOCUMENT_FOOTER ||
+                                    it == ScreenElement.DOCUMENT_REFERENCE
+                                ) {
+                                    bottomSheetType.value = BottomSheetType.ELEMENTS
+                                } else {
+                                    bottomSheetType.value = BottomSheetType.ITEMS
+                                }
+                                expandBottomSheet(scope, scaffoldState)
+                                /*                        when(it) {
+                                                ScreenElement.DOCUMENT_NUMBER ->
+                                                 selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
+                                                ScreenElement.DOCUMENT_DATE ->
+                                                ScreenElement.DOCUMENT_ISSUER ->
+                                                ScreenElement.DOCUMENT_CLIENT ->
+                                                ScreenElement.DOCUMENT_ORDER_NUMBER ->
+                                                ScreenElement.DOCUMENT_PRODUCTS ->*/
                             }
-                            expandBottomSheet(scope, scaffoldState)
-                            /*                        when(it) {
-                                                        ScreenElement.DOCUMENT_NUMBER ->
-                                                         selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
-                                                        ScreenElement.DOCUMENT_DATE ->
-                                                        ScreenElement.DOCUMENT_ISSUER ->
-                                                        ScreenElement.DOCUMENT_CLIENT ->
-                                                        ScreenElement.DOCUMENT_ORDER_NUMBER ->
-                                                        ScreenElement.DOCUMENT_PRODUCTS ->*/
-                        }
-                    },
-                    onClickRestOfThePage = {
-                        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                            hideBottomSheet(scope, scaffoldState)
-                        }
-                    },
-                )
+                        },
+                        onClickRestOfThePage = {
+                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                hideBottomSheet(
+                                    scope,
+                                    scaffoldState,
+                                    focusManager,
+                                    keyboardController
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetScaffoldState) {
@@ -443,11 +435,13 @@ private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetS
 private fun hideBottomSheet(
     scope: CoroutineScope,
     scaffoldState: BottomSheetScaffoldState,
-  //  keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager,
+    keyboardController: SoftwareKeyboardController?,
 ) {
     scope.launch {
+        focusManager.clearFocus() // Effacer le focus d'abord
+        keyboardController?.hide() // Puis cacher le clavier explicitement
         scaffoldState.bottomSheetState.hide()
-     //   keyboardController?.hide()
     }
 }
 

@@ -1,8 +1,9 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import android.R.attr.contentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,18 +20,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
@@ -79,117 +78,121 @@ fun DocumentBottomSheetTextElements(
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
 
         Box(
-            modifier = Modifier.background(Color.Transparent)
-        ) {
-            // The order of these conditions is important for the focus requesters
-            if (slideOtherComponent.value == null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight(0.5f)
-                ) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
-                            modifier = Modifier
-                                .height(50.dp)
-                                .width(70.dp)
-                                .clickable {
-                                    // Hides keyboard if it was opened
-                                    if (keyboard.name == "Opened") {
-                                        keyboardController?.hide()
-                                    } else { // Hides bottom sheet
-                                        onDismissBottomSheet()
-                                    }
-                                }) {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(30.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = Icons.Filled.ArrowDropDown,
-                                contentDescription = "Close bottom sheet"
-                            )
-                        }
+            modifier = Modifier
+                .background(Color.Transparent)
+                .fillMaxWidth() // Prend toute la largeur
+                // .background(Color.Yellow) // Pour débugger la zone cliquable
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {
+                        localFocusManager.clearFocus() // Efface le focus, ce qui devrait cacher le clavier
                     }
-                    Column(
+                )
+                .focusable(false)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight(0.5f)
+            ) {
+                Row(
+                    Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        // MAIN ELEMENTS
-                        DocumentBottomSheetElementsContent(
-                            document = document,
-                            onValueChange = onValueChange,
-                            onClickForward = {
-                                //  localFocusManager.clearFocus(force = true)
-                                slideOtherComponent.value = it
-                            },
-                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                            localFocusManager = localFocusManager
+                            .height(50.dp)
+                            .width(70.dp)
+                            .clickable {
+                                // Hides keyboard if it was opened
+                                if (keyboard.name == "Opened") {
+                                    keyboardController?.hide()
+                                } else { // Hides bottom sheet
+                                    onDismissBottomSheet()
+                                }
+                            }) {
+                        Icon(
+                            modifier = Modifier
+                                .padding(end = 10.dp)
+                                .size(30.dp)
+                                .align(alignment = Alignment.CenterEnd),
+                            imageVector = Icons.Filled.ArrowDropDown,
+                            contentDescription = "Close bottom sheet"
                         )
                     }
                 }
-
-
-            } else {
-                // SLIDING ELEMENTS (ISSUER, SENDER, DATE..)
-                DocumentBottomSheetElementsAfterSlide(
-                    pageElement = slideOtherComponent.value,
-                    parameters = when (slideOtherComponent.value) {
-                        ScreenElement.DOCUMENT_ISSUER -> Pair(
-                            document.documentIssuer,
-                            issuers
-                        )
-
-                        ScreenElement.DOCUMENT_CLIENT -> Pair(
-                            document.documentClient,
-                            clients
-                        )
-
-                        ScreenElement.DOCUMENT_DATE -> document.documentDate
-                        ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
-                        ScreenElement.DOCUMENT_FOOTER -> {
-                            document.footerText
-                        }
-
-                        else -> {}
-                    },
-                    onClickBack = {
-                        slideOtherComponent.value = null
-                    },
-                    documentClientUiState = documentClientUiState,
-                    documentIssuerUiState = documentIssuerUiState,
-                    taxRates = taxRates,
-                    onSelectClientOrIssuer = {
-                        slideOtherComponent.value = null
-                        onSelectClientOrIssuer(it)
-                    },
-                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
-                    onClickEditDocumentClientOrIssuer = onClickEditDocumentClientOrIssuer,
-                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    currentClientId = currentClientId,
-                    currentIssuerId = currentIssuerId,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = {
-                        slideOtherComponent.value = null
-                        onClickDoneForm(it)
-                    },
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm,
-                    onValueChange = onValueChange,
-                    onClickDeleteAddress = onClickDeleteAddress
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    // MAIN ELEMENTS
+                    DocumentBottomSheetElementsContent(
+                        document = document,
+                        onValueChange = onValueChange,
+                        onClickForward = {
+                            //  localFocusManager.clearFocus(force = true)
+                            slideOtherComponent.value = it
+                        },
+                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                        localFocusManager = localFocusManager
+                    )
+                }
             }
+
+            // SLIDING ELEMENTS (ISSUER, SENDER, DATE..)
+            DocumentBottomSheetElementsAfterSlide(
+                pageElement = slideOtherComponent.value,
+                parameters = when (slideOtherComponent.value) {
+                    ScreenElement.DOCUMENT_ISSUER -> Pair(
+                        document.documentIssuer,
+                        issuers
+                    )
+
+                    ScreenElement.DOCUMENT_CLIENT -> Pair(
+                        document.documentClient,
+                        clients
+                    )
+
+                    ScreenElement.DOCUMENT_DATE -> document.documentDate
+                    ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
+                    ScreenElement.DOCUMENT_FOOTER -> {
+                        document.footerText
+                    }
+
+                    else -> {}
+                },
+                onClickBack = {
+                    slideOtherComponent.value = null
+                },
+                documentClientUiState = documentClientUiState,
+                documentIssuerUiState = documentIssuerUiState,
+                taxRates = taxRates,
+                onSelectClientOrIssuer = {
+                    slideOtherComponent.value = null
+                    onSelectClientOrIssuer(it)
+                },
+                onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
+                onClickEditDocumentClientOrIssuer = onClickEditDocumentClientOrIssuer,
+                onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+                currentClientId = currentClientId,
+                currentIssuerId = currentIssuerId,
+                bottomFormOnValueChange = bottomFormOnValueChange,
+                bottomFormPlaceCursor = bottomFormPlaceCursor,
+                onClickDoneForm = {
+                    slideOtherComponent.value = null
+                    onClickDoneForm(it)
+                },
+                onClickCancelForm = onClickCancelForm,
+                onSelectTaxRate = onSelectTaxRate,
+                showDocumentForm = showDocumentForm,
+                onShowDocumentForm = onShowDocumentForm,
+                onValueChange = onValueChange,
+                onClickDeleteAddress = onClickDeleteAddress
+            )
         }
     }
-
-
 }
 
 
