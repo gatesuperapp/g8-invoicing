@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Use only for the splash screen. Other colors handled in Color.kt -->
+<resources>
+    <color name="white">#FFFFFF</color>
+</resources>
