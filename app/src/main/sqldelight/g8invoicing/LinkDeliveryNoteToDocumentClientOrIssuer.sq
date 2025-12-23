@@ -1,0 +1,28 @@
+CREATE TABLE LinkDeliveryNoteToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  delivery_note_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(id)
+          ON DELETE CASCADE
+);
+
+getDocumentClientOrIssuerLinkedToDeliveryNote:
+SELECT *
+FROM LinkDeliveryNoteToDocumentClientOrIssuer
+WHERE delivery_note_id = :delivery_note_id;
+
+saveDocumentClientOrIssuerLinkedToDeliveryNote:
+INSERT
+INTO LinkDeliveryNoteToDocumentClientOrIssuer (id, delivery_note_id, document_client_or_issuer_id)
+VALUES (?, ?, ?);
+
+deleteDocumentClientOrIssuerLinkedToDeliveryNote:
+DELETE FROM LinkDeliveryNoteToDocumentClientOrIssuer
+WHERE  delivery_note_id = :delivery_note_id
+AND document_client_or_issuer_id = :document_client_or_issuer_id;
+
+deleteAllDocumentClientOrIssuerLinkedToADeliveryNote:
+DELETE FROM LinkDeliveryNoteToDocumentClientOrIssuer
+WHERE  delivery_note_id = :delivery_note_id;

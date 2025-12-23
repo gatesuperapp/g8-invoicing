@@ -1,0 +1,87 @@
+CREATE TABLE Invoice (
+  invoice_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  issuing_date TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  due_date TEXT,
+  payment_status INTEGER NOT NULL,
+  footer TEXT,
+
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
+
+
+get:
+SELECT *
+FROM Invoice
+WHERE invoice_id = :id;
+
+getId:
+SELECT invoice_id
+FROM Invoice
+WHERE invoice_id = :id;
+
+getLastInvoiceNumber:
+SELECT number
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+getAll:
+SELECT *
+FROM Invoice;
+
+getAllIds:
+SELECT invoice_id
+FROM Invoice;
+
+save:
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE Invoice
+SET number = :number,
+    issuing_date = :issuing_date,
+    reference = :reference,
+    free_field = :free_field,
+    currency =: currency,
+    due_date =: due_date,
+    payment_status =: payment_status,
+    footer  =: footer,
+    updated_at =: updated_at
+WHERE
+    invoice_id = :invoice_id;
+
+updateNumber:
+UPDATE Invoice
+SET number = :number
+WHERE
+    invoice_id = :invoice_id;
+
+updatePaymentStatus:
+UPDATE Invoice
+SET payment_status =: payment_status,
+    updated_at =: updated_at
+WHERE
+    invoice_id = :invoice_id;
+
+delete:
+DELETE FROM Invoice
+WHERE invoice_id = :id;
+
+getLastInsertedRowId:
+SELECT invoice_id
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+getLastInsertedInvoiceFooter:
+SELECT footer
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+

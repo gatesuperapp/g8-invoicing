@@ -1,0 +1,68 @@
+CREATE TABLE DeliveryNote (
+  delivery_note_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  delivery_date TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  footer TEXT,
+
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
+
+get:
+SELECT *
+FROM DeliveryNote
+WHERE delivery_note_id = :id;
+
+getId:
+SELECT delivery_note_id
+FROM DeliveryNote
+WHERE delivery_note_id = :id;
+
+getLastDeliveryNoteNumber:
+SELECT number
+FROM DeliveryNote
+ORDER BY delivery_note_id DESC
+LIMIT 1;
+
+getAll:
+SELECT *
+FROM DeliveryNote;
+
+getAllIds:
+SELECT delivery_note_id
+FROM DeliveryNote;
+
+save:
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer)
+VALUES (?,  ?,  ?, ?, ?,?, ?);
+
+update:
+UPDATE DeliveryNote
+SET number = :number,
+    delivery_date = :delivery_date,
+    reference = :reference,
+    free_field = :free_field,
+    currency =: currency,
+    footer  =: footer,
+    updated_at =: updated_at
+WHERE
+    delivery_note_id = :delivery_note_id;
+
+delete:
+DELETE FROM DeliveryNote
+WHERE delivery_note_id = :id;
+
+getLastInsertedRowId:
+SELECT delivery_note_id
+FROM DeliveryNote
+ORDER BY delivery_note_id DESC
+LIMIT 1;
+
+getLastInsertedFooter:
+SELECT footer
+FROM CreditNote
+ORDER BY credit_note_id DESC
+LIMIT 1;

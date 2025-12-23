@@ -1,0 +1,28 @@
+CREATE TABLE LinkClientOrIssuerToAddress (
+  id INTEGER PRIMARY KEY NOT NULL,
+  client_or_issuer_id INTEGER NOT NULL,
+  address_id INTEGER NOT NULL
+);
+
+get:
+SELECT *
+FROM LinkClientOrIssuerToAddress
+WHERE client_or_issuer_id = :client_or_issuer_id;
+
+getWithClientOrIssuerId:
+SELECT address_id
+FROM LinkClientOrIssuerToAddress
+WHERE client_or_issuer_id = :id;
+
+save:
+INSERT
+INTO LinkClientOrIssuerToAddress (id, client_or_issuer_id, address_id)
+VALUES (?, ?, ?);
+
+delete:
+DELETE FROM LinkClientOrIssuerToAddress
+WHERE  id = :id;
+
+deleteWithClientId:
+DELETE FROM LinkClientOrIssuerToAddress
+WHERE  client_or_issuer_id = :client_or_issuer_id;

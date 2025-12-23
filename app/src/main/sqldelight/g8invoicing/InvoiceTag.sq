@@ -1,0 +1,35 @@
+CREATE TABLE InvoiceTag (
+  invoice_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO InvoiceTag (invoice_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'PAID'),
+(4, 'LATE'),
+(5, 'REMINDED'),
+(6, 'CANCELLED');
+
+getTagId:
+SELECT invoice_tag_id
+FROM InvoiceTag
+WHERE name = :name;
+
+getTag:
+SELECT name
+FROM InvoiceTag
+WHERE invoice_tag_id = :invoice_tag_id;
+
+getAllTags:
+SELECT *
+FROM InvoiceTag;
+
+saveTag:
+INSERT
+INTO InvoiceTag (invoice_tag_id, name)
+VALUES (?, ?);
+
+deleteTagById:
+DELETE FROM InvoiceTag
+WHERE invoice_tag_id = :id;

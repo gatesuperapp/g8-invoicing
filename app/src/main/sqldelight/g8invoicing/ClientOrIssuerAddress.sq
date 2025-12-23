@@ -1,0 +1,37 @@
+CREATE TABLE ClientOrIssuerAddress (
+  id INTEGER PRIMARY KEY NOT NULL,
+  address_title TEXT,
+  address_line_1 TEXT,
+  address_line_2 TEXT,
+  zip_code TEXT,
+  city TEXT
+);
+
+get:
+SELECT *
+FROM ClientOrIssuerAddress
+WHERE id = :id;
+
+save:
+INSERT INTO ClientOrIssuerAddress (id, address_title, address_line_1, address_line_2, zip_code, city)
+VALUES (?, ?, ?,?, ?,  ?);
+
+update:
+UPDATE ClientOrIssuerAddress
+SET address_title = :address_title,
+    address_line_1 = :address_line_1,
+    address_line_2 = :address_line_2,
+    zip_code = :zip_code,
+    city = :city
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM ClientOrIssuerAddress
+WHERE id = :id;
+
+getLastInsertedRowId:
+SELECT id
+FROM ClientOrIssuerAddress
+ORDER BY id DESC
+LIMIT 1;

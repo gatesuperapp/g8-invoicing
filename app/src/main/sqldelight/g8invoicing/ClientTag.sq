@@ -1,0 +1,25 @@
+CREATE TABLE ClientTag (
+  client_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO ClientTag (client_tag_id, name)
+VALUES (1, 'Pro');
+
+getTag:
+SELECT client_tag_id
+FROM ClientTag
+WHERE name = :name;
+
+getAllTags:
+SELECT *
+FROM ClientTag;
+
+saveTag:
+INSERT
+INTO ClientTag (client_tag_id, name)
+VALUES (?, ?);
+
+deleteTagById:
+DELETE FROM ClientTag
+WHERE client_tag_id = :id;

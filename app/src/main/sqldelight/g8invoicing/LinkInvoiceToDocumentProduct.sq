@@ -1,0 +1,40 @@
+CREATE TABLE LinkInvoiceToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  invoice_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+  sort_order INTEGER,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(id)
+          ON DELETE CASCADE
+);
+
+getDocumentProductsLinkedToInvoice:
+SELECT *
+FROM LinkInvoiceToDocumentProduct
+WHERE invoice_id = :invoice_id
+ORDER BY sort_order ASC;
+
+saveProductLinkedToInvoice:
+INSERT
+INTO LinkInvoiceToDocumentProduct (id, invoice_id, document_product_id, sort_order)
+VALUES (?, ?, ?, ?);
+
+getMaxSortOrderForInvoice:
+SELECT MAX(sort_order) AS maxOrder
+FROM LinkInvoiceToDocumentProduct
+WHERE invoice_id = :invoice_id;
+
+updateSortOrderForDocumentProduct:
+UPDATE LinkInvoiceToDocumentProduct
+SET sort_order = :sort_order
+WHERE invoice_id = :id AND document_product_id = :document_product_id;
+
+deleteProductLinkedToInvoice:
+DELETE FROM LinkInvoiceToDocumentProduct
+WHERE  invoice_id = :invoice_id
+AND document_product_id = :document_product_id;
+
+deleteAllProductsLinkedToInvoice:
+DELETE FROM LinkInvoiceToDocumentProduct
+WHERE  invoice_id = :invoice_id;

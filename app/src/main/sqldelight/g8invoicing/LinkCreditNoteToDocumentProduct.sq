@@ -1,0 +1,39 @@
+CREATE TABLE LinkCreditNoteToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  credit_note_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+  sort_order INTEGER,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(id)
+          ON DELETE CASCADE
+);
+
+getDocumentProductsLinkedToCreditNote:
+SELECT *
+FROM LinkCreditNoteToDocumentProduct
+WHERE credit_note_id = :credit_note_id;
+
+saveProductLinkedToCreditNote:
+INSERT
+INTO LinkCreditNoteToDocumentProduct (id, credit_note_id, document_product_id, sort_order)
+VALUES (?, ?, ?, ?);
+
+deleteProductLinkedToCreditNote:
+DELETE FROM LinkCreditNoteToDocumentProduct
+WHERE  credit_note_id = :credit_note_id
+AND document_product_id = :document_product_id;
+
+deleteAllProductsLinkedToCreditNote:
+DELETE FROM LinkCreditNoteToDocumentProduct
+WHERE  credit_note_id = :credit_note_id;
+
+getMaxSortOrderForCreditNote:
+SELECT MAX(sort_order) AS maxOrder
+FROM LinkCreditNoteToDocumentProduct
+WHERE credit_note_id = :credit_note_id;
+
+updateSortOrderForDocumentProduct:
+UPDATE LinkCreditNoteToDocumentProduct
+SET sort_order = :sort_order
+WHERE credit_note_id = :id AND document_product_id = :document_product_id;

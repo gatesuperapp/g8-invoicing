@@ -1,0 +1,80 @@
+CREATE TABLE DocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  type TEXT,
+  first_name TEXT,
+  name TEXT NOT NULL,
+  phone TEXT,
+  email TEXT,
+  notes TEXT,
+  company_id1_label TEXT,
+  company_id1_number TEXT,
+  company_id2_label TEXT,
+  company_id2_number TEXT,
+  company_id3_label TEXT,
+  company_id3_number TEXT,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  deleted_at REAL DEFAULT (datetime('now', 'localtime'))
+);
+
+get:
+SELECT *
+FROM DocumentClientOrIssuer
+WHERE id = :id;
+
+getIdByMail:
+SELECT id
+FROM DocumentClientOrIssuer
+WHERE email = :email;
+
+getIdByName:
+SELECT id
+FROM DocumentClientOrIssuer
+WHERE name = :name AND first_name =: first_name;
+
+save:
+INSERT INTO DocumentClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number)
+VALUES (?, ?, ?,  ?, ?, ?, ?, ?, ?, ?,  ?, ?,  ?);
+
+update:
+UPDATE DocumentClientOrIssuer
+SET type = :type,
+    first_name = :first_name,
+    name = :name,
+    phone = :phone,
+    email = :email,
+    notes = :notes,
+    company_id1_label = :company_id1_label,
+    company_id1_number = :company_id1_number,
+    company_id2_label = :company_id2_label,
+    company_id2_number = :company_id2_number,
+    company_id3_label = :company_id3_label,
+    company_id3_number = :company_id3_number
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM DocumentClientOrIssuer
+WHERE id = :id;
+
+getLastInsertedClientOrIssuerId:
+SELECT id
+FROM DocumentClientOrIssuer
+ORDER BY id DESC
+LIMIT 1;
+
+getLastInsertedIssuer:
+SELECT *
+FROM DocumentClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY id DESC
+LIMIT 1;
+
+getLastInsertedRowId:
+SELECT id
+FROM DocumentClientOrIssuer
+ORDER BY id DESC
+LIMIT 1;
+
+

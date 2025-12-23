@@ -1,0 +1,27 @@
+CREATE TABLE LinkInvoiceToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  invoice_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(id)
+          ON DELETE CASCADE
+);
+
+getDocumentClientOrIssuerLinkedToInvoice:
+SELECT *
+FROM LinkInvoiceToDocumentClientOrIssuer
+WHERE invoice_id = :invoice_id;
+
+saveDocumentClientOrIssuerLinkedToInvoice:
+INSERT
+INTO LinkInvoiceToDocumentClientOrIssuer (id, invoice_id, document_client_or_issuer_id)
+VALUES (?, ?, ?);
+
+deleteDocumentClientOrIssuerLinkedToInvoice:
+DELETE FROM LinkInvoiceToDocumentClientOrIssuer
+WHERE document_client_or_issuer_id = :document_client_or_issuer_id;
+
+deleteAllDocumentClientOrIssuerLinkedToInvoice:
+DELETE FROM LinkInvoiceToDocumentClientOrIssuer
+WHERE  invoice_id = :invoice_id;

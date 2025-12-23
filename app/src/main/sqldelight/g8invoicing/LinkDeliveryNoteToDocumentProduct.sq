@@ -1,0 +1,39 @@
+CREATE TABLE LinkDeliveryNoteToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  delivery_note_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+  sort_order INTEGER,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(id)
+          ON DELETE CASCADE
+);
+
+getDocumentProductsLinkedToDeliveryNote:
+SELECT *
+FROM LinkDeliveryNoteToDocumentProduct
+WHERE delivery_note_id = :delivery_note_id;
+
+saveProductLinkedToDeliveryNote:
+INSERT
+INTO LinkDeliveryNoteToDocumentProduct (id, delivery_note_id, document_product_id, sort_order)
+VALUES (?, ?, ?, ?);
+
+deleteProductLinkedToDeliveryNote:
+DELETE FROM LinkDeliveryNoteToDocumentProduct
+WHERE  delivery_note_id = :delivery_note_id
+AND document_product_id = :document_product_id;
+
+deleteAllProductsLinkedToADeliveryNote:
+DELETE FROM LinkDeliveryNoteToDocumentProduct
+WHERE  delivery_note_id = :delivery_note_id;
+
+getMaxSortOrderForDeliveryNote:
+SELECT MAX(sort_order) AS maxOrder
+FROM LinkDeliveryNoteToDocumentProduct
+WHERE delivery_note_id = :delivery_note_id;
+
+updateSortOrderForDocumentProduct:
+UPDATE LinkDeliveryNoteToDocumentProduct
+SET sort_order = :sort_order
+WHERE delivery_note_id = :id AND document_product_id = :document_product_id;

@@ -1,0 +1,49 @@
+CREATE TABLE Product (
+  id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  unit TEXT,
+  product_tax_id INTEGER,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+
+    FOREIGN KEY(product_tax_id)
+          REFERENCES TaxRate(product_tax_id)
+          ON DELETE CASCADE
+);
+
+getProduct:
+SELECT *
+FROM Product
+WHERE id = :id;
+
+getAllProducts:
+SELECT *
+FROM Product;
+
+saveProduct:
+INSERT INTO Product (id, name, description, product_tax_id,unit)
+VALUES (?, ?, ?, ?, ?);
+
+updateProduct:
+UPDATE Product
+SET name = :name,
+    description = :description,
+    product_tax_id = :product_tax_id,
+    unit = :unit
+WHERE
+    id = :id;
+
+deleteProduct:
+DELETE FROM Product
+WHERE id = :id;
+
+checkIfEmpty:
+SELECT count(*) FROM ClientOrIssuer LIMIT 1;
+
+lastInsertRowId:
+SELECT id
+FROM Product
+ORDER BY id DESC
+LIMIT 1;

@@ -1,0 +1,87 @@
+CREATE TABLE ClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  type TEXT,
+  first_name TEXT,
+  name TEXT NOT NULL,
+  phone TEXT,
+  email TEXT,
+  notes TEXT,
+  company_id1_label TEXT,
+  company_id1_number TEXT,
+  company_id2_label TEXT,
+  company_id2_number TEXT,
+  company_id3_label TEXT,
+  company_id3_number TEXT,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  deleted_at REAL DEFAULT (datetime('now', 'localtime'))
+);
+
+get:
+SELECT *
+FROM ClientOrIssuer
+WHERE id = :id;
+
+getIdByMail:
+SELECT id
+FROM ClientOrIssuer
+WHERE email = :email;
+
+getIdByName:
+SELECT id
+FROM ClientOrIssuer
+WHERE name = :name AND first_name =: first_name;
+
+getAll:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = :type;
+
+checkIfEmpty:
+SELECT count(*) FROM ClientOrIssuer LIMIT 1;
+
+countDuplicates:
+SELECT COUNT(*)
+FROM ClientOrIssuer
+WHERE instr(name, :name);
+
+save:
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number)
+VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?);
+
+update:
+UPDATE ClientOrIssuer
+SET type = :type,
+    first_name = :first_name,
+    name = :name,
+    phone = :phone,
+    email = :email,
+    notes = :notes,
+    company_id1_label = :company_id1_label,
+    company_id1_number = :company_id1_number,
+    company_id2_label = :company_id2_label,
+    company_id2_number = :company_id2_number,
+    company_id3_label = :company_id3_label,
+    company_id3_number = :company_id3_number
+WHERE
+    id = :id;
+
+delete:
+DELETE FROM ClientOrIssuer
+WHERE id = :id;
+
+getLastInsertedRowId:
+SELECT id
+FROM ClientOrIssuer
+ORDER BY id DESC
+LIMIT 1;
+
+
+getLastInsertedClientId:
+SELECT id
+FROM ClientOrIssuer
+WHERE type = 'client'
+ORDER BY id DESC
+LIMIT 1;
+

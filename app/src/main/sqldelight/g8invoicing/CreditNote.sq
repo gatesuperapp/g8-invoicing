@@ -1,0 +1,72 @@
+CREATE TABLE CreditNote (
+  credit_note_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  issuing_date TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  due_date TEXT,
+  footer TEXT,
+
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
+
+get:
+SELECT *
+FROM CreditNote
+WHERE credit_note_id = :id;
+
+getId:
+SELECT credit_note_id
+FROM CreditNote
+WHERE credit_note_id = :id;
+
+getLastCreditNoteNumber:
+SELECT number
+FROM CreditNote
+ORDER BY credit_note_id DESC
+LIMIT 1;
+
+getAll:
+SELECT *
+FROM CreditNote;
+
+getAllIds:
+SELECT credit_note_id
+FROM CreditNote;
+
+save:
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE CreditNote
+SET number = :number,
+    issuing_date = :issuing_date,
+    reference = :reference,
+    free_field = :free_field,
+    currency =: currency,
+    due_date =: due_date,
+    footer  =: footer,
+    updated_at =: updated_at
+
+WHERE
+    credit_note_id = :credit_note_id;
+
+delete:
+DELETE FROM CreditNote
+WHERE credit_note_id = :id;
+
+getLastInsertedRowId:
+SELECT credit_note_id
+FROM CreditNote
+ORDER BY credit_note_id DESC
+LIMIT 1;
+
+getLastInsertedFooter:
+SELECT footer
+FROM CreditNote
+ORDER BY credit_note_id DESC
+LIMIT 1;
+

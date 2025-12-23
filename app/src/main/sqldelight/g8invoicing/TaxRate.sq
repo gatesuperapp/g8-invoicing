@@ -1,0 +1,33 @@
+CREATE TABLE TaxRate (
+  product_tax_id INTEGER PRIMARY KEY NOT NULL,
+  amount REAL NOT NULL
+  );
+
+INSERT INTO TaxRate (product_tax_id, amount)
+VALUES (1,5.5),
+(2,10),
+(3,20);
+
+
+getTaxRateId:
+SELECT product_tax_id
+FROM TaxRate
+WHERE amount = :amount;
+
+getTaxRate:
+SELECT amount
+FROM TaxRate
+WHERE product_tax_id = :id;
+
+getTaxRates:
+SELECT amount
+FROM TaxRate;
+
+saveTaxRate:
+INSERT
+INTO TaxRate (product_tax_id, amount)
+VALUES (?, ?);
+
+deleteTaxRate:
+DELETE FROM TaxRate
+WHERE product_tax_id = :id;

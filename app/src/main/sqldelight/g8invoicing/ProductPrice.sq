@@ -1,0 +1,54 @@
+CREATE TABLE  ProductPrice (
+  id INTEGER PRIMARY KEY NOT NULL,
+  price_without_tax REAL,
+  product_id INTEGER,
+  client_id INTEGER,
+
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+
+  FOREIGN KEY(product_id)
+      REFERENCES Product(id)
+      ON DELETE CASCADE,
+
+  FOREIGN KEY(client_id)
+      REFERENCES ClientOrIssuer(id)
+      ON DELETE CASCADE
+);
+
+getDefaultPrice:
+SELECT *
+FROM ProductPrice
+WHERE product_id = :product_id
+AND client_id IS NULL ;
+
+getAdditionalPrices:
+SELECT *
+FROM ProductPrice
+WHERE product_id = :product_id AND client_id IS NOT NULL ;
+
+saveProductPrice:
+INSERT INTO ProductPrice (id, price_without_tax, product_id, client_id)
+VALUES (?, ?, ?, ?);
+
+updateProductPrice:
+UPDATE ProductPrice
+SET price_without_tax = :name,
+    product_id = :description,
+    client_id = :product_tax_id
+WHERE
+    id = :id;
+
+deleteAllPricesForProduct:
+DELETE FROM ProductPrice
+WHERE product_id = ?;
+
+deletePriceForClient:
+DELETE FROM ProductPrice
+WHERE product_id = :product_id
+AND client_id =: client_id;
+
+deletePriceForClients:
+DELETE FROM ProductPrice
+WHERE product_id = :product_id
+AND price_without_tax =: price_without_tax;

@@ -1,0 +1,352 @@
+<resources>
+    <string name="app_name">g8</string>
+    <string name="ic_arrow_back">Back button</string>
+    <string name="next">Next</string>
+    <string name="start_app">Start using the app</string>
+    <string name="drawer_home">Accueil</string>
+    <string name="home_products">Produits phares</string>
+    <string name="home_sales">Résumé des ventes</string>
+    <string name="home">Accueil</string>
+    <string name="drawer_invoices">Factures</string>
+    <string name="appbar_invoices">Factures</string>
+    <string name="appbar_credit_notes">Avoirs</string>
+    <string name="appbar_new"> Nouveau</string>
+    <string name="appbar_categories"> Catégories</string>
+    <string name="dropdown_menu_categories"> Catégories</string>
+    <string name="appbar_label_description"> Ajouter un label</string>
+    <string name="appbar_tag">Marquer</string>
+    <string name="appbar_send_reminder">Relancer</string>
+    <string name="appbar_text">Modifier le texte</string>
+    <string name="appbar_list">Ajouter des produits</string>
+    <string name="appbar_list_label">Produits</string>
+    <string name="appbar_components">Modifier les éléments</string>
+    <string name="appbar_text_label">Texte</string>
+    <string name="appbar_new_label">Créer</string>
+    <string name="appbar_menu_label">Menu</string>
+    <string name="appbar_style">Modifier le style</string>
+    <string name="appbar_style_label">Style</string>
+    <string name="appbar_mark_as_paid">Basculer à "payée"</string>
+    <string name="appbar_more">Autres options</string>
+    <string name="appbar_more_label">Plus</string>
+    <string name="appbar_delete">Supprimer</string>
+    <string name="appbar_create_corrected_invoice">Créer facture rectificative</string>
+    <string name="appbar_create_credit_note">Créer avoir</string>
+    <string name="appbar_convert">Convertir</string>
+    <string name="appbar_convert_label">Facturer</string>
+    <string name="appbar_unselect_all">Annuler sélection</string>
+    <string name="appbar_unselect_all_label">Retour</string>
+    <string name="appbar_select_all">Sélectionner tout </string>
+    <string name="appbar_edit">Modifier la facture</string>
+    <string name="appbar_duplicate">Dupliquer</string>
+    <string name="appbar_duplicate_label">Dupliquer</string>
+    <string name="appbar_save_payment">Enregistrer paiement</string>
+    <string name="appbar_save_payment_label">Paiement</string>
+    <string name="appbar_send">Envoyer</string>
+    <string name="appbar_search">Recherche</string>
+    <string name="appbar_save"> Sauvegarder</string>
+    <string name="appbar_export">Exporter</string>
+    <string name="appbar_tag_draft">Brouillon</string>
+    <string name="appbar_tag_paid">Payée</string>
+    <string name="appbar_tag_sent">Envoyée</string>
+    <string name="appbar_tag_late">En retard</string>
+    <string name="appbar_tag_cancelled">Annulée</string>
+    <string name="appbar_tag_reminded">Relancée</string>
+    <string name="drawer_delivery_notes">Bons de livraison</string>
+    <string name="appbar_delivery_notes">Bons de livraison</string>
+    <string name="drawer_products">Produits</string>
+    <string name="appbar_products">Produits</string>
+    <string name="drawer_client_list">Clients</string>
+    <string name="appbar_client_list">Clients</string>
+    <string name="appbar_title_add_new">Nouveau</string>
+    <string name="appbar_product_add">Ajout produit</string>
+    <string name="appbar_title_info">Infos client</string>
+    <string name="appbar_product_detail">Infos produit</string>
+    <string name="appbar_client_edit">Modifier client</string>
+    <string name="appbar_product_edit">Modifier produit</string>
+    <string name="drawer_settings">Réglages</string>
+    <string name="appbar_account">Contribuer</string>
+    <string name="drawer_about">Aide </string>
+    <string name="appbar_about">Aide </string>
+    <string name="drawer_menu_description">Menu navigation button</string>
+    <string name="drawer_home_description">Home navigation button</string>
+    <string name="drawer_invoices_description">Invoices button</string>
+    <string name="drawer_delivery_notes_description">Delivery notes button</string>
+    <string name="drawer_products_description">Products button</string>
+    <string name="drawer_clients_description">Clients button</string>
+    <string name="drawer_settings_description">Settings navigation button</string>
+    <string name="drawer_info_description">About navigation button</string>
+    <string name="my_info">Mes informations</string>
+    <string name="client">Client</string>
+    <string name="products">Produits</string>
+    <string name="product_duplicate_suffix"> - Copie</string>
+    <string name="total_amount">Montant total</string>
+    <string name="total_amount_without_tax">Montant HT</string>
+    <string name="discount">Réduction</string>
+    <string name="terms">Champs additionnels</string>
+    <string name="footer">Bas de page</string>
+    <string name="add">Ajouter</string>
+    <string name="dropdown">Dérouler</string>
+    <string name="edit">Modifier</string>
+    <string name="payments">Paiements collectés</string>
+    <string name="client_business_name">Nom de l\'organisation</string>
+    <string name="client_business_name_input">Entreprise X</string>
+    <string name="category">Type de client</string>
+    <string name="client_first_name">Prénom</string>
+    <string name="client_first_name_input">Hipposideros</string>
+    <string name="client_name">Nom <sup>*</sup></string>
+    <string name="client_name_input">RhinoCorp</string>
+    <string name="client_block_address">Adresse</string>
+    <string name="client_block_identification">Identification</string>
+    <string name="client_address">Adresse</string>
+    <string name="client_add_address">+ Ajouter une adresse</string>
+    <string name="client_delete_address">Effacer l\'adresse</string>
+    <string name="client_address_title">Intitulé</string>
+    <string name="client_address_title_invoicing_placeholder">Adressé à</string>
+    <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
+    <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
+    <string name="client_address1">Adresse</string>
+    <string name="client_address1_input">6 rue de l\'église</string>
+    <string name="client_address2"></string>
+    <string name="client_address2_input">Lieu-dit beròi</string>
+    <string name="client_city">Ville</string>
+    <string name="client_city_input">Écholoc</string>
+    <string name="client_zip_code">Code Postal</string>
+    <string name="client_zip_code_input">81000</string>
+    <string name="client_email">E-mail</string>
+    <string name="client_email_input">petitrhino@ecomail.fr</string>
+    <string name="client_phone">Téléphone</string>
+    <string name="client_phone_input">0787878787</string>
+    <string name="form_label_edit">Modifier</string>
+    <string name="client_company_identification1">N° SIRET</string>
+    <string name="client_company_identification1_input">123456789 12345</string>
+    <string name="client_company_identification2">N° TVA</string>
+    <string name="client_company_identification2_input">123456789</string>
+    <string name="client_company_identification3">N° RCS</string>
+    <string name="client_company_identification3_input">123456789</string>
+    <string name="client_notes">Notes privées</string>
+    <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus. </string>
+    <string name="client_detail_balance">Solde</string>
+    <string name="client_detail_paid">Payé</string>
+    <string name="client_detail_to_be_paid">À payer</string>
+    <string name="client_detail_total_paid">Total payé</string>
+    <string name="client_detail_total_credit_to_apply">Crédit disponible</string>
+    <string name="client_detail_total_payment_waiting">En attente</string>
+    <string name="client_detail_total_payment_overdue">En retard</string>
+    <string name="currency">€</string>
+    <string name="copy">Copie de</string>
+    <string name="product_name">Nom <sup>*</sup></string>
+    <string name="product_name2">Nom</string>
+    <string name="product_name_input">Betteraves</string>
+    <string name="product_description">Description</string>
+    <string name="product_unit">Unité</string>
+    <string name="product_unit_input">kg</string>
+    <string name="product_description_input">Rose Lutz</string>
+    <string name="product_price">Prix</string>
+    <string name="product_price_without_tax">HT</string>
+    <string name="product_price_with_tax">TTC</string>
+    <string name="product_price_input">3</string>
+    <string name="product_tax">TVA</string>
+    <string name="product_add_price">+ Ajouter un prix</string>
+    <string name="product_delete_price">Supprimer ce prix</string>
+    <string name="document_product_quantity">Quantité <sup>*</sup></string>
+    <string name="document_product_quantity_input">1</string>
+    <string name="tax_rate_screen_title">Taux de TVA</string>
+    <string name="tax_rate_change_rates">Modifier les taux</string>
+    <string name="delivery_note">Bon de livraison</string>
+    <string name="invoice">Facture</string>
+    <string name="invoice_due_date">Échéance :</string>
+    <string name="credit_note_due_date">Échéance :</string>
+    <string name="invoice_paid">Payée &#x2714;</string>
+    <string name="invoice_pdf_due_date">Date limite de paiement</string>
+    <string name="invoice_pending">En attente</string>
+    <string name="invoice_late">En retard</string>
+    <string name="delivery_note_number">Bon de livraison N°</string>
+    <string name="invoice_number">Facture N°</string>
+    <string name="credit_note_number">Avoir N°</string>
+    <string name="document_number_short">N°</string>
+    <string name="document_date">Date</string>
+    <string name="document_date_emitting">Date d\'émission</string>
+    <string name="document_due_date">Échéance</string>
+    <string name="document_issuer">Émetteur</string>
+    <string name="document_client">Client</string>x
+    <string name="document_reference">Référence</string>
+    <string name="document_free_field">Champ libre</string>
+    <string name="document_footer">Pied de page</string>
+    <string name="document_line_products">Produits</string>
+    <string name="invoice_default_number">F001</string>
+    <string name="delivery_note_default_number">BL001</string>
+    <string name="credit_note_default_number">FA001</string>
+    <string name="corrected_invoice_cancel_and_replace">Annule et remplace la facture</string>
+    <string name="document_default_date">-</string>
+    <string name="document_default_due_date">11/01/2024</string>
+    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1027 8073 7000 983764 8377
+    </string>
+    <string name="document_default_reference">XFGDTSF</string>
+    <string name="document_default_issuer_firstName">Ignacio</string>
+    <string name="document_default_issuer_name">Cantu</string>
+    <string name="document_default_issuer_address1">6 rue de l\'amour</string>
+    <string name="document_default_issuer_address2">Lieu dit triomphe</string>
+    <string name="document_default_issuer_zipCode">79524</string>
+    <string name="document_default_issuer_city">El Dorado</string>
+    <string name="document_default_issuer_phone">(974) 491–3398</string>
+    <string name="document_default_issuer_email">kristie.goodman@example.com</string>
+    <string name="document_default_issuer_company_notes">Petites notes pour moi-même</string>
+    <string name="document_default_issuer_company_label1">N° SIRET</string>
+    <string name="document_default_issuer_company_number1">776EYEYI</string>
+    <string name="document_default_issuer_company_label2">N° TVA</string>
+    <string name="document_default_issuer_company_label3">N° RCS</string>
+    <string name="document_default_issuer_company_number2">64554828928938</string>
+    <string name="document_default_client_firstName">Laura</string>
+    <string name="document_default_client_name">Toun</string>
+    <string name="document_default_client_address1">16 route de la vie</string>
+    <string name="document_default_client_zipCode">01785</string>
+    <string name="document_default_client_city">Saint Marceline</string>
+    <string name="document_default_client_phone">0789093849</string>
+    <string name="document_default_client_email">laura.toun@example.com</string>
+    <string name="document_default_client_notes">Une petite notita.</string>
+    <string name="document_default_client_company_label1">TVA</string>
+    <string name="document_default_client_company_number1">776EYEYI</string>
+    <string name="document_default_document_product_name">Betterave bio</string>
+    <string name="document_default_document_product_description">Variété Chioggia</string>
+    <string name="document_default_document_product_unit">kg</string>
+    <string name="document_default_document_product_currency">€</string>
+    <string name="document_order_document_products">Produits</string>
+    <string name="document_total_without_tax">Total HT :</string>
+    <string name="document_total_with_tax">Total TTC :</string>
+    <string name="document_tax">TVA</string>
+    <string name="document_table_description">Désignation</string>
+    <string name="document_table_quantity">Qté</string>
+    <string name="document_table_unit">Unité</string>
+    <string name="document_table_unit_price_without_tax">PU HT</string>
+    <string name="document_table_total_price_without_tax">Total HT</string>
+    <string name="document_table_tax_rate">TVA</string>
+    <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
+    <string name="document_bottom_sheet_list_add_new_client">Nouveau client</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel émetteur</string>
+    <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
+    <string name="document_modal_add_product">Ajout produit</string>
+    <string name="document_modal_edit_product">Édition produit</string>
+    <string name="document_modal_new_product">Nouveau produit</string>
+    <string name="document_modal_new_issuer">Nouvel émetteur</string>
+    <string name="document_modal_edit_issuer">Édition émetteur</string>
+    <string name="document_modal_new_client">Nouveau client</string>
+    <string name="document_modal_edit_client">Édition client</string>
+    <string name="document_modal_product_cancel">Annuler</string>
+    <string name="document_modal_product_save">Valider</string>
+    <string name="document_modal_product_back">Retour</string>
+    <string name="document_modal_product_tva_title">TVA</string>
+    <string name="account_label">Mon compte</string>
+    <string name="account_project_info">
+        Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
+    </string>
+    <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
+    <string name="account_subscribe">
+        Tu peux t\'abonner à partir de 2€ par mois pour soutenir le projet et bénéficier d\'avantages exclusifs !\n\n
+        C\'est aussi grâce à ta contribution que les prochaines fonctionnalités pourront voir le jour : ajout du logo,  prix par client, nouveaux modèles, appli de bureau, et + encore.
+    </string>
+    <string name="account_subscribe2">
+        Gros avantage : si vous souscrivez dès maintenant, l\'appli de bureau (dès qu\'elle est prête)
+        sera automatiquement incluse dans vore abonnement…Sinon, il vous faudra prendre l\'abonnement à 10€/mois !
+    </string>
+    <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
+    <string name="about_title_about">À propos</string>
+    <string name="about_title_tutorials">Tutos &amp; conseils</string>
+    <string name="about_title_tutorials_button">Accéder au site</string>
+    <string name="about_title_tutorials_button_link">https://the-gate.fr/conseils-et-tutos</string>
+    <string name="about_tutorials"> Plusieurs articles sont disponibles sur le site internet :\n
+        &#8226; Comment numéroter les factures \n
+        &#8226; Supprimer ou annuler une facture \n
+        &#8226; Transformer des bons de livraison en facture\n
+        &#8226; Mentions obligatoires sur les factures\n
+        &#8226; Délai de conservation des documents comptables
+    </string>
+    <string name="about_title_contact">Contact</string>
+    <string name="about">
+        𝕘𝟠 est une application pratique et engagée :\n
+        &#8226; Fonctionne hors-ligne \n
+        &#8226; Ni pub ni traceur \n
+        &#8226; Logiciel libre et open-source\n
+        &#8226; Conçue pour les paysan·ne·s en priorité\n
+        &#8226; Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.\n
+    </string>
+    <string name="about2">
+    Pour contacter l\'assistance, remonter un bug ou toute autre demande :</string>
+    <string name="about_terms_of_service_header">En utilisant l\'application, tu acceptes les</string>
+    <string name="about_build_version">Version de l\'application : &#160;</string>
+    <string name="about_terms_of_service">conditions d\'utilisation</string>
+    <string name="about_terms_of_service_header_2">et la</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
+    <string name="about_privacy">politique de confidentialité.</string>
+    <string name="account_button_create">Créer mon compte</string>
+    <string name="about_button_contact">contact@the-gate.fr</string>
+    <string name="about_contact_email">contact@the-gate.fr</string>
+    <string name="account_donate">En savoir plus</string>
+    <string name="account_donate_link">https://the-gate.fr/abonnement</string>
+    <string name="account_bat_love">𝕚 𝕔𝕒𝕟𝕥 𝕝𝕚𝕧𝕖 𝕨𝕚𝕥𝕙𝕠𝕦𝕥 𝕦</string>
+    <string name="invoice_advice_legal_help">Clique sur moi …!</string>
+    <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n
+        Tu peux me cliquer dessus quand tu me vois, je donne des
+        \n\n …</string>
+    <string name="invoice_advice_legal_2">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des
+        \n\n … </string>
+    <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j\'ai tout résumé ici : \n</string>
+    <string name="invoice_advice_legal_4">the-gate.fr</string>
+    <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
+   </string>
+    <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n
+   </string>
+    <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
+    <string name="invoice_advice_bottom_menu">Hey hey, ici ton batmagotchi. Il faut absolument que je te montre une astuce \n\n …   </string>
+    <string name="invoice_advice_bottom_menu1">Pour faire apparaître des options très utiles, comme supprimer un document \n\n …   </string>
+    <string name="invoice_advice_bottom_menu2">clique sur le cercle ○ devant le numéro de la facture. Tu peux même sélectionner plusieurs documents à la fois.\n\n 𝕨𝕚𝕝𝕕 </string>
+    <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
+    <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l\'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
+        \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
+        \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.
+    </string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
+    <string name="document_product_advice_2">La modification s\'applique uniquement à ce document …</string>
+    <string name="document_product_advice_3">Elle n\'impacte pas le produit enregistré dans l\'onglet "Produits".</string>
+    <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
+    <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
+    <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
+    <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
+    <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠\n\  &#160;&#160;&#160;&#160;&#160;&#160;  ((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
+    <string name="alert_convert_notes_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour convertir des bons de livraison en facture, il faut les sélectionner (clic long ou clic sur la coche) puis choisir «Facturer».  </string>
+    <string name="alert_delete_dialog_info">𝕚𝕟𝕗𝕠\n  &#160;&#160;&#160;&#160; (◍•ᴗ•◍)♡\n\nPour supprimer un document, il faut le sélectionner (clic long sur l\'élément ou clic sur la coche) puis choisir «Plus» et «Supprimer».   </string>
+    <string name="alert_dialog_error_confirm">Ouch</string>
+    <string name="alert_dialog_info_confirm">Merveilleux</string>
+    <string name="alert_convert_notes_info_confirm">Superbe</string>
+    <string name="alert_delete_info_confirm">Capito</string>
+    <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
+    <string name="export_ongoing">Export en cours…</string>
+    <string name="export_done">Export terminé</string>
+    <string name="export_error">Échec de l\'export.</string>
+    <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
+    <string name="export_clickable_text">• ֊ •</string>
+    <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
+        \n\n• Pense à conserver une copie du PDF dans tes mails envoyés ou dans un espace de stockage, en cas de perte du téléphone. </string>
+    <string name="export_info_popup_validate">okurrr</string>
+    <string name="export_send_file">Envoyer par e-mail</string>
+    <string name="export_send_file_content">Bonjour, \n
+        Veuillez trouver votre %s en pièce jointe.\n
+        Cordialement\n\n</string>
+    <string name="send_reminder_email_content">Bonjour, \n\n
+        Votre facture %s d\'un montant de %s€ est arrivée à échéance le %s. Nous n\'avons à ce jour pas reçu de paiement
+        de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n
+        Cordialement\n</string>
+    <string name="send_reminder_email_subject">Relance : facture N°%s</string>
+    <string name="send_reminder_email_subject_invoice">facture</string>
+    <string name="export_share_file">Partager</string>
+    <string name="export_close">Terminer</string>
+    <string name="export_error_sharing">Erreur. Veuillez passer directement par le dossier "téléchargements". </string>
+    <string name="export_email_subject">Votre %s N°%s</string>
+    <string name="export_email_subject_invoice">facture</string>
+    <string name="export_email_subject_delivery_note">bon de livraison</string>
+    <string name="export_email_subject_credit_note">avoir</string>
+    <string name="delivery_note_acronym">BL</string>
+
+</resources>

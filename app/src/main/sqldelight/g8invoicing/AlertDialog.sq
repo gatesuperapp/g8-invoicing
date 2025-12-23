@@ -1,0 +1,25 @@
+CREATE TABLE AlertDialog (
+  id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  hasBeenShown INTEGER DEFAULT 0
+);
+
+INSERT INTO AlertDialog (id, name)
+VALUES (1, 'WELCOME_AND_TERMS_ALERT'),
+(2, 'INVOICE_LEGAL_ALERT'),
+(3, 'DATA_LOSS_ALERT'),
+(4, 'AUTO_SAVE_DOC_ALERT'),
+(5, 'CONVERT_DELIVERY_NOTE_DOC_ALERT'),
+(6, 'DELETE_DOC_ALERT')
+;
+
+fetch:
+SELECT hasBeenShown
+FROM AlertDialog
+WHERE id = :id;
+
+update:
+UPDATE AlertDialog
+SET hasBeenShown = 1
+WHERE
+    id = :id;

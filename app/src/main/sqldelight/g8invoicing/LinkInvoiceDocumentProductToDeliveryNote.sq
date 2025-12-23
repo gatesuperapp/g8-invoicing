@@ -1,0 +1,19 @@
+CREATE TABLE LinkInvoiceDocumentProductToDeliveryNote (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  delivery_note_number TEXT,
+  delivery_date TEXT
+);
+
+getInfoLinkedToDocumentProduct:
+SELECT *
+FROM LinkInvoiceDocumentProductToDeliveryNote
+WHERE document_product_id = :document_product_id;
+
+saveInfoLinkedToDocumentProduct:
+INSERT
+INTO LinkInvoiceDocumentProductToDeliveryNote (document_product_id, delivery_note_number, delivery_date)
+VALUES (?, ?, ?);
+
+deleteInfoLinkedToDocumentProduct:
+DELETE FROM LinkInvoiceDocumentProductToDeliveryNote
+WHERE  document_product_id = :document_product_id;
