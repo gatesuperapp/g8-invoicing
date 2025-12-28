@@ -47,7 +47,7 @@ class ProductListViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                //println("Fetching products failed with exception: ${e.localizedMessage}")
+                println("Fetching products failed with exception: ${e.localizedMessage}")
             }
         }
     }

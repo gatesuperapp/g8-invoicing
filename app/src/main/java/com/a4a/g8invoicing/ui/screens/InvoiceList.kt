@@ -1,23 +1,18 @@
 package com.a4a.g8invoicing.ui.screens
 
 import android.text.TextUtils.substring
-import androidx.activity.result.launch
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -25,9 +20,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -43,29 +40,26 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.data.hasSeenPopup
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.BatAnimation
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
-import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
-import androidx.compose.material3.Text
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.style.TextAlign
-import com.a4a.g8invoicing.ui.navigation.TopBar
-import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
+import java.io.File
 
 @Composable
 fun InvoiceList(
@@ -80,6 +74,7 @@ fun InvoiceList(
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
     onClickBack: () -> Unit,
+    hasUserData: Boolean,
 ) {
     // Main list to handle actions with selected items
     val selectedItems = remember { mutableStateListOf<InvoiceState>() }
@@ -96,124 +91,167 @@ fun InvoiceList(
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
-        ScaffoldWithDimmedOverlay(
-            isDimmed = isDimActive.value,
-            onDismissDim = { isDimActive.value = false },
-            topBar = {
-                TopBar(
-                    title = R.string.appbar_invoices,
-                    navController = navController,
-                    onClickBackArrow = onClickBack,
-                    isCancelCtaDisplayed = false
-                )
-            },
-            bottomBar = {
-                GeneralBottomBar(
-                    navController = navController,
-                    numberOfItemsSelected = selectedItems.size,
-                    onClickDelete = {
-                        isDimActive.value = !isDimActive.value
-                        openDeleteAlertDialog.value = true
-                    },
-                    onClickCreateCreditNote = {
-                        onClickCreateCreditNote(selectedItems.toList())
-                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                    },
-                    onClickCreateCorrectedInvoice = {
-                        onClickCreateCorrectedInvoice(selectedItems.toList())
-                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                    },
-                    onClickDuplicate = {
-                        onClickDuplicate(selectedItems.toList())
-                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                    },
-                    onClickUnselectAll = {
-                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                    },
-                    onClickTag = {
-                        onClickTag(selectedItems.toList(), it)
-                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                    },
-                    onClickSendReminder = {
-                        val document = selectedItems.first()
-                        composeEmail(
-                            address = document.documentClient?.email?.text,
-                            documentNumber = document.documentNumber.text,
-                            context = context,
-                            emailSubject = Strings.get(
-                                R.string.send_reminder_email_subject,
-                                document.documentNumber.text
-                            ),
-                            emailMessage = createReminderTextMessage(document)
-                        )
-                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                    },
-                    onClickNew = { onClickNew() },
-                    onClickCategory = onClickCategory,
-                    isInvoice = true,
-                    onChangeBackground = {
-                        isDimActive.value = !isDimActive.value
-                    }
-                )
-            }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    if (documentsUiState.documentStates.isEmpty()) {
-                        DisplayBatHelperWelcome()
-                    } else {
-                        Column {
-                            DocumentListContent(
-                                documents = documentsUiState.documentStates,
-                                onItemClick = onClickListItem,
-                                addDocumentToSelectedList = {
-                                    selectedItems.add(it as InvoiceState)
-                                    selectedMode.value = true
-                                },
-                                removeDocumentFromSelectedList = {
-                                    selectedItems.remove(it as InvoiceState)
-                                    if (selectedItems.isEmpty()) {
-                                        selectedMode.value = false
-                                    }
-                                },
-                                keyToResetCheckboxes = keyToResetCheckboxes.value
-                            )
-                            Spacer(modifier = Modifier.height(20.dp))
+    //Launch download db popup
+    val hasSeenPopup by hasSeenPopup(context).collectAsState(initial = null)
+    var showExportDatabaseDialog by remember { mutableStateOf(false) }
+    var showSendDatabaseByEmail by remember { mutableStateOf(false) }
+    var exportedFile: File? by remember { mutableStateOf(null) }
 
-                            if (documentsUiState.documentStates.size == 1)
-                                DisplayBatHelperMenuAdvice()
-                        }
+    LaunchedEffect(hasSeenPopup, hasUserData) {
+        val loaded = hasSeenPopup ?: return@LaunchedEffect // wait until the DataStore emits
+        if (!loaded && hasUserData) {
+            showExportDatabaseDialog = true
+        }
+    }
+
+    // Show second popup when file has been exported
+    LaunchedEffect(exportedFile) {
+        if (exportedFile != null) {
+            showSendDatabaseByEmail = true
+        }
+    }
+
+    if (showExportDatabaseDialog) {
+        DatabaseExportDialog(
+            context = context,
+            onDismiss = {
+                showExportDatabaseDialog = false
+            },
+            onResult = {
+                showExportDatabaseDialog = false
+                exportedFile = it
+            }
+        )
+    }
+    if (showSendDatabaseByEmail) {
+        exportedFile?.let {
+            DatabaseEmailDialog(
+                context = context,
+                onDismiss = {
+                    showSendDatabaseByEmail = false
+                },
+                file = it
+            )
+        }
+    }
+
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
+        topBar = {
+            TopBar(
+                title = R.string.appbar_invoices,
+                navController = navController,
+                onClickBackArrow = onClickBack,
+                isCancelCtaDisplayed = false
+            )
+        },
+        bottomBar = {
+            GeneralBottomBar(
+                navController = navController,
+                numberOfItemsSelected = selectedItems.size,
+                onClickDelete = {
+                    isDimActive.value = !isDimActive.value
+                    openDeleteAlertDialog.value = true
+                },
+                onClickCreateCreditNote = {
+                    onClickCreateCreditNote(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickCreateCorrectedInvoice = {
+                    onClickCreateCorrectedInvoice(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickDuplicate = {
+                    onClickDuplicate(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickUnselectAll = {
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickTag = {
+                    onClickTag(selectedItems.toList(), it)
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickSendReminder = {
+                    val document = selectedItems.first()
+                    composeEmail(
+                        address = document.documentClient?.email?.text,
+                        documentNumber = document.documentNumber.text,
+                        context = context,
+                        emailSubject = Strings.get(
+                            R.string.send_reminder_email_subject,
+                            document.documentNumber.text
+                        ),
+                        emailMessage = createReminderTextMessage(document)
+                    )
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                onClickNew = { onClickNew() },
+                onClickCategory = onClickCategory,
+                isInvoice = true,
+                onChangeBackground = {
+                    isDimActive.value = !isDimActive.value
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                if (documentsUiState.documentStates.isEmpty()) {
+                    DisplayBatHelperWelcome()
+                } else {
+                    Column {
+                        DocumentListContent(
+                            documents = documentsUiState.documentStates,
+                            onItemClick = onClickListItem,
+                            addDocumentToSelectedList = {
+                                selectedItems.add(it as InvoiceState)
+                                selectedMode.value = true
+                            },
+                            removeDocumentFromSelectedList = {
+                                selectedItems.remove(it as InvoiceState)
+                                if (selectedItems.isEmpty()) {
+                                    selectedMode.value = false
+                                }
+                            },
+                            keyToResetCheckboxes = keyToResetCheckboxes.value
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        if (documentsUiState.documentStates.size == 1)
+                            DisplayBatHelperMenuAdvice()
                     }
                 }
             }
-
-            if (openDeleteAlertDialog.value) {
-                AlertDialogDeleteDocument(
-                    onDismissRequest = {
-                        openDeleteAlertDialog.value = false
-                        isDimActive.value = !isDimActive.value
-                    },
-                    onConfirmation = {
-                        openDeleteAlertDialog.value = false
-                        onClickDelete(selectedItems.toList())
-                        selectedItems.clear()
-                        selectedMode.value = false
-                        isDimActive.value = !isDimActive.value// Réinitialiser le fond //
-                    },
-                    isInvoice = true
-                )
-            }
         }
 
+        if (openDeleteAlertDialog.value) {
+            AlertDialogDeleteDocument(
+                onDismissRequest = {
+                    openDeleteAlertDialog.value = false
+                    isDimActive.value = !isDimActive.value
+                },
+                onConfirmation = {
+                    openDeleteAlertDialog.value = false
+                    onClickDelete(selectedItems.toList())
+                    selectedItems.clear()
+                    selectedMode.value = false
+                    isDimActive.value = !isDimActive.value// Réinitialiser le fond //
+                },
+                isInvoice = true
+            )
+        }
+    }
 }
 
 

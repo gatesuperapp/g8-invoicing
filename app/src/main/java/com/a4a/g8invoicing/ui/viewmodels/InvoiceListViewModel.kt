@@ -1,10 +1,5 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import android.content.ContentValues
-import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,11 +9,13 @@ import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.screens.composeEmail
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.migration.CustomInjection
+import g8invoicing.ClientOrIssuerQueries
+import g8invoicing.DeliveryNoteQueries
+import g8invoicing.InvoiceQueries
+import g8invoicing.ProductQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +30,11 @@ import javax.inject.Inject
 class InvoiceListViewModel @Inject constructor(
     private val invoiceDataSource: InvoiceLocalDataSourceInterface,
     private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
-    ) : ViewModel() {
+    private val invoiceQueries: InvoiceQueries,
+    private val productQueries: ProductQueries,
+    private val deliveryNoteQueries: DeliveryNoteQueries,
+    private val clientOrIssuerQueries: ClientOrIssuerQueries
+) : ViewModel() {
 
     private val _documentsUiState = MutableStateFlow(InvoicesUiState())
     val documentsUiState: StateFlow<InvoicesUiState> = _documentsUiState.asStateFlow()
@@ -58,16 +59,16 @@ class InvoiceListViewModel @Inject constructor(
         fetchJob = viewModelScope.launch {
             try {
                 invoiceDataSource.fetchAll()
-                ?.flowOn(Dispatchers.IO)
-                ?.collect {
-                    _documentsUiState.update { uiState ->
-                        //Log.e(ContentValues.TAG, "clientAndIssuer _documentsUiState" + _documentsUiState)
+                    ?.flowOn(Dispatchers.IO)
+                    ?.collect {
+                        _documentsUiState.update { uiState ->
+                            //Log.e(ContentValues.TAG, "clientAndIssuer _documentsUiState" + _documentsUiState)
 
-                        uiState.copy(
-                            documentStates = it
-                        )
+                            uiState.copy(
+                                documentStates = it
+                            )
+                        }
                     }
-                }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
@@ -148,7 +149,14 @@ class InvoiceListViewModel @Inject constructor(
             }
         }
     }
-}
 
+    // Used to display download db popup to existing users
+    fun hasUserData(): Boolean {
+        return invoiceQueries.countAll().executeAsOne() > 3 ||
+                deliveryNoteQueries.countAll().executeAsOne() > 3 ||
+                productQueries.countAll().executeAsOne() > 3 ||
+                clientOrIssuerQueries.countAll().executeAsOne() > 3
+    }
+}
 
 

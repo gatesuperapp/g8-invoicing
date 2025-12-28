@@ -42,7 +42,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
         fetchJobClients?.cancel()
         fetchJobClients = viewModelScope.launch {
             try {
-                clientOrIssuerDataSource.fetchAll(PersonType.Client)
+                clientOrIssuerDataSource.fetchAll(PersonType.CLIENT)
                     .collect { clientsOrIssuers ->
                         _clientsUiState.update {
                             it.copy(
@@ -62,7 +62,7 @@ class ClientOrIssuerListViewModel @Inject constructor(
         fetchJobIssuers?.cancel()
         fetchJobIssuers = viewModelScope.launch {
             try {
-                clientOrIssuerDataSource.fetchAll(PersonType.Issuer)
+                clientOrIssuerDataSource.fetchAll(PersonType.ISSUER)
                     .collect { clientsOrIssuers ->
                         _issuersUiState.update {
                             it.copy(
@@ -106,5 +106,5 @@ class ClientOrIssuerListViewModel @Inject constructor(
 data class Message(val id: Long, val message: String)
 
 enum class PersonType {
-    Client, Issuer
+    CLIENT, ISSUER
 }

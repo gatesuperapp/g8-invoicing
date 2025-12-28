@@ -26,7 +26,12 @@ import com.a4a.g8invoicing.data.auth.AuthRepositoryInterface
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import g8invoicing.ClientOrIssuerQueries
+import g8invoicing.DeliveryNoteQueries
+import g8invoicing.InvoiceQueries
+import g8invoicing.ProductQueries
 import retrofit2.Retrofit
 import retrofit2.create
 import javax.inject.Singleton
@@ -111,5 +116,36 @@ object AppModule {
     fun provideAuthRepository(api: AuthApi, prefs: SharedPreferences): AuthRepositoryInterface {
         return AuthRepository(api, prefs)
     }
+
+    // Used to know if db is empty or not, for the download db popuop
+
+    // You need to add this @Provides method for your Database
+    @Provides
+    @Singleton // Or an appropriate scope
+    fun provideDatabase(@ApplicationContext appContext: Context): Database {
+        return Database(
+            driver = AndroidSqliteDriver(
+                schema = Database.Schema, // Or Database.Schema if that's how SQLDelight generates it
+                context = appContext,
+                name = "g8_invoicing.db" // Replace with your actual database file name
+            )
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideInvoiceQueries(db: Database): InvoiceQueries = db.invoiceQueries
+
+    @Provides
+    @Singleton
+    fun provideProductQueries(db: Database): ProductQueries = db.productQueries
+
+    @Provides
+    @Singleton
+    fun provideDeliveryNoteQueries(db: Database): DeliveryNoteQueries = db.deliveryNoteQueries
+
+    @Provides
+    @Singleton
+    fun provideClientOrIssuerQueries(db: Database): ClientOrIssuerQueries = db.clientOrIssuerQueries
 
 }

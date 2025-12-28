@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.shared
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -25,8 +26,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import java.math.BigDecimal
+import kotlin.collections.filter
 
 @Composable
 fun FormUI(
@@ -34,6 +37,7 @@ fun FormUI(
     keyboard: KeyboardOpt = KeyboardOpt.GO_TO_NEXT_INPUT,
     localFocusManager: FocusManager,
     onClickForward: (ScreenElement) -> Unit = {},
+    onClickOpenClientSelection: (String) -> Unit = {},
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
     errors: MutableList<Pair<ScreenElement, String?>>? = null,
     onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
@@ -60,6 +64,7 @@ fun FormUI(
     val focusRequesters: List<Pair<ScreenElement, FocusRequester>> =
         remember { inputsWithFocusRequester }
 
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -69,13 +74,13 @@ fun FormUI(
             )
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
-                    localFocusManager.clearFocus()
+                    focusManager.clearFocus()
                 })
             }
     ) {
-        inputList.forEach { item ->
+        inputList.forEach { input ->
             // Keyboard actions and options
-            val isLastInput = item == inputList.last()
+            val isLastInput = input == inputList.last()
             val imeAction = if (isLastInput || keyboard == KeyboardOpt.VALIDATE_INPUT) {
                 ImeAction.Done
             } else {
@@ -84,64 +89,67 @@ fun FormUI(
             val formActions = if (!isLastInput) {
                 KeyboardActions(
                     onNext = {
-                        localFocusManager.moveFocus(FocusDirection.Down)
+                        focusManager.moveFocus(FocusDirection.Down)
                     }
                 )
             } else {
                 KeyboardActions(
                     onGo = {
-                        localFocusManager.clearFocus()
+                        focusManager.clearFocus()
                     }
                 )
             }
 
             PageElementCreator(
-                item = item,
-                isLastInput = item == inputList.last(),
+                input = input,
+                isLastInput = input == inputList.last(),
                 imeAction = imeAction,
                 onClickForward = onClickForward,
+                onClickOpenClientSelection = onClickOpenClientSelection,
                 formActions = formActions,
-                focusRequester = focusRequesters.firstOrNull { it.first == item.pageElement }?.second,
+                focusRequester = focusRequesters.firstOrNull { it.first == input.pageElement }?.second,
                 onClickRow = {
-                        if (item.inputType is TextInput) {
-                            placeCursorAtTheEndOfText(item.pageElement)
-                        }
-                        focusRequesters.firstOrNull { it.first == item.pageElement }?.second?.requestFocus()
+                    if (input.inputType is TextInput) {
+                        placeCursorAtTheEndOfText(input.pageElement)
+                    }
+                    focusRequesters.firstOrNull { it.first == input.pageElement }?.second?.requestFocus()
                 },
-                errorMessage = errors?.firstOrNull { it.first == item.pageElement }?.second,
+                errorMessage = errors?.firstOrNull { it.first == input.pageElement }?.second,
                 onClickExpandFullScreen = {
-                    onClickExpandFullScreen(item.pageElement)
+                    onClickExpandFullScreen(input.pageElement)
                 }, // Used to expand product description field,
                 clearFocusForAllRows = {
-                    focusManager.clearFocus()
+                    focusManager.clearFocus(force = true)
+
                 }
             )
         }
     }
 }
 
-
 @Composable
 fun PageElementCreator(
-    item: FormInput,
+    input: FormInput,
     isLastInput: Boolean,
     imeAction: ImeAction,
     formActions: KeyboardActions,
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
+    onClickOpenClientSelection: (String) -> Unit,
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
-    clearFocusForAllRows: () -> Unit
+    clearFocusForAllRows: () -> Unit,
 ) {
 
     RowWithLabelAndInput(
-        formInput = item,
+        formInput = input,
         imeAction = imeAction,
         formActions = formActions,
         focusRequester = focusRequester,
         onClickRow = onClickRow,
         onClickForward = onClickForward,
+        onClickOpenClientSelection = onClickOpenClientSelection,
         errorMessage = errorMessage,
         onClickExpandFullScreen = onClickExpandFullScreen,
         clearFocusForAllRows = clearFocusForAllRows
@@ -160,9 +168,10 @@ fun RowWithLabelAndInput(
     focusRequester: FocusRequester?,
     onClickRow: () -> Unit,
     onClickForward: (ScreenElement) -> Unit,
+    onClickOpenClientSelection: (String) -> Unit,
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
-    clearFocusForAllRows: () -> Unit
+    clearFocusForAllRows: () -> Unit,
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
@@ -179,7 +188,11 @@ fun RowWithLabelAndInput(
                             clearFocusForAllRows()
                             onClickForward(formInput.pageElement)
                         }
-
+                        is ListPicker -> {
+                            formInput.extraId?.let {
+                                onClickOpenClientSelection(it)
+                            }
+                        }
                         else -> onClickRow()
                     }
                 }
@@ -247,6 +260,12 @@ fun RowWithLabelAndInput(
                 FormInputCreatorGoForward(
                     forwardInput = formInput.inputType
                 )
+
+            // Used for additional prices, to add client(s)
+            is ListPicker ->
+                FormInputCreatorListPicker(
+                    input = formInput.inputType
+                )
         }
     }
 }
@@ -256,6 +275,7 @@ class FormInput(
     val inputType: Any,
     val inputType2: Any? = null, // Used for DoubleInputCreator
     val pageElement: ScreenElement,
+    val extraId: String? = null
 )
 
 class TextInput(
@@ -280,7 +300,11 @@ class ForwardElement(
     val displayArrow: Boolean = true,
 )
 
-
+data class ListPicker(
+    val selectedItems: List<ClientRef>,
+    val onClick: (() -> Unit)? = null,
+    val onRemoveItem: ((Int) -> Unit)? = null
+)
 /*
 class DateInput @OptIn(ExperimentalMaterial3Api::class) constructor(
     val text: String? = null,

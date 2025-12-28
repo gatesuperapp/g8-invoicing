@@ -12,6 +12,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -31,12 +34,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.ui.shared.icons.IconFullScreen
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import com.a4a.g8invoicing.ui.theme.textVerySmall
-import icons.IconEdit
 
 @Composable
 fun FormInputCreatorText(
@@ -118,7 +119,7 @@ fun FormInputCreatorText(
                             .clickable(
                                 onClick = onClickExpandFullScreen
                             ),
-                        imageVector = IconFullScreen,
+                        imageVector = Icons.Outlined.Fullscreen,
                         contentDescription = "Icon for description in full screen",
                         tint = ColorGreyo
                     )
@@ -137,7 +138,7 @@ fun FormInputCreatorText(
                     Icon(
                         modifier = Modifier
                             .width(10.dp),
-                        imageVector = IconEdit,
+                        imageVector = Icons.Outlined.Edit,
                         contentDescription = "Edit label",
                         tint = ColorGreyo
                     )

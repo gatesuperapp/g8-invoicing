@@ -27,6 +27,16 @@ SELECT *
 FROM ProductPrice
 WHERE product_id = :product_id AND client_id IS NOT NULL ;
 
+getAdditionalPricesWithClients:
+SELECT
+    pp.price_without_tax,
+    c.id AS client_id,
+    c.first_name,
+    c.name
+FROM ProductPrice pp
+LEFT JOIN ClientOrIssuer c ON c.id = pp.client_id
+WHERE pp.product_id = :product_id;
+
 saveProductPrice:
 INSERT INTO ProductPrice (id, price_without_tax, product_id, client_id)
 VALUES (?, ?, ?, ?);

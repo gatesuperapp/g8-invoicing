@@ -38,10 +38,10 @@ val ColorDarkGrayTransp = Color(0x8A545b66)
 val ColorGrayTransp = Color(0x30545b66)
 val ColorBlueCredit = Color(0xFFD8EFFF)
 val ColorBlueLink = Color(0xFF3B97D3)
-val ColorViolet = Color(0xFF932092)
-val ColorVioletLight = Color(0xFFAF52DE)
-val ColorBlueViolet = Color(0xFF3D4B9B)
+val ColorVioletLink = Color(0xFF932092)
+val ColorVioletLight = Color(0xFF932092)
 
+val ColorBlueViolet = Color(0xFF3D4B9B)
 
 val ColorBlack = Color(0xFF000000)
 val ColorDarkBar = Color(0xFF0A0A0A)

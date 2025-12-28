@@ -47,3 +47,6 @@ SELECT id
 FROM Product
 ORDER BY id DESC
 LIMIT 1;
+
+countAll:
+SELECT COUNT(*) FROM Product;

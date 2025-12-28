@@ -10,16 +10,16 @@ import java.util.UUID
 // it allows to not specify the client id (that will be auto-incremented)
 // and to change properties values (var instead of val)
 data class ProductState(
-    var id: Int? = null,
-    var name: TextFieldValue = TextFieldValue(""),
-    var description: TextFieldValue? = null,
-    var taxRate: BigDecimal? = null,
-    var unit: TextFieldValue? = null,
-    var defaultPriceWithoutTax: BigDecimal? = null,
-    var defaultPriceWithTax:  BigDecimal? = null,
+    val id: Int? = null,
+    val name: TextFieldValue = TextFieldValue(""),
+    val description: TextFieldValue? = null,
+    val taxRate: BigDecimal? = null,
+    val unit: TextFieldValue? = null,
+    val defaultPriceWithoutTax: BigDecimal? = null,
+    val defaultPriceWithTax:  BigDecimal? = null,
     // This list would be populated on demand, not when initially fetching all products
-    var additionalPrices: List<ProductPrice>? = null,
-    var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
+    val additionalPrices: List<ProductPrice>? = null,
+    val errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )
 
 data class ProductPrice(
@@ -27,6 +27,11 @@ data class ProductPrice(
     val idStr: String = UUID.randomUUID().toString(), // Pour identifier chaque prix de manière unique
     var priceWithoutTax: BigDecimal? = null,
     var priceWithTax: BigDecimal? = null,
-    var clientIds: MutableList<Long>? = null,
+    var clients: List<ClientRef> = emptyList()
+
 )
 
+data class ClientRef(
+    val id: Int,
+    val name: String
+)

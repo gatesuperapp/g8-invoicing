@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
@@ -22,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.Separator
-import icons.IconDone
 import java.math.BigDecimal
 
 @Composable
@@ -109,7 +110,7 @@ fun ProductTaxRatesContent(
                     )
                     if (isCurrentTaxRate) {
                         Icon(
-                            imageVector = IconDone,
+                            imageVector = Icons.Outlined.Done,
                             contentDescription = "Selected tax rate"
                         )
                     }

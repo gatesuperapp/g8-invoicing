@@ -1,33 +1,36 @@
 package com.a4a.g8invoicing.ui.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.IosShare
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PostAdd
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.outlined.Brush
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.IndeterminateCheckBox
+import androidx.compose.material.icons.outlined.Sell
+
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.shared.icons.IconArrowForward
-import com.a4a.g8invoicing.ui.shared.icons.IconBrush
-import com.a4a.g8invoicing.ui.shared.icons.IconCheckboxUnselect
-import com.a4a.g8invoicing.ui.shared.icons.IconCircle
-import com.a4a.g8invoicing.ui.shared.icons.IconExport
-import com.a4a.g8invoicing.ui.shared.icons.IconList
-import com.a4a.g8invoicing.ui.shared.icons.IconText
 import com.a4a.g8invoicing.ui.theme.ColorCancelled
 import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
 import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorReminded
 import com.a4a.g8invoicing.ui.theme.ColorSent
-import com.ninetyninepercent.funfactu.icons.IconApps
-import com.ninetyninepercent.funfactu.icons.IconDollar
-import com.ninetyninepercent.funfactu.icons.IconDuplicate
-import com.ninetyninepercent.funfactu.icons.IconLabel
-import com.ninetyninepercent.funfactu.icons.IconMail
-import icons.IconDelete
-import icons.IconEdit
-import icons.IconMoreThreeDots
-import icons.IconNew
+
 
 /**
  * Contains:
@@ -56,7 +59,7 @@ data class AppBarAction(
 
 fun actionCategories() =
     AppBarAction(
-        icon = IconApps,
+        icon = Icons.Filled.Apps,
         description = R.string.appbar_categories,
         label = R.string.appbar_menu_label,
         alignmentLeft = true,
@@ -68,7 +71,7 @@ fun actionCategories() =
 //onClickCategory: (Category) -> Unit = null
 fun actionNew(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconNew,
+        icon = Icons.Filled.PostAdd,
         description = R.string.appbar_new,
         label = R.string.appbar_new_label,
         onClick = onClick
@@ -76,7 +79,7 @@ fun actionNew(onClick: () -> Unit) =
 
 fun actionEdit() =
     AppBarAction(
-        icon = IconEdit,
+        icon = Icons.Filled.Edit,
         description = R.string.appbar_edit,
         onClick = {
         }
@@ -84,7 +87,7 @@ fun actionEdit() =
 
 fun actionDuplicate(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconDuplicate,
+        icon = Icons.Filled.ContentCopy,
         description = R.string.appbar_duplicate,
         label = R.string.appbar_duplicate_label,
         onClick = onClick
@@ -92,7 +95,7 @@ fun actionDuplicate(onClick: () -> Unit) =
 
 fun actionSavePayment(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconDollar,
+        icon = Icons.Filled.AttachMoney,
         description = R.string.appbar_save_payment,
         label = R.string.appbar_save_payment_label,
         onClick = onClick
@@ -100,15 +103,15 @@ fun actionSavePayment(onClick: () -> Unit) =
 
 fun actionDelete(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconDelete,
+        icon = Icons.Outlined.DeleteOutline,
         description = R.string.appbar_delete,
         isSecondary = true,
         onClick = onClick
     )
 
-fun actionCreateCreditNote(onClick: () -> Unit) =
+fun actionArrowRight(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconArrowForward,
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
         description = R.string.appbar_create_credit_note,
         isSecondary = true,
         onClick = onClick
@@ -116,7 +119,7 @@ fun actionCreateCreditNote(onClick: () -> Unit) =
 
 fun actionCreateCorrectedInvoice(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconArrowForward,
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
         description = R.string.appbar_create_corrected_invoice,
         isSecondary = true,
         onClick = onClick
@@ -124,7 +127,7 @@ fun actionCreateCorrectedInvoice(onClick: () -> Unit) =
 
 fun actionConvert(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconArrowForward,
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
         description = R.string.appbar_convert,
         label = R.string.appbar_convert_label,
         onClick = onClick
@@ -132,14 +135,14 @@ fun actionConvert(onClick: () -> Unit) =
 
 fun actionMore() =
     AppBarAction(
-        icon = IconMoreThreeDots,
+        icon = Icons.Filled.MoreVert,
         description = R.string.appbar_more,
         label = R.string.appbar_more_label,
     )
 
 fun actionExport(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconExport,
+        icon = Icons.Filled.IosShare,
         description = R.string.appbar_export,
         isSecondary = false,
         onClick = onClick
@@ -147,7 +150,7 @@ fun actionExport(onClick: () -> Unit) =
 
 fun actionUnselectAll(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconCheckboxUnselect,
+        icon = Icons.Outlined.IndeterminateCheckBox,
         description = R.string.appbar_unselect_all,
         label = R.string.appbar_unselect_all_label,
         isSecondary = false,
@@ -158,7 +161,7 @@ fun actionUnselectAll(onClick: () -> Unit) =
 fun actionTag() =
     AppBarAction(
         name = "TAG",
-        icon = IconLabel,
+        icon = Icons.Outlined.Sell,
         description = R.string.appbar_label_description,
         label = R.string.appbar_tag,
         isSecondary = false,
@@ -167,7 +170,7 @@ fun actionTag() =
 fun actionTagUndefined() =
     AppBarAction(
         tag = DocumentTag.UNDEFINED,
-        icon = IconCircle,
+        icon = Icons.Filled.Circle,
         iconColor = Color.White,
         iconBorder = ColorGreyDraft,
         description = R.string.appbar_tag_draft,
@@ -178,7 +181,7 @@ fun actionTagUndefined() =
 fun actionTagDraft() =
     AppBarAction(
         tag = DocumentTag.DRAFT,
-        icon = IconCircle,
+        icon = Icons.Filled.Circle,
         iconColor = ColorGreyDraft,
         description = R.string.appbar_tag_draft,
         label = R.string.appbar_tag_draft,
@@ -189,7 +192,7 @@ fun actionTagDraft() =
 fun actionTagSent() =
     AppBarAction(
         tag = DocumentTag.SENT,
-        icon = IconCircle,
+        icon = Icons.Filled.Circle,
         iconColor = ColorSent,
         description = R.string.appbar_tag_sent,
         label = R.string.appbar_tag_sent,
@@ -200,7 +203,7 @@ fun actionTagSent() =
 fun actionTagPaid() =
     AppBarAction(
         tag = DocumentTag.PAID,
-        icon = IconCircle,
+        icon = Icons.Filled.CheckCircle,
         iconColor = ColorGreenPaid,
         description = R.string.appbar_tag_paid,
         label = R.string.appbar_tag_paid,
@@ -211,7 +214,7 @@ fun actionTagPaid() =
 fun actionTagLate() =
     AppBarAction(
         tag = DocumentTag.LATE,
-        icon = IconCircle,
+        icon = Icons.Filled.CheckCircle,
         iconColor = ColorRedLate,
         description = R.string.appbar_tag_late,
         label = R.string.appbar_tag_late,
@@ -221,7 +224,7 @@ fun actionTagLate() =
 fun actionTagReminded() =
     AppBarAction(
         tag = DocumentTag.REMINDED,
-        icon = IconCircle,
+        icon = Icons.Filled.CheckCircle,
         iconColor = ColorReminded,
         description = R.string.appbar_tag_reminded,
         label = R.string.appbar_tag_reminded,
@@ -231,7 +234,7 @@ fun actionTagReminded() =
 fun actionTagCancelled() =
     AppBarAction(
         tag = DocumentTag.CANCELLED,
-        icon = IconCircle,
+        icon = Icons.Filled.CheckCircle,
         iconColor = ColorCancelled,
         description = R.string.appbar_tag_cancelled,
         label = R.string.appbar_tag_cancelled,
@@ -240,7 +243,7 @@ fun actionTagCancelled() =
 
 fun actionSendReminder(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconMail,
+        icon = Icons.Outlined.Email,
         description = R.string.appbar_send_reminder,
         label = R.string.appbar_send_reminder,
         isSecondary = false,
@@ -249,7 +252,7 @@ fun actionSendReminder(onClick: () -> Unit) =
 
 fun actionTextElements(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconText,
+        icon = Icons.Filled.TextFields,
         label = R.string.appbar_text_label,
         description = R.string.appbar_components,
         isSecondary = false,
@@ -260,7 +263,7 @@ fun actionTextElements(onClick: () -> Unit) =
 
 fun actionItems(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconList,
+        icon = Icons.AutoMirrored.Filled.List,
         label = R.string.appbar_list_label,
         description = R.string.appbar_list,
         isSecondary = false,
@@ -268,10 +271,9 @@ fun actionItems(onClick: () -> Unit) =
         onClick = onClick
     )
 
-
 fun actionStyle(onClick: () -> Unit) =
     AppBarAction(
-        icon = IconBrush,
+        icon = Icons.Outlined.Brush,
         label = R.string.appbar_style_label,
         description = R.string.appbar_text,
         isSecondary = false,

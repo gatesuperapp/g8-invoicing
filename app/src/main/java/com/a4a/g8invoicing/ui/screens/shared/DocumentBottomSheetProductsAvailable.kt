@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -14,11 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ProductListContent
-import com.a4a.g8invoicing.ui.shared.icons.IconArrowBack
 import com.a4a.g8invoicing.ui.states.ProductState
 
 @Composable
-fun DocumentBottomSheetProducts(
+fun DocumentBottomSheetProductsAvailable(
     list: List<ProductState>,
     onClickBack: () -> Unit,
     onProductClick: (ProductState) -> Unit, // To select a product
@@ -36,7 +37,7 @@ fun DocumentBottomSheetProducts(
         ) {
             IconButton(onClick = onClickBack) {
                 Icon(
-                    imageVector = IconArrowBack,
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                     contentDescription = "Validate"
                 )
             }

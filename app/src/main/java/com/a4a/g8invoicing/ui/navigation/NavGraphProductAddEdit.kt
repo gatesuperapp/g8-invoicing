@@ -1,22 +1,18 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
+import android.util.Log.e
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ProductAddEdit
+import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
-import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.states.ProductState
 
 fun NavGraphBuilder.productAddEdit(
     navController: NavController,
@@ -44,7 +40,7 @@ fun NavGraphBuilder.productAddEdit(
 
         ProductAddEdit(
             navController = navController,
-            product = productUiState,
+            viewModel = viewModel,
             onValueChange = { pageElement, value, idStr ->
                 viewModel.updateProductState(pageElement, value, ProductType.PRODUCT, idStr)
             },
@@ -61,8 +57,15 @@ fun NavGraphBuilder.productAddEdit(
             },
             onClickBack = onClickBack,
             onClickForward = onClickForward,
+            onClickOpenClientSelection = { priceId ->
+                viewModel.openClientSelectionDialog(priceId)
+            },
+            onClickRemoveClient = {priceId, clientId ->
+                viewModel.removeClientFromPrice(priceId, clientId)
+            },
             onClickDeletePrice = { viewModel.deletePrice(it) },
-            onClickAddPrice = { viewModel.addPrice() }
+            onClickAddPrice = { viewModel.addPrice() },
+            product = productUiState
         )
     }
 }

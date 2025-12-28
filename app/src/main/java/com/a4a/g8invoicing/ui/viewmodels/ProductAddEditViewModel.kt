@@ -1,41 +1,44 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
-import androidx.compose.animation.core.copy
+import android.content.ContentValues
+import android.util.Log
+import android.util.Log.e
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.geometry.isEmpty
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.calculatePriceWithTax
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ClientRef
+import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductPrice
+import com.a4a.g8invoicing.ui.states.ProductState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlin.collections.filter
+import kotlin.collections.map
 
 
 @HiltViewModel
 class ProductAddEditViewModel @Inject constructor(
     private val dataSource: ProductLocalDataSourceInterface,
     private val taxDataSource: ProductTaxLocalDataSourceInterface,
+    private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -57,6 +60,17 @@ class ProductAddEditViewModel @Inject constructor(
     private val _documentProductUiState = MutableStateFlow(DocumentProductState())
     val documentProductUiState: StateFlow<DocumentProductState> = _documentProductUiState
 
+
+    // Prix additionnel : liste des clients disponibles
+    private val _availableClients = MutableStateFlow<List<ClientOrIssuerState>>(emptyList())
+    val availableClients: StateFlow<List<ClientOrIssuerState>> = _availableClients.asStateFlow()
+
+    // Prix additionnel : state pour le dialog de sélection de clients
+    private val _clientSelectionDialogState = MutableStateFlow<ClientSelectionDialogState?>(null)
+    val clientSelectionDialogState: StateFlow<ClientSelectionDialogState?> =
+        _clientSelectionDialogState.asStateFlow()
+
+
     init {
         // We initialize only if coming from the navigation (NavGraph)
         // Not if calling from a document (to open the bottom sheet form)
@@ -65,21 +79,11 @@ class ProductAddEditViewModel @Inject constructor(
                 viewModelScope.launch {
                     _isLoading.value = true // Démarre le chargement
                     try {
-                        val productData = dataSource.fetchProduct(productId.toLong())
-                        productData?.let { product ->
-                            _productUiState.value = _productUiState.value.copy(
-                                id = product.id,
-                                name = product.name,
-                                description = product.description,
-                                defaultPriceWithoutTax = product.defaultPriceWithoutTax,
-                                defaultPriceWithTax = product.defaultPriceWithTax,
-                                taxRate = product.taxRate,
-                                unit = product.unit
-                            )
+                        dataSource.fetchProduct(productId.toLong())?.let {
+                            _productUiState.value = it
                         }
                     } finally {
-                        _isLoading.value =
-                            false // Termine le chargement, que le produit soit trouvé ou non
+                        _isLoading.value = false // Termine le chargement, que le produit soit trouvé ou non
                     }
                 }
             } ?: run {
@@ -90,6 +94,13 @@ class ProductAddEditViewModel @Inject constructor(
             // Si ce n'est pas de type PRODUCT, on ne gère pas le chargement ici
             // (ou alors il faudrait une logique spécifique pour DocumentProduct si nécessaire)
             _isLoading.value = false
+        }
+
+        // Additional prices : get clients
+        viewModelScope.launch {
+            clientOrIssuerDataSource.fetchAll(type = PersonType.CLIENT).collect { clients ->
+                _availableClients.value = clients
+            }
         }
     }
 
@@ -217,9 +228,15 @@ class ProductAddEditViewModel @Inject constructor(
         }
     }
 
-    fun updateProductState(pageElement: ScreenElement, value: Any, productType: ProductType, idStr: String? = null) {
+    fun updateProductState(
+        pageElement: ScreenElement,
+        value: Any,
+        productType: ProductType,
+        idStr: String? = null,
+    ) {
         if (productType == ProductType.PRODUCT) {
-            _productUiState.value = updateProductUiState(_productUiState.value, pageElement, value, idStr)
+            _productUiState.value =
+                updateProductUiState(_productUiState.value, pageElement, value, idStr)
         } else {
             _documentProductUiState.value =
                 updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
@@ -303,9 +320,10 @@ class ProductAddEditViewModel @Inject constructor(
 
     // Ajouter ou supprimer des prix additionnels
     fun addPrice() {
-        val currentProduct = _productUiState.value // Supposons que vous avez un _uiState
+        val currentProduct = _productUiState.value
         val newPrices =
-            currentProduct.additionalPrices?.plus(ProductPrice()) ?: listOf(ProductPrice()) // Ajoute un nouveau prix vide
+            currentProduct.additionalPrices?.plus(ProductPrice())
+                ?: listOf(ProductPrice()) // Ajoute un nouveau prix vide
         _productUiState.value = _productUiState.value.copy(
             additionalPrices = newPrices
         )
@@ -320,13 +338,79 @@ class ProductAddEditViewModel @Inject constructor(
         )
     }
 
+    // Nouveau: ouvrir le dialog de sélection de clients pour un prix spécifique
+    fun openClientSelectionDialog(priceId: String) {
+        val price = _productUiState.value.additionalPrices
+            ?.find { it.idStr == priceId }
+            ?: return
+
+        val allClients = _availableClients.value.mapNotNull {
+            val id = it.id ?: return@mapNotNull null
+            ClientRef(
+                id = id,
+                name = it.name.text
+            )
+        }
+        _clientSelectionDialogState.value = ClientSelectionDialogState(
+            priceId = priceId,
+            selectedClients = price.clients,
+            availableClients = allClients
+        )
+    }
+
+    // Additional prices: close client selection dialog
+    fun closeClientSelectionDialog() {
+        _clientSelectionDialogState.value = null
+    }
+
+    // Additional prices: toggle client selection dialog
+    fun toggleClientSelection(client: ClientRef) {
+        val state = _clientSelectionDialogState.value ?: return
+
+        val updated = if (state.selectedClients.any { it.id == client.id }) {
+            state.selectedClients.filterNot { it.id == client.id }
+        } else {
+            state.selectedClients + client
+        }
+
+        _clientSelectionDialogState.value =
+            state.copy(selectedClients = updated)
+    }
+
+
+    // Additional prices: confirm client selection
+    fun confirmClientSelection() {
+        val state = _clientSelectionDialogState.value ?: return
+
+        _productUiState.value =
+            updateProductUiState(_productUiState.value,
+                ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS, state.selectedClients, state.priceId)
+
+        _clientSelectionDialogState.value = null
+    }
+
+    // Additional prices: remove a client from price
+    fun removeClientFromPrice(priceId: String, clientId: Int) {
+        val updatedPrices =
+            _productUiState.value.additionalPrices?.map { price ->
+                if (price.idStr == priceId) {
+                    price.copy(
+                        clients = price.clients.filterNot { it.id == clientId }
+                    )
+                } else price
+            }
+
+        _productUiState.value =
+            _productUiState.value.copy(additionalPrices = updatedPrices)
+    }
+
 }
 
 private fun updateProductUiState(
     currentProductState: ProductState,
     element: ScreenElement,
     value: Any,
-    priceId: String? = null
+    priceId: String? = null,
 ): ProductState {
     var updatedProductState = currentProductState
     when (element) {
@@ -367,22 +451,32 @@ private fun updateProductUiState(
         ScreenElement.PRODUCT_OTHER_PRICE_WITHOUT_TAX -> {
             if (priceId != null) {
                 val priceWithoutTaxStr = value as String
+
                 val newPrices = updatedProductState.additionalPrices?.map { price ->
                     if (price.idStr == priceId) {
-                        price.copy(
-                            priceWithoutTax = if (priceWithoutTaxStr.isNotEmpty()) {
-                                priceWithoutTaxStr.replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0)
-                            } else {
-                                null
+
+                        val ht = priceWithoutTaxStr
+                            .replace(",", ".")
+                            .toBigDecimalOrNull()
+
+                        val ttc = ht?.let {
+                            updatedProductState.taxRate?.let { tax ->
+                                calculatePriceWithTax(it, tax)
                             }
+                        }
+
+                        price.copy(
+                            priceWithoutTax = ht,
+                            priceWithTax = ttc
                         )
-                    } else {
-                        price
-                    }
+                    } else price
                 }
-                updatedProductState = updatedProductState.copy(additionalPrices = newPrices)
+
+                updatedProductState =
+                    updatedProductState.copy(additionalPrices = newPrices)
             }
         }
+
         ScreenElement.PRODUCT_OTHER_PRICE_WITH_TAX -> {
             if (priceId != null) {
                 val priceWithTaxStr = value as String
@@ -390,7 +484,8 @@ private fun updateProductUiState(
                     if (price.idStr == priceId) {
                         price.copy(
                             priceWithTax = if (priceWithTaxStr.isNotEmpty()) {
-                                priceWithTaxStr.replace(",", ".").toBigDecimalOrNull() ?: BigDecimal(0)
+                                priceWithTaxStr.replace(",", ".").toBigDecimalOrNull()
+                                    ?: BigDecimal(0)
                             } else {
                                 null
                             }
@@ -407,11 +502,22 @@ private fun updateProductUiState(
             updatedProductState = updatedProductState.copy(unit = value as TextFieldValue)
         }
 
+        ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS -> {
+            val newPrices = updatedProductState.additionalPrices?.map { price ->
+                if (price.idStr == priceId) {
+                    price.copy(
+                        clients = value as List<ClientRef>
+                    )
+                } else price
+            }
+
+            updatedProductState = updatedProductState.copy(additionalPrices = newPrices)
+        }
+
         else -> null
     }
     return updatedProductState
 }
-
 
 
 enum class ProductType {
@@ -474,3 +580,10 @@ private fun updateDocumentProductUiState(
     }
     return documentProduct
 }
+
+// Additional prices: State for client selection dialog
+data class ClientSelectionDialogState(
+    val priceId: String,
+    val selectedClients: List<ClientRef>,
+    val availableClients: List<ClientRef>,
+)

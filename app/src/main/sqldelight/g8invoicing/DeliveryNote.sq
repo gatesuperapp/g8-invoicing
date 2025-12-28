@@ -66,3 +66,6 @@ SELECT footer
 FROM CreditNote
 ORDER BY credit_note_id DESC
 LIMIT 1;
+
+countAll:
+SELECT COUNT(*) FROM DeliveryNote;

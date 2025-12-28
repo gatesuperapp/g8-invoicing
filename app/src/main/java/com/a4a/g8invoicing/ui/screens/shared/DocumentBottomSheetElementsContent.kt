@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.res.stringResource
 import com.a4a.g8invoicing.R
@@ -21,6 +22,7 @@ fun DocumentBottomSheetElementsContent(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     localFocusManager: FocusManager,
 ) {
+
     val inputList = mutableListOf(
         FormInput(
             label = stringResource(id = R.string.document_number_short),
@@ -108,11 +110,14 @@ fun DocumentBottomSheetElementsContent(
         )
     )
 
+
     FormUI(
         inputList = inputList,
-        keyboard = KeyboardOpt.VALIDATE_INPUT,
         localFocusManager = localFocusManager,
         onClickForward = onClickForward,
-        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText
+        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+        //keyboard = KeyboardOpt.VALIDATE_INPUT,
     )
+
 }
+

@@ -148,6 +148,7 @@
     <string name="product_tax">TVA</string>
     <string name="product_add_price">+ Ajouter un prix</string>
     <string name="product_delete_price">Supprimer ce prix</string>
+    <string name="product_price_client">Client·e(s)</string>
     <string name="document_product_quantity">Quantité <sup>*</sup></string>
     <string name="document_product_quantity_input">1</string>
     <string name="tax_rate_screen_title">Taux de TVA</string>
@@ -349,4 +350,28 @@
     <string name="export_email_subject_credit_note">avoir</string>
     <string name="delivery_note_acronym">BL</string>
 
+    <!-- DatabaseExportDialog -->
+    <string name="database_export_dialog_title">^._.^</string>
+    <string name="database_export_dialog_intro">Hey ! Je te conseille de télécharger ta base de données 💎\n\n</string>
+    <string name="database_export_dialog_explanation">C\'est utile en cas de perte du téléphone ou s\'il y a un problème lors d\'une mise à jour.\n\n</string>
+    <string name="database_export_dialog_where">Retrouve l\'option dans Menu \> À propos.</string>
+    <string name="database_export_dialog_error">Erreur lors de l\'enregistrement de la base : %1$s</string>
+    <string name="database_export_dialog_confirm">Télécharger mes données</string>
+    <string name="database_export_dialog_dismiss">Je le ferai plus tard</string>
+
+    <!-- DatabaseEmailDialog -->
+    <string name="database_email_dialog_title">✅Export réussi</string>
+    <string name="database_email_dialog_text">La base de données a été enregistrée dans le dossier Téléchargements. Veux-tu te l\'envoyer par mail ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+
+    <!-- Email export -->
+    <string name="database_email_subject">Export de mes données g8</string>
+    <string name="database_email_body">Ma base de données SQLite de l’application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
+    <string name="database_email_chooser">Envoyer la base par mail</string>
+
+    <!-- About screen -->
+    <string name="about_download_database">💎 Télécharger ma base de données 💎</string>
+    <string name="about_download_database_error">Erreur lors de l\'enregistrement de la base : %1$s.\n\nPour contacter l\'assistance : contact@the-gate.fr</string>
+    <string name="ok">OK</string>
 </resources>

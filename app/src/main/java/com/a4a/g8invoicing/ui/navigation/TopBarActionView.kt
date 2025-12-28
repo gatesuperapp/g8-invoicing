@@ -8,19 +8,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.viewmodels.ProductType
-import icons.IconDone
-import java.math.BigDecimal
 
 @Composable
 fun TopBarActionView(

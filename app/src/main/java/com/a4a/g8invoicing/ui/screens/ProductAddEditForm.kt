@@ -1,11 +1,14 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +16,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -38,12 +47,13 @@ import com.a4a.g8invoicing.ui.shared.DecimalInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
+import com.a4a.g8invoicing.ui.shared.ListPicker
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActions
-import icons.IconDelete
 import java.math.BigDecimal
 
 @Composable
@@ -54,6 +64,8 @@ fun ProductAddEditForm(
     onClickForward: (ScreenElement) -> Unit,
     onClickDeletePrice: (priceId: String) -> Unit,
     onClickAddPrice: () -> Unit,
+    onClickSelectClients: (priceId: String) -> Unit,
+    onRemoveClient: (priceId: String, clientId: Int) -> Unit,
     isLoading: Boolean,
 ) {
     val localFocusManager = LocalFocusManager.current
@@ -68,161 +80,187 @@ fun ProductAddEditForm(
     val productTaxLabel = stringResource(id = R.string.product_tax)
     val productPriceLabel = stringResource(id = R.string.product_price)
     val productPricePlaceholder = stringResource(id = R.string.product_price_input)
+    val productPriceClient = stringResource(id = R.string.product_price_client)
 
-    Column( // This column is scrollable and set background
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray.copy(alpha = 0.4f))
+            .background(Color.LightGray)
+            .verticalScroll(rememberScrollState())
             .padding(12.dp)
             .padding(top = 110.dp, bottom = 60.dp)
-            .imePadding()
+            .imePadding() // Ceci fait remonter l'écran quand le clavier s'ouvre
             .pointerInput(Unit) {
                 detectTapGestures(onTap = {
                     localFocusManager.clearFocus()
                 })
             }
     ) {
-        if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
-                    .fillMaxWidth()
-                    .padding(
-                        top = 6.dp,
-                        bottom = 6.dp
-                    ),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-
-                // Create the list with all fields
-                val inputList = remember(
-                    product.name,
-                    product.description,
-                    product.unit,
-                    product.taxRate,
-                    product.defaultPriceWithoutTax,
-                    product.defaultPriceWithTax
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column {
+                Column(
+                    modifier = Modifier
+                        .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                        .fillMaxWidth()
+                        .padding(
+                            top = 6.dp,
+                            bottom = 6.dp
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    listOfNotNull(
-                        FormInput(
-                            label = productNameLabel,
-                            inputType = TextInput(
-                                text = product.name,
-                                placeholder = productNamePlaceholder,
-                                onValueChange = {
-                                    onValueChange(ScreenElement.PRODUCT_NAME, it, null)
-                                }
-                            ),
-                            pageElement = ScreenElement.PRODUCT_NAME
-                        ),
-                        FormInput(
-                            label = productDescriptionLabel,
-                            inputType = TextInput(
-                                text = product.description,
-                                placeholder = productDescriptionPlaceholder,
-                                onValueChange = {
-                                    onValueChange(ScreenElement.PRODUCT_DESCRIPTION, it, null)
-                                }
-                            ),
-                            pageElement = ScreenElement.PRODUCT_DESCRIPTION
-                        ),
-                        FormInput(
-                            label = productUnitLabel,
-                            inputType = TextInput(
-                                text = product.unit,
-                                placeholder = productUnitPlaceholder,
-                                onValueChange = {
-                                    onValueChange(ScreenElement.PRODUCT_UNIT, it, null)
-                                }
-                            ),
-                            pageElement = ScreenElement.PRODUCT_UNIT
-                        ),
-                        FormInput(
-                            label = productTaxLabel,
-                            inputType = ForwardElement(
-                                text = product.taxRate.let { taxRate ->
-                                    if (taxRate == null) {
-                                        "-"
-                                    } else {
-                                        "$taxRate%"
+
+                    val inputList = remember(
+                        product.name,
+                        product.description,
+                        product.unit,
+                        product.taxRate,
+                        product.defaultPriceWithoutTax,
+                        product.defaultPriceWithTax
+                    ) {
+                        listOfNotNull(
+                            FormInput(
+                                label = productNameLabel,
+                                inputType = TextInput(
+                                    text = product.name,
+                                    placeholder = productNamePlaceholder,
+                                    onValueChange = {
+                                        onValueChange(ScreenElement.PRODUCT_NAME, it, null)
                                     }
-                                },
+                                ),
+                                pageElement = ScreenElement.PRODUCT_NAME
                             ),
-                            pageElement = ScreenElement.PRODUCT_TAX_RATE
-                        ),
-                        FormInput(
-                            label = productPriceLabel,
-                            inputType = DecimalInput(
-                                text = (product.defaultPriceWithoutTax ?: "").toString(),
-                                taxRate = product.taxRate,
-                                placeholder = productPricePlaceholder,
-                                keyboardType = KeyboardType.Decimal,
-                                onValueChange = {
-                                    onValueChange(
-                                        ScreenElement.PRODUCT_DEFAULT_PRICE_WITHOUT_TAX,
-                                        it, null
-                                    )
-                                }
+                            FormInput(
+                                label = productDescriptionLabel,
+                                inputType = TextInput(
+                                    text = product.description,
+                                    placeholder = productDescriptionPlaceholder,
+                                    onValueChange = {
+                                        onValueChange(ScreenElement.PRODUCT_DESCRIPTION, it, null)
+                                    }
+                                ),
+                                pageElement = ScreenElement.PRODUCT_DESCRIPTION
                             ),
-                            inputType2 = DecimalInput(
-                                text = (product.defaultPriceWithTax ?: "").toString(),
-                                placeholder = product.taxRate?.let {
-                                    (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
-                                } ?: "",
-                                keyboardType = KeyboardType.Decimal,
-                                onValueChange = {
-                                    onValueChange(
-                                        ScreenElement.PRODUCT_DEFAULT_PRICE_WITH_TAX,
-                                        it,
-                                        null
-                                    )
-                                }
+                            FormInput(
+                                label = productUnitLabel,
+                                inputType = TextInput(
+                                    text = product.unit,
+                                    placeholder = productUnitPlaceholder,
+                                    onValueChange = {
+                                        onValueChange(ScreenElement.PRODUCT_UNIT, it, null)
+                                    }
+                                ),
+                                pageElement = ScreenElement.PRODUCT_UNIT
                             ),
-                            pageElement = ScreenElement.PRODUCT_DEFAULT_PRICE_WITHOUT_TAX
+                            FormInput(
+                                label = productTaxLabel,
+                                inputType = ForwardElement(
+                                    text = product.taxRate.let { taxRate ->
+                                        if (taxRate == null) {
+                                            "-"
+                                        } else {
+                                            "$taxRate%"
+                                        }
+                                    },
+                                ),
+                                pageElement = ScreenElement.PRODUCT_TAX_RATE
+                            ),
+                            FormInput(
+                                label = productPriceLabel,
+                                inputType = DecimalInput(
+                                    text = (product.defaultPriceWithoutTax ?: "").toString(),
+                                    taxRate = product.taxRate,
+                                    placeholder = productPricePlaceholder,
+                                    keyboardType = KeyboardType.Decimal,
+                                    onValueChange = {
+                                        onValueChange(
+                                            ScreenElement.PRODUCT_DEFAULT_PRICE_WITHOUT_TAX,
+                                            it, null
+                                        )
+                                    }
+                                ),
+                                inputType2 = DecimalInput(
+                                    text = (product.defaultPriceWithTax ?: "").toString(),
+                                    placeholder = product.taxRate?.let {
+                                        (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
+                                    } ?: "",
+                                    keyboardType = KeyboardType.Decimal,
+                                    onValueChange = {
+                                        onValueChange(
+                                            ScreenElement.PRODUCT_DEFAULT_PRICE_WITH_TAX,
+                                            it,
+                                            null
+                                        )
+                                    }
+                                ),
+                                pageElement = ScreenElement.PRODUCT_DEFAULT_PRICE_WITHOUT_TAX
+                            )
                         )
+                    }
+
+                    FormUI(
+                        inputList = inputList,
+                        localFocusManager = localFocusManager,
+                        onClickForward = onClickForward,
+                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                        errors = product.errors
                     )
                 }
 
-                // Create the UI with list items
-                FormUI(
-                    inputList = inputList,
-                    localFocusManager = localFocusManager,
-                    onClickForward = onClickForward,
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    errors = product.errors
-                )
+                // Afficher "Ajouter un prix" seulement s'il n'y a pas de prix additionnels
+                if (product.additionalPrices.isNullOrEmpty()) {
+                    Spacer(Modifier.padding(bottom = 6.dp))
+                    AddPriceButton(
+                        onClick = onClickAddPrice,
+                        bottomPadding = 16.dp
+                    )
+                }
             }
 
-            if (product.additionalPrices.isNullOrEmpty()) {
-                Spacer(Modifier.padding(bottom = 6.dp))
-                // Add price button
-                AddPriceButton(
-                    onClick = onClickAddPrice,
-                    bottomPadding = 16.dp
-                )
-            } else {
-                Spacer(Modifier.padding(bottom = 16.dp))
+            if (isLoading) {
+                CircularProgressIndicator()
             }
         }
 
-        // Section pour les prix
+        // Section pour les prix additionnels
         product.additionalPrices?.let { prices ->
             prices.forEachIndexed { index, currentPrice ->
+                // Espacement entre les blocs de prix additionnels
+                if (index > 0) {
+                    Spacer(Modifier.padding(bottom = 12.dp))
+                } else {
+                    Spacer(Modifier.padding(bottom = 16.dp))
+                }
+
                 key(currentPrice.idStr) {
                     Column(
                         modifier = Modifier
                             .background(color = Color.White, shape = RoundedCornerShape(6.dp))
-                            .padding(top = 4.dp)
                     ) {
 
-                        val priceInputList = remember(currentPrice, product.taxRate) {
+                        // 🗑️ Suppression du prix - padding réduit
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp, end = 4.dp),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            DeletePriceButton {
+                                onClickDeletePrice(currentPrice.idStr)
+                            }
+                        }
+
+                        Log.e("DEBUG", "currentPrice.clients: ${currentPrice.clients}")
+
+                        val priceInputList = remember(
+                            currentPrice.clients,
+                            currentPrice.priceWithoutTax,
+                            currentPrice.priceWithTax,
+                            currentPrice.idStr,
+                            product.taxRate
+                        ) {
                             listOf(
                                 FormInput(
                                     label = productPriceLabel,
@@ -232,7 +270,6 @@ fun ProductAddEditForm(
                                         placeholder = productPricePlaceholder,
                                         keyboardType = KeyboardType.Decimal,
                                         onValueChange = {
-                                            // Passez l'ID du prix et le bon ScreenElement/PriceScreenElement
                                             onValueChange(
                                                 ScreenElement.PRODUCT_OTHER_PRICE_WITHOUT_TAX,
                                                 it,
@@ -242,7 +279,7 @@ fun ProductAddEditForm(
                                     ),
                                     inputType2 = DecimalInput(
                                         text = (currentPrice.priceWithTax ?: "").toString(),
-                                        placeholder = "Avec taxe", // Adaptez le placeholder
+                                        placeholder = "Avec taxe",
                                         keyboardType = KeyboardType.Decimal,
                                         onValueChange = {
                                             onValueChange(
@@ -252,54 +289,108 @@ fun ProductAddEditForm(
                                             )
                                         }
                                     ),
-                                    // Adaptez 'pageElement' si nécessaire, ou la logique dans FormUI
-                                    pageElement = ScreenElement.PRODUCT_OTHER_PRICE_WITHOUT_TAX // Peut nécessiter une adaptation
+                                    pageElement = ScreenElement.PRODUCT_OTHER_PRICE_WITHOUT_TAX
+                                ),
+                                FormInput(
+                                    label = productPriceClient,
+                                    inputType = ListPicker(
+                                        selectedItems = currentPrice.clients,
+                                        onClick = {
+                                            onClickSelectClients(currentPrice.idStr)
+                                        },
+                                        onRemoveItem = {
+                                            onRemoveClient(currentPrice.idStr, it)
+                                        }
+                                    ),
+                                    pageElement = ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS,
+                                    extraId = currentPrice.idStr
                                 )
                             )
                         }
 
-
-                        // Create the UI with list items
-                        FormUI(
-                            inputList = priceInputList,
-                            localFocusManager = localFocusManager,
-                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                            errors = product.errors
-                        )
-                    }
-
-                    // Add buttons to add or delete price
-                    Row() {
-                        // Show AddPriceButton only for the last item in the list
-                        if (index == prices.size - 1) {
-                            AddPriceButton(
-                                onClick = onClickAddPrice,
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            FormUI(
+                                inputList = priceInputList,
+                                localFocusManager = localFocusManager,
+                                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                                onClickOpenClientSelection = onClickSelectClients,
+                                errors = product.errors
                             )
                         }
-
-                        Spacer(Modifier.weight(1F))
-                        DeletePriceButton(
-                            onClick = { onClickDeletePrice(currentPrice.idStr) })
                     }
                 }
+            }
+
+            // Afficher "Ajouter un prix" après tous les prix additionnels
+            Spacer(Modifier.padding(bottom = 6.dp))
+            AddPriceButton(
+                onClick = onClickAddPrice,
+                bottomPadding = 16.dp
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ClientChipsRow(
+    clients: List<ClientRef>,
+    onRemoveClient: (Int) -> Unit,
+) {
+    if (clients.isNotEmpty()) {
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp), // Padding vertical réduit de 8dp à 4dp
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp) // Espacement vertical réduit de 8dp à 4dp
+        ) {
+            clients.forEach { client ->
+                SuggestionChip(
+                    onClick = {},
+                    label = { Text(client.name) },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Supprimer ${client.name}",
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clickable {
+                                    onRemoveClient(client.id)
+                                }
+                        )
+                    }
+                )
             }
         }
     }
 }
 
-
 @Composable
 fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
-    Text(
-        style = MaterialTheme.typography.callForActions,
+    Box(
         modifier = Modifier
             .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
+            .background(
+                color = Color(0xFFE8E8E8), // Gris clair
+                shape = RoundedCornerShape(6.dp)
+            )
             .clickable(enabled = true) {
                 onClick()
-            },
-        text = AnnotatedString(Strings.get(R.string.product_add_price)),
-    )
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            style = MaterialTheme.typography.callForActions,
+            text = AnnotatedString(Strings.get(R.string.product_add_price)),
+        )
+    }
 }
+
+
+
 
 @Composable
 fun DeletePriceButton(onClick: () -> Unit) {
@@ -312,7 +403,7 @@ fun DeletePriceButton(onClick: () -> Unit) {
         Icon(
             modifier = Modifier
                 .size(22.dp),
-            imageVector = IconDelete,
+            imageVector = Icons.Outlined.Delete,
             tint = ColorDarkGray,
             contentDescription = Strings.get(R.string.product_delete_price)
         )

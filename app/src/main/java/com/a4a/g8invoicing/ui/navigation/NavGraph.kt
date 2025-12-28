@@ -35,10 +35,10 @@ fun NavGraph(navController: NavHostController) {
         navController,
         // startDestination = (Screen.About.name),
         //  startDestination = (Screen.Account.name),
-          startDestination = (Screen.InvoiceList.name),
+        //  startDestination = (Screen.InvoiceList.name),
         // startDestination = (Screen.CreditNoteList.name),
         //   startDestination = (Screen.DeliveryNoteList.name),
-        // startDestination = (Screen.ProductList.name),
+       startDestination = (Screen.ProductList.name),
         // startDestination = (Screen.DeliveryNoteAddEdit.name),
         // startDestination = (Screen.ClientOrIssuerAddEdit.name),
         //  startDestination = (Screen.ClientOrIssuerList.name),
@@ -216,11 +216,13 @@ fun NavGraph(navController: NavHostController) {
             productTaxRates(
                 navController = navController,
                 onClickBackOrSelect = {
-                    navigateToPreviousNestedScreen(
-                        navController,
-                        Screen.ProductAddEdit.name,
-                        "ProductCreation"
-                    )
+                    navController.navigate(Screen.ProductAddEdit.name) {
+                        popUpTo("ProductCreation") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -240,20 +242,6 @@ private fun navigateBackWithResult(
         ?.savedStateHandle
         ?.set(key, value)
     navController.popBackStack()
-}
-
-private fun navigateToPreviousNestedScreen(
-    navController: NavController,
-    previousScreen: String,
-    route: String,
-) {
-    navController.navigate(previousScreen) {
-        popUpTo(route) {
-            saveState = true
-        }
-        launchSingleTop = true
-        restoreState = true
-    }
 }
 
 private fun NavHostController.navigateAndReplaceStartDestination(

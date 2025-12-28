@@ -40,7 +40,7 @@ import com.a4a.g8invoicing.ui.theme.textSmall
 // Bottom sheet with "New product" and "Choose in list" buttons
 // And the list of chosen products
 @Composable
-fun DocumentBottomSheetDocumentProductListChosen(
+fun DocumentBottomSheetProductsChosen(
     list: List<DocumentProductState>,
     onClickNew: () -> Unit, // Add a new product to the document (product list)
     onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)

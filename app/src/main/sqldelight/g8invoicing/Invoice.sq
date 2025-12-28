@@ -85,3 +85,5 @@ FROM Invoice
 ORDER BY invoice_id DESC
 LIMIT 1;
 
+countAll:
+SELECT COUNT(*) FROM Invoice;

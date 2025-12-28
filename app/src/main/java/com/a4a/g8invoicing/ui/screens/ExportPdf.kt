@@ -16,6 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -46,9 +49,7 @@ import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.createPdfWithIText
 import com.a4a.g8invoicing.ui.shared.getFileUri
-import com.a4a.g8invoicing.ui.shared.icons.IconShare
 import com.a4a.g8invoicing.ui.states.DocumentState
-import com.ninetyninepercent.funfactu.icons.IconMail
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -240,7 +241,7 @@ fun Send(context: Context, document: DocumentState, finalFileName: String) {
         }
         // startActivity(context, share, null)
     }) {
-        Icon(imageVector = IconMail, contentDescription = null)
+        Icon(imageVector =  Icons.Outlined.Email, contentDescription = null)
         Text(
             stringResource(R.string.export_send_file),
             modifier = Modifier.padding(start = 8.dp)
@@ -301,7 +302,7 @@ fun Share(context: Context, finalFileName: String) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }) {
-        Icon(imageVector = IconShare, contentDescription = null)
+        Icon(imageVector = Icons.Outlined.Share, contentDescription = null)
         Text(
             stringResource(R.string.export_share_file),
             modifier = Modifier.padding(start = 8.dp)

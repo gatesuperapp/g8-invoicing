@@ -1,10 +1,9 @@
 package com.a4a.g8invoicing.ui.shared
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -25,8 +24,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.theme.ColorBlueLink
-import icons.IconDelete
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 
 @Composable
 fun AlertDialogDeleteDocument(
@@ -39,7 +37,7 @@ fun AlertDialogDeleteDocument(
     AlertDialog(
         icon = {
             Icon(
-                imageVector = IconDelete,
+                imageVector = Icons.Outlined.Cancel,
                 contentDescription = "Delete line item"
             )
         },
@@ -74,7 +72,7 @@ fun DeleteInvoiceLink(uriHandler: UriHandler) {
             tag = "link",
             annotation = Strings.get(R.string.alert_dialog_delete_url)
         )
-        withStyle(style = SpanStyle(color = ColorBlueLink)) {
+        withStyle(style = SpanStyle(color = ColorVioletLink)) {
             append(Strings.get(R.string.alert_dialog_delete_invoice_2))
         }
         // pop()

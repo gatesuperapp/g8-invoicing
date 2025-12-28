@@ -6,8 +6,8 @@ import android.os.StrictMode.VmPolicy
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.a4a.g8invoicing.ui.MainCompose
+import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -22,14 +22,13 @@ class MainActivity : ComponentActivity() {
                 .build()
         )
 
-
         // Compulsory for the bottom sheet modal to not overlap native navbar
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-
         setContent {
-            MainCompose()
-            // val viewModel: PrepareDBViewModel = hiltViewModel()
+            G8InvoicingTheme {
+                MainCompose()
+            }
         }
     }
 }
