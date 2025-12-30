@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -79,9 +80,10 @@ fun ProductAddEditForm(
     val productUnitPlaceholder = stringResource(id = R.string.product_unit_input)
     val productTaxLabel = stringResource(id = R.string.product_tax)
     val productPriceLabel = stringResource(id = R.string.product_price)
+    val productPriceDefaultLabel = stringResource(id = R.string.product_price_default)
     val productPricePlaceholder = stringResource(id = R.string.product_price_input)
     val productPriceClient = stringResource(id = R.string.product_price_client)
-
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,13 +114,15 @@ fun ProductAddEditForm(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
 
+                    val hasAdditionalPrices = !product.additionalPrices.isNullOrEmpty()
                     val inputList = remember(
                         product.name,
                         product.description,
                         product.unit,
                         product.taxRate,
                         product.defaultPriceWithoutTax,
-                        product.defaultPriceWithTax
+                        product.defaultPriceWithTax,
+                        hasAdditionalPrices
                     ) {
                         listOfNotNull(
                             FormInput(
@@ -168,7 +172,7 @@ fun ProductAddEditForm(
                                 pageElement = ScreenElement.PRODUCT_TAX_RATE
                             ),
                             FormInput(
-                                label = productPriceLabel,
+                                label = if (hasAdditionalPrices) productPriceDefaultLabel else productPriceLabel,
                                 inputType = DecimalInput(
                                     text = (product.defaultPriceWithoutTax ?: "").toString(),
                                     taxRate = product.taxRate,
@@ -252,8 +256,6 @@ fun ProductAddEditForm(
                             }
                         }
 
-                        Log.e("DEBUG", "currentPrice.clients: ${currentPrice.clients}")
-
                         val priceInputList = remember(
                             currentPrice.clients,
                             currentPrice.priceWithoutTax,
@@ -309,7 +311,8 @@ fun ProductAddEditForm(
                         }
 
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                            modifier = Modifier
+                                .offset(y = (-4).dp)
                         ) {
                             FormUI(
                                 inputList = priceInputList,
@@ -329,41 +332,6 @@ fun ProductAddEditForm(
                 onClick = onClickAddPrice,
                 bottomPadding = 16.dp
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun ClientChipsRow(
-    clients: List<ClientRef>,
-    onRemoveClient: (Int) -> Unit,
-) {
-    if (clients.isNotEmpty()) {
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp), // Padding vertical réduit de 8dp à 4dp
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp) // Espacement vertical réduit de 8dp à 4dp
-        ) {
-            clients.forEach { client ->
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text(client.name) },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Supprimer ${client.name}",
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clickable {
-                                    onRemoveClient(client.id)
-                                }
-                        )
-                    }
-                )
-            }
         }
     }
 }
@@ -390,14 +358,12 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
 }
 
 
-
-
 @Composable
 fun DeletePriceButton(onClick: () -> Unit) {
     IconButton(
         onClick = onClick,
         modifier = Modifier
-            .padding(end = 4.dp, top = 4.dp, bottom = 16.dp)
+            .padding(end = 4.dp, top = 4.dp)
             .size(14.dp)
     ) {
         Icon(

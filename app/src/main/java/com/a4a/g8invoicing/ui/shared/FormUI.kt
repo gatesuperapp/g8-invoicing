@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.shared
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -204,14 +205,15 @@ fun RowWithLabelAndInput(
                     || formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
                 ) 0.dp else 16.dp,
                 top = 14.dp,
-                bottom = 14.dp
+                bottom = if (formInput.pageElement == ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS) 4.dp else 14.dp
             )
     ) {
         // Label
         when (formInput.label) {
             is String -> Text(
                 modifier = Modifier
-                    .fillMaxWidth(0.4f),
+                    .fillMaxWidth(0.4f)
+                    .padding(end = 3.dp),
                 text = formInput.label,
                 style = MaterialTheme.typography.inputLabel
             )

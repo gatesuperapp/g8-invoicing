@@ -142,6 +142,7 @@
     <string name="product_unit_input">kg</string>
     <string name="product_description_input">Rose Lutz</string>
     <string name="product_price">Prix</string>
+    <string name="product_price_default">Prix par défaut</string>
     <string name="product_price_without_tax">HT</string>
     <string name="product_price_with_tax">TTC</string>
     <string name="product_price_input">3</string>

@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
@@ -42,13 +43,19 @@ fun ClientMultiSelectSheet(
 
             Spacer(Modifier.height(8.dp))
 
-            // Rendre la liste scrollable
+            // Ordre figé à l'ouverture - clients sélectionnés en premier
+            val sortedClients = remember(allClients) {
+                val initialSelectedIds = selectedClients.map { it.id }.toSet()
+                allClients.sortedByDescending { client ->
+                    initialSelectedIds.contains(client.id)
+                }
+            }
             Column(
                 Modifier
                     .weight(1f, fill = false)
                     .verticalScroll(rememberScrollState())
             ) {
-                allClients.forEach { client ->
+                sortedClients.forEach { client ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

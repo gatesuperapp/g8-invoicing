@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data
 
+import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database

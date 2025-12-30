@@ -42,8 +42,9 @@ fun FormInputCreatorDoublePrice(
     focusRequester: FocusRequester?,
 ) {
     // Stateful : mutable values are remembered here - avoids recomposing all form
-    var textPriceWithoutTax by remember { mutableStateOf(priceWithoutTaxInput.text) }
-    var textPriceWithTax by remember { mutableStateOf(priceWithTaxInput.text) }
+    // La clé permet de synchroniser le state interne avec la prop quand elle change
+    var textPriceWithoutTax by remember(priceWithoutTaxInput.text) { mutableStateOf(priceWithoutTaxInput.text) }
+    var textPriceWithTax by remember(priceWithTaxInput.text) { mutableStateOf(priceWithTaxInput.text) }
 
     // Rounds after 2 numbers after decimal (2,15 instead of 2,14678)
     val formatWithTwoDecimals = DecimalFormat("#.##")
