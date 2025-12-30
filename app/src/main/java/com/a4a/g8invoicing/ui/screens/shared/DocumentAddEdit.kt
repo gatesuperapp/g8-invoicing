@@ -94,7 +94,7 @@ fun DocumentAddEdit(
     products: MutableList<ProductState>,
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
-    onSelectProduct: (ProductState) -> Unit,
+    onSelectProduct: (ProductState, Int?) -> Unit, // ProductState + clientId for pricing
     onClickNewDocumentProduct: () -> Unit,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickEditDocumentProduct: (DocumentProductState) -> Unit,
@@ -194,7 +194,9 @@ fun DocumentAddEdit(
                         documentProductUiState = documentProductUiState,
                         products = products,
                         taxRates = taxRates,
-                        onClickProduct = onSelectProduct,
+                        onClickProduct = { product ->
+                            onSelectProduct(product, document.documentClient?.originalClientId)
+                        },
                         onClickNewProduct = onClickNewDocumentProduct,
                         onClickDocumentProduct = onClickEditDocumentProduct,
                         onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,

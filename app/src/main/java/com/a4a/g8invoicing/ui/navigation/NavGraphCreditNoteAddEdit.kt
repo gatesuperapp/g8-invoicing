@@ -76,17 +76,19 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onValueChange = { pageElement, value ->
                 creditNoteViewModel.updateUiState(pageElement, value)
             },
-            onSelectProduct = { product ->
-                val lastDocumentProductPage =
-                    // Initialize documentProductUiState to display it in the bottomSheet form
-                    productAddEditViewModel.setDocumentProductUiStateWithProduct(
-                        product,
-                    )
+            onSelectProduct = { product, clientId ->
+                // Initialize documentProductUiState to display it in the bottomSheet form
+                productAddEditViewModel.setDocumentProductUiStateWithProduct(
+                    product,
+                    clientId
+                )
             },
             onClickNewDocumentProduct = {
                 productAddEditViewModel.clearProductNameAndDescription()
             },
             onSelectClientOrIssuer = { clientOrIssuer ->
+                // Conserver l'ID original du client avant de le transformer en document client
+                clientOrIssuer.originalClientId = clientOrIssuer.id
                 if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                     clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT

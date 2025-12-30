@@ -1,18 +1,15 @@
 package com.a4a.g8invoicing.data
 
-import androidx.compose.foundation.text.input.insert
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.ui.states.AddressState
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.viewmodels.PersonType
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuerAddress
-import g8invoicing.LinkClientOrIssuerToAddressQueries
-import g8invoicing.LinkDocumentClientOrIssuerToAddressQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -304,6 +301,7 @@ class ClientOrIssuerLocalDataSource(
                         )
                             ClientOrIssuerType.CLIENT.name.lowercase()
                         else ClientOrIssuerType.ISSUER.name.lowercase(),
+                        original_client_id = documentClientOrIssuer.originalClientId?.toLong(),
                         first_name = documentClientOrIssuer.firstName?.text,
                         name = documentClientOrIssuer.name.text,
                         phone = documentClientOrIssuer.phone?.text,

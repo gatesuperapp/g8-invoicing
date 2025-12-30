@@ -128,10 +128,11 @@ fun NavGraphBuilder.invoiceAddEdit(
             onValueChange = { pageElement, value ->
                 invoiceViewModel.updateUiState(pageElement, value)
             },
-            onSelectProduct = { product ->
+            onSelectProduct = { product, clientId ->
                 // Initialize documentProductUiState to display it in the bottomSheet form
                 productAddEditViewModel.setDocumentProductUiStateWithProduct(
                     product,
+                    clientId
                 )
             },
             onClickNewDocumentProduct = {
@@ -145,10 +146,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                 invoiceViewModel.removeDocumentProductFromLocalDb(it)
             },
             onSelectClientOrIssuer = { clientOrIssuer ->
+                // Conserver l'ID original du client avant de le transformer en document client
+                clientOrIssuer.originalClientId = clientOrIssuer.id
                 if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                     clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                    a
                 } else {
                     documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
                     clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER

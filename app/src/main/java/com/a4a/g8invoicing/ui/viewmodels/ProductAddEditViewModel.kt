@@ -121,13 +121,27 @@ class ProductAddEditViewModel @Inject constructor(
 
     // Used when sliding the bottom form from documents
     // Choosing a product
-    fun setDocumentProductUiStateWithProduct(product: ProductState) {
+    fun setDocumentProductUiStateWithProduct(product: ProductState, clientId: Int? = null) {
+        // Trouver le prix spécifique au client si clientId est fourni
+        val (priceWithoutTax, priceWithTax) = if (clientId != null) {
+            val clientPrice = product.additionalPrices?.find { price ->
+                price.clients.any { it.id == clientId }
+            }
+            if (clientPrice != null) {
+                Pair(clientPrice.priceWithoutTax, clientPrice.priceWithTax)
+            } else {
+                Pair(product.defaultPriceWithoutTax, product.defaultPriceWithTax)
+            }
+        } else {
+            Pair(product.defaultPriceWithoutTax, product.defaultPriceWithTax)
+        }
+
         _documentProductUiState.value = DocumentProductState(
             id = null,
             name = product.name,
             description = product.description,
-            priceWithoutTax = product.defaultPriceWithoutTax,
-            priceWithTax = product.defaultPriceWithTax,
+            priceWithoutTax = priceWithoutTax,
+            priceWithTax = priceWithTax,
             taxRate = product.taxRate,
             quantity = BigDecimal(1),
             unit = product.unit,

@@ -48,11 +48,22 @@ fun ProductListItem(
     onItemCheckboxClick: (Boolean) -> Unit = {},
     isCheckboxDisplayed: Boolean,
     keyToResetCheckbox: Boolean,
+    clientId: Int? = null, // ID du client pour afficher son prix spécifique
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
     val checkedState = remember(keyToResetCheckbox) { mutableStateOf(false) }
+
+    // Trouver le prix spécifique au client si clientId est fourni
+    val displayPrice = if (clientId != null) {
+        // Chercher un prix additionnel qui contient ce client
+        product.additionalPrices?.find { price ->
+            price.clients.any { it.id == clientId }
+        }?.priceWithTax ?: product.defaultPriceWithTax
+    } else {
+        product.defaultPriceWithTax
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -135,7 +146,7 @@ fun ProductListItem(
                     )
 
                     Text(
-                        text = product.defaultPriceWithTax?.let {
+                        text = displayPrice?.let {
                             it.toString() + stringResource(R.string.currency)
                         } ?: " - "
                     )

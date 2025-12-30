@@ -83,7 +83,7 @@ fun ProductAddEditForm(
     val productPriceDefaultLabel = stringResource(id = R.string.product_price_default)
     val productPricePlaceholder = stringResource(id = R.string.product_price_input)
     val productPriceClient = stringResource(id = R.string.product_price_client)
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()

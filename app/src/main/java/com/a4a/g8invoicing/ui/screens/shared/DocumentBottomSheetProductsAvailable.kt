@@ -23,6 +23,7 @@ fun DocumentBottomSheetProductsAvailable(
     list: List<ProductState>,
     onClickBack: () -> Unit,
     onProductClick: (ProductState) -> Unit, // To select a product
+    clientId: Int? = null, // ID du client pour afficher son prix spécifique
 ) {
     Column(
         modifier = Modifier
@@ -51,7 +52,8 @@ fun DocumentBottomSheetProductsAvailable(
             ProductListContent(
                 products = list,
                 onProductClick = onProductClick,
-                displayCheckboxes = false
+                displayCheckboxes = false,
+                clientId = clientId
             )
         }
     }

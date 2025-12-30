@@ -13,6 +13,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
 data class ClientOrIssuerState(
     var id: Int? = null,
     var type: ClientOrIssuerType? = null,
+    var originalClientId: Int? = null, // ID du client original (pour les documents)
     var firstName: TextFieldValue? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var addresses: List<AddressState>? = null,

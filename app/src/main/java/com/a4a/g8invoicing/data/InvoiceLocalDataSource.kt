@@ -1023,17 +1023,18 @@ private fun saveInfoInDocumentClientOrIssuerTable(
             documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
         ) ClientOrIssuerType.CLIENT.name.lowercase()
         else ClientOrIssuerType.ISSUER.name.lowercase(),
-        documentClientOrIssuer.firstName?.text,
-        documentClientOrIssuer.name.text,
-        documentClientOrIssuer.phone?.text,
-        documentClientOrIssuer.email?.text,
-        documentClientOrIssuer.notes?.text,
-        documentClientOrIssuer.companyId1Label?.text,
-        documentClientOrIssuer.companyId1Number?.text,
-        documentClientOrIssuer.companyId2Label?.text,
-        documentClientOrIssuer.companyId2Number?.text,
-        documentClientOrIssuer.companyId3Label?.text,
-        documentClientOrIssuer.companyId3Number?.text,
+        original_client_id = documentClientOrIssuer.originalClientId?.toLong(),
+        first_name = documentClientOrIssuer.firstName?.text,
+        name = documentClientOrIssuer.name.text,
+        phone = documentClientOrIssuer.phone?.text,
+        email = documentClientOrIssuer.email?.text,
+        notes = documentClientOrIssuer.notes?.text,
+        company_id1_label = documentClientOrIssuer.companyId1Label?.text,
+        company_id1_number = documentClientOrIssuer.companyId1Number?.text,
+        company_id2_label = documentClientOrIssuer.companyId2Label?.text,
+        company_id2_number = documentClientOrIssuer.companyId2Number?.text,
+        company_id3_label = documentClientOrIssuer.companyId3Label?.text,
+        company_id3_number = documentClientOrIssuer.companyId3Number?.text,
     )
 }
 
@@ -1078,6 +1079,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
             ClientOrIssuerType.DOCUMENT_CLIENT
         else ClientOrIssuerType.DOCUMENT_ISSUER,
+        originalClientId = documentClientOrIssuer.original_client_id?.toInt(),
         firstName = documentClientOrIssuer.first_name?.let { TextFieldValue(text = it) },
         addresses = addresses,
         name = TextFieldValue(text = documentClientOrIssuer.name),

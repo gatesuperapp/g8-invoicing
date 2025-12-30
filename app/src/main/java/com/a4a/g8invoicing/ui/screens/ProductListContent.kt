@@ -16,6 +16,7 @@ fun ProductListContent(
     removeFromSelectedList: (ProductState) -> Unit = {},
     displayCheckboxes: Boolean = true, // Will not be displayed when the list is opened from a document
     keyToUnselectAll: Boolean = false,
+    clientId: Int? = null, // ID du client pour afficher son prix spécifique
 ) {
     LazyColumn {
         items(
@@ -38,7 +39,8 @@ fun ProductListContent(
                     }
                 },
                 displayCheckboxes,
-                keyToUnselectAll
+                keyToUnselectAll,
+                clientId = clientId
             )
 
             HorizontalDivider(

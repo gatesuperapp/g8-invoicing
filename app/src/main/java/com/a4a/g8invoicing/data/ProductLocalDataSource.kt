@@ -304,7 +304,7 @@ fun Product.transformIntoEditableProduct(
     val defaultPriceWithTax = defaultPriceWithoutTax?.let { price ->
         taxRate?.let { tax ->
             calculatePriceWithTax(price, tax)
-        }
+        } ?: price // Si pas de taxe, prix TTC = prix HT
     }
 
     // ─────────────────────────────
@@ -346,7 +346,7 @@ fun Product.transformIntoEditableProduct(
                 priceWithoutTax = price,
                 priceWithTax = taxRate?.let {
                     calculatePriceWithTax(price, it)
-                },
+                } ?: price, // Si pas de taxe, prix TTC = prix HT
                 clients = clients
             )
             println(productPrice)

@@ -177,7 +177,8 @@ fun DocumentBottomSheetProducts(
                         // so previous screen change is in background
                         isProductListVisible = false
                     }
-                }
+                },
+                clientId = document.documentClient?.originalClientId
             )
         }
         // Add new product or edit chosen product

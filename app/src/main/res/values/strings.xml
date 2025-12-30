@@ -243,8 +243,12 @@
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
     <string name="account_subscribe">
-        Tu peux t\'abonner à partir de 2€ par mois pour soutenir le projet et bénéficier d\'avantages exclusifs !\n\n
-        C\'est aussi grâce à ta contribution que les prochaines fonctionnalités pourront voir le jour : ajout du logo,  prix par client, nouveaux modèles, appli de bureau, et + encore.
+        Tu peux t\'abonner à partir de 4€ par mois pour bénéficier de la synchronisation de tes données avec l\'outil Grist !\n\n
+        Grist c\'est un tableur collaboratif et un outil no-code libre. \n\n
+        Pour 4€/mois, tu peux visualiser tes données, les sauvegarder et les exporter.\n
+        Pour 8€/mois, tu peux aussi éditer tes données, créer tes propres tableaux de bord et vues personnalisées.\n
+        Et pour 15€/mois, tu gères ton propre dossier créer tes propres documents grist (planning de récoltes, pré-comptabilité etc.).
+
     </string>
     <string name="account_subscribe2">
         Gros avantage : si vous souscrivez dès maintenant, l\'appli de bureau (dès qu\'elle est prête)

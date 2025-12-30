@@ -99,7 +99,7 @@ fun About(
                     .verticalScroll(rememberScrollState())
                     .padding(
                         top = 130.dp,
-                        bottom = 100.dp,
+                        bottom = 140.dp,
                         start = 40.dp,
                         end = 40.dp,
                     )
