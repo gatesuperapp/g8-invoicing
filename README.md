@@ -6,7 +6,7 @@ A privacy-focused app for creating delivery notes and invoices. Designed for far
 The app is available on Android. iOS and desktop versions are in development.
 
 **Community**
-A forum will be online soon! A Discord server is available for subscribers and contributors (please contact contact@the-gate.fr to join).
+The community forum : https://forum.the-gate.fr
 
 **Contribute**
 Contributions are welcome to create new features, fix bugs, translate the application or improve the documentation.
