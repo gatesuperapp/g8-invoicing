@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -71,6 +72,7 @@ fun DocumentBottomSheetTextElements(
     val keyboard by keyboardAsState()
 
     Column(
+        modifier = Modifier.imePadding()
         // We add this column to be able to apply "fillMaxHeight" to the components that slide in
         // If we don't constrain the parent (=this column) width, components that slide in
         // fill the screen full height

@@ -99,8 +99,8 @@ fun About(
     }
 
     // Export db popup
-    var exportedFile: File? = null
-    var exportErrorMessage: String? = null
+    var exportedFile by remember { mutableStateOf<File?>(null) }
+    var exportErrorMessage by remember { mutableStateOf<String?>(null) }
     var showExportErrorDialog by remember { mutableStateOf(false) }
     var showSendDatabaseByEmailDialog by remember { mutableStateOf(false) }
 

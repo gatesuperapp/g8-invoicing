@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -148,6 +147,17 @@ fun ExportPdf(
         }
     }
 
+    // Dialog pour erreur de partage
+    var showShareError by remember { mutableStateOf(false) }
+    if (showShareError) {
+        AlertDialogErrorOrInfo(
+            onDismissRequest = { showShareError = false },
+            onConfirmation = { showShareError = false },
+            message = stringResource(id = R.string.export_error_sharing),
+            confirmationText = stringResource(id = R.string.ok)
+        )
+    }
+
 
     Column(
         modifier = Modifier
@@ -220,8 +230,8 @@ fun ExportPdf(
             )
 
 
-            Send(context, deliveryNote, finalFileName)
-            Share(context, finalFileName)
+            Send(context, deliveryNote, finalFileName, onError = { showShareError = true })
+            Share(context, finalFileName, onError = { showShareError = true })
         }
     }
 }
@@ -267,7 +277,7 @@ enum class ExportStatus {
 
 
 @Composable
-fun Send(context: Context, document: DocumentState, finalFileName: String) {
+fun Send(context: Context, document: DocumentState, finalFileName: String, onError: () -> Unit) {
     Button(onClick = {
         try {
             val type = when (document.documentType) {
@@ -287,17 +297,12 @@ fun Send(context: Context, document: DocumentState, finalFileName: String) {
                     attachedDocumentUri = it,
                     context = context
                 )
-            } ?: Toast.makeText(
-                context,
-                R.string.export_error_sharing,
-                Toast.LENGTH_LONG
-            ).show()
+            } ?: onError()
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            onError()
         }
-        // startActivity(context, share, null)
     }) {
-        Icon(imageVector =  Icons.Outlined.Email, contentDescription = null)
+        Icon(imageVector = Icons.Outlined.Email, contentDescription = null)
         Text(
             stringResource(R.string.export_send_file),
             modifier = Modifier.padding(start = 8.dp)
@@ -338,7 +343,7 @@ fun composeEmail(
 }
 
 @Composable
-fun Share(context: Context, finalFileName: String) {
+fun Share(context: Context, finalFileName: String, onError: () -> Unit) {
     Button(onClick = {
         try {
             val uri = getFileUri(context, finalFileName)
@@ -349,13 +354,9 @@ fun Share(context: Context, finalFileName: String) {
                     .setChooserTitle("Share document")
                     .setSubject("Shared document")
                     .startChooser()
-            } ?: Toast.makeText(
-                context,
-                R.string.export_error_sharing,
-                Toast.LENGTH_LONG
-            ).show()
+            } ?: onError()
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            onError()
         }
     }) {
         Icon(imageVector = Icons.Outlined.Share, contentDescription = null)

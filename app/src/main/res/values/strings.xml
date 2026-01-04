@@ -248,7 +248,7 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     </string>
     <string name="about_share_text">L\'application vous est utile ? Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
-    <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et dédié aux producteur·ices bio. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et engagé. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
     <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
     <string name="about_title_about">À propos</string>
     <string name="about_title_early_access">Programme \"Early bat\"</string>
@@ -351,7 +351,7 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     <string name="send_reminder_email_subject_invoice">facture</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
-    <string name="export_error_sharing">Erreur. Veuillez passer directement par le dossier "téléchargements". </string>
+    <string name="export_error_sharing">Le fichier n\'a pas pu être partagé.\n\nVeuillez l\'ouvrir directement depuis le dossier Téléchargements/g8.</string>
     <string name="export_email_subject">Votre %s N°%s</string>
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
@@ -376,7 +376,7 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     <!-- Email export -->
     <string name="database_email_subject">Export de mes données g8</string>
     <string name="database_email_body">Ma base de données SQLite de l’application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
-    <string name="database_email_chooser">Envoyer la base par mail</string>
+    <string name="database_email_chooser">Envoyer la base de données par mail</string>
 
     <!-- About screen -->
     <string name="about_download_database">💎 Télécharger ma base de données 💎</string>

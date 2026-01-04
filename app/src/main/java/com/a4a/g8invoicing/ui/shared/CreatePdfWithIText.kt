@@ -52,6 +52,9 @@ import java.io.InputStream
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+// Cache pour stocker l'Uri du dernier PDF exporté (Android 10+)
+private var lastExportedPdfUri: Uri? = null
+private var lastExportedPdfFileName: String? = null
 
 fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
     val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
@@ -244,7 +247,10 @@ fun addPageNumberingAndDeletePreviousFile(
             // Sauvegarder le PDF final dans Downloads/g8
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 // Android 10+ : utiliser MediaStore
-                saveToDownloadsWithMediaStore(context, tempFinalFile, finalFileName)
+                val savedUri = saveToDownloadsWithMediaStore(context, tempFinalFile, finalFileName)
+                // Sauvegarder l'Uri dans le cache pour le partage
+                lastExportedPdfUri = savedUri
+                lastExportedPdfFileName = finalFileName
                 // Supprimer le fichier temporaire après copie
                 tempFinalFile.delete()
             } else {
@@ -861,8 +867,13 @@ data class PriceRow(
 )
 
 fun getFileUri(context: Context, fileName: String): Uri? {
-    // Sur Android 10+, chercher d'abord dans MediaStore
+    // Sur Android 10+, utiliser l'Uri cachée si disponible
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        // Vérifier d'abord le cache
+        if (lastExportedPdfFileName == fileName && lastExportedPdfUri != null) {
+            return lastExportedPdfUri
+        }
+        // Sinon chercher dans MediaStore
         val uri = findMediaStoreUri(context, fileName)
         if (uri != null) return uri
     }
