@@ -184,13 +184,23 @@ class ProductAddEditViewModel @Inject constructor(
     // When user chooses a new tax rate
     fun updateTaxRate(taxRate: BigDecimal?, type: ProductType) {
         if (type == ProductType.PRODUCT) {
+            // Recalculate TTC for additional prices
+            val updatedAdditionalPrices = _productUiState.value.additionalPrices?.map { price ->
+                price.copy(
+                    priceWithTax = price.priceWithoutTax?.let { ht ->
+                        taxRate?.let { tax -> calculatePriceWithTax(ht, tax) }
+                    }
+                )
+            }
+
             _productUiState.value = _productUiState.value.copy(
                 taxRate = taxRate,
                 defaultPriceWithTax = _productUiState.value.defaultPriceWithoutTax?.let { priceWithoutTax ->
                     taxRate?.let { tax ->
                         calculatePriceWithTax(priceWithoutTax, tax)
                     } ?: BigDecimal(0)
-                }
+                },
+                additionalPrices = updatedAdditionalPrices
             )
         } else {
             _documentProductUiState.value = _documentProductUiState.value.copy(

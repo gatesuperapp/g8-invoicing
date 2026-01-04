@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -54,6 +55,7 @@ fun ClientOrIssuerAddEditForm(
     isInBottomSheetModal: Boolean = false,
     onClickDeleteAddress: () -> Unit,
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val localFocusManager = LocalFocusManager.current
     var numberOfClientAddresses by remember {
@@ -65,7 +67,7 @@ fun ClientOrIssuerAddEditForm(
 
     Column(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .background(ColorBackgroundGrey)
             .fillMaxSize()
             .padding(12.dp)

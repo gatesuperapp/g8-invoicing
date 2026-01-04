@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -21,6 +23,7 @@ fun ClientAddEdit(
     onClickDone: () -> Unit,
     onClickBack: () -> Unit,
     onClickDeleteAddress: () -> Unit,
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     val requiredFieldsAreFilled: Boolean =
         if (clientOrIssuer.type?.name == ClientOrIssuerType.CLIENT.name
@@ -51,7 +54,8 @@ fun ClientAddEdit(
             onValueChange,
             placeCursorAtTheEndOfText,
             onClickDeleteAddress = onClickDeleteAddress,
-            typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_CLIENT
+            typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_CLIENT,
+            scrollState = scrollState
         )
     }
 }

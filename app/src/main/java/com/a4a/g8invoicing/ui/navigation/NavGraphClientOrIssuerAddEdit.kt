@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -30,7 +31,8 @@ fun NavGraphBuilder.clientAddEdit(
 
         // Get the keyboard controller
         val keyboardController = LocalSoftwareKeyboardController.current
-        val scope = rememberCoroutineScope() // To launch suspend functions from ViewModel
+        val scope = rememberCoroutineScope()
+        val scrollState = rememberScrollState()
 
 
         ClientAddEdit(
@@ -45,11 +47,9 @@ fun NavGraphBuilder.clientAddEdit(
                 viewModel.updateCursor(pageElement, ClientOrIssuerType.CLIENT)
             },
             onClickDone = {
-                scope.launch { // Launch a coroutine for suspend functions
-                    // 1. Hide the keyboard
-                    keyboardController?.hide() // Gracefully hide the keyboard
+                scope.launch {
+                    keyboardController?.hide()
 
-                    // 2. Perform validation and DB operations
                     if (viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
                         val success = if (isNew) {
                             viewModel.createNew(ClientOrIssuerType.CLIENT)
@@ -57,22 +57,22 @@ fun NavGraphBuilder.clientAddEdit(
                             viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
                         }
 
-                        // 3. Navigate back only if DB operation was successful
                         if (success) {
                             goToPreviousScreen()
-                        } else {
-                            // Handle save/update failure (e.g., show a Snackbar)
-                            // Log.e("ClientAddEdit", "Failed to save/update client.")
                         }
+                    } else {
+                        // Scroll to top to show validation error
+                        scrollState.animateScrollTo(0)
                     }
                 }
             },
             onClickBack = {
                 goToPreviousScreen()
-            }, // If the user went back, no need to pass value
+            },
             onClickDeleteAddress = {
                 viewModel.removeAddressFromClientOrIssuerState(ClientOrIssuerType.CLIENT)
-            }
+            },
+            scrollState = scrollState
         )
     }
 }
