@@ -26,7 +26,6 @@ import com.a4a.g8invoicing.data.auth.AuthRepositoryInterface
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import g8invoicing.ClientOrIssuerQueries
 import g8invoicing.DeliveryNoteQueries
@@ -48,7 +47,12 @@ object AppModule {
         return AndroidSqliteDriver(
             schema = Database.Schema,
             context = app,
-            name = "g8_invoicing.db"
+            name = "g8_invoicing.db",
+            callback = object : AndroidSqliteDriver.Callback(Database.Schema) {
+                override fun onOpen(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    db.execSQL("PRAGMA foreign_keys=ON;")
+                }
+            }
         )
     }
 
@@ -117,19 +121,11 @@ object AppModule {
         return AuthRepository(api, prefs)
     }
 
-    // Used to know if db is empty or not, for the download db popuop
-
-    // You need to add this @Provides method for your Database
+    // Used to know if db is empty or not, for the download db popup
     @Provides
-    @Singleton // Or an appropriate scope
-    fun provideDatabase(@ApplicationContext appContext: Context): Database {
-        return Database(
-            driver = AndroidSqliteDriver(
-                schema = Database.Schema, // Or Database.Schema if that's how SQLDelight generates it
-                context = appContext,
-                name = "g8_invoicing.db" // Replace with your actual database file name
-            )
-        )
+    @Singleton
+    fun provideDatabase(driver: SqlDriver): Database {
+        return Database(driver)
     }
 
     @Provides

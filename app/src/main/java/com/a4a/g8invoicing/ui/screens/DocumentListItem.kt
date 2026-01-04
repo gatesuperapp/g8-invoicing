@@ -86,7 +86,7 @@ fun DocumentListItem(
             ) {
                 //onItemClick()
             }
-            .pointerInput(Unit) {
+            .pointerInput(keyToResetCheckbox) {
                 detectTapGestures(
                     onPress = { offset ->
                         val press = PressInteraction.Press(offset)
@@ -100,11 +100,8 @@ fun DocumentListItem(
                         onItemClick()
                     },
                     onLongPress = {
-                        /*   Log.e(ContentValues.TAG,"dddd--  onLongPress checkedState =" + checkedState.value)
-                           Log.e(ContentValues.TAG,"dddd ===== =")*/
-                        /*   checkedState.value = !checkedState.value
-
-                           onItemCheckboxClick(checkedState.value)*/
+                        checkedState.value = !checkedState.value
+                        onItemCheckboxClick(checkedState.value)
                     }
                 )
             }

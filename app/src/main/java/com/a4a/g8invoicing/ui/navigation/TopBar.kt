@@ -88,16 +88,24 @@ private fun BackArrow(
     onClickBackArrow: () -> Unit,
 ) {
 
-    //Adding this check to avoid the back arrow flicker when opening a detail screen
-    // from a list (The back arrows was showing in the top bar while the new screen is loaded)
-    val previousRoute = navController.previousBackStackEntry?.destination?.route
     val currentRoute = navController.currentDestination?.route
-    val noBackArrowScreens = listOf(Screen.ProductList.name, Screen.ClientOrIssuerList.name)
+    // Main screens that should not display a back arrow
+    val noBackArrowScreens = listOf(
+        Screen.InvoiceList.name,
+        Screen.DeliveryNoteList.name,
+        Screen.CreditNoteList.name,
+        Screen.ProductList.name,
+        Screen.ClientOrIssuerList.name
+    )
 
+    // Show back arrow if:
+    // - Current screen is ProductTaxRates, OR
+    // - There's a previous screen AND current screen is NOT a main list screen
     val showBackButton =
-        currentRoute == Screen.ProductTaxRates.name || (navController.previousBackStackEntry != null &&
-                previousRoute != null &&
-                noBackArrowScreens.none { previousRoute.startsWith(it) })
+        currentRoute == Screen.ProductTaxRates.name ||
+        (navController.previousBackStackEntry != null &&
+         currentRoute != null &&
+         noBackArrowScreens.none { currentRoute.startsWith(it) })
 
     if (showBackButton) {
         IconButton(onClick = onClickBackArrow) {

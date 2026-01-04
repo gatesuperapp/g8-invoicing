@@ -34,6 +34,8 @@ fun GeneralBottomBar(
     isConvertible: Boolean = false,
     isInvoice: Boolean = false,
     onChangeBackground: () -> Unit,
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     ) {
     BottomBarAction(
         navController,
@@ -82,6 +84,8 @@ fun GeneralBottomBar(
         },
         onClickCategory,
         onClickTag,
-        onChangeBackground
+        onChangeBackground,
+        isCategoriesMenuOpen,
+        onCategoriesMenuOpenChange
     )
 }

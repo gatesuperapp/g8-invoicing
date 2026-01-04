@@ -21,3 +21,15 @@
 #-renamesourcefileattribute SourceFile
 
 -keep public class com.itextpdf.**
+
+# iTextPDF - ignore missing optional dependencies
+-dontwarn aQute.bnd.annotation.spi.**
+-dontwarn com.itextpdf.bouncycastle.**
+-dontwarn com.itextpdf.bouncycastlefips.**
+-dontwarn com.itextpdf.eutrustedlistsresources.**
+-dontwarn sharpen.config.**
+
+# Woodstox XML - ignore missing javax.xml.stream classes (not available on Android)
+-dontwarn javax.xml.stream.**
+-dontwarn org.codehaus.stax2.**
+-dontwarn com.ctc.wstx.**

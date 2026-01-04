@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -30,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +75,20 @@ fun DeliveryNoteList(
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    var isCategoriesMenuOpen by remember { mutableStateOf(false) }
+    var lastBackPressTime by remember { mutableStateOf(0L) }
+
+    BackHandler {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressTime < 2000) {
+            (context as? android.app.Activity)?.finish()
+        } else {
+            lastBackPressTime = currentTime
+            isCategoriesMenuOpen = true
+        }
+    }
+
     ScaffoldWithDimmedOverlay(
         isDimmed = isDimActive.value,
         onDismissDim = { isDimActive.value = false },
@@ -107,7 +124,9 @@ fun DeliveryNoteList(
                 isConvertible = true,
                 onChangeBackground = {
                     isDimActive.value = !isDimActive.value
-                }
+                },
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it }
             )
         }
     ) { padding ->

@@ -38,24 +38,26 @@ class CreditNoteLocalDataSource(
         db.linkCreditNoteToDocumentClientOrIssuerQueries
 
     override suspend fun createNew(): Long? {
-        var newCreditNoteId: Long? = null
-        val issuer = getExistingIssuer()?.transformIntoEditable()
-        val creditNote = CreditNoteState(
-            documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
-                incrementDocumentNumber(it)
-            } ?: Strings.get(R.string.credit_note_default_number)),
-            documentIssuer = issuer,
-            footerText = TextFieldValue(getExistingFooter() ?: "")
-        )
+        return withContext(Dispatchers.IO) {
+            val issuer = getExistingIssuer()?.transformIntoEditable()
+            val creditNote = CreditNoteState(
+                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                    incrementDocumentNumber(it)
+                } ?: Strings.get(R.string.credit_note_default_number)),
+                documentIssuer = issuer,
+                footerText = TextFieldValue(getExistingFooter() ?: "")
+            )
 
-        saveInfoInCreditNoteTable(creditNote)
-        saveInfoInOtherTables(creditNote)
-        try {
-            newCreditNoteId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            saveInfoInCreditNoteTable(creditNote)
+
+            val newCreditNoteId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
+
+            newCreditNoteId?.let { id ->
+                saveInfoInOtherTables(creditNote)
+            }
+
+            newCreditNoteId
         }
-        return newCreditNoteId
     }
 
     private fun getLastDocumentNumber(): String? {
@@ -86,8 +88,8 @@ class CreditNoteLocalDataSource(
                     }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
             }
-            null
         }
     }
 
@@ -241,9 +243,10 @@ class CreditNoteLocalDataSource(
         deliveryNoteDate: String?,
         deliveryNoteNumber: String?,
     ): Int? {
+        android.util.Log.e("CreditNoteDS", "saveDocumentProductInDbAndLinkToDocument called with documentId=$documentId")
         return withContext(Dispatchers.IO) {
             try {
-                documentProductQueries.transactionWithResult {
+                val result = documentProductQueries.transactionWithResult {
                     saveDocumentProductInDbAndLink(
                         documentProductQueries,
                         linkDocumentProductToCreditNoteQueries,
@@ -254,9 +257,12 @@ class CreditNoteLocalDataSource(
                         deliveryNoteNumber
                     )
                 }
+                android.util.Log.e("CreditNoteDS", "transactionWithResult returned: $result")
+                result
             } catch (e: Exception) {
+                android.util.Log.e("CreditNoteDS", "Error saveDocProdAndLink: ${e.message}")
+                e.printStackTrace()
                 null
-                //Log.e("InvoiceDS", "Error saveDocProdAndLink: ${e.message}")
             }
         }
     }

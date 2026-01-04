@@ -12,6 +12,7 @@ import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuerAddress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -53,6 +54,7 @@ class ClientOrIssuerLocalDataSource(
                         )
                     }
             }
+            .flowOn(Dispatchers.IO)
     }
 
     fun fetchClientOrIssuerAddresses(clientOrIssuerId: Long): List<AddressState>? {

@@ -40,8 +40,7 @@ fun CategoriesDropdownMenu(
 ) {
     val categories = listOf(
         //  Category.Home,
-        Category.MyAccount,
-        Category.About,
+        Category.G8,
         Category.Clients,
         Category.Products,
         Category.CreditNotes,
@@ -96,7 +95,7 @@ fun CategoriesDropdownMenu(
                   }*/
             )
 
-            if (category is Category.About || category is Category.Products) {
+            if (category is Category.G8 || category is Category.Products) {
                 HorizontalDivider(
                     modifier = Modifier.padding(start = 24.dp, end = 16.dp),
                     thickness = 1.dp,
@@ -120,9 +119,7 @@ sealed class Category(
     data object Invoices : Category(Screen.InvoiceList.name, R.string.appbar_invoices, null, null)
     data object CreditNotes : Category(Screen.CreditNoteList.name, R.string.appbar_credit_notes, null, null)
     data object DeliveryNotes : Category(Screen.DeliveryNoteList.name, R.string.appbar_delivery_notes, null, null)
-    data object MyAccount : Category(Screen.Account.name, R.string.appbar_account, null, null)
-    data object About : Category(Screen.About.name, R.string.appbar_about, null, null)
-
+    data object G8 : Category(Screen.About.name, R.string.drawer_g8, null, null)
 }
 
 

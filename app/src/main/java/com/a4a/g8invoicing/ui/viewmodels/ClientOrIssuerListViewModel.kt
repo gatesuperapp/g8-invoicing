@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
@@ -41,6 +42,8 @@ class ClientOrIssuerListViewModel @Inject constructor(
     private fun fetchAllClients() {
         fetchJobClients?.cancel()
         fetchJobClients = viewModelScope.launch {
+            Log.e("DEBUG CLIENTS", "in fetchAllClients")
+
             try {
                 clientOrIssuerDataSource.fetchAll(PersonType.CLIENT)
                     .collect { clientsOrIssuers ->
@@ -52,7 +55,10 @@ class ClientOrIssuerListViewModel @Inject constructor(
                             )
                         }
                     }
+                Log.e("DEBUG CLIENTS", "_clientsUiState"+ _clientsUiState.value)
             } catch (e: Exception) {
+                Log.e("DEBUG CLIENTS", "error ${e.localizedMessage}")
+
                 //println("Fetching clients failed with exception: ${e.localizedMessage}")
             }
         }

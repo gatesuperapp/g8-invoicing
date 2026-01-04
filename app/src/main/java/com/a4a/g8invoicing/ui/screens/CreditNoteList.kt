@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,10 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import com.a4a.g8invoicing.Strings
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -53,6 +59,20 @@ fun CreditNoteList(
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    var isCategoriesMenuOpen by remember { mutableStateOf(false) }
+    var lastBackPressTime by remember { mutableStateOf(0L) }
+
+    BackHandler {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressTime < 2000) {
+            (context as? android.app.Activity)?.finish()
+        } else {
+            lastBackPressTime = currentTime
+            isCategoriesMenuOpen = true
+        }
+    }
+
     ScaffoldWithDimmedOverlay(
         isDimmed = isDimActive.value,
         onDismissDim = { isDimActive.value = false },
@@ -88,7 +108,9 @@ fun CreditNoteList(
                 onClickCategory = onClickCategory,
                 onChangeBackground = {
                     isDimActive.value = !isDimActive.value
-                }
+                },
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it }
             )
         }
     ) { padding ->

@@ -43,7 +43,7 @@ fun Settings(
     Scaffold(
         topBar = {
             TopBar(
-                title = R.string.appbar_about,
+              //  title = R.string.appbar_about,
                 navController = navController,
                 onClickBackArrow = onClickBack,
                 isCancelCtaDisplayed = false

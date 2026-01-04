@@ -113,10 +113,10 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
     }
 
     fun setClientOrIssuerUiState(type: ClientOrIssuerType) {
-        if (type == ClientOrIssuerType.CLIENT) {
+        if (type == ClientOrIssuerType.CLIENT || type == ClientOrIssuerType.DOCUMENT_CLIENT) {
             _clientUiState.value = ClientOrIssuerState(
                 id = null,
-                type = type,
+                type = ClientOrIssuerType.CLIENT,
                 firstName = _documentClientUiState.value.firstName,
                 name = _documentClientUiState.value.name,
                 addresses = _documentClientUiState.value.addresses,
@@ -130,22 +130,24 @@ class ClientOrIssuerAddEditViewModel @Inject constructor(
                 companyId3Label = _documentClientUiState.value.companyId3Label,
                 companyId3Number = _documentClientUiState.value.companyId3Number
             )
-        } else _issuerUiState.value = ClientOrIssuerState(
-            id = null,
-            type = type,
-            firstName = _documentIssuerUiState.value.firstName,
-            name = _documentIssuerUiState.value.name,
-            addresses = _documentClientUiState.value.addresses,
-            phone = _documentIssuerUiState.value.phone,
-            email = _documentIssuerUiState.value.email,
-            notes = _documentIssuerUiState.value.notes,
-            companyId1Label = _documentIssuerUiState.value.companyId1Label,
-            companyId1Number = _documentIssuerUiState.value.companyId1Number,
-            companyId2Label = _documentIssuerUiState.value.companyId2Label,
-            companyId2Number = _documentIssuerUiState.value.companyId2Number,
-            companyId3Label = _documentClientUiState.value.companyId3Label,
-            companyId3Number = _documentClientUiState.value.companyId3Number
-        )
+        } else {
+            _issuerUiState.value = ClientOrIssuerState(
+                id = null,
+                type = ClientOrIssuerType.ISSUER,
+                firstName = _documentIssuerUiState.value.firstName,
+                name = _documentIssuerUiState.value.name,
+                addresses = _documentIssuerUiState.value.addresses,
+                phone = _documentIssuerUiState.value.phone,
+                email = _documentIssuerUiState.value.email,
+                notes = _documentIssuerUiState.value.notes,
+                companyId1Label = _documentIssuerUiState.value.companyId1Label,
+                companyId1Number = _documentIssuerUiState.value.companyId1Number,
+                companyId2Label = _documentIssuerUiState.value.companyId2Label,
+                companyId2Number = _documentIssuerUiState.value.companyId2Number,
+                companyId3Label = _documentIssuerUiState.value.companyId3Label,
+                companyId3Number = _documentIssuerUiState.value.companyId3Number
+            )
+        }
     }
 
     fun clearClientOrIssuerUiState(type: ClientOrIssuerType) {

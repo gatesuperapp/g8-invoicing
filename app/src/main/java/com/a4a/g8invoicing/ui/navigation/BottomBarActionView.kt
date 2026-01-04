@@ -34,8 +34,18 @@ fun BottomBarActionView(
     onClickCategory: (Category) -> Unit,
     onClickTag: (DocumentTag) -> Unit,
     onChangeBackground: () -> Unit,
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+
+    // Synchroniser avec l'état externe
+    androidx.compose.runtime.LaunchedEffect(isCategoriesMenuOpen) {
+        if (isCategoriesMenuOpen && !isExpanded) {
+            onChangeBackground()
+            isExpanded = true
+        }
+    }
 
     ViewWithLayout {
         if (appBarActions !== null) {
@@ -62,6 +72,7 @@ fun BottomBarActionView(
                                     dismissMenu = {
                                         onChangeBackground()
                                         isExpanded = false
+                                        onCategoriesMenuOpenChange(false)
                                     },
                                     onClickCategory
                                 )

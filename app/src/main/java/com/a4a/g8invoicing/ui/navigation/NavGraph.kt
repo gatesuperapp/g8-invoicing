@@ -33,9 +33,8 @@ fun NavGraph(navController: NavHostController) {
 
     NavHost(
         navController,
-        // startDestination = (Screen.About.name),
-          startDestination = (Screen.Account.name),
-        //  startDestination = (Screen.InvoiceList.name),
+        //startDestination = (Screen.About.name),
+          startDestination = (Screen.InvoiceList.name),
         // startDestination = (Screen.CreditNoteList.name),
         //   startDestination = (Screen.DeliveryNoteList.name),
         // startDestination = (Screen.ProductList.name),
@@ -45,15 +44,6 @@ fun NavGraph(navController: NavHostController) {
 
     ) {
              about(
-                 navController = navController,
-                 onClickCategory = {
-                     navController.navigateAndReplaceStartDestination(it)
-                 },
-                 onClickBack = {
-                     navigateBack(navController)
-                 }
-             )
-             account(
                  navController = navController,
                  onClickCategory = {
                      navController.navigateAndReplaceStartDestination(it)

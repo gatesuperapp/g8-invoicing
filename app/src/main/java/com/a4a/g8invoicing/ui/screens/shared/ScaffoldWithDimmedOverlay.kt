@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -29,26 +30,22 @@ fun ScaffoldWithDimmedOverlay(
             topBar = topBar,
             bottomBar = bottomBar
         ) { paddingValues ->
-            Box(Modifier.fillMaxSize()) {
-                // Contenu principal
-                content(paddingValues)
+            content(paddingValues)
+        }
 
-                // Fond sombre (au-dessus du contenu mais en-dessous de la bottom bar)
-                if (isDimmed) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = paddingValues.calculateBottomPadding())
-                            .fillMaxHeight()
-                            .background(Color.Black.copy(alpha = 0.2f))
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) { onDismissDim() }
-                            .zIndex(1f)
-                    )
-                }
-            }
+        // Overlay au-dessus de tout (topbar incluse) sauf la bottombar
+        if (isDimmed) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 128.dp)
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { onDismissDim() }
+                    .zIndex(10f)
+            )
         }
     }
 }

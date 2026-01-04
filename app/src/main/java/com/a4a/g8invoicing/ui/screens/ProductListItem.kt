@@ -75,7 +75,7 @@ fun ProductListItem(
             ) {
                 //onItemClick()
             }
-            .pointerInput(Unit) {
+            .pointerInput(keyToResetCheckbox) {
                 detectTapGestures(
                     onPress = { offset ->
                         val press = PressInteraction.Press(offset)
@@ -89,8 +89,8 @@ fun ProductListItem(
                         onItemClick()
                     },
                     onLongPress = {
-                      /*  checkedState.value = !checkedState.value
-                        onItemCheckboxClick(checkedState.value)*/
+                        checkedState.value = !checkedState.value
+                        onItemCheckboxClick(checkedState.value)
                     }
                 )
             }

@@ -1,11 +1,16 @@
 package com.a4a.g8invoicing.ui.screens
 
+import android.Manifest
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -42,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ShareCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
@@ -61,19 +67,65 @@ fun ExportPdf(
     onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
-    var isExportOngoing by remember { mutableStateOf(ExportStatus.ONGOING) }
+    var isExportOngoing by remember { mutableStateOf(ExportStatus.WAITING_PERMISSION) }
     var finalFileName by remember { mutableStateOf("") }
 
     val openErrorDialog = remember { mutableStateOf(false) }
     val errorMessage = remember { mutableStateOf("") }
+
+    // Sur Android 10+ (API 29+), pas besoin de permissions (MediaStore)
+    val needsPermission = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+
+    // Vérification des permissions (seulement pour Android 9 et moins)
+    val hasPermissions = remember {
+        if (!needsPermission) {
+            true // Pas besoin de permission sur Android 10+
+        } else {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    // Launcher pour demander les permissions (seulement pour Android 9 et moins)
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            isExportOngoing = ExportStatus.ONGOING
+        } else {
+            errorMessage.value = Strings.get(R.string.export_permission_denied)
+            openErrorDialog.value = true
+            isExportOngoing = ExportStatus.ERROR
+        }
+    }
+
+    // Demander les permissions ou lancer l'export au démarrage
+    LaunchedEffect(Unit) {
+        if (hasPermissions) {
+            isExportOngoing = ExportStatus.ONGOING
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            )
+        }
+    }
+
     when {
         openErrorDialog.value -> {
             AlertDialogErrorOrInfo(
                 onDismissRequest = {
                     openErrorDialog.value = false
+                    onDismissRequest()
                 },
                 onConfirmation = {
                     openErrorDialog.value = false
+                    onDismissRequest()
                 },
                 message = Strings.get(R.string.alert_dialog_error) + errorMessage.value,
                 confirmationText = stringResource(id = R.string.alert_dialog_error_confirm)
@@ -122,6 +174,7 @@ fun ExportPdf(
             modifier = Modifier
                 .padding(bottom = 30.dp),
             text = when (isExportOngoing) {
+                ExportStatus.WAITING_PERMISSION -> stringResource(R.string.export_waiting_permission)
                 ExportStatus.ONGOING -> stringResource(R.string.export_ongoing)
                 ExportStatus.DONE -> stringResource(R.string.export_done)
                 else -> stringResource(R.string.export_error)
@@ -130,18 +183,21 @@ fun ExportPdf(
             color = Color.White
         )
 
-        ExportDocumentAndShowProgressBar(
-            deliveryNote,
-            context,
-            loadingIsOver = {
-                finalFileName = it
-                isExportOngoing = ExportStatus.DONE
-            },
-            displayErrorMessage = {
-                errorMessage.value = it ?: ""
-                openErrorDialog.value = true
-            }
-        )
+        // Lancer l'export seulement si les permissions sont accordées
+        if (isExportOngoing == ExportStatus.ONGOING) {
+            ExportDocumentAndShowProgressBar(
+                deliveryNote,
+                context,
+                loadingIsOver = {
+                    finalFileName = it
+                    isExportOngoing = ExportStatus.DONE
+                },
+                displayErrorMessage = {
+                    errorMessage.value = it ?: ""
+                    openErrorDialog.value = true
+                }
+            )
+        }
 
         if (isExportOngoing == ExportStatus.DONE) {
             Text(
@@ -206,7 +262,7 @@ fun ExportDocumentAndShowProgressBar(
 }
 
 enum class ExportStatus {
-    ONGOING, DONE, ERROR
+    WAITING_PERMISSION, ONGOING, DONE, ERROR
 }
 
 

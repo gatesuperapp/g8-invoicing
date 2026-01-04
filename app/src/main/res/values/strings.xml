@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">g8</string>
+    <string name="back_press_again_to_exit">Appuyez encore pour quitter</string>
     <string name="ic_arrow_back">Back button</string>
     <string name="next">Next</string>
     <string name="start_app">Start using the app</string>
@@ -64,9 +65,8 @@
     <string name="appbar_client_edit">Modifier client</string>
     <string name="appbar_product_edit">Modifier produit</string>
     <string name="drawer_settings">Réglages</string>
-    <string name="appbar_account">Contribuer</string>
-    <string name="drawer_about">Aide </string>
-    <string name="appbar_about">Aide </string>
+    <string name="appbar_g8">𝕘𝟠</string>
+    <string name="drawer_g8">𝕘𝟠</string>
     <string name="drawer_menu_description">Menu navigation button</string>
     <string name="drawer_home_description">Home navigation button</string>
     <string name="drawer_invoices_description">Invoices button</string>
@@ -242,54 +242,55 @@
         Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
     </string>
     <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
-    <string name="account_subscribe">
-        Tu peux t\'abonner à partir de 4€ par mois pour bénéficier de la synchronisation de tes données avec l\'outil Grist !\n\n
-        Grist c\'est un tableur collaboratif et un outil no-code libre. \n\n
-        Pour 4€/mois, tu peux visualiser tes données, les sauvegarder et les exporter.\n
-        Pour 8€/mois, tu peux aussi éditer tes données, créer tes propres tableaux de bord et vues personnalisées.\n
-        Et pour 15€/mois, tu gères ton propre dossier créer tes propres documents grist (planning de récoltes, pré-comptabilité etc.).
-
-    </string>
+    <string name="account_subscribe">Soutenez le projet et bénéficiez d\'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
     <string name="account_subscribe2">
-        Gros avantage : si vous souscrivez dès maintenant, l\'appli de bureau (dès qu\'elle est prête)
-        sera automatiquement incluse dans vore abonnement…Sinon, il vous faudra prendre l\'abonnement à 10€/mois !
+Sans engagement. Accès anticipé aux nouveautés inclus.
     </string>
+    <string name="about_share_text">L\'application vous est utile ? Partagez-la à vos ami·es !</string>
+    <string name="about_share_button">Partager</string>
+    <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et dédié aux producteur·ices bio. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
     <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
     <string name="about_title_about">À propos</string>
-    <string name="about_title_tutorials">Tutos &amp; conseils</string>
-    <string name="about_title_tutorials_button">Accéder au site</string>
-    <string name="about_title_tutorials_button_link">https://the-gate.fr/conseils-et-tutos</string>
-    <string name="about_tutorials"> Plusieurs articles sont disponibles sur le site internet :\n
-        &#8226; Comment numéroter les factures \n
-        &#8226; Supprimer ou annuler une facture \n
-        &#8226; Transformer des bons de livraison en facture\n
-        &#8226; Mentions obligatoires sur les factures\n
-        &#8226; Délai de conservation des documents comptables
-    </string>
-    <string name="about_title_contact">Contact</string>
+    <string name="about_title_early_access">Programme \"Early bat\"</string>
+    <string name="about_title_community">Communauté</string>
+    <string name="about_community_text">Venez discuter de vos besoins, vos idées et échanger sur le</string>
+    <string name="about_community_cta">forum de la communauté.</string>
+    <string name="about_community_link">https://forum.the-gate.fr/</string>
+    <string name="about_title_assistance">Assistance</string>
+    <string name="about_assistance_text_1">Consultez la</string>
+    <string name="about_assistance_forum_link_text">rubrique \"Aide\" du forum</string>
+    <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
+    <string name="about_assistance_text_2">, parcourez les</string>
+    <string name="about_assistance_tutorials_link_text">tutoriels et conseils</string>
+    <string name="about_assistance_tutorials_link">https://the-gate.fr/conseils-et-tutos</string>
+    <string name="about_assistance_text_3">sur le site, ou écrivez à</string>
+    <string name="about_assistance_email_link_text">contact@the-gate.fr</string>
+    <string name="about_title_backup">Sauvegarde</string>
+    <string name="about_backup_text">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
+    <string name="about_title_legal">Mentions légales</string>
     <string name="about">
         𝕘𝟠 est une application pratique et engagée :\n
         &#8226; Fonctionne hors-ligne \n
         &#8226; Ni pub ni traceur \n
-        &#8226; Logiciel libre et open-source\n
-        &#8226; Conçue pour les paysan·ne·s en priorité\n
+        &#8226; Logiciel libre, open-source\n
+        &#8226; Conçue pour les producteur·ices bio\n
         &#8226; Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.\n
     </string>
     <string name="about2">
     Pour contacter l\'assistance, remonter un bug ou toute autre demande :</string>
-    <string name="about_terms_of_service_header">En utilisant l\'application, tu acceptes les</string>
+    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez les</string>
     <string name="about_build_version">Version de l\'application : &#160;</string>
     <string name="about_terms_of_service">conditions d\'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
     <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
-    <string name="about_privacy">politique de confidentialité.</string>
+    <string name="about_privacy">politique de confidentialité de 𝕘𝟠.</string>
     <string name="account_button_create">Créer mon compte</string>
     <string name="about_button_contact">contact@the-gate.fr</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="account_donate">En savoir plus</string>
-    <string name="account_donate_link">https://the-gate.fr/abonnement</string>
-    <string name="account_bat_love">𝕚 𝕔𝕒𝕟𝕥 𝕝𝕚𝕧𝕖 𝕨𝕚𝕥𝕙𝕠𝕦𝕥 𝕦</string>
+    <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
+    <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n
         Tu peux me cliquer dessus quand tu me vois, je donne des
@@ -307,7 +308,7 @@
     <string name="invoice_advice_bottom_menu1">Pour faire apparaître des options très utiles, comme supprimer un document \n\n …   </string>
     <string name="invoice_advice_bottom_menu2">clique sur le cercle ○ devant le numéro de la facture. Tu peux même sélectionner plusieurs documents à la fois.\n\n 𝕨𝕚𝕝𝕕 </string>
     <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
-    <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en cliquant sur le ○ \n\n …   </string>
+    <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l\'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
         \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
@@ -328,9 +329,11 @@
     <string name="alert_convert_notes_info_confirm">Superbe</string>
     <string name="alert_delete_info_confirm">Capito</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
+    <string name="export_waiting_permission">Autorisation requise…</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l\'export.</string>
+    <string name="export_permission_denied">L\'accès au stockage est nécessaire pour enregistrer le PDF. Vous pouvez autoriser l\'accès dans les paramètres de l\'application.</string>
     <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
@@ -359,7 +362,7 @@
     <string name="database_export_dialog_title">^._.^</string>
     <string name="database_export_dialog_intro">Hey ! Je te conseille de télécharger ta base de données 💎\n\n</string>
     <string name="database_export_dialog_explanation">C\'est utile en cas de perte du téléphone ou s\'il y a un problème lors d\'une mise à jour.\n\n</string>
-    <string name="database_export_dialog_where">Retrouve l\'option dans Menu \> À propos.</string>
+    <string name="database_export_dialog_where">Retrouve l\'option dans Menu \> 𝕘𝟠.</string>
     <string name="database_export_dialog_error">Erreur lors de l\'enregistrement de la base : %1$s</string>
     <string name="database_export_dialog_confirm">Télécharger mes données</string>
     <string name="database_export_dialog_dismiss">Je le ferai plus tard</string>
@@ -379,4 +382,28 @@
     <string name="about_download_database">💎 Télécharger ma base de données 💎</string>
     <string name="about_download_database_error">Erreur lors de l\'enregistrement de la base : %1$s.\n\nPour contacter l\'assistance : contact@the-gate.fr</string>
     <string name="ok">OK</string>
+
+    <!-- WhatsNew Dialog -->
+    <string name="whats_new_kaomoji_1">(㇏(－.－)ノ)</string>
+    <string name="whats_new_intro_ommm">om̐m̐m̐m̐m̐m̐…</string>
+    <string name="whats_new_kaomoji_2">(㇏(˶˃ ᵕ ˂˶)ノ)</string>
+    <string name="whats_new_intro_version">…version %s de 𝕘𝟠 installée ! Découvre les nouveautés >>></string>
+    <string name="whats_new_prices_title">Plusieurs prix par produit</string>
+    <string name="whats_new_prices_text">Tu peux définir plusieurs prix quand tu crées un nouveau produit (depuis la page \"Produits\" uniquement).\n\nDans ton BL ou ta facture, choisis d\'abord le·la client·e. Les prix qui lui correspondent seront proposés automatiquement.</string>
+    <string name="whats_new_longpress_title">Sélection par clic prolongé</string>
+    <string name="whats_new_longpress_text">Pour sélectionner un élément (client·e, produit, document) dans une liste, tu peux désormais faire un clic prolongé.\n\nLe clic sur le cercle ○ fonctionne toujours. ofc.</string>
+    <string name="whats_new_forum_title">Le forum de la communauté</string>
+    <string name="whats_new_forum_text">Un lieu d\'échange pour co-construire 𝕘𝟠 (et papoter).</string>
+    <string name="whats_new_forum_link">https://forum.the-gate.fr/</string>
+    <string name="whats_new_kaomoji_bye">(ノ◕ヮ◕)ノ☆</string>
+    <string name="whats_new_happy_new_year">Bonne année 2026 ! Plein de succès dans tes projets ! </string>
+    <string name="whats_new_early_bat_title">Programme \"Early bat\"</string>
+    <string name="whats_new_early_bat_text">Rejoins la petite colonie de 20 productrices et producteurs bio volontaires pour tester l\'appli, et gagne de jolis cadeaux !</string>
+    <string name="whats_new_early_bat_cta">En savoir plus</string>
+    <string name="whats_new_early_bat_link">https://www.the-gate.fr/soutenir-g8</string>
+    <string name="whats_new_bye_text">Allez je repars au boulot, je prépare l\'appli bureau et la facturation électronique.</string>
+    <string name="whats_new_bye_signature">𝕘𝕚𝕞𝕞𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="whats_new_rate_button">✰✰✰✰✰</string>
+    <string name="whats_new_rate_link">https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="whats_new_close">Fermer</string>
 </resources>

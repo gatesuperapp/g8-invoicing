@@ -31,12 +31,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.util.concurrent.TimeUnit
 import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
 
@@ -143,10 +138,6 @@ fun DocumentBottomSheetProducts(
             onClickNew = {
                 typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
                 onShowDocumentForm(true)
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(TimeUnit.MILLISECONDS.toMillis(500))
-                    isProductListVisible = false
-                }
                 onClickNewProduct()
             },
             onClickChooseExisting = {
@@ -167,16 +158,10 @@ fun DocumentBottomSheetProducts(
                 list = params.second ?: emptyList(),
                 onClickBack = { isProductListVisible = false },
                 onProductClick = {
-                    onClickProduct(it) // Update the ProductAddEditViewModel with the chosen product
-                    // so we open bottom document form with the chosen product
+                    onClickProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
+                    isProductListVisible = false
                     onShowDocumentForm(true)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(TimeUnit.MILLISECONDS.toMillis(500))
-                        // Waits for the bottom form to be opened,
-                        // so previous screen change is in background
-                        isProductListVisible = false
-                    }
                 },
                 clientId = document.documentClient?.originalClientId
             )

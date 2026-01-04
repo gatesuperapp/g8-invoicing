@@ -18,6 +18,8 @@ fun BottomBarAction(
     onClickCategory: (Category) -> Unit = { },
     onClickTag: (DocumentTag) -> Unit,
     onChangeBackground: () -> Unit,
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     ) {
     BottomAppBar(
         modifier = Modifier
@@ -28,7 +30,9 @@ fun BottomBarAction(
                 appBarActions,
                 onClickCategory,
                 onClickTag,
-                onChangeBackground
+                onChangeBackground,
+                isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange
             )
         },
         contentPadding = PaddingValues(

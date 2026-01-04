@@ -47,6 +47,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -135,7 +136,7 @@ fun Account(
     Scaffold(
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
-                title = R.string.appbar_account,
+              //  title = R.string.appbar_account,
                 navController = navController,
                 onClickBackArrow = onClickBack,
                 isCancelCtaDisplayed = false
@@ -237,6 +238,39 @@ fun Account(
                     },
                 ) {
                     Text(stringResource(id = R.string.account_donate))
+                }
+
+                Spacer(modifier = Modifier.height(40.dp))
+
+                // Section partage
+        /*        Text(
+                    modifier = Modifier.padding(horizontal = 40.dp),
+                    textAlign = TextAlign.Center,
+                    text = stringResource(id = R.string.account_share_text)
+                )*/
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val shareContent = stringResource(id = R.string.account_share_content)
+                Button(
+                    modifier = Modifier.border(
+                        BorderStroke(
+                            width = 4.dp,
+                            brush = brush
+                        ), shape = RoundedCornerShape(50)
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
+                    onClick = {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, shareContent)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
+                    },
+                ) {
+                //    Text(stringResource(id = R.string.account_share_button))
                 }
 
                 Spacer(modifier = Modifier.height(30.dp))

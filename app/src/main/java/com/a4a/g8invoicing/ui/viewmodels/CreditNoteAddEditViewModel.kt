@@ -47,12 +47,13 @@ class CreditNoteAddEditViewModel @Inject constructor(
             id?.let {
                 fetchCreditNoteFromLocalDb(it.toLong())
             } ?: viewModelScope.launch(context = Dispatchers.Default) {
-                createNewCreditNote()?.let {
+                val newId = createNewCreditNote()
+                newId?.let {
                     fetchCreditNoteFromLocalDb(it)
                 }
             }
         } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
+            //Log.e("CreditNoteVM", "init error: ${e.message}")
         }
     }
 
@@ -69,11 +70,12 @@ class CreditNoteAddEditViewModel @Inject constructor(
         fetchJob?.cancel()
         fetchJob = viewModelScope.launch {
             try {
-                documentDataSource.fetch(id)?.let {
+                val fetched = documentDataSource.fetch(id)
+                fetched?.let {
                     _documentUiState.value = it
                 }
             } catch (e: Exception) {
-                //println("Fetching deliveryNote failed with exception: ${e.localizedMessage}")
+                //Log.e("CreditNoteVM", "fetchCreditNoteFromLocalDb error: ${e.message}")
             }
         }
     }
@@ -111,10 +113,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
 
     suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
         val currentDocumentId = _documentUiState.value.documentId?.toLong()
-        if (currentDocumentId == null) {
-            //println("Error: documentId is null, cannot save document product")
-            return null
-        }
+            ?: return null
 
         return try {
             documentDataSource.saveDocumentProductInDbAndLinkToDocument(
@@ -122,7 +121,7 @@ class CreditNoteAddEditViewModel @Inject constructor(
                 documentId = currentDocumentId
             )
         } catch (e: Exception) {
-            //println("Saving documentProduct failed with exception: ${e.localizedMessage}")
+            //Log.e("CreditNoteVM", "Saving documentProduct failed: ${e.localizedMessage}")
             null
         }
     }

@@ -375,5 +375,11 @@ suspend fun createNewClientOrIssuer(
     type: ClientOrIssuerType,
 ) {
     clientOrIssuerAddEditViewModel.setClientOrIssuerUiState(type)
-    clientOrIssuerAddEditViewModel.createNew(type)
+    // Convertir DOCUMENT_CLIENT/DOCUMENT_ISSUER vers CLIENT/ISSUER pour sauvegarder dans la bonne table
+    val saveType = when (type) {
+        ClientOrIssuerType.DOCUMENT_CLIENT -> ClientOrIssuerType.CLIENT
+        ClientOrIssuerType.DOCUMENT_ISSUER -> ClientOrIssuerType.ISSUER
+        else -> type
+    }
+    clientOrIssuerAddEditViewModel.createNew(saveType)
 }

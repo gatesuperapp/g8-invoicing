@@ -5,7 +5,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.a4a.g8invoicing.R
@@ -52,27 +54,15 @@ import java.math.RoundingMode
 
 
 fun createPdfWithIText(inputDocument: DocumentState, context: Context): String {
-    var fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
+    val fileNameBeforeNumbering = "${inputDocument.documentNumber.text}_temp.pdf"
 
-    // Check if this file already exists and delete it
-    var isDeleted = false
-    getFile(fileNameBeforeNumbering)?.let { file ->
-        if (file.exists() && file.isFile) {
-            isDeleted = deleteFile(fileNameBeforeNumbering)
-        }
-    }
-    val newName = File(fileNameBeforeNumbering).nameWithoutExtension
-    var i = 1
-    while (getFile(fileNameBeforeNumbering) != null && getFile(fileNameBeforeNumbering)!!.exists() && !isDeleted) {
-        // When the pdf has been saved the day or more before
-        // it cant be erased anymore, throwing a java.nio.file.NoSuchFileException
-        // because there's no read/write permission. So we're renaming the file in such case
-        fileNameBeforeNumbering = newName.substringBefore(" - ") + " - " + (i) + ".pdf"
-        isDeleted = deleteFile(fileNameBeforeNumbering)
-        i += 1
+    // Supprimer le fichier temporaire s'il existe déjà
+    val tempFile = getTempFile(context, fileNameBeforeNumbering)
+    if (tempFile.exists()) {
+        tempFile.delete()
     }
 
-    val writer = PdfWriter(getFilePath(fileNameBeforeNumbering))
+    val writer = PdfWriter(getTempFilePath(context, fileNameBeforeNumbering))
     writer.isFullCompression
     val pdfDocument = PdfDocument(writer)
 
@@ -197,68 +187,77 @@ fun addPageNumberingAndDeletePreviousFile(
     context: Context,
 ): String {
     val fontRegular: PdfFont = PdfFontFactory.createFont("assets/helvetica.ttf")
-    var finalFileName = "${inputDocument.documentNumber.text}.pdf"
-    var isDeleted = false
-    getFile(finalFileName)?.let { file ->
-        if (file.exists() && file.isFile) {
-            isDeleted = deleteFile(finalFileName)
-        }
-    }
-    val newName = File(finalFileName).nameWithoutExtension
-    var i = 1
-    while (getFile(finalFileName) != null && getFile(finalFileName)!!.exists() && !isDeleted) {
-        // When the pdf has been saved the day or more before
-        // it cant be erased anymore, throwing a java.nio.file.NoSuchFileException
-        // because there's no read/write permission. So we're renaming the file in such case
-        finalFileName = newName.substringBefore(" - ") + " - " + (i) + ".pdf"
-        isDeleted = deleteFile(finalFileName)
-        i += 1
+    val finalFileName = "${inputDocument.documentNumber.text}.pdf"
+
+    // Fichier temporaire source (le PDF sans numérotation)
+    val tempSourceFile = getTempFile(context, fileNameBeforeNumbering)
+    // Fichier temporaire destination (le PDF final avec numérotation)
+    val tempFinalFile = getTempFile(context, finalFileName)
+
+    // Supprimer le fichier final temporaire s'il existe
+    if (tempFinalFile.exists()) {
+        tempFinalFile.delete()
     }
 
+    if (tempSourceFile.exists() && tempSourceFile.isFile) {
+        try {
+            val pdfDoc = PdfDocument(
+                PdfReader(tempSourceFile.absolutePath),
+                PdfWriter(tempFinalFile.absolutePath)
+            )
+            val doc = Document(pdfDoc)
+            val numberOfPages = pdfDoc.numberOfPages
 
-    getFile(fileNameBeforeNumbering)?.let {
-        if (it.exists() && it.isFile) {
-            try {
-                val pdfDoc = PdfDocument(
-                    PdfReader(getFilePath(fileNameBeforeNumbering)),
-                    PdfWriter(getFilePath(finalFileName))
-                )
-                val doc = Document(pdfDoc)
-                val numberOfPages = pdfDoc.numberOfPages
-
-                if (inputDocument is InvoiceState && inputDocument.documentTag == DocumentTag.PAID) {
-                    createPaidStamp(context)?.let {
-                        doc.add(it)
-                    }
+            if (inputDocument is InvoiceState && inputDocument.documentTag == DocumentTag.PAID) {
+                createPaidStamp(context)?.let {
+                    doc.add(it)
                 }
-
-                if (numberOfPages > 1) {
-                    for (i in 1..numberOfPages) {
-                        // Display document number on every page footer except first page
-                        val documentNameAndNumber =
-                            if (i == 1) "" else getDocumentName(inputDocument.documentType) + " " +
-                                    inputDocument.documentNumber.text + " - "
-                        doc.showTextAligned(
-                            Paragraph(
-                                documentNameAndNumber
-                                        + String.format(
-                                    "%s/%s",
-                                    i,
-                                    numberOfPages
-                                )
-                            )
-                                .setFont(fontRegular),
-                            570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
-                        )
-                    }
-                }
-
-                deleteFile(fileNameBeforeNumbering)
-                doc.close()
-                pdfDoc.close()
-            } catch (e: Exception) {
-                Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
+
+            if (numberOfPages > 1) {
+                for (i in 1..numberOfPages) {
+                    // Display document number on every page footer except first page
+                    val documentNameAndNumber =
+                        if (i == 1) "" else getDocumentName(inputDocument.documentType) + " " +
+                                inputDocument.documentNumber.text + " - "
+                    doc.showTextAligned(
+                        Paragraph(
+                            documentNameAndNumber
+                                    + String.format(
+                                "%s/%s",
+                                i,
+                                numberOfPages
+                            )
+                        )
+                            .setFont(fontRegular),
+                        570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
+                    )
+                }
+            }
+
+            doc.close()
+            pdfDoc.close()
+
+            // Supprimer le fichier source temporaire
+            tempSourceFile.delete()
+
+            // Sauvegarder le PDF final dans Downloads/g8
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                // Android 10+ : utiliser MediaStore
+                saveToDownloadsWithMediaStore(context, tempFinalFile, finalFileName)
+                // Supprimer le fichier temporaire après copie
+                tempFinalFile.delete()
+            } else {
+                // Android 9 et moins : copier vers Downloads/g8
+                val destFile = getFileLegacy(finalFileName)
+                destFile?.let {
+                    tempFinalFile.copyTo(it, overwrite = true)
+                    tempFinalFile.delete()
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
     }
     return finalFileName
@@ -862,29 +861,130 @@ data class PriceRow(
 )
 
 fun getFileUri(context: Context, fileName: String): Uri? {
+    // Sur Android 10+, chercher d'abord dans MediaStore
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val uri = findMediaStoreUri(context, fileName)
+        if (uri != null) return uri
+    }
+
+    // Fallback: FileProvider pour les fichiers locaux
     var uri: Uri? = null
-    val file = File(getFilePath(fileName))
-    try {
-        uri = FileProvider.getUriForFile(
-            context,
-            context.applicationContext.packageName + ".provider",
-            file
-        )
-    } catch (e: Exception) {
-        //Log.e(ContentValues.TAG, "Error: ${e.message}")
+    val file = File(getFilePath(context, fileName))
+    if (file.exists()) {
+        try {
+            uri = FileProvider.getUriForFile(
+                context,
+                context.applicationContext.packageName + ".provider",
+                file
+            )
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error getFileUri: ${e.message}")
+        }
     }
     return uri
 }
 
-fun getFilePath(fileName: String): String {
+// Chercher un fichier dans MediaStore par nom
+private fun findMediaStoreUri(context: Context, fileName: String): Uri? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+
+    val projection = arrayOf(MediaStore.Downloads._ID)
+    val selection = "${MediaStore.Downloads.DISPLAY_NAME} = ?"
+    val selectionArgs = arrayOf(fileName)
+
+    context.contentResolver.query(
+        MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+        projection,
+        selection,
+        selectionArgs,
+        null
+    )?.use { cursor ->
+        if (cursor.moveToFirst()) {
+            val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID))
+            return android.content.ContentUris.withAppendedId(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                id
+            )
+        }
+    }
+    return null
+}
+
+// Sauvegarder un fichier dans Downloads/g8 via MediaStore (Android 10+)
+fun saveToDownloadsWithMediaStore(context: Context, sourceFile: File, fileName: String): Uri? {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+
+    // Supprimer le fichier existant s'il y en a un
+    deleteFromMediaStore(context, fileName)
+
+    val contentValues = ContentValues().apply {
+        put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+        put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+        put(MediaStore.Downloads.RELATIVE_PATH, "Download/g8")
+    }
+
+    val resolver = context.contentResolver
+    val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+
+    uri?.let {
+        resolver.openOutputStream(it)?.use { outputStream ->
+            sourceFile.inputStream().use { inputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+    }
+
+    return uri
+}
+
+// Supprimer un fichier de MediaStore
+private fun deleteFromMediaStore(context: Context, fileName: String): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false
+
+    val uri = findMediaStoreUri(context, fileName) ?: return false
+    return try {
+        context.contentResolver.delete(uri, null, null) > 0
+    } catch (e: Exception) {
+        Log.e(ContentValues.TAG, "Error deleteFromMediaStore: ${e.message}")
+        false
+    }
+}
+
+// Obtenir le chemin d'un fichier temporaire dans le cache
+fun getTempFilePath(context: Context, fileName: String): String {
+    val cacheDir = File(context.cacheDir, "pdf_temp")
+    if (!cacheDir.exists()) cacheDir.mkdirs()
+    return File(cacheDir, fileName).absolutePath
+}
+
+// Obtenir un fichier temporaire
+fun getTempFile(context: Context, fileName: String): File {
+    val cacheDir = File(context.cacheDir, "pdf_temp")
+    if (!cacheDir.exists()) cacheDir.mkdirs()
+    return File(cacheDir, fileName)
+}
+
+// Supprimer un fichier temporaire
+private fun deleteTempFile(context: Context, fileName: String): Boolean {
+    val file = getTempFile(context, fileName)
+    return if (file.exists()) file.delete() else true
+}
+
+fun getFilePath(context: Context, fileName: String): String {
+    // Sur Android 10+, utiliser le cache pour les fichiers temporaires
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        return getTempFilePath(context, fileName)
+    }
+    // Android 9 et moins: utiliser Downloads/g8
     var path = ""
-    getFile(fileName)?.let {
+    getFileLegacy(fileName)?.let {
         path = it.absolutePath
     }
     return path
 }
 
-fun getFile(fileName: String): File? {
+// Ancienne méthode pour Android 9 et moins
+private fun getFileLegacy(fileName: String): File? {
     val folder =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     val directory = File(folder, "g8")
@@ -902,7 +1002,14 @@ fun getFile(fileName: String): File? {
     return File("$folder/g8/$fileName")
 }
 
-private fun deleteFile(fileName: String): Boolean {
+private fun deleteFile(context: Context, fileName: String): Boolean {
+    // Sur Android 10+, supprimer via MediaStore
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        // Supprimer aussi du cache si présent
+        deleteTempFile(context, fileName)
+        return deleteFromMediaStore(context, fileName)
+    }
+    // Android 9 et moins
     var isDeleted = false
     val folder =
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath

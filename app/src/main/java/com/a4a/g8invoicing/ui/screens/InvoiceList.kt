@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.ui.screens
 
 import android.text.TextUtils.substring
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -30,6 +32,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +50,8 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.hasSeenPopup
+import com.a4a.g8invoicing.data.hasSeenWhatsNew
+import com.a4a.g8invoicing.data.setSeenWhatsNew
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -54,6 +59,8 @@ import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.BatAnimation
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
+import com.a4a.g8invoicing.ui.shared.WhatsNewDialog
+import kotlinx.coroutines.launch
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
@@ -90,6 +97,23 @@ fun InvoiceList(
 
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
+
+    // Contrôle du menu catégories et double-tap pour quitter
+    var isCategoriesMenuOpen by remember { mutableStateOf(false) }
+    var lastBackPressTime by remember { mutableStateOf(0L) }
+
+    // BackHandler pour gérer le retour
+    BackHandler {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressTime < 2000) {
+            // Double tap -> quitter
+            (context as? android.app.Activity)?.finish()
+        } else {
+            // Premier tap -> ouvrir le menu
+            lastBackPressTime = currentTime
+            isCategoriesMenuOpen = true
+        }
+    }
 
     //Launch download db popup
     val hasSeenPopup by hasSeenPopup(context).collectAsState(initial = null)
@@ -133,6 +157,29 @@ fun InvoiceList(
                 file = it
             )
         }
+    }
+
+    // What's New dialog pour afficher les nouveautés de la version
+    val hasSeenWhatsNew by hasSeenWhatsNew(context).collectAsState(initial = null)
+    var showWhatsNewDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(hasSeenWhatsNew) {
+        val seen = hasSeenWhatsNew ?: return@LaunchedEffect
+        if (!seen) {
+            showWhatsNewDialog = true
+        }
+    }
+
+    if (showWhatsNewDialog) {
+        WhatsNewDialog(
+            onDismiss = {
+                showWhatsNewDialog = false
+                coroutineScope.launch {
+                    setSeenWhatsNew(context)
+                }
+            }
+        )
     }
 
     ScaffoldWithDimmedOverlay(
@@ -192,7 +239,9 @@ fun InvoiceList(
                 isInvoice = true,
                 onChangeBackground = {
                     isDimActive.value = !isDimActive.value
-                }
+                },
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it }
             )
         }
     ) { padding ->
@@ -207,9 +256,20 @@ fun InvoiceList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                if (documentsUiState.documentStates.isEmpty()) {
+                // Délai pour éviter le flash de l'animation pendant le chargement
+                var showEmptyState by remember { mutableStateOf(false) }
+                LaunchedEffect(documentsUiState.documentStates.isEmpty()) {
+                    if (documentsUiState.documentStates.isEmpty()) {
+                        kotlinx.coroutines.delay(300)
+                        showEmptyState = true
+                    } else {
+                        showEmptyState = false
+                    }
+                }
+
+                if (documentsUiState.documentStates.isEmpty() && showEmptyState) {
                     DisplayBatHelperWelcome()
-                } else {
+                } else if (documentsUiState.documentStates.isNotEmpty()) {
                     Column {
                         DocumentListContent(
                             documents = documentsUiState.documentStates,

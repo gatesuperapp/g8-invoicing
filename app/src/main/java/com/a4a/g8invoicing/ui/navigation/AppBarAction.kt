@@ -203,7 +203,7 @@ fun actionTagSent() =
 fun actionTagPaid() =
     AppBarAction(
         tag = DocumentTag.PAID,
-        icon = Icons.Filled.CheckCircle,
+        icon = Icons.Filled.Circle,
         iconColor = ColorGreenPaid,
         description = R.string.appbar_tag_paid,
         label = R.string.appbar_tag_paid,
@@ -214,7 +214,7 @@ fun actionTagPaid() =
 fun actionTagLate() =
     AppBarAction(
         tag = DocumentTag.LATE,
-        icon = Icons.Filled.CheckCircle,
+        icon = Icons.Filled.Circle,
         iconColor = ColorRedLate,
         description = R.string.appbar_tag_late,
         label = R.string.appbar_tag_late,
@@ -224,7 +224,7 @@ fun actionTagLate() =
 fun actionTagReminded() =
     AppBarAction(
         tag = DocumentTag.REMINDED,
-        icon = Icons.Filled.CheckCircle,
+        icon = Icons.Filled.Circle,
         iconColor = ColorReminded,
         description = R.string.appbar_tag_reminded,
         label = R.string.appbar_tag_reminded,
@@ -234,7 +234,7 @@ fun actionTagReminded() =
 fun actionTagCancelled() =
     AppBarAction(
         tag = DocumentTag.CANCELLED,
-        icon = Icons.Filled.CheckCircle,
+        icon = Icons.Filled.Circle,
         iconColor = ColorCancelled,
         description = R.string.appbar_tag_cancelled,
         label = R.string.appbar_tag_cancelled,
