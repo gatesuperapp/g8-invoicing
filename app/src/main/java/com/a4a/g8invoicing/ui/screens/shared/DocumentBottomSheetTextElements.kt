@@ -128,6 +128,7 @@ fun DocumentBottomSheetTextElements(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .padding(bottom = 50.dp)
                 ) {
                     // MAIN ELEMENTS
                     DocumentBottomSheetElementsContent(
