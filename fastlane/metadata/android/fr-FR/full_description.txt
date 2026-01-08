@@ -1,1 +1,12 @@
-Créez des bons de livraison et factures professionnels grâce à une application gratuite et facile à prendre en main. Pour gagner du temps, vous pouvez transformer vos bons de livraison en factures et dupliquer vos documents.
+G8 Invoicing est une application de facturation gratuite et open-source pour Android.
+
+Fonctionnalités :
+- Créer et gérer des factures
+- Créer des bons de livraison et les convertir en factures
+- Créer des avoirs
+- Gérer vos clients et produits
+- Prix personnalisés par client
+- Export des documents en PDF
+- Aucun compte requis, toutes les données stockées localement
+
+Parfait pour les freelances, petites entreprises et tous ceux qui ont besoin de créer des factures professionnelles en déplacement.

@@ -1,1 +1,12 @@
-Create professional delivery notes and invoices with a free, easy-to-use application. To save time, you can transform your delivery notes into invoices and duplicate your documents.
+G8 Invoicing is a free and open-source invoicing app for Android.
+
+Features:
+- Create and manage invoices
+- Create delivery notes and convert them to invoices
+- Create credit notes
+- Manage your clients and products
+- Custom pricing per client
+- Export documents to PDF
+- No account required, all data stored locally
+
+Perfect for freelancers, small businesses and anyone who needs to create professional invoices on the go.

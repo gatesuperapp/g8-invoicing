@@ -1,0 +1,3 @@
+- Améliorations de l'interface et corrections de bugs
+- Améliorations de l'export PDF
+- Suppression de la dépendance Google Fonts pour une meilleure confidentialité
