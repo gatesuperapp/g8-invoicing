@@ -1,4 +1,4 @@
-G8 Invoicing est une application de facturation gratuite et open-source pour Android.
+G8 Invoicing est une application de facturation gratuite et open source pour Android.
 
 Fonctionnalités :
 - Créer et gérer des factures
@@ -9,4 +9,4 @@ Fonctionnalités :
 - Export des documents en PDF
 - Aucun compte requis, toutes les données stockées localement
 
-Parfait pour les freelances, petites entreprises et tous ceux qui ont besoin de créer des factures professionnelles en déplacement.
+Parfait pour les paysan·nes, freelances, petites entreprises et tous ceux qui ont besoin de créer des factures professionnelles.

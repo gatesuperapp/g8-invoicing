@@ -1,7 +1,7 @@
-- créer des bons de livraison et factures
-- convertir un ou plusieurs bons de livraison en une facture
-- envoyer les documents par mail, SMS ou réseaux sociaux et les imprimer,
-- créer des avoirs et factures rectificatives
-- dupliquer un document
-- marquer une facture "payée"
-- relancer en un clic...
+- Create delivery notes and invoices
+- Convert one or more delivery notes into an invoice
+- Send documents by email, SMS or social networks and print them
+- Create credit notes and corrective invoices
+- Duplicate a document
+- Mark an invoice as "paid"
+- Send payment reminders with one click
