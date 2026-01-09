@@ -1,0 +1,3 @@
+- Suppression de la permission INTERNET
+- Suppression du code d'authentification inutilisé
+- Améliorations de la confidentialité

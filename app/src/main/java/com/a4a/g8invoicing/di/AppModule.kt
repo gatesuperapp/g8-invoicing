@@ -1,8 +1,6 @@
 package com.a4a.g8invoicing.di
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.a4a.g8invoicing.Database
@@ -20,9 +18,6 @@ import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
-import com.a4a.g8invoicing.data.auth.AuthApi
-import com.a4a.g8invoicing.data.auth.AuthRepository
-import com.a4a.g8invoicing.data.auth.AuthRepositoryInterface
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,10 +26,7 @@ import g8invoicing.ClientOrIssuerQueries
 import g8invoicing.DeliveryNoteQueries
 import g8invoicing.InvoiceQueries
 import g8invoicing.ProductQueries
-import retrofit2.Retrofit
-import retrofit2.create
 import javax.inject.Singleton
-import retrofit2.converter.moshi.MoshiConverterFactory
 
 
 @Module
@@ -96,29 +88,6 @@ object AppModule {
     @Singleton
     fun alertDialogDataSource(driver: SqlDriver): AlertDialogDataSourceInterface {
         return AlertDialogLocalDataSource(Database(driver))
-    }
-
-    @Provides
-    @Singleton
-    fun provideAuthApi(): AuthApi {
-        return Retrofit.Builder()
-            .baseUrl("https://g8-api-4zjqp.ondigitalocean.app/api/")
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build()
-            .create()
-    }
-
-    @Provides
-    @Singleton
-    fun provideSharedPref(app: Application): SharedPreferences {
-        return app.getSharedPreferences("prefs", Context.MODE_PRIVATE)
-    }
-
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(api: AuthApi, prefs: SharedPreferences): AuthRepositoryInterface {
-        return AuthRepository(api, prefs)
     }
 
     // Used to know if db is empty or not, for the download db popup

@@ -1,0 +1,3 @@
+- Remove INTERNET permission (app is now fully offline)
+- Remove unused authentication code
+- Privacy improvements

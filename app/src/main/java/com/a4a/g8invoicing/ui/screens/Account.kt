@@ -54,25 +54,15 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.ui.shared.BatAnimation
-import com.a4a.g8invoicing.ui.states.AuthState
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 
 @Composable
 fun Account(
     navController: NavController,
-    uiState: AuthState,
-    httpRequestResult: AuthResult<Unit>?,
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
-    signUpUsernameChanged: (String) -> Unit,
-    signUpPasswordChanged: (String) -> Unit,
-    signUp: () -> Unit,
-    signInUsernameChanged: (String) -> Unit,
-    signInPasswordChanged: (String) -> Unit,
-    signIn: () -> Unit,
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current

@@ -16,8 +16,8 @@ android {
         minSdk = 26
 
         targetSdk = 36
-        versionCode = 38
-        versionName = "1.4"
+        versionCode = 39
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -98,10 +98,6 @@ dependencies {
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.2.0")
 
-    // retrofit
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
-
     // iText (create PDF)
     implementation("com.itextpdf:itext7-core:9.4.0")
 
@@ -109,9 +105,6 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.17")
     implementation("org.slf4j:slf4j-simple:2.0.17")
 
-    // Auth info storage
-    implementation("androidx.security:security-crypto:1.1.0")
-    implementation("org.mindrot:jbcrypt:0.4")
 
     // Lottie
     implementation("com.airbnb.android:lottie-compose:6.7.1")
