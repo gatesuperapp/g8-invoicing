@@ -11,7 +11,6 @@ import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import g8invoicing.ClientOrIssuerQueries
 import g8invoicing.DeliveryNoteQueries
 import g8invoicing.InvoiceQueries
@@ -24,10 +23,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class InvoiceListViewModel @Inject constructor(
+class InvoiceListViewModel(
     private val invoiceDataSource: InvoiceLocalDataSourceInterface,
     private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
     private val invoiceQueries: InvoiceQueries,

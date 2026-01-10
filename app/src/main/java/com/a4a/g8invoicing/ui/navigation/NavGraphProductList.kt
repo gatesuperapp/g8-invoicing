@@ -5,7 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -29,7 +29,7 @@ fun NavGraphBuilder.productList(
             )
         }
     ) {
-        val viewModel: ProductListViewModel = hiltViewModel()
+        val viewModel: ProductListViewModel = koinViewModel()
         val productsUiState by viewModel.productsUiState
             .collectAsStateWithLifecycle()
 

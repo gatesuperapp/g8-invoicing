@@ -6,17 +6,14 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class DeliveryNoteListViewModel @Inject constructor(
+class DeliveryNoteListViewModel(
     private val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface,
     private val invoiceDataSource: InvoiceLocalDataSourceInterface,
 ) : ViewModel() {

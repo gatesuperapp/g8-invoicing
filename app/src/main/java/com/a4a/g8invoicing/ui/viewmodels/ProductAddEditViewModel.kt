@@ -21,7 +21,6 @@ import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductPrice
 import com.a4a.g8invoicing.ui.states.ProductState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +28,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import javax.inject.Inject
 import kotlin.collections.filter
 import kotlin.collections.map
 
 
-@HiltViewModel
-class ProductAddEditViewModel @Inject constructor(
+class ProductAddEditViewModel(
     private val dataSource: ProductLocalDataSourceInterface,
     private val taxDataSource: ProductTaxLocalDataSourceInterface,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,

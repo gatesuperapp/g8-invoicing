@@ -2,9 +2,11 @@ package com.a4a.g8invoicing
 
 import android.app.Application
 import androidx.annotation.StringRes
-import dagger.hilt.android.HiltAndroidApp
+import com.a4a.g8invoicing.di.appModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
-@HiltAndroidApp
 class G8Invoicing : Application() {
     companion object {
         lateinit var instance: G8Invoicing private set
@@ -13,6 +15,12 @@ class G8Invoicing : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+
+        startKoin {
+            androidLogger()
+            androidContext(this@G8Invoicing)
+            modules(appModule)
+        }
     }
 }
 

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.FileProvider
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.viewModelScope
 import java.io.File
 import com.a4a.g8invoicing.R
@@ -28,7 +28,7 @@ import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
 
 @Composable
 fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (File) -> Unit) {
-    val viewModel: InvoiceListViewModel = hiltViewModel()
+    val viewModel: InvoiceListViewModel = koinViewModel()
 
     var exportMessage by remember { mutableStateOf<String?>(null) }
 

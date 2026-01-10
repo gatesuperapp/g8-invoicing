@@ -1,7 +1,7 @@
 package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -18,7 +18,7 @@ fun NavGraphBuilder.invoiceList(
     onClickBack: () -> Unit,
 ) {
     composable(route = Screen.InvoiceList.name) {
-        val viewModel: InvoiceListViewModel = hiltViewModel()
+        val viewModel: InvoiceListViewModel = koinViewModel()
         val invoicesUiState by viewModel.documentsUiState
             .collectAsStateWithLifecycle()
 

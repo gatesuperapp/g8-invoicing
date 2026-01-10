@@ -8,19 +8,16 @@ import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductsUiState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.collections.sortedBy
 
-@HiltViewModel
-class ProductListViewModel @Inject constructor(
-    private val application: Application, // For context
+class ProductListViewModel(
+    private val application: Application,
     private val productDataSource: ProductLocalDataSourceInterface,
 ) : ViewModel() {
 

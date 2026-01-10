@@ -5,7 +5,6 @@ import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import dagger.Binds
 import kotlinx.coroutines.flow.Flow
 
 interface CreditNoteLocalDataSourceInterface {

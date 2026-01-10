@@ -12,15 +12,12 @@ import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class ClientOrIssuerAddEditViewModel @Inject constructor(
+class ClientOrIssuerAddEditViewModel(
     private val dataSource: ClientOrIssuerLocalDataSourceInterface,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {

@@ -50,7 +50,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -88,26 +88,26 @@ fun NavGraphBuilder.invoiceAddEdit(
     ) {
         val scope = rememberCoroutineScope()
 
-        val invoiceViewModel: InvoiceAddEditViewModel = hiltViewModel()
+        val invoiceViewModel: InvoiceAddEditViewModel = koinViewModel()
         val document by invoiceViewModel.documentUiState.collectAsStateWithLifecycle()
 
-        val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = hiltViewModel()
+        val clientOrIssuerListViewModel: ClientOrIssuerListViewModel = koinViewModel()
         val clientListUiState by clientOrIssuerListViewModel.clientsUiState
             .collectAsStateWithLifecycle()
         val issuerListUiState by clientOrIssuerListViewModel.issuersUiState
             .collectAsStateWithLifecycle()
 
-        val clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
+        val clientOrIssuerAddEditViewModel: ClientOrIssuerAddEditViewModel = koinViewModel()
         val documentClientUiState by clientOrIssuerAddEditViewModel.documentClientUiState.collectAsState()
         val documentIssuerUiState by clientOrIssuerAddEditViewModel.documentIssuerUiState.collectAsState()
 
         // all available products
-        val productListViewModel: ProductListViewModel = hiltViewModel()
+        val productListViewModel: ProductListViewModel = koinViewModel()
         val productListUiState by productListViewModel.productsUiState
             .collectAsStateWithLifecycle()
 
         // when adding a product to the document
-        val productAddEditViewModel: ProductAddEditViewModel = hiltViewModel()
+        val productAddEditViewModel: ProductAddEditViewModel = koinViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
 
         var showDocumentForm by remember { mutableStateOf(false) }

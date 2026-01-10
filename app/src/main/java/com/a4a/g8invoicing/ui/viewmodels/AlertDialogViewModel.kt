@@ -3,13 +3,10 @@ package com.a4a.g8invoicing.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.AlertDialogDataSourceInterface
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class AlertDialogViewModel @Inject constructor(
+class AlertDialogViewModel(
     private val alertDialogDataSource: AlertDialogDataSourceInterface,
 ) : ViewModel() {
     private var updateJob: Job? = null

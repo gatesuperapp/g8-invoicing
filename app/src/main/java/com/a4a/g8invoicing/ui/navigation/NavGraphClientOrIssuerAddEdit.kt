@@ -4,7 +4,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -25,7 +25,7 @@ fun NavGraphBuilder.clientAddEdit(
             navArgument("type") { nullable = true },
         ) // used in the ViewModel
     ) { backStackEntry ->
-        val viewModel: ClientOrIssuerAddEditViewModel = hiltViewModel()
+        val viewModel: ClientOrIssuerAddEditViewModel = koinViewModel()
         val clientUiState by viewModel.clientUiState
         val isNew = backStackEntry.arguments?.getString("itemId") == null
 

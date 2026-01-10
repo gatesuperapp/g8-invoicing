@@ -1,8 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("com.google.dagger.hilt.android")
-    id("kotlin-kapt")
     id("app.cash.sqldelight") version "2.2.1"
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
 }
@@ -62,9 +60,6 @@ android {
         )
     }
 
-    kapt {
-        correctErrorTypes = true
-    }
 }
 
 dependencies {
@@ -76,6 +71,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.5.0-alpha11")
     implementation("androidx.compose.runtime:runtime-livedata:1.10.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.9.6")
+    implementation("androidx.navigation:navigation-compose:2.9.6")
     implementation("androidx.wear.compose:compose-foundation:1.5.6")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
@@ -85,10 +81,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // hilt
-    implementation("com.google.dagger:hilt-android:2.57.2")
-    kapt("com.google.dagger:hilt-compiler:2.57.2")
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
+    // Koin
+    implementation("io.insert-koin:koin-android:3.5.0")
+    implementation("io.insert-koin:koin-androidx-compose:3.5.0")
 
     //SQLDelight
     implementation("app.cash.sqldelight:android-driver:2.2.1")

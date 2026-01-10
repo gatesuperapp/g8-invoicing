@@ -9,17 +9,14 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.CreditNotesUiState
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class CreditNoteListViewModel @Inject constructor(
+class CreditNoteListViewModel(
     private val creditNoteDataSource: CreditNoteLocalDataSourceInterface,
 ) : ViewModel() {
     private val _documentsUiState = MutableStateFlow(CreditNotesUiState())
