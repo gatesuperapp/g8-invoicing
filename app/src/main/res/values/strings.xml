@@ -246,7 +246,10 @@
     <string name="account_subscribe2">
 Sans engagement. Accès anticipé aux nouveautés inclus.
     </string>
-    <string name="about_share_text">L\'application vous est utile ? Partagez-la à vos ami·es !</string>
+    <string name="about_share_text">L\'application vous est utile ?</string>
+    <string name="about_donate_button">Faire un don</string>
+    <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
+    <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
     <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et engagé. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
     <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
