@@ -54,7 +54,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.shared.BatAnimation
+import com.a4a.g8invoicing.ui.shared.animations.BatKiss
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 
@@ -277,13 +277,12 @@ fun Account(
                             visibleText = !visibleText
                         }
                 ) {
-                    BatAnimation(
+                    BatKiss(
                         modifier = Modifier
                             .width(300.dp)
                             .height(200.dp)
                             .align(Alignment.Center),
-                        file = R.raw.bat_kiss_gif,
-                        numberOfIteration = numberOfIterations.intValue
+                        iterations = numberOfIterations.intValue
                     )
                 }
 

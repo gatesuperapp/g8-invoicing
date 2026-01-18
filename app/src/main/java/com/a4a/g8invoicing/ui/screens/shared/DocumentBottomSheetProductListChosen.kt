@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.shared.BatAnimation
+import com.a4a.g8invoicing.ui.shared.animations.BatWavyArms
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.theme.textSmall
@@ -164,13 +164,12 @@ private fun DisplayBatHelperAdvice() {
                 numberOfIterations.intValue += 1
             }
         ) {
-            BatAnimation(
+            BatWavyArms(
                 modifier = Modifier
                     .width(80.dp)
                     .height(50.dp)
                     .align(Alignment.Center),
-                file = R.raw.bat_wavy_arms,
-                numberOfIteration = numberOfIterations.intValue
+                iterations = numberOfIterations.intValue
             )
         }
 

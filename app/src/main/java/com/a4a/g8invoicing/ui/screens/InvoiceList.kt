@@ -57,7 +57,8 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.BatAnimation
+import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
+import com.a4a.g8invoicing.ui.shared.animations.BatOpenMouth
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.WhatsNewDialog
 import kotlinx.coroutines.launch
@@ -346,13 +347,12 @@ fun DisplayBatHelperWelcome() {
                 numberOfIterations.intValue += 1
             }
         ) {
-            BatAnimation(
+            BatSmilingEyes(
                 modifier = Modifier
                     .width(150.dp)
                     .height(150.dp)
                     .align(Alignment.Center),
-                file = R.raw.bat_smiling_eyes,
-                numberOfIteration = numberOfIterations.intValue
+                iterations = numberOfIterations.intValue
             )
         }
 
@@ -467,13 +467,12 @@ private fun DisplayBatHelperMenuAdvice() {
                 numberOfIterations.intValue += 1
             }
         ) {
-            BatAnimation(
+            BatOpenMouth(
                 modifier = Modifier
                     .width(100.dp)
                     .height(45.dp)
                     .align(Alignment.Center),
-                file = R.raw.bat_openmouth,
-                numberOfIteration = numberOfIterations.intValue
+                iterations = numberOfIterations.intValue
             )
         }
 

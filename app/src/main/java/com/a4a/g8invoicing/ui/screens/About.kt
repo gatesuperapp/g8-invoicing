@@ -66,7 +66,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
-import com.a4a.g8invoicing.ui.shared.BatAnimation
+import com.a4a.g8invoicing.ui.shared.animations.BatKiss
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
@@ -269,13 +269,12 @@ fun About(
                             visibleText = !visibleText
                         }
                 ) {
-                    BatAnimation(
+                    BatKiss(
                         modifier = Modifier
                             .width(250.dp)
                             .height(170.dp)
                             .align(Alignment.Center),
-                        file = R.raw.bat_kiss_gif,
-                        numberOfIteration = numberOfIterations.intValue
+                        iterations = numberOfIterations.intValue
                     )
                 }
 

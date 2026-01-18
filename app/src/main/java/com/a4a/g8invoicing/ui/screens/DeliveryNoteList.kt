@@ -44,7 +44,7 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
-import com.a4a.g8invoicing.ui.shared.BatAnimation
+import com.a4a.g8invoicing.ui.shared.animations.BatWavyArms
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNotesUiState
@@ -220,13 +220,12 @@ private fun DisplayBatHelperAdvice() {
                 numberOfIterations.intValue += 1
             }
         ) {
-            BatAnimation(
+            BatWavyArms(
                 modifier = Modifier
                     .width(130.dp)
                     .height(80.dp)
                     .align(Alignment.Center),
-                file = R.raw.bat_wavy_arms,
-                numberOfIteration = numberOfIterations.intValue
+                iterations = numberOfIterations.intValue
             )
         }
 

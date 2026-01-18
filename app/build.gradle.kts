@@ -101,9 +101,6 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:2.0.17")
 
 
-    // Lottie
-    implementation("com.airbnb.android:lottie-compose:6.7.1")
-
     // Drag & drop
     implementation("sh.calvin.reorderable:reorderable:3.0.0")
 
