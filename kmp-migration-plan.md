@@ -17,16 +17,16 @@ Migration de l'app Android vers Kotlin Multiplatform pour supporter iOS.
 | Phase | Sujet | Status |
 |-------|-------|--------|
 | Préparatoire | 0A - Hilt → Koin | ✅ Terminé |
-| Préparatoire | 0B - Lottie → Compottie | ✅ Terminé |
-| KMP | 1 - Setup Projet KMP | ✅ Terminé |
-| KMP | 2 - DI Koin KMP | ✅ Terminé |
-| KMP | 3 - Extraction Code Partagé | ✅ Terminé |
-| KMP | 4 - expect/actual Database | ✅ Terminé |
-| KMP | 5 - expect/actual Storage | ✅ Terminé |
-| KMP | 6 - expect/actual PDF | 🟡 Partiel |
-| KMP | 7 - Navigation KMP | 🟡 Partiel (TopBar, Screens List migrés) |
-| KMP | 8 - UI Compose Multiplatform | 🟡 Partiel (ViewModels + Screens List migrés) |
-| KMP | 9 - Tests et Finalisation | ❌ Non commencé |
+| Préparatoire | 0B - Lottie → Compose natif | ✅ Terminé |
+| KMP | 1 - Setup Projet KMP | ❌ À faire |
+| KMP | 2 - DI Koin KMP | ❌ À faire |
+| KMP | 3 - Extraction Code Partagé | ❌ À faire |
+| KMP | 4 - expect/actual Database | ❌ À faire |
+| KMP | 5 - expect/actual Storage | ❌ À faire |
+| KMP | 6 - expect/actual PDF | ❌ À faire |
+| KMP | 7 - Navigation KMP | ❌ À faire |
+| KMP | 8 - UI Compose Multiplatform | ❌ À faire |
+| KMP | 9 - Tests et Finalisation | ❌ À faire |
 
 ---
 
@@ -172,34 +172,28 @@ g8-invoicing/
 
 ---
 
-### SUJET 0B : Migration Lottie → Compottie - ✅ TERMINÉ
+### SUJET 0B : Migration Lottie → Compose natif - ✅ TERMINÉ
 
-> **Note:** Utilisé Compottie (lib KMP) au lieu d'animations Compose natives
+> **Note:** Utilisé animations Compose natives (pas Compottie) - plus léger, pas de dépendance externe
 
 #### 0B.1 - Analyser les animations actuelles ✅
 - [x] Identifier tous les fichiers .json Lottie utilisés (bat_wavy_arms, bat_smiling_eyes, bat_openmouth, bat_kiss_gif)
-- [x] Documenter ce que chaque animation fait
-- [x] Identifier les paramètres utilisés (iterations, modifier)
 
-#### 0B.2 - Intégrer Compottie ✅
-- [x] Ajouter dépendance `io.github.alexzhirkevich:compottie:2.0.2` dans shared
-- [x] Ajouter dépendance `io.github.alexzhirkevich:compottie-resources:2.0.2`
-- [x] Exclure kotlinx-datetime de Compottie (conflit de version)
-- [x] Copier les fichiers JSON vers `shared/commonMain/composeResources/files/`
-- [x] Créer `shared/commonMain/ui/shared/BatAnimation.kt` avec enum `BatAnimationType`
+#### 0B.2 - Créer animations Compose natives ✅
+- [x] Créer `ui/shared/animations/BatAnimations.kt` avec animations Compose pures
+- [x] Implémenter BatWavyArms, BatSmilingEyes, BatOpenMouth, BatKiss
 
 #### 0B.3 - Remplacer BatAnimation ✅
-- [x] Modifier `InvoiceList.kt` : utiliser nouveau BatAnimation
+- [x] Modifier `InvoiceList.kt`
 - [x] Modifier `DeliveryNoteList.kt`
 - [x] Modifier `Account.kt`
 - [x] Modifier `About.kt`
 - [x] Modifier `DocumentBottomSheetProductListChosen.kt`
 
 #### 0B.4 - Nettoyage Lottie ✅
-- [x] Supprimer ancien `ui/shared/BatAnimation.kt` de app
-- [x] Garder les fichiers .json dans `res/raw/` (pour compatibilité)
-- [x] Retirer dépendance `com.airbnb.android:lottie-compose` du `build.gradle.kts`
-- [x] Vérifier que l'app compile et fonctionne
+- [x] Supprimer ancien `ui/shared/BatAnimation.kt`
+- [x] Supprimer les fichiers .json dans `res/raw/`
+- [x] Retirer dépendance `com.airbnb.android:lottie-compose`
 
 ---
 
