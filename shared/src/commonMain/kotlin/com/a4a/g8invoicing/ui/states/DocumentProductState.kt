@@ -1,0 +1,24 @@
+package com.a4a.g8invoicing.ui.states
+
+import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+
+// The equivalent of ProductState, but used to save the products
+// linked to the documents, so the product is not deleted from the doc
+// when deleted from the product list.
+data class DocumentProductState(
+    var id: Int? = null,
+    var name: TextFieldValue = TextFieldValue(""),
+    var description: TextFieldValue? = null,
+    var priceWithoutTax: BigDecimal? = null,
+    var priceWithTax: BigDecimal? = null,
+    var taxRate: BigDecimal? = null,
+    var quantity: BigDecimal = BigDecimal.ONE,
+    var unit: TextFieldValue? = null,
+    var productId: Int? = null,
+    val linkedDate: String? = null,
+    val linkedDocNumber: String? = null,
+    var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
+    var sortOrder: Int? = null // remember product sorting in document
+)

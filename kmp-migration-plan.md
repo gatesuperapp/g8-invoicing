@@ -10,6 +10,11 @@ Migration de l'app Android vers Kotlin Multiplatform pour supporter iOS.
 - Garder iText sur Android, utiliser PDFKit sur iOS via expect/actual
 - Utiliser Compose Multiplatform pour l'UI
 
+**Approche actuelle :**
+- ⚠️ **iOS sera fait à la fin** - pour l'instant on se concentre sur Android fonctionnel avec code dans shared/
+- ⚠️ **Pas de modification de logique** - on transfère le code tel quel vers shared/
+- ⚠️ **Migration BigDecimal → bignum** à faire lors du transfert (java.math.BigDecimal → com.ionspin.kotlin.bignum)
+
 ---
 
 ## ÉTAT D'AVANCEMENT GLOBAL
@@ -18,7 +23,7 @@ Migration de l'app Android vers Kotlin Multiplatform pour supporter iOS.
 |-------|-------|--------|
 | Préparatoire | 0A - Hilt → Koin | ✅ Terminé |
 | Préparatoire | 0B - Lottie → Compose natif | ✅ Terminé |
-| KMP | 1 - Setup Projet KMP | ❌ À faire |
+| KMP | 1 - Setup Projet KMP | ✅ Terminé |
 | KMP | 2 - DI Koin KMP | ❌ À faire |
 | KMP | 3 - Extraction Code Partagé | ❌ À faire |
 | KMP | 4 - expect/actual Database | ❌ À faire |
