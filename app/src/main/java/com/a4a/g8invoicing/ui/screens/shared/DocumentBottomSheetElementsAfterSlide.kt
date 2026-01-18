@@ -10,8 +10,8 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import java.math.BigDecimal
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @Composable
 fun DocumentBottomSheetElementsAfterSlide(

@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.theme.inputLabel
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlin.collections.filter
 
 @Composable

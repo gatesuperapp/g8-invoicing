@@ -30,8 +30,8 @@ import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import java.math.BigDecimal
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
 

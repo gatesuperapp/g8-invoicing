@@ -45,7 +45,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActions
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 
 @Composable
 fun ClientOrIssuerAddEditForm(

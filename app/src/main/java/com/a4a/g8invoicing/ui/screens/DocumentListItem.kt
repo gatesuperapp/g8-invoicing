@@ -190,7 +190,7 @@ fun DocumentListItem(
                 )
                 Text(
                     text = (document.documentTotalPrices?.let {
-                        it.totalPriceWithTax.toString().replace(".", ",")
+                        it.totalPriceWithTax?.toPlainString()?.replace(".", ",")
                     }
                         ?: "") + stringResource(
                         id = R.string.currency

@@ -40,7 +40,7 @@ fun DocumentBasicTemplate(
         val pagerState = rememberPagerState { pageNumber }*/
     val footerArray = mutableStateListOf(PricesRowName.TOTAL_WITHOUT_TAX.name)
     val taxRates =
-        uiState.documentProducts?.mapNotNull { it.taxRate?.toInt() }?.distinct()?.sorted()
+        uiState.documentProducts?.mapNotNull { it.taxRate?.intValue(false) }?.distinct()?.sorted()
     taxRates?.forEach {
         footerArray.add("TAXES_$it")
     }

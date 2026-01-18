@@ -20,7 +20,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable

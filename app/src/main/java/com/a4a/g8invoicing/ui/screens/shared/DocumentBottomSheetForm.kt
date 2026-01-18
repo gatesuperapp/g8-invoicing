@@ -31,9 +31,9 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

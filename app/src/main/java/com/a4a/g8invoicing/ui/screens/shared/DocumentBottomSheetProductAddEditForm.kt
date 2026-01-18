@@ -31,7 +31,7 @@ import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 // It's a bit different from ProductAddEditForm: user can choose the quantity; there's some styling diff;
 // and it's not possible to add several prices from here.
@@ -151,7 +151,7 @@ fun DocumentBottomSheetProductAddEditForm(
                                 if (taxRate == null) {
                                     "-"
                                 } else {
-                                    "$taxRate%"
+                                    "${taxRate.toPlainString()}%"
                                 }
                             },
                         ),
@@ -160,7 +160,7 @@ fun DocumentBottomSheetProductAddEditForm(
                     FormInput(
                         label = priceLabel,
                         inputType = DecimalInput(
-                            text = (documentProduct.priceWithoutTax ?: "").toString(),
+                            text = documentProduct.priceWithoutTax?.toPlainString() ?: "",
                             taxRate = documentProduct.taxRate,
                             placeholder = pricePlaceholder,
                             keyboardType = KeyboardType.Decimal,
@@ -169,9 +169,9 @@ fun DocumentBottomSheetProductAddEditForm(
                             }
                         ),
                         inputType2 = DecimalInput(
-                            text = (documentProduct.priceWithTax ?: "").toString(),
+                            text = documentProduct.priceWithTax?.toPlainString() ?: "",
                             placeholder = documentProduct.taxRate?.let {
-                                (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
+                                (BigDecimal.fromInt(3) + BigDecimal.fromInt(3) * it / BigDecimal.fromInt(100)).toPlainString()
                             } ?: "",
                             keyboardType = KeyboardType.Decimal,
                             onValueChange = {

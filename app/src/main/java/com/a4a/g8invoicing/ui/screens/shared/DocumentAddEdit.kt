@@ -69,10 +69,10 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

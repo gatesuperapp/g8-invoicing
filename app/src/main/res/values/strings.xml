@@ -56,13 +56,13 @@
     <string name="appbar_delivery_notes">Bons de livraison</string>
     <string name="drawer_products">Produits</string>
     <string name="appbar_products">Produits</string>
-    <string name="drawer_client_list">Clients</string>
-    <string name="appbar_client_list">Clients</string>
+    <string name="drawer_client_list">Client·es</string>
+    <string name="appbar_client_list">Client·es</string>
     <string name="appbar_title_add_new">Nouveau</string>
     <string name="appbar_product_add">Ajout produit</string>
-    <string name="appbar_title_info">Infos client</string>
+    <string name="appbar_title_info">Infos client·e</string>
     <string name="appbar_product_detail">Infos produit</string>
-    <string name="appbar_client_edit">Modifier client</string>
+    <string name="appbar_client_edit">Modifier client·e</string>
     <string name="appbar_product_edit">Modifier produit</string>
     <string name="drawer_settings">Réglages</string>
     <string name="appbar_g8">𝕘𝟠</string>
@@ -76,7 +76,7 @@
     <string name="drawer_settings_description">Settings navigation button</string>
     <string name="drawer_info_description">About navigation button</string>
     <string name="my_info">Mes informations</string>
-    <string name="client">Client</string>
+    <string name="client">Client·e</string>
     <string name="products">Produits</string>
     <string name="product_duplicate_suffix"> - Copie</string>
     <string name="total_amount">Montant total</string>
@@ -90,7 +90,7 @@
     <string name="payments">Paiements collectés</string>
     <string name="client_business_name">Nom de l\'organisation</string>
     <string name="client_business_name_input">Entreprise X</string>
-    <string name="category">Type de client</string>
+    <string name="category">Type de client·e</string>
     <string name="client_first_name">Prénom</string>
     <string name="client_first_name_input">Hipposideros</string>
     <string name="client_name">Nom <sup>*</sup></string>
@@ -169,8 +169,8 @@
     <string name="document_date">Date</string>
     <string name="document_date_emitting">Date d\'émission</string>
     <string name="document_due_date">Échéance</string>
-    <string name="document_issuer">Émetteur</string>
-    <string name="document_client">Client</string>x
+    <string name="document_issuer">Émetteur·ice</string>
+    <string name="document_client">Client·e</string>x
     <string name="document_reference">Référence</string>
     <string name="document_free_field">Champ libre</string>
     <string name="document_footer">Pied de page</string>
@@ -223,16 +223,16 @@
     <string name="document_table_total_price_without_tax">Total HT</string>
     <string name="document_table_tax_rate">TVA</string>
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
-    <string name="document_bottom_sheet_list_add_new_client">Nouveau client</string>
-    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel émetteur</string>
+    <string name="document_bottom_sheet_list_add_new_client">Nouveau client·e</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel émetteur·ice</string>
     <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
     <string name="document_modal_add_product">Ajout produit</string>
     <string name="document_modal_edit_product">Édition produit</string>
     <string name="document_modal_new_product">Nouveau produit</string>
-    <string name="document_modal_new_issuer">Nouvel émetteur</string>
-    <string name="document_modal_edit_issuer">Édition émetteur</string>
-    <string name="document_modal_new_client">Nouveau client</string>
-    <string name="document_modal_edit_client">Édition client</string>
+    <string name="document_modal_new_issuer">Nouvel émetteur·ice</string>
+    <string name="document_modal_edit_issuer">Édition émetteur·ice</string>
+    <string name="document_modal_new_client">Nouveau client·e</string>
+    <string name="document_modal_edit_client">Édition client·e</string>
     <string name="document_modal_product_cancel">Annuler</string>
     <string name="document_modal_product_save">Valider</string>
     <string name="document_modal_product_back">Retour</string>
@@ -246,7 +246,10 @@
     <string name="account_subscribe2">
 Sans engagement. Accès anticipé aux nouveautés inclus.
     </string>
-    <string name="about_share_text">L\'application vous est utile ? Partagez-la à vos ami·es !</string>
+    <string name="about_share_text">L\'application vous est utile ?</string>
+    <string name="about_donate_button">Faire un don</string>
+    <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
+    <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
     <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et engagé. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
     <string name="about_kaomoji">(ノ)￣ ³￣)ノ)</string>
@@ -377,6 +380,11 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     <string name="database_email_subject">Export de mes données g8</string>
     <string name="database_email_body">Ma base de données SQLite de l’application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
     <string name="database_email_chooser">Envoyer la base de données par mail</string>
+
+    <!-- Client selection -->
+    <string name="client_selection_title">Sélectionner les clients</string>
+    <string name="client_selection_empty">Vous n\'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie \"Client·es\".</string>
+    <string name="client_selection_validate">Valider</string>
 
     <!-- About screen -->
     <string name="about_download_database">💎 Télécharger ma base de données 💎</string>

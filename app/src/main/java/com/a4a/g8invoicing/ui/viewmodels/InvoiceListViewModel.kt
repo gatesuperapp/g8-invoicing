@@ -7,7 +7,7 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
-import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState

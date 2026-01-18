@@ -193,10 +193,33 @@ fun About(
                     text = stringResource(id = R.string.about)
                 )
 
-                // Partage dans À propos
+                // Donation dans À propos
                 Text(
                     modifier = Modifier.padding(bottom = 12.dp),
                     text = stringResource(id = R.string.about_share_text)
+                )
+
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .border(
+                            BorderStroke(width = 4.dp, brush = brush),
+                            shape = RoundedCornerShape(50)
+                        ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
+                    onClick = {
+                        uriHandler.openUri(Strings.get(R.string.about_donate_link))
+                    },
+                ) {
+                    Text(stringResource(id = R.string.about_donate_button))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Partage dans À propos
+                Text(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    text = stringResource(id = R.string.about_share_text_2)
                 )
 
                 val shareContent = stringResource(id = R.string.account_share_content)

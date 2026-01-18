@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
@@ -1111,8 +1112,4 @@ class ClientOrIssuerAddEditViewModel(
             ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value.errors.clear()
         }
     }
-}
-
-enum class ClientOrIssuerType {
-    CLIENT, ISSUER, DOCUMENT_CLIENT, DOCUMENT_ISSUER
 }

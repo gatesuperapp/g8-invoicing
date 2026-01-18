@@ -16,7 +16,8 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerAddressQueries
 import g8invoicing.DocumentClientOrIssuerQueries
@@ -35,8 +36,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import java.util.Calendar
 
 class InvoiceLocalDataSource(
@@ -62,11 +63,19 @@ class InvoiceLocalDataSource(
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
         return withContext(Dispatchers.IO) {
+            val formatter = getDateFormatter()
+            val today = Calendar.getInstance()
+            val todayFormatted = formatter.format(today.time)
+            val dueDateCalendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }
+            val dueDateFormatted = formatter.format(dueDateCalendar.time)
+
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
                     getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
                         ?: Strings.get(R.string.invoice_default_number)
                 ),
+                documentDate = todayFormatted,
+                dueDate = dueDateFormatted,
                 documentIssuer = getExistingIssuer()?.transformIntoEditable(), // DB call
                 footerText = TextFieldValue(
                     getExistingFooter() ?: Strings.get(R.string.document_default_footer) // DB call
@@ -754,12 +763,6 @@ fun incrementDocumentNumber(docNumber: String): String {
     } else return docNumber
 }
 
-enum class TagUpdateOrCreationCase {
-    TAG_CREATION, // new invoice, delivery note conversion, duplication
-    UPDATED_BY_USER,
-    AUTOMATICALLY_CANCELLED, //after creating credit note or corrected invoice
-    DUE_DATE_EXPIRED
-}
 
 
 // This function performs synchronous DB IO.
@@ -779,10 +782,10 @@ fun saveDocumentProductInDbAndLink(
     documentProductQueries.saveDocumentProduct(  // DB call
         id = null,
         name = documentProduct.name.text,
-        quantity = documentProduct.quantity.toDouble(),
+        quantity = documentProduct.quantity.doubleValue(false),
         description = documentProduct.description?.text,
-        price_without_tax = documentProduct.priceWithoutTax?.toDouble(),
-        tax_rate = documentProduct.taxRate?.toDouble(),
+        price_without_tax = documentProduct.priceWithoutTax?.doubleValue(false),
+        tax_rate = documentProduct.taxRate?.doubleValue(false),
         unit = documentProduct.unit?.text,
         product_id = documentProduct.productId?.toLong()
     )
@@ -798,12 +801,13 @@ fun saveDocumentProductInDbAndLink(
             documentId,
             newDocumentProductId
         )
-        if (!deliveryNoteDate.isNullOrEmpty() && !deliveryNoteNumber.isNullOrEmpty() && linkToDeliveryNotesQueries != null) {
+        // Link to delivery note info if we have at least the delivery note number
+        if (!deliveryNoteNumber.isNullOrEmpty() && linkToDeliveryNotesQueries != null) {
             linkDocumentProductToDeliveryNoteInfo(
                 linkToDeliveryNotesQueries,
                 newDocumentProductId,
                 deliveryNoteNumber,
-                deliveryNoteDate,
+                deliveryNoteDate ?: "",
             )
         }
         return newDocumentProductId.toInt()
@@ -1248,9 +1252,12 @@ fun updateDocumentProductsOrderInDb(
 
 
 fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotalPrices {
-    val totalPriceWithoutTax = products.filter { it.priceWithoutTax != null }.sumOf {
-        it.priceWithoutTax!! * (it.quantity)
-    }.setScale(2, RoundingMode.HALF_UP)
+    val totalPriceWithoutTax = products
+        .filter { it.priceWithoutTax != null }
+        .fold(BigDecimal.ZERO) { acc, item ->
+            acc + (item.priceWithoutTax!! * item.quantity)
+        }
+        .roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
 
     // Calculate the total amount of each tax
     val groupedItems = products.groupBy {
@@ -1261,10 +1268,12 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotal
     val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
     for (documentProduct in groupedItems.values) {
         val listOfAmounts = documentProduct.filter { it.priceWithoutTax != null }.map {
-            BigDecimal(it.priceWithoutTax!!.toDouble()) * it.quantity * (it.taxRate
-                ?: BigDecimal(0)) / BigDecimal(100)
+            it.priceWithoutTax!! * it.quantity * (it.taxRate
+                ?: BigDecimal.ZERO) / BigDecimal.fromInt(100)
         }
-        val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
+        val sumOfAmounts = listOfAmounts
+            .fold(BigDecimal.ZERO) { acc, value -> acc + value }
+            .roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
         amounts.add(
             sumOfAmounts
         )
@@ -1277,6 +1286,6 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotal
     return DocumentTotalPrices(
         totalPriceWithoutTax = totalPriceWithoutTax,
         totalAmountsOfEachTax = amountsPerTaxRate,
-        totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }
+        totalPriceWithTax = totalPriceWithoutTax + amounts.fold(BigDecimal.ZERO) { acc, value -> acc + value }
     )
 }

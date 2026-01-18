@@ -21,7 +21,7 @@ import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.io.source.ByteArrayOutputStream
 import com.itextpdf.kernel.colors.Color
@@ -49,8 +49,10 @@ import com.itextpdf.layout.renderer.CellRenderer
 import com.itextpdf.layout.renderer.DrawContext
 import java.io.File
 import java.io.InputStream
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.a4a.g8invoicing.data.setScale
+import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 
 // Cache pour stocker l'Uri du dernier PDF exporté (Android 10+)
 private var lastExportedPdfUri: Uri? = null
@@ -680,21 +682,21 @@ private fun addProductsToTable(
                 fontRegular = fontRegular
             )
         productsTable.addCustomCell(text = it.taxRate?.let {
-            it.toString() + "%"
+            it.toPlainString() + "%"
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
 
         productsTable.addCustomCell(
-            text = it.priceWithoutTax?.setScale(2, RoundingMode.HALF_UP)
-                .toString().replace(".", ",") + Strings.get(R.string.currency),
+            text = it.priceWithoutTax?.setScale(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
+                ?.toPlainString()?.replace(".", ",")?.plus(Strings.get(R.string.currency)) ?: "",
             fontBold = fontBold,
             fontRegular = fontRegular
         )
         productsTable.addCustomCell(
             text = it.priceWithoutTax?.let { price ->
                 price * it.quantity
-            }?.setScale(2, RoundingMode.HALF_UP)
-                .toString().replace(".", ",") + Strings.get(R.string.currency),
+            }?.setScale(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
+                ?.toPlainString()?.replace(".", ",")?.plus(Strings.get(R.string.currency)) ?: "",
             fontBold = fontBold,
             fontRegular = fontRegular
         )
@@ -732,7 +734,7 @@ private fun createPrices(
         pricesTable.addCellInPrices(Paragraph(Strings.get(R.string.document_total_without_tax)))
 
         val totalWithoutTax =
-            Paragraph(documentPrices.totalPriceWithoutTax?.toString()?.replace(".", ",") ?: " - ")
+            Paragraph(documentPrices.totalPriceWithoutTax?.toPlainString()?.replace(".", ",") ?: " - ")
         totalWithoutTax.add(Strings.get(R.string.currency))
         pricesTable.addCellInPrices(totalWithoutTax)
     }
@@ -749,19 +751,17 @@ private fun createPrices(
 
         taxesAmount.forEach { tax ->
             documentPrices.totalAmountsOfEachTax?.firstOrNull {
-                it.first.stripTrailingZeros() == BigDecimal(
-                    tax
-                ).stripTrailingZeros()
+                it.first.stripTrailingZeros() == BigDecimal.fromInt(tax).stripTrailingZeros()
             }?.let {
                 pricesTable.addCellInPrices(
                     Paragraph(
                         Strings.get(R.string.document_tax) + " " + it.first.setScale(
                             0,
-                            RoundingMode.HALF_UP
-                        ).toString() + "% : "
+                            RoundingMode.ROUND_HALF_AWAY_FROM_ZERO
+                        ).toPlainString() + "% : "
                     )
                 )
-                pricesTable.addCellInPrices(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
+                pricesTable.addCellInPrices(Paragraph(it.second.toPlainString() + Strings.get(R.string.currency)))
             }
         }
     }
@@ -772,7 +772,7 @@ private fun createPrices(
             ).setFont(font).setFontSize(fontSize)
         )
         val totalWithTax =
-            Paragraph(documentPrices.totalPriceWithTax?.toString()?.replace(".", ",") ?: " - ")
+            Paragraph(documentPrices.totalPriceWithTax?.toPlainString()?.replace(".", ",") ?: " - ")
         totalWithTax.add(Strings.get(R.string.currency))
         pricesTable.addCellInPrices(totalWithTax.setFont(font).setFontSize(fontSize))
     }

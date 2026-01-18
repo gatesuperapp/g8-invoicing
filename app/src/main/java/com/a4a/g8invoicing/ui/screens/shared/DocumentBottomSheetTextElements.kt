@@ -37,8 +37,8 @@ import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
-import java.math.BigDecimal
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 
 @Composable

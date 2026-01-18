@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.ClientAddEdit
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.clientAddEdit(

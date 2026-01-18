@@ -19,5 +19,6 @@ data class CreditNoteState(
     override var currency: TextFieldValue = TextFieldValue(),
     override var footerText: TextFieldValue = TextFieldValue(),
     override var createdDate: String? = null,
+    var dueDate: String = "",
     var linkedInvoice: InvoiceState? = null
 ) : DocumentState()

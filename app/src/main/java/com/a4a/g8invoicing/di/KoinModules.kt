@@ -1,7 +1,6 @@
 package com.a4a.g8invoicing.di
 
 import app.cash.sqldelight.db.SqlDriver
-import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.AlertDialogDataSourceInterface
 import com.a4a.g8invoicing.data.AlertDialogLocalDataSource
@@ -9,6 +8,7 @@ import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSource
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSource
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.DatabaseDriverFactory
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
@@ -36,18 +36,9 @@ import org.koin.dsl.module
 
 val appModule = module {
 
-    single<SqlDriver> {
-        AndroidSqliteDriver(
-            schema = Database.Schema,
-            context = androidContext(),
-            name = "g8_invoicing.db",
-            callback = object : AndroidSqliteDriver.Callback(Database.Schema) {
-                override fun onOpen(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                    db.execSQL("PRAGMA foreign_keys=ON;")
-                }
-            }
-        )
-    }
+    single { DatabaseDriverFactory(androidContext()) }
+
+    single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
 
     single { Database(get()) }
 

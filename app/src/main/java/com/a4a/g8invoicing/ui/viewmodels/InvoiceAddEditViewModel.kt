@@ -14,6 +14,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import kotlinx.coroutines.Dispatchers
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

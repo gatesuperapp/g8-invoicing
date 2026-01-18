@@ -37,7 +37,15 @@ fun DocumentBottomSheetDatePicker(
     onValueChange: (String) -> Unit,
 ) {
     val formatter = getDateFormatter()
-    val currentDate = formatter.parse(initialDate)?.time
+    val currentDate = if (initialDate.isNotBlank()) {
+        try {
+            formatter.parse(initialDate)?.time
+        } catch (e: Exception) {
+            System.currentTimeMillis()
+        }
+    } else {
+        System.currentTimeMillis()
+    }
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = currentDate,
@@ -55,7 +63,8 @@ fun DocumentBottomSheetDatePicker(
     // Only way i found to execute function when new date is picked..There must be a better way?
     selectedDate =
         datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) }?.substring(0,10) ?: ""
-    if (initialDate.substring(0,10) != selectedDate) { // Substring to keep only the date, not the time
+    val initialDateTrimmed = if (initialDate.length >= 10) initialDate.substring(0,10) else ""
+    if (initialDateTrimmed != selectedDate) { // Substring to keep only the date, not the time
         onValueChange(
             datePickerState.selectedDateMillis?.let { formatter.format(Date(it)) } ?: "")
     }

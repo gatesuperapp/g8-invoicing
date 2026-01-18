@@ -16,3 +16,4 @@ shared/build
 local.properties
 app/release/
 .claude/
+.kotlin/

@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.Separator
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @Composable
 fun ProductTaxRatesContent(
@@ -63,13 +63,13 @@ fun ProductTaxRatesContent(
         ) {
             // Adds the no tax ("-") choice to the list
             val taxRatesIncludingNoTax = taxRates?.toMutableList()
-            taxRatesIncludingNoTax?.add(0, BigDecimal(0))
+            taxRatesIncludingNoTax?.add(0, BigDecimal.ZERO)
 
             taxRatesIncludingNoTax?.forEach { taxRate ->
-
+                val currentChosenOption = chosenOption
                 val isCurrentTaxRate = if(currentTaxRate == null) {
-                    taxRate == BigDecimal(0)
-                } else chosenOption != null && taxRate.compareTo(chosenOption) == 0
+                    taxRate == BigDecimal.ZERO
+                } else currentChosenOption != null && taxRate.compareTo(currentChosenOption) == 0
                 //We use compareTo() because if we use taxRate == chosenOption it compares 20 with 20.0 and returns false
 
                 Row(
@@ -89,7 +89,7 @@ fun ProductTaxRatesContent(
                                 onClick = {
                                     chosenOption = taxRate
                                     onSelectTaxRate(
-                                        if (taxRate == BigDecimal(0)) {
+                                        if (taxRate == BigDecimal.ZERO) {
                                             null
                                         } else taxRate
                                     )
@@ -101,10 +101,10 @@ fun ProductTaxRatesContent(
                                 start = 20.dp,
                                 end = 8.dp
                             ),
-                        text = if (taxRate == BigDecimal(0)) {
+                        text = if (taxRate == BigDecimal.ZERO) {
                             "-"
                         } else {
-                            "$taxRate%"
+                            "${taxRate.toPlainString()}%"
                         },
                         style = LocalTextStyle.current
                     )

@@ -9,7 +9,7 @@ import com.a4a.g8invoicing.Strings
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.CreditNoteState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -39,11 +39,19 @@ class CreditNoteLocalDataSource(
 
     override suspend fun createNew(): Long? {
         return withContext(Dispatchers.IO) {
+            val formatter = getDateFormatter()
+            val today = Calendar.getInstance()
+            val todayFormatted = formatter.format(today.time)
+            val dueDateCalendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }
+            val dueDateFormatted = formatter.format(dueDateCalendar.time)
+
             val issuer = getExistingIssuer()?.transformIntoEditable()
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: Strings.get(R.string.credit_note_default_number)),
+                documentDate = todayFormatted,
+                dueDate = dueDateFormatted,
                 documentIssuer = issuer,
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )

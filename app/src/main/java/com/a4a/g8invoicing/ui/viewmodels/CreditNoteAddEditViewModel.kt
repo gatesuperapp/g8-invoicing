@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job

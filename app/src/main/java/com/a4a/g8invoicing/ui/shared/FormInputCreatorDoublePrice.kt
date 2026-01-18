@@ -26,8 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.R
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.a4a.g8invoicing.data.util.calculatePriceWithTax
+import com.a4a.g8invoicing.data.util.calculatePriceWithoutTax
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import java.text.DecimalFormat
 
 // Used in forms with a product or documentProduct
@@ -70,13 +71,14 @@ fun FormInputCreatorDoublePrice(
     fun updateFieldsWithCalculatedValues(newValue: String, isFirstField: Boolean) {
         taxRate?.let { tax ->
             if (isFirstField) {
-                textPriceWithTax = newValue.toBigDecimalOrNull()?.let {
-                    val value = it.toDouble() / (1.0 + tax.toDouble() / 100.0)
-                    formatWithTwoDecimals.format(BigDecimal(value)).toString()
+                textPriceWithTax = newValue.replace(",", ".").toDoubleOrNull()?.let {
+                    val value = it / (1.0 + tax.doubleValue(false) / 100.0)
+                    formatWithTwoDecimals.format(value).toString()
                 }?.toString() ?: ""
             } else {
-                textPriceWithoutTax = newValue.toBigDecimalOrNull()?.let {
-                    formatWithTwoDecimals.format(it + it * tax / BigDecimal(100)).toString()
+                textPriceWithoutTax = newValue.replace(",", ".").toDoubleOrNull()?.let { price ->
+                    val priceDecimal = BigDecimal.fromDouble(price)
+                    formatWithTwoDecimals.format((priceDecimal + priceDecimal * tax / BigDecimal.fromInt(100)).doubleValue(false)).toString()
                 }?.toString() ?: ""
             }
         }
@@ -125,9 +127,9 @@ fun FormInputCreatorDoublePrice(
                     if (cleanedValue.isBlank()) { // Si le champ est vide
                         textPriceWithTax = "" // Vider aussi text2
                     } else {
-                        val newPrice = cleanedValue.replace(",", ".").toBigDecimalOrNull()
+                        val newPrice = cleanedValue.replace(",", ".").toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
                         if (newPrice != null && taxRate != null) {
-                            textPriceWithTax = calculatePriceWithTax(newPrice, taxRate).toString()
+                            textPriceWithTax = calculatePriceWithTax(newPrice, taxRate).toPlainString()
                         } else if (taxRate == null) {
                             // Si pas de taxe, text2 ne devrait pas être affecté ou devrait rester vide
                             // ou vous pouvez le laisser tel quel si text2 n'est pas affiché quand taxRate est null
@@ -171,9 +173,9 @@ fun FormInputCreatorDoublePrice(
                         if (cleanedValue.isBlank()) { // Si le champ est vide
                             textPriceWithoutTax = "" // Vider aussi text1
                         } else {
-                            val newPrice = cleanedValue.replace(",", ".").toBigDecimalOrNull()
+                            val newPrice = cleanedValue.replace(",", ".").toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
                             if (newPrice != null) { // taxRate est forcément non nul ici à cause du `if (taxRate != null)` externe
-                                textPriceWithoutTax = calculatePriceWithoutTax(newPrice, taxRate).toString()
+                                textPriceWithoutTax = calculatePriceWithoutTax(newPrice, taxRate).toPlainString()
                             }
                         }
                         priceWithoutTaxInput.onValueChange(textPriceWithoutTax ?: "")
@@ -197,17 +199,4 @@ fun FormInputCreatorDoublePrice(
             }
         }
     }
-}
-
-fun calculatePriceWithTax(priceWithoutTax: BigDecimal, taxRate: BigDecimal): BigDecimal {
-    val hundred = BigDecimal("100")
-    val taxAmount =
-        priceWithoutTax.multiply(taxRate).divide(hundred, 4, RoundingMode.HALF_UP) // calcul précis
-    return priceWithoutTax.add(taxAmount).setScale(2, RoundingMode.HALF_UP)
-}
-
-fun calculatePriceWithoutTax(priceWithTax: BigDecimal, taxRate: BigDecimal): BigDecimal {
-    val hundred = BigDecimal("100")
-    val divisor = BigDecimal.ONE.add(taxRate.divide(hundred, 10, RoundingMode.HALF_UP))
-    return priceWithTax.divide(divisor, 2, RoundingMode.HALF_UP)
 }

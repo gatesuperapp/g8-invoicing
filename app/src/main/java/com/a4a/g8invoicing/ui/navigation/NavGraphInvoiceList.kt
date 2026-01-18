@@ -6,7 +6,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.a4a.g8invoicing.data.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.screens.InvoiceList
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
 

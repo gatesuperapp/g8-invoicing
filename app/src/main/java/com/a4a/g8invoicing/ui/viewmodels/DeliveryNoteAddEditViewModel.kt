@@ -13,6 +13,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import kotlinx.coroutines.Dispatchers
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

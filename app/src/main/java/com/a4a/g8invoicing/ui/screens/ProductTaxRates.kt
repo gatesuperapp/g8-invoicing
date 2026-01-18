@@ -17,7 +17,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 
 @Composable

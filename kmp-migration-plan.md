@@ -13,7 +13,7 @@ Migration de l'app Android vers Kotlin Multiplatform pour supporter iOS.
 **Approche actuelle :**
 - ⚠️ **iOS sera fait à la fin** - pour l'instant on se concentre sur Android fonctionnel avec code dans shared/
 - ⚠️ **Pas de modification de logique** - on transfère le code tel quel vers shared/
-- ⚠️ **Migration BigDecimal → bignum** à faire lors du transfert (java.math.BigDecimal → com.ionspin.kotlin.bignum)
+- ✅ **Migration BigDecimal → bignum** **TERMINÉE** (java.math.BigDecimal → com.ionspin.kotlin.bignum.decimal.BigDecimal)
 
 ---
 
@@ -24,13 +24,13 @@ Migration de l'app Android vers Kotlin Multiplatform pour supporter iOS.
 | Préparatoire | 0A - Hilt → Koin | ✅ Terminé |
 | Préparatoire | 0B - Lottie → Compose natif | ✅ Terminé |
 | KMP | 1 - Setup Projet KMP | ✅ Terminé |
-| KMP | 2 - DI Koin KMP | ❌ À faire |
-| KMP | 3 - Extraction Code Partagé | ❌ À faire |
-| KMP | 4 - expect/actual Database | ❌ À faire |
-| KMP | 5 - expect/actual Storage | ❌ À faire |
-| KMP | 6 - expect/actual PDF | ❌ À faire |
-| KMP | 7 - Navigation KMP | ❌ À faire |
-| KMP | 8 - UI Compose Multiplatform | ❌ À faire |
+| KMP | 2 - DI Koin KMP | ✅ Terminé |
+| KMP | 3 - Extraction Code Partagé | ✅ Terminé |
+| KMP | 4 - expect/actual Database | 🟡 En cours |
+| KMP | 5 - expect/actual Storage | ✅ Terminé |
+| KMP | 6 - expect/actual PDF | 🟡 Partiel |
+| KMP | 7 - Navigation KMP | 🟡 Partiel |
+| KMP | 8 - UI Compose Multiplatform | 🟡 Partiel |
 | KMP | 9 - Tests et Finalisation | ❌ À faire |
 
 ---
@@ -177,27 +177,27 @@ g8-invoicing/
 
 ---
 
-### SUJET 0B : Migration Lottie → Compose natif - ✅ TERMINÉ
+### SUJET 0B : Migration Lottie → Compottie (KMP) - ✅ TERMINÉ
 
-> **Note:** Utilisé animations Compose natives (pas Compottie) - plus léger, pas de dépendance externe
+> **Note:** Utilisation de **Compottie** (bibliothèque KMP pour Lottie) pour garder les animations originales
 
 #### 0B.1 - Analyser les animations actuelles ✅
 - [x] Identifier tous les fichiers .json Lottie utilisés (bat_wavy_arms, bat_smiling_eyes, bat_openmouth, bat_kiss_gif)
 
-#### 0B.2 - Créer animations Compose natives ✅
-- [x] Créer `ui/shared/animations/BatAnimations.kt` avec animations Compose pures
-- [x] Implémenter BatWavyArms, BatSmilingEyes, BatOpenMouth, BatKiss
+#### 0B.2 - Configurer Compottie ✅
+- [x] Ajouter dépendances Compottie dans `shared/build.gradle.kts`:
+  - `io.github.alexzhirkevich:compottie:2.0.0-rc01`
+  - `io.github.alexzhirkevich:compottie-resources:2.0.0-rc01`
+- [x] Configurer Compose Resources avec package personnalisé
 
-#### 0B.3 - Remplacer BatAnimation ✅
-- [x] Modifier `InvoiceList.kt`
-- [x] Modifier `DeliveryNoteList.kt`
-- [x] Modifier `Account.kt`
-- [x] Modifier `About.kt`
-- [x] Modifier `DocumentBottomSheetProductListChosen.kt`
+#### 0B.3 - Migrer les animations vers shared ✅
+- [x] Copier fichiers .json vers `shared/src/commonMain/composeResources/files/`
+- [x] Créer `shared/.../ui/shared/animations/BatAnimations.kt` avec Compottie
+- [x] Implémenter BatWavyArms, BatSmilingEyes, BatOpenMouth, BatKiss avec Compottie
 
-#### 0B.4 - Nettoyage Lottie ✅
-- [x] Supprimer ancien `ui/shared/BatAnimation.kt`
-- [x] Supprimer les fichiers .json dans `res/raw/`
+#### 0B.4 - Nettoyage ✅
+- [x] Supprimer ancien `app/.../ui/shared/animations/BatAnimations.kt` (pixel art)
+- [x] Garder les fichiers .json dans `app/src/main/res/raw/` (backup)
 - [x] Retirer dépendance `com.airbnb.android:lottie-compose`
 
 ---
@@ -291,26 +291,48 @@ g8-invoicing/
 
 ---
 
-### SUJET 4 : expect/actual - Database - ✅ TERMINÉ
+### SUJET 4 : expect/actual - Database - 🟡 EN COURS
 
 #### 4.1 - DatabaseDriverFactory ✅
-- [x] Créer `shared/commonMain/data/driver/DatabaseDriverFactory.kt` avec `expect`
-- [x] Créer `shared/androidMain/data/driver/DatabaseDriverFactory.kt` avec `actual` (AndroidSqliteDriver)
-- [x] Créer `shared/iosMain/data/driver/DatabaseDriverFactory.kt` avec `actual` (NativeSqliteDriver)
-- [x] SQLDelight configuré dans shared
+- [x] Créer `shared/commonMain/data/DatabaseDriverFactory.kt` avec `expect`
+- [x] Créer `shared/androidMain/data/DatabaseDriverFactory.android.kt` avec `actual` (AndroidSqliteDriver)
+- [x] Créer `shared/iosMain/data/DatabaseDriverFactory.ios.kt` avec `actual` (NativeSqliteDriver)
+- [x] SQLDelight configuré dans shared/build.gradle.kts
+- [x] Fichiers .sq déplacés vers shared/src/commonMain/sqldelight/g8invoicing/
+- [x] SQLDelight plugin retiré de app/build.gradle.kts
+- [x] app/src/main/sqldelight supprimé
+- [x] KoinModules.kt mis à jour pour utiliser DatabaseDriverFactory
 
-#### 4.2 - Migration des DataSources ✅
-- [x] Déplacer `InvoiceLocalDataSource.kt` vers `shared/commonMain`
-- [x] Déplacer `DeliveryNoteLocalDataSource.kt`
-- [x] Déplacer `CreditNoteLocalDataSource.kt`
-- [x] Déplacer `ProductLocalDataSource.kt`
-- [x] Déplacer `ProductTaxLocalDataSource.kt`
-- [x] Déplacer `ClientOrIssuerLocalDataSource.kt`
-- [x] Déplacer `AlertDialogLocalDataSource.kt`
-- [x] Créer `DataSourceHelpers.kt` pour fonctions utilitaires partagées
-- [x] Créer `Logger` expect/actual pour remplacer android.util.Log
-- [x] Créer `IoDispatcher` expect/actual pour remplacer Dispatchers.IO
-- [x] Vérifier compilation Android et iOS
+#### 4.2 - Migration des DataSources 🟡 EN COURS
+**Utilitaires KMP créés dans shared/commonMain/data/util/:**
+- [x] `DispatcherProvider.kt` (expect) - remplace Dispatchers.IO
+- [x] `DispatcherProvider.android.kt` (actual) - Dispatchers.IO
+- [x] `DispatcherProvider.ios.kt` (actual) - Dispatchers.Default
+- [x] `DateUtils.kt` - fonctions de date avec kotlinx-datetime
+- [x] `DefaultStrings.kt` - strings par défaut pour les documents
+- [x] `PriceCalculations.kt` - calculatePriceWithTax, calculatePriceWithoutTax
+
+**DataSources simples migrés vers shared/commonMain/data/:**
+- [x] `ProductTaxLocalDataSource.kt`
+- [x] `AlertDialogLocalDataSource.kt`
+- [x] `ClientOrIssuerLocalDataSource.kt`
+- [x] `ProductLocalDataSource.kt`
+
+**DataSources documents (restent dans app/ - dépendances Android):**
+- [ ] `InvoiceLocalDataSource.kt` (utilise SimpleDateFormat, Strings.get())
+- [ ] `DeliveryNoteLocalDataSource.kt` (utilise SimpleDateFormat, Strings.get())
+- [ ] `CreditNoteLocalDataSource.kt` (utilise SimpleDateFormat, Strings.get())
+
+**Fichiers supprimés de app/:**
+- [x] `app/src/main/java/.../data/ProductTaxLocalDataSource.kt`
+- [x] `app/src/main/java/.../data/AlertDialogLocalDataSource.kt`
+- [x] `app/src/main/java/.../data/ClientOrIssuerLocalDataSource.kt`
+- [x] `app/src/main/java/.../data/ProductLocalDataSource.kt`
+
+**Prochaines étapes pour migration complète:**
+- [ ] Remplacer SimpleDateFormat par DateUtils dans les DataSources de documents
+- [ ] Remplacer Strings.get(R.string.xxx) par DefaultStrings
+- [ ] Déplacer les DataSources de documents vers shared
 
 ---
 
@@ -528,7 +550,7 @@ g8-invoicing/
 ## Décisions Prises
 
 1. **Auth/Retrofit** : SUPPRIMÉ (pas utilisé)
-2. **Lottie** : Remplacé par **Compottie** (lib KMP pour Lottie)
+2. **Lottie** : Remplacé par **Compottie** (`io.github.alexzhirkevich:compottie:2.0.0-rc01`) - garde les animations originales .json
 3. **Navigation** : Utiliser `navigation-compose` de JetBrains Compose Multiplatform (pas Voyager)
 4. **ViewModels** : Garder les ViewModels avec `koin-compose-viewmodel` (pas de ScreenModel)
 5. **Compose Multiplatform** : Version 1.7.0+ (stable avec navigation)
@@ -536,6 +558,108 @@ g8-invoicing/
 7. **PDF iOS** : Wrapper Swift appelant PDFKit, exposé à Kotlin via expect/actual
 8. **BigDecimal** : Utiliser `com.ionspin.kotlin:bignum` (KMP) au lieu de java.math.BigDecimal
 9. **Structure** : Garder `app/` au lieu de renommer en `androidApp/` (fonctionne)
+
+---
+
+## Migration BigDecimal - ✅ TERMINÉE (18 Jan 2026)
+
+### Changements effectués
+
+**Bibliothèque utilisée:** `com.ionspin.kotlin:bignum:0.3.10`
+
+**Fichier d'extensions créé:** `shared/src/commonMain/kotlin/com/a4a/g8invoicing/data/BigDecimalExtensions.kt`
+- `String.toBigDecimalKmp()` → `BigDecimal.parseString()`
+- `Double.toBigDecimalKmp()` → `BigDecimal.fromDouble()`
+- `BigDecimal.setScale(scale, roundingMode)` → `roundToDigitPositionAfterDecimalPoint()`
+- `BigDecimal.stripTrailingZeros()` → extension personnalisée
+- `BigDecimal.toIntKmp()` → `intValue(false)`
+
+**Conversions principales:**
+| java.math.BigDecimal | bignum BigDecimal |
+|---------------------|-------------------|
+| `BigDecimal(0)` | `BigDecimal.ZERO` |
+| `BigDecimal(1)` | `BigDecimal.ONE` |
+| `BigDecimal(100)` | `BigDecimal.fromInt(100)` |
+| `value.toBigDecimal()` | `BigDecimal.fromDouble(value)` |
+| `.toDouble()` | `.doubleValue(false)` |
+| `.toInt()` | `.intValue(false)` |
+| `.setScale(2, RoundingMode.HALF_UP)` | `.roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)` |
+| `.multiply(x)` | `* x` |
+| `.divide(x)` | `/ x` |
+| `.add(x)` | `+ x` |
+| `sumOf { }` | `.fold(BigDecimal.ZERO) { acc, x -> acc + x }` |
+
+**Fichiers modifiés dans app/:**
+- Tous les DataSources (`InvoiceLocalDataSource.kt`, `ProductLocalDataSource.kt`, etc.)
+- Tous les ViewModels utilisant BigDecimal
+- Tous les fichiers UI affichant des prix
+- `CreatePdfWithIText.kt`
+- `FormInputCreatorDoublePrice.kt` (calculatePriceWithTax, calculatePriceWithoutTax)
+
+**Corrections supplémentaires:**
+- `ClientOrIssuerType` enum: supprimé la duplication, utiliser uniquement `com.a4a.g8invoicing.data.models.ClientOrIssuerType`
+- `UiStates.kt`: corrigé les noms de propriétés (`clientsOrIssuerList`, `products`, `deliveryNoteStates`)
+- `CreditNoteState.kt`: ajouté le champ `dueDate` manquant
+
+---
+
+## Migration SQLDelight - ✅ TERMINÉ (19 Jan 2026)
+
+### Changements effectués
+
+**Configuration SQLDelight dans shared:**
+- Plugin `app.cash.sqldelight` version 2.2.1 ajouté à `shared/build.gradle.kts`
+- Base de données configurée: `packageName.set("com.a4a.g8invoicing")`
+- Dépendances ajoutées:
+  - `api("app.cash.sqldelight:coroutines-extensions:2.2.1")` (commonMain - exporté)
+  - `implementation("app.cash.sqldelight:android-driver:2.2.1")` (androidMain)
+  - `implementation("app.cash.sqldelight:native-driver:2.2.1")` (iosMain)
+
+**Fichiers créés dans shared:**
+- `shared/src/commonMain/sqldelight/g8invoicing/*.sq` (25 fichiers copiés depuis app)
+- `shared/src/commonMain/kotlin/com/a4a/g8invoicing/data/DatabaseDriverFactory.kt` (expect)
+- `shared/src/androidMain/kotlin/com/a4a/g8invoicing/data/DatabaseDriverFactory.android.kt` (actual)
+- `shared/src/iosMain/kotlin/com/a4a/g8invoicing/data/DatabaseDriverFactory.ios.kt` (actual)
+
+**Changements dans app:**
+- Plugin SQLDelight retiré de `app/build.gradle.kts`
+- Dépendances SQLDelight retirées de `app/build.gradle.kts`
+- `app/src/main/sqldelight/` supprimé
+- `KoinModules.kt` mis à jour pour utiliser `DatabaseDriverFactory` depuis shared
+
+---
+
+## Migration DataSources - 🟡 EN COURS (19 Jan 2026)
+
+### Utilitaires KMP créés
+
+**shared/src/commonMain/kotlin/com/a4a/g8invoicing/data/util/:**
+- `DispatcherProvider.kt` (expect/actual) - remplace `Dispatchers.IO` Android par abstraction KMP
+- `DateUtils.kt` - fonctions de date utilisant `kotlinx-datetime` (getCurrentDateFormatted, getDatePlusDaysFormatted, etc.)
+- `DefaultStrings.kt` - constantes par défaut (numéros de documents, footer, devise)
+- `PriceCalculations.kt` - fonctions de calcul de prix (calculatePriceWithTax, calculatePriceWithoutTax)
+
+### DataSources migrés vers shared
+
+| DataSource | Status | Notes |
+|------------|--------|-------|
+| `ProductTaxLocalDataSource` | ✅ Migré | Simple, pas de dépendances Android |
+| `AlertDialogLocalDataSource` | ✅ Migré | Simple, pas de dépendances Android |
+| `ClientOrIssuerLocalDataSource` | ✅ Migré | Remplacé Dispatchers.IO par DispatcherProvider.IO |
+| `ProductLocalDataSource` | ✅ Migré | Remplacé calculatePriceWithTax import |
+| `InvoiceLocalDataSource` | ❌ Dans app | Utilise SimpleDateFormat, Strings.get() |
+| `DeliveryNoteLocalDataSource` | ❌ Dans app | Utilise SimpleDateFormat, Strings.get() |
+| `CreditNoteLocalDataSource` | ❌ Dans app | Utilise SimpleDateFormat, Strings.get() |
+
+### Fichiers supprimés de app/
+- `app/src/main/java/.../data/ProductTaxLocalDataSource.kt`
+- `app/src/main/java/.../data/AlertDialogLocalDataSource.kt`
+- `app/src/main/java/.../data/ClientOrIssuerLocalDataSource.kt`
+- `app/src/main/java/.../data/ProductLocalDataSource.kt`
+
+### Imports mis à jour
+- `ProductAddEditViewModel.kt` - import calculatePriceWithTax depuis shared
+- `FormInputCreatorDoublePrice.kt` - import calculatePriceWithTax/calculatePriceWithoutTax depuis shared, suppression des fonctions locales
 
 ---
 

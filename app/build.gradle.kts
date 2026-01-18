@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-    id("app.cash.sqldelight") version "2.2.1"
     id("org.jetbrains.kotlin.plugin.compose") version "2.2.0"
 }
 
@@ -85,11 +84,6 @@ dependencies {
     // Koin
     implementation("io.insert-koin:koin-android:3.5.0")
     implementation("io.insert-koin:koin-androidx-compose:3.5.0")
-
-    //SQLDelight
-    implementation("app.cash.sqldelight:android-driver:2.2.1")
-    implementation("app.cash.sqldelight:coroutines-extensions-jvm:2.2.1")
-
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.2.0")

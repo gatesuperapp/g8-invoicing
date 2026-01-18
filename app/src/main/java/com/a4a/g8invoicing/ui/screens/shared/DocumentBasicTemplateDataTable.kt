@@ -32,8 +32,10 @@ import com.a4a.g8invoicing.ui.screens.shared.TableCell
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.a4a.g8invoicing.data.setScale
+import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 
 // We use leftBorder, rightBorder, BottomBorder & TopBorder, because if we used simple "border"
 // and apply it to the rows, borders would be doubled (except on top, left and right)
@@ -208,22 +210,22 @@ fun DocumentProductsRows(
             }
 
             TableCell(
-                text = data.taxRate?.let { "$it%" }
+                text = data.taxRate?.let { "${it.toPlainString()}%" }
                     ?: " - ",
                 weight = taxColumnWeight,
                 alignEnd = true
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
-                    it.setScale(2, RoundingMode.HALF_UP)
-                        .toString().replace(".", ",") + stringResource(id = R.string.currency)
+                    it.setScale(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
+                        .toPlainString().replace(".", ",") + stringResource(id = R.string.currency)
                 } ?: "",
                 alignEnd = true
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
-                    (it * data.quantity).setScale(2, RoundingMode.HALF_UP)
-                        .toString().replace(".", ",") + stringResource(id = R.string.currency)
+                    (it * data.quantity).setScale(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
+                        .toPlainString().replace(".", ",") + stringResource(id = R.string.currency)
                 } ?: "",
                 alignEnd = true
             )

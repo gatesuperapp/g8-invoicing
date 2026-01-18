@@ -55,7 +55,7 @@ import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
 import com.a4a.g8invoicing.ui.theme.callForActions
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @Composable
 fun ProductAddEditForm(
@@ -165,7 +165,7 @@ fun ProductAddEditForm(
                                         if (taxRate == null) {
                                             "-"
                                         } else {
-                                            "$taxRate%"
+                                            "${taxRate.toPlainString()}%"
                                         }
                                     },
                                 ),
@@ -174,7 +174,7 @@ fun ProductAddEditForm(
                             FormInput(
                                 label = if (hasAdditionalPrices) productPriceDefaultLabel else productPriceLabel,
                                 inputType = DecimalInput(
-                                    text = (product.defaultPriceWithoutTax ?: "").toString(),
+                                    text = product.defaultPriceWithoutTax?.toPlainString() ?: "",
                                     taxRate = product.taxRate,
                                     placeholder = productPricePlaceholder,
                                     keyboardType = KeyboardType.Decimal,
@@ -186,9 +186,9 @@ fun ProductAddEditForm(
                                     }
                                 ),
                                 inputType2 = DecimalInput(
-                                    text = (product.defaultPriceWithTax ?: "").toString(),
+                                    text = product.defaultPriceWithTax?.toPlainString() ?: "",
                                     placeholder = product.taxRate?.let {
-                                        (BigDecimal(3) + BigDecimal(3) * it / BigDecimal(100)).toString()
+                                        (BigDecimal.fromInt(3) + BigDecimal.fromInt(3) * it / BigDecimal.fromInt(100)).toPlainString()
                                     } ?: "",
                                     keyboardType = KeyboardType.Decimal,
                                     onValueChange = {
@@ -267,7 +267,7 @@ fun ProductAddEditForm(
                                 FormInput(
                                     label = productPriceLabel,
                                     inputType = DecimalInput(
-                                        text = (currentPrice.priceWithoutTax ?: "").toString(),
+                                        text = currentPrice.priceWithoutTax?.toPlainString() ?: "",
                                         taxRate = product.taxRate,
                                         placeholder = productPricePlaceholder,
                                         keyboardType = KeyboardType.Decimal,
@@ -280,7 +280,7 @@ fun ProductAddEditForm(
                                         }
                                     ),
                                     inputType2 = DecimalInput(
-                                        text = (currentPrice.priceWithTax ?: "").toString(),
+                                        text = currentPrice.priceWithTax?.toPlainString() ?: "",
                                         placeholder = "Avec taxe",
                                         keyboardType = KeyboardType.Decimal,
                                         onValueChange = {

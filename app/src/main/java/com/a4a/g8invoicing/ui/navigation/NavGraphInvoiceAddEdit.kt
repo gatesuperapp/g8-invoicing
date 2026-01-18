@@ -58,7 +58,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEdit
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel

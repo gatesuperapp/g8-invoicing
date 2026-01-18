@@ -16,8 +16,8 @@ import com.a4a.g8invoicing.R
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
-import java.math.BigDecimal
-import java.math.RoundingMode
+import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @Composable
 fun DocumentBasicTemplateTotalPrices(
@@ -60,18 +60,18 @@ fun DocumentBasicTemplateTotalPrices(
 
                 val taxesAmount = mutableListOf<BigDecimal>()
                 taxes.forEach {
-                    taxesAmount += it.removePrefix("TAXES_").toBigDecimal()
+                    taxesAmount.add(BigDecimal.parseString(it.removePrefix("TAXES_")))
                 }
 
                 taxesAmount.forEach { tax ->
                     uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
-                        tax.stripTrailingZeros().toString() in it.first.stripTrailingZeros().toString()
+                        tax.stripTrailingZeros().toPlainString() in it.first.stripTrailingZeros().toPlainString()
                     }?.let {
                         Text(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(id = R.string.document_tax) + " " + it.first.toString().replace(".", ",") + "% : "
+                            text = stringResource(id = R.string.document_tax) + " " + it.first.toPlainString().replace(".", ",") + "% : "
                         )
                     }
                 }
@@ -96,7 +96,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toPlainString()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
@@ -107,18 +107,18 @@ fun DocumentBasicTemplateTotalPrices(
 
                 val taxesAmount = mutableListOf<BigDecimal>()
                 taxes.forEach {
-                    taxesAmount += it.removePrefix("TAXES_").toBigDecimal()
+                    taxesAmount.add(BigDecimal.parseString(it.removePrefix("TAXES_")))
                 }
 
                 taxesAmount.forEach { tax ->
                     uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
-                        tax.stripTrailingZeros().toString() in it.first.stripTrailingZeros().toString()
+                        tax.stripTrailingZeros().toPlainString() in it.first.stripTrailingZeros().toPlainString()
                     }?.let {
                         Text(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = it.second.toString().replace(".", ",") + stringResource(id = R.string.currency)
+                            text = it.second.toPlainString().replace(".", ",") + stringResource(id = R.string.currency)
                         )
                     }
                 }
@@ -126,7 +126,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toPlainString()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }

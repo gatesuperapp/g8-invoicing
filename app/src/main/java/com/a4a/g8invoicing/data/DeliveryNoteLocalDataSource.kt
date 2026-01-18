@@ -10,7 +10,7 @@ import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.Dispatchers
@@ -38,11 +38,15 @@ class DeliveryNoteLocalDataSource(
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
         return withContext(Dispatchers.IO) {
+            val formatter = getDateFormatter()
+            val today = Calendar.getInstance()
+            val todayFormatted = formatter.format(today.time)
 
             val newDeliveryNoteState = DeliveryNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: Strings.get(R.string.delivery_note_default_number)),
+                documentDate = todayFormatted,
                 documentIssuer = getExistingIssuer()?.transformIntoEditable(),
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )

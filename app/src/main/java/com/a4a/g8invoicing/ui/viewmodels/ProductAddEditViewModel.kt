@@ -11,11 +11,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.calculatePriceWithTax
+import com.a4a.g8invoicing.data.util.calculatePriceWithTax
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -27,7 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlin.collections.filter
 import kotlin.collections.map
 
@@ -140,7 +141,7 @@ class ProductAddEditViewModel(
             priceWithoutTax = priceWithoutTax,
             priceWithTax = priceWithTax,
             taxRate = product.taxRate,
-            quantity = BigDecimal(1),
+            quantity = BigDecimal.ONE,
             unit = product.unit,
             productId = product.id,
         )
@@ -195,7 +196,7 @@ class ProductAddEditViewModel(
                 defaultPriceWithTax = _productUiState.value.defaultPriceWithoutTax?.let { priceWithoutTax ->
                     taxRate?.let { tax ->
                         calculatePriceWithTax(priceWithoutTax, tax)
-                    } ?: BigDecimal(0)
+                    } ?: BigDecimal.ZERO
                 },
                 additionalPrices = updatedAdditionalPrices
             )
@@ -205,7 +206,7 @@ class ProductAddEditViewModel(
                 priceWithTax = _documentProductUiState.value.priceWithoutTax?.let { priceWithoutTax ->
                     taxRate?.let { tax ->
                         calculatePriceWithTax(priceWithoutTax, tax)
-                    } ?: BigDecimal(0)
+                    } ?: BigDecimal.ZERO
                 }
             )
         }
@@ -448,8 +449,8 @@ private fun updateProductUiState(
             updatedProductState = if (priceWithoutTax.isNotEmpty()) {
                 updatedProductState.copy(
                     defaultPriceWithoutTax = priceWithoutTax.replace(",", ".")
-                        .toBigDecimalOrNull()
-                        ?: BigDecimal(0)
+                        .toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
+                        ?: BigDecimal.ZERO
                 )
             } else updatedProductState.copy(
                 defaultPriceWithoutTax = null
@@ -461,8 +462,8 @@ private fun updateProductUiState(
             updatedProductState = if (priceWithTax.isNotEmpty()) {
                 updatedProductState.copy(
                     defaultPriceWithTax = priceWithTax.replace(",", ".")
-                        .toBigDecimalOrNull()
-                        ?: BigDecimal(0)
+                        .toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
+                        ?: BigDecimal.ZERO
                 )
             } else updatedProductState.copy(
                 defaultPriceWithTax = null
@@ -478,7 +479,7 @@ private fun updateProductUiState(
 
                         val ht = priceWithoutTaxStr
                             .replace(",", ".")
-                            .toBigDecimalOrNull()
+                            .toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
 
                         val ttc = ht?.let {
                             updatedProductState.taxRate?.let { tax ->
@@ -505,8 +506,8 @@ private fun updateProductUiState(
                     if (price.idStr == priceId) {
                         price.copy(
                             priceWithTax = if (priceWithTaxStr.isNotEmpty()) {
-                                priceWithTaxStr.replace(",", ".").toBigDecimalOrNull()
-                                    ?: BigDecimal(0)
+                                priceWithTaxStr.replace(",", ".").toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
+                                    ?: BigDecimal.ZERO
                             } else {
                                 null
                             }
@@ -559,7 +560,7 @@ private fun updateDocumentProductUiState(
         ScreenElement.DOCUMENT_PRODUCT_QUANTITY -> {
             documentProduct =
                 documentProduct.copy(
-                    quantity = (value as String).toBigDecimalOrNull() ?: BigDecimal(0)
+                    quantity = (value as String).replace(",", ".").toDoubleOrNull()?.let { BigDecimal.fromDouble(it) } ?: BigDecimal.ZERO
                 )
         }
 
@@ -572,8 +573,8 @@ private fun updateDocumentProductUiState(
             documentProduct = if (priceWithoutTax.isNotEmpty()) {
                 documentProduct.copy(
                     priceWithoutTax = priceWithoutTax.replace(",", ".")
-                        .toBigDecimalOrNull()
-                        ?: BigDecimal(0)
+                        .toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
+                        ?: BigDecimal.ZERO
                 )
             } else documentProduct.copy(
                 priceWithoutTax = null
@@ -585,8 +586,8 @@ private fun updateDocumentProductUiState(
             documentProduct = if (priceWithTax.isNotEmpty()) {
                 documentProduct.copy(
                     priceWithTax = priceWithTax.replace(",", ".")
-                        .toBigDecimalOrNull()
-                        ?: BigDecimal(0)
+                        .toDoubleOrNull()?.let { BigDecimal.fromDouble(it) }
+                        ?: BigDecimal.ZERO
                 )
             } else documentProduct.copy(
                 priceWithTax = null

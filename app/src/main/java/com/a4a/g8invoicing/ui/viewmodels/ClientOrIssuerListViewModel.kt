@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.ClientsOrIssuerUiState
 import kotlinx.coroutines.Job
@@ -107,7 +108,3 @@ class ClientOrIssuerListViewModel(
 }
 
 data class Message(val id: Long, val message: String)
-
-enum class PersonType {
-    CLIENT, ISSUER
-}

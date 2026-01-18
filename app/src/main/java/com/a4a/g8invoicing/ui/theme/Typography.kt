@@ -184,7 +184,7 @@ val Typography.callForActionsDisabled: TextStyle
     get() {
         return TextStyle(
             fontFamily = uiFontBold,
-            color = ColorGrayTransp,
+            color = ColorDarkGrayTransp,
             fontSize = 14.sp,
             platformStyle = PlatformTextStyle(
                 includeFontPadding = false,
