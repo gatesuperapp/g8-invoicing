@@ -115,7 +115,7 @@
     <string name="client_email">E-mail</string>
     <string name="client_email_input">petitrhino@ecomail.fr</string>
     <string name="client_phone">Téléphone</string>
-    <string name="client_phone_input">0787878787</string>
+    <string name="client_phone_input">01 99 00 22 33</string>
     <string name="form_label_edit">Modifier</string>
     <string name="client_company_identification1">N° SIRET</string>
     <string name="client_company_identification1_input">123456789 12345</string>
@@ -181,7 +181,7 @@
     <string name="corrected_invoice_cancel_and_replace">Annule et remplace la facture</string>
     <string name="document_default_date">-</string>
     <string name="document_default_due_date">11/01/2024</string>
-    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1027 8073 7000 983764 8377
+    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234
     </string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="document_default_issuer_firstName">Ignacio</string>
