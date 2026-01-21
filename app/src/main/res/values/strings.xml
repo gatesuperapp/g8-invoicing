@@ -332,6 +332,7 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     <string name="alert_convert_notes_info_confirm">Superbe</string>
     <string name="alert_delete_info_confirm">Capito</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
+    <string name="alert_dialog_cancel">Annuler</string>
     <string name="export_waiting_permission">Autorisation requise…</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>

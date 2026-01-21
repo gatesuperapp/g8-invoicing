@@ -2,11 +2,8 @@ package com.a4a.g8invoicing.ui.shared
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,12 +32,6 @@ fun AlertDialogDeleteDocument(
     val uriHandler = LocalUriHandler.current
 
     AlertDialog(
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.Cancel,
-                contentDescription = "Delete line item"
-            )
-        },
         text = {
             if (isInvoice) DeleteInvoiceLink(uriHandler)
             else
@@ -51,6 +42,15 @@ fun AlertDialogDeleteDocument(
         textContentColor = Color.Black,
         onDismissRequest = {
             onDismissRequest()
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = stringResource(id = R.string.alert_dialog_cancel))
+            }
         },
         confirmButton = {
             Button(

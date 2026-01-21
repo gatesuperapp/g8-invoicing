@@ -84,6 +84,7 @@ fun ProductAddEdit(
 
             ClientMultiSelectSheet(
                 allClients = availableClients,
+                totalClientsInDb = dialogState.availableClients.size,
                 selectedClients = dialogState.selectedClients,
                 onToggleClient = { clientRef ->
                     viewModel.toggleClientSelection(clientRef)

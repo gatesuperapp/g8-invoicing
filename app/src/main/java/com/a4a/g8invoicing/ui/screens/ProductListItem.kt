@@ -147,7 +147,7 @@ fun ProductListItem(
 
                     Text(
                         text = displayPrice?.let {
-                            it.toString() + stringResource(R.string.currency)
+                            it.toString().replace(".", ",") + stringResource(R.string.currency)
                         } ?: " - "
                     )
                 }

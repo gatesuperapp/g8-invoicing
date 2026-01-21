@@ -28,6 +28,7 @@ import com.a4a.g8invoicing.ui.states.ClientRef
 @Composable
 fun ClientMultiSelectSheet(
     allClients: List<ClientRef>,
+    totalClientsInDb: Int,
     selectedClients: List<ClientRef>,
     onToggleClient: (ClientRef) -> Unit,
     onConfirm: () -> Unit,
@@ -43,31 +44,43 @@ fun ClientMultiSelectSheet(
 
             Spacer(Modifier.height(8.dp))
 
-            // Ordre figé à l'ouverture - clients sélectionnés en premier
-            val sortedClients = remember(allClients) {
-                val initialSelectedIds = selectedClients.map { it.id }.toSet()
-                allClients.sortedByDescending { client ->
-                    initialSelectedIds.contains(client.id)
+            if (totalClientsInDb == 0) {
+                Text(
+                    text = "Vous n'avez pas encore créé de client.",
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            } else if (allClients.isEmpty()) {
+                Text(
+                    text = "Vous avez déjà affecté un prix à tous les clients.",
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            } else {
+                // Ordre figé à l'ouverture - clients sélectionnés en premier
+                val sortedClients = remember(allClients) {
+                    val initialSelectedIds = selectedClients.map { it.id }.toSet()
+                    allClients.sortedByDescending { client ->
+                        initialSelectedIds.contains(client.id)
+                    }
                 }
-            }
-            Column(
-                Modifier
-                    .weight(1f, fill = false)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                sortedClients.forEach { client ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onToggleClient(client) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = selectedClients.any { it.id == client.id },
-                            onCheckedChange = { onToggleClient(client) }
-                        )
-                        Text(text = client.name)
+                Column(
+                    Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    sortedClients.forEach { client ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onToggleClient(client) }
+                                .padding(vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = selectedClients.any { it.id == client.id },
+                                onCheckedChange = { onToggleClient(client) }
+                            )
+                            Text(text = client.name)
+                        }
                     }
                 }
             }
@@ -78,7 +91,7 @@ fun ClientMultiSelectSheet(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onConfirm
             ) {
-                Text("Valider")
+                Text(if (allClients.isEmpty() || totalClientsInDb == 0) "Fermer" else "Valider")
             }
         }
     }
