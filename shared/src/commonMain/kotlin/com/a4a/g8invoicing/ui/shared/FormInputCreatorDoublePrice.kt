@@ -21,15 +21,20 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.data.util.calculatePriceWithTax
 import com.a4a.g8invoicing.data.util.calculatePriceWithoutTax
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import java.text.DecimalFormat
+import kotlin.math.round
+
+// Simple decimal formatter for KMP
+private fun formatWithTwoDecimals(value: Double): String {
+    val rounded = round(value * 100) / 100
+    return rounded.toString()
+}
 
 // Used in forms with a product or documentProduct
 // for changing alternatively Price & Price including tax
@@ -46,9 +51,6 @@ fun FormInputCreatorDoublePrice(
     // La clé permet de synchroniser le state interne avec la prop quand elle change
     var textPriceWithoutTax by remember(priceWithoutTaxInput.text) { mutableStateOf(priceWithoutTaxInput.text) }
     var textPriceWithTax by remember(priceWithTaxInput.text) { mutableStateOf(priceWithTaxInput.text) }
-
-    // Rounds after 2 numbers after decimal (2,15 instead of 2,14678)
-    val formatWithTwoDecimals = DecimalFormat("#.##")
 
     // Rules to format the display, as Compose don't do it alone :
     // for instance, allow the input of only 1 separator (2,15 and not 2,15.23,23)
@@ -73,12 +75,12 @@ fun FormInputCreatorDoublePrice(
             if (isFirstField) {
                 textPriceWithTax = newValue.replace(",", ".").toDoubleOrNull()?.let {
                     val value = it / (1.0 + tax.doubleValue(false) / 100.0)
-                    formatWithTwoDecimals.format(value).toString()
+                    formatWithTwoDecimals(value)
                 }?.toString() ?: ""
             } else {
                 textPriceWithoutTax = newValue.replace(",", ".").toDoubleOrNull()?.let { price ->
                     val priceDecimal = BigDecimal.fromDouble(price)
-                    formatWithTwoDecimals.format((priceDecimal + priceDecimal * tax / BigDecimal.fromInt(100)).doubleValue(false)).toString()
+                    formatWithTwoDecimals((priceDecimal + priceDecimal * tax / BigDecimal.fromInt(100)).doubleValue(false))
                 }?.toString() ?: ""
             }
         }
@@ -97,11 +99,11 @@ fun FormInputCreatorDoublePrice(
             Text(
                 modifier = Modifier
                     .padding(bottom = 3.dp),
-                text = stringResource(id = R.string.product_price_without_tax),
+                text = DefaultStrings.PRODUCT_PRICE_WITHOUT_TAX,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = stringResource(id = R.string.product_price_with_tax),
+                text = DefaultStrings.PRODUCT_PRICE_WITH_TAX,
                 fontWeight = FontWeight.SemiBold
             )
         }

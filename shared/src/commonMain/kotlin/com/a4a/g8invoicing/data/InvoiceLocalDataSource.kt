@@ -1,14 +1,14 @@
 package com.a4a.g8invoicing.data
 
-import android.util.Log
-import android.util.Log.e
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.data.util.DateUtils
+import com.a4a.g8invoicing.data.util.DefaultStrings
+import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -16,8 +16,8 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.data.models.ClientOrIssuerType
-import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerAddressQueries
 import g8invoicing.DocumentClientOrIssuerQueries
@@ -32,13 +32,9 @@ import g8invoicing.LinkDocumentClientOrIssuerToAddressQueries
 import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
 import g8invoicing.LinkInvoiceToDocumentProductQueries
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.RoundingMode
-import java.util.Calendar
 
 class InvoiceLocalDataSource(
     db: Database,
@@ -62,25 +58,26 @@ class InvoiceLocalDataSource(
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        return withContext(Dispatchers.IO) {
-            val formatter = getDateFormatter()
-            val today = Calendar.getInstance()
-            val todayFormatted = formatter.format(today.time)
-            val dueDateCalendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }
-            val dueDateFormatted = formatter.format(dueDateCalendar.time)
+        return withContext(DispatcherProvider.IO) {
+            val todayFormatted = DateUtils.getCurrentDateFormatted()
+            val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
+
+            println("DEBUG createNew: todayFormatted=$todayFormatted, dueDateFormatted=$dueDateFormatted")
 
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
                     getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
-                        ?: Strings.get(R.string.invoice_default_number)
+                        ?: DefaultStrings.INVOICE_DEFAULT_NUMBER
                 ),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = getExistingIssuer()?.transformIntoEditable(), // DB call
                 footerText = TextFieldValue(
-                    getExistingFooter() ?: Strings.get(R.string.document_default_footer) // DB call
+                    getExistingFooter() ?: DefaultStrings.DOCUMENT_DEFAULT_FOOTER // DB call
                 )
             )
+
+            println("DEBUG createNew: newInvoiceState.documentDate=${newInvoiceState.documentDate}, dueDate=${newInvoiceState.dueDate}")
 
             saveInfoInInvoiceTable(newInvoiceState)
 
@@ -129,7 +126,7 @@ class InvoiceLocalDataSource(
     // Correctly uses withContext(Dispatchers.IO).
     // Internal fetch* helpers are synchronous and will run on this IO context.
     override suspend fun fetch(id: Long): InvoiceState? {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 invoiceQueries.get(id).executeAsOneOrNull()
                     ?.let {
@@ -242,6 +239,7 @@ class InvoiceLocalDataSource(
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
     ): InvoiceState {
+        println("DEBUG transformIntoEditableInvoice: issuing_date=${this.issuing_date}, due_date=${this.due_date}")
         return InvoiceState(
             documentId = this.invoice_id.toInt(),
             documentTag = documentTag ?: DocumentTag.DRAFT,
@@ -253,7 +251,7 @@ class InvoiceLocalDataSource(
             documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
             documentProducts = documentProducts?.sortedBy { it.sortOrder },
             documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-            currency = TextFieldValue(Strings.get(R.string.currency)),
+            currency = TextFieldValue(DefaultStrings.CURRENCY),
             dueDate = this.due_date ?: "",
             paymentStatus = this.payment_status.toInt(),
             footerText = TextFieldValue(text = this.footer ?: ""),
@@ -265,10 +263,10 @@ class InvoiceLocalDataSource(
     // --- convertDeliveryNotesToInvoice ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
-            } ?: Strings.get(R.string.invoice_default_number)
+            } ?: DefaultStrings.INVOICE_DEFAULT_NUMBER
 
 
             try {
@@ -304,7 +302,7 @@ class InvoiceLocalDataSource(
     // --- update ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun update(document: InvoiceState) {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 invoiceQueries.update( // DB Call
                     invoice_id = document.documentId?.toLong() ?: 0,
@@ -316,7 +314,7 @@ class InvoiceLocalDataSource(
                     due_date = document.dueDate,
                     payment_status = document.paymentStatus.toLong(),
                     footer = document.footerText.text,
-                    updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
+                    updated_at = DateUtils.getCurrentTimestamp()
                 )
                 // Update tag if payment is late (due date expired)
                 if (isPaymentLate(document.dueDate)) { // isPaymentLate is pure
@@ -336,12 +334,12 @@ class InvoiceLocalDataSource(
     // --- duplicate ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun duplicate(documents: List<InvoiceState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { originalDocument ->
                     val docNumber = getLastDocumentNumber()?.let { // DB Call
                         incrementDocumentNumber(it)
-                    } ?: Strings.get(R.string.invoice_default_number)
+                    } ?: DefaultStrings.INVOICE_DEFAULT_NUMBER
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),
@@ -375,7 +373,7 @@ class InvoiceLocalDataSource(
         tag: DocumentTag,
         tagUpdateCase: TagUpdateOrCreationCase,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { invoice ->
                     invoice.documentId?.toLong()?.let { invoiceId ->
@@ -397,16 +395,14 @@ class InvoiceLocalDataSource(
     // --- markAsPaid ---
     // Added withContext(Dispatchers.IO).
     override suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach {
                     it.documentId?.toLong()?.let {
                         invoiceQueries.updatePaymentStatus(
                             invoice_id = it,
                             payment_status = if (tag == DocumentTag.PAID) 2 else 0,
-                            updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(
-                                Calendar.getInstance().time
-                            )
+                            updated_at = DateUtils.getCurrentTimestamp()
                         )
                     }
                 }
@@ -424,7 +420,7 @@ class InvoiceLocalDataSource(
         deliveryNoteDate: String?,
         deliveryNoteNumber: String?,
     ): Int? {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 documentProductQueries.transactionWithResult {
                     // This global function performs synchronous DB operations
@@ -452,7 +448,7 @@ class InvoiceLocalDataSource(
         documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?, // This is the parent document ID (e.g., invoiceId)
     ) {
-        withContext(Dispatchers.IO) { // This IO context is inherited by the suspend call below
+        withContext(DispatcherProvider.IO) { // This IO context is inherited by the suspend call below
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
@@ -471,7 +467,7 @@ class InvoiceLocalDataSource(
     // --- delete ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun delete(documents: List<InvoiceState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.filter { it.documentId != null }.forEach { document ->
                     // Delete linked products and their specific links
@@ -535,7 +531,7 @@ class InvoiceLocalDataSource(
     // Uses withContext(Dispatchers.IO).
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 linkInvoiceToDocumentProductQueries.deleteProductLinkedToInvoice(
                     documentId,
                     documentProductId
@@ -553,7 +549,7 @@ class InvoiceLocalDataSource(
     // Uses withContext(Dispatchers.IO).
     override suspend fun deleteTag(invoiceId: Long) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 linkInvoiceToTagQueries.delete(
                     invoiceId  // DB call
                 )
@@ -571,7 +567,7 @@ class InvoiceLocalDataSource(
         type: ClientOrIssuerType,
     ) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 // Fetch the specific client/issuer linked to THIS invoice
                 val clientOrIssuerToDelete =
                     fetchClientAndIssuer( // Synchronous, runs on this IO context
@@ -611,7 +607,7 @@ class InvoiceLocalDataSource(
         updateCase: TagUpdateOrCreationCase,
     ) {
         try {
-            withContext(Dispatchers.IO) {
+            withContext(DispatcherProvider.IO) {
                 invoiceTagQueries.getTagId(newTag.name).executeAsOneOrNull()?.let {
                     if (updateCase == TagUpdateOrCreationCase.UPDATED_BY_USER ||
                         updateCase == TagUpdateOrCreationCase.AUTOMATICALLY_CANCELLED ||
@@ -716,13 +712,9 @@ class InvoiceLocalDataSource(
     }
 
     // --- isPaymentLate ---
-    // Pure utility function.
+    // Pure utility function using DateUtils.
     private fun isPaymentLate(dueDate: String): Boolean {
-        val formatter = getDateFormatter()
-        val dueDate = formatter.parse(dueDate)?.time
-        val currentDate = java.util.Date().time
-        val isLatePayment = dueDate != null && dueDate < currentDate
-        return isLatePayment
+        return DateUtils.isDateBeforeToday(dueDate)
     }
 
     /**
@@ -732,7 +724,7 @@ class InvoiceLocalDataSource(
         documentId: Long,
         orderedProducts: List<DocumentProductState>,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documentProductQueries.transaction {
                     updateDocumentProductsOrderInDb(
@@ -988,7 +980,7 @@ private suspend fun saveDocumentClientOrIssuer(
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
     clientOrIssuerState: ClientOrIssuerState,
 ): Long? { // Return the ID of the saved client/issuer
-    return withContext(Dispatchers.IO) {
+    return withContext(DispatcherProvider.IO) {
         try {
             saveInfoInDocumentClientOrIssuerTable(
                 documentClientOrIssuerQueries,
@@ -1212,10 +1204,7 @@ fun updateDocumentProductsOrderInDb(
                             document_product_id = documentProductId
                         )
                     } catch (e: Exception) {
-                        Log.e(
-                            "InvoiceLocalDataSource updateSortOrderForDocumentProduct",
-                            "Error: ${e.message}"
-                        )
+                        // Error updating sort order
                     }
 
                 }
@@ -1236,16 +1225,12 @@ fun updateDocumentProductsOrderInDb(
                     )
                 }
 
-                else -> Log.w(
-                    "InvoiceLocalDataSource",
-                    "Unsupported document type for updating sort order"
-                )
+                else -> {
+                    // Unsupported document type for updating sort order
+                }
             }
         } else {
-            Log.w(
-                "InvoiceLocalDataSource",
-                "Product ID is null for product: ${documentProduct.name.text}, cannot update sort order."
-            )
+            // Product ID is null, cannot update sort order
         }
     }
 }

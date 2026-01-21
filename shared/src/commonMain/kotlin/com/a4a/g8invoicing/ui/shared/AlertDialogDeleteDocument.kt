@@ -10,20 +10,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
+import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 
 @Composable
@@ -45,7 +40,7 @@ fun AlertDialogDeleteDocument(
             if (isInvoice) DeleteInvoiceLink(uriHandler)
             else
                 Text(
-                    text = Strings.get(R.string.alert_dialog_delete_general),
+                    text = DefaultStrings.ALERT_DIALOG_DELETE_GENERAL,
                 )
         },
         textContentColor = Color.Black,
@@ -58,7 +53,7 @@ fun AlertDialogDeleteDocument(
                     onConfirmation()
                 }
             ) {
-                Text(text = stringResource(id = R.string.alert_dialog_delete_confirm))
+                Text(text = DefaultStrings.ALERT_DIALOG_DELETE_CONFIRM)
             }
         }
     )
@@ -67,16 +62,16 @@ fun AlertDialogDeleteDocument(
 @Composable
 fun DeleteInvoiceLink(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
-        append(Strings.get(R.string.alert_dialog_delete_invoice_1) + " ")
+        append(DefaultStrings.ALERT_DIALOG_DELETE_INVOICE_1 + " ")
         pushStringAnnotation(
             tag = "link",
-            annotation = Strings.get(R.string.alert_dialog_delete_url)
+            annotation = DefaultStrings.ALERT_DIALOG_DELETE_URL
         )
         withStyle(style = SpanStyle(color = ColorVioletLink)) {
-            append(Strings.get(R.string.alert_dialog_delete_invoice_2))
+            append(DefaultStrings.ALERT_DIALOG_DELETE_INVOICE_2)
         }
         // pop()
-        append(Strings.get(R.string.alert_dialog_delete_invoice_3))
+        append(DefaultStrings.ALERT_DIALOG_DELETE_INVOICE_3)
         // pop()
     }
 

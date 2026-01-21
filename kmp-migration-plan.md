@@ -26,7 +26,7 @@ Migration de l'app Android vers Kotlin Multiplatform pour supporter iOS.
 | KMP | 1 - Setup Projet KMP | ✅ Terminé |
 | KMP | 2 - DI Koin KMP | ✅ Terminé |
 | KMP | 3 - Extraction Code Partagé | ✅ Terminé |
-| KMP | 4 - expect/actual Database | 🟡 En cours |
+| KMP | 4 - expect/actual Database | ✅ Terminé |
 | KMP | 5 - expect/actual Storage | ✅ Terminé |
 | KMP | 6 - expect/actual PDF | 🟡 Partiel |
 | KMP | 7 - Navigation KMP | 🟡 Partiel |
@@ -291,7 +291,7 @@ g8-invoicing/
 
 ---
 
-### SUJET 4 : expect/actual - Database - 🟡 EN COURS
+### SUJET 4 : expect/actual - Database - ✅ TERMINÉ
 
 #### 4.1 - DatabaseDriverFactory ✅
 - [x] Créer `shared/commonMain/data/DatabaseDriverFactory.kt` avec `expect`
@@ -303,7 +303,7 @@ g8-invoicing/
 - [x] app/src/main/sqldelight supprimé
 - [x] KoinModules.kt mis à jour pour utiliser DatabaseDriverFactory
 
-#### 4.2 - Migration des DataSources 🟡 EN COURS
+#### 4.2 - Migration des DataSources ✅ TERMINÉ
 **Utilitaires KMP créés dans shared/commonMain/data/util/:**
 - [x] `DispatcherProvider.kt` (expect) - remplace Dispatchers.IO
 - [x] `DispatcherProvider.android.kt` (actual) - Dispatchers.IO
@@ -318,21 +318,19 @@ g8-invoicing/
 - [x] `ClientOrIssuerLocalDataSource.kt`
 - [x] `ProductLocalDataSource.kt`
 
-**DataSources documents (restent dans app/ - dépendances Android):**
-- [ ] `InvoiceLocalDataSource.kt` (utilise SimpleDateFormat, Strings.get())
-- [ ] `DeliveryNoteLocalDataSource.kt` (utilise SimpleDateFormat, Strings.get())
-- [ ] `CreditNoteLocalDataSource.kt` (utilise SimpleDateFormat, Strings.get())
+**DataSources documents migrés vers shared/commonMain/data/ (19 Jan 2026):**
+- [x] `InvoiceLocalDataSource.kt` - remplacé SimpleDateFormat→DateUtils, Strings.get()→DefaultStrings, Dispatchers.IO→DispatcherProvider.IO
+- [x] `DeliveryNoteLocalDataSource.kt` - remplacé SimpleDateFormat→DateUtils, Strings.get()→DefaultStrings, Dispatchers.IO→DispatcherProvider.IO
+- [x] `CreditNoteLocalDataSource.kt` - remplacé SimpleDateFormat→DateUtils, Strings.get()→DefaultStrings, Dispatchers.IO→DispatcherProvider.IO
 
 **Fichiers supprimés de app/:**
 - [x] `app/src/main/java/.../data/ProductTaxLocalDataSource.kt`
 - [x] `app/src/main/java/.../data/AlertDialogLocalDataSource.kt`
 - [x] `app/src/main/java/.../data/ClientOrIssuerLocalDataSource.kt`
 - [x] `app/src/main/java/.../data/ProductLocalDataSource.kt`
-
-**Prochaines étapes pour migration complète:**
-- [ ] Remplacer SimpleDateFormat par DateUtils dans les DataSources de documents
-- [ ] Remplacer Strings.get(R.string.xxx) par DefaultStrings
-- [ ] Déplacer les DataSources de documents vers shared
+- [x] `app/src/main/java/.../data/InvoiceLocalDataSource.kt`
+- [x] `app/src/main/java/.../data/DeliveryNoteLocalDataSource.kt`
+- [x] `app/src/main/java/.../data/CreditNoteLocalDataSource.kt`
 
 ---
 
@@ -413,10 +411,12 @@ g8-invoicing/
 - [x] Configurer Compose pour iOS
 - [x] Dépendances compose-multiplatform ajoutées
 
-#### 8.2 - Migration du Theme ✅
-- [x] Déplacer `ui/theme/Theme.kt` vers `shared/commonMain/ui/theme/`
-- [x] Déplacer `ui/theme/Color.kt`
-- [x] Déplacer `ui/theme/Typography.kt`
+#### 8.2 - Migration du Theme ✅ (19 Jan 2026)
+- [x] `Color.kt` migré vers `shared/commonMain/ui/theme/`
+- [x] `Typography.kt` migré vers `shared/commonMain/ui/theme/` (utilise Compose Resources pour fonts)
+- [x] `Theme.kt` migré vers `shared/commonMain/ui/theme/`
+- [x] Fonts copiées vers `shared/commonMain/composeResources/font/` (dmsansregular, dmsansmedium, helvetica, helveticabold)
+- [x] Supprimé `app/src/main/java/.../ui/theme/` (Color.kt, Theme.kt, Type.kt, Typography.kt)
 
 #### 8.3 - Migration des Strings ✅
 - [x] Créer `shared/commonMain/composeResources/values/strings.xml`
@@ -425,25 +425,26 @@ g8-invoicing/
 - [x] Remplacer `stringResource(R.string.xxx)` par `stringResource(Res.string.xxx)`
 - [x] Garder `Strings.get()` pour strings dynamiques (Android R.string)
 
-#### 8.4 - Migration des Composants Partagés 🟡
-**Migrés vers shared :**
-- [x] `Separators.kt`
-- [x] `FlippyCheckBox.kt`
-- [x] `ButtonAddOrChoose.kt`
-- [x] `FormInputDefaultStyle.kt`
-- [x] `DecimalInputVisualTransformation.kt`
-- [x] `BatAnimation.kt` (Compottie)
-- [x] `FormUI.kt` (data classes + composables: FormUI, PageElementCreator, RowWithLabelAndInput)
-- [x] `DecimalFormatter.kt`
-- [x] `FormInputCreatorGoForward.kt`
-- [x] `FormInputCreatorListPicker.kt`
-- [x] `FormInputCreatorText.kt`
-- [x] `FormInputCreatorDecimal.kt`
-- [x] `FormInputCreatorDoublePrice.kt`
-- [x] `AlertDialogDeleteDocument.kt`
-- [x] `AlertDialogErrorOrInfo.kt`
-- [x] `WhatsNewDialog.kt`
-- [x] `GeneralBottomBar.kt`
+#### 8.4 - Migration des Composants Partagés ✅ (19 Jan 2026)
+**Migrés vers shared/commonMain/ui/shared/ :**
+- [x] `Separators.kt` ✅
+- [x] `FlippyCheckBox.kt` ✅
+- [x] `ButtonAddOrChoose.kt` ✅ (Icons.Filled.KeyboardArrowRight remplace ArrowForwardIos)
+- [x] `FormInputDefaultStyle.kt` ✅
+- [x] `DecimalInputVisualTransformation.kt` ✅
+- [x] `BatAnimation.kt` (Compottie) ✅
+- [x] `FormUI.kt` ✅ (data classes + composables: FormUI, PageElementCreator, RowWithLabelAndInput)
+- [x] `DecimalFormatter.kt` ✅ (simplifié sans java.text)
+- [x] `FormInputCreatorGoForward.kt` ✅
+- [x] `FormInputCreatorListPicker.kt` ✅ (@OptIn ExperimentalLayoutApi pour FlowRow)
+- [x] `FormInputCreatorText.kt` ✅ (DefaultStrings.FORM_LABEL_EDIT)
+- [x] `FormInputCreatorDecimal.kt` ✅
+- [x] `FormInputCreatorDoublePrice.kt` ✅ (DefaultStrings pour labels HT/TTC)
+- [x] `FormInputCreatorDate.kt` ✅ (commenté, migré tel quel)
+- [x] `AlertDialogDeleteDocument.kt` ✅ (DefaultStrings pour messages)
+- [x] `AlertDialogErrorOrInfo.kt` ✅
+- [x] `FormInputsValidator.kt` ✅ (regex KMP au lieu de android.util.Patterns)
+- [x] `SwipeBackground.kt` ✅ (commenté, migré tel quel)
 
 **ui/navigation migrés:**
 - [x] `BottomBarAction.kt`
@@ -455,18 +456,17 @@ g8-invoicing/
 - [x] `ScaffoldWithDimmedOverlay.kt`
 - [x] `DocumentBottomSheetLargeText.kt`
 
-**Restent dans app (à migrer ou garder Android-specific) :**
-- [ ] `FormInputCreatorDate.kt` (commenté/non utilisé)
-- [ ] `DocumentBottomSheet*.kt` (nombreux fichiers liés)
-- [ ] `DocumentBasicTemplate*.kt` (template PDF)
-- [ ] `SwipeBackground.kt` (commenté/non utilisé)
-- [ ] `pullrefresh/` (custom implementation)
+**Restent dans app (Android-specific - migration non possible) :**
+- [x] `CreatePdfWithIText.kt` - iText7 (Android only, nécessite expect/actual pour iOS avec PDFKit)
+- [x] `PdfUtils.kt` - Android Context/Intent pour partage PDF
+- [x] `KeyboardVisibility.kt` - ViewTreeObserver, android.graphics.Rect
+- [x] `GeneralBottomBar.kt` - NavController Android Navigation
+- [x] `WhatsNewDialog.kt` - Nombreuses R.string, à migrer quand strings KMP prêtes
 
-**Android-specific (restent dans app) :**
-- [x] `CreatePdfWithIText.kt` (iText7 - Android only)
-- [x] `FormInputsValidator.kt` (android.util.Patterns)
-- [x] `KeyboardVisibility.kt` (Android specific)
-- [x] `PdfUtils.kt`
+**Restent dans app (à migrer plus tard) :**
+- [ ] `DocumentBottomSheet*.kt` (nombreux fichiers liés aux écrans)
+- [ ] `DocumentBasicTemplate*.kt` (template PDF)
+- [ ] `pullrefresh/` (custom implementation)
 
 #### 8.5 - Migration des Screens ❌
 - [ ] Déplacer `ui/screens/InvoiceList.kt` vers `shared/commonMain/ui/screens/`
@@ -629,14 +629,14 @@ g8-invoicing/
 
 ---
 
-## Migration DataSources - 🟡 EN COURS (19 Jan 2026)
+## Migration DataSources - ✅ TERMINÉ (19 Jan 2026)
 
 ### Utilitaires KMP créés
 
 **shared/src/commonMain/kotlin/com/a4a/g8invoicing/data/util/:**
 - `DispatcherProvider.kt` (expect/actual) - remplace `Dispatchers.IO` Android par abstraction KMP
 - `DateUtils.kt` - fonctions de date utilisant `kotlinx-datetime` (getCurrentDateFormatted, getDatePlusDaysFormatted, etc.)
-- `DefaultStrings.kt` - constantes par défaut (numéros de documents, footer, devise)
+- `DefaultStrings.kt` - constantes par défaut (numéros de documents, footer, devise, messages UI)
 - `PriceCalculations.kt` - fonctions de calcul de prix (calculatePriceWithTax, calculatePriceWithoutTax)
 
 ### DataSources migrés vers shared
@@ -647,15 +647,18 @@ g8-invoicing/
 | `AlertDialogLocalDataSource` | ✅ Migré | Simple, pas de dépendances Android |
 | `ClientOrIssuerLocalDataSource` | ✅ Migré | Remplacé Dispatchers.IO par DispatcherProvider.IO |
 | `ProductLocalDataSource` | ✅ Migré | Remplacé calculatePriceWithTax import |
-| `InvoiceLocalDataSource` | ❌ Dans app | Utilise SimpleDateFormat, Strings.get() |
-| `DeliveryNoteLocalDataSource` | ❌ Dans app | Utilise SimpleDateFormat, Strings.get() |
-| `CreditNoteLocalDataSource` | ❌ Dans app | Utilise SimpleDateFormat, Strings.get() |
+| `InvoiceLocalDataSource` | ✅ Migré | SimpleDateFormat→DateUtils, Strings.get()→DefaultStrings, Dispatchers.IO→DispatcherProvider.IO |
+| `DeliveryNoteLocalDataSource` | ✅ Migré | SimpleDateFormat→DateUtils, Strings.get()→DefaultStrings, Dispatchers.IO→DispatcherProvider.IO |
+| `CreditNoteLocalDataSource` | ✅ Migré | SimpleDateFormat→DateUtils, Strings.get()→DefaultStrings, Dispatchers.IO→DispatcherProvider.IO |
 
 ### Fichiers supprimés de app/
 - `app/src/main/java/.../data/ProductTaxLocalDataSource.kt`
 - `app/src/main/java/.../data/AlertDialogLocalDataSource.kt`
 - `app/src/main/java/.../data/ClientOrIssuerLocalDataSource.kt`
 - `app/src/main/java/.../data/ProductLocalDataSource.kt`
+- `app/src/main/java/.../data/InvoiceLocalDataSource.kt`
+- `app/src/main/java/.../data/DeliveryNoteLocalDataSource.kt`
+- `app/src/main/java/.../data/CreditNoteLocalDataSource.kt`
 
 ### Imports mis à jour
 - `ProductAddEditViewModel.kt` - import calculatePriceWithTax depuis shared

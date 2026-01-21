@@ -29,11 +29,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.inputLabel
@@ -145,7 +144,7 @@ fun FormInputCreatorText(
                     Text(
                         color = ColorGreyo,
                         style = MaterialTheme.typography.textVerySmall,
-                        text = stringResource(id = R.string.form_label_edit)
+                        text = DefaultStrings.FORM_LABEL_EDIT
                     )
                 }
             }

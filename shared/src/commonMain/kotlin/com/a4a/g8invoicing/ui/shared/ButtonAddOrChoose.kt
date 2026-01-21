@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,7 +41,7 @@ fun ButtonAddOrChoose(
     if (hasBorder) {
         myModifier = myModifier.then(
             Modifier.border(
-                border = ButtonDefaults.outlinedButtonBorder,
+                border = ButtonDefaults.outlinedButtonBorder(enabled = true),
                 shape = RoundedCornerShape(2.dp)
             )
         )
@@ -77,7 +77,7 @@ fun ButtonAddOrChoose(
                         top = 10.dp,
                         bottom = 10.dp
                     ),
-                imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                imageVector = Icons.Filled.KeyboardArrowRight,
                 contentDescription = "Choose existing"
             )
         else Icon(
@@ -88,7 +88,7 @@ fun ButtonAddOrChoose(
                         top = 10.dp,
                         bottom = 10.dp
                     ),
-                imageVector = Icons.Outlined.Add,
+                imageVector = Icons.Filled.Add,
                 contentDescription = "Add new"
             )
     }

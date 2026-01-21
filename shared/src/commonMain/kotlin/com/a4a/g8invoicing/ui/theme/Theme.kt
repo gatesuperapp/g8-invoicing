@@ -24,24 +24,7 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = ColorVeryLightGreen,
     surfaceContainerLow = Color.White,
     surfaceContainer = Color.White,
-    )
-
-
-
-
-/*private val DarkColorScheme = darkColorScheme(
-    primary = ColorLightGreen,
-    secondary = ColorDarkGreen,
-    tertiary = ColorCoral,
-    background = ColorBlack,
-    surface = ColorBlack,
-    onPrimary = ColorLightBlack,
-    onSecondary = ColorLightBlack,
-    onTertiary = ColorLightBlack,
-    onBackground = ColorLightBlack,
-    onSurface = ColorLightBlack,
-    surfaceTint = ColorRedCultured
-)*/
+)
 
 @Composable
 fun G8InvoicingTheme(
@@ -51,13 +34,15 @@ fun G8InvoicingTheme(
     val colors = if (!useDarkTheme) {
         LightColorScheme
     } else {
-        //DarkColorScheme
+        // Dark theme not implemented yet
         LightColorScheme
     }
 
+    val typography = createCustomTypography()
+
     MaterialTheme(
         colorScheme = colors,
-        typography = customTypography,
+        typography = typography,
         content = content
     )
 }

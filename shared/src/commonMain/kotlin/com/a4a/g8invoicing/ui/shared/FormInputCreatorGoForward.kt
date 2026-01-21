@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +37,7 @@ fun FormInputCreatorGoForward(
                 .width(15.dp)
                 .padding(bottom = 3.dp),
             tint = ColorGreyo,
-            imageVector = Icons.AutoMirrored.Outlined.ArrowRight,
+            imageVector = Icons.Filled.KeyboardArrowRight,
             contentDescription = "Right arrow"
         )
     }

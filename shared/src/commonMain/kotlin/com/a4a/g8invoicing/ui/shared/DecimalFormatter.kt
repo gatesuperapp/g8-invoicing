@@ -1,19 +1,14 @@
 package com.a4a.g8invoicing.ui.shared
 
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-
 // Credits: Jemshit Tuvakov https://dev.to/tuvakov/decimal-input-formatting-with-jetpack-composes-visualtransformation-110n
 
-class DecimalFormatter(
-    symbols: DecimalFormatSymbols = DecimalFormatSymbols.getInstance()
-) {
+class DecimalFormatter {
 
     // Not used yet, Adds a separator for thousands (ex: 2,500 instead of 2500)
-    private val thousandsSeparator = symbols.groupingSeparator
+    // private val thousandsSeparator = ','
     // Decimal separator will be "," for France for instance, "." for USA
-    private val comaSeparator = ",".single()
-    private val dotSeparator = ".".single()
+    private val comaSeparator = ','.toChar()
+    private val dotSeparator = '.'.toChar()
 
     fun cleanup(input: String): String {
 

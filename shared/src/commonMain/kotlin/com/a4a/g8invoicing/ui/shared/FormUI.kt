@@ -1,7 +1,5 @@
 package com.a4a.g8invoicing.ui.shared
 
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import kotlin.collections.filter
 
 @Composable
 fun FormUI(

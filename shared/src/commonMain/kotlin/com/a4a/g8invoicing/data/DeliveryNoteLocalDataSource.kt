@@ -4,20 +4,18 @@ package com.a4a.g8invoicing.data
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.util.DateUtils
+import com.a4a.g8invoicing.data.util.DefaultStrings
+import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 
 class DeliveryNoteLocalDataSource(
     db: Database,
@@ -37,15 +35,14 @@ class DeliveryNoteLocalDataSource(
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        return withContext(Dispatchers.IO) {
-            val formatter = getDateFormatter()
-            val today = Calendar.getInstance()
-            val todayFormatted = formatter.format(today.time)
+        return withContext(DispatcherProvider.IO) {
+            val todayFormatted = DateUtils.getCurrentDateFormatted()
+            println("DEBUG DeliveryNote createNew: todayFormatted=$todayFormatted")
 
             val newDeliveryNoteState = DeliveryNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
-                } ?: Strings.get(R.string.delivery_note_default_number)),
+                } ?: DefaultStrings.DELIVERY_NOTE_DEFAULT_NUMBER),
                 documentDate = todayFormatted,
                 documentIssuer = getExistingIssuer()?.transformIntoEditable(),
                 footerText = TextFieldValue(getExistingFooter() ?: "")
@@ -96,7 +93,7 @@ class DeliveryNoteLocalDataSource(
     // Correctly uses withContext(Dispatchers.IO).
     // Internal fetch* helpers are synchronous and will run on this IO context.
     override suspend fun fetch(id: Long): DeliveryNoteState? {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 deliveryNoteQueries.get(id).executeAsOneOrNull()
                     ?.let {
@@ -192,7 +189,7 @@ class DeliveryNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(Strings.get(R.string.currency)),
+                currency = TextFieldValue(DefaultStrings.CURRENCY),
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at
             )
@@ -202,7 +199,7 @@ class DeliveryNoteLocalDataSource(
     // --- update ---
     // Uses withContext(Dispatchers.IO)
     override suspend fun update(document: DeliveryNoteState) {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 deliveryNoteQueries.update(
                     delivery_note_id = document.documentId?.toLong() ?: 0,
@@ -212,7 +209,7 @@ class DeliveryNoteLocalDataSource(
                     free_field = document.freeField?.text,
                     currency = document.currency.text,
                     footer = document.footerText.text,
-                    updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
+                    updated_at = DateUtils.getCurrentTimestamp()
                 )
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -223,12 +220,12 @@ class DeliveryNoteLocalDataSource(
     // --- duplicate ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun duplicate(documents: List<DeliveryNoteState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { originalDocument ->
                     val docNumber = getLastDocumentNumber()?.let {
                         incrementDocumentNumber(it)
-                    } ?: Strings.get(R.string.delivery_note_default_number)
+                    } ?: DefaultStrings.DELIVERY_NOTE_DEFAULT_NUMBER
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),
@@ -258,7 +255,7 @@ class DeliveryNoteLocalDataSource(
         documentProduct: DocumentProductState,
         documentId: Long
     ): Int? {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 documentProductQueries.transactionWithResult {
                     // This global function performs synchronous DB operations
@@ -282,7 +279,7 @@ class DeliveryNoteLocalDataSource(
         documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
@@ -301,7 +298,7 @@ class DeliveryNoteLocalDataSource(
     // --- delete ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun delete(documents: List<DeliveryNoteState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.filter { it.documentId != null }.forEach { document ->
                     document.documentProducts?.mapNotNull { it.id }?.forEach {
@@ -359,7 +356,7 @@ class DeliveryNoteLocalDataSource(
     // Uses withContext(Dispatchers.IO).
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 linkDeliveryNoteToDocumentProductQueries.deleteProductLinkedToDeliveryNote(
                     documentId,
                     documentProductId
@@ -377,7 +374,7 @@ class DeliveryNoteLocalDataSource(
         type: ClientOrIssuerType,
     ) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 val clientOrIssuerToDelete =
                     fetchClientAndIssuer(
                         documentId,
@@ -468,7 +465,7 @@ class DeliveryNoteLocalDataSource(
         documentId: Long,
         orderedProducts: List<DocumentProductState>,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documentProductQueries.transaction {
                     updateDocumentProductsOrderInDb(
@@ -484,4 +481,3 @@ class DeliveryNoteLocalDataSource(
         }
     }
 }
-

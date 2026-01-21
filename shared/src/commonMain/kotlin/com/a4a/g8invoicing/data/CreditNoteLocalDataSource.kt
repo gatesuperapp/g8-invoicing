@@ -1,26 +1,23 @@
 package com.a4a.g8invoicing.data
 
-import android.util.Log.e
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
-import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.Strings
-import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
-import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.util.DateUtils
+import com.a4a.g8invoicing.data.util.DefaultStrings
+import com.a4a.g8invoicing.data.util.DispatcherProvider
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 
 class CreditNoteLocalDataSource(
     db: Database,
@@ -38,18 +35,15 @@ class CreditNoteLocalDataSource(
         db.linkCreditNoteToDocumentClientOrIssuerQueries
 
     override suspend fun createNew(): Long? {
-        return withContext(Dispatchers.IO) {
-            val formatter = getDateFormatter()
-            val today = Calendar.getInstance()
-            val todayFormatted = formatter.format(today.time)
-            val dueDateCalendar = Calendar.getInstance().apply { add(Calendar.DAY_OF_MONTH, 30) }
-            val dueDateFormatted = formatter.format(dueDateCalendar.time)
+        return withContext(DispatcherProvider.IO) {
+            val todayFormatted = DateUtils.getCurrentDateFormatted()
+            val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
             val issuer = getExistingIssuer()?.transformIntoEditable()
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
-                } ?: Strings.get(R.string.credit_note_default_number)),
+                } ?: DefaultStrings.CREDIT_NOTE_DEFAULT_NUMBER),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = issuer,
@@ -79,7 +73,7 @@ class CreditNoteLocalDataSource(
 
     override suspend fun fetch(id: Long): CreditNoteState? {
 
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 creditNoteQueries.get(id).executeAsOneOrNull()
                     ?.let {
@@ -170,7 +164,7 @@ class CreditNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(Strings.get(R.string.currency)),
+                currency = TextFieldValue(DefaultStrings.CURRENCY),
                 dueDate = it.due_date ?: "",
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at
@@ -179,10 +173,10 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
-            } ?: Strings.get(R.string.credit_note_default_number)
+            } ?: DefaultStrings.CREDIT_NOTE_DEFAULT_NUMBER
 
             try {
                 saveInfoInCreditNoteTable(
@@ -207,7 +201,7 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun update(document: CreditNoteState) {
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 creditNoteQueries.update(
                     credit_note_id = document.documentId?.toLong() ?: 0,
@@ -218,7 +212,7 @@ class CreditNoteLocalDataSource(
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     footer = document.footerText.text,
-                    updated_at = getDateFormatter(pattern = "yyyy-MM-dd HH:mm:ss").format(Calendar.getInstance().time)
+                    updated_at = DateUtils.getCurrentTimestamp()
                 )
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -227,12 +221,12 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun duplicate(documents: List<CreditNoteState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach {
                     val docNumber = getLastDocumentNumber()?.let {
                         incrementDocumentNumber(it)
-                    } ?: Strings.get(R.string.credit_note_default_number)
+                    } ?: DefaultStrings.CREDIT_NOTE_DEFAULT_NUMBER
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
 
@@ -251,25 +245,21 @@ class CreditNoteLocalDataSource(
         deliveryNoteDate: String?,
         deliveryNoteNumber: String?,
     ): Int? {
-        android.util.Log.e("CreditNoteDS", "saveDocumentProductInDbAndLinkToDocument called with documentId=$documentId")
-        return withContext(Dispatchers.IO) {
+        return withContext(DispatcherProvider.IO) {
             try {
                 val result = documentProductQueries.transactionWithResult {
                     saveDocumentProductInDbAndLink(
                         documentProductQueries,
                         linkDocumentProductToCreditNoteQueries,
-                        linkDocumentClientOrIssuerToAddressQueries,
+                        linkCreditNoteDocumentProductToDeliveryNoteQueries,
                         documentProduct,
                         documentId,
                         deliveryNoteDate,
                         deliveryNoteNumber
                     )
                 }
-                android.util.Log.e("CreditNoteDS", "transactionWithResult returned: $result")
                 result
             } catch (e: Exception) {
-                android.util.Log.e("CreditNoteDS", "Error saveDocProdAndLink: ${e.message}")
-                e.printStackTrace()
                 null
             }
         }
@@ -279,7 +269,7 @@ class CreditNoteLocalDataSource(
         documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
@@ -296,7 +286,7 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun delete(documents: List<CreditNoteState>) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documents.filter { it.documentId != null }.forEach { document ->
                     document.documentProducts?.mapNotNull { it.id }?.forEach {
@@ -349,7 +339,7 @@ class CreditNoteLocalDataSource(
 
     override suspend fun deleteDocumentProduct(documentId: Long, documentProductId: Long) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 linkDocumentProductToCreditNoteQueries.deleteProductLinkedToCreditNote(
                     documentId,
                     documentProductId
@@ -368,7 +358,7 @@ class CreditNoteLocalDataSource(
         type: ClientOrIssuerType,
     ) {
         try {
-            return withContext(Dispatchers.IO) {
+            return withContext(DispatcherProvider.IO) {
                 val documentClientOrIssuer =
                     fetchClientAndIssuer(
                         id,
@@ -467,13 +457,13 @@ class CreditNoteLocalDataSource(
         documentId: Long,
         orderedProducts: List<DocumentProductState>,
     ) {
-        withContext(Dispatchers.IO) {
+        withContext(DispatcherProvider.IO) {
             try {
                 documentProductQueries.transaction {
                     updateDocumentProductsOrderInDb(
                         documentId,
                         orderedProducts,
-                        linkCreditNoteDocumentProductToDeliveryNoteQueries
+                        linkDocumentProductToCreditNoteQueries
                     )
                 }
             } catch (e: Exception) {
@@ -483,4 +473,3 @@ class CreditNoteLocalDataSource(
         }
     }
 }
-
