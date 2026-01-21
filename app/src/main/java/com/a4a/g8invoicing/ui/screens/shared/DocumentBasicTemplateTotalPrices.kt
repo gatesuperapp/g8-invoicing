@@ -71,7 +71,7 @@ fun DocumentBasicTemplateTotalPrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(id = R.string.document_tax) + " " + it.first.toString().replace(".", ",") + "% : "
+                            text = stringResource(id = R.string.document_tax) + " " + it.first.stripTrailingZeros().toPlainString().replace(".", ",") + "% : "
                         )
                     }
                 }

@@ -680,7 +680,7 @@ private fun addProductsToTable(
                 fontRegular = fontRegular
             )
         productsTable.addCustomCell(text = it.taxRate?.let {
-            it.toString() + "%"
+            it.stripTrailingZeros().toPlainString().replace(".", ",") + "%"
         } ?: " - ", fontBold = fontBold, fontRegular = fontRegular)
 
 
@@ -707,18 +707,8 @@ private fun createPrices(
     fontSize: Float,
 ): Table {
     val pricesArray = listOf(
-        PriceRow(
-            rowDescription = "TOTAL_WITHOUT_TAX"
-        ),
-        PriceRow(
-            rowDescription = "TAXES_10"
-        ),
-        PriceRow(
-            rowDescription = "TAXES_20"
-        ),
-        PriceRow(
-            rowDescription = "TOTAL_WITH_TAX"
-        ),
+        PriceRow(rowDescription = "TOTAL_WITHOUT_TAX"),
+        PriceRow(rowDescription = "TOTAL_WITH_TAX"),
     )
 
     val pricesColumnsWidth = floatArrayOf(90f, 10f)
@@ -737,34 +727,16 @@ private fun createPrices(
         pricesTable.addCellInPrices(totalWithoutTax)
     }
 
-    if (pricesArray.any { it.rowDescription.contains("TAXES") }) {
-        val taxes = pricesArray
-            .filter { it.rowDescription.contains("TAXES") }
-            .map { it.rowDescription }.toMutableList()
-
-        var taxesAmount = listOf<Int>()
-        taxes.forEach {
-            taxesAmount += it.removePrefix("TAXES_").toInt()
-        }
-
-        taxesAmount.forEach { tax ->
-            documentPrices.totalAmountsOfEachTax?.firstOrNull {
-                it.first.stripTrailingZeros() == BigDecimal(
-                    tax
-                ).stripTrailingZeros()
-            }?.let {
-                pricesTable.addCellInPrices(
-                    Paragraph(
-                        Strings.get(R.string.document_tax) + " " + it.first.setScale(
-                            0,
-                            RoundingMode.HALF_UP
-                        ).toString() + "% : "
-                    )
+    documentPrices.totalAmountsOfEachTax
+        ?.sortedBy { it.first }
+        ?.forEach { (taxRate, taxAmount) ->
+            pricesTable.addCellInPrices(
+                Paragraph(
+                    Strings.get(R.string.document_tax) + " " + taxRate.stripTrailingZeros().toPlainString().replace(".", ",") + "% : "
                 )
-                pricesTable.addCellInPrices(Paragraph(it.second.toString() + Strings.get(R.string.currency)))
-            }
+            )
+            pricesTable.addCellInPrices(Paragraph(taxAmount.toString().replace(".", ",") + Strings.get(R.string.currency)))
         }
-    }
     if (pricesArray.any { it.rowDescription == PricesRowName.TOTAL_WITH_TAX.name }) {
         pricesTable.addCellInPrices(
             Paragraph(

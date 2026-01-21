@@ -104,7 +104,7 @@ fun ProductTaxRatesContent(
                         text = if (taxRate == BigDecimal(0)) {
                             "-"
                         } else {
-                            "$taxRate%"
+                            taxRate.stripTrailingZeros().toPlainString().replace(".", ",") + "%"
                         },
                         style = LocalTextStyle.current
                     )

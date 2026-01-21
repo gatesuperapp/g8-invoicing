@@ -165,7 +165,7 @@ fun ProductAddEditForm(
                                         if (taxRate == null) {
                                             "-"
                                         } else {
-                                            "$taxRate%"
+                                            taxRate.stripTrailingZeros().toPlainString().replace(".", ",") + "%"
                                         }
                                     },
                                 ),

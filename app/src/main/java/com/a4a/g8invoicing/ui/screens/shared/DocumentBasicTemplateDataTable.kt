@@ -208,7 +208,7 @@ fun DocumentProductsRows(
             }
 
             TableCell(
-                text = data.taxRate?.let { "$it%" }
+                text = data.taxRate?.let { it.stripTrailingZeros().toPlainString().replace(".", ",") + "%" }
                     ?: " - ",
                 weight = taxColumnWeight,
                 alignEnd = true
