@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.navigation.NavController
@@ -31,6 +32,11 @@ fun NavGraphBuilder.productTaxRates(
         }) { backStackEntry ->
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
         val taxRates = viewModel.fetchTaxRatesFromLocalDb()
+
+        // Handle system back button
+        BackHandler {
+            onClickBackOrSelect()
+        }
 
         ProductTaxRates(
             navController = navController,

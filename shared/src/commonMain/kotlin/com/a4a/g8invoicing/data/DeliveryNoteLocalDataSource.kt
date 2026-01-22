@@ -6,8 +6,10 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.util.DateUtils
-import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.data.util.DispatcherProvider
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.delivery_note_default_number
+import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -42,7 +44,7 @@ class DeliveryNoteLocalDataSource(
             val newDeliveryNoteState = DeliveryNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
-                } ?: DefaultStrings.DELIVERY_NOTE_DEFAULT_NUMBER),
+                } ?: getString(Res.string.delivery_note_default_number)),
                 documentDate = todayFormatted,
                 documentIssuer = getExistingIssuer()?.transformIntoEditable(),
                 footerText = TextFieldValue(getExistingFooter() ?: "")
@@ -189,7 +191,8 @@ class DeliveryNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(DefaultStrings.CURRENCY),
+                // TODO: Currency should come from user preferences, not hardcoded
+                currency = TextFieldValue("EUR"),
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at
             )
@@ -225,7 +228,7 @@ class DeliveryNoteLocalDataSource(
                 documents.forEach { originalDocument ->
                     val docNumber = getLastDocumentNumber()?.let {
                         incrementDocumentNumber(it)
-                    } ?: DefaultStrings.DELIVERY_NOTE_DEFAULT_NUMBER
+                    } ?: getString(Res.string.delivery_note_default_number)
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),

@@ -47,6 +47,12 @@ kotlin {
             implementation("io.github.alexzhirkevich:compottie:2.0.0-rc01")
             implementation("io.github.alexzhirkevich:compottie-resources:2.0.0-rc01")
 
+            // Reorderable - Drag and drop for LazyColumn/LazyRow (KMP compatible)
+            implementation("sh.calvin.reorderable:reorderable:3.0.0")
+
+            // Navigation Compose Multiplatform (JetBrains)
+            api("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
+
             // SQLDelight - use api() to export to app module
             api("app.cash.sqldelight:coroutines-extensions:2.2.1")
         }

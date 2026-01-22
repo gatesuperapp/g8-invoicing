@@ -3,8 +3,7 @@ package com.a4a.g8invoicing.ui.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,32 +23,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FormInputCreatorListPicker(
     input: ListPicker,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         if (input.selectedItems.isEmpty()) {
             Text(
                 text = "Sélectionner...",
             )
         } else if (input.selectedItems.size <= 3) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                input.selectedItems.forEach { clientRef ->
-                    CustomChip(
-                        text = clientRef.name,
-                        onChipClick = { input.onClick?.invoke() },
-                        onRemoveClick = { input.onRemoveItem?.invoke(clientRef.id) }
-                    )
-                }
+            // Use Column with Rows instead of FlowRow for KMP compatibility
+            input.selectedItems.forEach { clientRef ->
+                CustomChip(
+                    text = clientRef.name,
+                    onChipClick = { input.onClick?.invoke() },
+                    onRemoveClick = { input.onRemoveItem?.invoke(clientRef.id) }
+                )
             }
         } else {
             Text(

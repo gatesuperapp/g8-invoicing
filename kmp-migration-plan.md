@@ -387,14 +387,18 @@ g8-invoicing/
 #### 7.2 - Migration Navigation 🟡
 - [x] `Screen.kt` migré vers `shared/commonMain/ui/navigation/`
 - [x] `Category.kt` migré vers `shared/commonMain/ui/navigation/`
-- [x] `AppBarAction.kt` migré vers `shared/commonMain/ui/navigation/`
-- [x] `TopBarActionView.kt` migré vers `shared/commonMain/ui/navigation/`
-- [x] `NavigationComponents.kt` créé (AddIconAndLabelInColumn, ViewWithLayout)
-- [x] `ButtonWithDropdownMenu.kt` migré vers `shared/commonMain/ui/navigation/`
-- [x] `CategoriesDropdownMenu.kt` migré vers `shared/commonMain/ui/navigation/`
-- [x] `BottomBarActionView.kt` migré vers `shared/commonMain/ui/navigation/`
-- [ ] TopBar.kt reste dans app (utilise R.string et NavController spécifique Android)
-- [ ] BottomBarAction.kt reste dans app (enveloppe BottomBarActionView avec BottomAppBar)
+- [x] `AppBarAction.kt` migré vers `shared/commonMain/ui/navigation/` (String au lieu de @StringRes Int)
+- [x] `TopBar.kt` migré vers `shared/commonMain/ui/navigation/` (JetBrains NavController)
+- [x] `TopBarViews.kt` migré (TopBarActionView, TopBarCtaView)
+- [x] `DocumentBottomBar.kt` migré vers `shared/commonMain/ui/navigation/` (avec ViewWithLayout)
+- [x] `Category.kt` créé dans `shared/commonMain/ui/navigation/` (22 Jan 2026 - StringResource au lieu de @StringRes Int)
+- [x] `CategoriesDropdownMenu.kt` migré vers `shared/commonMain/ui/navigation/` (22 Jan 2026)
+- [x] `ButtonWithDropdownMenu.kt` migré vers `shared/commonMain/ui/navigation/` (22 Jan 2026)
+- [x] `BottomBarActionView.kt` migré vers `shared/commonMain/ui/navigation/` (22 Jan 2026)
+- [x] `BottomBarAction.kt` migré vers `shared/commonMain/ui/navigation/` (22 Jan 2026)
+- [x] Ajout dépendance `org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10`
+- [x] Suppression duplicats app/ (TopBar.kt, TopBarActionView.kt, Screen.kt, DocumentBottomBar.kt, DocumentBottomBarView.kt)
+- [x] Mise à jour appels TopBar dans app/ pour utiliser `stringResource(R.string.xxx)` (titre String)
 - [ ] NavGraph*.kt restent dans app (dépendent des screens/viewmodels non migrés)
 - [ ] Vérifier que les arguments de navigation fonctionnent
 
@@ -451,22 +455,118 @@ g8-invoicing/
 - [x] `DocumentBottomBar.kt`
 - [x] `DocumentBottomBarView.kt`
 
-**ui/screens/shared migrés:**
+**ui/screens/shared migrés (22 Jan 2026):**
 - [x] `DocumentBottomSheetTypeOfForm.kt`
 - [x] `ScaffoldWithDimmedOverlay.kt`
 - [x] `DocumentBottomSheetLargeText.kt`
+- [x] `DocumentBasicTemplateClientOrIssuer.kt`
+- [x] `DocumentBottomSheetClientOrIssuerContent.kt`
+- [x] `ModifierExtensions.kt` (customCombinedClickable, getBorder) - NOUVEAU
+- [x] `DateFormatter.kt` (formatDate, parseDate avec kotlinx-datetime) - NOUVEAU
+- [x] `DocumentBasicTemplateFooter.kt`
+- [x] `DocumentBasicTemplateFreeField.kt`
+- [x] `DocumentBasicTemplateReference.kt`
+- [x] `DocumentBasicTemplateHeader.kt`
+- [x] `DocumentBasicTemplateDataTable.kt` (TableCell, border extensions)
+- [x] `DocumentBasicTemplateTotalPrices.kt`
+- [x] `DocumentBasicTemplateContent.kt` (utilise Compose Resources pour img_paid)
+- [x] `DocumentBasicTemplate.kt` (BoxWithConstraints au lieu de LocalConfiguration)
+- [x] `DocumentBottomSheetFormSimple.kt`
+- [x] `DocumentBottomSheetClientOrIssuerPreview.kt`
+- [x] `DocumentBottomSheetDatePicker.kt` (kotlinx-datetime au lieu de java.util.Date)
 
-**Restent dans app (Android-specific - migration non possible) :**
+**Compose Resources ajoutées (22 Jan 2026):**
+- [x] `drawable/img_paid.png` - image "Payée" pour factures
+- [x] Strings: invoice_number, delivery_note_number, credit_note_number, document_date, document_reference, document_table_*, document_total_*, document_bottom_sheet_*, document_modal_*, etc.
+
+**expect/actual KeyboardVisibility créé (22 Jan 2026):**
+- [x] `shared/commonMain/.../ui/shared/KeyboardVisibility.kt` (expect)
+- [x] `shared/androidMain/.../ui/shared/KeyboardVisibility.android.kt` (actual - ViewTreeObserver)
+- [x] `shared/iosMain/.../ui/shared/KeyboardVisibility.ios.kt` (actual - stub pour l'instant)
+
+**Restent dans app (Android-specific - migration non possible) :
 - [x] `CreatePdfWithIText.kt` - iText7 (Android only, nécessite expect/actual pour iOS avec PDFKit)
 - [x] `PdfUtils.kt` - Android Context/Intent pour partage PDF
-- [x] `KeyboardVisibility.kt` - ViewTreeObserver, android.graphics.Rect
-- [x] `GeneralBottomBar.kt` - NavController Android Navigation
-- [x] `WhatsNewDialog.kt` - Nombreuses R.string, à migrer quand strings KMP prêtes
+- [x] `KeyboardVisibility.kt` - expect/actual créé (shared/androidMain/iosMain)
+- [x] `GeneralBottomBar.kt` migré vers `shared/commonMain/ui/shared/` (22 Jan 2026)
+- [x] `WhatsNewDialog.kt` migré vers `shared/commonMain/ui/shared/` (22 Jan 2026)
 
-**Restent dans app (à migrer plus tard) :**
-- [ ] `DocumentBottomSheet*.kt` (nombreux fichiers liés aux écrans)
-- [ ] `DocumentBasicTemplate*.kt` (template PDF)
+**Migrés le 22 Jan 2026 (suite):**
+- [x] `DocumentBottomSheetProductListChosenContent.kt` ✅ (reorderable library ajoutée)
+- [x] `DocumentBottomSheetProductListChosenItem.kt` ✅ (HapticFeedbackType.LongPress car KMP)
+- [x] `DocumentBottomSheetProductListChosen.kt` ✅ (Compose Resources pour strings)
+- [x] `DocumentBottomSheetProductAddEditForm.kt` ✅ (FormUI, FormInput depuis shared)
+- [x] `DocumentBottomSheetProductsAvailable.kt` ✅ (ProductListContent migré)
+- [x] `DocumentBottomSheetProducts.kt` ✅ (keyboardAsState depuis shared)
+- [x] `DocumentBottomSheetForm.kt` ✅ (ClientOrIssuerAddEditForm + ProductTaxRatesContent migrés)
+- [x] `ProductListContent.kt` → `shared/commonMain/ui/screens/` ✅
+- [x] `ProductListItem.kt` → `shared/commonMain/ui/screens/` ✅ (actionTagUndefined().iconColor → Color.White)
+- [x] `ProductTaxRatesContent.kt` → `shared/commonMain/ui/screens/` ✅
+- [x] `ClientOrIssuerAddEditForm.kt` → `shared/commonMain/ui/screens/` ✅ (498 lignes migrées)
+- [x] `ProductType.kt` → `shared/commonMain/ui/viewmodels/` ✅ (enum extrait)
+
+**Strings ajoutées le 22 Jan 2026:**
+- client_name, client_first_name, client_email, client_phone
+- client_address_title, client_address1, client_address2, client_city, client_zip_code
+- client_company_identification*_input, client_notes
+- client_add_address, client_delete_address
+- document_modal_add_product, document_modal_edit_product, document_modal_new_*
+
+**Migrés le 22 Jan 2026 (suite 2):**
+- [x] `ClientOrIssuerListItem.kt` → `shared/commonMain/ui/screens/` ✅
+- [x] `ClientOrIssuerListContent.kt` → `shared/commonMain/ui/screens/` ✅
+- [x] `DocumentBottomSheetClientOrIssuerList.kt` → `shared/commonMain/ui/screens/shared/` ✅
+- [x] `DocumentBottomSheetElementsContent.kt` → `shared/commonMain/ui/screens/shared/` ✅ (Compose Resources)
+- [x] `DocumentBottomSheetElementsAfterSlide.kt` → `shared/commonMain/ui/screens/shared/` ✅ (Compose Resources)
+- [x] `DocumentBottomSheetTextElements.kt` → `shared/commonMain/ui/screens/shared/` ✅
+
+**Migrés le 22 Jan 2026 (documents list) :**
+- [x] `DocumentListItem.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - Remplacé `R.string` et `Strings.get()` par Compose Resources `stringResource(Res.string.xxx)`
+  - String `invoice_due_date` ajoutée aux Compose Resources
+- [x] `DocumentListContent.kt` migré vers `shared/commonMain/ui/screens/` ✅ (simple migration)
+- [x] `WhatsNewDialog.kt` migré vers `shared/commonMain/ui/shared/` ✅
+  - `appVersion` passé en paramètre au lieu d'utiliser `CURRENT_APP_VERSION` directement
+
+**Migrés le 22 Jan 2026 (product screens) :**
+- [x] `ProductAddEditForm.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - Strings ajoutées: product_price_default, product_price_client, product_add_price, product_delete_price
+- [x] `ClientMultiSelectSheet.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - Strings ajoutées: client_selection_title, client_selection_empty, client_selection_validate
+- [x] `ProductTaxRates.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - BackHandler retiré (déplacé vers NavGraphProductTaxRates.kt côté Android)
+  - String ajoutée: tax_rate_screen_title
+- [x] `ProductAddEdit.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - ViewModel retiré des paramètres, remplacé par callbacks et valeurs directes
+  - Créé `ClientSelectionDialogState` data class dans shared
+  - NavGraphProductAddEdit.kt mis à jour pour mapper les états et callbacks
+- [x] `ClientOrIssuerAddEdit.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - Strings.get() remplacé par stringResource(Res.string.xxx)
+- [x] `ProductList.kt` migré vers `shared/commonMain/ui/screens/` ✅
+  - BackHandler retiré (déplacé vers NavGraphProductList.kt côté Android)
+  - Ajouté callbacks pour isCategoriesMenuOpen et onCategoriesMenuOpenChange
+
+**Migrés le 22 Jan 2026 (navigation et screens) :**
+- [x] `DocumentAddEdit.kt` migré vers `shared/commonMain/ui/screens/shared/` ✅
+  - Toast remplacé par callback `onShowMessage: (String) -> Unit`
+  - ExportPdf rendu en slot `exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit`
+  - Utilise JetBrains NavController (navigation-compose KMP)
+  - BackHandler doit être géré côté appelant (Android-specific)
+- [x] NavGraph*AddEdit.kt mis à jour pour utiliser DocumentAddEdit depuis shared avec nouveaux paramètres ✅
+- [x] `AppBarAction.kt` consolidé: toutes les fonctions action* sont maintenant @Composable et utilisent stringResource(Res.string.xxx)
+- [x] Suppression app/ui/navigation/AppBarAction.kt (dupliqué) ✅
+- [x] `Category.kt` créé dans shared (StringResource au lieu de @StringRes Int) ✅
+- [x] `CategoriesDropdownMenu.kt` migré vers shared (utilise Compose Resources) ✅
+- [x] Suppression app/ui/navigation/CategoriesDropdownMenu.kt (contenait aussi Category) ✅
+- [x] `BottomBarActionView.kt` mis à jour: utilise action.name == "CATEGORIES" au lieu de stringResource comparison
+- [x] `DocumentListItem.kt` mis à jour: actionTag* appelé dans contexte @Composable
+- [x] `DateFormatter.kt` mis à jour pour supporter les formats "yyyy-MM-dd" et "dd/MM/yyyy" ✅
+- [x] `DocumentListContent.kt`, `CreditNoteListViewModel.kt` mis à jour pour utiliser parseDate/currentTimeMillis ✅
+- [x] Suppression de `app/ui/screens/shared/DocumentAddEdit.kt` (dupliqué) ✅
+
+**Restent dans app (Android-specific) :**
 - [ ] `pullrefresh/` (custom implementation)
+- [x] `ExportPdf.kt` (iText7, Android Context) - passé en slot au DocumentAddEdit
 
 #### 8.5 - Migration des Screens ❌
 - [ ] Déplacer `ui/screens/InvoiceList.kt` vers `shared/commonMain/ui/screens/`
@@ -636,8 +736,12 @@ g8-invoicing/
 **shared/src/commonMain/kotlin/com/a4a/g8invoicing/data/util/:**
 - `DispatcherProvider.kt` (expect/actual) - remplace `Dispatchers.IO` Android par abstraction KMP
 - `DateUtils.kt` - fonctions de date utilisant `kotlinx-datetime` (getCurrentDateFormatted, getDatePlusDaysFormatted, etc.)
-- `DefaultStrings.kt` - constantes par défaut (numéros de documents, footer, devise, messages UI)
 - `PriceCalculations.kt` - fonctions de calcul de prix (calculatePriceWithTax, calculatePriceWithoutTax)
+- ~~`DefaultStrings.kt`~~ → SUPPRIMÉ (22 Jan 2026) - remplacé par Compose Resources + getString()
+
+**Strings migrées vers Compose Resources (22 Jan 2026):**
+- DataSources utilisent maintenant `getString(Res.string.xxx)` (suspend function)
+- UI utilise `stringResource(Res.string.xxx)` (composable)
 
 ### DataSources migrés vers shared
 

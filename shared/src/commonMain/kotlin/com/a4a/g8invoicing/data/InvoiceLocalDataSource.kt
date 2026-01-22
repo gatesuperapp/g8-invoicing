@@ -6,8 +6,12 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.data.util.DateUtils
-import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.data.util.DispatcherProvider
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.currency
+import com.a4a.g8invoicing.shared.resources.document_default_footer
+import com.a4a.g8invoicing.shared.resources.invoice_default_number
+import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -67,13 +71,13 @@ class InvoiceLocalDataSource(
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
                     getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
-                        ?: DefaultStrings.INVOICE_DEFAULT_NUMBER
+                        ?: getString(Res.string.invoice_default_number)
                 ),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = getExistingIssuer()?.transformIntoEditable(), // DB call
                 footerText = TextFieldValue(
-                    getExistingFooter() ?: DefaultStrings.DOCUMENT_DEFAULT_FOOTER // DB call
+                    getExistingFooter() ?: getString(Res.string.document_default_footer) // DB call
                 )
             )
 
@@ -251,7 +255,8 @@ class InvoiceLocalDataSource(
             documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
             documentProducts = documentProducts?.sortedBy { it.sortOrder },
             documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-            currency = TextFieldValue(DefaultStrings.CURRENCY),
+            // TODO: Currency should come from user preferences, not hardcoded
+            currency = TextFieldValue("EUR"),
             dueDate = this.due_date ?: "",
             paymentStatus = this.payment_status.toInt(),
             footerText = TextFieldValue(text = this.footer ?: ""),
@@ -266,7 +271,7 @@ class InvoiceLocalDataSource(
         withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
-            } ?: DefaultStrings.INVOICE_DEFAULT_NUMBER
+            } ?: getString(Res.string.invoice_default_number)
 
 
             try {
@@ -276,7 +281,7 @@ class InvoiceLocalDataSource(
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
                     documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                     documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
-                    footerText = TextFieldValue(getExistingFooter() ?: "") // DB call
+                    footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)) // DB call
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -339,7 +344,7 @@ class InvoiceLocalDataSource(
                 documents.forEach { originalDocument ->
                     val docNumber = getLastDocumentNumber()?.let { // DB Call
                         incrementDocumentNumber(it)
-                    } ?: DefaultStrings.INVOICE_DEFAULT_NUMBER
+                    } ?: getString(Res.string.invoice_default_number)
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),

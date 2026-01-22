@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
-import com.a4a.g8invoicing.ui.screens.shared.getDateFormatter
+import com.a4a.g8invoicing.ui.screens.shared.parseDate
+import com.a4a.g8invoicing.ui.screens.shared.currentTimeMillis
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.CreditNotesUiState
 import kotlinx.coroutines.Job
@@ -84,11 +85,9 @@ class CreditNoteListViewModel(
     }
 
     private fun isPaymentLate(dueDate: String): Boolean {
-        val formatter = getDateFormatter()
-        val dueDate = formatter.parse(dueDate)?.time
-        val currentDate = java.util.Date().time
-        val isLatePayment = dueDate != null && dueDate < currentDate
-        return isLatePayment
+        val dueDateMillis = parseDate(dueDate)
+        val currentDate = currentTimeMillis()
+        return dueDateMillis != null && dueDateMillis < currentDate
     }
 }
 

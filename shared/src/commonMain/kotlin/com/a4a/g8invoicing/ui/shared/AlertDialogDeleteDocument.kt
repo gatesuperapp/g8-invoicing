@@ -2,11 +2,8 @@ package com.a4a.g8invoicing.ui.shared
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,8 +15,16 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.data.util.DefaultStrings
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.alert_dialog_cancel
+import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_confirm
+import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_general
+import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_invoice_1
+import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_invoice_2
+import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_invoice_3
+import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_url
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AlertDialogDeleteDocument(
@@ -30,22 +35,25 @@ fun AlertDialogDeleteDocument(
     val uriHandler = LocalUriHandler.current
 
     AlertDialog(
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.Cancel,
-                contentDescription = "Delete line item"
-            )
-        },
         text = {
             if (isInvoice) DeleteInvoiceLink(uriHandler)
             else
                 Text(
-                    text = DefaultStrings.ALERT_DIALOG_DELETE_GENERAL,
+                    text = stringResource(Res.string.alert_dialog_delete_general),
                 )
         },
         textContentColor = Color.Black,
         onDismissRequest = {
             onDismissRequest()
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text(text = stringResource(Res.string.alert_dialog_cancel))
+            }
         },
         confirmButton = {
             Button(
@@ -53,7 +61,7 @@ fun AlertDialogDeleteDocument(
                     onConfirmation()
                 }
             ) {
-                Text(text = DefaultStrings.ALERT_DIALOG_DELETE_CONFIRM)
+                Text(text = stringResource(Res.string.alert_dialog_delete_confirm))
             }
         }
     )
@@ -61,17 +69,22 @@ fun AlertDialogDeleteDocument(
 
 @Composable
 fun DeleteInvoiceLink(uriHandler: UriHandler) {
+    val deleteInvoice1 = stringResource(Res.string.alert_dialog_delete_invoice_1)
+    val deleteInvoice2 = stringResource(Res.string.alert_dialog_delete_invoice_2)
+    val deleteInvoice3 = stringResource(Res.string.alert_dialog_delete_invoice_3)
+    val deleteUrl = stringResource(Res.string.alert_dialog_delete_url)
+
     val annotatedString = buildAnnotatedString {
-        append(DefaultStrings.ALERT_DIALOG_DELETE_INVOICE_1 + " ")
+        append("$deleteInvoice1 ")
         pushStringAnnotation(
             tag = "link",
-            annotation = DefaultStrings.ALERT_DIALOG_DELETE_URL
+            annotation = deleteUrl
         )
         withStyle(style = SpanStyle(color = ColorVioletLink)) {
-            append(DefaultStrings.ALERT_DIALOG_DELETE_INVOICE_2)
+            append(deleteInvoice2)
         }
         // pop()
-        append(DefaultStrings.ALERT_DIALOG_DELETE_INVOICE_3)
+        append(deleteInvoice3)
         // pop()
     }
 

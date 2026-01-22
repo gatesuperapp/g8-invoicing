@@ -295,7 +295,7 @@ class ProductAddEditViewModel(
             ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION -> documentProductUiState.value.description?.text
                 ?: ""
 
-            ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit?.text
+            ScreenElement.DOCUMENT_PRODUCT_UNIT -> documentProductUiState.value.unit?.text ?: ""
             else -> ""
         }
         _documentProductUiState.value = updateDocumentProductUiState(

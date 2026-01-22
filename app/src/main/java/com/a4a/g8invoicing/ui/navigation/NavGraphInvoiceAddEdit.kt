@@ -61,6 +61,9 @@ import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEdit
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.screens.ExportPdf
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 
@@ -111,6 +114,7 @@ fun NavGraphBuilder.invoiceAddEdit(
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
 
         var showDocumentForm by remember { mutableStateOf(false) }
+        val context = LocalContext.current
 
         // Get result from "Add new" screen, to know if it's
         // a client or issuer that has been added
@@ -364,7 +368,13 @@ fun NavGraphBuilder.invoiceAddEdit(
             onClickDeleteAddress = {
                 clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
             },
-            onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb
+            onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb,
+            onShowMessage = { message ->
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            },
+            exportPdfContent = { documentState, onDismiss ->
+                ExportPdf(documentState, onDismiss)
+            }
         )
     }
 }

@@ -5,8 +5,10 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.util.DateUtils
-import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.data.util.DispatcherProvider
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.credit_note_default_number
+import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
@@ -43,7 +45,7 @@ class CreditNoteLocalDataSource(
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
-                } ?: DefaultStrings.CREDIT_NOTE_DEFAULT_NUMBER),
+                } ?: getString(Res.string.credit_note_default_number)),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = issuer,
@@ -164,7 +166,7 @@ class CreditNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue(DefaultStrings.CURRENCY),
+                currency = TextFieldValue("EUR"), // TODO: Currency should come from user preferences
                 dueDate = it.due_date ?: "",
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at
@@ -176,7 +178,7 @@ class CreditNoteLocalDataSource(
         withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
-            } ?: DefaultStrings.CREDIT_NOTE_DEFAULT_NUMBER
+            } ?: getString(Res.string.credit_note_default_number)
 
             try {
                 saveInfoInCreditNoteTable(
@@ -226,7 +228,7 @@ class CreditNoteLocalDataSource(
                 documents.forEach {
                     val docNumber = getLastDocumentNumber()?.let {
                         incrementDocumentNumber(it)
-                    } ?: DefaultStrings.CREDIT_NOTE_DEFAULT_NUMBER
+                    } ?: getString(Res.string.credit_note_default_number)
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
 

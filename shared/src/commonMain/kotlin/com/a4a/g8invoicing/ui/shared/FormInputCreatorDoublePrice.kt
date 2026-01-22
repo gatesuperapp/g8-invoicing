@@ -24,10 +24,15 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.data.util.DefaultStrings
 import com.a4a.g8invoicing.data.util.calculatePriceWithTax
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.product_price_with_tax
+import com.a4a.g8invoicing.shared.resources.product_price_without_tax
+import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.data.util.calculatePriceWithoutTax
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import kotlin.math.round
 
 // Simple decimal formatter for KMP
@@ -71,6 +76,7 @@ fun FormInputCreatorDoublePrice(
     }
 
     fun updateFieldsWithCalculatedValues(newValue: String, isFirstField: Boolean) {
+        val decimalMode = DecimalMode(decimalPrecision = 10, roundingMode = RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
         taxRate?.let { tax ->
             if (isFirstField) {
                 textPriceWithTax = newValue.replace(",", ".").toDoubleOrNull()?.let {
@@ -80,7 +86,8 @@ fun FormInputCreatorDoublePrice(
             } else {
                 textPriceWithoutTax = newValue.replace(",", ".").toDoubleOrNull()?.let { price ->
                     val priceDecimal = BigDecimal.fromDouble(price)
-                    formatWithTwoDecimals((priceDecimal + priceDecimal * tax / BigDecimal.fromInt(100)).doubleValue(false))
+                    val taxAmount = (priceDecimal * tax).divide(BigDecimal.fromInt(100), decimalMode)
+                    formatWithTwoDecimals((priceDecimal + taxAmount).doubleValue(false))
                 }?.toString() ?: ""
             }
         }
@@ -99,11 +106,11 @@ fun FormInputCreatorDoublePrice(
             Text(
                 modifier = Modifier
                     .padding(bottom = 3.dp),
-                text = DefaultStrings.PRODUCT_PRICE_WITHOUT_TAX,
+                text = stringResource(Res.string.product_price_without_tax),
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                text = DefaultStrings.PRODUCT_PRICE_WITH_TAX,
+                text = stringResource(Res.string.product_price_with_tax),
                 fontWeight = FontWeight.SemiBold
             )
         }

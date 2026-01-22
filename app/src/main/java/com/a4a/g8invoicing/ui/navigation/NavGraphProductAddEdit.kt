@@ -1,14 +1,15 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import android.util.Log.e
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.a4a.g8invoicing.ui.screens.ClientSelectionDialogState
 import com.a4a.g8invoicing.ui.screens.ProductAddEdit
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
@@ -36,11 +37,24 @@ fun NavGraphBuilder.productAddEdit(
     ) { backStackEntry ->
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
         val productUiState by viewModel.productUiState
+        val isLoading by viewModel.isLoading.collectAsState()
+        val clientSelectionDialogState by viewModel.clientSelectionDialogState.collectAsState()
         val isNew = backStackEntry.arguments?.getString("itemId") == null
+
+        // Map ViewModel dialog state to shared module's data class
+        val mappedDialogState = clientSelectionDialogState?.let {
+            ClientSelectionDialogState(
+                priceId = it.priceId,
+                availableClients = it.availableClients,
+                selectedClients = it.selectedClients
+            )
+        }
 
         ProductAddEdit(
             navController = navController,
-            viewModel = viewModel,
+            product = productUiState,
+            isLoading = isLoading,
+            clientSelectionDialogState = mappedDialogState,
             onValueChange = { pageElement, value, idStr ->
                 viewModel.updateProductState(pageElement, value, ProductType.PRODUCT, idStr)
             },
@@ -60,12 +74,20 @@ fun NavGraphBuilder.productAddEdit(
             onClickOpenClientSelection = { priceId ->
                 viewModel.openClientSelectionDialog(priceId)
             },
-            onClickRemoveClient = {priceId, clientId ->
+            onClickRemoveClient = { priceId, clientId ->
                 viewModel.removeClientFromPrice(priceId, clientId)
             },
             onClickDeletePrice = { viewModel.deletePrice(it) },
             onClickAddPrice = { viewModel.addPrice() },
-            product = productUiState
+            onToggleClientSelection = { clientRef ->
+                viewModel.toggleClientSelection(clientRef)
+            },
+            onConfirmClientSelection = {
+                viewModel.confirmClientSelection()
+            },
+            onCloseClientSelectionDialog = {
+                viewModel.closeClientSelectionDialog()
+            }
         )
     }
 }

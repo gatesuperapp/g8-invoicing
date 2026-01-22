@@ -32,8 +32,10 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.data.util.DefaultStrings
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.form_label_edit
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
+import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import com.a4a.g8invoicing.ui.theme.textVerySmall
@@ -144,7 +146,7 @@ fun FormInputCreatorText(
                     Text(
                         color = ColorGreyo,
                         style = MaterialTheme.typography.textVerySmall,
-                        text = DefaultStrings.FORM_LABEL_EDIT
+                        text = stringResource(Res.string.form_label_edit)
                     )
                 }
             }

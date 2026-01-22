@@ -1,7 +1,11 @@
 package com.a4a.g8invoicing.ui.shared
 
-import com.a4a.g8invoicing.data.util.DefaultStrings
-
+/**
+ * Validates form inputs.
+ * NOTE: Validation messages are hardcoded here because this is not a Composable.
+ * To support translation, refactor to return error types (enum/sealed class)
+ * and resolve strings in the UI layer with stringResource().
+ */
 object FormInputsValidator {
     // Simple email regex pattern for KMP
     private val EMAIL_REGEX = Regex(
@@ -14,15 +18,19 @@ object FormInputsValidator {
         ")+"
     )
 
+    // TODO: Move to Compose Resources when refactoring to error types
+    private const val VALIDATION_NAME_REQUIRED = "Le nom est obligatoire"
+    private const val VALIDATION_EMAIL_INVALID = "L'e-mail n'est pas valide"
+
     fun validateName(input: String?): String? {
         return if(input.isNullOrEmpty())
-            DefaultStrings.VALIDATION_NAME_REQUIRED
+            VALIDATION_NAME_REQUIRED
         else null
     }
 
     fun validateEmail(input: String?): String? {
         return if(!input.isNullOrEmpty() && !EMAIL_REGEX.matches(input))
-            DefaultStrings.VALIDATION_EMAIL_INVALID
+            VALIDATION_EMAIL_INVALID
         else null
     }
 }
