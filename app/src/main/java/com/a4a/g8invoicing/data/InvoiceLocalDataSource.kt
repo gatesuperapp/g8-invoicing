@@ -269,7 +269,7 @@ class InvoiceLocalDataSource(
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
                     documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                     documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
-                    footerText = TextFieldValue(getExistingFooter() ?: "") // DB call
+                    footerText = TextFieldValue(getExistingFooter() ?: Strings.get(R.string.document_default_footer)) // DB call
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
