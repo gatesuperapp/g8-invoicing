@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.client_selection_all_used
 import com.a4a.g8invoicing.shared.resources.client_selection_empty
 import com.a4a.g8invoicing.shared.resources.client_selection_title
 import com.a4a.g8invoicing.shared.resources.client_selection_validate
@@ -31,7 +32,8 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClientMultiSelectSheet(
-    allClients: List<ClientRef>,
+    allClients: List<ClientRef>,          // Clients disponibles (filtrés)
+    totalClientsInDatabase: Int,          // Nombre total de clients en BDD
     selectedClients: List<ClientRef>,
     onToggleClient: (ClientRef) -> Unit,
     onConfirm: () -> Unit,
@@ -47,10 +49,17 @@ fun ClientMultiSelectSheet(
 
             Spacer(Modifier.height(8.dp))
 
-            if (allClients.isEmpty()) {
-                // Message quand il n'y a pas de clients
+            if (totalClientsInDatabase == 0) {
+                // Aucun client en base de données
                 Text(
                     text = stringResource(Res.string.client_selection_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            } else if (allClients.isEmpty()) {
+                // Des clients existent mais tous sont déjà assignés à d'autres prix
+                Text(
+                    text = stringResource(Res.string.client_selection_all_used),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )

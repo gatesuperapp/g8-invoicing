@@ -127,6 +127,7 @@ fun About(
     // Callbacks for categories menu state (managed by NavGraph for BackHandler)
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    showCategoryButton: Boolean = true,
 ) {
     val uriHandler = LocalUriHandler.current
     val isDimActive = remember { mutableStateOf(false) }
@@ -183,7 +184,8 @@ fun About(
                     isDimActive.value = !isDimActive.value
                 },
                 isCategoriesMenuOpen = isCategoriesMenuOpen,
-                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange
+                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
+                showCategoryButton = showCategoryButton
             )
         }
     ) { padding ->

@@ -108,6 +108,7 @@ fun actionDelete(onClick: () -> Unit) =
     AppBarAction(
         icon = Icons.Outlined.DeleteOutline,
         description = stringResource(Res.string.appbar_delete),
+        label = stringResource(Res.string.appbar_delete), // Use same string for label
         isSecondary = true,
         onClick = onClick
     )

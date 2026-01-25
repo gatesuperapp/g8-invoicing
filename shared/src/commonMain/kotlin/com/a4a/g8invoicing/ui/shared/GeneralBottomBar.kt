@@ -36,19 +36,28 @@ fun GeneralBottomBar(
     onChangeBackground: () -> Unit,
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    showCategoryButton: Boolean = true, // Hidden on desktop when sidebar is shown
 ) {
     BottomBarAction(
         navController,
         appBarActions =
         if (numberOfItemsSelected == 0) {
-            if (isButtonNewDisplayed) {
+            if (isButtonNewDisplayed && showCategoryButton) {
                 arrayOf(
                     actionNew(onClickNew),
                     actionCategories()
                 )
-            } else arrayOf(
-                actionCategories()
-            )
+            } else if (isButtonNewDisplayed) {
+                arrayOf(
+                    actionNew(onClickNew)
+                )
+            } else if (showCategoryButton) {
+                arrayOf(
+                    actionCategories()
+                )
+            } else {
+                arrayOf()
+            }
         } else if (isInvoice && numberOfItemsSelected > 1) {
             arrayOf(
                 actionUnselectAll(onClickUnselectAll),

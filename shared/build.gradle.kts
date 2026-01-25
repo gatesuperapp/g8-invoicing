@@ -13,6 +13,12 @@ kotlin {
         }
     }
 
+    jvm("desktop") {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -53,6 +59,14 @@ kotlin {
             // Navigation Compose Multiplatform (JetBrains)
             api("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
 
+            // Lifecycle ViewModel Compose Multiplatform (JetBrains)
+            api("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+
+            // Koin for KMP
+            api("io.insert-koin:koin-core:4.0.2")
+            api("io.insert-koin:koin-compose:4.0.2")
+            api("io.insert-koin:koin-compose-viewmodel:4.0.2")
+
             // SQLDelight - use api() to export to app module
             api("app.cash.sqldelight:coroutines-extensions:2.2.1")
         }
@@ -61,6 +75,8 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
             // SQLDelight Android Driver
             implementation("app.cash.sqldelight:android-driver:2.2.1")
+            // iText 7 for PDF generation
+            implementation("com.itextpdf:itext7-core:7.2.5")
         }
 
         iosMain.dependencies {
@@ -68,8 +84,19 @@ kotlin {
             implementation("app.cash.sqldelight:native-driver:2.2.1")
         }
 
+        val desktopMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
+                // SQLDelight JVM Driver for Desktop
+                implementation("app.cash.sqldelight:sqlite-driver:2.2.1")
+                // iText 7 for PDF generation
+                implementation("com.itextpdf:itext7-core:7.2.5")
+            }
+        }
+
         commonTest.dependencies {
             implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
         }
     }
 }

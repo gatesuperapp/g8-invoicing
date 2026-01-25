@@ -16,4 +16,5 @@ dependencyResolutionManagement {
 rootProject.name = "G8 Invoicing"
 include(":app")
 include(":shared")
+include(":desktop")
  

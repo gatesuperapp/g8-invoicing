@@ -12,9 +12,12 @@ import androidx.compose.foundation.gestures.calculatePan
 import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -250,15 +253,29 @@ fun DocumentAddEdit(
             var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
             var newOffsetY by remember { mutableFloatStateOf(0f) }
 
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(ColorLightGreyo)
             ) {
+                // A4 aspect ratio: 210mm / 297mm ≈ 0.707
+                val a4AspectRatio = 210f / 297f
+                // On desktop (wider screens), constrain to A4 format
+                val isWideScreen = maxWidth > 600.dp
+                val documentMaxWidth = if (isWideScreen) 500.dp else maxWidth
+
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
-                        .fillMaxSize()
+                        .then(
+                            if (isWideScreen) {
+                                Modifier
+                                    .widthIn(max = documentMaxWidth)
+                                    .align(Alignment.TopCenter)
+                            } else {
+                                Modifier.fillMaxSize()
+                            }
+                        )
                         .padding(
                             innerPadding
                         )

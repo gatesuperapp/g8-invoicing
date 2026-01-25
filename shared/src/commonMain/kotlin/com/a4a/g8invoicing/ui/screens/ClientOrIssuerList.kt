@@ -37,6 +37,7 @@ fun ClientOrIssuerList(
     // Callbacks for platform-specific back handling
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    showCategoryButton: Boolean = true,
 ) {
     // Main list to handle actions with selected items
     val selectedItems = remember { mutableStateListOf<ClientOrIssuerState>() }
@@ -83,7 +84,8 @@ fun ClientOrIssuerList(
                     isDimActive.value = !isDimActive.value
                 },
                 isCategoriesMenuOpen = isCategoriesMenuOpen,
-                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange
+                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
+                showCategoryButton = showCategoryButton
             )
         }
     ) { padding ->

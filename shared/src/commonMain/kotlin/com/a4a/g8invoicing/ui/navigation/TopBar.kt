@@ -1,22 +1,31 @@
 package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
+import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
 import org.jetbrains.compose.resources.stringResource
 
@@ -27,6 +36,7 @@ import org.jetbrains.compose.resources.stringResource
 fun TopBar(
     title: String? = null,
     appBarAction: AppBarAction? = null,
+    appBarActions: Array<AppBarAction>? = null, // Multiple actions for desktop
     ctaText: String? = null,
     ctaTextDisabled: Boolean? = null,
     onClickCtaValidate: () -> Unit = {},
@@ -45,16 +55,76 @@ fun TopBar(
             }
         },
         actions = {
-            if (appBarAction != null) {
+            // Multiple actions (for desktop)
+            if (appBarActions != null && appBarActions.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(end = 8.dp)
+                ) {
+                    appBarActions.forEachIndexed { index, action ->
+                        // First action (usually "New") gets a prominent outlined button
+                        if (index == 0 && action.label != null) {
+                            OutlinedButton(
+                                onClick = action.onClick,
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = ColorVioletLight
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(
+                                    width = 1.dp,
+                                    color = ColorVioletLight
+                                )
+                            ) {
+                                action.icon?.let {
+                                    Icon(
+                                        imageVector = it,
+                                        contentDescription = action.description,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                }
+                                Text(text = action.label)
+                            }
+                        } else {
+                            // Other actions get text buttons
+                            androidx.compose.material3.TextButton(
+                                onClick = action.onClick,
+                                modifier = Modifier.padding(start = 4.dp)
+                            ) {
+                                action.icon?.let {
+                                    Icon(
+                                        imageVector = it,
+                                        contentDescription = action.description,
+                                        modifier = Modifier.size(20.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    if (action.label != null) {
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                    }
+                                }
+                                action.label?.let {
+                                    Text(
+                                        text = it,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // Single action (legacy)
+            else if (appBarAction != null) {
                 TopBarActionView(
                     appBarAction,
                     iconSize
                 )
-            } else TopBarCtaView(
-                onClickCtaValidate,
-                ctaText,
-                ctaTextDisabled
-            )
+            } else {
+                TopBarCtaView(
+                    onClickCtaValidate,
+                    ctaText,
+                    ctaTextDisabled
+                )
+            }
         },
         navigationIcon = {
             if (isCancelCtaDisplayed) {

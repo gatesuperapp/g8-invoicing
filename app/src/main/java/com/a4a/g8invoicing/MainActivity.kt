@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 import com.a4a.g8invoicing.ui.MainCompose
-import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,9 +23,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            G8InvoicingTheme {
-                MainCompose()
-            }
+            MainCompose()
         }
     }
 }

@@ -58,14 +58,31 @@ val appModule = module {
     // ViewModels
     viewModel { AlertDialogViewModel(get()) }
     viewModel { ClientOrIssuerListViewModel(get()) }
-    viewModel { ClientOrIssuerAddEditViewModel(get(), get()) }
-    viewModel { ProductListViewModel(androidApplication(), get()) }
-    viewModel { ProductAddEditViewModel(get(), get(), get(), get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        val type: String? = if (params.size() > 1) params[1] else null
+        ClientOrIssuerAddEditViewModel(get(), itemId, type)
+    }
+    viewModel { ProductListViewModel(get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        val type: String? = if (params.size() > 1) params[1] else null
+        ProductAddEditViewModel(get(), get(), get(), itemId, type)
+    }
     viewModel { DeliveryNoteListViewModel(get(), get()) }
-    viewModel { DeliveryNoteAddEditViewModel(get(), get(), get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        DeliveryNoteAddEditViewModel(get(), get(), itemId)
+    }
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
-    viewModel { InvoiceAddEditViewModel(get(), get(), get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        InvoiceAddEditViewModel(get(), get(), itemId)
+    }
     viewModel { CreditNoteListViewModel(get()) }
-    viewModel { CreditNoteAddEditViewModel(get(), get(), get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        CreditNoteAddEditViewModel(get(), get(), itemId)
+    }
     viewModel { AccountViewModel() }
 }

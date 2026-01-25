@@ -81,18 +81,16 @@ fun ProductAddEdit(
         )
 
         clientSelectionDialogState?.let { dialogState ->
-            // Filtrer les clients déjà sélectionnés dans d'autres prix
-            val alreadySelectedClientIds = product.additionalPrices
-                ?.filter { it.idStr != dialogState.priceId } // Exclure le prix actuel
-                ?.flatMap { it.clients.map { client -> client.id } }
-                ?.toSet() ?: emptySet()
-
-            val availableClients = dialogState.availableClients.filter { client ->
-                client.id !in alreadySelectedClientIds
-            }
+            // Utiliser la fonction utilitaire pour filtrer les clients
+            val selectionState = filterClientsForAdditionalPrice(
+                allClientsInDatabase = dialogState.availableClients,
+                additionalPrices = product.additionalPrices,
+                currentPriceId = dialogState.priceId
+            )
 
             ClientMultiSelectSheet(
-                allClients = availableClients,
+                allClients = selectionState.availableClients,
+                totalClientsInDatabase = selectionState.totalClientsInDatabase,
                 selectedClients = dialogState.selectedClients,
                 onToggleClient = { clientRef ->
                     onToggleClientSelection(clientRef)

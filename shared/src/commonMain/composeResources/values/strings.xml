@@ -8,6 +8,9 @@
     <!-- Currency -->
     <string name="currency">€</string>
 
+    <!-- Product -->
+    <string name="product_duplicate_suffix"> - Copie</string>
+
     <!-- Document footer -->
     <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1027 8073 7000 983764 8377</string>
 
@@ -16,7 +19,7 @@
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
     <string name="document_date">Date</string>
-    <string name="document_date_emitting">Date d\'émission</string>
+    <string name="document_date_emitting">Date d'émission</string>
     <string name="document_reference">Référence</string>
     <string name="invoice_pdf_due_date">Date limite de paiement</string>
     <string name="invoice_paid">Payée ✔</string>
@@ -29,10 +32,23 @@
     <string name="document_table_total_price_without_tax">Total HT</string>
     <string name="document_table_tax_rate">TVA</string>
 
+    <!-- Document table aliases for PDF -->
+    <string name="table_description">Désignation</string>
+    <string name="table_quantity">Qté</string>
+    <string name="table_unit">Unité</string>
+    <string name="table_unit_price">PU HT</string>
+    <string name="table_total_price">Total HT</string>
+    <string name="table_tax_rate">TVA</string>
+
     <!-- Document totals -->
     <string name="document_total_without_tax">Total HT :</string>
     <string name="document_total_with_tax">Total TTC :</string>
     <string name="document_tax">TVA</string>
+
+    <!-- Document totals aliases for PDF -->
+    <string name="total_without_tax">Total HT :</string>
+    <string name="total_with_tax">Total TTC :</string>
+    <string name="vat">TVA</string>
 
     <!-- UI Labels -->
     <string name="form_label_edit">Modifier</string>
@@ -40,7 +56,7 @@
     <string name="product_price_with_tax">TTC</string>
 
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :</string>
+    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n'est pas légal de la supprimer :</string>
     <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
     <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
@@ -50,7 +66,7 @@
 
     <!-- Validation Strings -->
     <string name="validation_name_required">Le nom est obligatoire</string>
-    <string name="validation_email_invalid">L\'e-mail n\'est pas valide</string>
+    <string name="validation_email_invalid">L'e-mail n'est pas valide</string>
 
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nouveau client·e</string>
@@ -73,8 +89,8 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
     <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
-    <string name="document_product_advice_2">La modification s\'applique uniquement à ce document …</string>
-    <string name="document_product_advice_3">Elle n\'impacte pas le produit enregistré dans l\'onglet "Produits".</string>
+    <string name="document_product_advice_2">La modification s'applique uniquement à ce document …</string>
+    <string name="document_product_advice_3">Elle n'impacte pas le produit enregistré dans l'onglet "Produits".</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Nom</string>
@@ -108,7 +124,7 @@
     <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
     <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
     <string name="client_address1">Adresse</string>
-    <string name="client_address1_input">6 rue de l\'église</string>
+    <string name="client_address1_input">6 rue de l'église</string>
     <string name="client_address2"></string>
     <string name="client_address2_input">Lieu-dit beròi</string>
     <string name="client_city">Ville</string>
@@ -121,9 +137,10 @@
     <string name="client_notes">Notes privées</string>
     <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus.</string>
     <string name="client_add_address">+ Ajouter une adresse</string>
-    <string name="client_delete_address">Effacer l\'adresse</string>
+    <string name="client_delete_address">Effacer l'adresse</string>
     <string name="client_selection_title">Sélectionner les clients</string>
-    <string name="client_selection_empty">Vous n\'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie \"Client·es\".</string>
+    <string name="client_selection_empty">Vous n'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie "Client·es".</string>
+    <string name="client_selection_all_used">Tous les clients sont déjà assignés à d'autres prix.</string>
     <string name="client_selection_validate">Valider</string>
 
     <!-- Document Modal Strings -->
@@ -140,6 +157,9 @@
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bientôt disponible :)</string>
+
+    <!-- Corrected Invoice -->
+    <string name="corrected_invoice_cancel_and_replace">Annule et remplace la facture</string>
 
     <!-- AppBar actions -->
     <string name="appbar_invoices">Factures</string>
@@ -199,10 +219,10 @@
     <string name="drawer_g8">𝕘𝟠</string>
 
     <!-- Account Screen -->
-    <string name="account_subscribe">Soutenez le projet et bénéficiez d\'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
+    <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
     <string name="account_donate">En savoir plus</string>
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
-    <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et engagé. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
 
     <!-- About Screen -->
@@ -227,33 +247,33 @@
     <string name="about_backup_text">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
     <string name="about_download_database">💎 Télécharger ma base de données 💎</string>
     <string name="about_title_legal">Mentions légales</string>
-    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez les</string>
-    <string name="about_terms_of_service">conditions d\'utilisation</string>
+    <string name="about_terms_of_service_header">En utilisant l'application, vous acceptez les</string>
+    <string name="about_terms_of_service">conditions d'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
     <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
     <string name="about_privacy">politique de confidentialité de 𝕘𝟠.</string>
-    <string name="about_share_text">L\'application vous est utile ?</string>
+    <string name="about_share_text">L'application vous est utile ?</string>
     <string name="about_donate_button">Faire un don</string>
     <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
     <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
-    <string name="about_build_version">Version de l\'application : \u00A0</string>
+    <string name="about_build_version">Version de l'application : \u00A0</string>
     <string name="ok">OK</string>
 
     <!-- Delivery Note List Advice -->
-    <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="delivery_note_advice_convert">J'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
-    <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l\'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+    <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n …   </string>
     <string name="invoice_advice_legal_2">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des …   </string>
-    <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j\'ai tout résumé ici : \n</string>
+    <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n …   </string>
-    <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n …   </string>
+    <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n …   </string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="invoice_advice_bottom_menu">Hey hey, ici ton batmagotchi. Il faut absolument que je te montre une astuce \n\n …   </string>
     <string name="invoice_advice_bottom_menu1">Pour faire apparaître des options très utiles, comme supprimer un document \n\n …   </string>

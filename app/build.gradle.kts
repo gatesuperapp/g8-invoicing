@@ -81,13 +81,14 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.12.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Koin
-    implementation("io.insert-koin:koin-android:3.5.0")
-    implementation("io.insert-koin:koin-androidx-compose:3.5.0")
+    // Koin (aligned with shared/ KMP version 4.0.2)
+    implementation("io.insert-koin:koin-android:4.0.2")
+    implementation("io.insert-koin:koin-androidx-compose:4.0.2")
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.2.0")

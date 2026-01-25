@@ -55,6 +55,10 @@ import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_url
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.navigation.actionNew
+import com.a4a.g8invoicing.ui.navigation.actionDelete
+import com.a4a.g8invoicing.ui.navigation.actionDuplicate
+import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
@@ -88,6 +92,8 @@ fun InvoiceList(
     showWhatsNewDialog: Boolean = false,
     appVersion: String = "",
     onDismissWhatsNew: () -> Unit = {},
+    showCategoryButton: Boolean = true,
+    showBottomBar: Boolean = true, // False on desktop - actions go to top bar
 ) {
     // Main list to handle actions with selected items
     val selectedItems = remember { mutableStateListOf<InvoiceState>() }
@@ -110,6 +116,25 @@ fun InvoiceList(
         )
     }
 
+    // Top bar actions for desktop (when bottom bar is hidden)
+    val topBarActions = if (!showBottomBar) {
+        if (selectedItems.isEmpty()) {
+            arrayOf(actionNew(onClickNew))
+        } else {
+            arrayOf(
+                actionUnselectAll { resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes) },
+                actionDuplicate {
+                    onClickDuplicate(selectedItems.toList())
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
+                actionDelete {
+                    isDimActive.value = true
+                    openDeleteAlertDialog.value = true
+                }
+            )
+        }
+    } else null
+
     ScaffoldWithDimmedOverlay(
         isDimmed = isDimActive.value,
         onDismissDim = { isDimActive.value = false },
@@ -118,50 +143,54 @@ fun InvoiceList(
                 title = stringResource(Res.string.appbar_invoices),
                 navController = navController,
                 onClickBackArrow = onClickBack,
-                isCancelCtaDisplayed = false
+                isCancelCtaDisplayed = false,
+                appBarActions = topBarActions
             )
         },
         bottomBar = {
-            GeneralBottomBar(
-                navController = navController,
-                numberOfItemsSelected = selectedItems.size,
-                onClickDelete = {
-                    isDimActive.value = !isDimActive.value
-                    openDeleteAlertDialog.value = true
-                },
-                onClickCreateCreditNote = {
-                    onClickCreateCreditNote(selectedItems.toList())
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                },
-                onClickCreateCorrectedInvoice = {
-                    onClickCreateCorrectedInvoice(selectedItems.toList())
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                },
-                onClickDuplicate = {
-                    onClickDuplicate(selectedItems.toList())
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                },
-                onClickUnselectAll = {
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                },
-                onClickTag = {
-                    onClickTag(selectedItems.toList(), it)
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                },
-                onClickSendReminder = {
-                    val document = selectedItems.first()
-                    onSendReminder(document)
-                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
-                },
-                onClickNew = { onClickNew() },
-                onClickCategory = onClickCategory,
-                isInvoice = true,
-                onChangeBackground = {
-                    isDimActive.value = !isDimActive.value
-                },
-                isCategoriesMenuOpen = isCategoriesMenuOpen,
-                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange
-            )
+            if (showBottomBar) {
+                GeneralBottomBar(
+                    navController = navController,
+                    numberOfItemsSelected = selectedItems.size,
+                    onClickDelete = {
+                        isDimActive.value = !isDimActive.value
+                        openDeleteAlertDialog.value = true
+                    },
+                    onClickCreateCreditNote = {
+                        onClickCreateCreditNote(selectedItems.toList())
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickCreateCorrectedInvoice = {
+                        onClickCreateCorrectedInvoice(selectedItems.toList())
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickDuplicate = {
+                        onClickDuplicate(selectedItems.toList())
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickUnselectAll = {
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickTag = {
+                        onClickTag(selectedItems.toList(), it)
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickSendReminder = {
+                        val document = selectedItems.first()
+                        onSendReminder(document)
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickNew = { onClickNew() },
+                    onClickCategory = onClickCategory,
+                    isInvoice = true,
+                    onChangeBackground = {
+                        isDimActive.value = !isDimActive.value
+                    },
+                    isCategoriesMenuOpen = isCategoriesMenuOpen,
+                    onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
+                    showCategoryButton = showCategoryButton
+                )
+            }
         }
     ) { padding ->
         Column(

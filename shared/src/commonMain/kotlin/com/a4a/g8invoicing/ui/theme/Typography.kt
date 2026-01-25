@@ -3,7 +3,6 @@ package com.a4a.g8invoicing.ui.theme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -81,9 +80,6 @@ val Typography.textTitle: TextStyle
         return TextStyle(
             fontFamily = getUiFontBold(),
             fontSize = 18.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -93,9 +89,6 @@ val Typography.textNormalBold: TextStyle
         return TextStyle(
             fontFamily = getUiFontBold(),
             fontSize = 16.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
         )
     }
 
@@ -105,9 +98,6 @@ val Typography.textSmall: TextStyle
         return TextStyle(
             fontFamily = getUiFont(),
             fontSize = 14.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -118,9 +108,6 @@ val Typography.textVerySmall: TextStyle
         return TextStyle(
             fontFamily = getUiFont(),
             fontSize = 9.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -130,9 +117,6 @@ val Typography.textWithLinkCenteredMedium: TextStyle
         return TextStyle(
             fontFamily = getUiFont(),
             fontSize = 16.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
             textAlign = TextAlign.Center
         )
     }
@@ -145,9 +129,6 @@ val Typography.callForActions: TextStyle
             fontFamily = getUiFont(),
             color = Color.DarkGray,
             fontSize = 14.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -158,9 +139,6 @@ val Typography.callForActionsViolet: TextStyle
             fontFamily = getUiFontBold(),
             color = ColorVioletLight,
             fontSize = 14.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -171,9 +149,6 @@ val Typography.callForActionsDisabled: TextStyle
             fontFamily = getUiFontBold(),
             color = ColorDarkGrayTransp,
             fontSize = 14.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -185,9 +160,6 @@ val Typography.inputLabel: TextStyle
             fontFamily = getUiFont(),
             color = ColorDarkGray,
             fontSize = 16.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -199,9 +171,6 @@ val Typography.inputField: TextStyle
             fontFamily = getUiFont(),
             color = Color.LightGray,
             fontSize = 16.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
         )
     }
 
@@ -211,9 +180,6 @@ val Typography.textForDocuments: TextStyle
         return TextStyle(
             fontFamily = getPdfFont(),
             fontSize = 6.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
         )
     }
 
@@ -223,9 +189,6 @@ val Typography.textForDocumentsBold: TextStyle
         return TextStyle(
             fontFamily = getPdfFontBold(),
             fontSize = 6.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
         )
     }
 
@@ -236,9 +199,6 @@ val Typography.textForDocumentsSecondary: TextStyle
             color = Color.DarkGray,
             fontFamily = getPdfFont(),
             fontSize = 6.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            )
         )
     }
 
@@ -249,9 +209,6 @@ val Typography.titleForDocuments: TextStyle
         return TextStyle(
             fontFamily = getPdfFontBold(),
             fontSize = 13.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
         )
     }
 
@@ -261,8 +218,5 @@ val Typography.subTitleForDocuments: TextStyle
         return TextStyle(
             fontFamily = getPdfFontBold(),
             fontSize = 10.sp,
-            platformStyle = PlatformTextStyle(
-                includeFontPadding = false,
-            ),
         )
     }
