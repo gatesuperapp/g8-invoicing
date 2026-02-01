@@ -6,6 +6,7 @@ import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.fakes.FakeClientOrIssuerDataSource
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.EmailState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
@@ -89,7 +90,7 @@ class ClientOrIssuerDataSourceTest {
             name = TextFieldValue("Entreprise Complète"),
             firstName = TextFieldValue("Jean"),
             type = ClientOrIssuerType.CLIENT,
-            email = TextFieldValue("contact@entreprise.fr"),
+            emails = listOf(EmailState(email = TextFieldValue("contact@entreprise.fr"))),
             phone = TextFieldValue("0123456789"),
             notes = TextFieldValue("Client important"),
             companyId1Number = TextFieldValue("12345678901234"),
@@ -100,7 +101,7 @@ class ClientOrIssuerDataSourceTest {
 
         val saved = dataSource.getClients().first()
         assertEquals("Jean", saved.firstName?.text)
-        assertEquals("contact@entreprise.fr", saved.email?.text)
+        assertEquals("contact@entreprise.fr", saved.emails?.firstOrNull()?.email?.text)
         assertEquals("0123456789", saved.phone?.text)
     }
 
@@ -222,15 +223,15 @@ class ClientOrIssuerDataSourceTest {
         dataSource.createNew(ClientOrIssuerState(
             name = TextFieldValue("Client"),
             type = ClientOrIssuerType.CLIENT,
-            email = TextFieldValue("ancien@email.fr")
+            emails = listOf(EmailState(email = TextFieldValue("ancien@email.fr")))
         ))
         val client = dataSource.getClients().first()
 
-        val updated = client.copy(email = TextFieldValue("nouveau@email.fr"))
+        val updated = client.copy(emails = listOf(EmailState(email = TextFieldValue("nouveau@email.fr"))))
         dataSource.updateClientOrIssuer(updated)
 
         val fetched = dataSource.fetchClientOrIssuer(client.id!!.toLong())
-        assertEquals("nouveau@email.fr", fetched?.email?.text)
+        assertEquals("nouveau@email.fr", fetched?.emails?.firstOrNull()?.email?.text)
     }
 
     @Test

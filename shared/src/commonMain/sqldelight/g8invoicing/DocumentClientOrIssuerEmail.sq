@@ -1,0 +1,34 @@
+CREATE TABLE DocumentClientOrIssuerEmail (
+  id INTEGER PRIMARY KEY NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+  email TEXT NOT NULL,
+  FOREIGN KEY(document_client_or_issuer_id) REFERENCES DocumentClientOrIssuer(id) ON DELETE CASCADE
+);
+
+getByDocumentClientOrIssuerId:
+SELECT *
+FROM DocumentClientOrIssuerEmail
+WHERE document_client_or_issuer_id = :document_client_or_issuer_id;
+
+save:
+INSERT INTO DocumentClientOrIssuerEmail (id, document_client_or_issuer_id, email)
+VALUES (?, ?, ?);
+
+update:
+UPDATE DocumentClientOrIssuerEmail
+SET email = :email
+WHERE id = :id;
+
+delete:
+DELETE FROM DocumentClientOrIssuerEmail
+WHERE id = :id;
+
+deleteByDocumentClientOrIssuerId:
+DELETE FROM DocumentClientOrIssuerEmail
+WHERE document_client_or_issuer_id = :document_client_or_issuer_id;
+
+getLastInsertedRowId:
+SELECT id
+FROM DocumentClientOrIssuerEmail
+ORDER BY id DESC
+LIMIT 1;

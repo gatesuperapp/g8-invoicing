@@ -24,6 +24,8 @@ fun ClientAddEdit(
     onClickDone: () -> Unit,
     onClickBack: () -> Unit,
     onClickDeleteAddress: () -> Unit,
+    onClickDeleteEmail: (Int) -> Unit = {},
+    onAddEmail: (String) -> Unit = {},
     scrollState: ScrollState = rememberScrollState(),
 ) {
     val requiredFieldsAreFilled: Boolean =
@@ -55,6 +57,8 @@ fun ClientAddEdit(
             onValueChange,
             placeCursorAtTheEndOfText,
             onClickDeleteAddress = onClickDeleteAddress,
+            onClickDeleteEmail = onClickDeleteEmail,
+            onAddEmail = onAddEmail,
             typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_CLIENT,
             scrollState = scrollState
         )

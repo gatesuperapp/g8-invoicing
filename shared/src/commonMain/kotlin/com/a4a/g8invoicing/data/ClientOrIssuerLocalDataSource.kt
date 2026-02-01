@@ -6,6 +6,9 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.EmailState
+import g8invoicing.ClientOrIssuerEmail
+import g8invoicing.DocumentClientOrIssuerEmail
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.models.PersonType
 import g8invoicing.ClientOrIssuer
@@ -26,6 +29,8 @@ class ClientOrIssuerLocalDataSource(
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
     private val linkDocumentClientOrIssuerToAddressQueries =
         db.linkDocumentClientOrIssuerToAddressQueries
+    private val clientOrIssuerEmailQueries = db.clientOrIssuerEmailQueries
+    private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
 
     override suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
         return withContext(DispatcherProvider.IO) {
@@ -33,7 +38,8 @@ class ClientOrIssuerLocalDataSource(
                 clientOrIssuerQueries.get(id).executeAsOneOrNull()
                     ?.let {
                         it.transformIntoEditable(
-                            fetchClientOrIssuerAddresses(it.id)?.toMutableList()
+                            addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
+                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList()
                         )
                     }
             } catch (e: Exception) {
@@ -49,7 +55,8 @@ class ClientOrIssuerLocalDataSource(
                 query.executeAsList()
                     .map {
                         it.transformIntoEditable(
-                            fetchClientOrIssuerAddresses(it.id)?.toMutableList()
+                            addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
+                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList()
                         )
                     }
             }
@@ -75,6 +82,32 @@ class ClientOrIssuerLocalDataSource(
         return null
     }
 
+    fun fetchClientOrIssuerEmails(clientOrIssuerId: Long): List<EmailState>? {
+        try {
+            val emails = clientOrIssuerEmailQueries.getByClientOrIssuerId(clientOrIssuerId)
+                .executeAsList()
+            return if (emails.isNotEmpty()) {
+                emails.map { it.transformIntoEditable() }
+            } else null
+        } catch (e: Exception) {
+            // Log error if needed
+        }
+        return null
+    }
+
+    fun fetchDocumentClientOrIssuerEmails(documentClientOrIssuerId: Long): List<EmailState>? {
+        try {
+            val emails = documentClientOrIssuerEmailQueries.getByDocumentClientOrIssuerId(documentClientOrIssuerId)
+                .executeAsList()
+            return if (emails.isNotEmpty()) {
+                emails.map { it.transformIntoEditable() }
+            } else null
+        } catch (e: Exception) {
+            // Log error if needed
+        }
+        return null
+    }
+
 
     override suspend fun createNew(clientOrIssuer: ClientOrIssuerState): Boolean {
         return withContext(DispatcherProvider.IO) {
@@ -93,6 +126,9 @@ class ClientOrIssuerLocalDataSource(
                 if (!addressesSavedSuccessfully) {
                     return@withContext false
                 }
+
+                // 4: Save linked emails
+                saveInfoInClientOrIssuerEmailTable(newEntityId, clientOrIssuer.emails)
 
                 true
             } catch (e: Exception) {
@@ -113,7 +149,7 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.firstName?.text,
                     clientOrIssuer.name.text,
                     clientOrIssuer.phone?.text,
-                    clientOrIssuer.email?.text,
+                    clientOrIssuer.emails?.firstOrNull()?.email?.text,
                     clientOrIssuer.notes?.text,
                     clientOrIssuer.companyId1Label?.text,
                     clientOrIssuer.companyId1Number?.text,
@@ -162,6 +198,52 @@ class ClientOrIssuerLocalDataSource(
                 true
             } catch (e: Exception) {
                 false
+            }
+        }
+    }
+
+    private suspend fun saveInfoInClientOrIssuerEmailTable(
+        clientOrIssuerId: Long,
+        emails: List<EmailState>?,
+    ) {
+        if (emails.isNullOrEmpty()) return
+
+        withContext(DispatcherProvider.IO) {
+            try {
+                for (email in emails) {
+                    if (email.email.text.isNotEmpty()) {
+                        clientOrIssuerEmailQueries.save(
+                            id = null,
+                            client_or_issuer_id = clientOrIssuerId,
+                            email = email.email.text.trim()
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                // Log error if needed
+            }
+        }
+    }
+
+    private suspend fun saveInfoInDocumentClientOrIssuerEmailTable(
+        documentClientOrIssuerId: Long,
+        emails: List<EmailState>?,
+    ) {
+        if (emails.isNullOrEmpty()) return
+
+        withContext(DispatcherProvider.IO) {
+            try {
+                for (email in emails) {
+                    if (email.email.text.isNotEmpty()) {
+                        documentClientOrIssuerEmailQueries.save(
+                            id = null,
+                            document_client_or_issuer_id = documentClientOrIssuerId,
+                            email = email.email.text.trim()
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                // Log error if needed
             }
         }
     }
@@ -230,7 +312,7 @@ class ClientOrIssuerLocalDataSource(
                         first_name = clientOrIssuer.firstName?.text,
                         name = clientOrIssuer.name.text,
                         phone = clientOrIssuer.phone?.text,
-                        email = clientOrIssuer.email?.text,
+                        email = clientOrIssuer.emails?.firstOrNull()?.email?.text,
                         notes = clientOrIssuer.notes?.text,
                         company_id1_label = clientOrIssuer.companyId1Label?.text,
                         company_id1_number = clientOrIssuer.companyId1Number?.text,
@@ -273,6 +355,12 @@ class ClientOrIssuerLocalDataSource(
                         saveInfoInClientOrIssuerAddressTables(it.toLong(), addressesToCreate)
                     }
                 }
+
+                // Emails: delete all and recreate (simpler than tracking changes)
+                clientOrIssuer.id?.toLong()?.let { clientId ->
+                    clientOrIssuerEmailQueries.deleteByClientOrIssuerId(clientId)
+                    saveInfoInClientOrIssuerEmailTable(clientId, clientOrIssuer.emails)
+                }
             } catch (cause: Throwable) {
             }
         }
@@ -295,7 +383,7 @@ class ClientOrIssuerLocalDataSource(
                         first_name = documentClientOrIssuer.firstName?.text,
                         name = documentClientOrIssuer.name.text,
                         phone = documentClientOrIssuer.phone?.text,
-                        email = documentClientOrIssuer.email?.text,
+                        email = documentClientOrIssuer.emails?.firstOrNull()?.email?.text,
                         notes = documentClientOrIssuer.notes?.text,
                         company_id1_label = documentClientOrIssuer.companyId1Label?.text,
                         company_id1_number = documentClientOrIssuer.companyId1Number?.text,
@@ -342,6 +430,12 @@ class ClientOrIssuerLocalDataSource(
                         )
                     }
                 }
+
+                // Emails: delete all and recreate
+                documentClientOrIssuer.id?.toLong()?.let { docClientId ->
+                    documentClientOrIssuerEmailQueries.deleteByDocumentClientOrIssuerId(docClientId)
+                    saveInfoInDocumentClientOrIssuerEmailTable(docClientId, documentClientOrIssuer.emails)
+                }
             } catch (cause: Throwable) {
             }
         }
@@ -353,6 +447,7 @@ class ClientOrIssuerLocalDataSource(
                 clientOrIssuer.id?.let {
                     clientOrIssuerQueries.delete(it.toLong())
                     linkClientOrIssuerToAddressQueries.deleteWithClientId(it.toLong())
+                    clientOrIssuerEmailQueries.deleteByClientOrIssuerId(it.toLong())
                 }
                 clientOrIssuer.addresses?.filter { it.id != null }?.forEach {
                     clientOrIssuerAddressQueries.delete(it.id!!.toLong())
@@ -368,6 +463,7 @@ class ClientOrIssuerLocalDataSource(
                 documentClientOrIssuer.id?.let {
                     documentClientOrIssuerQueries.delete(it.toLong())
                     linkDocumentClientOrIssuerToAddressQueries.deleteWithClientId(it.toLong())
+                    documentClientOrIssuerEmailQueries.deleteByDocumentClientOrIssuerId(it.toLong())
                 }
                 documentClientOrIssuer.addresses?.filter { it.id != null }?.forEach {
                     documentClientOrIssuerAddressQueries.delete(it.id!!.toLong())
@@ -404,6 +500,7 @@ fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {
 
 fun ClientOrIssuer.transformIntoEditable(
     addresses: List<AddressState>? = null,
+    emails: List<EmailState>? = null,
 ): ClientOrIssuerState {
     val clientOrIssuer = this
 
@@ -416,7 +513,7 @@ fun ClientOrIssuer.transformIntoEditable(
         name = TextFieldValue(text = clientOrIssuer.name),
         addresses = addresses,
         phone = clientOrIssuer.phone?.let { TextFieldValue(text = it) },
-        email = clientOrIssuer.email?.let { TextFieldValue(text = it) },
+        emails = emails,
         notes = clientOrIssuer.notes?.let { TextFieldValue(text = it) },
         companyId1Label = clientOrIssuer.company_id1_label?.let {
             TextFieldValue(
@@ -436,6 +533,20 @@ fun ClientOrIssuer.transformIntoEditable(
             )
         },
         companyId3Number = clientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
+    )
+}
+
+fun ClientOrIssuerEmail.transformIntoEditable(): EmailState {
+    return EmailState(
+        id = this.id.toInt(),
+        email = TextFieldValue(text = this.email)
+    )
+}
+
+fun DocumentClientOrIssuerEmail.transformIntoEditable(): EmailState {
+    return EmailState(
+        id = this.id.toInt(),
+        email = TextFieldValue(text = this.email)
     )
 }
 

@@ -265,6 +265,12 @@ fun RowWithLabelAndInput(
                 FormInputCreatorListPicker(
                     input = formInput.inputType
                 )
+
+            // Used for email list with chips
+            is EmailListInput ->
+                FormInputCreatorEmailList(
+                    input = formInput.inputType
+                )
         }
     }
 }

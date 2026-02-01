@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -63,6 +64,7 @@ import com.a4a.g8invoicing.shared.resources.client_phone_input
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.EmailListInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -80,13 +82,16 @@ fun ClientOrIssuerAddEditForm(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     isInBottomSheetModal: Boolean = false,
     onClickDeleteAddress: () -> Unit,
+    onClickDeleteEmail: (Int) -> Unit = {},
+    onAddEmail: (String) -> Unit = {},
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
     scrollState: ScrollState = rememberScrollState(),
 ) {
     val localFocusManager = LocalFocusManager.current
-    var numberOfClientAddresses by remember {
+    // Use client ID as key to re-calculate when editing a different client
+    var numberOfClientAddresses by remember(clientOrIssuerUiState.id) {
         mutableIntStateOf(
-            clientOrIssuerUiState.addresses?.size ?: 1
+            clientOrIssuerUiState.addresses?.size?.coerceAtLeast(1) ?: 1
         )
     }
     val paddingTop = if (isInBottomSheetModal) 10.dp else 110.dp
@@ -145,7 +150,7 @@ fun ClientOrIssuerAddEditForm(
                     // end = 20.dp,
                 )
         ) {
-            // Create the list with all fields
+            // Create the list with all fields (name, first name, phone)
             val inputList = listOf(
                 FormInput(
                     label = clientNameLabel,
@@ -180,23 +185,6 @@ fun ClientOrIssuerAddEditForm(
                     else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
                 ),
                 FormInput(
-                    label = clientEmailLabel,
-                    inputType = TextInput(
-                        text = clientOrIssuerUiState.email,
-                        placeholder = clientEmailPlaceholder,
-                        onValueChange = {
-                            onValueChange(
-                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL
-                                else ScreenElement.CLIENT_OR_ISSUER_EMAIL,
-                                it
-                            )
-                        },
-                        keyboardType = KeyboardType.Email
-                    ),
-                    pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL
-                    else ScreenElement.CLIENT_OR_ISSUER_EMAIL
-                ),
-                FormInput(
                     label = clientPhoneLabel,
                     inputType = TextInput(
                         text = clientOrIssuerUiState.phone,
@@ -211,13 +199,44 @@ fun ClientOrIssuerAddEditForm(
                         keyboardType = KeyboardType.Number
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
-                    else ScreenElement.CLIENT_OR_ISSUER_PHONE,
-
-                    )
+                    else ScreenElement.CLIENT_OR_ISSUER_PHONE
+                )
             )
             // Create the UI with list items
             FormUI(
                 inputList = inputList,
+                localFocusManager = localFocusManager,
+                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                errors = clientOrIssuerUiState.errors
+            )
+        }
+
+        Spacer(Modifier.padding(bottom = 16.dp))
+
+        // Email section with chips
+        Column(
+            modifier = Modifier
+                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .padding(top = 8.dp)
+        ) {
+            val emailInputList = listOf(
+                FormInput(
+                    label = clientEmailLabel,
+                    inputType = EmailListInput(
+                        emails = clientOrIssuerUiState.emails ?: emptyList(),
+                        placeholder = clientEmailPlaceholder,
+                        onAddEmail = onAddEmail,
+                        onRemoveEmail = onClickDeleteEmail,
+                        maxEmails = 4
+                    ),
+                    pageElement = if (isInBottomSheetModal)
+                        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1
+                    else ScreenElement.CLIENT_OR_ISSUER_EMAIL_1
+                )
+            )
+
+            FormUI(
+                inputList = emailInputList,
                 localFocusManager = localFocusManager,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 errors = clientOrIssuerUiState.errors
@@ -551,3 +570,4 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String
         text = AnnotatedString(text),
     )
 }
+

@@ -1,0 +1,34 @@
+CREATE TABLE ClientOrIssuerEmail (
+  id INTEGER PRIMARY KEY NOT NULL,
+  client_or_issuer_id INTEGER NOT NULL,
+  email TEXT NOT NULL,
+  FOREIGN KEY(client_or_issuer_id) REFERENCES ClientOrIssuer(id) ON DELETE CASCADE
+);
+
+getByClientOrIssuerId:
+SELECT *
+FROM ClientOrIssuerEmail
+WHERE client_or_issuer_id = :client_or_issuer_id;
+
+save:
+INSERT INTO ClientOrIssuerEmail (id, client_or_issuer_id, email)
+VALUES (?, ?, ?);
+
+update:
+UPDATE ClientOrIssuerEmail
+SET email = :email
+WHERE id = :id;
+
+delete:
+DELETE FROM ClientOrIssuerEmail
+WHERE id = :id;
+
+deleteByClientOrIssuerId:
+DELETE FROM ClientOrIssuerEmail
+WHERE client_or_issuer_id = :client_or_issuer_id;
+
+getLastInsertedRowId:
+SELECT id
+FROM ClientOrIssuerEmail
+ORDER BY id DESC
+LIMIT 1;

@@ -16,7 +16,7 @@ data class ClientOrIssuerState(
     var name: TextFieldValue = TextFieldValue(""),
     var addresses: List<AddressState>? = null,
     var phone: TextFieldValue? = null,
-    var email: TextFieldValue? = null,
+    var emails: List<EmailState>? = null, // Max 4 emails
     var notes: TextFieldValue? = null,
     var companyId1Label: TextFieldValue? = TextFieldValue("SIRET"),
     var companyId1Number: TextFieldValue? = null,

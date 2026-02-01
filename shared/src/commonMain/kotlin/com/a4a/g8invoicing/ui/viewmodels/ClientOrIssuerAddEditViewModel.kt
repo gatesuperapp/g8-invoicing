@@ -11,6 +11,7 @@ import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
+import com.a4a.g8invoicing.ui.states.EmailState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +63,7 @@ class ClientOrIssuerAddEditViewModel(
                 id = null,
                 name = clientOrIssuer.name,
                 phone = clientOrIssuer.phone,
-                email = clientOrIssuer.email,
+                emails = clientOrIssuer.emails,
                 type = if (clientOrIssuer.type == ClientOrIssuerType.ISSUER) ClientOrIssuerType.DOCUMENT_ISSUER
                 else ClientOrIssuerType.DOCUMENT_CLIENT,
                 firstName = clientOrIssuer.firstName,
@@ -83,7 +84,7 @@ class ClientOrIssuerAddEditViewModel(
             firstName = clientOrIssuer.firstName,
             addresses = clientOrIssuer.addresses,
             phone = clientOrIssuer.phone,
-            email = clientOrIssuer.email,
+            emails = clientOrIssuer.emails,
             notes = clientOrIssuer.notes,
             companyId1Label = clientOrIssuer.companyId1Label,
             companyId1Number = clientOrIssuer.companyId1Number,
@@ -104,7 +105,7 @@ class ClientOrIssuerAddEditViewModel(
                 name = _documentClientUiState.value.name,
                 addresses = _documentClientUiState.value.addresses,
                 phone = _documentClientUiState.value.phone,
-                email = _documentClientUiState.value.email,
+                emails = _documentClientUiState.value.emails,
                 notes = _documentClientUiState.value.notes,
                 companyId1Label = _documentClientUiState.value.companyId1Label,
                 companyId1Number = _documentClientUiState.value.companyId1Number,
@@ -121,7 +122,7 @@ class ClientOrIssuerAddEditViewModel(
                 name = _documentIssuerUiState.value.name,
                 addresses = _documentIssuerUiState.value.addresses,
                 phone = _documentIssuerUiState.value.phone,
-                email = _documentIssuerUiState.value.email,
+                emails = _documentIssuerUiState.value.emails,
                 notes = _documentIssuerUiState.value.notes,
                 companyId1Label = _documentIssuerUiState.value.companyId1Label,
                 companyId1Number = _documentIssuerUiState.value.companyId1Number,
@@ -162,7 +163,7 @@ class ClientOrIssuerAddEditViewModel(
             ClientOrIssuerType.ISSUER -> _issuerUiState.value
             ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
             ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
-        }
+        }.withTrimmedEmails()
 
         return try {
             dataSource.createNew(stateToSave)
@@ -170,6 +171,19 @@ class ClientOrIssuerAddEditViewModel(
         } catch (e: Exception) {
             false
         }
+    }
+
+    private fun ClientOrIssuerState.withTrimmedEmails(): ClientOrIssuerState {
+        val trimmedEmails = emails?.map { emailState ->
+            emailState.copy(
+                email = TextFieldValue(
+                    emailState.email.text.trim(),
+                    emailState.email.selection,
+                    emailState.email.composition
+                )
+            )
+        }
+        return copy(emails = trimmedEmails)
     }
 
     suspend fun updateClientOrIssuerInLocalDb(
@@ -182,28 +196,28 @@ class ClientOrIssuerAddEditViewModel(
                     if (clientUiState.value.id == null) {
                         return false
                     }
-                    dataSource.updateClientOrIssuer(clientUiState.value)
+                    dataSource.updateClientOrIssuer(clientUiState.value.withTrimmedEmails())
                 }
 
                 ClientOrIssuerType.ISSUER -> {
                     if (issuerUiState.value.id == null) {
                         return false
                     }
-                    dataSource.updateClientOrIssuer(issuerUiState.value)
+                    dataSource.updateClientOrIssuer(issuerUiState.value.withTrimmedEmails())
                 }
 
                 ClientOrIssuerType.DOCUMENT_CLIENT -> {
                     if (documentClientOrIssuer == null || documentClientOrIssuer.id == null) {
                         return false
                     }
-                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer)
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer.withTrimmedEmails())
                 }
 
                 ClientOrIssuerType.DOCUMENT_ISSUER -> {
                     if (documentClientOrIssuer == null || documentClientOrIssuer.id == null) {
                         return false
                     }
-                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer)
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer.withTrimmedEmails())
                 }
             }
             true
@@ -267,6 +281,70 @@ class ClientOrIssuerAddEditViewModel(
                     newAddresses = listOf(onlyAddress)
                 }
                 _documentClientUiState.value = _documentClientUiState.value.copy(addresses = newAddresses)
+            }
+
+            else -> {}
+        }
+    }
+
+    fun removeEmailFromClientOrIssuerState(type: ClientOrIssuerType, indexToRemove: Int) {
+        when (type) {
+            ClientOrIssuerType.CLIENT -> {
+                val currentEmails = _clientUiState.value.emails ?: return
+                if (indexToRemove >= currentEmails.size) return
+                val newEmails = currentEmails.filterIndexed { index, _ -> index != indexToRemove }
+                _clientUiState.value = _clientUiState.value.copy(
+                    emails = if (newEmails.isEmpty()) null else newEmails
+                )
+            }
+
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                val currentEmails = _documentClientUiState.value.emails ?: return
+                if (indexToRemove >= currentEmails.size) return
+                val newEmails = currentEmails.filterIndexed { index, _ -> index != indexToRemove }
+                _documentClientUiState.value = _documentClientUiState.value.copy(
+                    emails = if (newEmails.isEmpty()) null else newEmails
+                )
+            }
+
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                val currentEmails = _documentIssuerUiState.value.emails ?: return
+                if (indexToRemove >= currentEmails.size) return
+                val newEmails = currentEmails.filterIndexed { index, _ -> index != indexToRemove }
+                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                    emails = if (newEmails.isEmpty()) null else newEmails
+                )
+            }
+
+            else -> {}
+        }
+    }
+
+    fun addEmailToClientOrIssuerState(type: ClientOrIssuerType, email: String) {
+        val newEmailState = EmailState(email = TextFieldValue(email))
+        when (type) {
+            ClientOrIssuerType.CLIENT -> {
+                val currentEmails = _clientUiState.value.emails ?: emptyList()
+                if (currentEmails.size >= 4) return
+                _clientUiState.value = _clientUiState.value.copy(
+                    emails = currentEmails + newEmailState
+                )
+            }
+
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                val currentEmails = _documentClientUiState.value.emails ?: emptyList()
+                if (currentEmails.size >= 4) return
+                _documentClientUiState.value = _documentClientUiState.value.copy(
+                    emails = currentEmails + newEmailState
+                )
+            }
+
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                val currentEmails = _documentIssuerUiState.value.emails ?: emptyList()
+                if (currentEmails.size >= 4) return
+                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                    emails = currentEmails + newEmailState
+                )
             }
 
             else -> {}
@@ -352,9 +430,18 @@ class ClientOrIssuerAddEditViewModel(
                 if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.firstName?.text
                 else _issuerUiState.value.firstName?.text
 
-            ScreenElement.CLIENT_OR_ISSUER_EMAIL ->
-                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.email?.text
-                else _issuerUiState.value.email?.text
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_1 ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.emails?.getOrNull(0)?.email?.text
+                else _issuerUiState.value.emails?.getOrNull(0)?.email?.text
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_2 ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.emails?.getOrNull(1)?.email?.text
+                else _issuerUiState.value.emails?.getOrNull(1)?.email?.text
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_3 ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.emails?.getOrNull(2)?.email?.text
+                else _issuerUiState.value.emails?.getOrNull(2)?.email?.text
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_4 ->
+                if (type == ClientOrIssuerType.CLIENT) _clientUiState.value.emails?.getOrNull(3)?.email?.text
+                else _issuerUiState.value.emails?.getOrNull(3)?.email?.text
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> firstAddress?.addressTitle?.text
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> firstAddress?.addressLine1?.text
@@ -435,9 +522,18 @@ class ClientOrIssuerAddEditViewModel(
                 if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.firstName?.text
                 else _documentIssuerUiState.value.firstName?.text
 
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL ->
-                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.email?.text
-                else _documentIssuerUiState.value.email?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1 ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.emails?.getOrNull(0)?.email?.text
+                else _documentIssuerUiState.value.emails?.getOrNull(0)?.email?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_2 ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.emails?.getOrNull(1)?.email?.text
+                else _documentIssuerUiState.value.emails?.getOrNull(1)?.email?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_3 ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.emails?.getOrNull(2)?.email?.text
+                else _documentIssuerUiState.value.emails?.getOrNull(2)?.email?.text
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_4 ->
+                if (type == ClientOrIssuerType.DOCUMENT_CLIENT) _documentClientUiState.value.emails?.getOrNull(3)?.email?.text
+                else _documentIssuerUiState.value.emails?.getOrNull(3)?.email?.text
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> firstAddress?.addressTitle?.text
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> firstAddress?.addressLine1?.text
@@ -502,11 +598,36 @@ class ClientOrIssuerAddEditViewModel(
         val secondAddress = person.addresses?.getOrNull(1)
         val thirdAddress = person.addresses?.getOrNull(2)
 
+        val firstEmail = person.emails?.getOrNull(0)
+        val secondEmail = person.emails?.getOrNull(1)
+        val thirdEmail = person.emails?.getOrNull(2)
+        val fourthEmail = person.emails?.getOrNull(3)
+
         when (element) {
             ScreenElement.CLIENT_OR_ISSUER_NAME -> person = person.copy(name = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> person = person.copy(firstName = value as TextFieldValue)
-            ScreenElement.CLIENT_OR_ISSUER_EMAIL -> person = person.copy(email = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_PHONE -> person = person.copy(phone = value as TextFieldValue)
+
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_1 -> {
+                val newEmail = firstEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 0))
+            }
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_2 -> {
+                val newEmail = secondEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 1))
+            }
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_3 -> {
+                val newEmail = thirdEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 2))
+            }
+            ScreenElement.CLIENT_OR_ISSUER_EMAIL_4 -> {
+                val newEmail = fourthEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 3))
+            }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
                 val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
@@ -608,6 +729,15 @@ class ClientOrIssuerAddEditViewModel(
         else addresses.slice(0 until addressIndex) + newAddress + addresses.slice(addressIndex + 1 until addresses.size)
     }
 
+    private fun getNewEmails(
+        newEmail: EmailState,
+        emails: List<EmailState>?,
+        emailIndex: Int,
+    ): List<EmailState> {
+        return if (emails.isNullOrEmpty()) listOf(newEmail)
+        else emails.slice(0 until emailIndex) + newEmail + emails.slice(emailIndex + 1 until emails.size)
+    }
+
     private fun updateDocumentClientOrIssuerUiState(
         documentClientOrIssuer: ClientOrIssuerState,
         element: ScreenElement,
@@ -617,12 +747,36 @@ class ClientOrIssuerAddEditViewModel(
         val firstAddress = person.addresses?.getOrNull(0)
         val secondAddress = person.addresses?.getOrNull(1)
         val thirdAddress = person.addresses?.getOrNull(2)
+        val firstEmail = person.emails?.getOrNull(0)
+        val secondEmail = person.emails?.getOrNull(1)
+        val thirdEmail = person.emails?.getOrNull(2)
+        val fourthEmail = person.emails?.getOrNull(3)
 
         when (element) {
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> person = person.copy(name = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> person = person.copy(firstName = value as TextFieldValue)
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL -> person = person.copy(email = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> person = person.copy(phone = value as TextFieldValue)
+
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1 -> {
+                val newEmail = firstEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 0))
+            }
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_2 -> {
+                val newEmail = secondEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 1))
+            }
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_3 -> {
+                val newEmail = thirdEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 2))
+            }
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_4 -> {
+                val newEmail = fourthEmail?.copy(email = value as TextFieldValue)
+                    ?: EmailState(email = value as TextFieldValue)
+                person = person.copy(emails = getNewEmails(newEmail, person.emails, 3))
+            }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
                 val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
@@ -722,9 +876,7 @@ class ClientOrIssuerAddEditViewModel(
                 FormInputsValidator.validateName(_clientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
-                FormInputsValidator.validateEmail(_clientUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
-                }
+                validateEmails(_clientUiState.value.emails, listOfErrors, isDocument = false)
                 _clientUiState.value = _clientUiState.value.copy(errors = listOfErrors)
             }
 
@@ -732,9 +884,7 @@ class ClientOrIssuerAddEditViewModel(
                 FormInputsValidator.validateName(_issuerUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
-                FormInputsValidator.validateEmail(_issuerUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
-                }
+                validateEmails(_issuerUiState.value.emails, listOfErrors, isDocument = false)
                 _issuerUiState.value = _issuerUiState.value.copy(errors = listOfErrors)
             }
 
@@ -742,9 +892,7 @@ class ClientOrIssuerAddEditViewModel(
                 FormInputsValidator.validateName(_documentClientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
-                FormInputsValidator.validateEmail(_documentClientUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
-                }
+                validateEmails(_documentClientUiState.value.emails, listOfErrors, isDocument = true)
                 _documentClientUiState.value = _documentClientUiState.value.copy(errors = listOfErrors)
             }
 
@@ -752,13 +900,28 @@ class ClientOrIssuerAddEditViewModel(
                 FormInputsValidator.validateName(_documentIssuerUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
-                FormInputsValidator.validateEmail(_documentIssuerUiState.value.email?.text)?.let {
-                    listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL, it))
-                }
+                validateEmails(_documentIssuerUiState.value.emails, listOfErrors, isDocument = true)
                 _documentIssuerUiState.value = _documentIssuerUiState.value.copy(errors = listOfErrors)
             }
         }
         return listOfErrors.isEmpty()
+    }
+
+    private fun validateEmails(
+        emails: List<EmailState>?,
+        listOfErrors: MutableList<Pair<ScreenElement, String?>>,
+        isDocument: Boolean
+    ) {
+        emails?.forEachIndexed { index, emailState ->
+            FormInputsValidator.validateEmail(emailState.email.text)?.let { error ->
+                val element = if (isDocument) {
+                    ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_EMAIL_${index + 1}")
+                } else {
+                    ScreenElement.valueOf("CLIENT_OR_ISSUER_EMAIL_${index + 1}")
+                }
+                listOfErrors.add(Pair(element, error))
+            }
+        }
     }
 
     fun clearValidateInputErrors(type: ClientOrIssuerType) {

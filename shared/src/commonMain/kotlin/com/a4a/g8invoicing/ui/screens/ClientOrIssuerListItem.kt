@@ -137,7 +137,7 @@ fun ClientOrIssuerListItem(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = clientOrIssuer.email?.text?.ifEmpty { " - " } ?: " - ",
+                        text = clientOrIssuer.emails?.firstOrNull()?.email?.text?.ifEmpty { " - " } ?: " - ",
                         fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
