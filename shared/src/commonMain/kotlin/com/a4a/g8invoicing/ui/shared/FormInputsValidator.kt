@@ -29,7 +29,8 @@ object FormInputsValidator {
     }
 
     fun validateEmail(input: String?): String? {
-        return if(!input.isNullOrEmpty() && !EMAIL_REGEX.matches(input))
+        val trimmed = input?.trim()
+        return if(!trimmed.isNullOrEmpty() && !EMAIL_REGEX.matches(trimmed))
             VALIDATION_EMAIL_INVALID
         else null
     }
