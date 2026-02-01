@@ -8,7 +8,8 @@ object FormInputsValidator {
     }
 
     fun validateEmail(input: String?): String? {
-        return if(!input.isNullOrEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches())
+        val trimmed = input?.trim()
+        return if(!trimmed.isNullOrEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(trimmed).matches())
             "L'e-mail n'est pas valide"
         else null
     }
