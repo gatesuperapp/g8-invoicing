@@ -8,6 +8,7 @@ import com.a4a.g8invoicing.di.desktopModule
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
+import java.awt.Dimension
 
 fun main() {
     // Initialize Koin BEFORE application starts (only once)
@@ -23,6 +24,9 @@ fun main() {
             title = "G8 Invoicing",
             state = rememberWindowState(width = 1200.dp, height = 800.dp)
         ) {
+            // Taille minimum : 900dp (contenu) + 200dp (sidebar) + marge
+            window.minimumSize = Dimension(1120, 600)
+
             G8InvoicingTheme {
                 App()
             }
