@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">g8</string>
+    <string name="back_press_again_to_exit">Press again to exit</string>
 </resources>
