@@ -143,13 +143,17 @@ class ProductAddEditViewModel(
         _productUiState.value = _productUiState.value.copy(
             name = TextFieldValue(),
             description = TextFieldValue(),
-            defaultPriceWithoutTax = null
+            defaultPriceWithoutTax = null,
+            defaultPriceWithTax = null
         )
 
         _documentProductUiState.value = _documentProductUiState.value.copy(
             name = TextFieldValue(),
             description = TextFieldValue(),
-            priceWithoutTax = null
+            priceWithoutTax = null,
+            priceWithTax = null,
+            quantity = BigDecimal.ONE
+            // unit is intentionally NOT reset - it's preserved between product creations
         )
     }
 
