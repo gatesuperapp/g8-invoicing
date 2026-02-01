@@ -9,7 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
-import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
+import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.ParametersDefinition
@@ -25,6 +25,8 @@ fun NavGraph(
     onSendReminder: (InvoiceState) -> Unit = {},
     // On desktop, hide category button since we have sidebar
     showCategoryButton: Boolean = true,
+    // PDF export - passed from app module (Android) or platform-specific implementation
+    exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
 ) {
     NavHost(
         navController = navController,
@@ -134,7 +136,7 @@ fun NavGraph(
                 navigateBack(navController)
             },
             exportPdfContent = { document, onDismiss ->
-                ExportPdfPlatform(document, onDismiss)
+                exportPdfContent(document, onDismiss)
             }
         )
 
@@ -144,7 +146,7 @@ fun NavGraph(
                 navigateBack(navController)
             },
             exportPdfContent = { document, onDismiss ->
-                ExportPdfPlatform(document, onDismiss)
+                exportPdfContent(document, onDismiss)
             }
         )
 
@@ -154,7 +156,7 @@ fun NavGraph(
                 navigateBack(navController)
             },
             exportPdfContent = { document, onDismiss ->
-                ExportPdfPlatform(document, onDismiss)
+                exportPdfContent(document, onDismiss)
             }
         )
 

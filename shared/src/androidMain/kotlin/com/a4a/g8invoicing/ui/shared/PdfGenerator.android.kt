@@ -443,7 +443,11 @@ actual class PdfGenerator actual constructor(
         if (displayAllInfo) {
             val numberAndEmail = Paragraph().setFixedLeading(12F).setPaddingBottom(5f)
             clientOrIssuer?.phone?.text?.let { numberAndEmail.add(Text("$it\n")) }
-            clientOrIssuer?.email?.text?.let { numberAndEmail.add(Text("$it\n")) }
+            clientOrIssuer?.emails?.forEach { emailState ->
+                if (emailState.email.text.isNotEmpty()) {
+                    numberAndEmail.add(Text("${emailState.email.text}\n"))
+                }
+            }
             result.add(numberAndEmail)
 
             val companyInfo = Paragraph().setFixedLeading(12F).setPaddingBottom(4f)

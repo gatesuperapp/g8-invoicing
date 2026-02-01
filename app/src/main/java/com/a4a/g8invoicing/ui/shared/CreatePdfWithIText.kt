@@ -482,12 +482,13 @@ private fun createClientOrIssuerParagraph(
             .setFixedLeading(12F)
             .setPaddingBottom(5f)
         val issuerPhone = clientOrIssuer?.phone?.text?.let { Text(it + "\n") }
-        val issuerEmail = clientOrIssuer?.email?.text?.let { Text(it + "\n") }
         issuerPhone?.let {
             numberAndEmail.add(it)
         }
-        issuerEmail?.let {
-            numberAndEmail.add(it)
+        clientOrIssuer?.emails?.forEach { emailState ->
+            if (emailState.email.text.isNotEmpty()) {
+                numberAndEmail.add(Text(emailState.email.text + "\n"))
+            }
         }
         listToReturn.add(numberAndEmail)
 

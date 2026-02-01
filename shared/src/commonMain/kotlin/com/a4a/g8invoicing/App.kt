@@ -10,6 +10,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.a4a.g8invoicing.ui.navigation.CategorySidebar
 import com.a4a.g8invoicing.ui.navigation.NavGraph
+import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.states.InvoiceState
 
 /**
@@ -44,14 +45,20 @@ fun App(
                 NavGraph(
                     navController = navController,
                     onSendReminder = onSendReminder,
-                    showCategoryButton = false // Hide on desktop since we have sidebar
+                    showCategoryButton = false, // Hide on desktop since we have sidebar
+                    exportPdfContent = { document, onDismiss ->
+                        ExportPdfPlatform(document, onDismiss)
+                    }
                 )
             }
         } else {
             NavGraph(
                 navController = navController,
                 onSendReminder = onSendReminder,
-                showCategoryButton = true // Show on mobile
+                showCategoryButton = true, // Show on mobile
+                exportPdfContent = { document, onDismiss ->
+                    ExportPdfPlatform(document, onDismiss)
+                }
             )
         }
     }

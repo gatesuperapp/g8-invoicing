@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.a4a.g8invoicing.ui.navigation.NavGraph
+import com.a4a.g8invoicing.ui.screens.ExportPdf
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 
@@ -21,7 +22,10 @@ fun MainCompose(
         ) {
             NavGraph(
                 navController = navController,
-                onSendReminder = onSendReminder
+                onSendReminder = onSendReminder,
+                exportPdfContent = { document, onDismiss ->
+                    ExportPdf(document, onDismiss)
+                }
             )
         }
     }
