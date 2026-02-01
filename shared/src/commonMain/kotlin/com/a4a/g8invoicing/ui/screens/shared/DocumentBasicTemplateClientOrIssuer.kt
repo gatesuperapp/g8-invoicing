@@ -77,15 +77,17 @@ fun DocumentBasicTemplateClientOrIssuer(
                 text = clientOrIssuer?.phone?.text ?: ""
             )
         }
-        if (!clientOrIssuer?.email?.text.isNullOrEmpty()) {
-            Text(
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .wrapContentHeight(),
-                style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.email?.text ?: ""
-            )
+        clientOrIssuer?.emails?.forEach { emailState ->
+            if (emailState.email.text.isNotEmpty()) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .wrapContentHeight(),
+                    style = MaterialTheme.typography.textForDocuments,
+                    text = emailState.email.text
+                )
+            }
         }
         if (!clientOrIssuer?.companyId1Number?.text.isNullOrEmpty()) {
             Text(

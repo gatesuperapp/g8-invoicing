@@ -39,7 +39,8 @@ fun DocumentBottomSheetElementsAfterSlide(
     onShowDocumentForm: (Boolean) -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
-
+    onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
+    onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     ) {
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
@@ -184,7 +185,9 @@ fun DocumentBottomSheetElementsAfterSlide(
                 onClickDoneForm(typeOfCreation)
             },
             onSelectTaxRate = onSelectTaxRate,
-            onClickDeleteAddress = onClickDeleteAddress
+            onClickDeleteAddress = onClickDeleteAddress,
+            onClickDeleteEmail = onClickDeleteEmail,
+            onAddEmail = onAddEmail
         )
     }
 }

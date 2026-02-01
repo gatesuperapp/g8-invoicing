@@ -15,6 +15,7 @@ import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.EmailState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -24,6 +25,8 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerAddressQueries
+import g8invoicing.DocumentClientOrIssuerEmail
+import g8invoicing.DocumentClientOrIssuerEmailQueries
 import g8invoicing.DocumentClientOrIssuerQueries
 import g8invoicing.DocumentProductQueries
 import g8invoicing.Invoice
@@ -49,6 +52,7 @@ class InvoiceLocalDataSource(
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
     private val linkDocumentClientOrIssuerToAddressQueries =
         db.linkDocumentClientOrIssuerToAddressQueries
+    private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
     private val documentProductQueries = db.documentProductQueries
     private val linkInvoiceToDocumentProductQueries = db.linkInvoiceToDocumentProductQueries
     private val linkInvoiceToTagQueries = db.linkInvoiceToTagQueries
@@ -141,7 +145,8 @@ class InvoiceLocalDataSource(
                                 linkInvoiceToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
                                 documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries
+                                documentClientOrIssuerAddressQueries,
+                                documentClientOrIssuerEmailQueries
                             ),
                             fetchTag(it.invoice_id)  // Synchronous, runs on this IO context
                         )
@@ -172,7 +177,8 @@ class InvoiceLocalDataSource(
                                 linkInvoiceToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
                                 documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries
+                                documentClientOrIssuerAddressQueries,
+                                documentClientOrIssuerEmailQueries
                             )
                             val tag = fetchTag(document.invoice_id)
 
@@ -277,6 +283,8 @@ class InvoiceLocalDataSource(
             try {
                 val newInvoiceState = InvoiceState(
                     documentNumber = TextFieldValue(docNumber),
+                    documentDate = DateUtils.getCurrentDateFormatted(),
+                    dueDate = DateUtils.getDatePlusDaysFormatted(30),
                     reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
                     documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
@@ -580,7 +588,8 @@ class InvoiceLocalDataSource(
                         linkInvoiceToDocumentClientOrIssuerQueries,
                         linkDocumentClientOrIssuerToAddressQueries,
                         documentClientOrIssuerQueries,
-                        documentClientOrIssuerAddressQueries
+                        documentClientOrIssuerAddressQueries,
+                        documentClientOrIssuerEmailQueries
                     )?.firstOrNull { it.type == type }
 
 
@@ -1028,7 +1037,7 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         first_name = documentClientOrIssuer.firstName?.text,
         name = documentClientOrIssuer.name.text,
         phone = documentClientOrIssuer.phone?.text,
-        email = documentClientOrIssuer.email?.text,
+        email = documentClientOrIssuer.emails?.firstOrNull()?.email?.text,
         notes = documentClientOrIssuer.notes?.text,
         company_id1_label = documentClientOrIssuer.companyId1Label?.text,
         company_id1_number = documentClientOrIssuer.companyId1Number?.text,
@@ -1072,6 +1081,7 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
 // Pure transformation function for DocumentClientOrIssuer.
 fun DocumentClientOrIssuer.transformIntoEditable(
     addresses: List<AddressState>? = null,
+    emails: List<EmailState>? = null,
 ): ClientOrIssuerState {
     val documentClientOrIssuer = this
 
@@ -1085,7 +1095,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         addresses = addresses,
         name = TextFieldValue(text = documentClientOrIssuer.name),
         phone = documentClientOrIssuer.phone?.let { TextFieldValue(text = it) },
-        email = documentClientOrIssuer.email?.let { TextFieldValue(text = it) },
+        emails = emails,
         notes = documentClientOrIssuer.notes?.let { TextFieldValue(text = it) },
         companyId1Label = documentClientOrIssuer.company_id1_number?.let {
             documentClientOrIssuer.company_id1_label?.let {
@@ -1122,6 +1132,7 @@ fun fetchClientAndIssuer(
     linkAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
+    documentClientOrIssuerEmailQueries: DocumentClientOrIssuerEmailQueries? = null,
 ): List<ClientOrIssuerState>? {
     try {
         val listOfIds: List<Long> = if (linkQueries is LinkInvoiceToDocumentClientOrIssuerQueries) {
@@ -1144,11 +1155,14 @@ fun fetchClientAndIssuer(
             val documentClientOrIssuer = documentClientOrIssuerQueries.get(it)
                 .executeAsOneOrNull()?.let {
                     it.transformIntoEditable(
-                        fetchDocumentClientOrIssuerAddresses(
+                        addresses = fetchDocumentClientOrIssuerAddresses(
                             it.id,
                             linkAddressQueries,
                             documentClientOrIssuerAddressQueries
-                        )?.toMutableList()
+                        )?.toMutableList(),
+                        emails = documentClientOrIssuerEmailQueries?.let { emailQueries ->
+                            fetchDocumentClientOrIssuerEmails(it.id, emailQueries)
+                        }
                     )
                 }
             documentClientOrIssuer?.let {
@@ -1182,6 +1196,24 @@ fun fetchDocumentClientOrIssuerAddresses(
                     .executeAsOne()
                     .transformIntoEditable()
             }.toMutableList()
+        } else null
+    } catch (e: Exception) {
+        //Log.e(ContentValues.TAG, "Error: ${e.message}")
+    }
+    return null
+}
+
+// Synchronous function, performs DB access.
+// Must be called from a Dispatchers.IO context.
+fun fetchDocumentClientOrIssuerEmails(
+    documentClientOrIssuerId: Long,
+    documentClientOrIssuerEmailQueries: DocumentClientOrIssuerEmailQueries,
+): List<EmailState>? {
+    try {
+        val emails = documentClientOrIssuerEmailQueries.getByDocumentClientOrIssuerId(documentClientOrIssuerId)
+            .executeAsList()
+        return if (emails.isNotEmpty()) {
+            emails.map { it.transformIntoEditable() }
         } else null
     } catch (e: Exception) {
         //Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -1250,32 +1282,24 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotal
         .roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
 
     // Calculate the total amount of each tax
-    val groupedItems = products.groupBy {
-        it.taxRate
-    }
-    val taxes = groupedItems.keys.filterNotNull().distinct().toMutableList() // ex: taxes= [10, 20]
+    val groupedItems = products.groupBy { it.taxRate }
+    val taxes = groupedItems.keys.filterNotNull().distinct() // ex: taxes= [10, 20]
 
-    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
-    for (documentProduct in groupedItems.values) {
-        val listOfAmounts = documentProduct.filter { it.priceWithoutTax != null }.map {
-            it.priceWithoutTax!! * it.quantity * (it.taxRate
-                ?: BigDecimal.ZERO) / BigDecimal.fromInt(100)
-        }
-        val sumOfAmounts = listOfAmounts
-            .fold(BigDecimal.ZERO) { acc, value -> acc + value }
-            .roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
-        amounts.add(
-            sumOfAmounts
-        )
-    }
     val amountsPerTaxRate: MutableList<Pair<BigDecimal, BigDecimal>> = mutableListOf()
-    taxes.forEachIndexed { index, key ->
-        amountsPerTaxRate.add(Pair(key, amounts[index]))
+    for (taxRate in taxes) {
+        val productsWithThisTax = groupedItems[taxRate] ?: continue
+        val sumOfAmounts = productsWithThisTax
+            .filter { it.priceWithoutTax != null }
+            .fold(BigDecimal.ZERO) { acc, item ->
+                acc + (item.priceWithoutTax!! * item.quantity * taxRate / BigDecimal.fromInt(100))
+            }
+            .roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
+        amountsPerTaxRate.add(Pair(taxRate, sumOfAmounts))
     } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
 
     return DocumentTotalPrices(
         totalPriceWithoutTax = totalPriceWithoutTax,
         totalAmountsOfEachTax = amountsPerTaxRate,
-        totalPriceWithTax = totalPriceWithoutTax + amounts.fold(BigDecimal.ZERO) { acc, value -> acc + value }
+        totalPriceWithTax = totalPriceWithoutTax + amountsPerTaxRate.fold(BigDecimal.ZERO) { acc, pair -> acc + pair.second }
     )
 }

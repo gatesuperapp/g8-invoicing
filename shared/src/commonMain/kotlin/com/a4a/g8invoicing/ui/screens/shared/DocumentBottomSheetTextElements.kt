@@ -67,6 +67,8 @@ fun DocumentBottomSheetTextElements(
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
+    onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
+    onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboard by keyboardAsState()
@@ -192,7 +194,9 @@ fun DocumentBottomSheetTextElements(
                 showDocumentForm = showDocumentForm,
                 onShowDocumentForm = onShowDocumentForm,
                 onValueChange = onValueChange,
-                onClickDeleteAddress = onClickDeleteAddress
+                onClickDeleteAddress = onClickDeleteAddress,
+                onClickDeleteEmail = onClickDeleteEmail,
+                onAddEmail = onAddEmail
             )
         }
     }

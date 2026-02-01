@@ -32,6 +32,7 @@ class DeliveryNoteLocalDataSource(
         db.linkDeliveryNoteToDocumentProductQueries
     private val linkDeliveryNoteToDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
+    private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
 
     // --- createNew ---
     // Called from ViewModel
@@ -106,7 +107,8 @@ class DeliveryNoteLocalDataSource(
                                 linkDeliveryNoteToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
                                 documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries
+                                documentClientOrIssuerAddressQueries,
+                                documentClientOrIssuerEmailQueries
                             )
                         )
                     }
@@ -135,7 +137,8 @@ class DeliveryNoteLocalDataSource(
                                 linkDeliveryNoteToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
                                 documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries
+                                documentClientOrIssuerAddressQueries,
+                                documentClientOrIssuerEmailQueries
                             )
 
                             document.transformIntoEditableDeliveryNote(
@@ -384,7 +387,8 @@ class DeliveryNoteLocalDataSource(
                         linkDeliveryNoteToDocumentClientOrIssuerQueries,
                         linkDocumentClientOrIssuerToAddressQueries,
                         documentClientOrIssuerQueries,
-                        documentClientOrIssuerAddressQueries
+                        documentClientOrIssuerAddressQueries,
+                        documentClientOrIssuerEmailQueries
                     )?.firstOrNull { it.type == type }
 
                 clientOrIssuerToDelete?.id?.let { entityId ->

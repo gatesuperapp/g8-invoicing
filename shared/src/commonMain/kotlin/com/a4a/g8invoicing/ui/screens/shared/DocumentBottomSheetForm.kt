@@ -59,6 +59,8 @@ fun DocumentBottomSheetForm(
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {},
+    onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
+    onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
 ) {
     // State for the ModalBottomSheet itself
     val sheetState = rememberModalBottomSheetState(
@@ -144,6 +146,8 @@ fun DocumentBottomSheetForm(
                     onSelectTaxRate(selectedRate)
                 },
                 onClickDeleteAddress = onClickDeleteAddress,
+                onClickDeleteEmail = onClickDeleteEmail,
+                onAddEmail = onAddEmail,
                 onNavigateToFullScreenText = { screenElement -> // Callback to show full screen editor
                     fullScreenElementToShow.value = screenElement
                     // fullScreenEditorText is initialized by the LaunchedEffect
@@ -230,10 +234,7 @@ private fun DocumentBottomSheetHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = if (typeOfCreation
-                        .toString()
-                        .contains(ClientOrIssuerType.CLIENT.name)
-                ) 60.dp else 40.dp, // Dynamic top padding based on type
+                top = 20.dp,
                 end = 30.dp,
                 start = 30.dp
             )
@@ -315,6 +316,8 @@ private fun DocumentBottomSheetContent(
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
+    onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit,
+    onAddEmail: (ClientOrIssuerType, String) -> Unit,
     onNavigateToFullScreenText: (ScreenElement) -> Unit, // Callback to request full screen view
     onNavigateToTaxSelection: (ScreenElement) -> Unit // Callback to request tax selection view
 ) {
@@ -331,7 +334,9 @@ private fun DocumentBottomSheetContent(
                     bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_CLIENT)
                 },
                 isInBottomSheetModal = true,
-                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) }
+                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) },
+                onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
+                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) }
             )
         }
 
@@ -346,7 +351,9 @@ private fun DocumentBottomSheetContent(
                     bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_ISSUER)
                 },
                 isInBottomSheetModal = true,
-                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) }
+                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) },
+                onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
+                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) }
             )
         }
 

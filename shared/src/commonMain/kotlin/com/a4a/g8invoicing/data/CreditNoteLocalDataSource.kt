@@ -35,6 +35,7 @@ class CreditNoteLocalDataSource(
         db.linkCreditNoteDocumentProductToDeliveryNoteQueries
     private val linkCreditNoteToDocumentClientOrIssuerQueries =
         db.linkCreditNoteToDocumentClientOrIssuerQueries
+    private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
 
     override suspend fun createNew(): Long? {
         return withContext(DispatcherProvider.IO) {
@@ -86,7 +87,8 @@ class CreditNoteLocalDataSource(
                                 linkCreditNoteToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
                                 documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries
+                                documentClientOrIssuerAddressQueries,
+                                documentClientOrIssuerEmailQueries
                             )
                         )
                     }
@@ -110,7 +112,8 @@ class CreditNoteLocalDataSource(
                                 linkCreditNoteToDocumentClientOrIssuerQueries,
                                 linkDocumentClientOrIssuerToAddressQueries,
                                 documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries
+                                documentClientOrIssuerAddressQueries,
+                                documentClientOrIssuerEmailQueries
                             )
 
                             document.transformIntoEditableCreditNote(
@@ -367,7 +370,8 @@ class CreditNoteLocalDataSource(
                         linkCreditNoteToDocumentClientOrIssuerQueries,
                         linkDocumentClientOrIssuerToAddressQueries,
                         documentClientOrIssuerQueries,
-                        documentClientOrIssuerAddressQueries
+                        documentClientOrIssuerAddressQueries,
+                        documentClientOrIssuerEmailQueries
                     )?.firstOrNull { it.type == type }
 
                 documentClientOrIssuer?.id?.let {

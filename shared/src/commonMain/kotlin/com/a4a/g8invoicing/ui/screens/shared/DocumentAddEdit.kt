@@ -110,6 +110,8 @@ fun DocumentAddEdit(
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
+    onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
+    onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit, // For showing toast/snackbar messages
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit, // Slot for ExportPdf
@@ -173,7 +175,9 @@ fun DocumentAddEdit(
                     localFocusManager = LocalFocusManager.current,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
-                    onClickDeleteAddress = onClickDeleteAddress
+                    onClickDeleteAddress = onClickDeleteAddress,
+                    onClickDeleteEmail = onClickDeleteEmail,
+                    onAddEmail = onAddEmail
                 )
             } else {
                 DocumentBottomSheetProducts(
