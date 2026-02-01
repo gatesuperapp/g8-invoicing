@@ -9,8 +9,14 @@ import kotlinx.coroutines.flow.map
 
 val Context.dataStore by preferencesDataStore("settings")
 
-// Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "5.2"
+// Récupère la version de l'app dynamiquement
+fun Context.getAppVersion(): String {
+    return try {
+        packageManager.getPackageInfo(packageName, 0).versionName ?: "unknown"
+    } catch (e: Exception) {
+        "unknown"
+    }
+}
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")
@@ -36,12 +42,13 @@ suspend fun setSeenPopup(context: Context) {
 fun hasSeenWhatsNew(context: Context) =
     context.dataStore.data.map { prefs ->
         val lastVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
-        lastVersion == null || lastVersion == CURRENT_APP_VERSION
+        val currentVersion = context.getAppVersion()
+        lastVersion == null || lastVersion == currentVersion
     }
 
 // Marquer les nouveautés comme vues
 suspend fun setSeenWhatsNew(context: Context) {
     context.dataStore.edit { prefs ->
-        prefs[PrefKeys.LAST_SEEN_VERSION] = CURRENT_APP_VERSION
+        prefs[PrefKeys.LAST_SEEN_VERSION] = context.getAppVersion()
     }
 }

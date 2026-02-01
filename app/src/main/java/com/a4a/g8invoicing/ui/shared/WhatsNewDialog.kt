@@ -23,14 +23,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import com.a4a.g8invoicing.R
-import com.a4a.g8invoicing.data.CURRENT_APP_VERSION
+import com.a4a.g8invoicing.data.getAppVersion
 
 @Composable
 fun WhatsNewDialog(
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val appVersion = context.getAppVersion()
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
@@ -69,7 +72,7 @@ fun WhatsNewDialog(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Version $CURRENT_APP_VERSION",
+                        text = "Version $appVersion",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center
