@@ -1253,30 +1253,22 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotal
     }.setScale(2, RoundingMode.HALF_UP)
 
     // Calculate the total amount of each tax
-    val groupedItems = products.groupBy {
-        it.taxRate
-    }
-    val taxes = groupedItems.keys.filterNotNull().distinct().toMutableList() // ex: taxes= [10, 20]
+    val groupedItems = products.groupBy { it.taxRate }
+    val taxes = groupedItems.keys.filterNotNull().distinct() // ex: taxes= [10, 20]
 
-    val amounts: MutableList<BigDecimal> = mutableListOf()  // ex: amounts = [2.4, 9.0]
-    for (documentProduct in groupedItems.values) {
-        val listOfAmounts = documentProduct.filter { it.priceWithoutTax != null }.map {
-            BigDecimal(it.priceWithoutTax!!.toDouble()) * it.quantity * (it.taxRate
-                ?: BigDecimal(0)) / BigDecimal(100)
-        }
-        val sumOfAmounts = listOfAmounts.sumOf { it }.setScale(2, RoundingMode.HALF_UP)
-        amounts.add(
-            sumOfAmounts
-        )
-    }
     val amountsPerTaxRate: MutableList<Pair<BigDecimal, BigDecimal>> = mutableListOf()
-    taxes.forEachIndexed { index, key ->
-        amountsPerTaxRate.add(Pair(key, amounts[index]))
+    for (taxRate in taxes) {
+        val productsWithThisTax = groupedItems[taxRate] ?: continue
+        val sumOfAmounts = productsWithThisTax
+            .filter { it.priceWithoutTax != null }
+            .sumOf { it.priceWithoutTax!! * it.quantity * taxRate / BigDecimal(100) }
+            .setScale(2, RoundingMode.HALF_UP)
+        amountsPerTaxRate.add(Pair(taxRate, sumOfAmounts))
     } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
 
     return DocumentTotalPrices(
         totalPriceWithoutTax = totalPriceWithoutTax,
         totalAmountsOfEachTax = amountsPerTaxRate,
-        totalPriceWithTax = totalPriceWithoutTax + amounts.sumOf { it }
+        totalPriceWithTax = totalPriceWithoutTax + amountsPerTaxRate.sumOf { it.second }
     )
 }

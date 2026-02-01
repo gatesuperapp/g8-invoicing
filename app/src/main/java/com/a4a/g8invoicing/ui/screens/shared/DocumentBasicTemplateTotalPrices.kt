@@ -19,6 +19,11 @@ import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import java.math.BigDecimal
 import java.math.RoundingMode
 
+// Format avec exactement 2 décimales (ex: 3.5 -> "3.50", 3 -> "3.00")
+private fun BigDecimal.toStringWithTwoDecimals(): String {
+    return this.setScale(2, RoundingMode.HALF_UP).toPlainString()
+}
+
 @Composable
 fun DocumentBasicTemplateTotalPrices(
     uiState: DocumentState,
@@ -65,7 +70,7 @@ fun DocumentBasicTemplateTotalPrices(
 
                 taxesAmount.forEach { tax ->
                     uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
-                        tax.stripTrailingZeros().toString() in it.first.stripTrailingZeros().toString()
+                        tax.stripTrailingZeros().toPlainString() in it.first.stripTrailingZeros().toPlainString()
                     }?.let {
                         Text(
                             modifier = Modifier
@@ -96,7 +101,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
@@ -112,13 +117,13 @@ fun DocumentBasicTemplateTotalPrices(
 
                 taxesAmount.forEach { tax ->
                     uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
-                        tax.stripTrailingZeros().toString() in it.first.stripTrailingZeros().toString()
+                        tax.stripTrailingZeros().toPlainString() in it.first.stripTrailingZeros().toPlainString()
                     }?.let {
                         Text(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = it.second.toString().replace(".", ",") + stringResource(id = R.string.currency)
+                            text = it.second.toStringWithTwoDecimals().replace(".", ",") + stringResource(id = R.string.currency)
                         )
                     }
                 }
@@ -126,7 +131,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",")
                         ?: " - ") + stringResource(id = R.string.currency)
                 )
             }
