@@ -685,16 +685,16 @@ private fun addProductsToTable(
 
 
         productsTable.addCustomCell(
-            text = it.priceWithoutTax?.setScale(2, RoundingMode.HALF_UP)
-                .toString().replace(".", ",") + Strings.get(R.string.currency),
+            text = it.priceWithoutTax?.let { price ->
+                price.setScale(2, RoundingMode.HALF_UP).toPlainString().replace(".", ",") + Strings.get(R.string.currency)
+            } ?: "",
             fontBold = fontBold,
             fontRegular = fontRegular
         )
         productsTable.addCustomCell(
             text = it.priceWithoutTax?.let { price ->
-                price * it.quantity
-            }?.setScale(2, RoundingMode.HALF_UP)
-                .toString().replace(".", ",") + Strings.get(R.string.currency),
+                (price * it.quantity).setScale(2, RoundingMode.HALF_UP).toPlainString().replace(".", ",") + Strings.get(R.string.currency)
+            } ?: "",
             fontBold = fontBold,
             fontRegular = fontRegular
         )
