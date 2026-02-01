@@ -236,6 +236,12 @@ fun NavGraphBuilder.invoiceAddEdit(
             onClickDeleteAddress = {
                 clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
             },
+            onClickDeleteEmail = { type, index ->
+                clientOrIssuerAddEditViewModel.removeEmailFromClientOrIssuerState(type, index)
+            },
+            onAddEmail = { type, email ->
+                clientOrIssuerAddEditViewModel.addEmailToClientOrIssuerState(type, email)
+            },
             onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent

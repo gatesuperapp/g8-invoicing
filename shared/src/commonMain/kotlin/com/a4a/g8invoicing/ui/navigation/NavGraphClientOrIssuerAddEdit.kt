@@ -74,6 +74,12 @@ fun NavGraphBuilder.clientAddEdit(
             onClickDeleteAddress = {
                 viewModel.removeAddressFromClientOrIssuerState(ClientOrIssuerType.CLIENT)
             },
+            onClickDeleteEmail = { index ->
+                viewModel.removeEmailFromClientOrIssuerState(ClientOrIssuerType.CLIENT, index)
+            },
+            onAddEmail = { email ->
+                viewModel.addEmailToClientOrIssuerState(ClientOrIssuerType.CLIENT, email)
+            },
             scrollState = scrollState
         )
     }

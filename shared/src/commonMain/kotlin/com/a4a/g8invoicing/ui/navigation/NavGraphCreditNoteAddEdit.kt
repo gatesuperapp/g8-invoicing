@@ -231,6 +231,12 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onClickDeleteAddress = {
                 clientOrIssuerAddEditViewModel.removeAddressFromClientOrIssuerState(it)
             },
+            onClickDeleteEmail = { type, index ->
+                clientOrIssuerAddEditViewModel.removeEmailFromClientOrIssuerState(type, index)
+            },
+            onAddEmail = { type, email ->
+                clientOrIssuerAddEditViewModel.addEmailToClientOrIssuerState(type, email)
+            },
             onOrderChange = creditNoteViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent
