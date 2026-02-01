@@ -37,6 +37,7 @@ import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import com.a4a.g8invoicing.data.setScale
 import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import org.jetbrains.compose.resources.stringResource
 
@@ -222,15 +223,13 @@ fun DocumentProductsRows(
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
-                    it.setScale(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
-                        .toPlainString().replace(".", ",") + currencySymbol
+                    it.toStringWithTwoDecimals().replace(".", ",") + currencySymbol
                 } ?: "",
                 alignEnd = true
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
-                    (it * data.quantity).setScale(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
-                        .toPlainString().replace(".", ",") + currencySymbol
+                    (it * data.quantity).toStringWithTwoDecimals().replace(".", ",") + currencySymbol
                 } ?: "",
                 alignEnd = true
             )

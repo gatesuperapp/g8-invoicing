@@ -20,6 +20,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -102,7 +103,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toPlainString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")
                         ?: " - ") + currencySymbol
                 )
             }
@@ -124,7 +125,7 @@ fun DocumentBasicTemplateTotalPrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = it.second.toPlainString().replace(".", ",") + currencySymbol
+                            text = it.second.toStringWithTwoDecimals().replace(".", ",") + currencySymbol
                         )
                     }
                 }
@@ -132,7 +133,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toPlainString()?.replace(".", ",")
+                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",")
                         ?: " - ") + currencySymbol
                 )
             }
