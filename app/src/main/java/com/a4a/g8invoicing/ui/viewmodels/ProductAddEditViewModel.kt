@@ -369,7 +369,7 @@ class ProductAddEditViewModel(
             val id = it.id ?: return@mapNotNull null
             ClientRef(
                 id = id,
-                name = it.name.text
+                name = (it.firstName?.text?.let { firstName -> "$firstName " } ?: "") + it.name.text
             )
         }
         _clientSelectionDialogState.value = ClientSelectionDialogState(
