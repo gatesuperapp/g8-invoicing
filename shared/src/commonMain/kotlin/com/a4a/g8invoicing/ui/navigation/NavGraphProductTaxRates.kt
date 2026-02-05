@@ -31,6 +31,7 @@ fun NavGraphBuilder.productTaxRates(
     ) { backStackEntry ->
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
         val taxRates = viewModel.fetchTaxRatesFromLocalDb()
+        val taxRatesWithIds = viewModel.fetchTaxRatesWithIdsFromLocalDb()
 
         PlatformBackHandler {
             onClickBackOrSelect()
@@ -39,12 +40,16 @@ fun NavGraphBuilder.productTaxRates(
         ProductTaxRates(
             navController = navController,
             taxRates = taxRates,
+            taxRatesWithIds = taxRatesWithIds,
             currentTaxRate = viewModel.productUiState.value.taxRate,
             onSelectTaxRate = { selectedTaxRate ->
                 onClickBackOrSelect()
                 viewModel.updateTaxRate(selectedTaxRate, ProductType.PRODUCT)
             },
             onClickBack = onClickBackOrSelect,
+            onSaveTaxRates = { rates ->
+                viewModel.saveTaxRates(rates)
+            }
         )
     }
 }

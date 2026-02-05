@@ -23,10 +23,19 @@ getTaxRates:
 SELECT amount
 FROM TaxRate;
 
+getTaxRatesWithIds:
+SELECT product_tax_id, amount
+FROM TaxRate;
+
 saveTaxRate:
 INSERT
 INTO TaxRate (product_tax_id, amount)
 VALUES (?, ?);
+
+updateTaxRate:
+UPDATE TaxRate
+SET amount = :amount
+WHERE product_tax_id = :id;
 
 deleteTaxRate:
 DELETE FROM TaxRate

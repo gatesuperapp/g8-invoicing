@@ -101,6 +101,9 @@
     <string name="product_unit_input">kg</string>
     <string name="product_tax">TVA</string>
     <string name="tax_rate_screen_title">Taux de TVA</string>
+    <string name="tax_rate_edit_title">Modifier TVA</string>
+    <string name="tax_rate_edit_rates">Modifier les taux</string>
+    <string name="tax_rate_add_rate">+ Ajouter un taux</string>
     <string name="product_price">Prix</string>
     <string name="product_price_input">3</string>
     <string name="product_price_default">Prix par défaut</string>

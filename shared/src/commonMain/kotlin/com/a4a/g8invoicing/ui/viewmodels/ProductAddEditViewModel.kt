@@ -200,6 +200,44 @@ class ProductAddEditViewModel(
         return taxRates
     }
 
+    fun fetchTaxRatesWithIdsFromLocalDb(): List<Pair<Long, BigDecimal>> {
+        return taxDataSource.fetchProductTaxesWithIds()
+    }
+
+    fun saveTaxRates(rates: List<Pair<Long?, BigDecimal>>) {
+        viewModelScope.launch {
+            try {
+                // Get existing rates to determine what to update/add/delete
+                val existingRates = taxDataSource.fetchProductTaxesWithIds()
+                val existingIds = existingRates.map { it.first }.toSet()
+                val newRateIds = rates.mapNotNull { it.first }.toSet()
+
+                // Delete rates that are no longer in the list
+                existingIds.forEach { existingId ->
+                    if (existingId !in newRateIds) {
+                        taxDataSource.deleteProductTax(existingId)
+                    }
+                }
+
+                // Update existing rates and add new ones
+                rates.forEach { (id, amount) ->
+                    if (id != null && id in existingIds) {
+                        // Update existing rate
+                        taxDataSource.updateProductTax(id, amount)
+                    } else if (id == null) {
+                        // Add new rate
+                        taxDataSource.saveProductTax(amount)
+                    }
+                }
+
+                // Refresh the local taxRates list
+                taxRates = taxDataSource.fetchProductTaxes()
+            } catch (e: Exception) {
+                // Error handling
+            }
+        }
+    }
+
     fun saveProductInLocalDb() {
         saveJob?.cancel()
         saveJob = viewModelScope.launch {

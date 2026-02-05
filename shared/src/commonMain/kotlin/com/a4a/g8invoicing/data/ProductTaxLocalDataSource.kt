@@ -18,6 +18,12 @@ class ProductTaxLocalDataSource(
         return productTaxQueries.getTaxRates().executeAsList().map { BigDecimal.fromDouble(it) }
     }
 
+    override fun fetchProductTaxesWithIds(): List<Pair<Long, BigDecimal>> {
+        return productTaxQueries.getTaxRatesWithIds().executeAsList().map {
+            Pair(it.product_tax_id, BigDecimal.fromDouble(it.amount))
+        }
+    }
+
     override suspend fun saveProductTax(taxRate: BigDecimal) {
         return withContext(DispatcherProvider.IO) {
             try {
@@ -27,6 +33,19 @@ class ProductTaxLocalDataSource(
                         amount = it.doubleValue(false),
                     )
                 }
+            } catch (cause: Throwable) {
+                // Log error if needed
+            }
+        }
+    }
+
+    override suspend fun updateProductTax(id: Long, amount: BigDecimal) {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                productTaxQueries.updateTaxRate(
+                    id = id,
+                    amount = amount.doubleValue(false)
+                )
             } catch (cause: Throwable) {
                 // Log error if needed
             }

@@ -11,7 +11,9 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 interface ProductTaxLocalDataSourceInterface {
     fun fetchProductTax(id: Long): BigDecimal?
-    fun fetchProductTaxes():  List<BigDecimal>
+    fun fetchProductTaxes(): List<BigDecimal>
+    fun fetchProductTaxesWithIds(): List<Pair<Long, BigDecimal>>
     suspend fun saveProductTax(taxRate: BigDecimal)
+    suspend fun updateProductTax(id: Long, amount: BigDecimal)
     suspend fun deleteProductTax(id: Long)
 }
