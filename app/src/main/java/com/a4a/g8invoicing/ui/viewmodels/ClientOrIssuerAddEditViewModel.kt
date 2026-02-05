@@ -1043,7 +1043,12 @@ class ClientOrIssuerAddEditViewModel(
                 FormInputsValidator.validateEmail(_clientUiState.value.email?.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
                 }
+                // Trim email before saving
+                val trimmedEmail = _clientUiState.value.email?.let {
+                    TextFieldValue(text = it.text.trim(), selection = TextRange(it.text.trim().length))
+                }
                 _clientUiState.value = _clientUiState.value.copy(
+                    email = trimmedEmail,
                     errors = listOfErrors
                 )
             }
@@ -1055,7 +1060,12 @@ class ClientOrIssuerAddEditViewModel(
                 FormInputsValidator.validateEmail(_issuerUiState.value.email?.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_EMAIL, it))
                 }
+                // Trim email before saving
+                val trimmedEmail = _issuerUiState.value.email?.let {
+                    TextFieldValue(text = it.text.trim(), selection = TextRange(it.text.trim().length))
+                }
                 _issuerUiState.value = _issuerUiState.value.copy(
+                    email = trimmedEmail,
                     errors = listOfErrors
                 )
             }
@@ -1073,7 +1083,12 @@ class ClientOrIssuerAddEditViewModel(
                             )
                         )
                     }
+                // Trim email before saving
+                val trimmedEmail = _documentClientUiState.value.email?.let {
+                    TextFieldValue(text = it.text.trim(), selection = TextRange(it.text.trim().length))
+                }
                 _documentClientUiState.value = _documentClientUiState.value.copy(
+                    email = trimmedEmail,
                     errors = listOfErrors
                 )
             }
@@ -1091,7 +1106,12 @@ class ClientOrIssuerAddEditViewModel(
                             )
                         )
                     }
+                // Trim email before saving
+                val trimmedEmail = _documentIssuerUiState.value.email?.let {
+                    TextFieldValue(text = it.text.trim(), selection = TextRange(it.text.trim().length))
+                }
                 _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                    email = trimmedEmail,
                     errors = listOfErrors
                 )
             }
