@@ -90,11 +90,11 @@
     <string name="client_address_title_delivery_placeholder">Lieferanschrift</string>
     <string name="client_address_title_head_office_placeholder">Rechnungsanschrift</string>
     <string name="client_address1">Adresse</string>
-    <string name="client_address1_input">Kirchgasse 6</string>
-    <string name="client_address2_input">Ortsteil</string>
+    <string name="client_address1_input">Karbener Weg 55</string>
+    <string name="client_address2_input">Adresszusatz</string>
     <string name="client_city">Ort</string>
     <string name="client_zip_code">Postleitzahl</string>
-    <string name="client_zip_code_input">76131</string>
+    <string name="client_zip_code_input">61184</string>
     <string name="client_email">E-Mail</string>
     <string name="client_phone">Telefon</string>
     <string name="client_phone_input">0123 45 67 89 01</string>
@@ -103,7 +103,7 @@
     <string name="client_company_identification2_input">123456789012</string>
     <string name="client_notes">Notizen</string>
     <string name="client_notes_input">Die Kleine Hufeisennase ist eine Fledermausart, die in Laubwäldern lebt.</string>
-    <string name="client_email_input">hufeisennase@ecomail.de</string>
+    <string name="client_email_input">kleinehufnase@email.de</string>
     <string name="client_detail_balance">Kontostand</string>
     <string name="client_detail_paid">Bezahlt</string>
     <string name="client_detail_to_be_paid">Zu zahlen</string>
@@ -121,8 +121,8 @@
     <string name="product_description_input">Cosima</string>
     <string name="product_price">Preis</string>
     <string name="product_price_default">Standard-Preis</string>
-    <string name="product_price_without_tax">Ohne MwSt.</string>
-    <string name="product_price_with_tax">inkl. MwSt.</string>
+    <string name="product_price_without_tax">Netto</string>
+    <string name="product_price_with_tax">Brutto</string>
     <string name="product_price_input">3</string>
     <string name="product_tax">MwSt.</string>
     <string name="product_add_price">+ Einen Preis hinzufügen</string>
@@ -163,7 +163,7 @@
     <string name="document_default_reference">XFGDTSF</string>
     <string name="document_default_issuer_firstName">Max</string>
     <string name="document_default_issuer_name">Mustermann</string>
-    <string name="document_default_issuer_address1">Liebesgasse 6</string>
+    <string name="document_default_issuer_address1">Am Fliederbusch 6</string>
     <string name="document_default_issuer_zipCode">61184</string>
     <string name="document_default_issuer_city">Karben</string>
     <string name="document_default_issuer_phone">0123 / 456789-0</string>
@@ -288,4 +288,12 @@
     <string name="whats_new_rate_button">✰✰✰✰✰</string>
     <string name="whats_new_rate_link">https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
     <string name="whats_new_close">Schließen</string>
+    <string name="start_app">Starte mit der Nutzung der App</string>
+    <string name="home_products">Top-Produkte</string>
+    <string name="appbar_convert_label">In Rechnung stellen</string>
+    <string name="document_default_issuer_company_label2">Steuernummer</string>
+    <string name="client_city_input">Karben</string>
+    <string name="document_default_document_product_name">Runkelrüben, bio</string>
+    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, auch \"The Gate\" genannt !\n\nIch bin Kleine Hufnase, deine neue Freundin ♡ \n\n Du kannst jederzeit auf mich klicken, wenn Du mich siehst, ich gebe \n\n …</string>
+    <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
 </resources>
