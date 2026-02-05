@@ -137,7 +137,7 @@
     <string name="invoice_due_date">Fälligkeitsdatum:</string>
     <string name="credit_note_due_date">Fälligkeitsdatum:</string>
     <string name="invoice_paid">Bezahlt ✔</string>
-    <string name="invoice_pdf_due_date">Zahlungsfrist</string>
+    <string name="invoice_pdf_due_date">Fällig am</string>
     <string name="invoice_pending">ausstehend</string>
     <string name="invoice_late">Überfällig</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -296,4 +296,13 @@
     <string name="document_default_document_product_name">Runkelrüben, bio</string>
     <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, auch \"The Gate\" genannt !\n\nIch bin Kleine Hufnase, deine neue Freundin ♡ \n\n Du kannst jederzeit auf mich klicken, wenn Du mich siehst, ich gebe \n\n …</string>
     <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
+    <string name="client_name_input">Rhino GbR</string>
+    <string name="client_first_name_input">Hippie</string>
+    <string name="document_total_without_tax">Netto-Betrag:</string>
+    <string name="document_total_with_tax">Gesamtbetrag:</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">Neuer Ersteller</string>
+    <string name="document_modal_new_issuer">Neuer Ersteller</string>
+    <string name="document_modal_edit_issuer">Ersteller bearbeiten</string>
+    <string name="account_project_info">Sie möchten für 4 € pro Monat ein Abo abschließen? \n\nErstellen Sie Ihr Nutzerkonto und wir schicken Ihnen alle Informationen per E-Mail (wir können nicht alles hier schreiben 🤐)</string>
+    <string name="account_creation_success">Willkommen bei den Nutzern von G8! Sie bekommen gleich eine E-Mail.</string>
 </resources>
