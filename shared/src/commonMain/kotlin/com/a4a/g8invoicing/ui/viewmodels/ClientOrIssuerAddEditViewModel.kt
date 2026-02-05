@@ -877,7 +877,8 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_clientUiState.value.emails, listOfErrors, isDocument = false)
-                _clientUiState.value = _clientUiState.value.copy(errors = listOfErrors)
+                val trimmedEmails = trimEmails(_clientUiState.value.emails)
+                _clientUiState.value = _clientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
 
             ClientOrIssuerType.ISSUER -> {
@@ -885,7 +886,8 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_issuerUiState.value.emails, listOfErrors, isDocument = false)
-                _issuerUiState.value = _issuerUiState.value.copy(errors = listOfErrors)
+                val trimmedEmails = trimEmails(_issuerUiState.value.emails)
+                _issuerUiState.value = _issuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
 
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
@@ -893,7 +895,8 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_documentClientUiState.value.emails, listOfErrors, isDocument = true)
-                _documentClientUiState.value = _documentClientUiState.value.copy(errors = listOfErrors)
+                val trimmedEmails = trimEmails(_documentClientUiState.value.emails)
+                _documentClientUiState.value = _documentClientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
 
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
@@ -901,7 +904,8 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_documentIssuerUiState.value.emails, listOfErrors, isDocument = true)
-                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(errors = listOfErrors)
+                val trimmedEmails = trimEmails(_documentIssuerUiState.value.emails)
+                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
         }
         return listOfErrors.isEmpty()
@@ -921,6 +925,18 @@ class ClientOrIssuerAddEditViewModel(
                 }
                 listOfErrors.add(Pair(element, error))
             }
+        }
+    }
+
+    private fun trimEmails(emails: List<EmailState>?): List<EmailState>? {
+        return emails?.map { emailState ->
+            val trimmedText = emailState.email.text.trim()
+            emailState.copy(
+                email = TextFieldValue(
+                    text = trimmedText,
+                    selection = TextRange(trimmedText.length)
+                )
+            )
         }
     }
 
