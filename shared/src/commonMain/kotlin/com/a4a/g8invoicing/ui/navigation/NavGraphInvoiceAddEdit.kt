@@ -15,7 +15,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEdit
+import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -67,7 +67,7 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showDocumentForm by remember { mutableStateOf(false) }
 
-        DocumentAddEdit(
+        DocumentAddEditPlatform(
             navController = navController,
             document = document,
             onClickBack = onClickBack,

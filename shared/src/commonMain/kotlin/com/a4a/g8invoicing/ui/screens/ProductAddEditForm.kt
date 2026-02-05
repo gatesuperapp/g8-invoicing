@@ -21,7 +21,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -253,9 +252,7 @@ fun ProductAddEditForm(
 
                         // 🗑️ Suppression du prix - padding réduit
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp, end = 4.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
                             DeletePriceButton {
@@ -369,15 +366,15 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
 @Composable
 fun DeletePriceButton(onClick: () -> Unit) {
     val deletePriceText = stringResource(Res.string.product_delete_price)
-    IconButton(
-        onClick = onClick,
+    Box(
         modifier = Modifier
-            .padding(end = 4.dp, top = 4.dp)
-            .size(14.dp)
+            .offset(x = 8.dp, y = (-8).dp)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
     ) {
         Icon(
-            modifier = Modifier
-                .size(22.dp),
+            modifier = Modifier.size(18.dp),
             imageVector = Icons.Outlined.Delete,
             tint = ColorDarkGray,
             contentDescription = deletePriceText

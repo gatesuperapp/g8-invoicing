@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.a4a.g8invoicing.data.CURRENT_APP_VERSION // From AppConstants.kt
+import com.a4a.g8invoicing.getAppVersion
 import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.ui.screens.InvoiceList
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
@@ -74,7 +74,7 @@ fun NavGraphBuilder.invoiceList(
             showCategoryButton = showCategoryButton,
             showBottomBar = showBottomBar,
             showWhatsNewDialog = showWhatsNewDialog,
-            appVersion = CURRENT_APP_VERSION,
+            appVersion = getAppVersion(),
             onDismissWhatsNew = {
                 showWhatsNewDialog = false
                 // Note: setSeenWhatsNew is platform-specific, handled at platform level

@@ -12,7 +12,7 @@
     <string name="product_duplicate_suffix"> - Copie</string>
 
     <!-- Document footer -->
-    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1027 8073 7000 983764 8377</string>
+    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234</string>
 
     <!-- Document labels -->
     <string name="invoice_number">Facture N°</string>
@@ -63,10 +63,6 @@
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="alert_dialog_cancel">Annuler</string>
-
-    <!-- Validation Strings -->
-    <string name="validation_name_required">Le nom est obligatoire</string>
-    <string name="validation_email_invalid">L'e-mail n'est pas valide</string>
 
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nouveau client·e</string>
@@ -149,8 +145,6 @@
     <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus.</string>
     <string name="client_add_address">+ Ajouter une adresse</string>
     <string name="client_delete_address">Effacer l'adresse</string>
-    <string name="client_add_email">+ Ajouter un e-mail</string>
-    <string name="client_delete_email">Effacer l'e-mail</string>
     <string name="client_selection_title">Sélectionner les clients</string>
     <string name="client_selection_empty">Vous n'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie "Client·es".</string>
     <string name="client_selection_all_used">Tous les clients sont déjà assignés à d'autres prix.</string>
@@ -194,7 +188,6 @@
     <string name="appbar_text_label">Texte</string>
     <string name="appbar_style">Modifier le style</string>
     <string name="appbar_style_label">Style</string>
-    <string name="appbar_mark_as_paid">Basculer à "payée"</string>
     <string name="appbar_more">Autres options</string>
     <string name="appbar_more_label">Plus</string>
     <string name="appbar_delete">Supprimer</string>
@@ -204,14 +197,12 @@
     <string name="appbar_convert_label">Facturer</string>
     <string name="appbar_unselect_all">Annuler sélection</string>
     <string name="appbar_unselect_all_label">Retour</string>
-    <string name="appbar_select_all">Sélectionner tout</string>
     <string name="appbar_edit">Modifier la facture</string>
     <string name="appbar_duplicate">Dupliquer</string>
     <string name="appbar_duplicate_label">Dupliquer</string>
     <string name="appbar_save_payment">Enregistrer paiement</string>
     <string name="appbar_save_payment_label">Paiement</string>
     <string name="appbar_send">Envoyer</string>
-    <string name="appbar_search">Recherche</string>
     <string name="appbar_save">Sauvegarder</string>
     <string name="appbar_export">Exporter</string>
     <string name="appbar_tag_draft">Brouillon</string>
@@ -220,11 +211,7 @@
     <string name="appbar_tag_late">En retard</string>
     <string name="appbar_tag_cancelled">Annulée</string>
     <string name="appbar_tag_reminded">Relancée</string>
-    <string name="appbar_title_add_new">Nouveau</string>
     <string name="appbar_product_add">Ajout produit</string>
-    <string name="appbar_title_info">Infos client·e</string>
-    <string name="appbar_product_detail">Infos produit</string>
-    <string name="appbar_client_edit">Modifier client·e</string>
     <string name="appbar_product_edit">Modifier produit</string>
     <string name="appbar_g8">𝕘𝟠</string>
 
