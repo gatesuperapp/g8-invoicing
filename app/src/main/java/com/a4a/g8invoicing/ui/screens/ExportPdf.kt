@@ -289,8 +289,14 @@ fun Send(context: Context, document: DocumentState, finalFileName: String, onErr
 
             val uri = getFileUri(context, finalFileName)
             uri?.let {
+                // Récupérer toutes les adresses email du client
+                val emailAddresses = document.documentClient?.emails
+                    ?.map { it.email.text }
+                    ?.filter { it.isNotEmpty() }
+                    ?: emptyList()
+
                 composeEmail(
-                    address = document.documentClient?.emails?.firstOrNull()?.email?.text,
+                    addresses = emailAddresses,
                     documentNumber = document.documentNumber.text,
                     emailSubject = Strings.get(R.string.export_email_subject, type, document.documentNumber.text),
                     emailMessage = Strings.get(R.string.export_send_file_content, type ?: ""),
@@ -311,7 +317,7 @@ fun Send(context: Context, document: DocumentState, finalFileName: String, onErr
 }
 
 fun composeEmail(
-    address: String? = null,
+    addresses: List<String> = emptyList(),
     documentNumber: String? = null,
     emailSubject: String,
     emailMessage: String,
@@ -322,7 +328,7 @@ fun composeEmail(
     try {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE)
         intent.selector = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
-        intent.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
+        intent.putExtra(Intent.EXTRA_EMAIL, addresses.toTypedArray())
 
         if (documentNumber != null) {
             intent.putExtra(

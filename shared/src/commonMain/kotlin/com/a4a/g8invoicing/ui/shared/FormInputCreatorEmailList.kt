@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -34,7 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.EmailState
-import com.a4a.g8invoicing.ui.theme.textForDocuments
+import com.a4a.g8invoicing.ui.theme.inputField
 
 data class EmailListInput(
     val emails: List<EmailState>,
@@ -44,7 +42,6 @@ data class EmailListInput(
     val maxEmails: Int = 4
 )
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FormInputCreatorEmailList(
     input: EmailListInput,
@@ -57,12 +54,9 @@ fun FormInputCreatorEmailList(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // Show existing emails as chips
+        // Show existing emails as chips (Column + Row instead of FlowRow for KMP compatibility)
         if (nonEmptyEmails.isNotEmpty()) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 nonEmptyEmails.forEachIndexed { index, emailState ->
                     EmailChip(
                         text = emailState.email.text,
@@ -80,7 +74,7 @@ fun FormInputCreatorEmailList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = if (nonEmptyEmails.isNotEmpty()) 4.dp else 0.dp),
-                textStyle = MaterialTheme.typography.textForDocuments,
+                textStyle = MaterialTheme.typography.inputField,
                 cursorBrush = SolidColor(Color.Black),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -98,8 +92,7 @@ fun FormInputCreatorEmailList(
                     if (newEmailText.isEmpty()) {
                         Text(
                             text = input.placeholder,
-                            style = MaterialTheme.typography.textForDocuments,
-                            color = Color.Gray
+                            style = MaterialTheme.typography.inputField
                         )
                     }
                     innerTextField()

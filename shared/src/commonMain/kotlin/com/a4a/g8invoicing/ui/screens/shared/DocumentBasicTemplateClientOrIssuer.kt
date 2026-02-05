@@ -77,17 +77,17 @@ fun DocumentBasicTemplateClientOrIssuer(
                 text = clientOrIssuer?.phone?.text ?: ""
             )
         }
-        clientOrIssuer?.emails?.forEach { emailState ->
-            if (emailState.email.text.isNotEmpty()) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(bottom = 4.dp)
-                        .wrapContentHeight(),
-                    style = MaterialTheme.typography.textForDocuments,
-                    text = emailState.email.text
-                )
-            }
+        val nonEmptyEmails = clientOrIssuer?.emails?.filter { it.email.text.isNotEmpty() } ?: emptyList()
+        nonEmptyEmails.forEachIndexed { index, emailState ->
+            val isLast = index == nonEmptyEmails.lastIndex
+            Text(
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = if (isLast) 4.dp else 1.dp)
+                    .wrapContentHeight(),
+                style = MaterialTheme.typography.textForDocuments,
+                text = emailState.email.text
+            )
         }
         if (!clientOrIssuer?.companyId1Number?.text.isNullOrEmpty()) {
             Text(

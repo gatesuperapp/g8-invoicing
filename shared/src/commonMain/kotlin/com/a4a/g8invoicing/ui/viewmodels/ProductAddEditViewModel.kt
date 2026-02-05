@@ -326,7 +326,10 @@ class ProductAddEditViewModel(
 
         val allClients = _availableClients.value.mapNotNull {
             val id = it.id ?: return@mapNotNull null
-            ClientRef(id = id, name = it.name.text)
+            ClientRef(
+                id = id,
+                name = (it.firstName?.text?.let { firstName -> "$firstName " } ?: "") + it.name.text
+            )
         }
         _clientSelectionDialogState.value = ClientSelectionDialogState(
             priceId = priceId,
