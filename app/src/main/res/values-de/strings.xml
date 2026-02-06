@@ -236,10 +236,4 @@
     <string name="export_send_file_content" translatable="false">Guten Tag, \n Sie finden ihr %s im Anhang.\nHerzliche Grüße\n\n</string>
     <string name="about_privacy" translatable="false">Datenschutzerklärung von 𝕘𝟠.</string>
     <string name="about_community_cta" translatable="false">das Forum der Community auszutauschen.</string>
-    <string name="client_company_identification3" translatable="false"></string>
-    <string name="client_company_identification1_input" translatable="false"></string>
-    <string name="export_email_subject" translatable="false"></string>
-    <string name="client_address2" translatable="false"></string>
-    <string name="client_company_identification3_input" translatable="false"></string>
-    <string name="client_company_identification1" translatable="false"></string>
 </resources>
