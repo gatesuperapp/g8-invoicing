@@ -1,278 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">g8</string>
-    <string name="home">Accueil</string>
-    <string name="appbar_invoices">Factures</string>
-    <string name="appbar_credit_notes">Avoirs</string>
-    <string name="appbar_new"> Nouveau</string>
-    <string name="appbar_categories"> Catégories</string>
-    <string name="appbar_label_description"> Ajouter un label</string>
-    <string name="appbar_tag">Marquer</string>
-    <string name="appbar_send_reminder">Relancer</string>
-    <string name="appbar_text">Modifier le texte</string>
-    <string name="appbar_list">Ajouter des produits</string>
-    <string name="appbar_list_label">Produits</string>
-    <string name="appbar_components">Modifier les éléments</string>
-    <string name="appbar_text_label">Texte</string>
-    <string name="appbar_new_label">Créer</string>
-    <string name="appbar_menu_label">Menu</string>
-    <string name="appbar_style_label">Style</string>
-    <string name="appbar_more">Autres options</string>
-    <string name="appbar_more_label">Plus</string>
-    <string name="appbar_delete">Supprimer</string>
-    <string name="appbar_create_corrected_invoice">Créer facture rectificative</string>
-    <string name="appbar_create_credit_note">Créer avoir</string>
-    <string name="appbar_convert">Convertir</string>
-    <string name="appbar_convert_label">Facturer</string>
-    <string name="appbar_unselect_all">Annuler sélection</string>
-    <string name="appbar_unselect_all_label">Retour</string>
-    <string name="appbar_edit">Modifier la facture</string>
-    <string name="appbar_duplicate">Dupliquer</string>
-    <string name="appbar_duplicate_label">Dupliquer</string>
-    <string name="appbar_save_payment">Enregistrer paiement</string>
-    <string name="appbar_save_payment_label">Paiement</string>
-    <string name="appbar_export">Exporter</string>
-    <string name="appbar_tag_draft">Brouillon</string>
-    <string name="appbar_tag_paid">Payée</string>
-    <string name="appbar_tag_sent">Envoyée</string>
-    <string name="appbar_tag_late">En retard</string>
-    <string name="appbar_tag_cancelled">Annulée</string>
-    <string name="appbar_tag_reminded">Relancée</string>
-    <string name="appbar_delivery_notes">Bons de livraison</string>
-    <string name="appbar_products">Produits</string>
-    <string name="appbar_client_list">Clients</string>
-    <string name="appbar_g8">𝕘𝟠</string>
-    <string name="drawer_g8">𝕘𝟠</string>
-    <string name="product_duplicate_suffix"> - Copie</string>
-    <string name="client_first_name">Prénom</string>
-    <string name="client_first_name_input">Hipposideros</string>
-    <string name="client_name">Nom <sup>*</sup></string>
-    <string name="client_name_input">RhinoCorp</string>
-    <string name="client_add_address">+ Ajouter une adresse</string>
-    <string name="client_delete_address">Effacer l\'adresse</string>
-    <string name="client_address_title">Intitulé</string>
-    <string name="client_address_title_invoicing_placeholder">Adressé à</string>
-    <string name="client_address_title_delivery_placeholder">Adresse de livraison</string>
-    <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
-    <string name="client_address1">Adresse</string>
-    <string name="client_address1_input">6 rue de l\'église</string>
-    <string name="client_address2"></string>
-    <string name="client_address2_input">Lieu-dit beròi</string>
-    <string name="client_city">Ville</string>
-    <string name="client_city_input">Écholoc</string>
-    <string name="client_zip_code">Code Postal</string>
-    <string name="client_zip_code_input">81000</string>
-    <string name="client_email">E-mail</string>
-    <string name="client_email_input">petitrhino@ecomail.fr</string>
-    <string name="client_phone">Téléphone</string>
-    <string name="client_phone_input">01 99 00 22 33</string>
-    <string name="form_label_edit">Modifier</string>
-    <string name="client_company_identification1">N° SIRET</string>
-    <string name="client_company_identification1_input">123456789 12345</string>
-    <string name="client_company_identification2">N° TVA</string>
-    <string name="client_company_identification2_input">123456789</string>
-    <string name="client_company_identification3">N° RCS</string>
-    <string name="client_company_identification3_input">123456789</string>
-    <string name="client_notes">Notes privées</string>
-    <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus. </string>
-    <string name="currency">€</string>
-    <string name="product_name">Nom <sup>*</sup></string>
-    <string name="product_name_input">Betteraves</string>
-    <string name="product_description">Description</string>
-    <string name="product_unit">Unité</string>
-    <string name="product_unit_input">kg</string>
-    <string name="product_description_input">Rose Lutz</string>
-    <string name="product_price">Prix</string>
-    <string name="product_price_default">Prix par défaut</string>
-    <string name="product_price_without_tax">HT</string>
-    <string name="product_price_with_tax">TTC</string>
-    <string name="product_price_input">3</string>
-    <string name="product_tax">TVA</string>
-    <string name="product_add_price">+ Ajouter un prix</string>
-    <string name="product_delete_price">Supprimer ce prix</string>
-    <string name="product_price_client">Client·e(s)</string>
-    <string name="document_product_quantity">Quantité <sup>*</sup></string>
-    <string name="document_product_quantity_input">1</string>
-    <string name="tax_rate_screen_title">Taux de TVA</string>
-    <string name="invoice_due_date">Échéance :</string>
-    <string name="invoice_paid">Payée &#x2714;</string>
-    <string name="invoice_pdf_due_date">Date limite de paiement</string>
-    <string name="delivery_note_number">Bon de livraison N°</string>
-    <string name="invoice_number">Facture N°</string>
-    <string name="credit_note_number">Avoir N°</string>
-    <string name="document_number_short">N°</string>
-    <string name="document_date">Date</string>
-    <string name="document_date_emitting">Date d\'émission</string>
-    <string name="document_due_date">Échéance</string>
-    <string name="document_issuer">Émetteur</string>
-    <string name="document_client">Client</string>x
-    <string name="document_reference">Référence</string>
-    <string name="document_free_field">Champ libre</string>
-    <string name="document_footer">Pied de page</string>
-    <string name="invoice_default_number">F001</string>
-    <string name="delivery_note_default_number">BL001</string>
-    <string name="credit_note_default_number">FA001</string>
-    <string name="corrected_invoice_cancel_and_replace">Annule et remplace la facture</string>
-    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234
-    </string>
-    <string name="document_default_reference">XFGDTSF</string>
-    <string name="document_total_without_tax">Total HT :</string>
-    <string name="document_total_with_tax">Total TTC :</string>
-    <string name="document_tax">TVA</string>
-    <string name="document_table_description">Désignation</string>
-    <string name="document_table_quantity">Qté</string>
-    <string name="document_table_unit">Unité</string>
-    <string name="document_table_unit_price_without_tax">PU HT</string>
-    <string name="document_table_total_price_without_tax">Total HT</string>
-    <string name="document_table_tax_rate">TVA</string>
-    <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
-    <string name="document_bottom_sheet_list_add_new_client">Nouveau client</string>
-    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel émetteur</string>
-    <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
-    <string name="document_modal_add_product">Ajout produit</string>
-    <string name="document_modal_edit_product">Édition produit</string>
-    <string name="document_modal_new_product">Nouveau produit</string>
-    <string name="document_modal_new_issuer">Nouvel émetteur</string>
-    <string name="document_modal_edit_issuer">Édition émetteur</string>
-    <string name="document_modal_new_client">Nouveau client</string>
-    <string name="document_modal_edit_client">Édition client</string>
-    <string name="document_modal_product_cancel">Annuler</string>
-    <string name="document_modal_product_back">Retour</string>
-    <string name="document_modal_product_save">Valider</string>
-    <string name="account_project_info">
-        Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici &#x1F910;)
-    </string>
-    <string name="account_creation_success">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
-    <string name="account_subscribe">Soutenez le projet et bénéficiez d\'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
-    <string name="about_share_text">L\'application vous est utile ?</string>
-    <string name="about_donate_button">Faire un don</string>
-    <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
-    <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
-    <string name="about_share_button">Partager</string>
-    <string name="account_share_content">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et engagé. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
-    <string name="about_title_about">À propos</string>
-    <string name="about_title_early_access">Programme \"Early bat\"</string>
-    <string name="about_title_community">Communauté</string>
-    <string name="about_community_text">Venez discuter de vos besoins, vos idées et échanger sur le</string>
-    <string name="about_community_cta">forum de la communauté.</string>
-    <string name="about_community_link">https://forum.the-gate.fr/</string>
-    <string name="about_title_assistance">Assistance</string>
-    <string name="about_assistance_text_1">Consultez la</string>
-    <string name="about_assistance_forum_link_text">rubrique \"Aide\" du forum</string>
-    <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
-    <string name="about_assistance_text_2">, parcourez les</string>
-    <string name="about_assistance_tutorials_link_text">tutoriels et conseils</string>
-    <string name="about_assistance_tutorials_link">https://the-gate.fr/conseils-et-tutos</string>
-    <string name="about_assistance_text_3">sur le site, ou écrivez à</string>
-    <string name="about_assistance_email_link_text">contact@the-gate.fr</string>
-    <string name="about_title_backup">Sauvegarde</string>
-    <string name="about_backup_text">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
-    <string name="about_title_legal">Mentions légales</string>
-    <string name="about">
-        𝕘𝟠 est une application pratique et engagée :\n
-        &#8226; Fonctionne hors-ligne \n
-        &#8226; Ni pub ni traceur \n
-        &#8226; Logiciel libre, open-source\n
-        &#8226; Conçue pour les producteur·ices bio\n
-        &#8226; Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.\n
-    </string>
-    <string name="about_terms_of_service_header">En utilisant l\'application, vous acceptez les</string>
-    <string name="about_build_version">Version de l\'application : &#160;</string>
-    <string name="about_terms_of_service">conditions d\'utilisation</string>
-    <string name="about_terms_of_service_header_2">et la</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
-    <string name="about_privacy">politique de confidentialité de 𝕘𝟠.</string>
-    <string name="account_button_create">Créer mon compte</string>
-    <string name="about_contact_email">contact@the-gate.fr</string>
-    <string name="account_donate">En savoir plus</string>
-    <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
-    <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="invoice_advice_legal_help">Clique sur moi …!</string>
-    <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n
-        Tu peux me cliquer dessus quand tu me vois, je donne des
-        \n\n …</string>
-    <string name="invoice_advice_legal_2">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des
-        \n\n … </string>
-    <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j\'ai tout résumé ici : \n</string>
-    <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n
-   </string>
-    <string name="invoice_advice_legal_6">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n
-   </string>
-    <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="invoice_advice_bottom_menu">Hey hey, ici ton batmagotchi. Il faut absolument que je te montre une astuce \n\n …   </string>
-    <string name="invoice_advice_bottom_menu1">Pour faire apparaître des options très utiles, comme supprimer un document \n\n …   </string>
-    <string name="invoice_advice_bottom_menu2">clique sur le cercle ○ devant le numéro de la facture. Tu peux même sélectionner plusieurs documents à la fois.\n\n 𝕨𝕚𝕝𝕕 </string>
-    <string name="delivery_note_advice_convert">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
-    <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
-    <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l\'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
-    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer :
-        \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative
-        \n• si elle a été payée, il faut créer un avoir  &amp; une nouvelle facture.
-    </string>
-    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
-    <string name="document_product_advice_2">La modification s\'applique uniquement à ce document …</string>
-    <string name="document_product_advice_3">Elle n\'impacte pas le produit enregistré dans l\'onglet "Produits".</string>
-    <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
-    <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
-    <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
-    <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠\n\  &#160;&#160;&#160;&#160;&#160;&#160;  ((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
-    <string name="alert_dialog_error_confirm">Ouch</string>
-    <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
-    <string name="alert_dialog_cancel">Annuler</string>
-    <string name="export_waiting_permission">Autorisation requise…</string>
-    <string name="export_ongoing">Export en cours…</string>
-    <string name="export_done">Export terminé</string>
-    <string name="export_error">Échec de l\'export.</string>
-    <string name="export_permission_denied">L\'accès au stockage est nécessaire pour enregistrer le PDF. Vous pouvez autoriser l\'accès dans les paramètres de l\'application.</string>
-    <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
-    <string name="export_clickable_text">• ֊ •</string>
-    <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
-        \n\n• Pense à conserver une copie du PDF dans tes mails envoyés ou dans un espace de stockage, en cas de perte du téléphone. </string>
-    <string name="export_info_popup_validate">okurrr</string>
-    <string name="export_send_file">Envoyer par e-mail</string>
-    <string name="export_send_file_content">Bonjour, \n
-        Veuillez trouver votre %s en pièce jointe.\n
-        Cordialement\n\n</string>
-    <string name="send_reminder_email_content">Bonjour, \n\n
-        Votre facture %s d\'un montant de %s€ est arrivée à échéance le %s. Nous n\'avons à ce jour pas reçu de paiement
-        de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n
-        Cordialement\n</string>
-    <string name="send_reminder_email_subject">Relance : facture N°%s</string>
-    <string name="export_share_file">Partager</string>
-    <string name="export_close">Terminer</string>
-    <string name="export_error_sharing">Le fichier n\'a pas pu être partagé.\n\nVeuillez l\'ouvrir directement depuis le dossier Téléchargements/g8.</string>
-    <string name="export_email_subject">Votre %s N°%s</string>
-    <string name="export_email_subject_invoice">facture</string>
-    <string name="export_email_subject_delivery_note">bon de livraison</string>
-    <string name="export_email_subject_credit_note">avoir</string>
-
+    <string name="app_name" translatable="false">g8</string>
+    <string name="home" translatable="false">Accueil</string>
+    <string name="appbar_invoices" translatable="false">Factures</string>
+    <string name="appbar_credit_notes" translatable="false">Avoirs</string>
+    <string name="appbar_new" translatable="false">Nouveau</string>
+    <string name="appbar_categories" translatable="false">Catégories</string>
+    <string name="appbar_label_description" translatable="false">Ajouter un label</string>
+    <string name="appbar_tag" translatable="false">Marquer</string>
+    <string name="appbar_send_reminder" translatable="false">Relancer</string>
+    <string name="appbar_text" translatable="false">Modifier le texte</string>
+    <string name="appbar_list" translatable="false">Ajouter des produits</string>
+    <string name="appbar_list_label" translatable="false">Produits</string>
+    <string name="appbar_components" translatable="false">Modifier les éléments</string>
+    <string name="appbar_text_label" translatable="false">Texte</string>
+    <string name="appbar_new_label" translatable="false">Créer</string>
+    <string name="appbar_menu_label" translatable="false">Menu</string>
+    <string name="appbar_style_label" translatable="false">Style</string>
+    <string name="appbar_more" translatable="false">Autres options</string>
+    <string name="appbar_more_label" translatable="false">Plus</string>
+    <string name="appbar_delete" translatable="false">Supprimer</string>
+    <string name="appbar_create_corrected_invoice" translatable="false">Créer facture rectificative</string>
+    <string name="appbar_create_credit_note" translatable="false">Créer avoir</string>
+    <string name="appbar_convert" translatable="false">Convertir</string>
+    <string name="appbar_convert_label" translatable="false">Facturer</string>
+    <string name="appbar_unselect_all" translatable="false">Annuler sélection</string>
+    <string name="appbar_unselect_all_label" translatable="false">Retour</string>
+    <string name="appbar_edit" translatable="false">Modifier la facture</string>
+    <string name="appbar_duplicate" translatable="false">Dupliquer</string>
+    <string name="appbar_duplicate_label" translatable="false">Dupliquer</string>
+    <string name="appbar_save_payment" translatable="false">Enregistrer paiement</string>
+    <string name="appbar_save_payment_label" translatable="false">Paiement</string>
+    <string name="appbar_export" translatable="false">Exporter</string>
+    <string name="appbar_tag_draft" translatable="false">Brouillon</string>
+    <string name="appbar_tag_paid" translatable="false">Payée</string>
+    <string name="appbar_tag_sent" translatable="false">Envoyée</string>
+    <string name="appbar_tag_late" translatable="false">En retard</string>
+    <string name="appbar_tag_cancelled" translatable="false">Annulée</string>
+    <string name="appbar_tag_reminded" translatable="false">Relancée</string>
+    <string name="appbar_delivery_notes" translatable="false">Bons de livraison</string>
+    <string name="appbar_products" translatable="false">Produits</string>
+    <string name="appbar_client_list" translatable="false">Clients</string>
+    <string name="appbar_g8" translatable="false">𝕘𝟠</string>
+    <string name="drawer_g8" translatable="false">𝕘𝟠</string>
+    <string name="product_duplicate_suffix" translatable="false">- Copie</string>
+    <string name="client_first_name" translatable="false">Prénom</string>
+    <string name="client_first_name_input" translatable="false">Hipposideros</string>
+    <string name="client_name" translatable="false">Nom <sup>*</sup></string>
+    <string name="client_name_input" translatable="false">RhinoCorp</string>
+    <string name="client_add_address" translatable="false">+ Ajouter une adresse</string>
+    <string name="client_delete_address" translatable="false">Effacer l\'adresse</string>
+    <string name="client_address_title" translatable="false">Intitulé</string>
+    <string name="client_address_title_invoicing_placeholder" translatable="false">Adressé à</string>
+    <string name="client_address_title_delivery_placeholder" translatable="false">Adresse de livraison</string>
+    <string name="client_address_title_head_office_placeholder" translatable="false">Adresse de facturation</string>
+    <string name="client_address1" translatable="false">Adresse</string>
+    <string name="client_address1_input" translatable="false">6 rue de l\'église</string>
+    <string name="client_address2" translatable="false"></string>
+    <string name="client_address2_input" translatable="false">Lieu-dit beròi</string>
+    <string name="client_city" translatable="false">Ville</string>
+    <string name="client_city_input" translatable="false">Écholoc</string>
+    <string name="client_zip_code" translatable="false">Code Postal</string>
+    <string name="client_zip_code_input" translatable="false">81000</string>
+    <string name="client_email" translatable="false">E-mail</string>
+    <string name="client_email_input" translatable="false">petitrhino@ecomail.fr</string>
+    <string name="client_phone" translatable="false">Téléphone</string>
+    <string name="client_phone_input" translatable="false">01 99 00 22 33</string>
+    <string name="form_label_edit" translatable="false">Modifier</string>
+    <string name="client_company_identification1" translatable="false">N° SIRET</string>
+    <string name="client_company_identification1_input" translatable="false">123456789 12345</string>
+    <string name="client_company_identification2" translatable="false">N° TVA</string>
+    <string name="client_company_identification2_input" translatable="false">123456789</string>
+    <string name="client_company_identification3" translatable="false">N° RCS</string>
+    <string name="client_company_identification3_input" translatable="false">123456789</string>
+    <string name="client_notes" translatable="false">Notes privées</string>
+    <string name="client_notes_input" translatable="false">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus.</string>
+    <string name="currency" translatable="false">€</string>
+    <string name="product_name" translatable="false">Nom <sup>*</sup></string>
+    <string name="product_name_input" translatable="false">Betteraves</string>
+    <string name="product_description" translatable="false">Description</string>
+    <string name="product_unit" translatable="false">Unité</string>
+    <string name="product_unit_input" translatable="false">kg</string>
+    <string name="product_description_input" translatable="false">Rose Lutz</string>
+    <string name="product_price" translatable="false">Prix</string>
+    <string name="product_price_default" translatable="false">Prix par défaut</string>
+    <string name="product_price_without_tax" translatable="false">HT</string>
+    <string name="product_price_with_tax" translatable="false">TTC</string>
+    <string name="product_price_input" translatable="false">3</string>
+    <string name="product_tax" translatable="false">TVA</string>
+    <string name="product_add_price" translatable="false">+ Ajouter un prix</string>
+    <string name="product_delete_price" translatable="false">Supprimer ce prix</string>
+    <string name="product_price_client" translatable="false">Client·e(s)</string>
+    <string name="document_product_quantity" translatable="false">Quantité <sup>*</sup></string>
+    <string name="document_product_quantity_input" translatable="false">1</string>
+    <string name="tax_rate_screen_title" translatable="false">Taux de TVA</string>
+    <string name="invoice_due_date" translatable="false">Échéance :</string>
+    <string name="invoice_paid" translatable="false">Payée ✔</string>
+    <string name="invoice_pdf_due_date" translatable="false">Date limite de paiement</string>
+    <string name="delivery_note_number" translatable="false">Bon de livraison N°</string>
+    <string name="invoice_number" translatable="false">Facture N°</string>
+    <string name="credit_note_number" translatable="false">Avoir N°</string>
+    <string name="document_number_short" translatable="false">N°</string>
+    <string name="document_date" translatable="false">Date</string>
+    <string name="document_date_emitting" translatable="false">Date d\'émission</string>
+    <string name="document_due_date" translatable="false">Échéance</string>
+    <string name="document_issuer" translatable="false">Émetteur</string>
+    <string name="document_client" translatable="false">Client</string>x
+    <string name="document_reference" translatable="false">Référence</string>
+    <string name="document_free_field" translatable="false">Champ libre</string>
+    <string name="document_footer" translatable="false">Pied de page</string>
+    <string name="invoice_default_number" translatable="false">F001</string>
+    <string name="delivery_note_default_number" translatable="false">BL001</string>
+    <string name="credit_note_default_number" translatable="false">FA001</string>
+    <string name="corrected_invoice_cancel_and_replace" translatable="false">Annule et remplace la facture</string>
+    <string name="document_default_footer" translatable="false">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234</string>
+    <string name="document_default_reference" translatable="false">XFGDTSF</string>
+    <string name="document_total_without_tax" translatable="false">Total HT :</string>
+    <string name="document_total_with_tax" translatable="false">Total TTC :</string>
+    <string name="document_tax" translatable="false">TVA</string>
+    <string name="document_table_description" translatable="false">Désignation</string>
+    <string name="document_table_quantity" translatable="false">Qté</string>
+    <string name="document_table_unit" translatable="false">Unité</string>
+    <string name="document_table_unit_price_without_tax" translatable="false">PU HT</string>
+    <string name="document_table_total_price_without_tax" translatable="false">Total HT</string>
+    <string name="document_table_tax_rate" translatable="false">TVA</string>
+    <string name="document_bottom_sheet_list_add_new_product" translatable="false">Nouveau produit</string>
+    <string name="document_bottom_sheet_list_add_new_client" translatable="false">Nouveau client</string>
+    <string name="document_bottom_sheet_list_add_new_issuer" translatable="false">Nouvel émetteur</string>
+    <string name="document_bottom_sheet_document_product_add" translatable="false">Choisir dans ma liste</string>
+    <string name="document_modal_add_product" translatable="false">Ajout produit</string>
+    <string name="document_modal_edit_product" translatable="false">Édition produit</string>
+    <string name="document_modal_new_product" translatable="false">Nouveau produit</string>
+    <string name="document_modal_new_issuer" translatable="false">Nouvel émetteur</string>
+    <string name="document_modal_edit_issuer" translatable="false">Édition émetteur</string>
+    <string name="document_modal_new_client" translatable="false">Nouveau client</string>
+    <string name="document_modal_edit_client" translatable="false">Édition client</string>
+    <string name="document_modal_product_cancel" translatable="false">Annuler</string>
+    <string name="document_modal_product_back" translatable="false">Retour</string>
+    <string name="document_modal_product_save" translatable="false">Valider</string>
+    <string name="account_project_info" translatable="false">Vous souhaitez vous abonner pour 4€ par mois ? \n\nCréez votre compte et on vous envoie toutes les infos par email (on ne peut pas le dire ici 🤐)</string>
+    <string name="account_creation_success" translatable="false">Bienvenue parmi les membres du G8 ! Vous recevrez un email rapidement.</string>
+    <string name="account_subscribe" translatable="false">Soutenez le projet et bénéficiez d\'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker Petit Rhino.. et plus encore !</string>
+    <string name="about_share_text" translatable="false">L\'application vous est utile ?</string>
+    <string name="about_donate_button" translatable="false">Faire un don</string>
+    <string name="about_donate_link" translatable="false">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
+    <string name="about_share_text_2" translatable="false">Partagez-la à vos ami·es !</string>
+    <string name="about_share_button" translatable="false">Partager</string>
+    <string name="account_share_content" translatable="false">J\'utilise l\'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c\'est un logiciel libre et engagé. Tu veux tester ? C\'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="about_title_about" translatable="false">À propos</string>
+    <string name="about_title_early_access" translatable="false">Programme \"Early bat\"</string>
+    <string name="about_title_community" translatable="false">Communauté</string>
+    <string name="about_community_text" translatable="false">Venez discuter de vos besoins, vos idées et échanger sur le</string>
+    <string name="about_community_cta" translatable="false">forum de la communauté.</string>
+    <string name="about_community_link" translatable="false">https://forum.the-gate.fr/</string>
+    <string name="about_title_assistance" translatable="false">Assistance</string>
+    <string name="about_assistance_text_1" translatable="false">Consultez la</string>
+    <string name="about_assistance_forum_link_text" translatable="false">rubrique \"Aide\" du forum</string>
+    <string name="about_assistance_forum_link" translatable="false">https://forum.the-gate.fr/c/aide/7</string>
+    <string name="about_assistance_text_2" translatable="false">, parcourez les</string>
+    <string name="about_assistance_tutorials_link_text" translatable="false">tutoriels et conseils</string>
+    <string name="about_assistance_tutorials_link" translatable="false">https://the-gate.fr/conseils-et-tutos</string>
+    <string name="about_assistance_text_3" translatable="false">sur le site, ou écrivez à</string>
+    <string name="about_assistance_email_link_text" translatable="false">contact@the-gate.fr</string>
+    <string name="about_title_backup" translatable="false">Sauvegarde</string>
+    <string name="about_backup_text" translatable="false">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
+    <string name="about_title_legal" translatable="false">Mentions légales</string>
+    <string name="about" translatable="false">𝕘𝟠 est une application pratique et engagée :\n • Fonctionne hors-ligne \n • Ni pub ni traceur \n • Logiciel libre, open-source\n • Conçue pour les producteur·ices bio\n • Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.</string>
+    <string name="about_terms_of_service_header" translatable="false">En utilisant l\'application, vous acceptez les</string>
+    <string name="about_build_version" translatable="false">Version de l\'application :</string>
+    <string name="about_terms_of_service" translatable="false">conditions d\'utilisation</string>
+    <string name="about_terms_of_service_header_2" translatable="false">et la</string>
+    <string name="about_terms_of_service_url_1" translatable="false">https://www.the-gate.fr/conditions-generales</string>
+    <string name="about_terms_of_service_url_2" translatable="false">https://www.the-gate.fr/politique-confidentialite</string>
+    <string name="about_privacy" translatable="false">politique de confidentialité de 𝕘𝟠.</string>
+    <string name="account_button_create" translatable="false">Créer mon compte</string>
+    <string name="about_contact_email" translatable="false">contact@the-gate.fr</string>
+    <string name="account_donate" translatable="false">En savoir plus</string>
+    <string name="account_donate_link" translatable="false">https://www.the-gate.fr/soutenir-g8</string>
+    <string name="account_bat_love" translatable="false">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="invoice_advice_legal_help" translatable="false">Clique sur moi …!</string>
+    <string name="invoice_advice_legal_1" translatable="false">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n Tu peux me cliquer dessus quand tu me vois, je donne des \n\n …</string>
+    <string name="invoice_advice_legal_2" translatable="false">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des \n\n …</string>
+    <string name="invoice_advice_legal_3" translatable="false">mentions obligatoires pour une facture conforme. Pour te facilier la vie j\'ai tout résumé ici : \n</string>
+    <string name="invoice_advice_legal_4" translatable="false">the-gate.fr</string>
+    <string name="invoice_advice_legal_5" translatable="false">Sur un autre sujet…</string>
+    <string name="invoice_advice_legal_6" translatable="false">les documents que tu crées, ainsi que toutes tes modifications, s\'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
+    <string name="invoice_advice_legal_url" translatable="false">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
+    <string name="invoice_advice_bottom_menu" translatable="false">Hey hey, ici ton batmagotchi. Il faut absolument que je te montre une astuce \n\n …</string>
+    <string name="invoice_advice_bottom_menu1" translatable="false">Pour faire apparaître des options très utiles, comme supprimer un document \n\n …</string>
+    <string name="invoice_advice_bottom_menu2" translatable="false">clique sur le cercle ○ devant le numéro de la facture. Tu peux même sélectionner plusieurs documents à la fois.\n\n 𝕨𝕚𝕝𝕕</string>
+    <string name="delivery_note_advice_convert" translatable="false">J\'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j\'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …</string>
+    <string name="delivery_note_advice_convert1" translatable="false">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …</string>
+    <string name="delivery_note_advice_convert2" translatable="false">et cliquer sur «Facturer». Elle apparaîtra dans l\'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
+    <string name="alert_dialog_delete_invoice_1" translatable="false">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n\'est pas légal de la supprimer : \n• si elle n\'a pas encore été payée, il faut créer une facture rectificative \n• si elle a été payée, il faut créer un avoir &amp; une nouvelle facture.</string>
+    <string name="document_product_advice" translatable="false">Pour modifier un produit, clique sur le rectangle grisé …</string>
+    <string name="document_product_advice_2" translatable="false">La modification s\'applique uniquement à ce document …</string>
+    <string name="document_product_advice_3" translatable="false">Elle n\'impacte pas le produit enregistré dans l\'onglet Produits.</string>
+    <string name="alert_dialog_delete_invoice_2" translatable="false">En savoir plus\n</string>
+    <string name="alert_dialog_delete_invoice_3" translatable="false">\nDans tous les cas, la suppression est irréversible.</string>
+    <string name="alert_dialog_delete_url" translatable="false">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
+    <string name="alert_dialog_delete_general" translatable="false">Êtes vous sûr·e ? Cette action est irréversible.</string>
+    <string name="alert_dialog_error" translatable="false">𝕠𝕙 𝕟𝕠\n ((˃ᯅ˂)ノ) \n\nUne erreur s\'est produite : \n</string>
+    <string name="alert_dialog_error_confirm" translatable="false">Ouch</string>
+    <string name="alert_dialog_delete_confirm" translatable="false">Oui, supprimer</string>
+    <string name="alert_dialog_cancel" translatable="false">Annuler</string>
+    <string name="export_waiting_permission" translatable="false">Autorisation requise…</string>
+    <string name="export_ongoing" translatable="false">Export en cours…</string>
+    <string name="export_done" translatable="false">Export terminé</string>
+    <string name="export_error" translatable="false">Échec de l\'export.</string>
+    <string name="export_permission_denied" translatable="false">L\'accès au stockage est nécessaire pour enregistrer le PDF. Vous pouvez autoriser l\'accès dans les paramètres de l\'application.</string>
+    <string name="export_done_file_location" translatable="false">Enregistré dans l\'appareil (Téléchargements/g8)</string>
+    <string name="export_clickable_text" translatable="false">• ֊ •</string>
+    <string name="export_info_popup" translatable="false">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider). \n\n• Pense à conserver une copie du PDF dans tes mails envoyés ou dans un espace de stockage, en cas de perte du téléphone.</string>
+    <string name="export_info_popup_validate" translatable="false">okurrr</string>
+    <string name="export_send_file" translatable="false">Envoyer par e-mail</string>
+    <string name="export_send_file_content" translatable="false">Bonjour, \n Veuillez trouver votre %s en pièce jointe.\n Cordialement\n\n</string>
+    <string name="send_reminder_email_content" translatable="false">Bonjour, \n\n Votre facture %s d\'un montant de %s€ est arrivée à échéance le %s. Nous n\'avons à ce jour pas reçu de paiement de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n Cordialement\n</string>
+    <string name="send_reminder_email_subject" translatable="false">Relance : facture N°%s</string>
+    <string name="export_share_file" translatable="false">Partager</string>
+    <string name="export_close" translatable="false">Terminer</string>
+    <string name="export_error_sharing" translatable="false">Le fichier n\'a pas pu être partagé.\n\nVeuillez l\'ouvrir directement depuis le dossier Téléchargements/g8.</string>
+    <string name="export_email_subject" translatable="false">Votre %s N°%s</string>
+    <string name="export_email_subject_invoice" translatable="false">facture</string>
+    <string name="export_email_subject_delivery_note" translatable="false">bon de livraison</string>
+    <string name="export_email_subject_credit_note" translatable="false">avoir</string>
     <!-- DatabaseExportDialog -->
-    <string name="database_export_dialog_title">^._.^</string>
-    <string name="database_export_dialog_intro">Hey ! Je te conseille de télécharger ta base de données 💎\n\n</string>
-    <string name="database_export_dialog_explanation">C\'est utile en cas de perte du téléphone ou s\'il y a un problème lors d\'une mise à jour.\n\n</string>
-    <string name="database_export_dialog_where">Retrouve l\'option dans Menu \> 𝕘𝟠.</string>
-    <string name="database_export_dialog_error">Erreur lors de l\'enregistrement de la base : %1$s</string>
-    <string name="database_export_dialog_confirm">Télécharger mes données</string>
-    <string name="database_export_dialog_dismiss">Je le ferai plus tard</string>
-
+    <string name="database_export_dialog_title" translatable="false">^._.^</string>
+    <string name="database_export_dialog_intro" translatable="false">Hey ! Je te conseille de télécharger ta base de données 💎\n\n</string>
+    <string name="database_export_dialog_explanation" translatable="false">C\'est utile en cas de perte du téléphone ou s\'il y a un problème lors d\'une mise à jour.\n\n</string>
+    <string name="database_export_dialog_where" translatable="false">"Retrouve l\'option dans Menu  𝕘𝟠."</string>
+    <string name="database_export_dialog_error" translatable="false">Erreur lors de l\'enregistrement de la base : %1$s</string>
+    <string name="database_export_dialog_confirm" translatable="false">Télécharger mes données</string>
+    <string name="database_export_dialog_dismiss" translatable="false">Je le ferai plus tard</string>
     <!-- DatabaseEmailDialog -->
-    <string name="database_email_dialog_title">✅Export réussi</string>
-    <string name="database_email_dialog_text">La base de données a été enregistrée dans le dossier Téléchargements. Veux-tu te l\'envoyer par mail ?</string>
-    <string name="yes">Oui</string>
-    <string name="no">Non</string>
-
+    <string name="database_email_dialog_title" translatable="false">✅Export réussi</string>
+    <string name="database_email_dialog_text" translatable="false">La base de données a été enregistrée dans le dossier Téléchargements. Veux-tu te l\'envoyer par mail ?</string>
+    <string name="yes" translatable="false">Oui</string>
+    <string name="no" translatable="false">Non</string>
     <!-- Email export -->
-    <string name="database_email_subject">Export de mes données g8</string>
-    <string name="database_email_body">Ma base de données SQLite de l’application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
-    <string name="database_email_chooser">Envoyer la base de données par mail</string>
-
+    <string name="database_email_subject" translatable="false">Export de mes données g8</string>
+    <string name="database_email_body" translatable="false">Ma base de données SQLite de l’application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
+    <string name="database_email_chooser" translatable="false">Envoyer la base de données par mail</string>
     <!-- About screen -->
-    <string name="about_download_database">💎 Télécharger ma base de données 💎</string>
-    <string name="about_download_database_error">Erreur lors de l\'enregistrement de la base : %1$s.\n\nPour contacter l\'assistance : contact@the-gate.fr</string>
-    <string name="ok">OK</string>
-
+    <string name="about_download_database" translatable="false">💎 Télécharger ma base de données 💎</string>
+    <string name="about_download_database_error" translatable="false">Erreur lors de l\'enregistrement de la base : %1$s.\n\nPour contacter l\'assistance : contact@the-gate.fr</string>
+    <string name="ok" translatable="false">OK</string>
     <!-- WhatsNew Dialog -->
-    <string name="whats_new_close">Fermer</string>
+    <string name="whats_new_close" translatable="false">Fermer</string>
 </resources>
