@@ -53,7 +53,7 @@
     <string name="client_address_title_head_office_placeholder">Rechnungsanschrift</string>
     <string name="client_address1">Adresse</string>
     <string name="client_address1_input">Karbener Weg 55</string>
-    <string name="client_address2_input">Adresszusatz</string>
+    <string name="client_address2_input">Hinterhaus</string>
     <string name="client_city">Ort</string>
     <string name="client_zip_code">Postleitzahl</string>
     <string name="client_zip_code_input">61184</string>
@@ -89,7 +89,7 @@
     <string name="invoice_paid">Bezahlt ✔</string>
     <string name="invoice_pdf_due_date">Fällig am</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
-    <string name="invoice_number">Rechnungs-Nr.</string>
+    <string name="invoice_number">Rechnung Nr.</string>
     <string name="credit_note_number">Gutschrift Nr.</string>
     <string name="document_number_short">Nr.</string>
     <string name="document_date">Datum</string>
@@ -185,7 +185,7 @@
     <string name="whats_new_close">Schließen</string>
     <string name="appbar_convert_label">In Rechnung stellen</string>
     <string name="client_city_input">Karben</string>
-    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, auch \"The Gate\" genannt !\n\nIch bin Kleine Hufnase, deine neue Freundin ♡ \n\n Du kannst jederzeit auf mich klicken, wenn Du mich siehst, ich gebe \n\n …</string>
+    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, genannt: \"The Gate\"!\n\nIch bin Kleine Hufnase, deine neue Freundin ♡ \n\n Du kannst jederzeit auf mich klicken, wenn du mich siehst, ich gebe \n\n …</string>
     <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
     <string name="client_name_input">Rhino GbR</string>
     <string name="client_first_name_input">Hippie</string>
@@ -196,4 +196,44 @@
     <string name="document_modal_edit_issuer">Ersteller bearbeiten</string>
     <string name="account_project_info">Sie möchten für 4 € pro Monat ein Abo abschließen? \n\nErstellen Sie Ihr Nutzerkonto und wir schicken Ihnen alle Informationen per E-Mail (wir können nicht alles hier schreiben 🤐)</string>
     <string name="account_creation_success">Willkommen bei den Nutzern von G8! Sie bekommen gleich eine E-Mail.</string>
+    <string name="invoice_advice_legal_5" translatable="false">Zu einem anderen Thema…</string>
+    <string name="about_terms_of_service_header_2" translatable="false">und die</string>
+    <string name="export_error_sharing" translatable="false">Die Datei konnte nicht geteilt werden.\n\nBitte öffne sie direkt im Ordner Downloads/g8.</string>
+    <string name="about_title_backup" translatable="false">Datensicherung</string>
+    <string name="document_modal_product_save" translatable="false">Bestätigen</string>
+    <string name="invoice_advice_legal_3" translatable="false">die Pflichtangaben für eine konforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
+    <string name="about_assistance_text_3" translatable="false">auf der Site an, oder schreibt an</string>
+    <string name="about_title_community" translatable="false">Community</string>
+    <string name="export_info_popup_validate" translatable="false">OK</string>
+    <string name="alert_dialog_delete_general" translatable="false">Ganz sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="invoice_advice_bottom_menu2" translatable="false">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen.\n\n 𝕨𝕚𝕝𝕕</string>
+    <string name="about_assistance_tutorials_link_text" translatable="false">Tutorials und Ratschläge</string>
+    <string name="invoice_advice_bottom_menu1" translatable="false">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen,\n\n …</string>
+    <string name="about_community_text" translatable="false">Kommt vorbei, um eure Wünsche und Ideen zu besprechen und sich über</string>
+    <string name="about_terms_of_service_url_2" translatable="false">https://www.the-gate.fr/politique-confidentialite</string>
+    <string name="about_terms_of_service_header" translatable="false">Durch Nutzung der App akzeptieren Sie die</string>
+    <string name="about_build_version" translatable="false">Version der App:</string>
+    <string name="about_assistance_text_1" translatable="false">Besucht die</string>
+    <string name="invoice_advice_legal_6" translatable="false">Die Dokumente, die du erstellst, genauso wie alle deine Änderungen werden automatisch im Hintergrund gespeichert.\n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚\'𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
+    <string name="about_terms_of_service_url_1" translatable="false">https://www.the-gate.fr/conditions-generales</string>
+    <string name="invoice_advice_legal_2" translatable="false">hilfreiche Informationen. Du bist gerade in der Kategorie \"Rechnungen\".\n\nBevor du eine Rechnung erstellst empfehle ich dir, dich über\n\n…</string>
+    <string name="database_email_dialog_title" translatable="false">✅Export erfolgreich</string>
+    <string name="about_assistance_forum_link_text" translatable="false">Rubrik \"Hilfe\" im Forum</string>
+    <string name="database_export_dialog_intro" translatable="false">Hey! Ich empfehle dir, deine Datenbank herunterzuladen 💎\n\n</string>
+    <string name="about_assistance_text_2" translatable="false">, schaut euch die</string>
+    <string name="about_download_database" translatable="false">💎 Meine Datenbank herunterladen 💎</string>
+    <string name="delivery_note_advice_convert1" translatable="false">Wenn du aus einem oder mehreren Lieferscheinen eine Rechnung erstellen willst, kannst du sie in der Liste über langes Drücken (oder Klicken auf den ○) auswählen\n\n …</string>
+    <string name="about" translatable="false">𝕘𝟠 ist eine praktische und engagierte App:\n • Funktioniert offline\n • Keine Werbung, kein Tracking\n • Freie Software, open-source\n • Entworfen für Bio-Landwirte und -Landwirtinnen\n • Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>
+    <string name="about_backup_text" translatable="false">Denkt daran eure Datenbank regelmäßig herunterzuladen, um sie wiederherzustellen, sollte das Telefon mal verloren gegangen sein.</string>
+    <string name="document_date_emitting" translatable="false">Erstellungsdatum</string>
+    <string name="database_export_dialog_confirm" translatable="false">Meine Daten herunterladen</string>
+    <string name="account_share_content" translatable="false">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="delivery_note_advice_convert" translatable="false">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte\n\n …</string>
+    <string name="delivery_note_advice_convert2" translatable="false">und dann auf \"In Rechnung stellen\" klicken. Sie erscheint dann im Reiter \"Rechnungen\" oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
+    <string name="credit_note_default_number" translatable="false">Rg. 001</string>
+    <string name="invoice_advice_bottom_menu" translatable="false">Halli-Hallo, ich bin dein batmagotchi. Ich muss dir unbedingt einen Tipp geben\n\n …</string>
+    <string name="invoice_advice_legal_4" translatable="false">the-gate.fr</string>
+    <string name="export_send_file_content" translatable="false">Guten Tag, \n Sie finden ihr %s im Anhang.\nHerzliche Grüße\n\n</string>
+    <string name="about_privacy" translatable="false">Datenschutzerklärung von 𝕘𝟠.</string>
+    <string name="about_community_cta" translatable="false">das Forum der Community auszutauschen.</string>
 </resources>
