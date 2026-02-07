@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Default document numbers -->
+    <string name="invoice_default_number">INV001</string>
+    <string name="delivery_note_default_number">DN001</string>
+    <string name="credit_note_default_number">CN001</string>
+
+    <!-- Currency -->
+    <string name="currency">€</string>
+
+    <!-- Product -->
+    <string name="product_duplicate_suffix"> - Copy</string>
+
+    <!-- Document footer -->
+    <string name="document_default_footer">Discount for early payment: none\nLate payment penalties: none\n\n\nIBAN: FR76 1234 1234 1234 123456 1234</string>
+
+    <!-- Document labels -->
+    <string name="invoice_number">Invoice No.</string>
+    <string name="delivery_note_number">Delivery note No.</string>
+    <string name="credit_note_number">Credit note No.</string>
+    <string name="document_date">Date</string>
+    <string name="document_date_emitting">Issue date</string>
+    <string name="document_reference">Reference</string>
+    <string name="invoice_pdf_due_date">Payment due date</string>
+    <string name="invoice_paid">Paid ✔</string>
+
+    <!-- Document table -->
+    <string name="document_table_description">Description</string>
+    <string name="document_table_quantity">Qty</string>
+    <string name="document_table_unit">Unit</string>
+    <string name="document_table_unit_price_without_tax">Unit price excl. tax</string>
+    <string name="document_table_total_price_without_tax">Total excl. tax</string>
+    <string name="document_table_tax_rate">Tax</string>
+
+    <!-- Document table aliases for PDF -->
+    <string name="table_description">Description</string>
+    <string name="table_quantity">Qty</string>
+    <string name="table_unit">Unit</string>
+    <string name="table_unit_price">Unit price excl. tax</string>
+    <string name="table_total_price">Total excl. tax</string>
+    <string name="table_tax_rate">Tax</string>
+
+    <!-- Document totals -->
+    <string name="document_total_without_tax">Total excl. tax:</string>
+    <string name="document_total_with_tax">Total incl. tax:</string>
+    <string name="document_tax">Tax</string>
+
+    <!-- Document totals aliases for PDF -->
+    <string name="total_without_tax">Total excl. tax:</string>
+    <string name="total_with_tax">Total incl. tax:</string>
+    <string name="vat">Tax</string>
+
+    <!-- UI Labels -->
+    <string name="form_label_edit">Edit</string>
+    <string name="product_price_without_tax">Excl. tax</string>
+    <string name="product_price_with_tax">Incl. tax</string>
+
+    <!-- Alert Dialog Strings -->
+    <string name="alert_dialog_delete_invoice_1">Are you sure? \n\nIf you have already sent the invoice, it is not legal to delete it:</string>
+    <string name="alert_dialog_delete_invoice_2">Learn more\n</string>
+    <string name="alert_dialog_delete_invoice_3">\nIn any case, deletion is irreversible.</string>
+    <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
+    <string name="alert_dialog_delete_general">Are you sure? This action is irreversible.</string>
+    <string name="alert_dialog_delete_confirm">Yes, delete</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+
+    <!-- Bottom Sheet Strings -->
+    <string name="document_bottom_sheet_list_add_new_client">New client</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">New issuer</string>
+    <string name="document_bottom_sheet_document_product_add">Choose from my list</string>
+    <string name="document_modal_product_cancel">Cancel</string>
+    <string name="document_modal_product_save">Confirm</string>
+    <string name="document_modal_product_back">Back</string>
+
+    <!-- Document Form Strings -->
+    <string name="document_number_short">No.</string>
+    <string name="document_due_date">Due date</string>
+    <string name="invoice_due_date">Due date:</string>
+    <string name="document_issuer">Issuer</string>
+    <string name="document_client">Client</string>
+    <string name="document_free_field">Free field</string>
+    <string name="document_footer">Footer</string>
+    <string name="document_default_reference">XFGDTSF</string>
+
+    <!-- Product Bottom Sheet Strings -->
+    <string name="document_bottom_sheet_list_add_new_product">New product</string>
+    <string name="document_product_advice">To edit a product, click on the grey box…</string>
+    <string name="document_product_advice_2">The change only applies to this document…</string>
+    <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
+
+    <!-- Product Form Strings -->
+    <string name="product_name">Name</string>
+    <string name="product_name_input">Beetroots</string>
+    <string name="product_description">Description</string>
+    <string name="product_description_input">Rose Lutz</string>
+    <string name="product_unit">Unit</string>
+    <string name="product_unit_input">kg</string>
+    <string name="product_tax">Tax</string>
+    <string name="tax_rate_screen_title">Tax rates</string>
+    <string name="tax_rate_edit_title">Edit tax</string>
+    <string name="tax_rate_edit_rates">Edit rates</string>
+    <string name="tax_rate_add_rate">+ Add a rate</string>
+    <string name="product_price">Price</string>
+    <string name="product_price_input">3</string>
+    <string name="product_price_default">Default price</string>
+    <string name="product_price_client">Client(s)</string>
+    <string name="product_add_price">+ Add a price</string>
+    <string name="product_delete_price">Delete this price</string>
+    <string name="document_product_quantity">Quantity</string>
+    <string name="document_product_quantity_input">1</string>
+
+    <!-- Client/Issuer Form Strings -->
+    <string name="client_section_identity">IDENTITY</string>
+    <string name="client_section_address">ADDRESS</string>
+    <string name="client_section_legal">LEGAL INFORMATION</string>
+    <string name="client_section_complement">Additional info</string>
+    <string name="client_add_title">New client</string>
+    <string name="client_edit_title">Edit client</string>
+    <string name="client_form_cancel">Cancel</string>
+    <string name="client_form_validate">Confirm</string>
+    <string name="client_name">Name</string>
+    <string name="client_name_input">HorseshoeCorp</string>
+    <string name="client_first_name">First name</string>
+    <string name="client_first_name_input">Hipposideros</string>
+    <string name="client_email">Email</string>
+    <string name="client_email_input">littlehorse@ecomail.com</string>
+    <string name="client_phone">Phone</string>
+    <string name="client_phone_input">01 99 00 22 33</string>
+    <string name="client_address_title">Title</string>
+    <string name="client_address_title_invoicing_placeholder">Bill to</string>
+    <string name="client_address_title_delivery_placeholder">Delivery address</string>
+    <string name="client_address_title_head_office_placeholder">Billing address</string>
+    <string name="client_address1">Address</string>
+    <string name="client_address1_input">6 Church Street</string>
+    <string name="client_address2"></string>
+    <string name="client_address2_input">Apt 2B</string>
+    <string name="client_city">City</string>
+    <string name="client_city_input">Echoloc</string>
+    <string name="client_zip_code">Postal code</string>
+    <string name="client_zip_code_input">81000</string>
+    <string name="client_company_identification1_input">123456789 12345</string>
+    <string name="client_company_identification2_input">123456789</string>
+    <string name="client_company_identification3_input">123456789</string>
+    <string name="client_notes">Private notes</string>
+    <string name="client_notes_input">The lesser horseshoe bat is a species of bat found in deciduous forests.</string>
+    <string name="client_add_address">+ Add an address</string>
+    <string name="client_delete_address">Delete address</string>
+    <string name="client_selection_title">Select clients</string>
+    <string name="client_selection_empty">You haven't created any clients yet. You can do so from the "Clients" category.</string>
+    <string name="client_selection_all_used">All clients are already assigned to other prices.</string>
+    <string name="client_selection_validate">Confirm</string>
+
+    <!-- Document Modal Strings -->
+    <string name="document_modal_add_product">Add product</string>
+    <string name="document_modal_edit_product">Edit product</string>
+    <string name="document_modal_new_product">New product</string>
+    <string name="document_modal_new_issuer">New issuer</string>
+    <string name="document_modal_edit_issuer">Edit issuer</string>
+    <string name="document_modal_new_client">New client</string>
+    <string name="document_modal_edit_client">Edit client</string>
+
+    <!-- WhatsNew Dialog -->
+    <string name="whats_new_close">Close</string>
+
+    <!-- Toast messages -->
+    <string name="feature_coming_soon">Coming soon :)</string>
+
+    <!-- Corrected Invoice -->
+    <string name="corrected_invoice_cancel_and_replace">Cancels and replaces invoice</string>
+
+    <!-- AppBar actions -->
+    <string name="appbar_invoices">Invoices</string>
+    <string name="appbar_credit_notes">Credit notes</string>
+    <string name="appbar_delivery_notes">Delivery notes</string>
+    <string name="appbar_products">Products</string>
+    <string name="appbar_client_list">Clients</string>
+    <string name="appbar_new">New</string>
+    <string name="appbar_new_label">Create</string>
+    <string name="appbar_categories">Categories</string>
+    <string name="appbar_menu_label">Menu</string>
+    <string name="appbar_label_description">Add a label</string>
+    <string name="appbar_tag">Tag</string>
+    <string name="appbar_send_reminder">Send reminder</string>
+    <string name="appbar_text">Edit text</string>
+    <string name="appbar_list">Add products</string>
+    <string name="appbar_list_label">Products</string>
+    <string name="appbar_components">Edit elements</string>
+    <string name="appbar_text_label">Text</string>
+    <string name="appbar_style">Edit style</string>
+    <string name="appbar_style_label">Style</string>
+    <string name="appbar_more">More options</string>
+    <string name="appbar_more_label">More</string>
+    <string name="appbar_delete">Delete</string>
+    <string name="appbar_create_corrected_invoice">Create corrective invoice</string>
+    <string name="appbar_create_credit_note">Create credit note</string>
+    <string name="appbar_convert">Convert</string>
+    <string name="appbar_convert_label">Invoice</string>
+    <string name="appbar_unselect_all">Deselect all</string>
+    <string name="appbar_unselect_all_label">Back</string>
+    <string name="appbar_edit">Edit invoice</string>
+    <string name="appbar_duplicate">Duplicate</string>
+    <string name="appbar_duplicate_label">Duplicate</string>
+    <string name="appbar_save_payment">Record payment</string>
+    <string name="appbar_save_payment_label">Payment</string>
+    <string name="appbar_send">Send</string>
+    <string name="appbar_save">Save</string>
+    <string name="appbar_export">Export</string>
+    <string name="appbar_tag_draft">Draft</string>
+    <string name="appbar_tag_paid">Paid</string>
+    <string name="appbar_tag_sent">Sent</string>
+    <string name="appbar_tag_late">Overdue</string>
+    <string name="appbar_tag_cancelled">Cancelled</string>
+    <string name="appbar_tag_reminded">Reminded</string>
+    <string name="appbar_product_add">Add product</string>
+    <string name="appbar_product_edit">Edit product</string>
+    <string name="appbar_g8">𝕘𝟠</string>
+
+    <!-- Drawer / Categories -->
+    <string name="drawer_g8">𝕘𝟠</string>
+
+    <!-- Account Screen -->
+    <string name="account_subscribe">Support the project and enjoy exclusive benefits: early access to upcoming features (desktop app, electronic invoicing..), forum badge, "Little Horseshoe" sticker.. and more!</string>
+    <string name="account_donate">Learn more</string>
+    <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
+    <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+
+    <!-- About Screen -->
+    <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>
+    <string name="about_title_about">About</string>
+    <string name="about_title_early_access">"Early bat" programme</string>
+    <string name="about_title_community">Community</string>
+    <string name="about_community_text">Come and discuss your needs, ideas and share on the</string>
+    <string name="about_community_cta">community forum.</string>
+    <string name="about_community_link">https://forum.the-gate.fr/</string>
+    <string name="about_title_assistance">Support</string>
+    <string name="about_assistance_text_1">Check out the</string>
+    <string name="about_assistance_forum_link_text">"Help" section of the forum</string>
+    <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
+    <string name="about_assistance_text_2">, browse the</string>
+    <string name="about_assistance_tutorials_link_text">tutorials and tips</string>
+    <string name="about_assistance_tutorials_link">https://the-gate.fr/conseils-et-tutos</string>
+    <string name="about_assistance_text_3">on the website, or write to</string>
+    <string name="about_assistance_email_link_text">contact@the-gate.fr</string>
+    <string name="about_contact_email">contact@the-gate.fr</string>
+    <string name="about_title_backup">Backup</string>
+    <string name="about_backup_text">Remember to download your database regularly, so you can restore it if you lose your phone.</string>
+    <string name="about_download_database">💎 Download my database 💎</string>
+    <string name="about_title_legal">Legal notices</string>
+    <string name="about_terms_of_service_header">By using the app, you agree to the</string>
+    <string name="about_terms_of_service">terms of service</string>
+    <string name="about_terms_of_service_header_2">and the</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
+    <string name="about_privacy">privacy policy of 𝕘𝟠.</string>
+    <string name="about_share_text">Is the app useful to you?</string>
+    <string name="about_donate_button">Make a donation</string>
+    <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
+    <string name="about_share_text_2">Share it with your friends!</string>
+    <string name="about_share_button">Share</string>
+    <string name="about_build_version">App version: </string>
+    <string name="ok">OK</string>
+
+    <!-- Delivery Note List Advice -->
+    <string name="delivery_note_advice_convert">I learned this move in hip-hop, super cool I know. I still need to practice, I'm not super fast, I think my patagium slows down the wave. Anyway, I wanted to tell you \n\n …</string>
+    <string name="delivery_note_advice_convert1">that if you want to convert one or more delivery notes into an invoice, you can select them from the list by long pressing (or by clicking on the ○) \n\n …</string>
+    <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
+
+    <!-- Invoice List Advice -->
+    <string name="invoice_advice_legal_help">Click on me…!</string>
+    <string name="invoice_advice_legal_1">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡ \n\n …</string>
+    <string name="invoice_advice_legal_2">useful information. You are currently in the "Invoices" category.\n\n Before creating an invoice, I recommend you check the …</string>
+    <string name="invoice_advice_legal_3">mandatory information for a compliant invoice. To make your life easier, I've summarised everything here: \n</string>
+    <string name="invoice_advice_legal_4">the-gate.fr</string>
+    <string name="invoice_advice_legal_5"> \n\n On another note… \n …</string>
+    <string name="invoice_advice_legal_6">the documents you create, as well as all your changes, are saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n …</string>
+    <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
+    <string name="invoice_advice_bottom_menu">Hey hey, your batmagotchi here. I absolutely need to show you a trick \n\n …</string>
+    <string name="invoice_advice_bottom_menu1">To reveal very useful options, like deleting a document \n\n …</string>
+    <string name="invoice_advice_bottom_menu2">click on the circle ○ next to the invoice number. You can even select multiple documents at once.\n\n 𝕨𝕚𝕝𝕕</string>
+
+    <!-- Export PDF -->
+    <string name="export_waiting_permission">Permission required…</string>
+    <string name="export_ongoing">Export in progress…</string>
+    <string name="export_done">Export complete</string>
+    <string name="export_error">Export failed.</string>
+    <string name="export_permission_denied">Storage access is required to save the PDF. You can grant access in the app settings.</string>
+    <string name="export_done_file_location">Saved on device (Downloads/g8)</string>
+    <string name="export_clickable_text">• ֊ •</string>
+    <string name="export_info_popup">• The file may sometimes take a moment to appear in the downloads folder (refreshing may help). \n\n• Remember to keep a copy of the PDF in your sent emails or in a storage space, in case you lose your phone.</string>
+    <string name="export_info_popup_validate">okurrr</string>
+    <string name="export_send_file">Send by email</string>
+    <string name="export_send_file_content">Hello, \n\nPlease find your document attached.\n\nKind regards</string>
+    <string name="export_share_file">Share</string>
+    <string name="export_close">Done</string>
+    <string name="export_error_sharing">The file could not be shared.\n\nPlease open it directly from the Downloads/g8 folder.</string>
+    <string name="export_email_subject">Your %1$s No.%2$s</string>
+    <string name="export_email_subject_invoice">invoice</string>
+    <string name="export_email_subject_delivery_note">delivery note</string>
+    <string name="export_email_subject_credit_note">credit note</string>
+    <string name="alert_dialog_error">An error occurred: </string>
+    <string name="alert_dialog_error_confirm">OK</string>
+</resources>
