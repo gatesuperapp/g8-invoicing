@@ -1,0 +1,42 @@
+-- Migration de la version 2 vers la version 3
+-- Changements:
+-- 1. Création de ClientOrIssuerEmail pour les emails des clients/émetteurs
+-- 2. Création de DocumentClientOrIssuerEmail pour les emails dans les documents
+
+-- ============================================
+-- ÉTAPE 1: Créer la table ClientOrIssuerEmail
+-- ============================================
+CREATE TABLE IF NOT EXISTS ClientOrIssuerEmail (
+  id INTEGER PRIMARY KEY NOT NULL,
+  client_or_issuer_id INTEGER NOT NULL,
+  email TEXT NOT NULL,
+  FOREIGN KEY(client_or_issuer_id) REFERENCES ClientOrIssuer(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- ÉTAPE 2: Créer la table DocumentClientOrIssuerEmail
+-- ============================================
+CREATE TABLE IF NOT EXISTS DocumentClientOrIssuerEmail (
+  id INTEGER PRIMARY KEY NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+  email TEXT NOT NULL,
+  FOREIGN KEY(document_client_or_issuer_id) REFERENCES DocumentClientOrIssuer(id) ON DELETE CASCADE
+);
+
+-- ============================================
+-- ÉTAPE 3: Migrer les emails existants de ClientOrIssuer.email
+-- vers la nouvelle table ClientOrIssuerEmail
+-- ============================================
+INSERT INTO ClientOrIssuerEmail (client_or_issuer_id, email)
+SELECT id, email
+FROM ClientOrIssuer
+WHERE email IS NOT NULL AND TRIM(email) != '';
+
+-- ============================================
+-- ÉTAPE 4: Migrer les emails existants de DocumentClientOrIssuer.email
+-- vers la nouvelle table DocumentClientOrIssuerEmail
+-- ============================================
+INSERT INTO DocumentClientOrIssuerEmail (document_client_or_issuer_id, email)
+SELECT id, email
+FROM DocumentClientOrIssuer
+WHERE email IS NOT NULL AND TRIM(email) != '';
