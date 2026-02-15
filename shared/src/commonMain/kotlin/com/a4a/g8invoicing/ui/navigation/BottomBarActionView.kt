@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -56,6 +57,7 @@ fun BottomBarActionView(
                         if (action.name == "CATEGORIES") {
                             Button(
                                 contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(4.dp),
                                 onClick = {
                                     onChangeBackground()
                                     isExpanded = true
@@ -76,6 +78,7 @@ fun BottomBarActionView(
                         } else {  // Other icons handled "normally"
                             Button(
                                 contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(4.dp),
                                 onClick = action.onClick
                             ) {
                                 AddIconAndLabelInColumn(
@@ -94,6 +97,7 @@ fun BottomBarActionView(
                     .forEach { action ->
                         Button(
                             contentPadding = PaddingValues(0.dp),
+                            shape = RoundedCornerShape(4.dp),
                             onClick = action.onClick
                         ) {
                             if (action.name == "TAG") {

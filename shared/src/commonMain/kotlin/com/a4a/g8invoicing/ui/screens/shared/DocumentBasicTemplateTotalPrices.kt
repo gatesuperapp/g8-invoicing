@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.currency
-import com.a4a.g8invoicing.shared.resources.document_tax
+import com.a4a.g8invoicing.shared.resources.document_tax_label
 import com.a4a.g8invoicing.shared.resources.document_total_with_tax
 import com.a4a.g8invoicing.shared.resources.document_total_without_tax
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -78,7 +78,7 @@ fun DocumentBasicTemplateTotalPrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(Res.string.document_tax) + " " + it.first.stripTrailingZeros().toPlainString().replace(".", ",") + "% : "
+                            text = stringResource(Res.string.document_tax_label, "${it.first.stripTrailingZeros().toPlainString().replace(".", ",")}%")
                         )
                     }
                 }

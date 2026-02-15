@@ -6,7 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.document_reference
+import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
@@ -32,7 +32,7 @@ fun DocumentBasicTemplateReference(
     ) {
         Text(
             style = MaterialTheme.typography.textForDocumentsBold,
-            text = stringResource(Res.string.document_reference) + " : "
+            text = stringResource(Res.string.document_reference_label)
         )
         Text(
             style = MaterialTheme.typography.textForDocuments,

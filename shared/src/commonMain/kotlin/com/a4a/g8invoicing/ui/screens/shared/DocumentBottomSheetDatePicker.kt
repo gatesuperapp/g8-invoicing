@@ -30,10 +30,12 @@ fun DocumentBottomSheetDatePicker(
     initialDate: String,
     onValueChange: (String) -> Unit,
 ) {
+    // Use UTC-aware parsing for DatePicker compatibility
+    // DatePicker uses UTC internally, so we need midnight UTC of the desired date
     val currentDate = if (initialDate.isNotBlank()) {
-        parseDate(initialDate) ?: currentTimeMillis()
+        parseDateForPicker(initialDate) ?: todayForPicker()
     } else {
-        currentTimeMillis()
+        todayForPicker()
     }
 
     val datePickerState = rememberDatePickerState(
@@ -41,19 +43,21 @@ fun DocumentBottomSheetDatePicker(
         initialDisplayMode = DisplayMode.Picker
     )
 
-    var selectedDate by remember {
-        mutableStateOf(datePickerState.selectedDateMillis?.let {
-            formatDate(it)
-        })
+    // Track the initial date to detect user changes
+    val initialDateTrimmed = remember(initialDate) {
+        if (initialDate.length >= 10) initialDate.substring(0, 10) else ""
     }
 
-    // Only way i found to execute function when new date is picked..There must be a better way?
-    selectedDate =
-        datePickerState.selectedDateMillis?.let { formatDate(it) }?.substring(0,10) ?: ""
-    val initialDateTrimmed = if (initialDate.length >= 10) initialDate.substring(0,10) else ""
-    if (initialDateTrimmed != selectedDate) { // Substring to keep only the date, not the time
-        onValueChange(
-            datePickerState.selectedDateMillis?.let { formatDate(it) } ?: "")
+    // Track the last emitted date to avoid duplicate emissions
+    var lastEmittedDate by remember { mutableStateOf(initialDateTrimmed) }
+
+    // Use UTC-aware formatting for DatePicker compatibility
+    val selectedDate = datePickerState.selectedDateMillis?.let { formatDateFromPicker(it) } ?: ""
+
+    // Only emit when user actually selects a different date
+    if (selectedDate.isNotEmpty() && selectedDate != lastEmittedDate) {
+        lastEmittedDate = selectedDate
+        onValueChange(selectedDate)
     }
 
     // As soon as the user selects a new date, the new value is updated through datePickerState:

@@ -42,14 +42,24 @@ class CreditNoteLocalDataSource(
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
-            val issuer = getExistingIssuer()?.transformIntoEditable()
+            val existingIssuer = getExistingIssuer()
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.credit_note_default_number)),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
-                documentIssuer = issuer,
+                documentIssuer = existingIssuer?.transformIntoEditable(
+                    addresses = fetchDocumentClientOrIssuerAddresses(
+                        existingIssuer.id,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentClientOrIssuerAddressQueries
+                    ),
+                    emails = fetchDocumentClientOrIssuerEmails(
+                        existingIssuer.id,
+                        documentClientOrIssuerEmailQueries
+                    )
+                ),
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )
 

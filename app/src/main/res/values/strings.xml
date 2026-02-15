@@ -159,7 +159,7 @@
     <string name="invoice_due_date">Échéance :</string>
     <string name="credit_note_due_date">Échéance :</string>
     <string name="invoice_paid">Payée &#x2714;</string>
-    <string name="invoice_pdf_due_date">Date limite de paiement</string>
+    <string name="invoice_pdf_due_date">Date limite de paiement : </string>
     <string name="invoice_pending">En attente</string>
     <string name="invoice_late">En retard</string>
     <string name="delivery_note_number">Bon de livraison N°</string>
@@ -167,11 +167,13 @@
     <string name="credit_note_number">Avoir N°</string>
     <string name="document_number_short">N°</string>
     <string name="document_date">Date</string>
+    <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d\'émission</string>
     <string name="document_due_date">Échéance</string>
     <string name="document_issuer">Émetteur·ice</string>
     <string name="document_client">Client·e</string>x
     <string name="document_reference">Référence</string>
+    <string name="document_reference_label">Référence : </string>
     <string name="document_free_field">Champ libre</string>
     <string name="document_footer">Pied de page</string>
     <string name="document_line_products">Produits</string>
@@ -341,7 +343,7 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).
         \n\n• Pense à conserver une copie du PDF dans tes mails envoyés ou dans un espace de stockage, en cas de perte du téléphone. </string>
-    <string name="export_info_popup_validate">okurrr</string>
+    <string name="export_info_popup_validate">OK</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n
         Veuillez trouver votre %s en pièce jointe.\n
@@ -382,13 +384,14 @@ Sans engagement. Accès anticipé aux nouveautés inclus.
     <string name="database_email_chooser">Envoyer la base de données par mail</string>
 
     <!-- Client selection -->
-    <string name="client_selection_title">Sélectionner les clients</string>
+    <string name="client_selection_title">Sélectionner les client·es</string>
     <string name="client_selection_empty">Vous n\'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie \"Client·es\".</string>
     <string name="client_selection_validate">Valider</string>
 
     <!-- About screen -->
     <string name="about_download_database">💎 Télécharger ma base de données 💎</string>
     <string name="about_download_database_error">Erreur lors de l\'enregistrement de la base : %1$s.\n\nPour contacter l\'assistance : contact@the-gate.fr</string>
+    <string name="label_separator"> : </string>
     <string name="ok">OK</string>
 
     <!-- WhatsNew Dialog -->

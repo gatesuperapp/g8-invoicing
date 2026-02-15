@@ -19,9 +19,11 @@
     <string name="delivery_note_number">Delivery note No.</string>
     <string name="credit_note_number">Credit note No.</string>
     <string name="document_date">Date</string>
+    <string name="document_date_label">Date: </string>
     <string name="document_date_emitting">Issue date</string>
     <string name="document_reference">Reference</string>
-    <string name="invoice_pdf_due_date">Payment due date</string>
+    <string name="document_reference_label">Reference: </string>
+    <string name="invoice_pdf_due_date">Payment due date: </string>
     <string name="invoice_paid">Paid ✔</string>
 
     <!-- Document table -->
@@ -44,6 +46,7 @@
     <string name="document_total_without_tax">Total excl. tax:</string>
     <string name="document_total_with_tax">Total incl. tax:</string>
     <string name="document_tax">Tax</string>
+    <string name="document_tax_label">Tax %1$s: </string>
 
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Total excl. tax:</string>
@@ -222,7 +225,7 @@
     <string name="account_subscribe">Support the project and enjoy exclusive benefits: early access to upcoming features (desktop app, electronic invoicing..), forum badge, "Little Horseshoe" sticker.. and more!</string>
     <string name="account_donate">Learn more</string>
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
-    <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
 
     <!-- About Screen -->
@@ -259,6 +262,15 @@
     <string name="about_share_text_2">Share it with your friends!</string>
     <string name="about_share_button">Share</string>
     <string name="about_build_version">App version: </string>
+
+    <!-- Language Selection -->
+    <string name="about_title_language">Language</string>
+    <string name="about_language_system">System language</string>
+    <string name="about_language_french">Français</string>
+    <string name="about_language_english">English</string>
+    <string name="about_language_german">Deutsch</string>
+
+    <string name="label_separator">: </string>
     <string name="ok">OK</string>
 
     <!-- Delivery Note List Advice -->
@@ -288,7 +300,7 @@
     <string name="export_done_file_location">Saved on device (Downloads/g8)</string>
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• The file may sometimes take a moment to appear in the downloads folder (refreshing may help). \n\n• Remember to keep a copy of the PDF in your sent emails or in a storage space, in case you lose your phone.</string>
-    <string name="export_info_popup_validate">okurrr</string>
+    <string name="export_info_popup_validate">ok</string>
     <string name="export_send_file">Send by email</string>
     <string name="export_send_file_content">Hello, \n\nPlease find your document attached.\n\nKind regards</string>
     <string name="export_share_file">Share</string>

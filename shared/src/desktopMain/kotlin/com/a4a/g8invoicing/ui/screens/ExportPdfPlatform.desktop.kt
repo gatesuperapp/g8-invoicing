@@ -33,11 +33,12 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
-import com.a4a.g8invoicing.shared.resources.document_date
+import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
-import com.a4a.g8invoicing.shared.resources.document_reference
+import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
+import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.table_description
 import com.a4a.g8invoicing.shared.resources.table_quantity
 import com.a4a.g8invoicing.shared.resources.table_tax_rate
@@ -73,8 +74,8 @@ actual fun ExportPdfPlatform(
         invoiceNumber = stringResource(Res.string.invoice_number),
         deliveryNoteNumber = stringResource(Res.string.delivery_note_number),
         creditNoteNumber = stringResource(Res.string.credit_note_number),
-        documentDate = stringResource(Res.string.document_date),
-        documentReference = stringResource(Res.string.document_reference),
+        documentDate = stringResource(Res.string.document_date_label),
+        documentReference = stringResource(Res.string.document_reference_label),
         tableDescription = stringResource(Res.string.table_description),
         tableQuantity = stringResource(Res.string.table_quantity),
         tableUnit = stringResource(Res.string.table_unit),
@@ -87,6 +88,7 @@ actual fun ExportPdfPlatform(
         dueDate = stringResource(Res.string.invoice_pdf_due_date),
         currency = stringResource(Res.string.currency),
         invoicePaid = stringResource(Res.string.invoice_paid),
+        labelSeparator = stringResource(Res.string.label_separator),
     )
 
     val fileManager = remember { PdfFileManager() }

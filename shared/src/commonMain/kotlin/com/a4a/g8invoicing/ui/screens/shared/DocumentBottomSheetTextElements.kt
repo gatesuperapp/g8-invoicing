@@ -69,6 +69,7 @@ fun DocumentBottomSheetTextElements(
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
+    onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboard by keyboardAsState()
@@ -196,7 +197,8 @@ fun DocumentBottomSheetTextElements(
                 onValueChange = onValueChange,
                 onClickDeleteAddress = onClickDeleteAddress,
                 onClickDeleteEmail = onClickDeleteEmail,
-                onAddEmail = onAddEmail
+                onAddEmail = onAddEmail,
+                onPendingEmailValidationResult = onPendingEmailValidationResult
             )
         }
     }

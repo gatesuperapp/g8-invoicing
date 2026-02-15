@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.a4a.g8invoicing.getAppVersion
 import com.a4a.g8invoicing.ui.screens.About
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
@@ -17,7 +18,6 @@ fun NavGraphBuilder.about(
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
     // Platform-specific callbacks
-    versionName: String = "1.0.0",
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
@@ -27,6 +27,7 @@ fun NavGraphBuilder.about(
     composable(route = Screen.About.name) {
         var isCategoriesMenuOpen by remember { mutableStateOf(false) }
         var lastBackPressTime by remember { mutableStateOf(0L) }
+        val versionName = getAppVersion()
 
         PlatformBackHandler {
             val currentTime = currentTimeMillis()

@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.ui.navigation
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -35,6 +36,7 @@ fun NavGraphBuilder.clientAddEdit(
         val isNew = itemId == null
 
         val keyboardController = LocalSoftwareKeyboardController.current
+        val focusManager = LocalFocusManager.current
         val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
 
@@ -51,6 +53,9 @@ fun NavGraphBuilder.clientAddEdit(
             },
             onClickDone = {
                 scope.launch {
+                    // Clear focus first to trigger onFocusChanged in email field
+                    // This will add any pending email before validation
+                    focusManager.clearFocus()
                     keyboardController?.hide()
 
                     if (viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
@@ -80,7 +85,10 @@ fun NavGraphBuilder.clientAddEdit(
             onAddEmail = { email ->
                 viewModel.addEmailToClientOrIssuerState(ClientOrIssuerType.CLIENT, email)
             },
-            scrollState = scrollState
+            scrollState = scrollState,
+            onPendingEmailValidationResult = { isValid ->
+                viewModel.setPendingEmailValidationResult(isValid)
+            }
         )
     }
 }

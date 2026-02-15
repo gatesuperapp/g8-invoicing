@@ -33,5 +33,6 @@ data class ProductPrice @OptIn(ExperimentalUuidApi::class) constructor(
 
 data class ClientRef(
     val id: Int,
+    val firstName: String? = null,
     val name: String
 )

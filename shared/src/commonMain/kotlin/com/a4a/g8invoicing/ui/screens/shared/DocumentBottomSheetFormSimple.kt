@@ -50,7 +50,7 @@ fun DocumentBottomSheetFormSimple(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = 40.dp, end = 30.dp, start = 30.dp
+                        top = 40.dp, bottom = 16.dp, end = 30.dp, start = 30.dp
                     )
             ) {
                 Box(

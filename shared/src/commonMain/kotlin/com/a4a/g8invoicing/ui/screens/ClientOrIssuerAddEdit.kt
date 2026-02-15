@@ -27,6 +27,7 @@ fun ClientAddEdit(
     onClickDeleteEmail: (Int) -> Unit = {},
     onAddEmail: (String) -> Unit = {},
     scrollState: ScrollState = rememberScrollState(),
+    onPendingEmailValidationResult: (Boolean) -> Unit = {},
 ) {
     val requiredFieldsAreFilled: Boolean =
         if (clientOrIssuer.type?.name == ClientOrIssuerType.CLIENT.name
@@ -60,7 +61,8 @@ fun ClientAddEdit(
             onClickDeleteEmail = onClickDeleteEmail,
             onAddEmail = onAddEmail,
             typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_CLIENT,
-            scrollState = scrollState
+            scrollState = scrollState,
+            onPendingEmailValidationResult = onPendingEmailValidationResult
         )
     }
 }

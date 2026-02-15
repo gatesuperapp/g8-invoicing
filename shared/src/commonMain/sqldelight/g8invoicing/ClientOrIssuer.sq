@@ -36,7 +36,8 @@ WHERE name = :name AND first_name =: first_name;
 getAll:
 SELECT *
 FROM ClientOrIssuer
-WHERE type = :type;
+WHERE type = :type
+ORDER BY name COLLATE NOCASE ASC;
 
 checkIfEmpty:
 SELECT count(*) FROM ClientOrIssuer LIMIT 1;

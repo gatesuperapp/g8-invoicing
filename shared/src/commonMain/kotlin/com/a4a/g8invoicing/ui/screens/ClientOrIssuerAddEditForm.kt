@@ -22,8 +22,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -86,6 +88,8 @@ fun ClientOrIssuerAddEditForm(
     onAddEmail: (String) -> Unit = {},
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
     scrollState: ScrollState = rememberScrollState(),
+    pendingEmailStateHolder: MutableState<String>? = null,
+    onPendingEmailValidationResult: (Boolean) -> Unit = {},
 ) {
     val localFocusManager = LocalFocusManager.current
     // Use client ID as key to re-calculate when editing a different client
@@ -227,7 +231,9 @@ fun ClientOrIssuerAddEditForm(
                         placeholder = clientEmailPlaceholder,
                         onAddEmail = onAddEmail,
                         onRemoveEmail = onClickDeleteEmail,
-                        maxEmails = 4
+                        maxEmails = 4,
+                        onPendingEmailValidationResult = onPendingEmailValidationResult,
+                        pendingEmailStateHolder = pendingEmailStateHolder
                     ),
                     pageElement = if (isInBottomSheetModal)
                         ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1

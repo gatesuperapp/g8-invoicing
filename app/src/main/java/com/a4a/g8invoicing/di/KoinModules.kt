@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.data.DatabaseDriverFactory
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
+import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -35,6 +36,9 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
+
+    // Locale Manager (singleton)
+    single { LocaleManager() }
 
     single { DatabaseDriverFactory(androidContext()) }
 

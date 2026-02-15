@@ -8,7 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 
@@ -18,6 +21,7 @@ fun DocumentBasicTemplateClientOrIssuer(
     displayAllInfo: Boolean = true,
     addressIndex: Int = 0
 ) {
+    val labelSeparator = stringResource(Res.string.label_separator)
     val address = clientOrIssuer?.addresses?.get(addressIndex)
     if(displayAllInfo) {
         val clientName = (clientOrIssuer?.firstName?.let { it.text + " " }
@@ -96,7 +100,7 @@ fun DocumentBasicTemplateClientOrIssuer(
                     .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.companyId1Label?.text + " : "
+                text = clientOrIssuer?.companyId1Label?.text + labelSeparator
                         + clientOrIssuer?.companyId1Number?.text
             )
         }
@@ -107,7 +111,7 @@ fun DocumentBasicTemplateClientOrIssuer(
                     .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.companyId2Label?.text + " : "
+                text = clientOrIssuer?.companyId2Label?.text + labelSeparator
                         + clientOrIssuer?.companyId2Number?.text
             )
         }
@@ -117,7 +121,7 @@ fun DocumentBasicTemplateClientOrIssuer(
                 modifier = Modifier
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.companyId3Label?.text + " : "
+                text = clientOrIssuer?.companyId3Label?.text + labelSeparator
                         + clientOrIssuer?.companyId3Number?.text
             )
         }

@@ -2,7 +2,9 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
-import com.a4a.g8invoicing.shared.resources.tax_rate_edit_title
 import com.a4a.g8invoicing.shared.resources.tax_rate_screen_title
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
@@ -103,6 +104,9 @@ fun ProductTaxRates(
                     onClickEditRates = { isEditMode = true }
                 )
             }
+
+            // Bottom spacer to ensure content can scroll above keyboard/bottom of screen
+            Spacer(modifier = Modifier.height(200.dp))
         }
     }
 }
@@ -128,7 +132,7 @@ private fun TaxRatesEditTopBar(
     onClickValidate: () -> Unit,
 ) {
     TopBar(
-        title = stringResource(Res.string.tax_rate_edit_title),
+        title = "",
         navController = navController,
         onClickBackArrow = onClickCancel,
         isCancelCtaDisplayed = true,

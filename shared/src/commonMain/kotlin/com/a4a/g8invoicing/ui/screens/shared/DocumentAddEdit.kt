@@ -112,6 +112,7 @@ fun DocumentAddEdit(
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
+    onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit, // For showing toast/snackbar messages
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit, // Slot for ExportPdf
@@ -177,7 +178,8 @@ fun DocumentAddEdit(
                     onShowDocumentForm = onShowDocumentForm,
                     onClickDeleteAddress = onClickDeleteAddress,
                     onClickDeleteEmail = onClickDeleteEmail,
-                    onAddEmail = onAddEmail
+                    onAddEmail = onAddEmail,
+                    onPendingEmailValidationResult = onPendingEmailValidationResult
                 )
             } else {
                 DocumentBottomSheetProducts(

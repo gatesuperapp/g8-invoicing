@@ -72,6 +72,7 @@ class InvoiceLocalDataSource(
 
             println("DEBUG createNew: todayFormatted=$todayFormatted, dueDateFormatted=$dueDateFormatted")
 
+            val existingIssuer = getExistingIssuer()
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
                     getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
@@ -79,7 +80,17 @@ class InvoiceLocalDataSource(
                 ),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
-                documentIssuer = getExistingIssuer()?.transformIntoEditable(), // DB call
+                documentIssuer = existingIssuer?.transformIntoEditable(
+                    addresses = fetchDocumentClientOrIssuerAddresses(
+                        existingIssuer.id,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentClientOrIssuerAddressQueries
+                    ),
+                    emails = fetchDocumentClientOrIssuerEmails(
+                        existingIssuer.id,
+                        documentClientOrIssuerEmailQueries
+                    )
+                ),
                 footerText = TextFieldValue(
                     getExistingFooter() ?: getString(Res.string.document_default_footer) // DB call
                 )

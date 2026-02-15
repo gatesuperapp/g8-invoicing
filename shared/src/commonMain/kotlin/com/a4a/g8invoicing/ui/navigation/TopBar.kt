@@ -158,7 +158,8 @@ private fun BackArrow(
         Screen.DeliveryNoteList.name,
         Screen.CreditNoteList.name,
         Screen.ProductList.name,
-        Screen.ClientOrIssuerList.name
+        Screen.ClientOrIssuerList.name,
+        Screen.About.name
     )
 
     // Show back arrow if:

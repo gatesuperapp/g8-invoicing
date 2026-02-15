@@ -37,8 +37,11 @@ class ProductAddEditViewModel(
     private var saveJob: Job? = null
     private var updateJob: Job? = null
     private var autoSaveJob: Job? = null
-    private var fetchTaxRatesJob: Job? = null
     private var taxRates: List<BigDecimal> = listOf()
+
+    // Counter to trigger recomposition after saving tax rates
+    private val _taxRatesRefreshCounter = MutableStateFlow(0)
+    val taxRatesRefreshCounter: StateFlow<Int> = _taxRatesRefreshCounter.asStateFlow()
 
     private val _productUiState = mutableStateOf(ProductState())
     val productUiState: State<ProductState> = _productUiState
@@ -189,14 +192,7 @@ class ProductAddEditViewModel(
     }
 
     fun fetchTaxRatesFromLocalDb(): List<BigDecimal> {
-        fetchTaxRatesJob?.cancel()
-        fetchTaxRatesJob = viewModelScope.launch {
-            try {
-                taxRates = taxDataSource.fetchProductTaxes()
-            } catch (e: Exception) {
-                // Error handling
-            }
-        }
+        taxRates = taxDataSource.fetchProductTaxes()
         return taxRates
     }
 
@@ -230,8 +226,8 @@ class ProductAddEditViewModel(
                     }
                 }
 
-                // Refresh the local taxRates list
-                taxRates = taxDataSource.fetchProductTaxes()
+                // Increment counter to trigger recomposition
+                _taxRatesRefreshCounter.value++
             } catch (e: Exception) {
                 // Error handling
             }
@@ -366,7 +362,8 @@ class ProductAddEditViewModel(
             val id = it.id ?: return@mapNotNull null
             ClientRef(
                 id = id,
-                name = (it.firstName?.text?.let { firstName -> "$firstName " } ?: "") + it.name.text
+                firstName = it.firstName?.text,
+                name = it.name.text
             )
         }
         _clientSelectionDialogState.value = ClientSelectionDialogState(

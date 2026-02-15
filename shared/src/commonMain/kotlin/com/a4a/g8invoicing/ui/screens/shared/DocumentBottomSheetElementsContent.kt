@@ -55,7 +55,7 @@ fun DocumentBottomSheetElementsContent(
             label = stringResource(Res.string.document_issuer),
             inputType = ForwardElement(
                 text = document.documentIssuer?.let {
-                    (it.firstName?.let { it.text + " " } ?: "") + it.name.text
+                    it.name.text + (it.firstName?.let { " " + it.text } ?: "")
                 } ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_ISSUER
@@ -64,7 +64,7 @@ fun DocumentBottomSheetElementsContent(
             label = stringResource(Res.string.document_client),
             inputType = ForwardElement(
                 text = document.documentClient?.let {
-                    (it.firstName?.let { it.text + " " } ?: "") + it.name.text
+                    it.name.text + (it.firstName?.let { " " + it.text } ?: "")
                 } ?: "",
             ),
             pageElement = ScreenElement.DOCUMENT_CLIENT

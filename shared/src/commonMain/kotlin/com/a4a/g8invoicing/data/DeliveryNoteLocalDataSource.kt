@@ -42,12 +42,23 @@ class DeliveryNoteLocalDataSource(
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             println("DEBUG DeliveryNote createNew: todayFormatted=$todayFormatted")
 
+            val existingIssuer = getExistingIssuer()
             val newDeliveryNoteState = DeliveryNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.delivery_note_default_number)),
                 documentDate = todayFormatted,
-                documentIssuer = getExistingIssuer()?.transformIntoEditable(),
+                documentIssuer = existingIssuer?.transformIntoEditable(
+                    addresses = fetchDocumentClientOrIssuerAddresses(
+                        existingIssuer.id,
+                        linkDocumentClientOrIssuerToAddressQueries,
+                        documentClientOrIssuerAddressQueries
+                    ),
+                    emails = fetchDocumentClientOrIssuerEmails(
+                        existingIssuer.id,
+                        documentClientOrIssuerEmailQueries
+                    )
+                ),
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )
 

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
-import com.a4a.g8invoicing.shared.resources.document_date
+import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -87,7 +87,7 @@ fun DocumentBasicTemplateHeader(
                         }
                     ),
                 style = MaterialTheme.typography.subTitleForDocuments,
-                text = stringResource(Res.string.document_date) + " : " + document.documentDate.substringBefore(
+                text = stringResource(Res.string.document_date_label) + document.documentDate.substringBefore(
                     " "
                 )
             )
@@ -156,12 +156,16 @@ fun DocumentBasicTemplateHeader(
 
     document.documentClient?.addresses?.let { addresses ->
         if (addresses.size > 1) {
-            // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TTITLE 3
+            // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TITLE 3
             Row {
+                // When there are only 2 addresses, put address 2 on the right (below address 1)
+                if (addresses.size == 2) {
+                    Spacer(modifier = Modifier.fillMaxWidth(0.5f))
+                }
                 for (i in 1..<addresses.size) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(if (i == 1) 0.5f else 1f),
+                            .fillMaxWidth(if (i == 1 && addresses.size > 2) 0.5f else 1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
@@ -176,10 +180,14 @@ fun DocumentBasicTemplateHeader(
 
             // ROW 4:  CLIENT ADDRESS 2 ----------ADDRESS 3
             Row {
+                // When there are only 2 addresses, put address 2 on the right (below address 1)
+                if (addresses.size == 2) {
+                    Spacer(modifier = Modifier.fillMaxWidth(0.5f))
+                }
                 for (i in 1..<addresses.size) {
                     Column(
                         modifier = Modifier
-                            .fillMaxWidth(if (i == 1) 0.5f else 1f),
+                            .fillMaxWidth(if (i == 1 && addresses.size > 2) 0.5f else 1f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         document.documentClient?.let {
@@ -192,7 +200,7 @@ fun DocumentBasicTemplateHeader(
                             )
                         }
                     }
-                    if (i == 1) Spacer(modifier = Modifier.width(2.dp))
+                    if (i == 1 && addresses.size > 2) Spacer(modifier = Modifier.width(2.dp))
                 }
             }
         }

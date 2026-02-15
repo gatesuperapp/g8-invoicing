@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
@@ -22,7 +23,9 @@ fun ClientOrIssuerListContent(
     isCheckboxDisplayed: Boolean = true,
     currentClientOrIssuerId: Int? = null,
 ) {
-    LazyColumn {
+    LazyColumn(
+        contentPadding = PaddingValues(bottom = 150.dp)
+    ) {
         items(
             items = clientsOrIssuers,
             key = { client ->

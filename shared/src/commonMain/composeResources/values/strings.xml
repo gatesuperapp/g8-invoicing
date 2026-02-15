@@ -19,9 +19,11 @@
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
     <string name="document_date">Date</string>
+    <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d'émission</string>
     <string name="document_reference">Référence</string>
-    <string name="invoice_pdf_due_date">Date limite de paiement</string>
+    <string name="document_reference_label">Référence : </string>
+    <string name="invoice_pdf_due_date">Date limite de paiement : </string>
     <string name="invoice_paid">Payée ✔</string>
 
     <!-- Document table -->
@@ -44,6 +46,7 @@
     <string name="document_total_without_tax">Total HT :</string>
     <string name="document_total_with_tax">Total TTC :</string>
     <string name="document_tax">TVA</string>
+    <string name="document_tax_label">TVA %1$s : </string>
 
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Total HT :</string>
@@ -222,7 +225,7 @@
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
     <string name="account_donate">En savoir plus</string>
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
-    <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing</string>
+    <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
 
     <!-- About Screen -->
@@ -259,6 +262,15 @@
     <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
     <string name="about_build_version">Version de l'application : \u00A0</string>
+
+    <!-- Language Selection -->
+    <string name="about_title_language">Langue</string>
+    <string name="about_language_system">Langue du système</string>
+    <string name="about_language_french">Français</string>
+    <string name="about_language_english">English</string>
+    <string name="about_language_german">Deutsch</string>
+
+    <string name="label_separator"> : </string>
     <string name="ok">OK</string>
 
     <!-- Delivery Note List Advice -->

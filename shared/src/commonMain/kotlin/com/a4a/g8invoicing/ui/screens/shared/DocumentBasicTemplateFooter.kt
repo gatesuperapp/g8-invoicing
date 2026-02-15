@@ -46,7 +46,7 @@ fun DocumentBasicTemplateFooter(
             if(document is InvoiceState) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = stringResource(Res.string.invoice_pdf_due_date) + " : " + document.dueDate.substringBefore(" ")
+                    text = stringResource(Res.string.invoice_pdf_due_date) + document.dueDate.substringBefore(" ")
                 )
             }
         }

@@ -39,6 +39,13 @@ class ClientOrIssuerAddEditViewModel(
         MutableStateFlow(ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER))
     val documentIssuerUiState: StateFlow<ClientOrIssuerState> = _documentIssuerUiState
 
+    // Flag to track if pending email validation failed
+    private var _pendingEmailIsValid = true
+
+    fun setPendingEmailValidationResult(isValid: Boolean) {
+        _pendingEmailIsValid = isValid
+    }
+
 
     init {
         if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
@@ -870,6 +877,11 @@ class ClientOrIssuerAddEditViewModel(
     }
 
     fun validateInputs(type: ClientOrIssuerType): Boolean {
+        // Check if there's an invalid pending email
+        if (!_pendingEmailIsValid) {
+            return false
+        }
+
         val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
         when (type) {
             ClientOrIssuerType.CLIENT -> {

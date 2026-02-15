@@ -64,12 +64,13 @@ fun ClientMultiSelectSheet(
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             } else {
-                // Ordre figé à l'ouverture - clients sélectionnés en premier
+                // Ordre figé à l'ouverture - clients sélectionnés en premier, puis alphabétique
                 val sortedClients = remember(allClients) {
                     val initialSelectedIds = selectedClients.map { it.id }.toSet()
-                    allClients.sortedByDescending { client ->
-                        initialSelectedIds.contains(client.id)
-                    }
+                    allClients.sortedWith(
+                        compareByDescending<ClientRef> { initialSelectedIds.contains(it.id) }
+                            .thenBy { it.name.lowercase() }
+                    )
                 }
                 Column(
                     Modifier
@@ -80,15 +81,14 @@ fun ClientMultiSelectSheet(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onToggleClient(client) }
-                                .padding(vertical = 12.dp),
+                                .clickable { onToggleClient(client) },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Checkbox(
                                 checked = selectedClients.any { it.id == client.id },
                                 onCheckedChange = { onToggleClient(client) }
                             )
-                            Text(text = client.name)
+                            Text(text = listOfNotNull(client.name, client.firstName).joinToString(" "))
                         }
                     }
                 }

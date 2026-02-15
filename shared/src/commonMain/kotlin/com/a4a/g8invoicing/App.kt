@@ -1,17 +1,21 @@
 package com.a4a.g8invoicing
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
+import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.ui.navigation.CategorySidebar
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import org.koin.compose.koinInject
 
 /**
  * Shared App composable - entry point for iOS and potentially other platforms.
@@ -20,6 +24,26 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 @Composable
 fun App(
     // Platform-specific callbacks can be passed here
+    onSendReminder: (InvoiceState) -> Unit = {},
+    localeManager: LocaleManager = koinInject()
+) {
+    // Initialize locale on first composition
+    LaunchedEffect(Unit) {
+        localeManager.initializeLocale()
+    }
+
+    // Use Crossfade for smooth transition when language changes
+    Crossfade(
+        targetState = localeManager.currentLanguage,
+        animationSpec = tween(300),
+        label = "language_transition"
+    ) { _ ->
+        AppContent(onSendReminder = onSendReminder)
+    }
+}
+
+@Composable
+private fun AppContent(
     onSendReminder: (InvoiceState) -> Unit = {},
 ) {
     val navController = rememberNavController()

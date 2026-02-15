@@ -39,7 +39,7 @@ fun FormInputCreatorListPicker(
             // Use Column with Rows instead of FlowRow for KMP compatibility
             input.selectedItems.forEach { clientRef ->
                 CustomChip(
-                    text = clientRef.name,
+                    text = listOfNotNull(clientRef.name, clientRef.firstName).joinToString(" "),
                     onChipClick = { input.onClick?.invoke() },
                     onRemoveClick = { input.onRemoveItem?.invoke(clientRef.id) }
                 )

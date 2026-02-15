@@ -242,6 +242,9 @@ fun NavGraphBuilder.invoiceAddEdit(
             onAddEmail = { type, email ->
                 clientOrIssuerAddEditViewModel.addEmailToClientOrIssuerState(type, email)
             },
+            onPendingEmailValidationResult = { _, isValid ->
+                clientOrIssuerAddEditViewModel.setPendingEmailValidationResult(isValid)
+            },
             onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent

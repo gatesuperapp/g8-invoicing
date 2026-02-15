@@ -242,6 +242,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onAddEmail = { type, email ->
                 clientOrIssuerAddEditViewModel.addEmailToClientOrIssuerState(type, email)
             },
+            onPendingEmailValidationResult = { _, isValid ->
+                clientOrIssuerAddEditViewModel.setPendingEmailValidationResult(isValid)
+            },
             onOrderChange = deliveryNoteViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent

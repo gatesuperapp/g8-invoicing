@@ -292,15 +292,12 @@ fun Product.transformIntoEditableProduct(
                 ?: return@forEach
 
             val clientId = row.client_id ?: return@forEach
-
-            val displayName = listOfNotNull(
-                row.first_name?.takeIf { it.isNotBlank() },
-                row.name
-            ).joinToString(" ")
+            val clientName = row.name ?: return@forEach
 
             val clientRef = ClientRef(
                 id = clientId.toInt(),
-                name = displayName
+                firstName = row.first_name?.takeIf { it.isNotBlank() },
+                name = clientName
             )
 
             priceToClients

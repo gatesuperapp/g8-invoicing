@@ -122,7 +122,7 @@ fun DocumentBottomSheetProductAddEditForm(
                         label = quantityLabel,
                         inputType = DecimalInput(
                             text = documentProduct.quantity
-                                .toString(),
+                                .stripTrailingZeros().toPlainString(),
                             placeholder = quantityPlaceholder,
                             onValueChange = {
                                 bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_QUANTITY, it)

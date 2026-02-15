@@ -145,7 +145,7 @@ fun DocumentListItem(
                 )
                 document.documentClient?.let {
                     Text(
-                        text = (it.firstName?.let { it.text + " " } ?: "") + it.name.text,
+                        text = it.name.text + (it.firstName?.let { " " + it.text } ?: ""),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.textSmall,

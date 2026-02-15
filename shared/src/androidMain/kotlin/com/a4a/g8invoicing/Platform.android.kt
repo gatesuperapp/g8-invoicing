@@ -1,7 +1,9 @@
 package com.a4a.g8invoicing
 
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.LocaleListCompat
 
 actual fun getPlatformName(): String = "Android"
 
@@ -13,4 +15,13 @@ actual fun getAppVersion(): String {
     } catch (e: Exception) {
         "unknown"
     }
+}
+
+actual fun setAppLocale(languageCode: String?) {
+    val localeList = if (languageCode != null) {
+        LocaleListCompat.forLanguageTags(languageCode)
+    } else {
+        LocaleListCompat.getEmptyLocaleList()
+    }
+    AppCompatDelegate.setApplicationLocales(localeList)
 }

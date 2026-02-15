@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -17,9 +18,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
@@ -36,6 +40,7 @@ import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
+import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -61,11 +66,21 @@ fun DocumentBottomSheetForm(
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {},
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
+    onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    // State holder to access pending email from child component
+    val pendingEmailState = remember { mutableStateOf("") }
+    // Track if there's an email validation error to show
+    var emailValidationError by remember { mutableStateOf<String?>(null) }
     // State for the ModalBottomSheet itself
+    // confirmValueChange prevents swipe-to-dismiss (only allow expanded state)
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden }
     )
+    val scope = rememberCoroutineScope()
 
     // State to manage visibility of the tax selection screen
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
@@ -91,8 +106,16 @@ fun DocumentBottomSheetForm(
         onDismissRequest = {
             // This is called when the user tries to dismiss the sheet (e.g., by swiping down or pressing back)
             when {
-                isTaxSelectionVisible -> isTaxSelectionVisible = false // Go back from tax selection
-                fullScreenElementToShow.value != null -> fullScreenElementToShow.value = null // Go back from full screen text editor
+                isTaxSelectionVisible -> {
+                    // Navigate back from tax selection but keep sheet open
+                    isTaxSelectionVisible = false
+                    scope.launch { sheetState.expand() }
+                }
+                fullScreenElementToShow.value != null -> {
+                    // Navigate back from full screen text editor but keep sheet open
+                    fullScreenElementToShow.value = null
+                    scope.launch { sheetState.expand() }
+                }
                 else -> onClickCancel() // Fully dismiss the bottom sheet
             }
         },
@@ -119,7 +142,33 @@ fun DocumentBottomSheetForm(
                         onNavigateBackFromFullScreen = { fullScreenElementToShow.value = null }
                     )
                 },
-                onClickDoneMain = onClickDone, // Main "Done" action for the form
+                onClickDoneMain = {
+                    // Hide keyboard
+                    keyboardController?.hide()
+
+                    // Check if there's a pending email to validate
+                    val pendingEmail = pendingEmailState.value.trim()
+                    if (pendingEmail.isNotEmpty()) {
+                        // Validate the pending email
+                        val validationError = FormInputsValidator.validateEmail(pendingEmail)
+                        if (validationError != null) {
+                            // Invalid email - show error and don't proceed
+                            emailValidationError = validationError
+                            return@DocumentBottomSheetHeader
+                        }
+                        // Valid email - add it first
+                        val clientOrIssuerType = when {
+                            typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> ClientOrIssuerType.DOCUMENT_CLIENT
+                            typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> ClientOrIssuerType.DOCUMENT_ISSUER
+                            else -> null
+                        }
+                        clientOrIssuerType?.let { onAddEmail(it, pendingEmail) }
+                        // Clear the pending email state
+                        pendingEmailState.value = ""
+                    }
+                    // Proceed with saving
+                    onClickDone()
+                }, // Main "Done" action for the form
                 onClickDoneFullScreen = { // "Done" action for the full-screen text editor
                     fullScreenElementToShow.value?.let { screenElement ->
                         bottomFormOnValueChange(screenElement, fullScreenEditorText, null)
@@ -148,6 +197,8 @@ fun DocumentBottomSheetForm(
                 onClickDeleteAddress = onClickDeleteAddress,
                 onClickDeleteEmail = onClickDeleteEmail,
                 onAddEmail = onAddEmail,
+                pendingEmailStateHolder = pendingEmailState,
+                onPendingEmailValidationResult = onPendingEmailValidationResult,
                 onNavigateToFullScreenText = { screenElement -> // Callback to show full screen editor
                     fullScreenElementToShow.value = screenElement
                     // fullScreenEditorText is initialized by the LaunchedEffect
@@ -234,7 +285,7 @@ private fun DocumentBottomSheetHeader(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = 20.dp,
+                top = 50.dp, // Increased to avoid camera notch
                 end = 30.dp,
                 start = 30.dp
             )
@@ -318,6 +369,8 @@ private fun DocumentBottomSheetContent(
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit,
     onAddEmail: (ClientOrIssuerType, String) -> Unit,
+    pendingEmailStateHolder: MutableState<String>,
+    onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit,
     onNavigateToFullScreenText: (ScreenElement) -> Unit, // Callback to request full screen view
     onNavigateToTaxSelection: (ScreenElement) -> Unit // Callback to request tax selection view
 ) {
@@ -336,7 +389,9 @@ private fun DocumentBottomSheetContent(
                 isInBottomSheetModal = true,
                 onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) },
                 onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
-                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) }
+                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) },
+                pendingEmailStateHolder = pendingEmailStateHolder,
+                onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) }
             )
         }
 
@@ -353,7 +408,9 @@ private fun DocumentBottomSheetContent(
                 isInBottomSheetModal = true,
                 onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) },
                 onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
-                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) }
+                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
+                pendingEmailStateHolder = pendingEmailStateHolder,
+                onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
             )
         }
 

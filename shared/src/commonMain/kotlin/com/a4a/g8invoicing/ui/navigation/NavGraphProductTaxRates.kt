@@ -2,6 +2,10 @@ package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -30,8 +34,13 @@ fun NavGraphBuilder.productTaxRates(
         }
     ) { backStackEntry ->
         val viewModel = backStackEntry.sharedViewModel<ProductAddEditViewModel>(navController)
-        val taxRates = viewModel.fetchTaxRatesFromLocalDb()
-        val taxRatesWithIds = viewModel.fetchTaxRatesWithIdsFromLocalDb()
+
+        // Counter to force recomposition after save
+        val refreshCounter by viewModel.taxRatesRefreshCounter.collectAsState()
+
+        // Load data synchronously using remember, keyed by refreshCounter to reload after save
+        val taxRates = remember(refreshCounter) { viewModel.fetchTaxRatesFromLocalDb() }
+        val taxRatesWithIds = remember(refreshCounter) { viewModel.fetchTaxRatesWithIdsFromLocalDb() }
 
         PlatformBackHandler {
             onClickBackOrSelect()

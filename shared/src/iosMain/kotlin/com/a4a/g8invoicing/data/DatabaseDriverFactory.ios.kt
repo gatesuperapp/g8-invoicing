@@ -6,6 +6,7 @@ import com.a4a.g8invoicing.Database
 
 actual class DatabaseDriverFactory {
     actual fun createDriver(): SqlDriver {
+        // NativeSqliteDriver handles migrations automatically via Database.Schema
         return NativeSqliteDriver(Database.Schema, "g8invoicing.db")
     }
 }

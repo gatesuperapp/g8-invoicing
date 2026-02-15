@@ -2,8 +2,10 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
@@ -28,6 +30,61 @@ fun formatDate(millis: Long, pattern: String = "dd/MM/yyyy HH:mm:ss"): String {
             append(":")
             append(localDateTime.second.toString().padStart(2, '0'))
         }
+    }
+}
+
+/**
+ * Format millis from DatePicker (which uses UTC) to a date string.
+ * The DatePicker's selectedDateMillis represents midnight UTC of the selected date.
+ */
+fun formatDateFromPicker(millis: Long): String {
+    val instant = Instant.fromEpochMilliseconds(millis)
+    // Use UTC because DatePicker uses UTC for its selectedDateMillis
+    val localDateTime = instant.toLocalDateTime(TimeZone.UTC)
+
+    return buildString {
+        append(localDateTime.dayOfMonth.toString().padStart(2, '0'))
+        append("/")
+        append(localDateTime.monthNumber.toString().padStart(2, '0'))
+        append("/")
+        append(localDateTime.year)
+    }
+}
+
+/**
+ * Parse a date string to millis for DatePicker (which uses UTC).
+ * Returns midnight UTC of the parsed date.
+ */
+fun parseDateForPicker(dateString: String): Long? {
+    return try {
+        val datePart = dateString.split(" ")[0]
+
+        // Detect format: yyyy-MM-dd or dd/MM/yyyy
+        val (year, month, day) = if (datePart.contains("-")) {
+            // yyyy-MM-dd format
+            val parts = datePart.split("-")
+            if (parts.size < 3) return null
+            Triple(
+                parts[0].toIntOrNull() ?: return null,
+                parts[1].toIntOrNull() ?: return null,
+                parts[2].toIntOrNull() ?: return null
+            )
+        } else {
+            // dd/MM/yyyy format
+            val parts = datePart.split("/")
+            if (parts.size < 3) return null
+            Triple(
+                parts[2].toIntOrNull() ?: return null,
+                parts[1].toIntOrNull() ?: return null,
+                parts[0].toIntOrNull() ?: return null
+            )
+        }
+
+        // Use UTC because DatePicker expects UTC millis
+        val localDate = LocalDate(year, month, day)
+        localDate.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+    } catch (e: Exception) {
+        null
     }
 }
 
@@ -76,3 +133,14 @@ fun parseDate(dateString: String, pattern: String = "dd/MM/yyyy HH:mm:ss"): Long
 }
 
 fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
+
+/**
+ * Get midnight UTC of today's date (for DatePicker initialization).
+ * DatePicker uses UTC internally, so this ensures the current local date
+ * is correctly displayed.
+ */
+fun todayForPicker(): Long {
+    val now = Clock.System.now()
+    val localDate = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return localDate.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
+}

@@ -12,12 +12,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.ImeAction
@@ -39,16 +44,48 @@ data class EmailListInput(
     val placeholder: String = "",
     val onAddEmail: (String) -> Unit = {},
     val onRemoveEmail: (Int) -> Unit = {},
-    val maxEmails: Int = 4
+    val maxEmails: Int = 4,
+    val onPendingEmailValidationResult: (Boolean) -> Unit = {}, // true = valid or empty, false = invalid
+    val pendingEmailStateHolder: MutableState<String>? = null // Parent can read this to validate directly
 )
 
 @Composable
 fun FormInputCreatorEmailList(
     input: EmailListInput,
 ) {
-    var newEmailText by remember { mutableStateOf("") }
     val nonEmptyEmails = input.emails.filter { it.email.text.isNotEmpty() }
     val canAddMore = nonEmptyEmails.size < input.maxEmails
+
+    // Use parent's state if provided, otherwise use local state
+    var localPendingEmail by remember { mutableStateOf("") }
+    val pendingEmail = input.pendingEmailStateHolder?.value ?: localPendingEmail
+    val setPendingEmail: (String) -> Unit = { value ->
+        if (input.pendingEmailStateHolder != null) {
+            input.pendingEmailStateHolder.value = value
+        } else {
+            localPendingEmail = value
+        }
+    }
+    var emailError by remember { mutableStateOf<String?>(null) }
+
+    // Function to try adding an email with validation
+    fun tryAddEmail() {
+        if (pendingEmail.isNotBlank()) {
+            val validationError = FormInputsValidator.validateEmail(pendingEmail.trim())
+            if (validationError == null) {
+                input.onAddEmail(pendingEmail.trim())
+                setPendingEmail("")
+                emailError = null
+                input.onPendingEmailValidationResult(true)
+            } else {
+                emailError = validationError
+                input.onPendingEmailValidationResult(false)
+            }
+        } else {
+            // No pending email, validation is OK
+            input.onPendingEmailValidationResult(true)
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -68,36 +105,57 @@ fun FormInputCreatorEmailList(
 
         // Input field for adding new email
         if (canAddMore) {
-            BasicTextField(
-                value = newEmailText,
-                onValueChange = { newEmailText = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = if (nonEmptyEmails.isNotEmpty()) 4.dp else 0.dp),
-                textStyle = MaterialTheme.typography.inputField,
-                cursorBrush = SolidColor(Color.Black),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        if (newEmailText.isNotBlank() && isValidEmail(newEmailText)) {
-                            input.onAddEmail(newEmailText.trim())
-                            newEmailText = ""
+            CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
+                BasicTextField(
+                    value = pendingEmail,
+                    onValueChange = {
+                        setPendingEmail(it)
+                        // Clear error when user starts typing again
+                        if (emailError != null) {
+                            emailError = null
+                            input.onPendingEmailValidationResult(true) // Reset validation state
                         }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = if (nonEmptyEmails.isNotEmpty()) 4.dp else 0.dp)
+                        .onFocusChanged { focusState ->
+                            // When focus is lost, try to add the email
+                            if (!focusState.isFocused) {
+                                tryAddEmail()
+                            }
+                        },
+                    textStyle = LocalTextStyle.current,
+                    cursorBrush = SolidColor(Color.Black),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            tryAddEmail()
+                        }
+                    ),
+                    decorationBox = { innerTextField ->
+                        if (pendingEmail.isEmpty()) {
+                            Text(
+                                text = input.placeholder,
+                                style = MaterialTheme.typography.inputField
+                            )
+                        }
+                        innerTextField()
                     }
-                ),
-                decorationBox = { innerTextField ->
-                    if (newEmailText.isEmpty()) {
-                        Text(
-                            text = input.placeholder,
-                            style = MaterialTheme.typography.inputField
-                        )
-                    }
-                    innerTextField()
-                }
-            )
+                )
+            }
+
+            // Error message
+            emailError?.let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
     }
 }
@@ -131,7 +189,3 @@ fun EmailChip(
     }
 }
 
-private fun isValidEmail(email: String): Boolean {
-    // Simple email validation
-    return email.contains("@") && email.contains(".")
-}

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -27,10 +28,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
@@ -86,7 +94,12 @@ import com.a4a.g8invoicing.shared.resources.about_title_assistance
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.about_title_community
 import com.a4a.g8invoicing.shared.resources.about_title_early_access
+import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.about_title_legal
+import com.a4a.g8invoicing.shared.resources.about_language_english
+import com.a4a.g8invoicing.shared.resources.about_language_french
+import com.a4a.g8invoicing.shared.resources.about_language_german
+import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.account_bat_love
 import com.a4a.g8invoicing.shared.resources.account_donate
 import com.a4a.g8invoicing.shared.resources.account_donate_link
@@ -94,6 +107,8 @@ import com.a4a.g8invoicing.shared.resources.account_share_content
 import com.a4a.g8invoicing.shared.resources.account_subscribe
 import com.a4a.g8invoicing.shared.resources.appbar_g8
 import com.a4a.g8invoicing.shared.resources.ok
+import com.a4a.g8invoicing.data.AppLanguage
+import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
@@ -105,6 +120,7 @@ import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textNormalBold
 import com.a4a.g8invoicing.ui.theme.textTitle
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 /**
  * Result of database export operation
@@ -414,6 +430,19 @@ fun About(
                 Spacer(modifier = Modifier.height(30.dp))
 
                 // =====================
+                // SECTION: Langue
+                // =====================
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(Res.string.about_title_language),
+                    style = MaterialTheme.typography.textTitle,
+                )
+
+                LanguageSelector()
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                // =====================
                 // SECTION: Version (en dernier)
                 // =====================
                 Row(
@@ -599,4 +628,66 @@ private fun AssistanceText(
                 }
         }
     )
+}
+
+@Composable
+private fun LanguageSelector(
+    localeManager: LocaleManager = koinInject()
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val currentLanguage = localeManager.currentLanguage
+
+    // String resources for language names
+    val systemLabel = stringResource(Res.string.about_language_system)
+    val frenchLabel = stringResource(Res.string.about_language_french)
+    val englishLabel = stringResource(Res.string.about_language_english)
+    val germanLabel = stringResource(Res.string.about_language_german)
+
+    fun getDisplayName(language: AppLanguage): String = when (language) {
+        AppLanguage.SYSTEM -> systemLabel
+        AppLanguage.FRENCH -> frenchLabel
+        AppLanguage.ENGLISH -> englishLabel
+        AppLanguage.GERMAN -> germanLabel
+    }
+
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = Color.Gray,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = getDisplayName(currentLanguage),
+                color = Color.Black
+            )
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AppLanguage.values().forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(getDisplayName(language)) },
+                    onClick = {
+                        localeManager.setLanguage(language)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }

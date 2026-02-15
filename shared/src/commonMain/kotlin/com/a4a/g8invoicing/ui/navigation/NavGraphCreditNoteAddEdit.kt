@@ -237,6 +237,9 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onAddEmail = { type, email ->
                 clientOrIssuerAddEditViewModel.addEmailToClientOrIssuerState(type, email)
             },
+            onPendingEmailValidationResult = { _, isValid ->
+                clientOrIssuerAddEditViewModel.setPendingEmailValidationResult(isValid)
+            },
             onOrderChange = creditNoteViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent
