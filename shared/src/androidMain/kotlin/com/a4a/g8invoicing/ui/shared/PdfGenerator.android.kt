@@ -337,7 +337,8 @@ actual class PdfGenerator actual constructor(
     }
 
     private fun createDate(date: String, font: PdfFont, fontSize: Float): Paragraph {
-        return Paragraph("${strings.documentDate} : $date")
+        val dateLabel = strings.documentDate.trimEnd() + " "
+        return Paragraph("$dateLabel$date")
             .setFont(font)
             .setFontSize(fontSize)
             .setMarginBottom(24F)
@@ -373,12 +374,20 @@ actual class PdfGenerator actual constructor(
             table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(6f))
 
             it.addresses?.let { addresses ->
+                // When there are only 2 addresses, put address 2 on the right (below address 1)
+                if (addresses.size == 2) {
+                    table.addCell(Cell().setBorder(Border.NO_BORDER)) // Empty cell on left
+                }
                 for (i in 1..<addresses.size) {
                     table.addCell(createAddressTitle(addresses, i, fontSize))
                 }
                 table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
                 table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
 
+                // When there are only 2 addresses, put address 2 on the right (below address 1)
+                if (addresses.size == 2) {
+                    table.addCell(Cell().setBorder(Border.NO_BORDER)) // Empty cell on left
+                }
                 for (i in 1..<addresses.size) {
                     table.addCell(
                         createClientRectangleAndContent(
@@ -452,13 +461,13 @@ actual class PdfGenerator actual constructor(
 
             val companyInfo = Paragraph().setFixedLeading(12F).setPaddingBottom(4f)
             clientOrIssuer?.companyId1Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId1Label?.text} : $it\n"))
+                companyInfo.add(Text("${clientOrIssuer.companyId1Label?.text}${strings.labelSeparator}$it\n"))
             }
             clientOrIssuer?.companyId2Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId2Label?.text} : $it\n"))
+                companyInfo.add(Text("${clientOrIssuer.companyId2Label?.text}${strings.labelSeparator}$it\n"))
             }
             clientOrIssuer?.companyId3Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId3Label?.text} : $it\n"))
+                companyInfo.add(Text("${clientOrIssuer.companyId3Label?.text}${strings.labelSeparator}$it\n"))
             }
             result.add(companyInfo)
         }
@@ -467,7 +476,8 @@ actual class PdfGenerator actual constructor(
     }
 
     private fun createReference(text: String, font: PdfFont): Paragraph {
-        return Paragraph(Text("${strings.documentReference} : ").setFont(font)).add(text)
+        val referenceLabel = strings.documentReference.trimEnd() + " "
+        return Paragraph(Text(referenceLabel).setFont(font)).add(text)
     }
 
     private fun createFreeText(text: String, font: PdfFont): Paragraph {
@@ -528,8 +538,7 @@ actual class PdfGenerator actual constructor(
             val spacing = Paragraph("\n").setFixedLeading(4F)
             val descriptionText = product.description?.text
             val itemDescription: Paragraph? = if (!descriptionText.isNullOrEmpty()) {
-                val italicText = Text(descriptionText)
-                italicText.setItalic()
+                val italicText = Text(descriptionText).simulateItalic()
                 Paragraph(italicText).setFixedLeading(10F)
             } else {
                 null
@@ -572,7 +581,7 @@ actual class PdfGenerator actual constructor(
         table.addCellInPrices(Paragraph("${prices.totalPriceWithoutTax?.toPlainString()?.replace(".", ",") ?: " - "}${strings.currency}"))
 
         prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
-            table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}% : "))
+            table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")} %${strings.labelSeparator}"))
             table.addCellInPrices(Paragraph("${taxAmount.toPlainString().replace(".", ",")}${strings.currency}"))
         }
 
@@ -583,7 +592,8 @@ actual class PdfGenerator actual constructor(
     }
 
     private fun createDueDate(font: PdfFont, date: String, fontSize: Float): Paragraph {
-        return Paragraph("${strings.dueDate} : $date")
+        val dueDateLabel = strings.dueDate.trimEnd() + " "
+        return Paragraph("$dueDateLabel$date")
             .setFixedLeading(16F)
             .setPaddingTop(12f)
             .setTextAlignment(TextAlignment.CENTER)

@@ -41,6 +41,9 @@ kotlin {
             // BigDecimal KMP - use api() to export to dependent modules
             api("com.ionspin.kotlin:bignum:0.3.10")
 
+            // Multiplatform Settings (for language persistence)
+            implementation("com.russhwolf:multiplatform-settings-no-arg:1.1.1")
+
             // Compose Multiplatform
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -75,8 +78,10 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
             // SQLDelight Android Driver
             implementation("app.cash.sqldelight:android-driver:2.2.1")
-            // iText 7 for PDF generation
-            implementation("com.itextpdf:itext7-core:7.2.5")
+            // iText for PDF generation
+            implementation("com.itextpdf:itext7-core:9.4.0")
+            // AppCompat for locale management
+            implementation("androidx.appcompat:appcompat:1.7.0")
         }
 
         iosMain.dependencies {
@@ -89,8 +94,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
                 // SQLDelight JVM Driver for Desktop
                 implementation("app.cash.sqldelight:sqlite-driver:2.2.1")
-                // iText 7 for PDF generation
-                implementation("com.itextpdf:itext7-core:7.2.5")
+                // iText for PDF generation
+                implementation("com.itextpdf:itext7-core:9.4.0")
             }
         }
 
