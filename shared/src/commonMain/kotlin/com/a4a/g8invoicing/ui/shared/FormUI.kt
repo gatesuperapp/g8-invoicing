@@ -139,7 +139,6 @@ fun PageElementCreator(
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
     clearFocusForAllRows: () -> Unit,
 ) {
-
     RowWithLabelAndInput(
         formInput = input,
         imeAction = imeAction,

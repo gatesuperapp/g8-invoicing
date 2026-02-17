@@ -14,17 +14,14 @@ import androidx.compose.ui.unit.dp
 fun Separator() {
     Canvas(
         modifier = Modifier
-            .height(3.dp)
+            .height(1.dp)
             .fillMaxWidth()
     ) {
         drawLine(
-            color = Color.LightGray.copy(alpha = 0.6f), // Line color
-            start = Offset(
-                0f,
-                2f
-            ), // Starting point (1f to be positioned on the line)
-            end = Offset(size.width, 2f), // Ending point
-            strokeWidth = 2f // Line width
+            color = Color.LightGray.copy(alpha = 0.6f),
+            start = Offset(0f, size.height / 2),
+            end = Offset(size.width, size.height / 2),
+            strokeWidth = size.height
         )
     }
 }

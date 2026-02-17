@@ -98,26 +98,31 @@ fun ProductTaxRatesContent(
                 val isFirst = index == 0
                 val isLast = taxRate == taxRatesIncludingNoTax.lastOrNull()
 
-                // Wrap row and separator in a Column with background
+                // Column with background - Separator at top (except first) included in background
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
                             if (isCurrentTaxRate) Color(0xFFF0F0F0) else Color.Transparent
                         )
+                        .clickable {
+                            chosenOption = taxRate
+                            onSelectTaxRate(
+                                if (taxRate == BigDecimal.ZERO) {
+                                    null
+                                } else taxRate
+                            )
+                        }
                 ) {
+                    // Separator at top of each item (except first)
+                    if (!isFirst) {
+                        Separator()
+                    }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                chosenOption = taxRate
-                                onSelectTaxRate(
-                                    if (taxRate == BigDecimal.ZERO) {
-                                        null
-                                    } else taxRate
-                                )
-                            }
                             .padding(
                                 start = 20.dp,
                                 end = 20.dp,
@@ -140,10 +145,6 @@ fun ProductTaxRatesContent(
                             style = LocalTextStyle.current
                         )
                     }
-
-                    if (!isLast) {
-                        Separator()
-                    }
                 }
             }
         }
@@ -154,16 +155,24 @@ fun ProductTaxRatesContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                IconButton(
-                    onClick = onClickEditRates,
-                    modifier = Modifier.size(32.dp)
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = Color(0xFFf7f7f7),
+                            shape = RoundedCornerShape(6.dp)
+                        )
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Modifier les taux",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Gray
-                    )
+                    IconButton(
+                        onClick = onClickEditRates,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = "Modifier les taux",
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.Gray
+                        )
+                    }
                 }
             }
         }
@@ -211,7 +220,7 @@ fun ProductTaxRatesEditContent(
             modifier = Modifier
                 .padding(start = 4.dp, top = 4.dp)
                 .background(
-                    color = Color(0xFFE8E8E8),
+                    color = Color(0xFFf7f7f7),
                     shape = RoundedCornerShape(6.dp)
                 )
                 .clickable(enabled = true) {
