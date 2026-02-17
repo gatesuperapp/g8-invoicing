@@ -31,6 +31,11 @@ kotlin {
     }
 
     sourceSets {
+        // Create jvmMain source set shared between Android and Desktop
+        val jvmMain by creating {
+            dependsOn(commonMain.get())
+        }
+
         commonMain.dependencies {
             // Coroutines
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
@@ -74,14 +79,20 @@ kotlin {
             api("app.cash.sqldelight:coroutines-extensions:2.2.1")
         }
 
-        androidMain.dependencies {
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-            // SQLDelight Android Driver
-            implementation("app.cash.sqldelight:android-driver:2.2.1")
-            // iText for PDF generation
+        jvmMain.dependencies {
+            // iText for PDF generation (shared between Android and Desktop)
             implementation("com.itextpdf:itext7-core:9.4.0")
-            // AppCompat for locale management
-            implementation("androidx.appcompat:appcompat:1.7.0")
+        }
+
+        androidMain {
+            dependsOn(jvmMain)
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+                // SQLDelight Android Driver
+                implementation("app.cash.sqldelight:android-driver:2.2.1")
+                // AppCompat for locale management
+                implementation("androidx.appcompat:appcompat:1.7.0")
+            }
         }
 
         iosMain.dependencies {
@@ -90,12 +101,11 @@ kotlin {
         }
 
         val desktopMain by getting {
+            dependsOn(jvmMain)
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
                 // SQLDelight JVM Driver for Desktop
                 implementation("app.cash.sqldelight:sqlite-driver:2.2.1")
-                // iText for PDF generation
-                implementation("com.itextpdf:itext7-core:9.4.0")
             }
         }
 
