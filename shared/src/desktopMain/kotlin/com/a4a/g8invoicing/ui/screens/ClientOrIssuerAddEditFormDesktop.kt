@@ -68,6 +68,9 @@ import com.a4a.g8invoicing.shared.resources.client_section_identity
 import com.a4a.g8invoicing.shared.resources.client_section_legal
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
+import com.a4a.g8invoicing.shared.resources.company_identification1
+import com.a4a.g8invoicing.shared.resources.company_identification2
+import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
@@ -111,6 +114,9 @@ fun ClientOrIssuerAddEditFormDesktop(
     val cityPlaceholder = stringResource(Res.string.client_city_input)
     val notesLabel = stringResource(Res.string.client_notes)
     val notesPlaceholder = stringResource(Res.string.client_notes_input)
+    val companyId1Label = stringResource(Res.string.company_identification1)
+    val companyId2Label = stringResource(Res.string.company_identification2)
+    val companyId3Label = stringResource(Res.string.company_identification3)
 
     // Get the first address
     val address = clientOrIssuerUiState.addresses?.getOrNull(0)
@@ -286,10 +292,10 @@ fun ClientOrIssuerAddEditFormDesktop(
                         SectionTitle(sectionLegal)
                         Spacer(Modifier.height(16.dp))
 
-                        // SIRET (label editable + value)
+                        // Company ID 1 (label editable + value)
                         DesktopFormFieldWithEditableLabel(
-                            labelValue = clientOrIssuerUiState.companyId1Label,
-                            labelPlaceholder = "SIRET",
+                            labelValue = clientOrIssuerUiState.companyId1Label ?: TextFieldValue(companyId1Label),
+                            labelPlaceholder = companyId1Label,
                             onLabelChange = { onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL, it) },
                             value = clientOrIssuerUiState.companyId1Number,
                             placeholder = "123456789 12345",
@@ -299,10 +305,10 @@ fun ClientOrIssuerAddEditFormDesktop(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // TVA (label editable + value)
+                        // Company ID 2 (label editable + value)
                         DesktopFormFieldWithEditableLabel(
-                            labelValue = clientOrIssuerUiState.companyId2Label,
-                            labelPlaceholder = "N° TVA",
+                            labelValue = clientOrIssuerUiState.companyId2Label ?: TextFieldValue(companyId2Label),
+                            labelPlaceholder = companyId2Label,
                             onLabelChange = { onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL, it) },
                             value = clientOrIssuerUiState.companyId2Number,
                             placeholder = "123456789",
@@ -312,10 +318,10 @@ fun ClientOrIssuerAddEditFormDesktop(
 
                         Spacer(Modifier.height(16.dp))
 
-                        // RCS (label editable + value)
+                        // Company ID 3 (label editable + value)
                         DesktopFormFieldWithEditableLabel(
-                            labelValue = clientOrIssuerUiState.companyId3Label,
-                            labelPlaceholder = "RCS",
+                            labelValue = clientOrIssuerUiState.companyId3Label ?: TextFieldValue(companyId3Label),
+                            labelPlaceholder = companyId3Label,
                             onLabelChange = { onValueChange(ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL, it) },
                             value = clientOrIssuerUiState.companyId3Number,
                             placeholder = "123456789",

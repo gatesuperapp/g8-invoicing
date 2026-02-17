@@ -34,6 +34,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
@@ -52,6 +53,9 @@ import com.a4a.g8invoicing.shared.resources.client_city_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification1_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification2_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification3_input
+import com.a4a.g8invoicing.shared.resources.company_identification1
+import com.a4a.g8invoicing.shared.resources.company_identification2
+import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.client_delete_address
 import com.a4a.g8invoicing.shared.resources.client_email
 import com.a4a.g8invoicing.shared.resources.client_email_input
@@ -121,6 +125,9 @@ fun ClientOrIssuerAddEditForm(
     val clientCityPlaceholder = stringResource(Res.string.client_city_input)
     val clientZipCodeLabel = stringResource(Res.string.client_zip_code)
     val clientZipCodePlaceholder = stringResource(Res.string.client_zip_code_input)
+    val companyId1Label = stringResource(Res.string.company_identification1)
+    val companyId2Label = stringResource(Res.string.company_identification2)
+    val companyId3Label = stringResource(Res.string.company_identification3)
     val clientCompanyId1Placeholder = stringResource(Res.string.client_company_identification1_input)
     val clientCompanyId2Placeholder = stringResource(Res.string.client_company_identification2_input)
     val clientCompanyId3Placeholder = stringResource(Res.string.client_company_identification3_input)
@@ -411,7 +418,7 @@ fun ClientOrIssuerAddEditForm(
             val inputList = listOf(
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuerUiState.companyId1Label,
+                        text = clientOrIssuerUiState.companyId1Label ?: TextFieldValue(companyId1Label),
                         onValueChange = {
                             onValueChange(
                                 if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL
@@ -436,7 +443,7 @@ fun ClientOrIssuerAddEditForm(
                 ),
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuerUiState.companyId2Label,
+                        text = clientOrIssuerUiState.companyId2Label ?: TextFieldValue(companyId2Label),
                         onValueChange = {
                             onValueChange(
                                 if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL
@@ -461,7 +468,7 @@ fun ClientOrIssuerAddEditForm(
                 ),
                 FormInput(
                     label = TextInput(
-                        text = clientOrIssuerUiState.companyId3Label,
+                        text = clientOrIssuerUiState.companyId3Label ?: TextFieldValue(companyId3Label),
                         onValueChange = {
                             onValueChange(
                                 if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL

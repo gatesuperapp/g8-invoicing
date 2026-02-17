@@ -141,6 +141,9 @@
     <string name="client_city_input">Écholoc</string>
     <string name="client_zip_code">Code Postal</string>
     <string name="client_zip_code_input">81000</string>
+    <string name="company_identification1">SIRET</string>
+    <string name="company_identification2">TVA</string>
+    <string name="company_identification3">RCS</string>
     <string name="client_company_identification1_input">123456789 12345</string>
     <string name="client_company_identification2_input">123456789</string>
     <string name="client_company_identification3_input">123456789</string>

@@ -18,11 +18,11 @@ data class ClientOrIssuerState(
     var phone: TextFieldValue? = null,
     var emails: List<EmailState>? = null, // Max 4 emails
     var notes: TextFieldValue? = null,
-    var companyId1Label: TextFieldValue? = TextFieldValue("SIRET"),
+    var companyId1Label: TextFieldValue? = null,
     var companyId1Number: TextFieldValue? = null,
-    var companyId2Label: TextFieldValue? = TextFieldValue("TVA"),
+    var companyId2Label: TextFieldValue? = null,
     var companyId2Number: TextFieldValue? = null,
-    var companyId3Label: TextFieldValue? = TextFieldValue("RCS"),
+    var companyId3Label: TextFieldValue? = null,
     var companyId3Number: TextFieldValue? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

@@ -141,6 +141,9 @@
     <string name="client_city_input">Karben</string>
     <string name="client_zip_code">Postleitzahl</string>
     <string name="client_zip_code_input">61184</string>
+    <string name="company_identification1">HRB</string>
+    <string name="company_identification2">USt-IdNr.</string>
+    <string name="company_identification3">Steuer-Nr.</string>
     <string name="client_company_identification1_input">123456789 12345</string>
     <string name="client_company_identification2_input">123456789012</string>
     <string name="client_company_identification3_input">123456789</string>
