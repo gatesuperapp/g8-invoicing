@@ -39,6 +39,11 @@ deleteProduct:
 DELETE FROM Product
 WHERE id = :id;
 
+clearTaxRateFromProducts:
+UPDATE Product
+SET product_tax_id = NULL
+WHERE product_tax_id = :taxId;
+
 checkIfEmpty:
 SELECT count(*) FROM ClientOrIssuer LIMIT 1;
 

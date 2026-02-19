@@ -252,6 +252,16 @@ class ProductLocalDataSource(
             }
         }
     }
+
+    override suspend fun clearTaxRateFromProducts(taxId: Long) {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                productQueries.clearTaxRateFromProducts(taxId)
+            } catch (cause: Throwable) {
+                println("Error clearing tax rate $taxId from products: ${cause.message}")
+            }
+        }
+    }
 }
 
 fun Product.transformIntoEditableProduct(

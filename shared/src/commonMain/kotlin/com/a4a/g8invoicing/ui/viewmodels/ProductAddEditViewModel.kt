@@ -209,8 +209,11 @@ class ProductAddEditViewModel(
                 val newRateIds = rates.mapNotNull { it.first }.toSet()
 
                 // Delete rates that are no longer in the list
+                // First, clear the tax rate from products to avoid cascade delete
                 existingIds.forEach { existingId ->
                     if (existingId !in newRateIds) {
+                        // Clear the tax rate from products before deleting
+                        dataSource.clearTaxRateFromProducts(existingId)
                         taxDataSource.deleteProductTax(existingId)
                     }
                 }

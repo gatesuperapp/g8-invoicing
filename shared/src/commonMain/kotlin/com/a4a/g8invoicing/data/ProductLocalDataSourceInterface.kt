@@ -22,4 +22,5 @@ interface ProductLocalDataSourceInterface {
     suspend fun deleteDocumentProducts(ids: List<Long>)
     suspend fun deleteAdditionalPrice(productId: Long, priceWithoutTax: BigDecimal)
     suspend fun removeClientFromAdditionalPrice(productId: Long, clientId: Long)
+    suspend fun clearTaxRateFromProducts(taxId: Long)
 }
