@@ -149,12 +149,19 @@
     <string name="client_company_identification3_input">123456789</string>
     <string name="client_notes">Notizen</string>
     <string name="client_notes_input">Die Kleine Hufeisennase ist eine Fledermausart, die in Laubwäldern lebt.</string>
+    <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_logo_select">Logo auswählen</string>
+    <string name="issuer_logo_remove">Logo entfernen</string>
+    <string name="issuer_logo_error_title">Fehler</string>
+    <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Adresse hinzufügen</string>
     <string name="client_delete_address">Adresse löschen</string>
     <string name="client_selection_title">Kunden auswählen</string>
     <string name="client_selection_empty">Sie haben noch keine Kunden erstellt. Dies können Sie in der Kategorie "Kunden" tun.</string>
     <string name="client_selection_all_used">Alle Kunden sind bereits anderen Preisen zugeordnet.</string>
     <string name="client_selection_validate">Bestätigen</string>
+    <string name="select_placeholder">Auswählen…</string>
+    <string name="clients_selected_count">%1$d Kunden ausgewählt</string>
 
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Produkt hinzufügen</string>
@@ -288,7 +295,7 @@
     <string name="invoice_advice_legal_3">die Pflichtangaben für eine konforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5">Zu einem anderen Thema…</string>
-    <string name="invoice_advice_legal_6">Die Dokumente, die du erstellst, genauso wie alle deine Änderungen werden automatisch im Hintergrund gespeichert.\n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚\'𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
+    <string name="invoice_advice_legal_6">Die Dokumente, die du erstellst, genauso wie alle deine Änderungen werden automatisch im Hintergrund gespeichert.\n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚&apos;𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
     <string name="invoice_advice_bottom_menu">Halli-Hallo, ich bin dein batmagotchi. Ich muss dir unbedingt einen Tipp geben\n\n …</string>
     <string name="invoice_advice_bottom_menu1">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen,\n\n …</string>

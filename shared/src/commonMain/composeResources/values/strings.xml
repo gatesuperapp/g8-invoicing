@@ -149,12 +149,19 @@
     <string name="client_company_identification3_input">123456789</string>
     <string name="client_notes">Notes privées</string>
     <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus.</string>
+    <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_logo_select">Choisir un logo</string>
+    <string name="issuer_logo_remove">Supprimer le logo</string>
+    <string name="issuer_logo_error_title">Erreur</string>
+    <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Ajouter une adresse</string>
     <string name="client_delete_address">Effacer l'adresse</string>
     <string name="client_selection_title">Sélectionner les clients</string>
     <string name="client_selection_empty">Vous n'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie "Client·es".</string>
     <string name="client_selection_all_used">Tous les clients sont déjà assignés à d'autres prix.</string>
     <string name="client_selection_validate">Valider</string>
+    <string name="select_placeholder">Sélectionner…</string>
+    <string name="clients_selected_count">%1$d clients sélectionnés</string>
 
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Ajout produit</string>
@@ -298,21 +305,21 @@
     <string name="export_waiting_permission">Autorisation requise…</string>
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
-    <string name="export_error">Échec de l\'export.</string>
-    <string name="export_permission_denied">L\'accès au stockage est nécessaire pour enregistrer le PDF. Vous pouvez autoriser l\'accès dans les paramètres de l\'application.</string>
-    <string name="export_done_file_location">Enregistré dans l\'appareil (Téléchargements/g8) </string>
+    <string name="export_error">Échec de l&apos;export.</string>
+    <string name="export_permission_denied">L&apos;accès au stockage est nécessaire pour enregistrer le PDF. Vous pouvez autoriser l&apos;accès dans les paramètres de l&apos;application.</string>
+    <string name="export_done_file_location">Enregistré dans l&apos;appareil (Téléchargements/g8) </string>
     <string name="export_clickable_text">• ֊ •</string>
-    <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).\n\n• Si le fichier n\'apparaît pas, il est possible qu\'il soit dans un sous-dossier du dossier de téléchargement (surtout si tu passes par une app de fichiers type Samsung)\n\n• Tu peux également retrouver le fichier en faisant une recherche à partir du nom de fichier.</string>
+    <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).\n\n• Si le fichier n&apos;apparaît pas, il est possible qu&apos;il soit dans un sous-dossier du dossier de téléchargement (surtout si tu passes par une app de fichiers type Samsung)\n\n• Tu peux également retrouver le fichier en faisant une recherche à partir du nom de fichier.</string>
     <string name="export_info_popup_validate">okurrr</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n\nVeuillez trouver ci-joint votre document.\n\nCordialement</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
-    <string name="export_error_sharing">Le fichier n\'a pas pu être partagé.\n\nVeuillez l\'ouvrir directement depuis le dossier Téléchargements/g8.</string>
+    <string name="export_error_sharing">Le fichier n&apos;a pas pu être partagé.\n\nVeuillez l&apos;ouvrir directement depuis le dossier Téléchargements/g8.</string>
     <string name="export_email_subject">Votre %1$s N°%2$s</string>
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
     <string name="export_email_subject_credit_note">avoir</string>
-    <string name="alert_dialog_error">Une erreur s\'est produite : </string>
+    <string name="alert_dialog_error">Une erreur s&apos;est produite : </string>
     <string name="alert_dialog_error_confirm">OK</string>
 </resources>

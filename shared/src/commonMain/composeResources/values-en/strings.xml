@@ -149,12 +149,19 @@
     <string name="client_company_identification3_input">123456789</string>
     <string name="client_notes">Private notes</string>
     <string name="client_notes_input">The lesser horseshoe bat is a species of bat found in deciduous forests.</string>
+    <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_logo_select">Select a logo</string>
+    <string name="issuer_logo_remove">Remove logo</string>
+    <string name="issuer_logo_error_title">Error</string>
+    <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Add an address</string>
     <string name="client_delete_address">Delete address</string>
     <string name="client_selection_title">Select clients</string>
     <string name="client_selection_empty">You haven't created any clients yet. You can do so from the "Clients" category.</string>
     <string name="client_selection_all_used">All clients are already assigned to other prices.</string>
     <string name="client_selection_validate">Confirm</string>
+    <string name="select_placeholder">Select…</string>
+    <string name="clients_selected_count">%1$d clients selected</string>
 
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Add product</string>
