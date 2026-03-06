@@ -185,7 +185,7 @@ fun DocumentListItem(
                     text = (document.documentTotalPrices?.let {
                         it.totalPriceWithTax?.toPlainString()?.replace(".", ",")
                     }
-                        ?: "") + stringResource(Res.string.currency),
+                        ?: "") + " " + stringResource(Res.string.currency),
                     color = when (document.documentTag) {
                         DocumentTag.PAID -> ColorGreen
                         DocumentTag.LATE -> ColorPinkOrange

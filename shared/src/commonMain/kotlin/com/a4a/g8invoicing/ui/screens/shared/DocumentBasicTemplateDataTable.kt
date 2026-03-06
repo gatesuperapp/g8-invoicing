@@ -223,13 +223,13 @@ fun DocumentProductsRows(
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
-                    it.toStringWithTwoDecimals().replace(".", ",") + currencySymbol
+                    it.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
                 } ?: "",
                 alignEnd = true
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
-                    (it * data.quantity).toStringWithTwoDecimals().replace(".", ",") + currencySymbol
+                    (it * data.quantity).toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
                 } ?: "",
                 alignEnd = true
             )

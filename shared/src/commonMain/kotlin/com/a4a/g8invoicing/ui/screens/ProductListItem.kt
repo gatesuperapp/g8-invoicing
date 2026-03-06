@@ -146,7 +146,7 @@ fun ProductListItem(
 
                     Text(
                         text = displayPrice?.let {
-                            it.toPlainString().replace(".", ",") + currencySymbol
+                            it.toPlainString().replace(".", ",") + " " + currencySymbol
                         } ?: " - "
                     )
                 }

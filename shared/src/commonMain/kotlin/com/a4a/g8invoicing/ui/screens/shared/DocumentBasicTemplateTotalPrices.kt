@@ -104,7 +104,7 @@ fun DocumentBasicTemplateTotalPrices(
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
                     text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")
-                        ?: " - ") + currencySymbol
+                        ?: " - ") + " " + currencySymbol
                 )
             }
             if (footerArray.any { it.contains("TAXES") }) {
@@ -125,7 +125,7 @@ fun DocumentBasicTemplateTotalPrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = it.second.toStringWithTwoDecimals().replace(".", ",") + currencySymbol
+                            text = it.second.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
                         )
                     }
                 }
@@ -134,7 +134,7 @@ fun DocumentBasicTemplateTotalPrices(
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
                     text = (uiState.documentTotalPrices?.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",")
-                        ?: " - ") + currencySymbol
+                        ?: " - ") + " " + currencySymbol
                 )
             }
         }

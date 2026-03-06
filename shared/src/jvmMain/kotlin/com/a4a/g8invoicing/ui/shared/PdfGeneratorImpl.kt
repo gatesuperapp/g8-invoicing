@@ -11,6 +11,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.itextpdf.io.font.constants.StandardFonts
+import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -24,6 +25,7 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Image
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
@@ -40,7 +42,8 @@ import java.io.File
  */
 class PdfGeneratorImpl(
     private val strings: PdfStrings,
-    private val fileManager: PdfFileManager
+    private val fileManager: PdfFileManager,
+    private val imageStorage: ImageStorage? = null
 ) {
     fun generatePdf(document: DocumentState): String {
         val tempFileName = "${document.documentNumber.text}_temp.pdf"
@@ -81,11 +84,24 @@ class PdfGeneratorImpl(
         val dateFontSize = 16F
         val fontSize = 9.5F
 
-        // Title
-        doc.add(createTitle(document.documentNumber.text, document.documentType, fontBold, titleFontSize))
-
-        // Date
-        doc.add(createDate(document.documentDate.substringBefore(" "), fontBold, dateFontSize))
+        // Header with Logo and Title/Date
+        val logoPath = document.documentIssuer?.logoPath
+        if (logoPath != null && imageStorage != null) {
+            doc.add(createLogoAndTitleTable(
+                logoPath = logoPath,
+                documentNumber = document.documentNumber.text,
+                documentType = document.documentType,
+                documentDate = document.documentDate.substringBefore(" "),
+                fontBold = fontBold,
+                titleFontSize = titleFontSize,
+                dateFontSize = dateFontSize
+            ))
+        } else {
+            // Title (no logo)
+            doc.add(createTitle(document.documentNumber.text, document.documentType, fontBold, titleFontSize))
+            // Date
+            doc.add(createDate(document.documentDate.substringBefore(" "), fontBold, dateFontSize))
+        }
 
         // Issuer and Client
         doc.add(createIssuerAndClientTable(document.documentIssuer, document.documentClient, fontBold, fontSize))
@@ -159,6 +175,60 @@ class PdfGeneratorImpl(
         }
 
         return finalFileName
+    }
+
+    private fun createLogoAndTitleTable(
+        logoPath: String,
+        documentNumber: String,
+        documentType: DocumentType?,
+        documentDate: String,
+        fontBold: PdfFont,
+        titleFontSize: Float,
+        dateFontSize: Float
+    ): Table {
+        val table = Table(UnitValue.createPercentArray(floatArrayOf(30f, 70f)))
+            .useAllAvailableWidth()
+            .setMarginBottom(24F)
+
+        // Logo cell (left)
+        val logoCell = Cell().setBorder(Border.NO_BORDER)
+        try {
+            val absoluteLogoPath = imageStorage?.getAbsolutePath(logoPath)
+            if (absoluteLogoPath != null && File(absoluteLogoPath).exists()) {
+                val imageData = ImageDataFactory.create(absoluteLogoPath)
+                val logoImage = Image(imageData)
+                    .setMaxHeight(60f)
+                    .setMaxWidth(150f)
+                logoCell.add(logoImage)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        table.addCell(logoCell)
+
+        // Title and Date cell (right)
+        val titleCell = Cell().setBorder(Border.NO_BORDER)
+            .setTextAlignment(TextAlignment.RIGHT)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+
+        val title = documentType?.let { getDocumentTypeName(it, strings) } ?: ""
+        titleCell.add(
+            Paragraph(title + documentNumber)
+                .setFont(fontBold)
+                .setFontSize(titleFontSize)
+                .setMarginBottom(-6F)
+        )
+
+        val dateLabel = strings.documentDate.trimEnd() + " "
+        titleCell.add(
+            Paragraph("$dateLabel$documentDate")
+                .setFont(fontBold)
+                .setFontSize(dateFontSize)
+        )
+
+        table.addCell(titleCell)
+
+        return table
     }
 
     private fun createTitle(documentNumber: String, documentType: DocumentType?, font: PdfFont, fontSize: Float): Paragraph {
@@ -395,12 +465,12 @@ class PdfGeneratorImpl(
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
-                product.priceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")?.plus(strings.currency) ?: "",
+                product.priceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")?.plus(" ${strings.currency}") ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
                 product.priceWithoutTax?.let { price ->
-                    (price * product.quantity).toStringWithTwoDecimals().replace(".", ",") + strings.currency
+                    (price * product.quantity).toStringWithTwoDecimals().replace(".", ",") + " ${strings.currency}"
                 } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
@@ -416,17 +486,17 @@ class PdfGeneratorImpl(
 
         // Total HT
         table.addCellInPrices(Paragraph(strings.totalWithoutTax))
-        table.addCellInPrices(Paragraph("${prices.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "}${strings.currency}"))
+        table.addCellInPrices(Paragraph("${prices.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "} ${strings.currency}"))
 
         // TVA par taux
         prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
             table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}%${strings.labelSeparator}"))
-            table.addCellInPrices(Paragraph("${taxAmount.toStringWithTwoDecimals().replace(".", ",")}${strings.currency}"))
+            table.addCellInPrices(Paragraph("${taxAmount.toStringWithTwoDecimals().replace(".", ",")} ${strings.currency}"))
         }
 
         // Total TTC
         table.addCellInPrices(Paragraph(strings.totalWithTax).setFont(font).setFontSize(fontSize))
-        table.addCellInPrices(Paragraph("${prices.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "}${strings.currency}").setFont(font).setFontSize(fontSize))
+        table.addCellInPrices(Paragraph("${prices.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "} ${strings.currency}").setFont(font).setFontSize(fontSize))
 
         return table
     }
