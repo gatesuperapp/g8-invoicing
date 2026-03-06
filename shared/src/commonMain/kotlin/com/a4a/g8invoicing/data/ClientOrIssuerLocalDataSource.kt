@@ -146,17 +146,18 @@ class ClientOrIssuerLocalDataSource(
                         clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
                     ) ClientOrIssuerType.CLIENT.name.lowercase()
                     else ClientOrIssuerType.ISSUER.name.lowercase(),
-                    clientOrIssuer.firstName?.text,
-                    clientOrIssuer.name.text,
-                    clientOrIssuer.phone?.text,
-                    clientOrIssuer.emails?.firstOrNull()?.email?.text,
-                    clientOrIssuer.notes?.text,
-                    clientOrIssuer.companyId1Label?.text,
-                    clientOrIssuer.companyId1Number?.text,
-                    clientOrIssuer.companyId2Label?.text,
-                    clientOrIssuer.companyId2Number?.text,
-                    clientOrIssuer.companyId3Label?.text,
-                    clientOrIssuer.companyId3Number?.text,
+                    clientOrIssuer.firstName?.text?.trim(),
+                    clientOrIssuer.name.text.trim(),
+                    clientOrIssuer.phone?.text?.trim(),
+                    clientOrIssuer.emails?.firstOrNull()?.email?.text?.trim(),
+                    clientOrIssuer.notes?.text?.trim(),
+                    clientOrIssuer.companyId1Label?.text?.trim(),
+                    clientOrIssuer.companyId1Number?.text?.trim(),
+                    clientOrIssuer.companyId2Label?.text?.trim(),
+                    clientOrIssuer.companyId2Number?.text?.trim(),
+                    clientOrIssuer.companyId3Label?.text?.trim(),
+                    clientOrIssuer.companyId3Number?.text?.trim(),
+                    clientOrIssuer.logoPath,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -177,11 +178,11 @@ class ClientOrIssuerLocalDataSource(
                 for (address in addresses) {
                     clientOrIssuerAddressQueries.save(
                         id = null,
-                        address_title = address.addressTitle?.text,
-                        address_line_1 = address.addressLine1?.text,
-                        address_line_2 = address.addressLine2?.text,
-                        zip_code = address.zipCode?.text,
-                        city = address.city?.text,
+                        address_title = address.addressTitle?.text?.trim(),
+                        address_line_1 = address.addressLine1?.text?.trim(),
+                        address_line_2 = address.addressLine2?.text?.trim(),
+                        zip_code = address.zipCode?.text?.trim(),
+                        city = address.city?.text?.trim(),
                     )
 
                     val newAddressId = clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -257,11 +258,11 @@ class ClientOrIssuerLocalDataSource(
                 addresses?.forEach { address ->
                     documentClientOrIssuerAddressQueries.save(
                         id = null,
-                        address_title = address.addressTitle?.text,
-                        address_line_1 = address.addressLine1?.text,
-                        address_line_2 = address.addressLine2?.text,
-                        zip_code = address.zipCode?.text,
-                        city = address.city?.text,
+                        address_title = address.addressTitle?.text?.trim(),
+                        address_line_1 = address.addressLine1?.text?.trim(),
+                        address_line_2 = address.addressLine2?.text?.trim(),
+                        zip_code = address.zipCode?.text?.trim(),
+                        city = address.city?.text?.trim(),
                     )
 
                     documentClientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -309,17 +310,18 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuerQueries.update(
                         id = it.toLong(),
                         type = clientOrIssuer.type?.name?.lowercase(),
-                        first_name = clientOrIssuer.firstName?.text,
-                        name = clientOrIssuer.name.text,
-                        phone = clientOrIssuer.phone?.text,
-                        email = clientOrIssuer.emails?.firstOrNull()?.email?.text,
-                        notes = clientOrIssuer.notes?.text,
-                        company_id1_label = clientOrIssuer.companyId1Label?.text,
-                        company_id1_number = clientOrIssuer.companyId1Number?.text,
-                        company_id2_label = clientOrIssuer.companyId2Label?.text,
-                        company_id2_number = clientOrIssuer.companyId2Number?.text,
-                        company_id3_label = clientOrIssuer.companyId3Label?.text,
-                        company_id3_number = clientOrIssuer.companyId3Number?.text,
+                        first_name = clientOrIssuer.firstName?.text?.trim(),
+                        name = clientOrIssuer.name.text.trim(),
+                        phone = clientOrIssuer.phone?.text?.trim(),
+                        email = clientOrIssuer.emails?.firstOrNull()?.email?.text?.trim(),
+                        notes = clientOrIssuer.notes?.text?.trim(),
+                        company_id1_label = clientOrIssuer.companyId1Label?.text?.trim(),
+                        company_id1_number = clientOrIssuer.companyId1Number?.text?.trim(),
+                        company_id2_label = clientOrIssuer.companyId2Label?.text?.trim(),
+                        company_id2_number = clientOrIssuer.companyId2Number?.text?.trim(),
+                        company_id3_label = clientOrIssuer.companyId3Label?.text?.trim(),
+                        company_id3_number = clientOrIssuer.companyId3Number?.text?.trim(),
+                        logo_path = clientOrIssuer.logoPath,
                     )
                 }
 
@@ -343,11 +345,11 @@ class ClientOrIssuerLocalDataSource(
                         address.id?.let {
                             clientOrIssuerAddressQueries.update(
                                 id = it.toLong(),
-                                address_title = address.addressTitle?.text,
-                                address_line_1 = address.addressLine1?.text,
-                                address_line_2 = address.addressLine2?.text,
-                                zip_code = address.zipCode?.text,
-                                city = address.city?.text,
+                                address_title = address.addressTitle?.text?.trim(),
+                                address_line_1 = address.addressLine1?.text?.trim(),
+                                address_line_2 = address.addressLine2?.text?.trim(),
+                                zip_code = address.zipCode?.text?.trim(),
+                                city = address.city?.text?.trim(),
                             )
                         }
                     }
@@ -380,17 +382,18 @@ class ClientOrIssuerLocalDataSource(
                             ClientOrIssuerType.CLIENT.name.lowercase()
                         else ClientOrIssuerType.ISSUER.name.lowercase(),
                         original_client_id = documentClientOrIssuer.originalClientId?.toLong(),
-                        first_name = documentClientOrIssuer.firstName?.text,
-                        name = documentClientOrIssuer.name.text,
-                        phone = documentClientOrIssuer.phone?.text,
-                        email = documentClientOrIssuer.emails?.firstOrNull()?.email?.text,
-                        notes = documentClientOrIssuer.notes?.text,
-                        company_id1_label = documentClientOrIssuer.companyId1Label?.text,
-                        company_id1_number = documentClientOrIssuer.companyId1Number?.text,
-                        company_id2_label = documentClientOrIssuer.companyId2Label?.text,
-                        company_id2_number = documentClientOrIssuer.companyId2Number?.text,
-                        company_id3_label = documentClientOrIssuer.companyId3Label?.text,
-                        company_id3_number = documentClientOrIssuer.companyId3Number?.text,
+                        first_name = documentClientOrIssuer.firstName?.text?.trim(),
+                        name = documentClientOrIssuer.name.text.trim(),
+                        phone = documentClientOrIssuer.phone?.text?.trim(),
+                        email = documentClientOrIssuer.emails?.firstOrNull()?.email?.text?.trim(),
+                        notes = documentClientOrIssuer.notes?.text?.trim(),
+                        company_id1_label = documentClientOrIssuer.companyId1Label?.text?.trim(),
+                        company_id1_number = documentClientOrIssuer.companyId1Number?.text?.trim(),
+                        company_id2_label = documentClientOrIssuer.companyId2Label?.text?.trim(),
+                        company_id2_number = documentClientOrIssuer.companyId2Number?.text?.trim(),
+                        company_id3_label = documentClientOrIssuer.companyId3Label?.text?.trim(),
+                        company_id3_number = documentClientOrIssuer.companyId3Number?.text?.trim(),
+                        logo_path = documentClientOrIssuer.logoPath,
                     )
                 }
                 // Addresses to delete
@@ -415,11 +418,11 @@ class ClientOrIssuerLocalDataSource(
                         address.id?.let {
                             documentClientOrIssuerAddressQueries.update(
                                 id = it.toLong(),
-                                address_title = address.addressTitle?.text,
-                                address_line_1 = address.addressLine1?.text,
-                                address_line_2 = address.addressLine2?.text,
-                                zip_code = address.zipCode?.text,
-                                city = address.city?.text,
+                                address_title = address.addressTitle?.text?.trim(),
+                                address_line_1 = address.addressLine1?.text?.trim(),
+                                address_line_2 = address.addressLine2?.text?.trim(),
+                                zip_code = address.zipCode?.text?.trim(),
+                                city = address.city?.text?.trim(),
                             )
                         }
                     }
@@ -533,6 +536,7 @@ fun ClientOrIssuer.transformIntoEditable(
             )
         },
         companyId3Number = clientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
+        logoPath = clientOrIssuer.logo_path,
     )
 }
 
