@@ -284,12 +284,11 @@ class InvoiceLocalDataSource(
 
     // --- convertDeliveryNotesToInvoice ---
     // Uses withContext(Dispatchers.IO).
-    override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
-        withContext(DispatcherProvider.IO) {
+    override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
+        return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.invoice_default_number)
-
 
             try {
                 val newInvoiceState = InvoiceState(
@@ -317,8 +316,10 @@ class InvoiceLocalDataSource(
                         saveInfoInOtherTables(id, deliveryNote)
                     }
                 }
+                newInvoiceId
             } catch (e: Exception) {
                 //Log.e("InvoiceDS", "Error convertDeliveryNotes: ${e.message}")
+                null
             }
         }
     }
@@ -1056,6 +1057,7 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         company_id2_number = documentClientOrIssuer.companyId2Number?.text,
         company_id3_label = documentClientOrIssuer.companyId3Label?.text,
         company_id3_number = documentClientOrIssuer.companyId3Number?.text,
+        logo_path = documentClientOrIssuer.logoPath,
     )
 }
 
@@ -1132,6 +1134,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
             }
         },
         companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
+        logoPath = documentClientOrIssuer.logo_path,
     )
 }
 

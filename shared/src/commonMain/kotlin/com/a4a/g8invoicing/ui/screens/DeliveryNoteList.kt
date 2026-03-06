@@ -40,6 +40,7 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
+import com.a4a.g8invoicing.ui.shared.AlertDialogInvoiceCreated
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.animations.BatWavyArms
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -57,6 +58,8 @@ fun DeliveryNoteList(
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
     onClickBack: () -> Unit,
+    onClickViewCreatedInvoice: (Long) -> Unit = {},
+    onDismissInvoiceCreatedDialog: () -> Unit = {},
     // Callbacks for platform-specific back handling
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
@@ -174,6 +177,19 @@ fun DeliveryNoteList(
                     }
                 )
             }
+        }
+
+        // Show dialog when invoice is created from delivery notes
+        documentsUiState.createdInvoiceId?.let { invoiceId ->
+            AlertDialogInvoiceCreated(
+                onDismissRequest = {
+                    onDismissInvoiceCreatedDialog()
+                },
+                onConfirmation = {
+                    onDismissInvoiceCreatedDialog()
+                    onClickViewCreatedInvoice(invoiceId)
+                }
+            )
         }
     }
 }

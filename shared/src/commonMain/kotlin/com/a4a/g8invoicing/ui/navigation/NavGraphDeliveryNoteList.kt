@@ -20,6 +20,7 @@ fun NavGraphBuilder.deliveryNoteList(
     onClickListItem: (Int) -> Unit,
     onClickNew: () -> Unit,
     onClickBack: () -> Unit,
+    onClickViewCreatedInvoice: (Long) -> Unit,
     showCategoryButton: Boolean = true,
 ) {
     composable(route = Screen.DeliveryNoteList.name) {
@@ -49,6 +50,11 @@ fun NavGraphBuilder.deliveryNoteList(
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
             onClickBack = { onClickBack() },
+            onClickViewCreatedInvoice = { invoiceId ->
+                viewModel.clearCreatedInvoiceId()
+                onClickViewCreatedInvoice(invoiceId)
+            },
+            onDismissInvoiceCreatedDialog = viewModel::clearCreatedInvoiceId,
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
             showCategoryButton = showCategoryButton

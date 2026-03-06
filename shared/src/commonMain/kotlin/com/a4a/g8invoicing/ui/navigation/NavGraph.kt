@@ -60,6 +60,10 @@ fun NavGraph(
             onClickBack = {
                 navigateBack(navController)
             },
+            onClickViewCreatedInvoice = { invoiceId ->
+                val params = "?itemId=$invoiceId"
+                navController.navigate(Screen.InvoiceAddEdit.name + params)
+            },
             showCategoryButton = showCategoryButton
         )
 

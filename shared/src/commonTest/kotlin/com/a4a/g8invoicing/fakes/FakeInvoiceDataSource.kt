@@ -136,7 +136,7 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
         invoicesFlow.value = invoices.toList()
     }
 
-    override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>) {
+    override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
         val newId = nextInvoiceId++
         val todayFormatted = DateUtils.getCurrentDateFormatted()
         val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
@@ -164,6 +164,7 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
         )
         invoices.add(newInvoice)
         invoicesFlow.value = invoices.toList()
+        return newId.toLong()
     }
 
     override suspend fun update(document: InvoiceState) {

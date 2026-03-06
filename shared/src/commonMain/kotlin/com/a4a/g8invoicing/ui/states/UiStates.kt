@@ -9,7 +9,8 @@ data class InvoicesUiState(
 data class DeliveryNotesUiState(
     val deliveryNoteStates: List<DeliveryNoteState> = listOf(),
     val userMessages: List<Message> = listOf(),
-    val isFetchingDeliveryNotes: Boolean = false
+    val isFetchingDeliveryNotes: Boolean = false,
+    val createdInvoiceId: Long? = null
 )
 
 data class CreditNotesUiState(

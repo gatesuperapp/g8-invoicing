@@ -75,6 +75,10 @@
     <string name="document_modal_product_save">Bestätigen</string>
     <string name="document_modal_product_back">Zurück</string>
 
+    <!-- Invoice Created Dialog -->
+    <string name="invoice_created_title">Ihre Rechnung wurde erstellt</string>
+    <string name="invoice_created_button">Meine Rechnung ansehen</string>
+
     <!-- Document Form Strings -->
     <string name="document_number_short">Nr.</string>
     <string name="document_due_date">Fälligkeitsdatum</string>

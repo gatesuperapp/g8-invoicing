@@ -75,6 +75,10 @@
     <string name="document_modal_product_save">Confirm</string>
     <string name="document_modal_product_back">Back</string>
 
+    <!-- Invoice Created Dialog -->
+    <string name="invoice_created_title">Your invoice has been created</string>
+    <string name="invoice_created_button">View my invoice</string>
+
     <!-- Document Form Strings -->
     <string name="document_number_short">No.</string>
     <string name="document_due_date">Due date</string>

@@ -73,10 +73,19 @@ class DeliveryNoteListViewModel(
         convertJob?.cancel()
         convertJob = viewModelScope.launch {
             try {
-                invoiceDataSource.convertDeliveryNotesToInvoice(selectedDeliveryNotes)
+                val invoiceId = invoiceDataSource.convertDeliveryNotesToInvoice(selectedDeliveryNotes)
+                _deliveryNotesUiState.update { state ->
+                    state.copy(createdInvoiceId = invoiceId)
+                }
             } catch (e: Exception) {
                 // Error handling
             }
+        }
+    }
+
+    fun clearCreatedInvoiceId() {
+        _deliveryNotesUiState.update { state ->
+            state.copy(createdInvoiceId = null)
         }
     }
 }

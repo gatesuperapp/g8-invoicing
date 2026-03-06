@@ -29,7 +29,7 @@ interface InvoiceLocalDataSourceInterface {
 
     suspend fun deleteDocumentClientOrIssuer(id: Long, type: ClientOrIssuerType)
     suspend fun duplicate(documents: List<InvoiceState>)
-    suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>)
+    suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long?
     suspend fun update(document: InvoiceState)
     suspend fun delete(documents: List<InvoiceState>)
     suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase)

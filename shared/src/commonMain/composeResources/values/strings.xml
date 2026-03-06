@@ -75,6 +75,10 @@
     <string name="document_modal_product_save">Valider</string>
     <string name="document_modal_product_back">Retour</string>
 
+    <!-- Invoice Created Dialog -->
+    <string name="invoice_created_title">Votre facture a bien été créée !</string>
+    <string name="invoice_created_button">Voir ma facture</string>
+
     <!-- Document Form Strings -->
     <string name="document_number_short">N°</string>
     <string name="document_due_date">Échéance</string>
