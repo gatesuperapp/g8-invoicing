@@ -368,13 +368,13 @@ class PdfGeneratorImpl(
 
             val companyInfo = Paragraph().setFixedLeading(12F).setPaddingBottom(4f)
             clientOrIssuer?.companyId1Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId1Label?.text}${strings.labelSeparator}$it\n"))
+                companyInfo.add(Text("${clientOrIssuer.companyId1Label?.text ?: ""}${strings.labelSeparator}$it\n"))
             }
             clientOrIssuer?.companyId2Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId2Label?.text}${strings.labelSeparator}$it\n"))
+                companyInfo.add(Text("${clientOrIssuer.companyId2Label?.text ?: ""}${strings.labelSeparator}$it\n"))
             }
             clientOrIssuer?.companyId3Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId3Label?.text}${strings.labelSeparator}$it\n"))
+                companyInfo.add(Text("${clientOrIssuer.companyId3Label?.text ?: ""}${strings.labelSeparator}$it\n"))
             }
             result.add(companyInfo)
         }

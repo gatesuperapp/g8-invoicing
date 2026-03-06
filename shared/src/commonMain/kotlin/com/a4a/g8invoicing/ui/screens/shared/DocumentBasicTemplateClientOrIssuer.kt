@@ -100,7 +100,7 @@ fun DocumentBasicTemplateClientOrIssuer(
                     .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.companyId1Label?.text + labelSeparator
+                text = (clientOrIssuer?.companyId1Label?.text ?: "") + labelSeparator
                         + clientOrIssuer?.companyId1Number?.text
             )
         }
@@ -111,7 +111,7 @@ fun DocumentBasicTemplateClientOrIssuer(
                     .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.companyId2Label?.text + labelSeparator
+                text = (clientOrIssuer?.companyId2Label?.text ?: "") + labelSeparator
                         + clientOrIssuer?.companyId2Number?.text
             )
         }
@@ -121,7 +121,7 @@ fun DocumentBasicTemplateClientOrIssuer(
                 modifier = Modifier
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = clientOrIssuer?.companyId3Label?.text + labelSeparator
+                text = (clientOrIssuer?.companyId3Label?.text ?: "") + labelSeparator
                         + clientOrIssuer?.companyId3Number?.text
             )
         }
