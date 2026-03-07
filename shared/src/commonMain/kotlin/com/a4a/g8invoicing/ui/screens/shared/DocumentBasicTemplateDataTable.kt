@@ -51,17 +51,25 @@ val borderWidth = 0.7.dp
 fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
 ) {
-    val descriptionColumnWeight = .8f
-    val quantityColumnWeight = .15f
-    val taxColumnWeight = .15f
-    val linkedNoteColumnWeight = .100f
-
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
+    // Fixed column weights - same total with or without unit column
+    val quantityColumnWeight = .16f
+    val unitColumnWeight = .23f
+    val taxColumnWeight = .15f
+    val unitPriceColumnWeight = .23f
+    val totalPriceColumnWeight = .23f
+    // Description takes remaining space (absorbs unit column when not displayed)
+    val descriptionColumnWeight = if (displayUnitColumn) .69f else .92f
+    val linkedNoteColumnWeight = 1f
 
     TitleRows(
         descriptionColumnWeight,
         quantityColumnWeight,
+        unitColumnWeight,
+        taxColumnWeight,
+        unitPriceColumnWeight,
+        totalPriceColumnWeight,
         displayUnitColumn
     )
 
@@ -74,7 +82,10 @@ fun DocumentBasicTemplateProductsTable(
                 products.filter { it.linkedDocNumber == docNumberAndDate.first },
                 descriptionColumnWeight,
                 quantityColumnWeight,
+                unitColumnWeight,
                 taxColumnWeight,
+                unitPriceColumnWeight,
+                totalPriceColumnWeight,
                 displayUnitColumn
             )
         }
@@ -83,7 +94,10 @@ fun DocumentBasicTemplateProductsTable(
             products,
             descriptionColumnWeight,
             quantityColumnWeight,
+            unitColumnWeight,
             taxColumnWeight,
+            unitPriceColumnWeight,
+            totalPriceColumnWeight,
             displayUnitColumn
         )
     }
@@ -93,6 +107,10 @@ fun DocumentBasicTemplateProductsTable(
 fun TitleRows(
     descriptionColumnWeight: Float,
     quantityColumnWeight: Float,
+    unitColumnWeight: Float,
+    taxColumnWeight: Float,
+    unitPriceColumnWeight: Float,
+    totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
 ) {
     Row(
@@ -117,6 +135,7 @@ fun TitleRows(
         if (displayUnitColumn) {
             TableCell(
                 text = stringResource(Res.string.document_table_unit),
+                weight = unitColumnWeight,
                 alignEnd = true,
                 isBold = true
             )
@@ -124,17 +143,19 @@ fun TitleRows(
 
         TableCell(
             text = stringResource(Res.string.document_table_tax_rate),
-            weight = quantityColumnWeight,
+            weight = taxColumnWeight,
             alignEnd = true,
             isBold = true
         )
         TableCell(
             text = stringResource(Res.string.document_table_unit_price_without_tax),
+            weight = unitPriceColumnWeight,
             alignEnd = true,
             isBold = true
         )
         TableCell(
             text = stringResource(Res.string.document_table_total_price_without_tax),
+            weight = totalPriceColumnWeight,
             alignEnd = true,
             isBold = true
         )
@@ -182,10 +203,12 @@ fun DocumentProductsRows(
     tableData: List<DocumentProductState>,
     descriptionColumnWeight: Float,
     quantityColumnWeight: Float,
+    unitColumnWeight: Float,
     taxColumnWeight: Float,
+    unitPriceColumnWeight: Float,
+    totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
-
-    ) {
+) {
     val currencySymbol = stringResource(Res.string.currency)
 
     tableData.forEach { data ->
@@ -211,6 +234,7 @@ fun DocumentProductsRows(
             if (displayUnitColumn) {
                 TableCell(
                     text = if (!data.unit?.text.isNullOrEmpty()) data.unit?.text!! else " - ",
+                    weight = unitColumnWeight,
                     alignEnd = true
                 )
             }
@@ -225,12 +249,14 @@ fun DocumentProductsRows(
                 text = data.priceWithoutTax?.let {
                     it.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
                 } ?: "",
+                weight = unitPriceColumnWeight,
                 alignEnd = true
             )
             TableCell(
                 text = data.priceWithoutTax?.let {
                     (it * data.quantity).toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
                 } ?: "",
+                weight = totalPriceColumnWeight,
                 alignEnd = true
             )
 

@@ -67,7 +67,7 @@ fun DocumentBasicTemplateHeader(
                     if (document is DeliveryNoteState) Res.string.delivery_note_number
                     else if (document is CreditNoteState) Res.string.credit_note_number
                     else Res.string.invoice_number
-                ) + document.documentNumber.text
+                ) + " " + document.documentNumber.text
             )
 
             Spacer(

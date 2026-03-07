@@ -213,7 +213,7 @@ class PdfGeneratorImpl(
 
         val title = documentType?.let { getDocumentTypeName(it, strings) } ?: ""
         titleCell.add(
-            Paragraph(title + documentNumber)
+            Paragraph(title + " " + documentNumber)
                 .setFont(fontBold)
                 .setFontSize(titleFontSize)
                 .setMarginBottom(-6F)
@@ -233,7 +233,7 @@ class PdfGeneratorImpl(
 
     private fun createTitle(documentNumber: String, documentType: DocumentType?, font: PdfFont, fontSize: Float): Paragraph {
         val title = documentType?.let { getDocumentTypeName(it, strings) } ?: ""
-        return Paragraph(title + documentNumber)
+        return Paragraph(title + " " + documentNumber)
             .setFont(font)
             .setFontSize(fontSize)
             .setMarginBottom(-6F)
@@ -399,8 +399,8 @@ class PdfGeneratorImpl(
         try {
             val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
-            val columnWidth = if (displayUnitColumn) floatArrayOf(45f, 9f, 13f, 8f, 12f, 13f)
-            else floatArrayOf(45f, 9f, 8f, 12f, 13f)
+            val columnWidth = if (displayUnitColumn) floatArrayOf(43f, 9f, 13f, 8f, 14f, 13f)
+            else floatArrayOf(56f, 9f, 8f, 14f, 13f)
 
             val table = Table(UnitValue.createPercentArray(columnWidth)).useAllAvailableWidth().setFixedLayout()
 
