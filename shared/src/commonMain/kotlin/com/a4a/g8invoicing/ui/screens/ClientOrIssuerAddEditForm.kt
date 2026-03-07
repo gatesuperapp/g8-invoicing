@@ -67,12 +67,18 @@ import com.a4a.g8invoicing.shared.resources.client_notes
 import com.a4a.g8invoicing.shared.resources.client_notes_input
 import com.a4a.g8invoicing.shared.resources.client_phone
 import com.a4a.g8invoicing.shared.resources.client_phone_input
+import com.a4a.g8invoicing.shared.resources.issuer_logo_error_dismiss
+import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
+import com.a4a.g8invoicing.shared.resources.issuer_logo_label
+import com.a4a.g8invoicing.shared.resources.issuer_logo_remove
+import com.a4a.g8invoicing.shared.resources.issuer_logo_select
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.EmailListInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
+import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -135,6 +141,18 @@ fun ClientOrIssuerAddEditForm(
     val clientNotesPlaceholder = stringResource(Res.string.client_notes_input)
     val clientAddAddressText = stringResource(Res.string.client_add_address)
     val clientDeleteAddressText = stringResource(Res.string.client_delete_address)
+    val issuerLogoLabel = stringResource(Res.string.issuer_logo_label)
+    val issuerLogoSelect = stringResource(Res.string.issuer_logo_select)
+    val issuerLogoRemove = stringResource(Res.string.issuer_logo_remove)
+    val issuerLogoErrorTitle = stringResource(Res.string.issuer_logo_error_title)
+    val issuerLogoErrorDismiss = stringResource(Res.string.issuer_logo_error_dismiss)
+
+    // Check if this is an issuer (to show logo field)
+    // Also check typeOfCreation for new issuer creation where type might be null
+    val isIssuer = clientOrIssuerUiState.type == ClientOrIssuerType.ISSUER ||
+            clientOrIssuerUiState.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
+            typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_ISSUER ||
+            typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER
 
     Column(
         modifier = Modifier
@@ -207,7 +225,7 @@ fun ClientOrIssuerAddEditForm(
                                 it
                             )
                         },
-                        keyboardType = KeyboardType.Number
+                        keyboardType = KeyboardType.Phone
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
                     else ScreenElement.CLIENT_OR_ISSUER_PHONE
@@ -312,8 +330,7 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ZIP_$i"),
                                     it
                                 )
-                            },
-                            keyboardType = KeyboardType.Number
+                            }
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ZIP_$i")
@@ -503,6 +520,34 @@ fun ClientOrIssuerAddEditForm(
         }
 
         Spacer(Modifier.padding(bottom = 16.dp))
+
+        // Logo section (only for issuers)
+        if (isIssuer) {
+            Column(
+                modifier = Modifier
+                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .padding(top = 8.dp, bottom = 8.dp)
+            ) {
+                LogoPickerComponent(
+                    label = issuerLogoLabel,
+                    selectButtonText = issuerLogoSelect,
+                    removeButtonText = issuerLogoRemove,
+                    issuerId = clientOrIssuerUiState.id?.toInt(),
+                    currentLogoPath = clientOrIssuerUiState.logoPath,
+                    onLogoPathChanged = { newPath ->
+                        onValueChange(
+                            if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_LOGO
+                            else ScreenElement.ISSUER_LOGO,
+                            newPath ?: ""
+                        )
+                    },
+                    errorTitle = issuerLogoErrorTitle,
+                    errorDismissText = issuerLogoErrorDismiss
+                )
+            }
+
+            Spacer(Modifier.padding(bottom = 16.dp))
+        }
 
         Column(
             modifier = Modifier

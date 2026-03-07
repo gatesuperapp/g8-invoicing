@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
@@ -96,11 +97,11 @@ fun FormInputCreatorText(
                     },
                     textStyle = if (isEditableLabel) MaterialTheme.typography.inputLabel
                     else LocalTextStyle.current,
-                    /*     keyboardOptions = KeyboardOptions(
-                             imeAction = keyboardOption,
-                             keyboardType = input.keyboardType
-                         ),*/
-                    // keyboardActions = formActions,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = keyboardOption,
+                        keyboardType = input.keyboardType
+                    ),
+                    keyboardActions = formActions,
                     //   singleLine = input.displayFullScreenIcon,
 
                 ) { innerTextField ->

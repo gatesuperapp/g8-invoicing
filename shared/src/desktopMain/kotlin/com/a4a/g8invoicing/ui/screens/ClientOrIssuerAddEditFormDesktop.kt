@@ -71,6 +71,13 @@ import com.a4a.g8invoicing.shared.resources.client_zip_code_input
 import com.a4a.g8invoicing.shared.resources.company_identification1
 import com.a4a.g8invoicing.shared.resources.company_identification2
 import com.a4a.g8invoicing.shared.resources.company_identification3
+import com.a4a.g8invoicing.shared.resources.issuer_logo_error_dismiss
+import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
+import com.a4a.g8invoicing.shared.resources.issuer_logo_label
+import com.a4a.g8invoicing.shared.resources.issuer_logo_remove
+import com.a4a.g8invoicing.shared.resources.issuer_logo_select
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
@@ -84,6 +91,7 @@ fun ClientOrIssuerAddEditFormDesktop(
     onClickDone: () -> Unit,
     onClickBack: () -> Unit,
     isNewClient: Boolean = true,
+    isIssuerForm: Boolean = false,
 ) {
     val localFocusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -117,6 +125,16 @@ fun ClientOrIssuerAddEditFormDesktop(
     val companyId1Label = stringResource(Res.string.company_identification1)
     val companyId2Label = stringResource(Res.string.company_identification2)
     val companyId3Label = stringResource(Res.string.company_identification3)
+    val issuerLogoLabel = stringResource(Res.string.issuer_logo_label)
+    val issuerLogoSelect = stringResource(Res.string.issuer_logo_select)
+    val issuerLogoRemove = stringResource(Res.string.issuer_logo_remove)
+    val issuerLogoErrorTitle = stringResource(Res.string.issuer_logo_error_title)
+    val issuerLogoErrorDismiss = stringResource(Res.string.issuer_logo_error_dismiss)
+
+    // Check if this is an issuer (to show logo field)
+    val isIssuer = isIssuerForm ||
+            clientOrIssuerUiState.type == ClientOrIssuerType.ISSUER ||
+            clientOrIssuerUiState.type == ClientOrIssuerType.DOCUMENT_ISSUER
 
     // Get the first address
     val address = clientOrIssuerUiState.addresses?.getOrNull(0)
@@ -274,7 +292,6 @@ fun ClientOrIssuerAddEditFormDesktop(
                                 value = address?.zipCode,
                                 placeholder = zipCodePlaceholder,
                                 onValueChange = { onValueChange(ScreenElement.CLIENT_OR_ISSUER_ZIP_1, it) },
-                                keyboardType = KeyboardType.Number,
                                 modifier = Modifier.weight(0.35f)
                             )
                             DesktopFormField(
@@ -330,6 +347,27 @@ fun ClientOrIssuerAddEditFormDesktop(
                         )
 
                         Spacer(Modifier.height(32.dp))
+
+                        // LOGO Section (only for issuers)
+                        if (isIssuer) {
+                            SectionTitle("LOGO")
+                            Spacer(Modifier.height(16.dp))
+
+                            LogoPickerComponent(
+                                label = issuerLogoLabel,
+                                selectButtonText = issuerLogoSelect,
+                                removeButtonText = issuerLogoRemove,
+                                issuerId = clientOrIssuerUiState.id?.toInt(),
+                                currentLogoPath = clientOrIssuerUiState.logoPath,
+                                onLogoPathChanged = { newPath ->
+                                    onValueChange(ScreenElement.ISSUER_LOGO, newPath ?: "")
+                                },
+                                errorTitle = issuerLogoErrorTitle,
+                                errorDismissText = issuerLogoErrorDismiss
+                            )
+
+                            Spacer(Modifier.height(32.dp))
+                        }
 
                         // NOTES Section
                         SectionTitle("NOTES")
