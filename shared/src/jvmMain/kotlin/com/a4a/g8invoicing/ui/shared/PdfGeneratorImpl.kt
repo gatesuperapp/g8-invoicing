@@ -186,29 +186,13 @@ class PdfGeneratorImpl(
         titleFontSize: Float,
         dateFontSize: Float
     ): Table {
-        val table = Table(UnitValue.createPercentArray(floatArrayOf(30f, 70f)))
+        val table = Table(UnitValue.createPercentArray(floatArrayOf(70f, 30f)))
             .useAllAvailableWidth()
             .setMarginBottom(24F)
 
-        // Logo cell (left)
-        val logoCell = Cell().setBorder(Border.NO_BORDER)
-        try {
-            val absoluteLogoPath = imageStorage?.getAbsolutePath(logoPath)
-            if (absoluteLogoPath != null && File(absoluteLogoPath).exists()) {
-                val imageData = ImageDataFactory.create(absoluteLogoPath)
-                val logoImage = Image(imageData)
-                    .setMaxHeight(60f)
-                    .setMaxWidth(150f)
-                logoCell.add(logoImage)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        table.addCell(logoCell)
-
-        // Title and Date cell (right)
+        // Title and Date cell (left)
         val titleCell = Cell().setBorder(Border.NO_BORDER)
-            .setTextAlignment(TextAlignment.RIGHT)
+            .setTextAlignment(TextAlignment.LEFT)
             .setVerticalAlignment(VerticalAlignment.MIDDLE)
 
         val title = documentType?.let { getDocumentTypeName(it, strings) } ?: ""
@@ -227,6 +211,23 @@ class PdfGeneratorImpl(
         )
 
         table.addCell(titleCell)
+
+        // Logo cell (right)
+        val logoCell = Cell().setBorder(Border.NO_BORDER)
+            .setTextAlignment(TextAlignment.RIGHT)
+        try {
+            val absoluteLogoPath = imageStorage?.getAbsolutePath(logoPath)
+            if (absoluteLogoPath != null && File(absoluteLogoPath).exists()) {
+                val imageData = ImageDataFactory.create(absoluteLogoPath)
+                val logoImage = Image(imageData)
+                    .setMaxHeight(80f)
+                    .setMaxWidth(200f)
+                logoCell.add(logoImage)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        table.addCell(logoCell)
 
         return table
     }

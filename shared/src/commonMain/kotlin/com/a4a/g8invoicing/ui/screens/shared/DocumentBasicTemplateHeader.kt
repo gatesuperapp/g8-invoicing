@@ -1,27 +1,39 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
+import com.a4a.g8invoicing.ui.shared.ImageStorage
+import com.a4a.g8invoicing.ui.shared.InitImageContext
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.loadLogoBitmap
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
@@ -37,20 +49,38 @@ fun DocumentBasicTemplateHeader(
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
 ) {
+    // Initialize image context and load logo
+    InitImageContext()
+    val imageStorage = remember { ImageStorage() }
+    var logoBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    val logoPath = document.documentIssuer?.logoPath
+
+    LaunchedEffect(logoPath) {
+        logoBitmap = if (logoPath != null && imageStorage.logoExists(logoPath)) {
+            loadLogoBitmap(imageStorage.getAbsolutePath(logoPath))
+        } else {
+            null
+        }
+    }
+
+    // Header with title/date (left) and logo (right)
     Row(
         Modifier
             .fillMaxWidth()
+            .padding(bottom = 8.dp)
             .customCombinedClickable(
                 onClick = {
                     onClickElement(ScreenElement.DOCUMENT_HEADER)
                 },
                 onLongClick = {
                 }
-            )
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // Title and date on the left
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.Start
         ) {
             Text(
                 modifier = Modifier
@@ -77,7 +107,6 @@ fun DocumentBasicTemplateHeader(
 
             Text(
                 modifier = Modifier
-                    .padding(bottom = 8.dp)
                     .getBorder(ScreenElement.DOCUMENT_DATE, selectedItem)
                     .customCombinedClickable(
                         onClick = {
@@ -90,6 +119,16 @@ fun DocumentBasicTemplateHeader(
                 text = stringResource(Res.string.document_date_label) + document.documentDate.substringBefore(
                     " "
                 )
+            )
+        }
+
+        // Logo on the right (if present)
+        if (logoBitmap != null) {
+            Image(
+                bitmap = logoBitmap!!,
+                contentDescription = "Logo",
+                contentScale = ContentScale.FillHeight,
+                modifier = Modifier.height(40.dp)
             )
         }
     }
