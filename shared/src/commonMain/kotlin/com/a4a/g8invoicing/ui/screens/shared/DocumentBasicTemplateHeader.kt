@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.addressed_to
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
@@ -135,30 +136,41 @@ fun DocumentBasicTemplateHeader(
     val client = document.documentClient
 
     // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
-    Row {
+    val numberOfAddresses = client?.addresses?.size ?: 0
+    val defaultTitle = stringResource(Res.string.addressed_to)
+    Row(
+        modifier = Modifier.padding(top = 12.dp)
+    ) {
         Spacer(
             modifier = Modifier
                 .fillMaxWidth(0.5f)
         )
+        // Show "Adressé à" by default when there's only one address and no custom title
         val addressTitle = client?.addresses?.getOrNull(0)?.addressTitle?.text
-                ?: ""
+        val displayTitle = if (numberOfAddresses == 1 && addressTitle.isNullOrEmpty()) {
+            defaultTitle
+        } else {
+            addressTitle ?: ""
+        }
         Column(
             modifier = Modifier
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                modifier = Modifier
-                    .padding(bottom = 2.dp),
-                style = MaterialTheme.typography.textForDocumentsSecondary,
-                text = addressTitle
-            )
+            if (displayTitle.isNotEmpty()) {
+                Text(
+                    modifier = Modifier
+                        .padding(bottom = 1.dp),
+                    style = MaterialTheme.typography.textForDocumentsSecondary,
+                    color = Color.DarkGray,
+                    text = displayTitle
+                )
+            }
         }
     }
 
     // ROW 2 : ISSUER --------- CLIENT ADDRESS 1
     Row() {
-        val numberOfAddresses = document.documentClient?.addresses?.size ?: 0
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.5f)

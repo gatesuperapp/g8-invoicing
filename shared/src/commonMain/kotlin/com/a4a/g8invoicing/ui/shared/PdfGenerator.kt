@@ -36,6 +36,7 @@ data class PdfStrings(
     val currency: String,
     val invoicePaid: String,
     val labelSeparator: String,
+    val addressedTo: String,
 )
 
 /**

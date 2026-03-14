@@ -215,6 +215,7 @@ class PdfGeneratorImpl(
         // Logo cell (right)
         val logoCell = Cell().setBorder(Border.NO_BORDER)
             .setTextAlignment(TextAlignment.RIGHT)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
         try {
             val absoluteLogoPath = imageStorage?.getAbsolutePath(logoPath)
             if (absoluteLogoPath != null && File(absoluteLogoPath).exists()) {
@@ -313,9 +314,16 @@ class PdfGeneratorImpl(
     }
 
     private fun createAddressTitle(addresses: List<AddressState>, index: Int, fontSize: Float): Cell {
-        val title = addresses.getOrNull(index)?.addressTitle?.text ?: ""
+        val addressTitle = addresses.getOrNull(index)?.addressTitle?.text
+        // Show "Addressed to" by default when there's only one address and no custom title
+        val title = if (addresses.size == 1 && index == 0 && addressTitle.isNullOrEmpty()) {
+            strings.addressedTo
+        } else {
+            addressTitle ?: ""
+        }
         return Cell()
             .setBorder(Border.NO_BORDER)
+            .setPaddingTop(8f)
             .add(Paragraph(title).setFontColor(ColorConstants.DARK_GRAY).setFixedLeading(6F).setFontSize(fontSize))
             .setTextAlignment(TextAlignment.CENTER)
     }

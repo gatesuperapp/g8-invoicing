@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.addressed_to
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
@@ -39,12 +40,12 @@ import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.label_separator
-import com.a4a.g8invoicing.shared.resources.table_description
-import com.a4a.g8invoicing.shared.resources.table_quantity
-import com.a4a.g8invoicing.shared.resources.table_tax_rate
-import com.a4a.g8invoicing.shared.resources.table_total_price
-import com.a4a.g8invoicing.shared.resources.table_unit
-import com.a4a.g8invoicing.shared.resources.table_unit_price
+import com.a4a.g8invoicing.shared.resources.document_table_description
+import com.a4a.g8invoicing.shared.resources.document_table_quantity
+import com.a4a.g8invoicing.shared.resources.document_table_tax_rate
+import com.a4a.g8invoicing.shared.resources.document_table_total_price_without_tax
+import com.a4a.g8invoicing.shared.resources.document_table_unit
+import com.a4a.g8invoicing.shared.resources.document_table_unit_price_without_tax
 import com.a4a.g8invoicing.shared.resources.total_without_tax
 import com.a4a.g8invoicing.shared.resources.total_with_tax
 import com.a4a.g8invoicing.shared.resources.vat
@@ -76,12 +77,12 @@ actual fun ExportPdfPlatform(
         creditNoteNumber = stringResource(Res.string.credit_note_number),
         documentDate = stringResource(Res.string.document_date_label),
         documentReference = stringResource(Res.string.document_reference_label),
-        tableDescription = stringResource(Res.string.table_description),
-        tableQuantity = stringResource(Res.string.table_quantity),
-        tableUnit = stringResource(Res.string.table_unit),
-        tableTaxRate = stringResource(Res.string.table_tax_rate),
-        tableUnitPrice = stringResource(Res.string.table_unit_price),
-        tableTotalPrice = stringResource(Res.string.table_total_price),
+        tableDescription = stringResource(Res.string.document_table_description),
+        tableQuantity = stringResource(Res.string.document_table_quantity),
+        tableUnit = stringResource(Res.string.document_table_unit),
+        tableTaxRate = stringResource(Res.string.document_table_tax_rate),
+        tableUnitPrice = stringResource(Res.string.document_table_unit_price_without_tax),
+        tableTotalPrice = stringResource(Res.string.document_table_total_price_without_tax),
         totalWithoutTax = stringResource(Res.string.total_without_tax),
         totalWithTax = stringResource(Res.string.total_with_tax),
         tax = stringResource(Res.string.vat),
@@ -89,6 +90,7 @@ actual fun ExportPdfPlatform(
         currency = stringResource(Res.string.currency),
         invoicePaid = stringResource(Res.string.invoice_paid),
         labelSeparator = stringResource(Res.string.label_separator),
+        addressedTo = stringResource(Res.string.addressed_to),
     )
 
     val fileManager = remember { PdfFileManager() }

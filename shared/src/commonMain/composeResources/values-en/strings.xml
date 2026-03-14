@@ -23,6 +23,7 @@
     <string name="document_date_emitting">Issue date</string>
     <string name="document_reference">Reference</string>
     <string name="document_reference_label">Reference: </string>
+    <string name="addressed_to">Addressed to</string>
     <string name="invoice_pdf_due_date">Payment due date: </string>
     <string name="invoice_paid">Paid ✔</string>
 
@@ -31,16 +32,8 @@
     <string name="document_table_quantity">Qty</string>
     <string name="document_table_unit">Unit</string>
     <string name="document_table_unit_price_without_tax">Unit price excl. tax</string>
-    <string name="document_table_total_price_without_tax">Total excl. tax</string>
+    <string name="document_table_total_price_without_tax">Price \n excl. tax</string>
     <string name="document_table_tax_rate">Tax</string>
-
-    <!-- Document table aliases for PDF -->
-    <string name="table_description">Description</string>
-    <string name="table_quantity">Qty</string>
-    <string name="table_unit">Unit</string>
-    <string name="table_unit_price">Unit price excl. tax</string>
-    <string name="table_total_price">Total excl. tax</string>
-    <string name="table_tax_rate">Tax</string>
 
     <!-- Document totals -->
     <string name="document_total_without_tax">Total excl. tax:</string>
@@ -115,6 +108,7 @@
     <string name="product_delete_price">Delete this price</string>
     <string name="document_product_quantity">Quantity</string>
     <string name="document_product_quantity_input">1</string>
+    <string name="product_select_placeholder">Select...</string>
 
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITY</string>
@@ -326,4 +320,20 @@
     <string name="export_email_subject_credit_note">credit note</string>
     <string name="alert_dialog_error">An error occurred: </string>
     <string name="alert_dialog_error_confirm">OK</string>
+
+    <!-- Version mismatch dialog -->
+    <string name="version_mismatch_title">Issuer modified</string>
+    <string name="version_mismatch_message">The issuer has been modified from another document. Would you like to load the latest version?</string>
+    <string name="version_mismatch_load_latest">Load latest version</string>
+    <string name="version_mismatch_keep_current">Keep current version</string>
+
+    <!-- Version mismatch dialog for clients -->
+    <string name="version_mismatch_client_title">Client modified</string>
+    <string name="version_mismatch_client_message">The client has been modified from another document. Would you like to load the latest version?</string>
+
+    <!-- Sync client to master dialog -->
+    <string name="sync_client_title">Update client?</string>
+    <string name="sync_client_message">Would you like to apply these changes to the client in your client list?</string>
+    <string name="sync_client_yes">Yes, update</string>
+    <string name="sync_client_no">No, this document only</string>
 </resources>

@@ -23,6 +23,7 @@
     <string name="document_date_emitting">Date d'émission</string>
     <string name="document_reference">Référence</string>
     <string name="document_reference_label">Référence : </string>
+    <string name="addressed_to">Adressé à</string>
     <string name="invoice_pdf_due_date">Date limite de paiement : </string>
     <string name="invoice_paid">Payée ✔</string>
 
@@ -33,14 +34,6 @@
     <string name="document_table_unit_price_without_tax">PU HT</string>
     <string name="document_table_total_price_without_tax">Total HT</string>
     <string name="document_table_tax_rate">TVA</string>
-
-    <!-- Document table aliases for PDF -->
-    <string name="table_description">Désignation</string>
-    <string name="table_quantity">Qté</string>
-    <string name="table_unit">Unité</string>
-    <string name="table_unit_price">PU HT</string>
-    <string name="table_total_price">Total HT</string>
-    <string name="table_tax_rate">TVA</string>
 
     <!-- Document totals -->
     <string name="document_total_without_tax">Total HT :</string>
@@ -68,8 +61,8 @@
     <string name="alert_dialog_cancel">Annuler</string>
 
     <!-- Bottom Sheet Strings -->
-    <string name="document_bottom_sheet_list_add_new_client">Nouveau client·e</string>
-    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel émetteur·ice</string>
+    <string name="document_bottom_sheet_list_add_new_client">Nouveau·elle client·e</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">Nouvel·le émetteur·ice</string>
     <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
     <string name="document_modal_product_cancel">Annuler</string>
     <string name="document_modal_product_save">Valider</string>
@@ -115,6 +108,9 @@
     <string name="product_delete_price">Supprimer ce prix</string>
     <string name="document_product_quantity">Quantité</string>
     <string name="document_product_quantity_input">1</string>
+    <string name="product_clientprice_select_placeholder">Sélectionner…</string>
+    <string name="product_select_placeholder">Sélectionner…</string>
+
 
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITÉ</string>
@@ -314,7 +310,7 @@
     <string name="export_done_file_location">Enregistré dans l&apos;appareil (Téléchargements/g8) </string>
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).\n\n• Si le fichier n&apos;apparaît pas, il est possible qu&apos;il soit dans un sous-dossier du dossier de téléchargement (surtout si tu passes par une app de fichiers type Samsung)\n\n• Tu peux également retrouver le fichier en faisant une recherche à partir du nom de fichier.</string>
-    <string name="export_info_popup_validate">okurrr</string>
+    <string name="export_info_popup_validate">ok</string>
     <string name="export_send_file">Envoyer par e-mail</string>
     <string name="export_send_file_content">Bonjour, \n\nVeuillez trouver ci-joint votre document.\n\nCordialement</string>
     <string name="export_share_file">Partager</string>
@@ -326,4 +322,20 @@
     <string name="export_email_subject_credit_note">avoir</string>
     <string name="alert_dialog_error">Une erreur s&apos;est produite : </string>
     <string name="alert_dialog_error_confirm">OK</string>
+
+    <!-- Version mismatch dialog -->
+    <string name="version_mismatch_title">Émetteur modifié</string>
+    <string name="version_mismatch_message">L&apos;émetteur a été modifié depuis un autre document. Souhaitez-vous charger la dernière version ?</string>
+    <string name="version_mismatch_load_latest">Charger la dernière version</string>
+    <string name="version_mismatch_keep_current">Garder la version actuelle</string>
+
+    <!-- Version mismatch dialog for clients -->
+    <string name="version_mismatch_client_title">Client modifié</string>
+    <string name="version_mismatch_client_message">Le client a été modifié depuis un autre document. Souhaitez-vous charger la dernière version ?</string>
+
+    <!-- Sync client to master dialog -->
+    <string name="sync_client_title">Mettre à jour le client ?</string>
+    <string name="sync_client_message">Voulez-vous appliquer ces modifications au client dans votre liste de clients ?</string>
+    <string name="sync_client_yes">Oui, mettre à jour</string>
+    <string name="sync_client_no">Non, uniquement ce document</string>
 </resources>

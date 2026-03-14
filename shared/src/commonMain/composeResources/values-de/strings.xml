@@ -23,6 +23,7 @@
     <string name="document_date_emitting">Erstellungsdatum</string>
     <string name="document_reference">Referenz</string>
     <string name="document_reference_label">Referenz: </string>
+    <string name="addressed_to">Adressiert an</string>
     <string name="invoice_pdf_due_date">Fällig am: </string>
     <string name="invoice_paid">Bezahlt ✔</string>
 
@@ -30,17 +31,9 @@
     <string name="document_table_description">Bezeichnung</string>
     <string name="document_table_quantity">Menge</string>
     <string name="document_table_unit">Einheit</string>
-    <string name="document_table_unit_price_without_tax">Einzelpreis ohne MwSt.</string>
-    <string name="document_table_total_price_without_tax">Netto-Betrag</string>
+    <string name="document_table_unit_price_without_tax">Einzelpreis</string>
+    <string name="document_table_total_price_without_tax">Netto\n-Betrag</string>
     <string name="document_table_tax_rate">MwSt.</string>
-
-    <!-- Document table aliases for PDF -->
-    <string name="table_description">Bezeichnung</string>
-    <string name="table_quantity">Menge</string>
-    <string name="table_unit">Einheit</string>
-    <string name="table_unit_price">Einzelpreis ohne MwSt.</string>
-    <string name="table_total_price">Netto-Betrag</string>
-    <string name="table_tax_rate">MwSt.</string>
 
     <!-- Document totals -->
     <string name="document_total_without_tax">Netto-Betrag:</string>
@@ -115,6 +108,7 @@
     <string name="product_delete_price">Diesen Preis löschen</string>
     <string name="document_product_quantity">Menge</string>
     <string name="document_product_quantity_input">1</string>
+    <string name="product_select_placeholder">Auswählen...</string>
 
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITÄT</string>
@@ -326,4 +320,20 @@
     <string name="export_email_subject_credit_note">Gutschrift</string>
     <string name="alert_dialog_error">Es ist ein Fehler aufgetreten: </string>
     <string name="alert_dialog_error_confirm">OK</string>
+
+    <!-- Version mismatch dialog -->
+    <string name="version_mismatch_title">Aussteller geändert</string>
+    <string name="version_mismatch_message">Der Aussteller wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
+    <string name="version_mismatch_load_latest">Neueste Version laden</string>
+    <string name="version_mismatch_keep_current">Aktuelle Version behalten</string>
+
+    <!-- Version mismatch dialog for clients -->
+    <string name="version_mismatch_client_title">Kunde geändert</string>
+    <string name="version_mismatch_client_message">Der Kunde wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
+
+    <!-- Sync client to master dialog -->
+    <string name="sync_client_title">Kunde aktualisieren?</string>
+    <string name="sync_client_message">Möchten Sie diese Änderungen auf den Kunden in Ihrer Kundenliste anwenden?</string>
+    <string name="sync_client_yes">Ja, aktualisieren</string>
+    <string name="sync_client_no">Nein, nur dieses Dokument</string>
 </resources>
