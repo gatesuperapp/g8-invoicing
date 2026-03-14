@@ -176,6 +176,7 @@ fun EmailChip(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             lineHeight = 16.sp,
+            modifier = Modifier.weight(1f, fill = false),
         )
         Icon(
             imageVector = Icons.Filled.Close,
