@@ -161,7 +161,8 @@ fun LogoPickerComponent(
                 ) {
                     Text(
                         text = currentLogoPath.substringAfterLast("/"),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     IconButton(
                         onClick = {
