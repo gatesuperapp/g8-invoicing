@@ -68,6 +68,7 @@ class ClientOrIssuerAddEditViewModel(
         if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
             _documentClientUiState.value = ClientOrIssuerState(
                 id = null,
+                originalClientOrIssuerId = clientOrIssuer.id,
                 name = clientOrIssuer.name,
                 phone = clientOrIssuer.phone,
                 emails = clientOrIssuer.emails,
@@ -86,8 +87,10 @@ class ClientOrIssuerAddEditViewModel(
             )
         } else _documentIssuerUiState.value = ClientOrIssuerState(
             id = null,
+            originalClientOrIssuerId = clientOrIssuer.id,
             name = clientOrIssuer.name,
-            type = clientOrIssuer.type,
+            type = if (clientOrIssuer.type == ClientOrIssuerType.ISSUER) ClientOrIssuerType.DOCUMENT_ISSUER
+            else ClientOrIssuerType.DOCUMENT_CLIENT,
             firstName = clientOrIssuer.firstName,
             addresses = clientOrIssuer.addresses,
             phone = clientOrIssuer.phone,
@@ -164,38 +167,25 @@ class ClientOrIssuerAddEditViewModel(
         }
     }
 
-    suspend fun createNew(type: ClientOrIssuerType): Boolean {
+    suspend fun createNew(type: ClientOrIssuerType): Long? {
         val stateToSave = when (type) {
             ClientOrIssuerType.CLIENT -> _clientUiState.value
             ClientOrIssuerType.ISSUER -> _issuerUiState.value
             ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
             ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
-        }.withTrimmedEmails()
+        }
 
         return try {
-            dataSource.createNew(stateToSave)
-            true
+            dataSource.createNewAndReturnId(stateToSave)
         } catch (e: Exception) {
-            false
+            null
         }
-    }
-
-    private fun ClientOrIssuerState.withTrimmedEmails(): ClientOrIssuerState {
-        val trimmedEmails = emails?.map { emailState ->
-            emailState.copy(
-                email = TextFieldValue(
-                    emailState.email.text.trim(),
-                    emailState.email.selection,
-                    emailState.email.composition
-                )
-            )
-        }
-        return copy(emails = trimmedEmails)
     }
 
     suspend fun updateClientOrIssuerInLocalDb(
         type: ClientOrIssuerType,
         documentClientOrIssuer: ClientOrIssuerState? = null,
+        syncToMaster: Boolean = true,
     ): Boolean {
         return try {
             when (type) {
@@ -203,28 +193,30 @@ class ClientOrIssuerAddEditViewModel(
                     if (clientUiState.value.id == null) {
                         return false
                     }
-                    dataSource.updateClientOrIssuer(clientUiState.value.withTrimmedEmails())
+                    dataSource.updateClientOrIssuer(clientUiState.value)
                 }
 
                 ClientOrIssuerType.ISSUER -> {
                     if (issuerUiState.value.id == null) {
                         return false
                     }
-                    dataSource.updateClientOrIssuer(issuerUiState.value.withTrimmedEmails())
+                    dataSource.updateClientOrIssuer(issuerUiState.value)
                 }
 
                 ClientOrIssuerType.DOCUMENT_CLIENT -> {
                     if (documentClientOrIssuer == null || documentClientOrIssuer.id == null) {
                         return false
                     }
-                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer.withTrimmedEmails())
+                    // updateDocumentClientOrIssuer handles sync to master table based on syncToMaster param
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer, syncToMaster)
                 }
 
                 ClientOrIssuerType.DOCUMENT_ISSUER -> {
                     if (documentClientOrIssuer == null || documentClientOrIssuer.id == null) {
                         return false
                     }
-                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer.withTrimmedEmails())
+                    // Issuers always sync to master (automatic sync for issuers)
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer, true)
                 }
             }
             true
@@ -722,6 +714,11 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person = person.copy(companyId3Label = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE -> person = person.copy(companyId3Number = value as TextFieldValue)
 
+            ScreenElement.ISSUER_LOGO -> {
+                val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
+                person = person.copy(logoPath = logoPath)
+            }
+
             else -> {}
         }
         return person
@@ -871,6 +868,11 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person = person.copy(companyId3Label = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE -> person = person.copy(companyId3Number = value as TextFieldValue)
 
+            ScreenElement.DOCUMENT_ISSUER_LOGO -> {
+                val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
+                person = person.copy(logoPath = logoPath)
+            }
+
             else -> {}
         }
         return person
@@ -962,5 +964,117 @@ class ClientOrIssuerAddEditViewModel(
             }
             ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value.errors.clear()
         }
+    }
+
+    /**
+     * Checks if the master version has changed since the document was created.
+     * Returns true if versions don't match (master was updated elsewhere).
+     * For legacy documents without originalVersion, compares against master version > 1.
+     */
+    suspend fun checkVersionMismatch(documentClientOrIssuer: ClientOrIssuerState): Boolean {
+        val masterId = documentClientOrIssuer.originalClientOrIssuerId?.toLong() ?: return false
+        val masterVersion = dataSource.getMasterVersion(masterId) ?: return false
+        val documentVersion = documentClientOrIssuer.originalVersion
+        // If documentVersion is null (legacy document), check if master has been updated (version > 1)
+        if (documentVersion == null) {
+            return masterVersion > 1
+        }
+        return documentVersion != masterVersion
+    }
+
+    /**
+     * Checks if the document client/issuer has changes compared to the master.
+     * Returns true if there are differences that need syncing.
+     */
+    suspend fun hasChangesFromMaster(documentClientOrIssuer: ClientOrIssuerState): Boolean {
+        val masterId = documentClientOrIssuer.originalClientOrIssuerId?.toLong() ?: return false
+        val masterData = dataSource.fetchClientOrIssuer(masterId) ?: return false
+
+        // Compare relevant fields
+        if (documentClientOrIssuer.firstName?.text?.trim() != masterData.firstName?.text?.trim()) return true
+        if (documentClientOrIssuer.name.text.trim() != masterData.name.text.trim()) return true
+        if (documentClientOrIssuer.phone?.text?.trim() != masterData.phone?.text?.trim()) return true
+        if (documentClientOrIssuer.notes?.text?.trim() != masterData.notes?.text?.trim()) return true
+        if (documentClientOrIssuer.companyId1Label?.text?.trim() != masterData.companyId1Label?.text?.trim()) return true
+        if (documentClientOrIssuer.companyId1Number?.text?.trim() != masterData.companyId1Number?.text?.trim()) return true
+        if (documentClientOrIssuer.companyId2Label?.text?.trim() != masterData.companyId2Label?.text?.trim()) return true
+        if (documentClientOrIssuer.companyId2Number?.text?.trim() != masterData.companyId2Number?.text?.trim()) return true
+        if (documentClientOrIssuer.companyId3Label?.text?.trim() != masterData.companyId3Label?.text?.trim()) return true
+        if (documentClientOrIssuer.companyId3Number?.text?.trim() != masterData.companyId3Number?.text?.trim()) return true
+        if (documentClientOrIssuer.logoPath != masterData.logoPath) return true
+
+        // Compare emails
+        val docEmails = documentClientOrIssuer.emails?.map { it.email.text.trim() } ?: emptyList()
+        val masterEmails = masterData.emails?.map { it.email.text.trim() } ?: emptyList()
+        if (docEmails != masterEmails) return true
+
+        // Compare addresses (simplified comparison)
+        val docAddresses = documentClientOrIssuer.addresses?.map { addr ->
+            listOf(
+                addr.addressTitle?.text?.trim(),
+                addr.addressLine1?.text?.trim(),
+                addr.addressLine2?.text?.trim(),
+                addr.zipCode?.text?.trim(),
+                addr.city?.text?.trim()
+            )
+        } ?: emptyList()
+        val masterAddresses = masterData.addresses?.map { addr ->
+            listOf(
+                addr.addressTitle?.text?.trim(),
+                addr.addressLine1?.text?.trim(),
+                addr.addressLine2?.text?.trim(),
+                addr.zipCode?.text?.trim(),
+                addr.city?.text?.trim()
+            )
+        } ?: emptyList()
+        if (docAddresses != masterAddresses) return true
+
+        return false
+    }
+
+    /**
+     * Fetches the latest master data and updates the document client/issuer state.
+     */
+    suspend fun loadLatestMasterVersion(type: ClientOrIssuerType): ClientOrIssuerState? {
+        val currentState = when (type) {
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+            else -> return null
+        }
+
+        val masterId = currentState.originalClientOrIssuerId?.toLong() ?: return null
+        val masterData = dataSource.fetchClientOrIssuer(masterId) ?: return null
+
+        // Reset IDs for addresses and emails so they will be created as new document entries
+        // (Master IDs are from ClientOrIssuerAddress/Email, not DocumentClientOrIssuerAddress/Email)
+        val addressesWithNullIds = masterData.addresses?.map { it.copy(id = null) }
+        val emailsWithNullIds = masterData.emails?.map { it.copy(id = null) }
+
+        // Create updated state keeping document-specific fields but with master data
+        val updatedState = currentState.copy(
+            firstName = masterData.firstName,
+            name = masterData.name,
+            phone = masterData.phone,
+            emails = emailsWithNullIds,
+            addresses = addressesWithNullIds,
+            notes = masterData.notes,
+            companyId1Label = masterData.companyId1Label,
+            companyId1Number = masterData.companyId1Number,
+            companyId2Label = masterData.companyId2Label,
+            companyId2Number = masterData.companyId2Number,
+            companyId3Label = masterData.companyId3Label,
+            companyId3Number = masterData.companyId3Number,
+            logoPath = masterData.logoPath,
+            originalVersion = masterData.version // Update to current master version
+        )
+
+        // Update the appropriate state
+        when (type) {
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value = updatedState
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value = updatedState
+            else -> {}
+        }
+
+        return updatedState
     }
 }
