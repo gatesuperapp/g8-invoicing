@@ -312,14 +312,21 @@ class ClientOrIssuerLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             try {
                 clientsOrIssuers.forEach { client ->
-                    client.id?.let { clientId ->
+                    client.id?.let {
+                        // Modify name for duplicate
                         if (!client.firstName?.text.isNullOrEmpty()) {
                             client.firstName = TextFieldValue("${client.firstName?.text} - Copie")
                         } else {
                             client.name = TextFieldValue("${client.name.text} - Copie")
                         }
+                        // Save new client
                         saveInfoInClientOrIssuerTable(client)
-                        saveInfoInClientOrIssuerAddressTables(clientId.toLong(), client.addresses)
+                        // Get the ID of the newly created client
+                        val newClientId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                        // Save addresses with the NEW client ID
+                        newClientId?.let { newId ->
+                            saveInfoInClientOrIssuerAddressTables(newId, client.addresses)
+                        }
                     }
                 }
             } catch (e: Exception) {
