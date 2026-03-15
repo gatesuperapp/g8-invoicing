@@ -141,9 +141,9 @@
     <string name="client_city_input">Écholoc</string>
     <string name="client_zip_code">Code Postal</string>
     <string name="client_zip_code_input">81000</string>
-    <string name="company_identification1">SIRET</string>
-    <string name="company_identification2">TVA</string>
-    <string name="company_identification3">RCS</string>
+    <string name="company_identification1">N° SIRET</string>
+    <string name="company_identification2">N° TVA</string>
+    <string name="company_identification3">N° RCS</string>
     <string name="client_company_identification1_input">123456789 12345</string>
     <string name="client_company_identification2_input">123456789</string>
     <string name="client_company_identification3_input">123456789</string>
@@ -174,6 +174,17 @@
 
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Fermer</string>
+    <string name="whats_new_done">C'est parti !</string>
+    <string name="whats_new_welcome">Bienvenue sur la %1$s !</string>
+    <string name="whats_new_discover">Plein de nouveautés</string>
+    <string name="whats_new_emails_title">Plusieurs emails par client</string>
+    <string name="whats_new_emails_description">Associez jusqu'à 4 adresses email à un·e client·e pour envoyer vos factures à plusieurs destinataires.</string>
+    <string name="whats_new_translations_title">Nouvelles langues</string>
+    <string name="whats_new_translations_description">L'application est maintenant disponible en anglais et en allemand.</string>
+    <string name="whats_new_taxes_title">Taux de TVA</string>
+    <string name="whats_new_taxes_description">Idéal pour personnaliser les taux.</string>
+    <string name="whats_new_logo_title">Logo</string>
+    <string name="whats_new_logo_description">Ajoutez votre logo lors de la création ou modification d'un·e émetteur·ice depuis un document.</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bientôt disponible :)</string>

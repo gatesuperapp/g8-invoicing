@@ -172,6 +172,17 @@
 
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Close</string>
+    <string name="whats_new_done">Let's go!</string>
+    <string name="whats_new_welcome">Welcome to %1$s!</string>
+    <string name="whats_new_discover">Lots of new features</string>
+    <string name="whats_new_emails_title">Multiple emails per client</string>
+    <string name="whats_new_emails_description">Add up to 4 email addresses per client to send your invoices to multiple recipients.</string>
+    <string name="whats_new_translations_title">New languages</string>
+    <string name="whats_new_translations_description">The app is now available in English and German.</string>
+    <string name="whats_new_taxes_title">Tax rates</string>
+    <string name="whats_new_taxes_description">Ideal for customizing rates.</string>
+    <string name="whats_new_logo_title">Issuer logo</string>
+    <string name="whats_new_logo_description">Add your logo when creating or editing an issuer from a document.</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Coming soon :)</string>

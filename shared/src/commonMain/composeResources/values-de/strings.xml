@@ -172,6 +172,17 @@
 
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Schließen</string>
+    <string name="whats_new_done">Los geht's!</string>
+    <string name="whats_new_welcome">Willkommen bei %1$s!</string>
+    <string name="whats_new_discover">Viele neue Funktionen</string>
+    <string name="whats_new_emails_title">Mehrere E-Mails pro Kunde</string>
+    <string name="whats_new_emails_description">Fügen Sie bis zu 4 E-Mail-Adressen pro Kunde hinzu, um Ihre Rechnungen an mehrere Empfänger zu senden.</string>
+    <string name="whats_new_translations_title">Neue Sprachen</string>
+    <string name="whats_new_translations_description">Die App ist jetzt auf Englisch und Deutsch verfügbar.</string>
+    <string name="whats_new_taxes_title">Steuersätze</string>
+    <string name="whats_new_taxes_description">Ideal zur Anpassung der Sätze.</string>
+    <string name="whats_new_logo_title">Aussteller-Logo</string>
+    <string name="whats_new_logo_description">Fügen Sie Ihr Logo beim Erstellen oder Bearbeiten eines Ausstellers aus einem Dokument hinzu.</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bald verfügbar :)</string>

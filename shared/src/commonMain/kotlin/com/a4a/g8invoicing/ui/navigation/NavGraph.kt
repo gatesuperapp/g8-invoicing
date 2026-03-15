@@ -27,6 +27,9 @@ fun NavGraph(
     showCategoryButton: Boolean = true,
     // PDF export - passed from app module (Android) or platform-specific implementation
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
+    // What's New dialog
+    showWhatsNew: Boolean = false,
+    onWhatsNewDismissed: () -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -85,7 +88,9 @@ fun NavGraph(
             },
             onSendReminder = onSendReminder,
             showCategoryButton = showCategoryButton,
-            showBottomBar = showCategoryButton // Same logic: hide on desktop
+            showBottomBar = showCategoryButton, // Same logic: hide on desktop
+            initialShowWhatsNew = showWhatsNew,
+            onWhatsNewDismissed = onWhatsNewDismissed
         )
 
         // Credit Notes

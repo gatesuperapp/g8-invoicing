@@ -1,12 +1,9 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -18,7 +15,6 @@ import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.currentTimeMillis
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 fun NavGraphBuilder.invoiceList(
@@ -31,6 +27,9 @@ fun NavGraphBuilder.invoiceList(
     onSendReminder: (InvoiceState) -> Unit = {},
     showCategoryButton: Boolean = true,
     showBottomBar: Boolean = true,
+    // What's New dialog
+    initialShowWhatsNew: Boolean = false,
+    onWhatsNewDismissed: () -> Unit = {},
 ) {
     composable(route = Screen.InvoiceList.name) {
         val viewModel: InvoiceListViewModel = koinViewModel()
@@ -50,8 +49,7 @@ fun NavGraphBuilder.invoiceList(
         }
 
         // What's New dialog state
-        var showWhatsNewDialog by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
+        var showWhatsNewDialog by remember { mutableStateOf(initialShowWhatsNew) }
 
         InvoiceList(
             navController = navController,
@@ -77,7 +75,7 @@ fun NavGraphBuilder.invoiceList(
             appVersion = getAppVersion(),
             onDismissWhatsNew = {
                 showWhatsNewDialog = false
-                // Note: setSeenWhatsNew is platform-specific, handled at platform level
+                onWhatsNewDismissed()
             }
         )
     }
