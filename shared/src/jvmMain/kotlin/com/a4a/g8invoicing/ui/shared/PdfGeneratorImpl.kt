@@ -281,28 +281,33 @@ class PdfGeneratorImpl(
             table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(6f))
             table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(6f))
 
-            // Additional addresses
+            // Additional addresses (2 and/or 3)
             it.addresses?.let { addresses ->
-                // When there are only 2 addresses, put address 2 on the right (below address 1)
-                if (addresses.size == 2) {
-                    table.addCell(Cell().setBorder(Border.NO_BORDER)) // Empty cell on left
-                }
-                for (i in 1..<addresses.size) {
-                    table.addCell(createAddressTitle(addresses, i, fontSize))
-                }
-                table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
-                table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
+                if (addresses.size > 1) {
+                    // Row for address titles
+                    // When there are only 2 addresses, put address 2 on the right (below address 1)
+                    if (addresses.size == 2) {
+                        table.addCell(Cell().setBorder(Border.NO_BORDER))
+                    }
+                    for (i in 1..<addresses.size) {
+                        table.addCell(createAddressTitle(addresses, i, fontSize))
+                    }
 
-                // When there are only 2 addresses, put address 2 on the right (below address 1)
-                if (addresses.size == 2) {
-                    table.addCell(Cell().setBorder(Border.NO_BORDER)) // Empty cell on left
-                }
-                for (i in 1..<addresses.size) {
-                    table.addCell(
-                        createClientRectangleAndContent(
-                            createClientOrIssuerParagraph(client, font, displayAllInfo = false, addressIndex = i, fontSize = fontSize)
+                    // Spacer row
+                    table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
+                    table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
+
+                    // Row for address contents
+                    if (addresses.size == 2) {
+                        table.addCell(Cell().setBorder(Border.NO_BORDER))
+                    }
+                    for (i in 1..<addresses.size) {
+                        table.addCell(
+                            createClientRectangleAndContent(
+                                createClientOrIssuerParagraph(client, font, displayAllInfo = false, addressIndex = i, fontSize = fontSize)
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
@@ -359,10 +364,12 @@ class PdfGeneratorImpl(
         address?.addressLine1?.text?.takeIf { it.isNotEmpty() }?.let { nameAndAddress.add("$it\n") }
         address?.addressLine2?.text?.takeIf { it.isNotEmpty() }?.let { nameAndAddress.add("$it\n") }
 
-        val zipCode = address?.zipCode?.text ?: ""
-        val city = address?.city?.text ?: ""
-        if (zipCode.isNotEmpty() || city.isNotEmpty()) {
-            nameAndAddress.add("$zipCode $city\n")
+        val zipCodeCity = listOfNotNull(
+            address?.zipCode?.text?.takeIf { it.isNotEmpty() },
+            address?.city?.text?.takeIf { it.isNotEmpty() }
+        ).joinToString(" ")
+        if (zipCodeCity.isNotEmpty()) {
+            nameAndAddress.add("$zipCodeCity\n")
         }
 
         if (displayAllInfo) {

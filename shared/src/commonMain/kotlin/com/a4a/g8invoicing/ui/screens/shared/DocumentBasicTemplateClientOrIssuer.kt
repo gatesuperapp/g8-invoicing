@@ -60,13 +60,17 @@ fun DocumentBasicTemplateClientOrIssuer(
     if (!address?.zipCode?.text.isNullOrEmpty() ||
         !address?.city?.text.isNullOrEmpty()
     ) {
+        val zipCodeCity = listOfNotNull(
+            address?.zipCode?.text?.takeIf { it.isNotEmpty() },
+            address?.city?.text?.takeIf { it.isNotEmpty() }
+        ).joinToString(" ")
         Text(
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(bottom = 4.dp)
                 .wrapContentHeight(),
             style = MaterialTheme.typography.textForDocuments,
-            text = address?.zipCode?.text + " " + address?.city?.text
+            text = zipCodeCity
         )
     }
 
