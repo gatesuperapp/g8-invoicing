@@ -11,18 +11,20 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 data class ClientOrIssuerState(
     var id: Int? = null,
     var type: ClientOrIssuerType? = null,
-    var originalClientId: Int? = null, // ID du client original (pour les documents)
+    var originalClientOrIssuerId: Int? = null, // ID du client original (pour les documents)
+    var originalVersion: Int? = null, // Version du maître au moment de la copie (pour les documents)
+    var version: Int? = null, // Version actuelle (pour les maîtres)
     var firstName: TextFieldValue? = null,
     var name: TextFieldValue = TextFieldValue(""),
     var addresses: List<AddressState>? = null,
     var phone: TextFieldValue? = null,
     var emails: List<EmailState>? = null, // Max 4 emails
     var notes: TextFieldValue? = null,
-    var companyId1Label: TextFieldValue? = TextFieldValue("SIRET"),
+    var companyId1Label: TextFieldValue? = TextFieldValue("N° SIRET"),
     var companyId1Number: TextFieldValue? = null,
-    var companyId2Label: TextFieldValue? = TextFieldValue("TVA Intra"),
+    var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
     var companyId2Number: TextFieldValue? = null,
-    var companyId3Label: TextFieldValue? = TextFieldValue("RCS"),
+    var companyId3Label: TextFieldValue? = TextFieldValue("N° RCS"),
     var companyId3Number: TextFieldValue? = null,
     var logoPath: String? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
