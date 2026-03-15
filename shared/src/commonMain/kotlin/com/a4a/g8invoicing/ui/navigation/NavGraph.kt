@@ -231,7 +231,11 @@ fun NavGraph(
 }
 
 private fun navigateBack(navController: NavController) {
-    navController.popBackStack()
+    // Protect against double-click: only pop if there's a valid back stack entry
+    if (navController.currentBackStackEntry != null &&
+        navController.previousBackStackEntry != null) {
+        navController.popBackStack()
+    }
 }
 
 private fun NavHostController.navigateAndReplaceStartDestination(
