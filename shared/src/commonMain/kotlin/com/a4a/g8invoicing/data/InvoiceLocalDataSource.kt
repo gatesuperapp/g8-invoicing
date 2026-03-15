@@ -8,7 +8,6 @@ import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.document_default_footer
 import com.a4a.g8invoicing.shared.resources.invoice_default_number
 import org.jetbrains.compose.resources.getString
@@ -25,7 +24,6 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import g8invoicing.DocumentClientOrIssuer
 import g8invoicing.DocumentClientOrIssuerAddressQueries
-import g8invoicing.DocumentClientOrIssuerEmail
 import g8invoicing.DocumentClientOrIssuerEmailQueries
 import g8invoicing.DocumentClientOrIssuerQueries
 import g8invoicing.DocumentProductQueries
@@ -45,6 +43,7 @@ import kotlinx.coroutines.withContext
 
 class InvoiceLocalDataSource(
     db: Database,
+    private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
 ) : InvoiceLocalDataSourceInterface {
     private val invoiceQueries = db.invoiceQueries
     private val invoiceTagQueries = db.invoiceTagQueries
@@ -66,13 +65,13 @@ class InvoiceLocalDataSource(
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
+        // Récupérer l'émetteur depuis la table maître (avec emails et adresses)
+        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
-            println("DEBUG createNew: todayFormatted=$todayFormatted, dueDateFormatted=$dueDateFormatted")
-
-            val existingIssuer = getExistingIssuer()
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
                     getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
@@ -80,23 +79,11 @@ class InvoiceLocalDataSource(
                 ),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
-                documentIssuer = existingIssuer?.transformIntoEditable(
-                    addresses = fetchDocumentClientOrIssuerAddresses(
-                        existingIssuer.id,
-                        linkDocumentClientOrIssuerToAddressQueries,
-                        documentClientOrIssuerAddressQueries
-                    ),
-                    emails = fetchDocumentClientOrIssuerEmails(
-                        existingIssuer.id,
-                        documentClientOrIssuerEmailQueries
-                    )
-                ),
+                documentIssuer = existingIssuer,
                 footerText = TextFieldValue(
-                    getExistingFooter() ?: getString(Res.string.document_default_footer) // DB call
+                    getExistingFooter() ?: getString(Res.string.document_default_footer)
                 )
             )
-
-            println("DEBUG createNew: newInvoiceState.documentDate=${newInvoiceState.documentDate}, dueDate=${newInvoiceState.dueDate}")
 
             saveInfoInInvoiceTable(newInvoiceState)
 
@@ -119,16 +106,6 @@ class InvoiceLocalDataSource(
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return null
-    }
-
-    private fun getExistingIssuer(): DocumentClientOrIssuer? {
-        var issuer: DocumentClientOrIssuer? = null
-        try {
-            issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return issuer
     }
 
     private fun getExistingFooter(): String? {
@@ -473,14 +450,31 @@ class InvoiceLocalDataSource(
         documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?, // This is the parent document ID (e.g., invoiceId)
     ) {
+        // Si c'est un émetteur sans originalClientOrIssuerId, le créer dans la table maître d'abord
+        val clientOrIssuerToSave = if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.originalClientOrIssuerId == null
+        ) {
+            // Créer l'émetteur dans la table maître
+            val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
+            clientOrIssuerDataSource.createNew(masterIssuer)
+            val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
+            // Lier au master
+            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+        } else {
+            documentClientOrIssuer
+        }
+
         withContext(DispatcherProvider.IO) { // This IO context is inherited by the suspend call below
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
                     documentClientOrIssuerAddressQueries,
                     linkDocumentClientOrIssuerToAddressQueries,
+                    documentClientOrIssuerEmailQueries,
                     linkInvoiceToDocumentClientOrIssuerQueries,
-                    documentClientOrIssuer,
+                    clientOrIssuerToSave,
                     documentId
                 )
             } catch (e: Exception) {
@@ -932,6 +926,7 @@ suspend fun saveDocumentClientOrIssuerInDbAndLink(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    documentClientOrIssuerEmailQueries: DocumentClientOrIssuerEmailQueries,
     linkQueries: Any,
     documentClientOrIssuer: ClientOrIssuerState,
     documentId: Long?,
@@ -940,6 +935,7 @@ suspend fun saveDocumentClientOrIssuerInDbAndLink(
         documentClientOrIssuerQueries,
         documentClientOrIssuerAddressQueries,
         linkDocumentClientOrIssuerToAddressQueries,
+        documentClientOrIssuerEmailQueries,
         documentClientOrIssuer
     )
 
@@ -1004,6 +1000,7 @@ private suspend fun saveDocumentClientOrIssuer(
     documentClientOrIssuerQueries: DocumentClientOrIssuerQueries,
     documentClientOrIssuerAddressQueries: DocumentClientOrIssuerAddressQueries,
     linkDocumentClientOrIssuerToAddressQueries: LinkDocumentClientOrIssuerToAddressQueries,
+    documentClientOrIssuerEmailQueries: DocumentClientOrIssuerEmailQueries,
     clientOrIssuerState: ClientOrIssuerState,
 ): Long? { // Return the ID of the saved client/issuer
     return withContext(DispatcherProvider.IO) {
@@ -1021,6 +1018,11 @@ private suspend fun saveDocumentClientOrIssuer(
                     linkDocumentClientOrIssuerToAddressQueries,
                     id,
                     clientOrIssuerState.addresses
+                )
+                saveInfoInDocumentClientOrIssuerEmailTable(
+                    documentClientOrIssuerEmailQueries,
+                    id,
+                    clientOrIssuerState.emails
                 )
             }
             savedClientOrIssuerId
@@ -1045,7 +1047,8 @@ private fun saveInfoInDocumentClientOrIssuerTable(
             documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
         ) ClientOrIssuerType.CLIENT.name.lowercase()
         else ClientOrIssuerType.ISSUER.name.lowercase(),
-        original_client_id = documentClientOrIssuer.originalClientId?.toLong(),
+        original_client_id = documentClientOrIssuer.originalClientOrIssuerId?.toLong(),
+        original_version = documentClientOrIssuer.originalVersion?.toLong(),
         first_name = documentClientOrIssuer.firstName?.text,
         name = documentClientOrIssuer.name.text,
         phone = documentClientOrIssuer.phone?.text,
@@ -1073,6 +1076,7 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
         // 1: Save address
         documentClientOrIssuerAddressQueries.save( // DB call
             id = null,
+            original_address_id = address.originalAddressId?.toLong(),
             address_title = address.addressTitle?.text,
             address_line_1 = address.addressLine1?.text,
             address_line_2 = address.addressLine2?.text,
@@ -1091,6 +1095,24 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
     }
 }
 
+// Synchronous private helper, performs DB IO.
+// Must be called from a Dispatchers.IO context.
+private fun saveInfoInDocumentClientOrIssuerEmailTable(
+    documentClientOrIssuerEmailQueries: DocumentClientOrIssuerEmailQueries,
+    documentClientOrIssuerId: Long,
+    emails: List<EmailState>?,
+) {
+    emails?.forEach { email ->
+        if (email.email.text.isNotEmpty()) {
+            documentClientOrIssuerEmailQueries.save(
+                id = null,
+                document_client_or_issuer_id = documentClientOrIssuerId,
+                email = email.email.text.trim()
+            )
+        }
+    }
+}
+
 // Pure transformation function for DocumentClientOrIssuer.
 fun DocumentClientOrIssuer.transformIntoEditable(
     addresses: List<AddressState>? = null,
@@ -1103,35 +1125,24 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT.name.lowercase())
             ClientOrIssuerType.DOCUMENT_CLIENT
         else ClientOrIssuerType.DOCUMENT_ISSUER,
-        originalClientId = documentClientOrIssuer.original_client_id?.toInt(),
+        originalClientOrIssuerId = documentClientOrIssuer.original_client_id?.toInt(),
+        originalVersion = documentClientOrIssuer.original_version?.toInt(),
         firstName = documentClientOrIssuer.first_name?.let { TextFieldValue(text = it) },
         addresses = addresses,
         name = TextFieldValue(text = documentClientOrIssuer.name),
         phone = documentClientOrIssuer.phone?.let { TextFieldValue(text = it) },
         emails = emails,
         notes = documentClientOrIssuer.notes?.let { TextFieldValue(text = it) },
-        companyId1Label = documentClientOrIssuer.company_id1_number?.let {
-            documentClientOrIssuer.company_id1_label?.let {
-                TextFieldValue(
-                    text = it
-                )
-            }
+        companyId1Label = documentClientOrIssuer.company_id1_label?.let {
+            TextFieldValue(text = it)
         },
         companyId1Number = documentClientOrIssuer.company_id1_number?.let { TextFieldValue(text = it) },
-        companyId2Label = documentClientOrIssuer.company_id2_number?.let {
-            documentClientOrIssuer.company_id2_label?.let {
-                TextFieldValue(
-                    text = it
-                )
-            }
+        companyId2Label = documentClientOrIssuer.company_id2_label?.let {
+            TextFieldValue(text = it)
         },
         companyId2Number = documentClientOrIssuer.company_id2_number?.let { TextFieldValue(text = it) },
-        companyId3Label = documentClientOrIssuer.company_id3_number?.let {
-            documentClientOrIssuer.company_id3_label?.let {
-                TextFieldValue(
-                    text = it
-                )
-            }
+        companyId3Label = documentClientOrIssuer.company_id3_label?.let {
+            TextFieldValue(text = it)
         },
         companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
         logoPath = documentClientOrIssuer.logo_path,
@@ -1285,7 +1296,6 @@ fun updateDocumentProductsOrderInDb(
         }
     }
 }
-
 
 fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotalPrices {
     val totalPriceWithoutTax = products
