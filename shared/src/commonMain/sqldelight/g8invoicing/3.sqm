@@ -1,0 +1,30 @@
+-- Migration de la version 3 vers la version 4
+-- Changements:
+-- 1. Ajout de logo_path pour les émetteurs
+-- 2. Ajout de original_address_id pour lier les adresses document aux adresses maître
+-- 3. Ajout de version/original_version pour le suivi des modifications
+
+-- ============================================
+-- ÉTAPE 1: Ajouter logo_path à ClientOrIssuer
+-- ============================================
+ALTER TABLE ClientOrIssuer ADD COLUMN logo_path TEXT;
+
+-- ============================================
+-- ÉTAPE 2: Ajouter logo_path à DocumentClientOrIssuer
+-- ============================================
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN logo_path TEXT;
+
+-- ============================================
+-- ÉTAPE 3: Ajouter original_address_id à DocumentClientOrIssuerAddress
+-- ============================================
+ALTER TABLE DocumentClientOrIssuerAddress ADD COLUMN original_address_id INTEGER;
+
+-- ============================================
+-- ÉTAPE 4: Ajouter version à ClientOrIssuer
+-- ============================================
+ALTER TABLE ClientOrIssuer ADD COLUMN version INTEGER DEFAULT 1;
+
+-- ============================================
+-- ÉTAPE 5: Ajouter original_version à DocumentClientOrIssuer
+-- ============================================
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN original_version INTEGER DEFAULT 1;
