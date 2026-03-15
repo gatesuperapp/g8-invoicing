@@ -103,9 +103,10 @@ fun ClientOrIssuerAddEditForm(
 ) {
     val localFocusManager = LocalFocusManager.current
     // Use client ID as key to re-calculate when editing a different client
-    var numberOfClientAddresses by remember(clientOrIssuerUiState.id) {
+    // Use client ID AND addresses size as key to re-calculate when addresses change
+    var numberOfClientAddresses by remember(clientOrIssuerUiState.id, clientOrIssuerUiState.addresses?.size) {
         mutableIntStateOf(
-            clientOrIssuerUiState.addresses?.size?.coerceAtLeast(1) ?: 1
+            clientOrIssuerUiState.addresses?.size?.coerceIn(1, 3) ?: 1
         )
     }
     val paddingTop = if (isInBottomSheetModal) 10.dp else 110.dp
