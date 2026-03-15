@@ -315,18 +315,14 @@ fun Product.transformIntoEditableProduct(
                 .add(clientRef)
         }
 
-        println("additionalPrices size = ${priceToClients.size}")
-
         priceToClients.map { (price, clients) ->
-            val productPrice = ProductPrice(
+            ProductPrice(
                 priceWithoutTax = price,
                 priceWithTax = taxRate?.let {
                     calculatePriceWithTax(price, it)
                 } ?: price,
                 clients = clients
             )
-            println(productPrice)
-            productPrice
         }.ifEmpty { null }
     } else {
         null

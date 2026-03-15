@@ -237,7 +237,6 @@ class InvoiceLocalDataSource(
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
     ): InvoiceState {
-        println("DEBUG transformIntoEditableInvoice: issuing_date=${this.issuing_date}, due_date=${this.due_date}")
         return InvoiceState(
             documentId = this.invoice_id.toInt(),
             documentTag = documentTag ?: DocumentTag.DRAFT,
