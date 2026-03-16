@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
+import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,6 +31,11 @@ fun NavGraph(
     // What's New dialog
     showWhatsNew: Boolean = false,
     onWhatsNewDismissed: () -> Unit = {},
+    // About screen platform callbacks
+    onShareContent: (String) -> Unit = {},
+    onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
+    onSendDatabaseByEmail: (String) -> Unit = {},
+    onComposeEmail: (String, String, String) -> Unit = { _, _, _ -> },
 ) {
     NavHost(
         navController = navController,
@@ -44,6 +50,10 @@ fun NavGraph(
             onClickBack = {
                 navigateBack(navController)
             },
+            onShareContent = onShareContent,
+            onExportDatabase = onExportDatabase,
+            onSendDatabaseByEmail = onSendDatabaseByEmail,
+            onComposeEmail = onComposeEmail,
             showCategoryButton = showCategoryButton
         )
 

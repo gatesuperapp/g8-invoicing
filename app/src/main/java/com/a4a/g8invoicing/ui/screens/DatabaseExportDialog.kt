@@ -9,7 +9,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.a4a.g8invoicing.data.setSeenPopup
+import com.a4a.g8invoicing.data.setSeenDbExportPopup
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -34,7 +34,7 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
 
     AlertDialog(
         onDismissRequest = {
-            viewModel.viewModelScope.launch { setSeenPopup(context.applicationContext) }
+            viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
             onDismiss()
         },
         title = { Text(stringResource(id = R.string.database_export_dialog_title)) },
@@ -64,7 +64,7 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
                     )
                     return@TextButton
                 }
-                viewModel.viewModelScope.launch { setSeenPopup(context.applicationContext) }
+                viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
                 onDismiss()
                 onResult(file)
             }) {
@@ -73,7 +73,7 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
         },
         dismissButton = {
             TextButton(onClick = {
-                viewModel.viewModelScope.launch { setSeenPopup(context.applicationContext) }
+                viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
                 onDismiss()
             }) {
                 Text(stringResource(id = R.string.database_export_dialog_dismiss), color = ColorVioletLink)
@@ -119,7 +119,7 @@ fun exportDatabaseToDownloads(context: Context): File {
 fun sendDatabaseByEmail(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(
         context,
-        "${context.packageName}.provider",
+        "${context.packageName}.fileprovider",
         file
     )
 

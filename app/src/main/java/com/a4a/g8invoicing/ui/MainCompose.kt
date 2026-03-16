@@ -22,7 +22,13 @@ import com.a4a.g8invoicing.data.setSeenWhatsNew
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
+import com.a4a.g8invoicing.ui.screens.ExportResult
+import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
+import com.a4a.g8invoicing.ui.screens.sendDatabaseByEmail
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import android.content.Intent
+import android.net.Uri
+import java.io.File
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -77,6 +83,35 @@ fun MainCompose(
                         showWhatsNew = false
                         coroutineScope.launch {
                             setSeenWhatsNew(context)
+                        }
+                    },
+                    onShareContent = { content ->
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, content)
+                        }
+                        context.startActivity(Intent.createChooser(intent, null))
+                    },
+                    onExportDatabase = {
+                        try {
+                            val file = exportDatabaseToDownloads(context)
+                            ExportResult.Success(file.absolutePath)
+                        } catch (e: Exception) {
+                            ExportResult.Error(e.message ?: "Unknown error")
+                        }
+                    },
+                    onSendDatabaseByEmail = { filePath ->
+                        sendDatabaseByEmail(context, File(filePath))
+                    },
+                    onComposeEmail = { address, subject, body ->
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:")
+                            putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
+                            putExtra(Intent.EXTRA_SUBJECT, subject)
+                            putExtra(Intent.EXTRA_TEXT, body)
+                        }
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(intent)
                         }
                     }
                 )
