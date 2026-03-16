@@ -43,6 +43,7 @@ import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.invoice_due_date
@@ -183,7 +184,7 @@ fun DocumentListItem(
                 )
                 Text(
                     text = (document.documentTotalPrices?.let {
-                        it.totalPriceWithTax?.toPlainString()?.replace(".", ",")
+                        it.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",")
                     }
                         ?: "") + " " + stringResource(Res.string.currency),
                     color = when (document.documentTag) {

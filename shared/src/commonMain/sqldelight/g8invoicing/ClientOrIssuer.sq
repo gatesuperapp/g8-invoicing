@@ -12,6 +12,8 @@ CREATE TABLE ClientOrIssuer (
   company_id2_number TEXT,
   company_id3_label TEXT,
   company_id3_number TEXT,
+  logo_path TEXT,
+  version INTEGER DEFAULT 1,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -48,8 +50,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number)
-VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path)
+VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?, ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -64,7 +66,10 @@ SET type = :type,
     company_id2_label = :company_id2_label,
     company_id2_number = :company_id2_number,
     company_id3_label = :company_id3_label,
-    company_id3_number = :company_id3_number
+    company_id3_number = :company_id3_number,
+    logo_path = :logo_path,
+    version = COALESCE(version, 0) + 1,
+    updated_at = datetime('now', 'localtime')
 WHERE
     id = :id;
 
@@ -88,3 +93,17 @@ LIMIT 1;
 
 countAll:
 SELECT COUNT(*) FROM ClientOrIssuer;
+
+getLastIssuer:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY updated_at DESC
+LIMIT 1;
+
+getLastInsertedIssuerId:
+SELECT id
+FROM ClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY id DESC
+LIMIT 1;

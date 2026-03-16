@@ -107,11 +107,9 @@ fun FormInputCreatorDoublePrice(
                 modifier = Modifier
                     .padding(bottom = 3.dp),
                 text = stringResource(Res.string.product_price_without_tax),
-                fontWeight = FontWeight.SemiBold
             )
             Text(
                 text = stringResource(Res.string.product_price_with_tax),
-                fontWeight = FontWeight.SemiBold
             )
         }
     }

@@ -379,4 +379,225 @@ class ClientOrIssuerDataSourceTest {
         val lastId = dataSource.getLastCreatedClientId()
         assertNull(lastId)
     }
+
+    // ============= ISSUER SYNCHRONIZATION TESTS =============
+
+    @Test
+    fun updateDocumentIssuer_synchronizesToMasterTable() = runTest {
+        // Create an issuer in master table
+        val issuer = ClientOrIssuerState(
+            name = TextFieldValue("Ma Société"),
+            type = ClientOrIssuerType.ISSUER,
+            emails = listOf(EmailState(email = TextFieldValue("original@email.fr")))
+        )
+        dataSource.createNew(issuer)
+        val masterIssuer = dataSource.getIssuers().first()
+
+        // Create a document issuer that references the master
+        val docIssuerId = dataSource.addDocumentClientOrIssuer(
+            ClientOrIssuerState(
+                name = TextFieldValue("Ma Société"),
+                type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                originalClientId = masterIssuer.id,
+                emails = listOf(EmailState(email = TextFieldValue("original@email.fr")))
+            )
+        )
+
+        // Update document issuer with new email
+        val updatedDocIssuer = dataSource.getDocumentClientOrIssuer(docIssuerId)!!.copy(
+            emails = listOf(
+                EmailState(email = TextFieldValue("original@email.fr")),
+                EmailState(email = TextFieldValue("nouveau@email.fr"))
+            )
+        )
+        dataSource.updateDocumentClientOrIssuer(updatedDocIssuer)
+
+        // Verify master table was updated
+        val updatedMaster = dataSource.fetchClientOrIssuer(masterIssuer.id!!.toLong())
+        assertEquals(2, updatedMaster?.emails?.size)
+        assertTrue(updatedMaster?.emails?.any { it.email.text == "nouveau@email.fr" } == true)
+    }
+
+    @Test
+    fun updateDocumentIssuer_synchronizesAllFields() = runTest {
+        // Create issuer in master table
+        val issuer = ClientOrIssuerState(
+            name = TextFieldValue("Ancienne Société"),
+            type = ClientOrIssuerType.ISSUER,
+            phone = TextFieldValue("0100000000")
+        )
+        dataSource.createNew(issuer)
+        val masterIssuer = dataSource.getIssuers().first()
+
+        // Create document issuer
+        val docIssuerId = dataSource.addDocumentClientOrIssuer(
+            ClientOrIssuerState(
+                name = TextFieldValue("Ancienne Société"),
+                type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                originalClientId = masterIssuer.id,
+                phone = TextFieldValue("0100000000")
+            )
+        )
+
+        // Update document issuer
+        val updatedDocIssuer = dataSource.getDocumentClientOrIssuer(docIssuerId)!!.copy(
+            name = TextFieldValue("Nouvelle Société"),
+            phone = TextFieldValue("0999999999"),
+            companyId1Number = TextFieldValue("12345678901234")
+        )
+        dataSource.updateDocumentClientOrIssuer(updatedDocIssuer)
+
+        // Verify master was updated
+        val updatedMaster = dataSource.fetchClientOrIssuer(masterIssuer.id!!.toLong())
+        assertEquals("Nouvelle Société", updatedMaster?.name?.text)
+        assertEquals("0999999999", updatedMaster?.phone?.text)
+        assertEquals("12345678901234", updatedMaster?.companyId1Number?.text)
+    }
+
+    @Test
+    fun updateDocumentIssuer_withoutOriginalClientId_doesNotAffectMaster() = runTest {
+        // Create issuer in master table
+        val issuer = ClientOrIssuerState(
+            name = TextFieldValue("Société Master"),
+            type = ClientOrIssuerType.ISSUER
+        )
+        dataSource.createNew(issuer)
+        val masterIssuer = dataSource.getIssuers().first()
+
+        // Create document issuer WITHOUT originalClientId
+        val docIssuerId = dataSource.addDocumentClientOrIssuer(
+            ClientOrIssuerState(
+                name = TextFieldValue("Autre Société"),
+                type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                originalClientId = null // No link to master
+            )
+        )
+
+        // Update document issuer
+        val updatedDocIssuer = dataSource.getDocumentClientOrIssuer(docIssuerId)!!.copy(
+            name = TextFieldValue("Société Modifiée")
+        )
+        dataSource.updateDocumentClientOrIssuer(updatedDocIssuer)
+
+        // Verify master was NOT updated
+        val master = dataSource.fetchClientOrIssuer(masterIssuer.id!!.toLong())
+        assertEquals("Société Master", master?.name?.text)
+    }
+
+    @Test
+    fun getLastIssuer_returnsLastCreatedIssuer() = runTest {
+        dataSource.createNew(ClientOrIssuerState(
+            name = TextFieldValue("Premier Émetteur"),
+            type = ClientOrIssuerType.ISSUER
+        ))
+        dataSource.createNew(ClientOrIssuerState(
+            name = TextFieldValue("Deuxième Émetteur"),
+            type = ClientOrIssuerType.ISSUER
+        ))
+
+        val lastIssuer = dataSource.getLastIssuer()
+
+        assertNotNull(lastIssuer)
+        assertEquals("Deuxième Émetteur", lastIssuer.name.text)
+        // getLastIssuer returns as DOCUMENT_ISSUER type for use in documents
+        assertEquals(ClientOrIssuerType.DOCUMENT_ISSUER, lastIssuer.type)
+        // originalClientId should be set to link back to master
+        assertNotNull(lastIssuer.originalClientId)
+    }
+
+    @Test
+    fun getLastIssuer_returnsNullWhenNoIssuerExists() = runTest {
+        // Only create clients, no issuers
+        dataSource.createNew(ClientOrIssuerState(
+            name = TextFieldValue("Client"),
+            type = ClientOrIssuerType.CLIENT
+        ))
+
+        val lastIssuer = dataSource.getLastIssuer()
+
+        assertNull(lastIssuer)
+    }
+
+    @Test
+    fun getLastIssuer_includesEmailsAndAddresses() = runTest {
+        val email = EmailState(email = TextFieldValue("contact@societe.fr"))
+        val address = AddressState(
+            addressLine1 = TextFieldValue("1 Rue Test"),
+            city = TextFieldValue("Paris")
+        )
+        dataSource.createNew(ClientOrIssuerState(
+            name = TextFieldValue("Ma Société"),
+            type = ClientOrIssuerType.ISSUER,
+            emails = listOf(email),
+            addresses = listOf(address)
+        ))
+
+        val lastIssuer = dataSource.getLastIssuer()
+
+        assertNotNull(lastIssuer)
+        assertEquals(1, lastIssuer.emails?.size)
+        assertEquals("contact@societe.fr", lastIssuer.emails?.first()?.email?.text)
+        assertEquals(1, lastIssuer.addresses?.size)
+        assertEquals("1 Rue Test", lastIssuer.addresses?.first()?.addressLine1?.text)
+    }
+
+    @Test
+    fun getLastIssuer_ignoresClients() = runTest {
+        dataSource.createNew(ClientOrIssuerState(
+            name = TextFieldValue("Émetteur"),
+            type = ClientOrIssuerType.ISSUER
+        ))
+        dataSource.createNew(ClientOrIssuerState(
+            name = TextFieldValue("Client"),
+            type = ClientOrIssuerType.CLIENT
+        ))
+
+        val lastIssuer = dataSource.getLastIssuer()
+
+        assertNotNull(lastIssuer)
+        assertEquals("Émetteur", lastIssuer.name.text)
+        // Should be DOCUMENT_ISSUER type for use in documents
+        assertEquals(ClientOrIssuerType.DOCUMENT_ISSUER, lastIssuer.type)
+    }
+
+    @Test
+    fun updateDocumentIssuer_synchronizesAddresses() = runTest {
+        // Create issuer in master with one address
+        val address = AddressState(
+            addressLine1 = TextFieldValue("1 Rue Originale"),
+            city = TextFieldValue("Paris")
+        )
+        val issuer = ClientOrIssuerState(
+            name = TextFieldValue("Société"),
+            type = ClientOrIssuerType.ISSUER,
+            addresses = listOf(address)
+        )
+        dataSource.createNew(issuer)
+        val masterIssuer = dataSource.getIssuers().first()
+
+        // Create document issuer
+        val docIssuerId = dataSource.addDocumentClientOrIssuer(
+            ClientOrIssuerState(
+                name = TextFieldValue("Société"),
+                type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                originalClientId = masterIssuer.id,
+                addresses = listOf(address)
+            )
+        )
+
+        // Update document issuer with new address
+        val newAddress = AddressState(
+            addressLine1 = TextFieldValue("2 Avenue Nouvelle"),
+            city = TextFieldValue("Lyon")
+        )
+        val updatedDocIssuer = dataSource.getDocumentClientOrIssuer(docIssuerId)!!.copy(
+            addresses = listOf(address, newAddress)
+        )
+        dataSource.updateDocumentClientOrIssuer(updatedDocIssuer)
+
+        // Verify master was updated with new addresses
+        val updatedMaster = dataSource.fetchClientOrIssuer(masterIssuer.id!!.toLong())
+        assertEquals(2, updatedMaster?.addresses?.size)
+        assertTrue(updatedMaster?.addresses?.any { it.city?.text == "Lyon" } == true)
+    }
 }

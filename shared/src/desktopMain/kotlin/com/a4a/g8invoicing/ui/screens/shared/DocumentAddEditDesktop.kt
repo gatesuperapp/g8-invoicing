@@ -400,7 +400,7 @@ fun DocumentAddEditDesktop(
                                 products = products,
                                 taxRates = taxRates,
                                 onSelectProduct = { product ->
-                                    onSelectProduct(product, document.documentClient?.originalClientId)
+                                    onSelectProduct(product, document.documentClient?.originalClientOrIssuerId)
                                 },
                                 onClickNewProduct = onClickNewDocumentProduct,
                                 onClickDocumentProduct = onClickEditDocumentProduct,

@@ -8,13 +8,24 @@ android {
     namespace = "com.a4a.g8invoicing"
     compileSdk = 36
 
+    flavorDimensions += "channel"
+    productFlavors {
+        create("stable") {
+           // main app
+        }
+        create("beta") {
+            applicationIdSuffix = ".beta"
+            versionNameSuffix = "-beta"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.a4a.g8invoicing"
         minSdk = 26
 
         targetSdk = 36
-        versionCode = 44
-        versionName = "1.6.0-beta"
+        versionCode = 45
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

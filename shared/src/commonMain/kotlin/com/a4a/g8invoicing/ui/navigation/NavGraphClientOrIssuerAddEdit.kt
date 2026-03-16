@@ -60,7 +60,7 @@ fun NavGraphBuilder.clientAddEdit(
 
                     if (viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
                         val success = if (isNew) {
-                            viewModel.createNew(ClientOrIssuerType.CLIENT)
+                            viewModel.createNew(ClientOrIssuerType.CLIENT) != null
                         } else {
                             viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
                         }

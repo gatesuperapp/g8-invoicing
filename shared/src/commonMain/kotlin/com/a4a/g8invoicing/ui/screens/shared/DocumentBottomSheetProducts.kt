@@ -153,7 +153,7 @@ fun DocumentBottomSheetProducts(
                     isProductListVisible = false
                     onShowDocumentForm(true)
                 },
-                clientId = document.documentClient?.originalClientId
+                clientId = document.documentClient?.originalClientOrIssuerId
             )
         }
         // Add new product or edit chosen product

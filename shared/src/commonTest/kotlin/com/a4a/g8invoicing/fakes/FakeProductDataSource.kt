@@ -94,6 +94,12 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
         }
     }
 
+    override suspend fun clearTaxRateFromProducts(taxId: Long) {
+        // In the real implementation, this clears product_tax_id from products
+        // For the fake, we don't track tax IDs separately, so this is a no-op
+        // The real DB uses product_tax_id FK to ProductTax table
+    }
+
     // Helper to add additional price to a product
     fun addAdditionalPriceToProduct(productId: Int, price: ProductPrice) {
         val product = products.find { it.id == productId }

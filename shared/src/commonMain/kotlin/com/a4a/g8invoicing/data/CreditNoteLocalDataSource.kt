@@ -23,6 +23,7 @@ import kotlinx.coroutines.withContext
 
 class CreditNoteLocalDataSource(
     db: Database,
+    private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -38,28 +39,20 @@ class CreditNoteLocalDataSource(
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
 
     override suspend fun createNew(): Long? {
+        // Récupérer l'émetteur depuis la table maître
+        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
-            val existingIssuer = getExistingIssuer()
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.credit_note_default_number)),
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
-                documentIssuer = existingIssuer?.transformIntoEditable(
-                    addresses = fetchDocumentClientOrIssuerAddresses(
-                        existingIssuer.id,
-                        linkDocumentClientOrIssuerToAddressQueries,
-                        documentClientOrIssuerAddressQueries
-                    ),
-                    emails = fetchDocumentClientOrIssuerEmails(
-                        existingIssuer.id,
-                        documentClientOrIssuerEmailQueries
-                    )
-                ),
+                documentIssuer = existingIssuer,
                 footerText = TextFieldValue(getExistingFooter() ?: "")
             )
 
@@ -284,14 +277,31 @@ class CreditNoteLocalDataSource(
         documentClientOrIssuer: ClientOrIssuerState,
         documentId: Long?,
     ) {
+        // Si c'est un émetteur sans originalClientOrIssuerId, le créer dans la table maître d'abord
+        val clientOrIssuerToSave = if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.originalClientOrIssuerId == null
+        ) {
+            // Créer l'émetteur dans la table maître
+            val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
+            clientOrIssuerDataSource.createNew(masterIssuer)
+            val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
+            // Lier au master
+            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+        } else {
+            documentClientOrIssuer
+        }
+
         withContext(DispatcherProvider.IO) {
             try {
                 saveDocumentClientOrIssuerInDbAndLink(
                     documentClientOrIssuerQueries,
                     documentClientOrIssuerAddressQueries,
                     linkDocumentClientOrIssuerToAddressQueries,
+                    documentClientOrIssuerEmailQueries,
                     linkCreditNoteToDocumentClientOrIssuerQueries,
-                    documentClientOrIssuer,
+                    clientOrIssuerToSave,
                     documentId
                 )
             } catch (e: Exception) {
@@ -395,16 +405,6 @@ class CreditNoteLocalDataSource(
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
-    }
-
-    private fun getExistingIssuer(): DocumentClientOrIssuer? {
-        var issuer: DocumentClientOrIssuer? = null
-        try {
-            issuer = documentClientOrIssuerQueries.getLastInsertedIssuer().executeAsOneOrNull()
-        } catch (e: Exception) {
-            //Log.e(ContentValues.TAG, "Error: ${e.message}")
-        }
-        return issuer
     }
 
     private fun getExistingFooter(): String? {

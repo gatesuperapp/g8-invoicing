@@ -55,6 +55,7 @@ import com.a4a.g8invoicing.shared.resources.appbar_product_edit
 import com.a4a.g8invoicing.shared.resources.client_form_cancel
 import com.a4a.g8invoicing.shared.resources.client_form_validate
 import com.a4a.g8invoicing.shared.resources.product_add_price
+import com.a4a.g8invoicing.shared.resources.product_clientprice_select_placeholder
 import com.a4a.g8invoicing.shared.resources.product_delete_price
 import com.a4a.g8invoicing.shared.resources.product_description
 import com.a4a.g8invoicing.shared.resources.product_description_input
@@ -69,6 +70,7 @@ import com.a4a.g8invoicing.shared.resources.product_price_without_tax
 import com.a4a.g8invoicing.shared.resources.product_tax
 import com.a4a.g8invoicing.shared.resources.product_unit
 import com.a4a.g8invoicing.shared.resources.product_unit_input
+import com.a4a.g8invoicing.shared.resources.select_placeholder
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
@@ -554,7 +556,7 @@ private fun ProductDesktopClientsPicker(
         ) {
             if (clients.isEmpty()) {
                 Text(
-                    text = "Sélectionner...",
+                    text = stringResource(Res.string.product_clientprice_select_placeholder),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.LightGray,
                     modifier = Modifier.padding(16.dp)

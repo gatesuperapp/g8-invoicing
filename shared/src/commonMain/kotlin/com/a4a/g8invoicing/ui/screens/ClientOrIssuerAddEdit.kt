@@ -53,6 +53,13 @@ fun ClientAddEdit(
     ) {
         it
 
+        val typeOfCreation = when (clientOrIssuer.type) {
+            ClientOrIssuerType.ISSUER -> DocumentBottomSheetTypeOfForm.NEW_ISSUER
+            ClientOrIssuerType.DOCUMENT_ISSUER -> DocumentBottomSheetTypeOfForm.EDIT_ISSUER
+            ClientOrIssuerType.DOCUMENT_CLIENT -> DocumentBottomSheetTypeOfForm.EDIT_CLIENT
+            else -> DocumentBottomSheetTypeOfForm.NEW_CLIENT
+        }
+
         ClientOrIssuerAddEditForm(
             clientOrIssuer,
             onValueChange,
@@ -60,7 +67,7 @@ fun ClientAddEdit(
             onClickDeleteAddress = onClickDeleteAddress,
             onClickDeleteEmail = onClickDeleteEmail,
             onAddEmail = onAddEmail,
-            typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_CLIENT,
+            typeOfCreation = typeOfCreation,
             scrollState = scrollState,
             onPendingEmailValidationResult = onPendingEmailValidationResult
         )

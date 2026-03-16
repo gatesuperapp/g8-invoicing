@@ -21,6 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.clients_selected_count
+import com.a4a.g8invoicing.shared.resources.select_placeholder
+import org.jetbrains.compose.resources.stringResource
 
 
 @Composable
@@ -33,7 +37,7 @@ fun FormInputCreatorListPicker(
     ) {
         if (input.selectedItems.isEmpty()) {
             Text(
-                text = "Sélectionner...",
+                text = stringResource(Res.string.select_placeholder),
             )
         } else if (input.selectedItems.size <= 3) {
             // Use Column with Rows instead of FlowRow for KMP compatibility
@@ -46,7 +50,7 @@ fun FormInputCreatorListPicker(
             }
         } else {
             Text(
-                text = "${input.selectedItems.size} clients sélectionnés",
+                text = stringResource(Res.string.clients_selected_count, input.selectedItems.size),
             )
         }
     }

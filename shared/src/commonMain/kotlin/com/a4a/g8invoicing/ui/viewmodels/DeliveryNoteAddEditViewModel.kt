@@ -71,6 +71,12 @@ class DeliveryNoteAddEditViewModel(
         }
     }
 
+    fun reloadDocument() {
+        _documentUiState.value.documentId?.let {
+            fetchDeliveryNoteFromLocalDb(it.toLong())
+        }
+    }
+
     private suspend fun createNewDeliveryNoteInVM(): Long? {
         var deliveryNoteId: Long? = null
         val createNewJob = viewModelScope.launch {
@@ -216,6 +222,10 @@ class DeliveryNoteAddEditViewModel(
                     documentClientOrIssuer = documentClientOrIssuer,
                     documentId = _documentUiState.value.documentId?.toLong()
                 )
+                // Reload the document to get the correct DocumentClientOrIssuer ID
+                _documentUiState.value.documentId?.let {
+                    fetchDeliveryNoteFromLocalDb(it.toLong())
+                }
             } catch (e: Exception) {
                 // Error handling
             }

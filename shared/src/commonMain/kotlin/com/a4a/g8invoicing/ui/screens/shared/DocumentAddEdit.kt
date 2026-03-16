@@ -14,7 +14,6 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -191,7 +190,7 @@ fun DocumentAddEdit(
                     products = products,
                     taxRates = taxRates,
                     onClickProduct = { product ->
-                        onSelectProduct(product, document.documentClient?.originalClientId)
+                        onSelectProduct(product, document.documentClient?.originalClientOrIssuerId)
                     },
                     onClickNewProduct = onClickNewDocumentProduct,
                     onClickDocumentProduct = onClickEditDocumentProduct,

@@ -2,6 +2,7 @@ CREATE TABLE DocumentClientOrIssuer (
   id INTEGER PRIMARY KEY NOT NULL,
   type TEXT,
   original_client_id INTEGER,
+  original_version INTEGER DEFAULT 1,
   first_name TEXT,
   name TEXT NOT NULL,
   phone TEXT,
@@ -13,6 +14,7 @@ CREATE TABLE DocumentClientOrIssuer (
   company_id2_number TEXT,
   company_id3_label TEXT,
   company_id3_number TEXT,
+  logo_path TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -39,13 +41,14 @@ FROM DocumentClientOrIssuer
 WHERE name = :name AND first_name =: first_name;
 
 save:
-INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number)
-VALUES (:id, :type, :original_client_id, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number);
+INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path)
+VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path);
 
 update:
 UPDATE DocumentClientOrIssuer
 SET type = :type,
     original_client_id = :original_client_id,
+    original_version = :original_version,
     first_name = :first_name,
     name = :name,
     phone = :phone,
@@ -56,7 +59,8 @@ SET type = :type,
     company_id2_label = :company_id2_label,
     company_id2_number = :company_id2_number,
     company_id3_label = :company_id3_label,
-    company_id3_number = :company_id3_number
+    company_id3_number = :company_id3_number,
+    logo_path = :logo_path
 WHERE
     id = :id;
 
@@ -83,4 +87,8 @@ FROM DocumentClientOrIssuer
 ORDER BY id DESC
 LIMIT 1;
 
+updateOriginalVersion:
+UPDATE DocumentClientOrIssuer
+SET original_version = :original_version
+WHERE id = :id;
 

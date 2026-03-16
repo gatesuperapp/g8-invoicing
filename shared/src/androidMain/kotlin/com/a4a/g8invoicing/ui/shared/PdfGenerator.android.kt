@@ -180,7 +180,8 @@ actual class PdfGenerator actual constructor(
     private val strings: PdfStrings,
     private val fileManager: PdfFileManager
 ) {
-    private val impl = PdfGeneratorImpl(strings, fileManager)
+    private val imageStorage = ImageStorage()
+    private val impl = PdfGeneratorImpl(strings, fileManager, imageStorage)
 
     actual fun generatePdf(document: DocumentState): String {
         return impl.generatePdf(document)

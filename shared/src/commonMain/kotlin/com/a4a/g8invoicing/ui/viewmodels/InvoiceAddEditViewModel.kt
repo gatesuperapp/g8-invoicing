@@ -74,6 +74,12 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    fun reloadDocument() {
+        _documentUiState.value.documentId?.let {
+            fetchInvoiceFromLocalDb(it.toLong())
+        }
+    }
+
     private suspend fun createNewInvoiceInVM(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
@@ -215,6 +221,10 @@ class InvoiceAddEditViewModel(
                     documentClientOrIssuer = documentClientOrIssuer,
                     id = _documentUiState.value.documentId?.toLong()
                 )
+                // Reload the document to get the correct DocumentClientOrIssuer ID
+                _documentUiState.value.documentId?.let {
+                    fetchInvoiceFromLocalDb(it.toLong())
+                }
             } catch (e: Exception) {
                 // Error handling
             }

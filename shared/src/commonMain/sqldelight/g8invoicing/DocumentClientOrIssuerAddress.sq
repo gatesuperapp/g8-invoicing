@@ -1,5 +1,6 @@
 CREATE TABLE DocumentClientOrIssuerAddress (
   id INTEGER PRIMARY KEY NOT NULL,
+  original_address_id INTEGER,
   address_title TEXT,
   address_line_1 TEXT,
   address_line_2 TEXT,
@@ -13,8 +14,8 @@ FROM DocumentClientOrIssuerAddress
 WHERE id = :id;
 
 save:
-INSERT INTO DocumentClientOrIssuerAddress (id,  address_title, address_line_1, address_line_2, zip_code, city)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO DocumentClientOrIssuerAddress (id, original_address_id, address_title, address_line_1, address_line_2, zip_code, city)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE DocumentClientOrIssuerAddress
@@ -25,6 +26,11 @@ SET address_title = :address_title,
     city = :city
 WHERE
     id = :id;
+
+updateOriginalAddressId:
+UPDATE DocumentClientOrIssuerAddress
+SET original_address_id = :original_address_id
+WHERE id = :id;
 
 delete:
 DELETE FROM DocumentClientOrIssuerAddress
