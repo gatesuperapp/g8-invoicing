@@ -175,14 +175,14 @@
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Fermer</string>
     <string name="whats_new_done">C'est parti !</string>
-    <string name="whats_new_welcome">Bienvenue sur la %1$s !</string>
-    <string name="whats_new_discover">Plein de nouveautés</string>
+    <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
+    <string name="whats_new_discover">Découvrez les nouveautés...</string>
     <string name="whats_new_emails_title">Plusieurs emails par client</string>
     <string name="whats_new_emails_description">Associez jusqu'à 4 adresses email à un·e client·e pour envoyer vos factures à plusieurs destinataires.</string>
     <string name="whats_new_translations_title">Nouvelles langues</string>
     <string name="whats_new_translations_description">L'application est maintenant disponible en anglais et en allemand.</string>
     <string name="whats_new_taxes_title">Taux de TVA</string>
-    <string name="whats_new_taxes_description">Idéal pour personnaliser les taux.</string>
+    <string name="whats_new_taxes_description">Vous pouvez personnaliser les taux depuis la catégorie Produits, en cliquant sur l'icône réglages quand vous ajoutez un taux.</string>
     <string name="whats_new_logo_title">Logo</string>
     <string name="whats_new_logo_description">Ajoutez votre logo lors de la création ou modification d'un·e émetteur·ice depuis un document.</string>
 
