@@ -18,14 +18,8 @@ object PrefKeys {
     val LAST_SEEN_VERSION = stringPreferencesKey("last_seen_version")
 }
 
-// Lire le flag (pour la popup d'export DB)
-fun hasSeenPopup(context: Context) =
-    context.dataStore.data.map { prefs ->
-        prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
-    }
-
 // Écrire le flag (pour la popup d'export DB)
-suspend fun setSeenPopup(context: Context) {
+suspend fun setSeenDbExportPopup(context: Context) {
     context.dataStore.edit { prefs ->
         prefs[PrefKeys.HAS_SEEN_POPUP] = true
     }
@@ -35,14 +29,18 @@ suspend fun setSeenPopup(context: Context) {
 fun shouldShowWhatsNew(context: Context) =
     context.dataStore.data.map { prefs ->
         val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
-        // Afficher seulement si : version précédente existe ET est différente de la version actuelle
-        lastSeenVersion != null && lastSeenVersion != CURRENT_APP_VERSION
-    }
+        val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
 
-// Vérifier si l'utilisateur a vu les nouveautés de la version actuelle
-fun hasSeenWhatsNew(context: Context) =
-    context.dataStore.data.map { prefs ->
-        prefs[PrefKeys.LAST_SEEN_VERSION] == CURRENT_APP_VERSION
+        when {
+            // Version déjà vue → ne pas afficher
+            lastSeenVersion == CURRENT_APP_VERSION -> false
+            // Version précédente existe et différente → mise à jour → afficher
+            lastSeenVersion != null -> true
+            // lastSeenVersion null mais a déjà utilisé l'app → mise à jour depuis ancienne version → afficher
+            hasSeenPopup -> true
+            // Nouvelle installation → ne pas afficher
+            else -> false
+        }
     }
 
 // Marquer les nouveautés comme vues (aussi appelé à la première utilisation pour les nouvelles installations)
@@ -52,12 +50,16 @@ suspend fun setSeenWhatsNew(context: Context) {
     }
 }
 
-// Initialiser le suivi de version pour les nouvelles installations
-// Si lastSeenVersion est null, c'est une nouvelle installation → on enregistre la version actuelle
-// Ainsi, lors de la prochaine mise à jour, shouldShowWhatsNew retournera true
+// Initialiser le suivi de version pour les nouvelles installations uniquement
+// Si lastSeenVersion est null ET hasSeenPopup est false → nouvelle installation → enregistrer la version
+// Si lastSeenVersion est null ET hasSeenPopup est true → mise à jour depuis ancienne version → ne rien faire
 suspend fun initializeVersionTracking(context: Context) {
     val prefs = context.dataStore.data.first()
-    if (prefs[PrefKeys.LAST_SEEN_VERSION] == null) {
+    val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
+    val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
+
+    // Seulement pour les vraies nouvelles installations
+    if (lastSeenVersion == null && !hasSeenPopup) {
         setSeenWhatsNew(context)
     }
 }

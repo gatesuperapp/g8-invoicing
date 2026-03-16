@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +51,13 @@ fun NavGraphBuilder.invoiceList(
 
         // What's New dialog state
         var showWhatsNewDialog by remember { mutableStateOf(initialShowWhatsNew) }
+
+        // Update dialog state when initialShowWhatsNew changes (async loading from DataStore)
+        LaunchedEffect(initialShowWhatsNew) {
+            if (initialShowWhatsNew) {
+                showWhatsNewDialog = true
+            }
+        }
 
         InvoiceList(
             navController = navController,
