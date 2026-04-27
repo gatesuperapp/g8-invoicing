@@ -93,7 +93,6 @@ import com.a4a.g8invoicing.shared.resources.about_title_about
 import com.a4a.g8invoicing.shared.resources.about_title_assistance
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.about_title_community
-import com.a4a.g8invoicing.shared.resources.about_title_early_access
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.about_title_legal
 import com.a4a.g8invoicing.shared.resources.about_language_english
@@ -101,10 +100,7 @@ import com.a4a.g8invoicing.shared.resources.about_language_french
 import com.a4a.g8invoicing.shared.resources.about_language_german
 import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.account_bat_love
-import com.a4a.g8invoicing.shared.resources.account_donate
-import com.a4a.g8invoicing.shared.resources.account_donate_link
 import com.a4a.g8invoicing.shared.resources.account_share_content
-import com.a4a.g8invoicing.shared.resources.account_subscribe
 import com.a4a.g8invoicing.shared.resources.appbar_g8
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.data.AppLanguage
@@ -176,7 +172,6 @@ fun About(
 
     // String resources
     val donateLinkAbout = stringResource(Res.string.about_donate_link)
-    val donateLinkAccount = stringResource(Res.string.account_donate_link)
     val shareContent = stringResource(Res.string.account_share_content)
     val contactEmail = stringResource(Res.string.about_contact_email)
 
@@ -280,37 +275,6 @@ fun About(
                 }
 
                 Spacer(modifier = Modifier.height(30.dp))
-
-                // =====================
-                // SECTION: Accès anticipé
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_early_access),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                Text(
-                    modifier = Modifier.padding(bottom = 20.dp),
-                    text = stringResource(Res.string.account_subscribe)
-                )
-
-                Button(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .border(
-                            BorderStroke(width = 4.dp, brush = brush),
-                            shape = RoundedCornerShape(50)
-                        ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = {
-                        uriHandler.openUri(donateLinkAccount)
-                    },
-                ) {
-                    Text(stringResource(Res.string.account_donate))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
 
                 // Animation chauve-souris
                 val numberOfIterations = remember { mutableIntStateOf(2) }
