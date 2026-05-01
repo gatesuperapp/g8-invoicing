@@ -9,8 +9,8 @@ The app is available on Android. iOS and desktop versions are in development.
 The community forum : https://forum.the-gate.fr
 
 **Contribute**
-Contributions are welcome to create new features, fix bugs, translate the application or improve the documentation.
-You can check issues of interest and join the Discord to discuss the implementation. 
+Contributions are welcome to create new features, fix bugs, translate the application or improve the documentation. Contact me 
+contact@the-gate.fr or on the forum https://forum.the-gate.fr
 
 **Licence**
 Released under the GNU General Public License v3.0.
