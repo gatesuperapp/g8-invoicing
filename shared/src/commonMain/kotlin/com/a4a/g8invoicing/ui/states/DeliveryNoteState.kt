@@ -18,5 +18,6 @@ data class DeliveryNoteState(
     override var documentTotalPrices: DocumentTotalPrices? = null,
     override var currency: TextFieldValue = TextFieldValue(),
     override var footerText: TextFieldValue = TextFieldValue(),
-    override var createdDate: String? = null
+    override var createdDate: String? = null,
+    override var watermarkText: String? = null
 ) : DocumentState()

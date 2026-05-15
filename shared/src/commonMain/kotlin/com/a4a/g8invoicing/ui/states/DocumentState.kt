@@ -24,4 +24,8 @@ abstract class DocumentState {
     abstract var currency: TextFieldValue
     abstract var footerText: TextFieldValue
     abstract var createdDate: String?
+    // Frozen at document creation. null = no watermark (premium with watermark-removal
+    // module active when the doc was created, OR pre-feature legacy doc). Not edited
+    // afterwards — toggling the module later doesn't retroactively change existing docs.
+    abstract var watermarkText: String?
 }

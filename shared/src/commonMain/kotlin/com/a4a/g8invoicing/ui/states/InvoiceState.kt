@@ -27,5 +27,6 @@ data class InvoiceState(
     var paymentStatus: Int = 0,
     var dueDate: String = "",
     override var footerText: TextFieldValue = TextFieldValue(),
-    override var createdDate: String? = null
+    override var createdDate: String? = null,
+    override var watermarkText: String? = null
 ) : DocumentState()

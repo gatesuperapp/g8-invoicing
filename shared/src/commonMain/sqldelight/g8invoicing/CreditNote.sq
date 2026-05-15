@@ -7,6 +7,7 @@ CREATE TABLE CreditNote (
   currency TEXT,
   due_date TEXT,
   footer TEXT,
+  watermark_text TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -37,8 +38,8 @@ SELECT credit_note_id
 FROM CreditNote;
 
 save:
-INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?);
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE CreditNote
