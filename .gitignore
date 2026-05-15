@@ -7,13 +7,27 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/artifacts/
+/.idea/kotlinc.xml
 .DS_Store
 /build
 shared/build
+desktop/build/
 /captures
 .externalNativeBuild
 .cxx
 local.properties
 app/release/
+app/*/release/
 .claude/
 .kotlin/
+
+# Local SQLite DBs created when running the app from Android Studio /
+# desktop. They're scratch data, never the source of truth.
+*.db
+*.db-journal
+
+# One-off screenshots / dropped assets that should not slip into git.
+/Sans-titre.jpg
+/Sans-titre*.jpg
+/Sans-titre*.png
