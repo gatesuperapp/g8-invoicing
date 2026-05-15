@@ -1,0 +1,12 @@
+-- Migration de la version 4 vers la version 5
+-- Changement:
+-- 1. Ajout de watermark_text sur les 3 types de documents (Invoice, DeliveryNote, CreditNote).
+--    Cette colonne stocke la mention "Fait avec g8 (www.the-gate.fr), …" choisie à la
+--    création du document. NULL = pas de watermark sur ce doc.
+--    Les documents préexistants ne sont PAS mis à jour : ils restent à NULL et n'auront
+--    donc pas de watermark (intention utilisateur — la feature est neuve, on ne
+--    rétro-marque pas les anciennes factures).
+
+ALTER TABLE Invoice      ADD COLUMN watermark_text TEXT;
+ALTER TABLE DeliveryNote ADD COLUMN watermark_text TEXT;
+ALTER TABLE CreditNote   ADD COLUMN watermark_text TEXT;

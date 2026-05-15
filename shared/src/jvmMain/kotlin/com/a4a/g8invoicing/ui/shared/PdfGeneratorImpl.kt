@@ -20,12 +20,14 @@ import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Image
+import com.itextpdf.layout.element.Link
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
@@ -137,6 +139,12 @@ class PdfGeneratorImpl(
 
         // Footer
         doc.add(createFooter(document.footerText.text, fontSize))
+
+        // g8 watermark — text is frozen on the document at creation (watermark_text column).
+        // null/blank → no watermark for this doc.
+        document.watermarkText?.takeIf { it.isNotBlank() }?.let { watermark ->
+            doc.add(createWatermark(watermark, fontRegular))
+        }
     }
 
     private fun addPageNumbering(document: DocumentState, tempFileName: String): String {
@@ -531,6 +539,36 @@ class PdfGeneratorImpl(
         return Paragraph(text)
             .setFontSize(fontSize)
             .setFixedLeading(14F)
+            .setTextAlignment(TextAlignment.CENTER)
+    }
+
+    private fun createWatermark(text: String, font: PdfFont): Paragraph {
+        // Tiny watermark, smaller than the document body. We split on the URL marker
+        // to make only that substring a clickable Link in PDF readers, but the entire
+        // line is underlined to match the in-app preview (Text with TextDecoration.Underline).
+        // If the (translated) text doesn't contain the marker, we render plain underlined text.
+        // The underline uses an explicit thin thickness (0.2pt) — iText's default thickness
+        // is too heavy relative to the small font and reads as a smudged bar.
+        val urlMarker = "www.the-gate.fr"
+        val underlineThickness = 0.2F
+        val underlineYPosition = -1F
+        val paragraph = Paragraph()
+        if (text.contains(urlMarker)) {
+            paragraph.add(Text(text.substringBefore(urlMarker)).setUnderline(underlineThickness, underlineYPosition))
+            paragraph.add(
+                Link(urlMarker, PdfAction.createURI("https://the-gate.fr")).setUnderline(underlineThickness, underlineYPosition)
+            )
+            paragraph.add(Text(text.substringAfter(urlMarker)).setUnderline(underlineThickness, underlineYPosition))
+        } else {
+            paragraph.add(Text(text).setUnderline(underlineThickness, underlineYPosition))
+        }
+        return paragraph
+            .setFont(font)
+            .setFontSize(7F)
+            .setFixedLeading(9F)
+            .setCharacterSpacing(0.4F)
+            .setFontColor(ColorConstants.GRAY)
+            .setMarginTop(8F)
             .setTextAlignment(TextAlignment.CENTER)
     }
 

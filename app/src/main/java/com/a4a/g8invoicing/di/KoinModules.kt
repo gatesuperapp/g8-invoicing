@@ -99,9 +99,9 @@ val appModule = module {
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
-    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get()) }
-    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get()) }
-    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get()) }
+    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get()) }
+    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get()) }
+    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
 
     single { get<Database>().invoiceQueries }
