@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
@@ -146,7 +147,7 @@ fun ProductListItem(
 
                     Text(
                         text = displayPrice?.let {
-                            it.toPlainString().replace(".", ",") + " " + currencySymbol
+                            it.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
                         } ?: " - "
                     )
                 }
