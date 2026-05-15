@@ -69,6 +69,17 @@ fun NavGraph(
             onShareContent = onShareContent,
         )
 
+        // gStore (premium modules showcase, no commercial CTA)
+        gStore(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            },
+        )
+
         // Delivery Notes
         deliveryNoteList(
             navController = navController,

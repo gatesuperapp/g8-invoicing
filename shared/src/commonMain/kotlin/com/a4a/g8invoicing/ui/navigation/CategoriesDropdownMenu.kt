@@ -36,6 +36,7 @@ fun CategoriesDropdownMenu(
     val categories = listOf(
         Category.G8,
         Category.MyAccount,
+        Category.GStore,
         Category.Clients,
         Category.Products,
         Category.CreditNotes,
@@ -78,7 +79,7 @@ fun CategoriesDropdownMenu(
                 },
             )
 
-            if (category is Category.Products) {
+            if (category is Category.GStore || category is Category.Products) {
                 // Vertical padding around the divider preserves the original visual gap
                 // around section separators (calibrated against the 40dp item height).
                 HorizontalDivider(

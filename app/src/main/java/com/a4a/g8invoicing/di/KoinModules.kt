@@ -18,12 +18,14 @@ import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.AuthApiClient
 import com.a4a.g8invoicing.data.auth.AuthInterceptor
 import com.a4a.g8invoicing.data.auth.AuthRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
+import com.a4a.g8invoicing.ui.screens.GStoreViewModel
 import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -92,6 +94,7 @@ val appModule = module {
     single { AuthApiClient(get(), "https://api.the-gate.fr") }
     single { AuthRepository(get(), get()) }
     single { SubscriptionRepository(get(), get(), get()) }
+    single { ActivatedModulesRepository(get()) }
 
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
@@ -136,4 +139,5 @@ val appModule = module {
         CreditNoteAddEditViewModel(get(), get(), itemId)
     }
     viewModel { AccountViewModel(get(), get()) }
+    viewModel { GStoreViewModel(get(), get()) }
 }

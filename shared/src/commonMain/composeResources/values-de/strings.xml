@@ -253,6 +253,25 @@
     <string name="account_auth_send_link">Link erhalten</string>
     <string name="account_auth_link_sent">Eine E-Mail wurde gesendet. Klicken Sie auf den Link, um sich anzumelden.</string>
     <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Bitte in einigen Minuten erneut versuchen oder uns unter contact@the-gate.fr kontaktieren.</string>
+    <string name="drawer_gstore">𝕘Store</string>
+
+    <!-- gStore -->
+    <string name="gstore_title">𝕘Store</string>
+    <string name="gstore_subtitle_free">Entdecken Sie die mit einem g8-Premium-Konto verfügbaren Module.</string>
+    <string name="gstore_subtitle_premium">Aktivieren Sie die Module, die Sie verwenden möchten.</string>
+    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_footer_free">Mehr Informationen auf </string>
+    <string name="gstore_footer_premium">Verwalten Sie Ihr Konto auf </string>
+    <string name="gstore_module_orders_title">Bestellungen</string>
+    <string name="gstore_module_orders_desc">Verwalten Sie die Bestellungen Ihrer Kunden</string>
+    <string name="gstore_module_facturx_title">Factur-X</string>
+    <string name="gstore_module_facturx_desc">Elektronische Rechnungsstellung</string>
+    <string name="gstore_module_watermark_title">g8-Hinweis</string>
+    <string name="gstore_module_watermark_desc">Entfernen Sie den g8-Hinweis aus Ihren Dokumenten</string>
+    <string name="gstore_module_payments_title">Zahlungen</string>
+    <string name="gstore_module_payments_desc">Erfassen Sie Karten-, Scheck- und Barzahlungen</string>
+    <string name="gstore_module_themes_title">Premium-Themes</string>
+    <string name="gstore_module_themes_desc">Mehr Farben und Designs</string>
 
     <string name="account_logged_in_as">Angemeldet als:</string>
     <string name="account_logout">Abmelden</string>

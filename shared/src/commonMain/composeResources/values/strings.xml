@@ -242,6 +242,25 @@
     <!-- Drawer / Categories -->
     <string name="drawer_g8">Infos</string>
     <string name="drawer_my_account">Mon Compte</string>
+    <string name="drawer_gstore">𝕘Store</string>
+
+    <!-- gStore (premium modules showcase) -->
+    <string name="gstore_title">𝕘Store</string>
+    <string name="gstore_subtitle_free">Découvrez les modules disponibles avec un compte g8 premium.</string>
+    <string name="gstore_subtitle_premium">Activez les modules que vous souhaitez utiliser.</string>
+    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_footer_free">Plus d'informations sur </string>
+    <string name="gstore_footer_premium">Gérez votre compte sur </string>
+    <string name="gstore_module_orders_title">Bon de commande</string>
+    <string name="gstore_module_orders_desc">Gérez les commandes de vos clients</string>
+    <string name="gstore_module_facturx_title">Factur-X</string>
+    <string name="gstore_module_facturx_desc">Facturation électronique</string>
+    <string name="gstore_module_watermark_title">Mention g8</string>
+    <string name="gstore_module_watermark_desc">Retirer la mention g8 de vos documents</string>
+    <string name="gstore_module_payments_title">Paiements</string>
+    <string name="gstore_module_payments_desc">Enregistrez CB, chèques, espèces</string>
+    <string name="gstore_module_themes_title">Thèmes premium</string>
+    <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>

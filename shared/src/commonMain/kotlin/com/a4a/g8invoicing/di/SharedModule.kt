@@ -18,10 +18,12 @@ import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.AuthApiClient
 import com.a4a.g8invoicing.data.auth.AuthRepository
 import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
+import com.a4a.g8invoicing.ui.screens.GStoreViewModel
 import io.ktor.client.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
@@ -72,6 +74,7 @@ val sharedModule = module {
     single { get<Database>().clientOrIssuerQueries }
 
     // Data Sources
+    single { ActivatedModulesRepository(get()) }
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
@@ -110,4 +113,5 @@ val sharedModule = module {
         CreditNoteAddEditViewModel(get(), get(), itemId)
     }
     viewModel { AccountViewModel(get(), get()) }
+    viewModel { GStoreViewModel(get(), get()) }
 }

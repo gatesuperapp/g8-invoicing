@@ -51,6 +51,7 @@ fun CategorySidebar(
     val categories = listOf(
         Category.G8,
         Category.MyAccount,
+        Category.GStore,
         Category.Clients,
         Category.Products,
         Category.CreditNotes,
@@ -80,7 +81,7 @@ fun CategorySidebar(
                     onClick = { onClickCategory(category) }
                 )
 
-                if (category is Category.Products) {
+                if (category is Category.GStore || category is Category.Products) {
                     // Calibrated against the 8dp vertical item padding so the visible
                     // gap around section separators stays consistent with the original.
                     HorizontalDivider(
@@ -149,6 +150,7 @@ private fun getCategoryIcon(category: Category): ImageVector? {
     return when (category) {
         Category.G8 -> null // No icon for G8
         Category.MyAccount -> Icons.Filled.AccountCircle
+        Category.GStore -> Icons.Filled.Star
         Category.Clients -> Icons.Filled.People
         Category.Products -> Icons.Filled.ShoppingBasket
         Category.Invoices -> Icons.Filled.Receipt

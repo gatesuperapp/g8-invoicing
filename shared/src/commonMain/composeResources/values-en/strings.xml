@@ -253,6 +253,25 @@
     <string name="account_auth_send_link">Receive link</string>
     <string name="account_auth_link_sent">An email has been sent. Click the link to sign in.</string>
     <string name="account_auth_error">Could not send the link right now. Please try again in a few minutes or email us at contact@the-gate.fr.</string>
+    <string name="drawer_gstore">𝕘Store</string>
+
+    <!-- gStore -->
+    <string name="gstore_title">𝕘Store</string>
+    <string name="gstore_subtitle_free">Discover the modules available with a g8 premium account.</string>
+    <string name="gstore_subtitle_premium">Activate the modules you want to use.</string>
+    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_footer_free">More information at </string>
+    <string name="gstore_footer_premium">Manage your account at </string>
+    <string name="gstore_module_orders_title">Purchase orders</string>
+    <string name="gstore_module_orders_desc">Manage your clients\' orders</string>
+    <string name="gstore_module_facturx_title">Factur-X</string>
+    <string name="gstore_module_facturx_desc">Electronic invoicing</string>
+    <string name="gstore_module_watermark_title">g8 mark</string>
+    <string name="gstore_module_watermark_desc">Remove the g8 mention from your documents</string>
+    <string name="gstore_module_payments_title">Payments</string>
+    <string name="gstore_module_payments_desc">Record card, check, cash payments</string>
+    <string name="gstore_module_themes_title">Premium themes</string>
+    <string name="gstore_module_themes_desc">Extra colors and designs</string>
 
     <string name="account_logged_in_as">Signed in as:</string>
     <string name="account_logout">Sign out</string>
