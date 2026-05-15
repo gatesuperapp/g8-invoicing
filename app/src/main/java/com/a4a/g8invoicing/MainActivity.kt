@@ -7,11 +7,15 @@ import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.view.WindowCompat
 import com.a4a.g8invoicing.ui.MainCompose
 import com.a4a.g8invoicing.ui.states.InvoiceState
 
 class MainActivity : AppCompatActivity() {
+
+    private val pendingMagicLinkToken = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,12 +29,30 @@ class MainActivity : AppCompatActivity() {
         // Compulsory for the bottom sheet modal to not overlap native navbar
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        handleDeepLink(intent)
+
         setContent {
             MainCompose(
                 onSendReminder = { invoice ->
                     sendReminderEmail(invoice)
+                },
+                pendingMagicLinkToken = pendingMagicLinkToken.value,
+                onMagicLinkTokenConsumed = {
+                    pendingMagicLinkToken.value = null
                 }
             )
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        val token = intent?.data?.getQueryParameter("token")
+        if (token != null) {
+            pendingMagicLinkToken.value = token
         }
     }
 

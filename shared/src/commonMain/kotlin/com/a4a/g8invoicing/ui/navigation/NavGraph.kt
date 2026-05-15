@@ -57,6 +57,18 @@ fun NavGraph(
             showCategoryButton = showCategoryButton
         )
 
+        // Account (magic link auth + subscription)
+        account(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            },
+            onShareContent = onShareContent,
+        )
+
         // Delivery Notes
         deliveryNoteList(
             navController = navController,

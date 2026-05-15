@@ -1,62 +1,95 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
+import com.a4a.g8invoicing.data.AppLanguage
+import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.auth.SubscriptionState
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.account_bat_love
-import com.a4a.g8invoicing.shared.resources.account_donate
-import com.a4a.g8invoicing.shared.resources.account_donate_link
-import com.a4a.g8invoicing.shared.resources.account_share_content
-import com.a4a.g8invoicing.shared.resources.account_subscribe
+import com.a4a.g8invoicing.shared.resources.about_language_english
+import com.a4a.g8invoicing.shared.resources.about_language_french
+import com.a4a.g8invoicing.shared.resources.about_language_german
+import com.a4a.g8invoicing.shared.resources.about_language_system
+import com.a4a.g8invoicing.shared.resources.about_title_language
+import com.a4a.g8invoicing.shared.resources.account_auth_about_link
+import com.a4a.g8invoicing.shared.resources.account_auth_about_url
+import com.a4a.g8invoicing.shared.resources.account_auth_email_label
+import com.a4a.g8invoicing.shared.resources.account_auth_error
+import com.a4a.g8invoicing.shared.resources.account_auth_link_sent
+import com.a4a.g8invoicing.shared.resources.account_auth_send_link
+import com.a4a.g8invoicing.shared.resources.account_auth_subtitle
+import com.a4a.g8invoicing.shared.resources.account_auth_title
+import com.a4a.g8invoicing.shared.resources.account_logged_in_as
+import com.a4a.g8invoicing.shared.resources.account_logout
+import com.a4a.g8invoicing.shared.resources.account_manage_subscription
+import com.a4a.g8invoicing.shared.resources.account_manage_subscription_url
+import com.a4a.g8invoicing.shared.resources.account_cancellation_date
+import com.a4a.g8invoicing.shared.resources.account_renewal_date
+import com.a4a.g8invoicing.shared.resources.account_status_premium_fab
+import com.a4a.g8invoicing.shared.resources.account_status_premium_fly
+import com.a4a.g8invoicing.shared.resources.drawer_my_account
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
-import com.a4a.g8invoicing.ui.shared.animations.BatKiss
-import com.a4a.g8invoicing.ui.theme.ColorHotPink
+import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.textTitle
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun Account(
@@ -64,38 +97,23 @@ fun Account(
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
     onShareContent: (String) -> Unit = {},
+    viewModel: AccountViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
+    val uiState = viewModel.uiState
 
-    // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
-    // Animation around button
-    val infiniteTransition = rememberInfiniteTransition(label = "border")
-    val targetOffset = with(LocalDensity.current) {
-        1000.dp.toPx()
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        if (uiState.isLoggedIn) {
+            viewModel.refreshSubscription()
+        }
     }
-    val offset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = targetOffset,
-        animationSpec = infiniteRepeatable(
-            animation = tween(10000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "offset"
-    )
-    val brushSize = 400f
-    val brush = Brush.linearGradient(
-        colors = listOf(ColorVioletLight, ColorHotPink),
-        start = Offset(offset, offset),
-        end = Offset(offset + brushSize, offset + brushSize),
-        tileMode = TileMode.Mirror
-    )
 
     Scaffold(
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
-              //  title = R.string.appbar_account,
+                title = stringResource(Res.string.drawer_my_account),
                 navController = navController,
                 onClickBackArrow = onClickBack,
                 isCancelCtaDisplayed = false
@@ -105,123 +123,311 @@ fun Account(
             GeneralBottomBar(
                 navController = navController,
                 onClickCategory = onClickCategory,
-                onChangeBackground = {
-                    isDimActive.value = !isDimActive.value
-                },
+                onChangeBackground = { isDimActive.value = !isDimActive.value },
                 isButtonNewDisplayed = false
             )
-        }
-    ) { padding ->
-        val interactionSource = remember { MutableInteractionSource() }
-        var showText by remember { mutableStateOf(true) }
-        var showCreateAccountForm by remember { mutableStateOf(false) }
-
-        val numberOfIterations = remember { mutableIntStateOf(2) }
-
-        val donateLink = stringResource(Res.string.account_donate_link)
-        val shareContent = stringResource(Res.string.account_share_content)
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+        },
+    ) { _ ->
+        // Mirror the Infos screen: ignore Scaffold's content padding and lay out from
+        // the top of the screen, the TopBar overlaying. Single 130dp top padding (not
+        // stacked with the TopBar's ~64dp) keeps the visual rhythm identical to Infos.
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(padding)
-                    .padding(top=110.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Text(
-                    modifier = Modifier.padding(
-                        top = 40.dp,
+                    .padding(
+                        top = 130.dp,
+                        bottom = 140.dp,
                         start = 40.dp,
                         end = 40.dp,
-                        bottom = 20.dp
-                    ),
-                    textAlign = TextAlign.Center,
-                    text = stringResource(Res.string.account_subscribe)
+                    )
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.Start
+            ) {
+                // ============ Auth section (no title — per design) ============
+                if (uiState.isLoggedIn) {
+                    val subscriptionState by viewModel.subscriptionState.collectAsState()
+                    LoggedInContent(
+                        email = uiState.userEmail,
+                        subscriptionState = subscriptionState,
+                        onLogout = { viewModel.logout() },
+                        onOpenManageSubscription = { fallbackUrl ->
+                            viewModel.openCustomerPortal(fallbackUrl) { url ->
+                                uriHandler.openUri(url)
+                            }
+                        },
+                    )
+                } else {
+                    LoggedOutContent(
+                        uiState = uiState,
+                        onSubmit = { viewModel.requestMagicLink(it) },
+                        uriHandler = uriHandler,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                // ============ Langue section ============
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(Res.string.about_title_language),
+                    style = MaterialTheme.typography.textTitle,
                 )
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                Button(
-                    modifier = Modifier.border(
-                        BorderStroke(
-                            width = 4.dp,
-                            brush = brush
-                        ), shape = RoundedCornerShape(50)
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = {
-                        uriHandler.openUri(donateLink)
-                    },
-                ) {
-                    Text(stringResource(Res.string.account_donate))
-                }
-
-                Spacer(modifier = Modifier.height(40.dp))
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    modifier = Modifier.border(
-                        BorderStroke(
-                            width = 4.dp,
-                            brush = brush
-                        ), shape = RoundedCornerShape(50)
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = {
-                        onShareContent(shareContent)
-                    },
-                ) {
-                //    Text(stringResource(id = R.string.account_share_button))
-                }
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                var visibleText by remember { mutableStateOf(false) }
-
-                Box(
-                    Modifier
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() } // This is mandatory
-                        ) {
-                            numberOfIterations.intValue += 1
-                            visibleText = !visibleText
-                        }
-                ) {
-                    BatKiss(
-                        modifier = Modifier
-                            .width(300.dp)
-                            .height(200.dp)
-                            .align(Alignment.Center),
-                        iterations = numberOfIterations.intValue
-                    )
-                }
-
-                AnimatedVisibility(
-                    visible = visibleText,
-                    enter = fadeIn(
-                        tween(
-                            2000,
-                            delayMillis = 100,
-                            easing = LinearOutSlowInEasing
-                        )
-                    ),
-                    exit = fadeOut(tween(100)),
-                ) {
-                    Text(
-                        text = stringResource(Res.string.account_bat_love),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                LanguageSelector()
             }
         }
     }
+}
+
+@Composable
+private fun LoggedOutContent(
+    uiState: AccountUiState,
+    onSubmit: (String) -> Unit,
+    uriHandler: androidx.compose.ui.platform.UriHandler,
+) {
+    var email by remember { mutableStateOf("") }
+
+    Text(
+        text = stringResource(Res.string.account_auth_title),
+        fontWeight = FontWeight.Bold,
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Text(
+        text = stringResource(Res.string.account_auth_subtitle),
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    val violetSelectionColors = TextSelectionColors(
+        handleColor = Color.Transparent,
+        backgroundColor = ColorVioletLight.copy(alpha = 0.3f),
+    )
+    CompositionLocalProvider(LocalTextSelectionColors provides violetSelectionColors) {
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text(stringResource(Res.string.account_auth_email_label)) },
+            singleLine = true,
+            enabled = !uiState.isLoading && uiState.successMessage == null,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = ColorVioletLight,
+                unfocusedBorderColor = Color.Black,
+                focusedLabelColor = ColorVioletLight,
+                unfocusedLabelColor = Color.Black,
+                cursorColor = ColorVioletLight,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    if (uiState.successMessage != null) {
+        Text(
+            text = stringResource(Res.string.account_auth_link_sent),
+            color = Color.Black,
+            fontWeight = FontWeight.Medium,
+        )
+    } else {
+        val isEnabled = !uiState.isLoading && email.isNotBlank()
+        TextButton(
+            onClick = { onSubmit(email.trim()) },
+            enabled = isEnabled,
+            contentPadding = PaddingValues(horizontal = 0.dp),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = ColorVioletLight,
+                disabledContentColor = ColorDarkGrayTransp,
+            ),
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.height(18.dp).width(18.dp),
+                    strokeWidth = 2.dp,
+                    color = ColorVioletLight,
+                )
+            } else {
+                Text(stringResource(Res.string.account_auth_send_link))
+            }
+        }
+
+        if (uiState.errorMessage != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(Res.string.account_auth_error),
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    val aboutLabel = stringResource(Res.string.account_auth_about_link)
+    val aboutUrl = stringResource(Res.string.account_auth_about_url)
+    Text(
+        modifier = Modifier.clickable { uriHandler.openUri(aboutUrl) },
+        text = aboutLabel,
+        fontSize = 13.sp,
+        color = Color.Black,
+        textDecoration = TextDecoration.Underline,
+    )
+}
+
+@Composable
+private fun LoggedInContent(
+    email: String?,
+    subscriptionState: SubscriptionState,
+    onLogout: () -> Unit,
+    onOpenManageSubscription: (fallbackUrl: String) -> Unit,
+) {
+    if (!email.isNullOrBlank()) {
+        Text(text = stringResource(Res.string.account_logged_in_as))
+        Text(text = email)
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    // Premium status. The "manage" link points to Stripe Customer Portal — managing an
+    // existing subscription is explicitly allowed by Play Store and Apple (the rule only
+    // forbids *selling* via external link).
+    val known = subscriptionState as? SubscriptionState.Known
+    val premiumStatusRes: StringResource? = when {
+        known?.status != "active" -> null
+        known.product == "fly" -> Res.string.account_status_premium_fly
+        known.product == "fab" -> Res.string.account_status_premium_fab
+        else -> null
+    }
+
+    if (premiumStatusRes != null) {
+        PremiumBadge(label = stringResource(premiumStatusRes))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        known?.currentPeriodEndMs?.let { ms ->
+            val dateLabel = formatRenewalDate(ms)
+            val text = if (known.cancelAtPeriodEnd) {
+                stringResource(Res.string.account_cancellation_date, dateLabel)
+            } else {
+                stringResource(Res.string.account_renewal_date, dateLabel)
+            }
+            Text(
+                fontSize = 13.sp,
+                text = text,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        val manageLabel = stringResource(Res.string.account_manage_subscription)
+        val manageFallbackUrl = stringResource(Res.string.account_manage_subscription_url)
+        Text(
+            modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
+            text = manageLabel,
+            fontSize = 13.sp,
+            color = ColorVioletLight,
+            textDecoration = TextDecoration.Underline,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+    }
+
+    // No separator between manage subscription and logout — design choice.
+    Text(
+        modifier = Modifier.clickable { onLogout() },
+        text = stringResource(Res.string.account_logout),
+        fontSize = 13.sp,
+        color = ColorVioletLight,
+        textDecoration = TextDecoration.Underline,
+    )
+}
+
+@Composable
+private fun PremiumBadge(label: String) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = ColorVioletLight.copy(alpha = 0.08f),
+                shape = RoundedCornerShape(10.dp),
+            )
+            .border(
+                width = 1.dp,
+                color = ColorVioletLight.copy(alpha = 0.25f),
+                shape = RoundedCornerShape(10.dp),
+            )
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+    ) {
+        Text(
+            text = label,
+            color = ColorVioletLight,
+        )
+    }
+}
+
+@Composable
+private fun LanguageSelector(
+    localeManager: LocaleManager = koinInject()
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val currentLanguage = localeManager.currentLanguage
+
+    val systemLabel = stringResource(Res.string.about_language_system)
+    val frenchLabel = stringResource(Res.string.about_language_french)
+    val englishLabel = stringResource(Res.string.about_language_english)
+    val germanLabel = stringResource(Res.string.about_language_german)
+
+    fun getDisplayName(language: AppLanguage): String = when (language) {
+        AppLanguage.SYSTEM -> systemLabel
+        AppLanguage.FRENCH -> frenchLabel
+        AppLanguage.ENGLISH -> englishLabel
+        AppLanguage.GERMAN -> germanLabel
+    }
+
+    Box {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = Color.Gray,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = getDisplayName(currentLanguage),
+                color = Color.Black
+            )
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = Color.Gray
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AppLanguage.values().forEach { language ->
+                DropdownMenuItem(
+                    text = { Text(getDisplayName(language)) },
+                    onClick = {
+                        localeManager.setLanguage(language)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+private fun formatRenewalDate(epochMs: Long): String {
+    val date = Instant.fromEpochMilliseconds(epochMs)
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+    val day = date.dayOfMonth.toString().padStart(2, '0')
+    val month = date.monthNumber.toString().padStart(2, '0')
+    return "$day/$month/${date.year}"
 }

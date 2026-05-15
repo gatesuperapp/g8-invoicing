@@ -239,6 +239,7 @@
 
     <!-- Drawer / Categories -->
     <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_my_account">Mein Konto</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
@@ -246,6 +247,23 @@
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing oder auf F-Droid: https://f-droid.org/fr/packages/com.a4a.g8invoicing</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="account_auth_title">Bei 𝕘𝟠 anmelden</string>
+    <string name="account_auth_subtitle">Geben Sie Ihre E-Mail-Adresse ein, um einen Anmeldelink zu erhalten.</string>
+    <string name="account_auth_email_label">E-Mail</string>
+    <string name="account_auth_send_link">Link erhalten</string>
+    <string name="account_auth_link_sent">Eine E-Mail wurde gesendet. Klicken Sie auf den Link, um sich anzumelden.</string>
+    <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Bitte in einigen Minuten erneut versuchen oder uns unter contact@the-gate.fr kontaktieren.</string>
+
+    <string name="account_logged_in_as">Angemeldet als:</string>
+    <string name="account_logout">Abmelden</string>
+    <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium-Mitglied</string>
+    <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Premium-Mitglied</string>
+    <string name="account_renewal_date">Verlängert am %1$s</string>
+    <string name="account_cancellation_date">Gekündigt — endet am %1$s</string>
+    <string name="account_manage_subscription">Abonnement verwalten</string>
+    <string name="account_website_label">the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_section_auth">Authentifizierung</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 ist eine praktische und engagierte App:\n• Funktioniert offline\n• Keine Werbung, kein Tracking\n• Freie Software, open-source\n• Entworfen für Bio-Landwirte und -Landwirtinnen\n• Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>

@@ -102,6 +102,9 @@ dependencies {
     implementation("io.insert-koin:koin-android:4.0.2")
     implementation("io.insert-koin:koin-androidx-compose:4.0.2")
 
+    // Encrypted token storage
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.2.0")
 

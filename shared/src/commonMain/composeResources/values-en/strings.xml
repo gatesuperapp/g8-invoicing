@@ -239,6 +239,7 @@
 
     <!-- Drawer / Categories -->
     <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_my_account">My Account</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Support the project and enjoy exclusive benefits: early access to upcoming features (desktop app, electronic invoicing..), forum badge, "Little Horseshoe" sticker.. and more!</string>
@@ -246,6 +247,23 @@
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="account_auth_title">Sign in to 𝕘𝟠</string>
+    <string name="account_auth_subtitle">Enter your email to receive a sign-in link.</string>
+    <string name="account_auth_email_label">Email</string>
+    <string name="account_auth_send_link">Receive link</string>
+    <string name="account_auth_link_sent">An email has been sent. Click the link to sign in.</string>
+    <string name="account_auth_error">Could not send the link right now. Please try again in a few minutes or email us at contact@the-gate.fr.</string>
+
+    <string name="account_logged_in_as">Signed in as:</string>
+    <string name="account_logout">Sign out</string>
+    <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium Member</string>
+    <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Premium Member</string>
+    <string name="account_renewal_date">Renews on %1$s</string>
+    <string name="account_cancellation_date">Cancelled — ends on %1$s</string>
+    <string name="account_manage_subscription">Manage subscription</string>
+    <string name="account_website_label">the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_section_auth">Authentication</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>

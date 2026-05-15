@@ -18,7 +18,14 @@ import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.AuthApiClient
+import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
+import io.ktor.client.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
@@ -45,6 +52,18 @@ val sharedModule = module {
     // Database
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
     single { Database(get()) }
+
+    // Auth
+    single {
+        HttpClient {
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+        }
+    }
+    single { TokenStorage() }
+    single { AuthApiClient(get()) }
+    single { AuthRepository(get(), get()) }
 
     // Queries
     single { get<Database>().invoiceQueries }
@@ -90,5 +109,5 @@ val sharedModule = module {
         val itemId: String? = params.getOrNull()
         CreditNoteAddEditViewModel(get(), get(), itemId)
     }
-    viewModel { AccountViewModel() }
+    viewModel { AccountViewModel(get(), get()) }
 }

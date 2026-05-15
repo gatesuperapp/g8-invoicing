@@ -18,8 +18,22 @@ import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.AuthApiClient
+import com.a4a.g8invoicing.data.auth.AuthInterceptor
+import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
 import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.SharedPreferencesSettings
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.CreditNoteAddEditViewModel
@@ -45,6 +59,39 @@ val appModule = module {
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
 
     single { Database(get()) }
+
+    // Auth
+    single { AuthInterceptor(get()) }
+    single {
+        val interceptor: AuthInterceptor = get()
+        HttpClient(OkHttp) {
+            engine {
+                addInterceptor(interceptor)
+            }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+        }
+    }
+    // Encrypted token storage (EncryptedSharedPreferences wrapped as Settings)
+    single<Settings> {
+        val context = androidContext()
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+        val prefs = EncryptedSharedPreferences.create(
+            context,
+            "auth_tokens",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+        SharedPreferencesSettings(prefs)
+    }
+    single { TokenStorage(get()) }
+    single { AuthApiClient(get(), "https://api.the-gate.fr") }
+    single { AuthRepository(get(), get()) }
+    single { SubscriptionRepository(get(), get(), get()) }
 
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
@@ -88,5 +135,5 @@ val appModule = module {
         val itemId: String? = if (params.size() > 0) params[0] else null
         CreditNoteAddEditViewModel(get(), get(), itemId)
     }
-    viewModel { AccountViewModel() }
+    viewModel { AccountViewModel(get(), get()) }
 }

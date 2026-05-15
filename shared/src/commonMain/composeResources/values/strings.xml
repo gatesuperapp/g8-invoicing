@@ -241,6 +241,7 @@
 
     <!-- Drawer / Categories -->
     <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_my_account">Mon Compte</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
@@ -248,6 +249,25 @@
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="account_auth_title">Déjà membre Premium ?</string>
+    <string name="account_auth_subtitle">Reçois un lien de connexion par email.</string>
+    <string name="account_auth_email_label">Email</string>
+    <string name="account_auth_send_link">Recevoir mon lien</string>
+    <string name="account_auth_link_sent">Un email vous a été envoyé. Cliquez sur le lien pour vous connecter.</string>
+    <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Réessayez dans quelques minutes ou écrivez-nous à contact@the-gate.fr.</string>
+    <string name="account_auth_about_link">En savoir plus sur g8</string>
+    <string name="account_auth_about_url">https://the-gate.fr</string>
+    <string name="account_logged_in_as">Connecté·e en tant que :</string>
+    <string name="account_logout">Me déconnecter</string>
+    <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Membre Premium</string>
+    <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Membre Premium</string>
+    <string name="account_renewal_date">Renouvellement le %1$s</string>
+    <string name="account_cancellation_date">Annulé — se termine le %1$s</string>
+    <string name="account_manage_subscription">Gérer mon abonnement</string>
+    <string name="account_manage_subscription_url">https://billing.stripe.com/p/login/test_5kQ9ASbgrcPl6113Sm1RC00</string>
+    <string name="account_website_label">the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_section_auth">Authentification</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 est une application pratique et engagée :\n• Fonctionne hors-ligne \n• Ni pub ni traceur \n• Logiciel libre, open-source\n• Conçue pour les producteur·ices bio\n• Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.</string>

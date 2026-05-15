@@ -1,7 +1,9 @@
 package com.a4a.g8invoicing.ui.navigation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,6 +35,7 @@ fun CategoriesDropdownMenu(
 ) {
     val categories = listOf(
         Category.G8,
+        Category.MyAccount,
         Category.Clients,
         Category.Products,
         Category.CreditNotes,
@@ -54,13 +57,12 @@ fun CategoriesDropdownMenu(
             val selected = currentDestination?.hierarchy?.any { it.route == category.route } == true
 
             DropdownMenuItem(
-                modifier = if (selected) {
-                    Modifier
-                        .background(MainBackground)
+                modifier = (if (selected) {
+                    Modifier.background(MainBackground)
                 } else {
-                    Modifier
-                        .background(Color.Transparent)
-                },
+                    Modifier.background(Color.Transparent)
+                }).height(40.dp), // tighter rows (Material default ≈ 48dp) but tap-friendly
+                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
                 text = {
                     Text(
                         stringResource(category.resourceId),
@@ -76,9 +78,11 @@ fun CategoriesDropdownMenu(
                 },
             )
 
-            if (category is Category.G8 || category is Category.Products) {
+            if (category is Category.Products) {
+                // Vertical padding around the divider preserves the original visual gap
+                // around section separators (calibrated against the 40dp item height).
                 HorizontalDivider(
-                    modifier = Modifier.padding(start = 24.dp, end = 16.dp),
+                    modifier = Modifier.padding(start = 24.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
                     thickness = 1.dp,
                     color = Color.LightGray.copy(alpha = 0.6f)
                 )
