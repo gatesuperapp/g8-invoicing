@@ -37,6 +37,9 @@ data class PdfStrings(
     val invoicePaid: String,
     val labelSeparator: String,
     val addressedTo: String,
+    val companyId1Label: String,
+    val companyId2Label: String,
+    val companyId3Label: String,
 )
 
 /**

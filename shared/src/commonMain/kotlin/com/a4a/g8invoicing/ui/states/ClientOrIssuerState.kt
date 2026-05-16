@@ -20,11 +20,15 @@ data class ClientOrIssuerState(
     var phone: TextFieldValue? = null,
     var emails: List<EmailState>? = null, // Max 4 emails
     var notes: TextFieldValue? = null,
-    var companyId1Label: TextFieldValue? = TextFieldValue("N° SIRET"),
+    // Default labels stay null so the form falls back to the localized stringResource
+    // (FR: SIRET/TVA/RCS, DE: HRB/USt-IdNr./Steuer-Nr., EN: Reg. No./VAT/ID). Hardcoding
+    // them here would pin every new client to French regardless of the active locale.
+    // The user's own edits override this fallback once they type something.
+    var companyId1Label: TextFieldValue? = null,
     var companyId1Number: TextFieldValue? = null,
-    var companyId2Label: TextFieldValue? = TextFieldValue("N° TVA"),
+    var companyId2Label: TextFieldValue? = null,
     var companyId2Number: TextFieldValue? = null,
-    var companyId3Label: TextFieldValue? = TextFieldValue("N° RCS"),
+    var companyId3Label: TextFieldValue? = null,
     var companyId3Number: TextFieldValue? = null,
     var logoPath: String? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
