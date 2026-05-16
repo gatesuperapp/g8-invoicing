@@ -21,11 +21,13 @@ WHERE product_tax_id = :id;
 
 getTaxRates:
 SELECT amount
-FROM TaxRate;
+FROM TaxRate
+ORDER BY amount ASC;
 
 getTaxRatesWithIds:
 SELECT product_tax_id, amount
-FROM TaxRate;
+FROM TaxRate
+ORDER BY amount ASC;
 
 saveTaxRate:
 INSERT
