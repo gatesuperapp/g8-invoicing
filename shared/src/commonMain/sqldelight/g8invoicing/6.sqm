@@ -1,0 +1,38 @@
+-- Migration de la version 6 vers la version 7
+-- Fix de la seed introduite en 5.sqm : la migration précédente filtrait sur
+-- DocumentClientOrIssuer.type = 'document_issuer', mais le code en réalité
+-- stocke 'issuer' / 'client' dans cette table (cf. ClientOrIssuerLocalDataSource,
+-- branche DOCUMENT_ISSUER → ClientOrIssuerType.ISSUER.name.lowercase()).
+-- Résultat : tous les ClientOrIssuer.footer sont restés à NULL pour les
+-- utilisateurs déjà installés. On rejoue la seed avec le bon filtre, et
+-- uniquement sur les rows footer IS NULL (idempotent — n'écrase pas un
+-- footer déjà saisi via un futur formulaire).
+
+UPDATE ClientOrIssuer
+SET footer = (
+    SELECT footer FROM (
+        SELECT inv.footer AS footer, inv.created_at AS created_at
+        FROM Invoice inv
+        JOIN LinkInvoiceToDocumentClientOrIssuer link ON link.invoice_id = inv.invoice_id
+        JOIN DocumentClientOrIssuer dci ON dci.id = link.document_client_or_issuer_id
+        WHERE dci.original_client_id = ClientOrIssuer.id
+          AND dci.type = 'issuer'
+        UNION ALL
+        SELECT dn.footer AS footer, dn.created_at AS created_at
+        FROM DeliveryNote dn
+        JOIN LinkDeliveryNoteToDocumentClientOrIssuer link ON link.delivery_note_id = dn.delivery_note_id
+        JOIN DocumentClientOrIssuer dci ON dci.id = link.document_client_or_issuer_id
+        WHERE dci.original_client_id = ClientOrIssuer.id
+          AND dci.type = 'issuer'
+        UNION ALL
+        SELECT cn.footer AS footer, cn.created_at AS created_at
+        FROM CreditNote cn
+        JOIN LinkCreditNoteToDocumentClientOrIssuer link ON link.credit_note_id = cn.credit_note_id
+        JOIN DocumentClientOrIssuer dci ON dci.id = link.document_client_or_issuer_id
+        WHERE dci.original_client_id = ClientOrIssuer.id
+          AND dci.type = 'issuer'
+    )
+    ORDER BY created_at DESC
+    LIMIT 1
+)
+WHERE type = 'issuer' AND footer IS NULL;
