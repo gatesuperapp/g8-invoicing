@@ -148,6 +148,8 @@
     <string name="client_notes">Private notes</string>
     <string name="client_notes_input">The lesser horseshoe bat is a species of bat found in deciduous forests.</string>
     <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_footer_label">Default footer</string>
+    <string name="issuer_footer_placeholder">Legal notice, IBAN, contact info…</string>
     <string name="issuer_logo_select">Select a logo</string>
     <string name="issuer_logo_remove">Remove logo</string>
     <string name="issuer_logo_error_title">Error</string>

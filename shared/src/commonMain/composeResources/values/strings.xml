@@ -150,6 +150,8 @@
     <string name="client_notes">Notes privées</string>
     <string name="client_notes_input">Le petit rhinolophe est une espèce de chauve-souris liée aux forêts de feuillus.</string>
     <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_footer_label">Pied de page par défaut</string>
+    <string name="issuer_footer_placeholder">Mentions légales, IBAN, coordonnées…</string>
     <string name="issuer_logo_select">Choisir un logo</string>
     <string name="issuer_logo_remove">Supprimer le logo</string>
     <string name="issuer_logo_error_title">Erreur</string>

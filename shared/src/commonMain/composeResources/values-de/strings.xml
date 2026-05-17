@@ -148,6 +148,8 @@
     <string name="client_notes">Notizen</string>
     <string name="client_notes_input">Die Kleine Hufeisennase ist eine Fledermausart, die in Laubwäldern lebt.</string>
     <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_footer_label">Standard-Fußzeile</string>
+    <string name="issuer_footer_placeholder">Rechtliche Hinweise, IBAN, Kontaktdaten…</string>
     <string name="issuer_logo_select">Logo auswählen</string>
     <string name="issuer_logo_remove">Logo entfernen</string>
     <string name="issuer_logo_error_title">Fehler</string>

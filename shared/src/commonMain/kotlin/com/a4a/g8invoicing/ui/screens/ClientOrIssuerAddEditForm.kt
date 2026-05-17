@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -147,6 +148,8 @@ fun ClientOrIssuerAddEditForm(
     val issuerLogoRemove = stringResource(Res.string.issuer_logo_remove)
     val issuerLogoErrorTitle = stringResource(Res.string.issuer_logo_error_title)
     val issuerLogoErrorDismiss = stringResource(Res.string.issuer_logo_error_dismiss)
+    val issuerFooterLabel = stringResource(Res.string.issuer_footer_label)
+    val issuerFooterPlaceholder = stringResource(Res.string.issuer_footer_placeholder)
 
     // Check if this is an issuer (to show logo field)
     // Also check typeOfCreation for new issuer creation where type might be null
@@ -544,6 +547,38 @@ fun ClientOrIssuerAddEditForm(
                     },
                     errorTitle = issuerLogoErrorTitle,
                     errorDismissText = issuerLogoErrorDismiss
+                )
+            }
+
+            Spacer(Modifier.padding(bottom = 16.dp))
+        }
+
+        // Default footer (issuers only — and only in the full screen, not the
+        // bottom-sheet inline issuer flow which has its own simpler form).
+        // The TextField shows the localized document_default_footer as a
+        // placeholder while the state is null — when the user types,
+        // state.footer captures their value. On save, a null footer is
+        // preserved as null in DB; documents created later will fall back to
+        // the localized default at creation time.
+        if (isIssuer && !isInBottomSheetModal) {
+            Column(
+                modifier = Modifier
+                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    modifier = Modifier.padding(bottom = 6.dp),
+                    text = issuerFooterLabel,
+                )
+                OutlinedTextField(
+                    value = clientOrIssuerUiState.footer ?: TextFieldValue(""),
+                    onValueChange = {
+                        onValueChange(ScreenElement.ISSUER_FOOTER, it)
+                    },
+                    placeholder = { Text(issuerFooterPlaceholder) },
+                    minLines = 3,
+                    maxLines = 6,
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 

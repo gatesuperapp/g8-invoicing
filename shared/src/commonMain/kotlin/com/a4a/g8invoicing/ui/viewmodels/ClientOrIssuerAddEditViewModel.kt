@@ -719,6 +719,8 @@ class ClientOrIssuerAddEditViewModel(
                 person = person.copy(logoPath = logoPath)
             }
 
+            ScreenElement.ISSUER_FOOTER -> person = person.copy(footer = value as TextFieldValue)
+
             else -> {}
         }
         return person
