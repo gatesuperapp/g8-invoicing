@@ -1,0 +1,41 @@
+-- Migration de la version 5 vers la version 6
+-- Changement :
+-- 1. Ajout de footer sur ClientOrIssuer pour stocker le pied de page par défaut
+--    de chaque émetteur. Quand l'utilisateur sélectionne un émetteur dans un
+--    document, le footer du doc est préfillé avec celui de l'émetteur (puis
+--    librement éditable sur le doc).
+-- 2. Seed rétro-active : pour chaque émetteur existant sans footer, on copie le
+--    footer du document le plus récent associé à cet émetteur (toutes tables
+--    confondues : Invoice, DeliveryNote, CreditNote). Si aucun doc, footer
+--    reste NULL et l'utilisateur le saisira lui-même.
+
+ALTER TABLE ClientOrIssuer ADD COLUMN footer TEXT;
+
+UPDATE ClientOrIssuer
+SET footer = (
+    SELECT footer FROM (
+        SELECT inv.footer AS footer, inv.created_at AS created_at
+        FROM Invoice inv
+        JOIN LinkInvoiceToDocumentClientOrIssuer link ON link.invoice_id = inv.invoice_id
+        JOIN DocumentClientOrIssuer dci ON dci.id = link.document_client_or_issuer_id
+        WHERE dci.original_client_id = ClientOrIssuer.id
+          AND dci.type = 'document_issuer'
+        UNION ALL
+        SELECT dn.footer AS footer, dn.created_at AS created_at
+        FROM DeliveryNote dn
+        JOIN LinkDeliveryNoteToDocumentClientOrIssuer link ON link.delivery_note_id = dn.delivery_note_id
+        JOIN DocumentClientOrIssuer dci ON dci.id = link.document_client_or_issuer_id
+        WHERE dci.original_client_id = ClientOrIssuer.id
+          AND dci.type = 'document_issuer'
+        UNION ALL
+        SELECT cn.footer AS footer, cn.created_at AS created_at
+        FROM CreditNote cn
+        JOIN LinkCreditNoteToDocumentClientOrIssuer link ON link.credit_note_id = cn.credit_note_id
+        JOIN DocumentClientOrIssuer dci ON dci.id = link.document_client_or_issuer_id
+        WHERE dci.original_client_id = ClientOrIssuer.id
+          AND dci.type = 'document_issuer'
+    )
+    ORDER BY created_at DESC
+    LIMIT 1
+)
+WHERE type = 'issuer';

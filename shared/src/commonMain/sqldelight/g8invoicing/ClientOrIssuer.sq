@@ -13,6 +13,7 @@ CREATE TABLE ClientOrIssuer (
   company_id3_label TEXT,
   company_id3_number TEXT,
   logo_path TEXT,
+  footer TEXT,
   version INTEGER DEFAULT 1,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -50,8 +51,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path)
-VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?, ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, footer)
+VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -68,6 +69,7 @@ SET type = :type,
     company_id3_label = :company_id3_label,
     company_id3_number = :company_id3_number,
     logo_path = :logo_path,
+    footer = :footer,
     version = COALESCE(version, 0) + 1,
     updated_at = datetime('now', 'localtime')
 WHERE

@@ -31,5 +31,9 @@ data class ClientOrIssuerState(
     var companyId3Label: TextFieldValue? = null,
     var companyId3Number: TextFieldValue? = null,
     var logoPath: String? = null,
+    // Default footer carried by an issuer (ISSUER rows). Copied into a document's
+    // footerText when the issuer is selected/created from a doc — afterwards the
+    // doc owns its own footer and is unaffected by issuer changes.
+    var footer: TextFieldValue? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

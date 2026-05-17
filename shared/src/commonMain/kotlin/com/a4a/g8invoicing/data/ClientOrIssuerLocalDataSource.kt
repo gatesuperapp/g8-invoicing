@@ -184,6 +184,7 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.companyId3Label?.text?.trim(),
                     clientOrIssuer.companyId3Number?.text?.trim(),
                     clientOrIssuer.logoPath,
+                    clientOrIssuer.footer?.text,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -356,6 +357,7 @@ class ClientOrIssuerLocalDataSource(
                         company_id3_label = clientOrIssuer.companyId3Label?.text?.trim(),
                         company_id3_number = clientOrIssuer.companyId3Number?.text?.trim(),
                         logo_path = clientOrIssuer.logoPath,
+                        footer = clientOrIssuer.footer?.text,
                     )
                 }
 
@@ -504,7 +506,11 @@ class ClientOrIssuerLocalDataSource(
                         ClientOrIssuerType.CLIENT.name.lowercase()
                     }
 
-                    // Mettre à jour la table maître ClientOrIssuer
+                    // Mettre à jour la table maître ClientOrIssuer.
+                    // Le footer master ne traverse pas DocumentClientOrIssuer (le doc a
+                    // son propre footer figé) ; on relit la valeur courante du maître
+                    // pour ne pas l'écraser à null lors d'une édition côté doc.
+                    val preservedFooter = clientOrIssuerQueries.get(masterId).executeAsOneOrNull()?.footer
                     clientOrIssuerQueries.update(
                         id = masterId,
                         type = masterType,
@@ -520,6 +526,7 @@ class ClientOrIssuerLocalDataSource(
                         company_id3_label = documentClientOrIssuer.companyId3Label?.text?.trim(),
                         company_id3_number = documentClientOrIssuer.companyId3Number?.text?.trim(),
                         logo_path = documentClientOrIssuer.logoPath,
+                        footer = preservedFooter,
                     )
 
                     // Emails: supprimer et recréer dans table maître
@@ -689,6 +696,7 @@ class ClientOrIssuerLocalDataSource(
                             companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
                             companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
                             logoPath = issuer.logo_path,
+                            footer = issuer.footer?.let { TextFieldValue(text = it) },
                         )
                     }
                 }
@@ -762,6 +770,7 @@ fun ClientOrIssuer.transformIntoEditable(
         },
         companyId3Number = clientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
         logoPath = clientOrIssuer.logo_path,
+        footer = clientOrIssuer.footer?.let { TextFieldValue(text = it) },
     )
 }
 
