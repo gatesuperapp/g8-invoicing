@@ -84,8 +84,14 @@ class InvoiceLocalDataSource(
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = existingIssuer,
+                // Footer follows the auto-applied issuer: their default, or the
+                // localized fallback if the issuer hasn't set one. Empty when no
+                // issuer is auto-applied — the user picks an issuer manually and
+                // the doc viewmodel handles the prompt to copy its footer.
                 footerText = TextFieldValue(
-                    getExistingFooter() ?: getString(Res.string.document_default_footer)
+                    existingIssuer?.let {
+                        it.footer?.text ?: getString(Res.string.document_default_footer)
+                    } ?: ""
                 ),
                 watermarkText = frozenWatermark,
             )
@@ -282,6 +288,13 @@ class InvoiceLocalDataSource(
     // Uses withContext(Dispatchers.IO).
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
         val frozenWatermark = computeWatermark()
+        val carriedIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Resolve the master issuer's current footer (DocumentClientOrIssuer snapshot
+        // doesn't carry a footer column). Falls back to the localized default if the
+        // issuer hasn't set one yet.
+        val issuerFooter = carriedIssuer?.originalClientOrIssuerId?.toLong()
+            ?.let { clientOrIssuerDataSource.fetchClientOrIssuer(it)?.footer?.text }
+            ?: getString(Res.string.document_default_footer)
         return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -294,9 +307,9 @@ class InvoiceLocalDataSource(
                     dueDate = DateUtils.getDatePlusDaysFormatted(30),
                     reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
-                    documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentIssuer = carriedIssuer,
                     documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
-                    footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)), // DB call
+                    footerText = TextFieldValue(issuerFooter),
                     watermarkText = frozenWatermark,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call

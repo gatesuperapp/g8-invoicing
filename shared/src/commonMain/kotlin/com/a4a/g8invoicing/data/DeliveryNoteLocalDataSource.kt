@@ -9,6 +9,7 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.delivery_note_default_number
+import com.a4a.g8invoicing.shared.resources.document_default_footer
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
@@ -64,7 +65,13 @@ class DeliveryNoteLocalDataSource(
                 } ?: getString(Res.string.delivery_note_default_number)),
                 documentDate = todayFormatted,
                 documentIssuer = existingIssuer,
-                footerText = TextFieldValue(getExistingFooter() ?: ""),
+                // Footer follows the auto-applied issuer (their default, or the
+                // localized fallback). Empty when no issuer is auto-applied.
+                footerText = TextFieldValue(
+                    existingIssuer?.let {
+                        it.footer?.text ?: getString(Res.string.document_default_footer)
+                    } ?: ""
+                ),
                 watermarkText = frozenWatermark,
             )
 

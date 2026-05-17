@@ -8,6 +8,7 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_default_number
+import com.a4a.g8invoicing.shared.resources.document_default_footer
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
@@ -66,7 +67,13 @@ class CreditNoteLocalDataSource(
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = existingIssuer,
-                footerText = TextFieldValue(getExistingFooter() ?: ""),
+                // Footer follows the auto-applied issuer (their default, or the
+                // localized fallback). Empty when no issuer is auto-applied.
+                footerText = TextFieldValue(
+                    existingIssuer?.let {
+                        it.footer?.text ?: getString(Res.string.document_default_footer)
+                    } ?: ""
+                ),
                 watermarkText = frozenWatermark,
             )
 
@@ -197,6 +204,13 @@ class CreditNoteLocalDataSource(
 
     override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
         val frozenWatermark = computeWatermark()
+        val carriedIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Resolve the master issuer's current footer (DocumentClientOrIssuer
+        // snapshot doesn't carry a footer column). Falls back to the localized
+        // default if the issuer hasn't set one yet.
+        val issuerFooter = carriedIssuer?.originalClientOrIssuerId?.toLong()
+            ?.let { clientOrIssuerDataSource.fetchClientOrIssuer(it)?.footer?.text }
+            ?: getString(Res.string.document_default_footer)
         withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -208,9 +222,9 @@ class CreditNoteLocalDataSource(
                         documentNumber = TextFieldValue(docNumber),
                         reference = invoices.firstOrNull { it.reference != null }?.reference,
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
-                        documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                        documentIssuer = carriedIssuer,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
-                        footerText = TextFieldValue(getExistingFooter() ?: ""),
+                        footerText = TextFieldValue(issuerFooter),
                         watermarkText = frozenWatermark,
                     )
                 )
