@@ -70,6 +70,8 @@ import com.a4a.g8invoicing.shared.resources.client_phone
 import com.a4a.g8invoicing.shared.resources.client_phone_input
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_dismiss
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
+import com.a4a.g8invoicing.shared.resources.issuer_footer_label
+import com.a4a.g8invoicing.shared.resources.issuer_footer_placeholder
 import com.a4a.g8invoicing.shared.resources.issuer_logo_label
 import com.a4a.g8invoicing.shared.resources.issuer_logo_remove
 import com.a4a.g8invoicing.shared.resources.issuer_logo_select
