@@ -29,10 +29,19 @@ fun NavGraphBuilder.clientAddEdit(
     ) { backStackEntry ->
         val itemId = backStackEntry.arguments?.getString("itemId")
         val type = backStackEntry.arguments?.getString("type")
+        // Same route is reused for both clients ("type=client" or absent) and
+        // issuers ("type=issuer"). The full-screen issuer form is reached from
+        // Mon Compte → Mes entreprises, with the "pied de page par défaut"
+        // field visible because we're NOT in bottom-sheet mode here.
+        val isIssuer = type == ClientOrIssuerType.ISSUER.name.lowercase()
+        val effectiveType = if (isIssuer) ClientOrIssuerType.ISSUER else ClientOrIssuerType.CLIENT
+
         val viewModel: ClientOrIssuerAddEditViewModel = koinViewModel(
             parameters = { parametersOf(itemId, type) }
         )
         val clientUiState by viewModel.clientUiState
+        val issuerUiState by viewModel.issuerUiState
+        val currentState = if (isIssuer) issuerUiState else clientUiState
         val isNew = itemId == null
 
         val keyboardController = LocalSoftwareKeyboardController.current
@@ -42,14 +51,14 @@ fun NavGraphBuilder.clientAddEdit(
 
         ClientAddEdit(
             navController = navController,
-            clientOrIssuer = clientUiState,
+            clientOrIssuer = currentState,
             onValueChange = { pageElement, value ->
-                clientUiState.type?.let {
+                currentState.type?.let {
                     viewModel.updateClientOrIssuerState(pageElement, value, it)
                 }
             },
             placeCursorAtTheEndOfText = { pageElement ->
-                viewModel.updateCursor(pageElement, ClientOrIssuerType.CLIENT)
+                viewModel.updateCursor(pageElement, effectiveType)
             },
             onClickDone = {
                 scope.launch {
@@ -58,11 +67,11 @@ fun NavGraphBuilder.clientAddEdit(
                     focusManager.clearFocus()
                     keyboardController?.hide()
 
-                    if (viewModel.validateInputs(ClientOrIssuerType.CLIENT)) {
+                    if (viewModel.validateInputs(effectiveType)) {
                         val success = if (isNew) {
-                            viewModel.createNew(ClientOrIssuerType.CLIENT) != null
+                            viewModel.createNew(effectiveType) != null
                         } else {
-                            viewModel.updateClientOrIssuerInLocalDb(ClientOrIssuerType.CLIENT)
+                            viewModel.updateClientOrIssuerInLocalDb(effectiveType)
                         }
 
                         if (success) {
@@ -77,13 +86,13 @@ fun NavGraphBuilder.clientAddEdit(
                 goToPreviousScreen()
             },
             onClickDeleteAddress = {
-                viewModel.removeAddressFromClientOrIssuerState(ClientOrIssuerType.CLIENT)
+                viewModel.removeAddressFromClientOrIssuerState(effectiveType)
             },
             onClickDeleteEmail = { index ->
-                viewModel.removeEmailFromClientOrIssuerState(ClientOrIssuerType.CLIENT, index)
+                viewModel.removeEmailFromClientOrIssuerState(effectiveType, index)
             },
             onAddEmail = { email ->
-                viewModel.addEmailToClientOrIssuerState(ClientOrIssuerType.CLIENT, email)
+                viewModel.addEmailToClientOrIssuerState(effectiveType, email)
             },
             scrollState = scrollState,
             onPendingEmailValidationResult = { isValid ->

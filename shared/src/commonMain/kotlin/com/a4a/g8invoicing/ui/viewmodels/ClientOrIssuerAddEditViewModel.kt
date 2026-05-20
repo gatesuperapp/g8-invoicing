@@ -29,7 +29,7 @@ class ClientOrIssuerAddEditViewModel(
 
     private val _issuerUiState =
         mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.ISSUER))
-    private val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
+    val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
     private val _documentClientUiState =
         MutableStateFlow(ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
@@ -49,9 +49,9 @@ class ClientOrIssuerAddEditViewModel(
 
     init {
         if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
-            itemId?.let {
-                fetchFromLocalDb(it.toLong())
-            }
+            itemId?.let { fetchFromLocalDb(it.toLong(), ClientOrIssuerType.CLIENT) }
+        } else if (type == ClientOrIssuerType.ISSUER.name.lowercase()) {
+            itemId?.let { fetchFromLocalDb(it.toLong(), ClientOrIssuerType.ISSUER) }
         }
     }
 
@@ -154,12 +154,15 @@ class ClientOrIssuerAddEditViewModel(
         }
     }
 
-    private fun fetchFromLocalDb(id: Long) {
+    private fun fetchFromLocalDb(id: Long, target: ClientOrIssuerType = ClientOrIssuerType.CLIENT) {
         viewModelScope.launch {
             try {
                 val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
                 clientOrIssuer?.let {
-                    _clientUiState.value = it
+                    when (target) {
+                        ClientOrIssuerType.ISSUER -> _issuerUiState.value = it
+                        else -> _clientUiState.value = it
+                    }
                 }
             } catch (e: Exception) {
                 // Error handling

@@ -20,8 +20,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -42,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
@@ -70,7 +73,9 @@ import com.a4a.g8invoicing.shared.resources.account_auth_send_link
 import com.a4a.g8invoicing.shared.resources.account_auth_subtitle
 import com.a4a.g8invoicing.shared.resources.account_auth_title
 import com.a4a.g8invoicing.shared.resources.account_logged_in_as
+import com.a4a.g8invoicing.shared.resources.account_add_company
 import com.a4a.g8invoicing.shared.resources.account_logout
+import com.a4a.g8invoicing.shared.resources.account_my_companies
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription_url
 import com.a4a.g8invoicing.shared.resources.account_cancellation_date
@@ -80,9 +85,14 @@ import com.a4a.g8invoicing.shared.resources.account_status_premium_fly
 import com.a4a.g8invoicing.shared.resources.drawer_my_account
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
+import com.a4a.g8invoicing.ui.navigation.Screen
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
+import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.callForActions
 import com.a4a.g8invoicing.ui.theme.textTitle
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -165,6 +175,11 @@ fun Account(
                         uriHandler = uriHandler,
                     )
                 }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                // ============ Mes entreprises ============
+                MyCompaniesSection(navController = navController)
 
                 Spacer(modifier = Modifier.height(30.dp))
 
@@ -430,4 +445,86 @@ private fun formatRenewalDate(epochMs: Long): String {
     val day = date.dayOfMonth.toString().padStart(2, '0')
     val month = date.monthNumber.toString().padStart(2, '0')
     return "$day/$month/${date.year}"
+}
+
+@Composable
+private fun MyCompaniesSection(
+    navController: NavController,
+    listViewModel: ClientOrIssuerListViewModel = koinViewModel(),
+) {
+    val issuersUiState by listViewModel.issuersUiState.collectAsState()
+    val issuers = issuersUiState.clientsOrIssuerList.orEmpty()
+
+    Text(
+        modifier = Modifier.padding(bottom = 16.dp),
+        text = stringResource(Res.string.account_my_companies),
+        style = MaterialTheme.typography.textTitle,
+    )
+
+    issuers.forEach { issuer ->
+        IssuerListRow(
+            issuer = issuer,
+            onClick = {
+                navController.navigate(
+                    Screen.ClientAddEdit.name + "?itemId=${issuer.id}&type=issuer"
+                )
+            },
+            onDelete = {
+                listViewModel.deleteClientsOrIssuers(listOf(issuer))
+            },
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    // "+ Ajouter une entreprise" — same look as ProductAddEditForm's
+    // AddPriceButton (light-grey rounded pill, callForActions typo).
+    Box(
+        modifier = Modifier
+            .padding(top = if (issuers.isEmpty()) 0.dp else 4.dp)
+            .background(
+                color = Color(0xFFE8E8E8),
+                shape = RoundedCornerShape(6.dp),
+            )
+            .clickable {
+                navController.navigate(Screen.ClientAddEdit.name + "?type=issuer")
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            style = MaterialTheme.typography.callForActions,
+            text = stringResource(Res.string.account_add_company),
+        )
+    }
+}
+
+@Composable
+private fun IssuerListRow(
+    issuer: ClientOrIssuerState,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(5.dp))
+            .background(ColorLightGrey)
+            .clickable(onClick = onClick)
+            .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            modifier = Modifier.weight(1F),
+            text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
+        Icon(
+            modifier = Modifier
+                .size(18.dp)
+                .clickable(onClick = onDelete),
+            imageVector = Icons.Outlined.DeleteOutline,
+            contentDescription = null,
+        )
+    }
 }

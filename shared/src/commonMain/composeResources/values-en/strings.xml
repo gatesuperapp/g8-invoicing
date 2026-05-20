@@ -284,6 +284,8 @@
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr</string>
     <string name="account_section_auth">Authentication</string>
+    <string name="account_my_companies">My companies</string>
+    <string name="account_add_company">+ Add a company</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>

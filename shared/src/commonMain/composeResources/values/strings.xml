@@ -288,6 +288,8 @@
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr</string>
     <string name="account_section_auth">Authentification</string>
+    <string name="account_my_companies">Mes entreprises</string>
+    <string name="account_add_company">+ Ajouter une entreprise</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 est une application pratique et engagée :\n• Fonctionne hors-ligne \n• Ni pub ni traceur \n• Logiciel libre, open-source\n• Conçue pour les producteur·ices bio\n• Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.</string>
