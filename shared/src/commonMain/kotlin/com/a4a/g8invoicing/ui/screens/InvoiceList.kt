@@ -62,6 +62,7 @@ import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.WhatsNewDialog
 import com.a4a.g8invoicing.ui.shared.animations.BatOpenMouth
 import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
@@ -116,6 +117,13 @@ fun InvoiceList(
         )
     }
 
+    // When items are selected, intercept system back to clear the selection
+    // first instead of falling through to navigation (which on the start
+    // destination is a no-op and just flashes a ripple).
+    PlatformBackHandler(enabled = selectedItems.isNotEmpty()) {
+        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+    }
+
     // Top bar actions for desktop (when bottom bar is hidden)
     val topBarActions = if (!showBottomBar) {
         if (selectedItems.isEmpty()) {
@@ -142,7 +150,13 @@ fun InvoiceList(
             TopBar(
                 title = stringResource(Res.string.appbar_invoices),
                 navController = navController,
-                onClickBackArrow = onClickBack,
+                onClickBackArrow = {
+                    if (selectedItems.isNotEmpty()) {
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    } else {
+                        onClickBack()
+                    }
+                },
                 isCancelCtaDisplayed = false,
                 appBarActions = topBarActions
             )
