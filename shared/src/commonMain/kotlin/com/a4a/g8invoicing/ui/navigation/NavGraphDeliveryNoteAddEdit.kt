@@ -34,6 +34,7 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -85,6 +86,13 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
 
         var showDocumentForm by remember { mutableStateOf(false) }
+
+        // When the bottom-sheet form is open, system back closes it instead
+        // of popping back to the doc list.
+        PlatformBackHandler(enabled = showDocumentForm) {
+            showDocumentForm = false
+        }
+
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
         var showClientVersionMismatchDialog by remember { mutableStateOf(false) }

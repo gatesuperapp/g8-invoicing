@@ -61,6 +61,7 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionExport
 import com.a4a.g8invoicing.ui.navigation.actionItems
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -134,9 +135,13 @@ fun DocumentAddEdit(
     // Store string for callback (can't use stringResource in lambda)
     val comingSoonMessage = stringResource(Res.string.feature_coming_soon)
 
-    // Handling native navigation back action
-    // Note: BackHandler is Android-specific, handle in the calling screen
-    // BackHandler { ... }
+    // When the bottom sheet is visible (any of the slide-in elements,
+    // products picker, nested form…) intercept system back to close it
+    // instead of popping back to the document list.
+    val isSheetVisible = scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden
+    PlatformBackHandler(enabled = isSheetVisible) {
+        hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+    }
 
     BottomSheetScaffold(
         sheetSwipeEnabled = false,
