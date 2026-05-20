@@ -209,7 +209,7 @@ fun RowWithLabelAndInput(
             is String -> Text(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
-                    .padding(end = 3.dp),
+                    .padding(end = 12.dp),
                 text = formInput.label,
                 style = MaterialTheme.typography.inputLabel
             )

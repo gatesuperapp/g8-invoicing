@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.document_default_footer
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
@@ -16,6 +18,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 class ClientOrIssuerAddEditViewModel(
     private val dataSource: ClientOrIssuerLocalDataSourceInterface,
@@ -29,7 +32,7 @@ class ClientOrIssuerAddEditViewModel(
 
     private val _issuerUiState =
         mutableStateOf(ClientOrIssuerState(type = ClientOrIssuerType.ISSUER))
-    private val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
+    val issuerUiState: State<ClientOrIssuerState> = _issuerUiState
 
     private val _documentClientUiState =
         MutableStateFlow(ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT))
@@ -49,8 +52,38 @@ class ClientOrIssuerAddEditViewModel(
 
     init {
         if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
-            itemId?.let {
-                fetchFromLocalDb(it.toLong())
+            itemId?.let { fetchFromLocalDb(it.toLong(), ClientOrIssuerType.CLIENT) }
+        } else if (type == ClientOrIssuerType.ISSUER.name.lowercase()) {
+            if (itemId != null) {
+                fetchFromLocalDb(itemId.toLong(), ClientOrIssuerType.ISSUER)
+            } else {
+                // New issuer (full-screen flow from Mon Compte → Mes entreprises):
+                // pre-fill the default footer so the user starts with the
+                // localized legal text and can edit/clear it.
+                prefillDefaultFooterIfEmpty(ClientOrIssuerType.ISSUER)
+            }
+        }
+    }
+
+    private fun prefillDefaultFooterIfEmpty(target: ClientOrIssuerType) {
+        viewModelScope.launch {
+            val defaultFooter = getString(Res.string.document_default_footer)
+            when (target) {
+                ClientOrIssuerType.ISSUER -> {
+                    if (_issuerUiState.value.footer == null) {
+                        _issuerUiState.value = _issuerUiState.value.copy(
+                            footer = TextFieldValue(text = defaultFooter)
+                        )
+                    }
+                }
+                ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                    if (_documentIssuerUiState.value.footer == null) {
+                        _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                            footer = TextFieldValue(text = defaultFooter)
+                        )
+                    }
+                }
+                else -> {}
             }
         }
     }
@@ -61,6 +94,22 @@ class ClientOrIssuerAddEditViewModel(
             _documentClientUiState.value.errors = mutableListOf()
         } else {
             _documentIssuerUiState.value = documentClientOrIssuer
+            // DocumentClientOrIssuer has no footer column — when opening the
+            // bottom-sheet to edit an existing doc issuer, backfill state.footer
+            // from the master so the field is populated for display + edit.
+            if (documentClientOrIssuer.footer == null) {
+                val masterId = documentClientOrIssuer.originalClientOrIssuerId?.toLong()
+                if (masterId != null) {
+                    viewModelScope.launch {
+                        val masterFooter = dataSource.fetchClientOrIssuer(masterId)?.footer
+                        if (masterFooter != null) {
+                            _documentIssuerUiState.value = _documentIssuerUiState.value.copy(
+                                footer = masterFooter
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -102,6 +151,11 @@ class ClientOrIssuerAddEditViewModel(
             companyId2Number = clientOrIssuer.companyId2Number,
             companyId3Label = clientOrIssuer.companyId3Label,
             companyId3Number = clientOrIssuer.companyId3Number,
+            // DocumentClientOrIssuer table doesn't have its own footer column;
+            // we carry the master's footer through state so the bottom-sheet form
+            // can display + edit it. On save, the sync path propagates it back
+            // to the master.
+            footer = clientOrIssuer.footer,
             errors = mutableListOf()
         )
     }
@@ -139,7 +193,9 @@ class ClientOrIssuerAddEditViewModel(
                 companyId2Label = _documentIssuerUiState.value.companyId2Label,
                 companyId2Number = _documentIssuerUiState.value.companyId2Number,
                 companyId3Label = _documentIssuerUiState.value.companyId3Label,
-                companyId3Number = _documentIssuerUiState.value.companyId3Number
+                companyId3Number = _documentIssuerUiState.value.companyId3Number,
+                logoPath = _documentIssuerUiState.value.logoPath,
+                footer = _documentIssuerUiState.value.footer,
             )
         }
     }
@@ -151,15 +207,21 @@ class ClientOrIssuerAddEditViewModel(
         } else {
             _issuerUiState.value = ClientOrIssuerState()
             _documentIssuerUiState.value = ClientOrIssuerState()
+            // New issuer from the doc bottom-sheet "+ Nouvel émetteur": pre-fill
+            // the default footer so it's saved to the master on createNew.
+            prefillDefaultFooterIfEmpty(ClientOrIssuerType.DOCUMENT_ISSUER)
         }
     }
 
-    private fun fetchFromLocalDb(id: Long) {
+    private fun fetchFromLocalDb(id: Long, target: ClientOrIssuerType = ClientOrIssuerType.CLIENT) {
         viewModelScope.launch {
             try {
                 val clientOrIssuer: ClientOrIssuerState? = dataSource.fetchClientOrIssuer(id)
                 clientOrIssuer?.let {
-                    _clientUiState.value = it
+                    when (target) {
+                        ClientOrIssuerType.ISSUER -> _issuerUiState.value = it
+                        else -> _clientUiState.value = it
+                    }
                 }
             } catch (e: Exception) {
                 // Error handling
@@ -874,6 +936,11 @@ class ClientOrIssuerAddEditViewModel(
                 val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
                 person = person.copy(logoPath = logoPath)
             }
+
+            // The bottom-sheet form fires ISSUER_FOOTER (not DOCUMENT_ISSUER_FOOTER)
+            // because DocumentClientOrIssuer has no footer column — we just carry
+            // the footer through state and propagate it back to the master on save.
+            ScreenElement.ISSUER_FOOTER -> person = person.copy(footer = value as TextFieldValue)
 
             else -> {}
         }

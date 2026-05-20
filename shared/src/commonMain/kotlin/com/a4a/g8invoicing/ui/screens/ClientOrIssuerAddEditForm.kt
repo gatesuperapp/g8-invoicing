@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -77,8 +76,11 @@ import com.a4a.g8invoicing.shared.resources.issuer_logo_remove
 import com.a4a.g8invoicing.shared.resources.issuer_logo_select
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
+import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetFormSimple
+import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetLargeText
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.EmailListInput
+import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
@@ -555,32 +557,55 @@ fun ClientOrIssuerAddEditForm(
             Spacer(Modifier.padding(bottom = 16.dp))
         }
 
-        // Default footer (issuers only — and only in the full screen, not the
-        // bottom-sheet inline issuer flow which has its own simpler form).
-        // The TextField shows the localized document_default_footer as a
-        // placeholder while the state is null — when the user types,
-        // state.footer captures their value. On save, a null footer is
-        // preserved as null in DB; documents created later will fall back to
-        // the localized default at creation time.
-        if (isIssuer && !isInBottomSheetModal) {
+        // Default footer (issuers only). Single-line truncated display
+        // mirroring DOCUMENT_FOOTER in the doc bottom-sheet; tapping opens
+        // a modal bottom-sheet with a multi-line editor.
+        if (isIssuer) {
+            var showFooterEditor by remember { mutableStateOf(false) }
+            val footerCurrent = clientOrIssuerUiState.footer ?: TextFieldValue("")
+
             Column(
                 modifier = Modifier
                     .background(color = Color.White, shape = RoundedCornerShape(6.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(top = 8.dp)
             ) {
-                Text(
-                    modifier = Modifier.padding(bottom = 6.dp),
-                    text = issuerFooterLabel,
+                val footerInputList = listOf(
+                    FormInput(
+                        label = issuerFooterLabel,
+                        inputType = ForwardElement(
+                            text = footerCurrent.text.ifEmpty { issuerFooterPlaceholder },
+                            isMultiline = false,
+                            displayArrow = false
+                        ),
+                        pageElement = ScreenElement.ISSUER_FOOTER
+                    )
                 )
-                OutlinedTextField(
-                    value = clientOrIssuerUiState.footer ?: TextFieldValue(""),
-                    onValueChange = {
-                        onValueChange(ScreenElement.ISSUER_FOOTER, it)
+
+                FormUI(
+                    inputList = footerInputList,
+                    localFocusManager = localFocusManager,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    onClickForward = { showFooterEditor = true },
+                    errors = clientOrIssuerUiState.errors
+                )
+            }
+
+            if (showFooterEditor) {
+                var editedText by remember { mutableStateOf(footerCurrent) }
+                DocumentBottomSheetFormSimple(
+                    onClickCancel = { showFooterEditor = false },
+                    onClickDone = {
+                        onValueChange(ScreenElement.ISSUER_FOOTER, editedText)
+                        showFooterEditor = false
                     },
-                    placeholder = { Text(issuerFooterPlaceholder) },
-                    minLines = 3,
-                    maxLines = 6,
-                    modifier = Modifier.fillMaxWidth(),
+                    bottomSheetTitle = issuerFooterLabel,
+                    content = {
+                        DocumentBottomSheetLargeText(
+                            initialText = footerCurrent,
+                            onValueChange = { editedText = it }
+                        )
+                    },
+                    screenElement = ScreenElement.ISSUER_FOOTER
                 )
             }
 

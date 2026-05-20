@@ -217,6 +217,12 @@ class InvoiceAddEditViewModel(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
+                // Persist the doc's current footer first — saveDocumentClientOrIssuerInUiState
+                // may have updated footerText in memory (when adopting the issuer's
+                // default footer), and the reload below would otherwise overwrite it.
+                _documentUiState.value.documentId?.let {
+                    documentDataSource.update(_documentUiState.value)
+                }
                 documentDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
                     id = _documentUiState.value.documentId?.toLong()
@@ -267,9 +273,21 @@ class InvoiceAddEditViewModel(
             _documentUiState.value = _documentUiState.value.copy(
                 documentClient = documentClientOrIssuer
             )
-        else _documentUiState.value = _documentUiState.value.copy(
-            documentIssuer = documentClientOrIssuer
-        )
+        else {
+            // When an issuer is attached and the doc has no footer yet (e.g. the
+            // first invoice ever, created before any issuer existed), adopt the
+            // issuer's footer so the document is no longer empty.
+            val currentFooter = _documentUiState.value.footerText.text
+            val issuerFooter = documentClientOrIssuer.footer?.text
+            val newFooter = if (currentFooter.isBlank() && !issuerFooter.isNullOrBlank()) {
+                TextFieldValue(text = issuerFooter)
+            } else _documentUiState.value.footerText
+
+            _documentUiState.value = _documentUiState.value.copy(
+                documentIssuer = documentClientOrIssuer,
+                footerText = newFooter,
+            )
+        }
     }
 
     fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {

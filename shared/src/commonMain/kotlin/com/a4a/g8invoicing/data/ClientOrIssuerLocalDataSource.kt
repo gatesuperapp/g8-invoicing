@@ -507,10 +507,14 @@ class ClientOrIssuerLocalDataSource(
                     }
 
                     // Mettre à jour la table maître ClientOrIssuer.
-                    // Le footer master ne traverse pas DocumentClientOrIssuer (le doc a
-                    // son propre footer figé) ; on relit la valeur courante du maître
-                    // pour ne pas l'écraser à null lors d'une édition côté doc.
-                    val preservedFooter = clientOrIssuerQueries.get(masterId).executeAsOneOrNull()?.footer
+                    // L'état carry le footer (chargé depuis le maître au moment du
+                    // pick, puis éventuellement édité via le form bottom-sheet du
+                    // doc). Si le caller a explicitement mis state.footer à non-null,
+                    // on l'écrit ; sinon on relit la valeur courante du maître pour
+                    // éviter d'écraser à null le footer existant lors d'une édition
+                    // partielle (champ non exposé sur certains chemins).
+                    val masterFooter = documentClientOrIssuer.footer?.text
+                        ?: clientOrIssuerQueries.get(masterId).executeAsOneOrNull()?.footer
                     clientOrIssuerQueries.update(
                         id = masterId,
                         type = masterType,
@@ -526,7 +530,7 @@ class ClientOrIssuerLocalDataSource(
                         company_id3_label = documentClientOrIssuer.companyId3Label?.text?.trim(),
                         company_id3_number = documentClientOrIssuer.companyId3Number?.text?.trim(),
                         logo_path = documentClientOrIssuer.logoPath,
-                        footer = preservedFooter,
+                        footer = masterFooter,
                     )
 
                     // Emails: supprimer et recréer dans table maître
