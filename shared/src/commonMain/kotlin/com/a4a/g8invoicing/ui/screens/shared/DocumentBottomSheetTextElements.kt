@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -81,6 +82,12 @@ fun DocumentBottomSheetTextElements(
         // fill the screen full height
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
+
+        // Back inside a slid-in sub-screen (client/issuer list, date picker, footer…)
+        // returns to the elements list instead of dismissing the whole sheet.
+        PlatformBackHandler(enabled = slideOtherComponent.value != null) {
+            slideOtherComponent.value = null
+        }
 
         Box(
             modifier = Modifier

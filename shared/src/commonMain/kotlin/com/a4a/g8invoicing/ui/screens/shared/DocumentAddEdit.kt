@@ -135,10 +135,11 @@ fun DocumentAddEdit(
     // Store string for callback (can't use stringResource in lambda)
     val comingSoonMessage = stringResource(Res.string.feature_coming_soon)
 
-    // When the bottom sheet is visible (any of the slide-in elements,
-    // products picker, nested form…) intercept system back to close it
-    // instead of popping back to the document list.
-    val isSheetVisible = scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden
+    // When the bottom sheet is expanded (slide-in elements, products picker,
+    // nested form…) intercept system back to close it instead of popping
+    // back to the document list. Mirrors the visibility check used elsewhere
+    // in this file (== SheetValue.Expanded) so it stays in sync.
+    val isSheetVisible = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
     PlatformBackHandler(enabled = isSheetVisible) {
         hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
     }
