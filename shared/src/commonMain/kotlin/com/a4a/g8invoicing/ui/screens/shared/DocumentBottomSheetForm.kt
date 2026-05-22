@@ -112,7 +112,9 @@ fun DocumentBottomSheetForm(
                     scope.launch { sheetState.expand() }
                 }
                 fullScreenElementToShow.value != null -> {
-                    // Navigate back from full screen text editor but keep sheet open
+                    // Navigate back from full screen text editor but keep sheet open.
+                    // Back discards the typed text — only Done persists it.
+                    fullScreenEditorText = TextFieldValue("")
                     fullScreenElementToShow.value = null
                     scope.launch { sheetState.expand() }
                 }
@@ -139,7 +141,11 @@ fun DocumentBottomSheetForm(
                         fullScreenElementToShowState = fullScreenElementToShow, // Pass the MutableState
                         onDismissSheet = onClickCancel,
                         onNavigateBackFromTaxSelection = { isTaxSelectionVisible = false },
-                        onNavigateBackFromFullScreen = { fullScreenElementToShow.value = null }
+                        onNavigateBackFromFullScreen = {
+                            // Clear typed text immediately so it doesn't flash on re-open
+                            fullScreenEditorText = TextFieldValue("")
+                            fullScreenElementToShow.value = null
+                        }
                     )
                 },
                 onClickDoneMain = {
@@ -173,6 +179,8 @@ fun DocumentBottomSheetForm(
                     fullScreenElementToShow.value?.let { screenElement ->
                         bottomFormOnValueChange(screenElement, fullScreenEditorText, null)
                     }
+                    // Clear editor text so it doesn't flash when opening another field
+                    fullScreenEditorText = TextFieldValue("")
                     fullScreenElementToShow.value = null // Exit full screen mode
                 }
             )
@@ -426,7 +434,7 @@ private fun DocumentBottomSheetContent(
             } else if (fullScreenElementCurrentlyShown != null) {
                 // If not in tax selection, but in full-screen text mode
                 DocumentBottomSheetLargeText(
-                    initialText = fullScreenTextForEditor,
+                    text = fullScreenTextForEditor,
                     onValueChange = onFullScreenTextChanged
                 )
             } else {

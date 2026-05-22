@@ -143,7 +143,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     }
 
     if (pageElement == ScreenElement.DOCUMENT_FOOTER) {
-        var footerText by remember { mutableStateOf(TextFieldValue("")) }
+        var footerText by remember { mutableStateOf(parameters as TextFieldValue) }
         var showBottomSheet by remember { mutableStateOf(true) }
 
         if (showBottomSheet)
@@ -160,7 +160,7 @@ fun DocumentBottomSheetElementsAfterSlide(
                 bottomSheetTitle = documentFooterString,
                 content = {
                     DocumentBottomSheetLargeText(
-                        initialText = parameters.let { it as TextFieldValue },
+                        text = footerText,
                         onValueChange = {
                             footerText = it
                         }
