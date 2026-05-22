@@ -210,7 +210,7 @@ fun RowWithLabelAndInput(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
                     .padding(end = 12.dp),
-                text = formInput.label,
+                text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
                 style = MaterialTheme.typography.inputLabel
             )
 
@@ -279,7 +279,8 @@ class FormInput(
     val inputType: Any,
     val inputType2: Any? = null, // Used for DoubleInputCreator
     val pageElement: ScreenElement,
-    val extraId: String? = null
+    val extraId: String? = null,
+    val isMandatory: Boolean = false
 )
 
 class TextInput(

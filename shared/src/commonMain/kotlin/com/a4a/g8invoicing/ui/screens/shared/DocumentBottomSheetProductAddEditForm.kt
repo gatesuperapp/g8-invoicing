@@ -116,7 +116,8 @@ fun DocumentBottomSheetProductAddEditForm(
                             },
                             displayFullScreenIcon = true
                         ),
-                        pageElement = ScreenElement.DOCUMENT_PRODUCT_NAME
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_NAME,
+                        isMandatory = true
                     ),
                     FormInput(
                         label = quantityLabel,

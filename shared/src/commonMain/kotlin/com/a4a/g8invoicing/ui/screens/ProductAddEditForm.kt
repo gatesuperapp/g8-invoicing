@@ -140,7 +140,8 @@ fun ProductAddEditForm(
                                         onValueChange(ScreenElement.PRODUCT_NAME, it, null)
                                     }
                                 ),
-                                pageElement = ScreenElement.PRODUCT_NAME
+                                pageElement = ScreenElement.PRODUCT_NAME,
+                                isMandatory = true
                             ),
                             FormInput(
                                 label = productDescriptionLabel,

@@ -196,7 +196,8 @@ fun ClientOrIssuerAddEditForm(
                         }
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
-                    else ScreenElement.CLIENT_OR_ISSUER_NAME
+                    else ScreenElement.CLIENT_OR_ISSUER_NAME,
+                    isMandatory = true
                 ),
                 FormInput(
                     label = clientFirstNameLabel,
