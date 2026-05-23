@@ -20,7 +20,9 @@ fun ProductListContent(
 ) {
     LazyColumn {
         items(
-            items = products,
+            // Skip transient products that haven't been persisted yet (id == null)
+            // so the `key` lambda below never crashes on `!!`.
+            items = products.filter { it.id != null },
             key = { product ->
                 product.id!!
             }

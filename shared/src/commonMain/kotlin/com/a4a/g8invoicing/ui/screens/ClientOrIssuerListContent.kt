@@ -27,7 +27,9 @@ fun ClientOrIssuerListContent(
         contentPadding = PaddingValues(bottom = 150.dp)
     ) {
         items(
-            items = clientsOrIssuers,
+            // Skip transient clients that haven't been persisted yet (id == null)
+            // so the `key` lambda below never crashes on `!!`.
+            items = clientsOrIssuers.filter { it.id != null },
             key = { client ->
                 client.id!!
             }
