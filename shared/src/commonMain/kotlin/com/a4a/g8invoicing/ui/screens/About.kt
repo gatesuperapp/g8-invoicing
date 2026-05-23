@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -91,7 +92,7 @@ import com.a4a.g8invoicing.shared.resources.about_title_community
 import com.a4a.g8invoicing.shared.resources.about_title_legal
 import com.a4a.g8invoicing.shared.resources.account_bat_love
 import com.a4a.g8invoicing.shared.resources.account_share_content
-import com.a4a.g8invoicing.shared.resources.appbar_g8
+import com.a4a.g8invoicing.shared.resources.drawer_g8
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -167,7 +168,7 @@ fun About(
         onDismissDim = { isDimActive.value = false },
         topBar = {
             TopBar(
-                title = stringResource(Res.string.appbar_g8),
+                title = stringResource(Res.string.drawer_g8),
                 navController = navController,
                 onClickBackArrow = onClickBack,
                 isCancelCtaDisplayed = false
@@ -188,7 +189,9 @@ fun About(
         }
     ) { padding ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
         ) {
             Column(
                 modifier = Modifier

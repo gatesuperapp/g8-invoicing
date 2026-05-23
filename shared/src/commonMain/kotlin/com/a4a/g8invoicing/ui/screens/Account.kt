@@ -121,6 +121,7 @@ fun Account(
     }
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = stringResource(Res.string.drawer_my_account),
