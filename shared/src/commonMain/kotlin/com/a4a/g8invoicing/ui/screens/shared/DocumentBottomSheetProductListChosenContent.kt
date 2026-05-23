@@ -66,7 +66,9 @@ fun DocumentBottomSheetProductListChosenContent(
         contentPadding = PaddingValues(start = 22.dp, end = 22.dp, bottom = 22.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(list, key = { it.id!! }) { item ->
+        // Skip transient items that haven't been persisted yet (id == null)
+        // so the `key` lambdas below never crash on `!!`.
+        items(list.filter { it.id != null }, key = { it.id!! }) { item ->
             ReorderableItem(reorderableLazyListState, key = item.id!!) { isDragging ->
                 val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
 

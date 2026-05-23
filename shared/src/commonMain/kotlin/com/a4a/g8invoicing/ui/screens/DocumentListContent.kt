@@ -20,9 +20,13 @@ fun DocumentListContent(
 ) {
     LazyColumn {
         items(
-            items = documents.sortedByDescending { doc ->
-                parseDate(doc.createdDate ?: "", "yyyy-MM-dd HH:mm:ss") ?: 0L
-            },
+            // Skip transient documents that haven't been persisted yet (documentId == null)
+            // so the `key` lambda below never crashes on `!!`.
+            items = documents
+                .filter { it.documentId != null }
+                .sortedByDescending { doc ->
+                    parseDate(doc.createdDate ?: "", "yyyy-MM-dd HH:mm:ss") ?: 0L
+                },
             key = {
                 it.documentId!!
             }
