@@ -185,8 +185,8 @@ fun Account(
 
                 // ============ Langue section ============
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_language),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_language).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
                 LanguageSelector()
@@ -456,8 +456,8 @@ private fun MyCompaniesSection(
     val issuers = issuersUiState.clientsOrIssuerList.orEmpty()
 
     Text(
-        modifier = Modifier.padding(bottom = 16.dp),
-        text = stringResource(Res.string.account_my_companies),
+        modifier = Modifier.padding(bottom = 8.dp),
+        text = stringResource(Res.string.account_my_companies).uppercase(),
         style = MaterialTheme.typography.textTitle,
     )
 

@@ -207,8 +207,8 @@ fun About(
                 // SECTION: À propos
                 // =====================
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_about),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_about).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
 
@@ -305,8 +305,8 @@ fun About(
                 // SECTION: Communauté
                 // =====================
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_community),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_community).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
 
@@ -318,8 +318,8 @@ fun About(
                 // SECTION: Assistance
                 // =====================
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_assistance),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_assistance).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
 
@@ -336,8 +336,8 @@ fun About(
                 // SECTION: Sauvegarde
                 // =====================
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_backup),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_backup).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
 
@@ -371,8 +371,8 @@ fun About(
                 // SECTION: Mentions légales
                 // =====================
                 Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_title_legal),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_legal).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
 

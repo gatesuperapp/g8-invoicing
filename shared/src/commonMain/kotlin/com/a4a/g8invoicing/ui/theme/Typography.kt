@@ -74,12 +74,18 @@ fun createCustomTypography(): Typography {
     )
 }
 
+// Section title: small uppercase, muted gray, slight letter-spacing.
+// Matches the section title style used in the desktop forms.
+// Call sites should pass already-uppercased text (e.g. `text.uppercase()`).
 val Typography.textTitle: TextStyle
     @Composable
     get() {
         return TextStyle(
             fontFamily = getUiFontBold(),
-            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            color = ColorDarkGrayo,
+            letterSpacing = 1.sp,
         )
     }
 
