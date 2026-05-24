@@ -1,8 +1,8 @@
 package com.a4a.g8invoicing.ui.shared
 
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.stripTrailingZeros
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -492,12 +492,12 @@ class PdfGeneratorImpl(
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
-                product.priceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")?.plus(" ${strings.currency}") ?: "",
+                product.priceWithoutTax?.let { formatAmount(it) } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
                 product.priceWithoutTax?.let { price ->
-                    (price * product.quantity).toStringWithTwoDecimals().replace(".", ",") + " ${strings.currency}"
+                    formatAmount(price * product.quantity)
                 } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
@@ -513,17 +513,17 @@ class PdfGeneratorImpl(
 
         // Total HT
         table.addCellInPrices(Paragraph(strings.totalWithoutTax))
-        table.addCellInPrices(Paragraph("${prices.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "} ${strings.currency}"))
+        table.addCellInPrices(Paragraph(prices.totalPriceWithoutTax?.let { formatAmount(it) } ?: " - "))
 
         // TVA par taux
         prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
             table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}%${strings.labelSeparator}"))
-            table.addCellInPrices(Paragraph("${taxAmount.toStringWithTwoDecimals().replace(".", ",")} ${strings.currency}"))
+            table.addCellInPrices(Paragraph(formatAmount(taxAmount)))
         }
 
         // Total TTC
         table.addCellInPrices(Paragraph(strings.totalWithTax).setFont(font).setFontSize(fontSize))
-        table.addCellInPrices(Paragraph("${prices.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "} ${strings.currency}").setFont(font).setFontSize(fontSize))
+        table.addCellInPrices(Paragraph(prices.totalPriceWithTax?.let { formatAmount(it) } ?: " - ").setFont(font).setFontSize(fontSize))
 
         return table
     }

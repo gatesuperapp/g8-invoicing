@@ -28,17 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
-import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.textSmall
-import org.jetbrains.compose.resources.stringResource
-
-
 @Composable
 fun ProductListItem(
     product: ProductState,
@@ -62,8 +57,6 @@ fun ProductListItem(
     } else {
         product.defaultPriceWithTax
     }
-
-    val currencySymbol = stringResource(Res.string.currency)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -146,9 +139,7 @@ fun ProductListItem(
                     )
 
                     Text(
-                        text = displayPrice?.let {
-                            it.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
-                        } ?: " - "
+                        text = displayPrice?.let { formatAmount(it) } ?: " - "
                     )
                 }
                 Row(

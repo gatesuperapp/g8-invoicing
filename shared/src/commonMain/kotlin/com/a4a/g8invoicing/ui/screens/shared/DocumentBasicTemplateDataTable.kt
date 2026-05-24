@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.document_table_description
 import com.a4a.g8invoicing.shared.resources.document_table_quantity
 import com.a4a.g8invoicing.shared.resources.document_table_tax_rate
@@ -35,9 +34,9 @@ import com.a4a.g8invoicing.shared.resources.document_table_unit_price_without_ta
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.setScale
 import com.a4a.g8invoicing.data.stripTrailingZeros
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import org.jetbrains.compose.resources.stringResource
 
@@ -209,8 +208,6 @@ fun DocumentProductsRows(
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
 ) {
-    val currencySymbol = stringResource(Res.string.currency)
-
     tableData.forEach { data ->
 
         Row(
@@ -246,16 +243,12 @@ fun DocumentProductsRows(
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let {
-                    it.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
-                } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it) } ?: "",
                 weight = unitPriceColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let {
-                    (it * data.quantity).toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
-                } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it * data.quantity) } ?: "",
                 weight = totalPriceColumnWeight,
                 alignEnd = true
             )

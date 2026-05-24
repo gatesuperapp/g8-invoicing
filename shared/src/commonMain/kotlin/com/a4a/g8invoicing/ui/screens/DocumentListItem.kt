@@ -43,9 +43,8 @@ import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.textSmall
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.invoice_due_date
 import org.jetbrains.compose.resources.stringResource
 
@@ -183,10 +182,7 @@ fun DocumentListItem(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = (document.documentTotalPrices?.let {
-                        it.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",")
-                    }
-                        ?: "") + " " + stringResource(Res.string.currency),
+                    text = document.documentTotalPrices?.totalPriceWithTax?.let { formatAmount(it) } ?: "",
                     color = when (document.documentTag) {
                         DocumentTag.PAID -> ColorGreen
                         DocumentTag.LATE -> ColorPinkOrange

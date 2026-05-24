@@ -33,7 +33,6 @@ data class PdfStrings(
     val totalWithTax: String,
     val tax: String,
     val dueDate: String,
-    val currency: String,
     val invoicePaid: String,
     val labelSeparator: String,
     val addressedTo: String,
