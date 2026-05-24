@@ -31,6 +31,7 @@ import com.itextpdf.layout.element.Link
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
+import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import com.itextpdf.layout.properties.VerticalAlignment
@@ -505,8 +506,12 @@ class PdfGeneratorImpl(
     }
 
     private fun createPrices(font: PdfFont, prices: DocumentTotalPrices, fontSize: Float): Table {
-        val table = Table(UnitValue.createPercentArray(floatArrayOf(90f, 10f)))
-            .useAllAvailableWidth()
+        // Auto-layout + right alignment so each column sizes to its content
+        // (mirrors the in-app preview). Avoids the wide-amount wrap to a new
+        // line that occurred with the previous 90/10 fixed split.
+        val table = Table(2)
+            .setAutoLayout()
+            .setHorizontalAlignment(HorizontalAlignment.RIGHT)
             .setTextAlignment(TextAlignment.RIGHT)
             .setPaddingBottom(8f)
             .setPaddingRight(4f)
