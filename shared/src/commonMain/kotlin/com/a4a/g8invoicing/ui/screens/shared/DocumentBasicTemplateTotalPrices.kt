@@ -28,6 +28,7 @@ fun DocumentBasicTemplateTotalPrices(
     uiState: DocumentState,
     footerArray: List<String>,
 ) {
+    val currencyCode = uiState.currency.text.ifEmpty { "EUR" }
     Row(
         Modifier
             .fillMaxWidth()
@@ -100,7 +101,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = uiState.documentTotalPrices?.totalPriceWithoutTax?.let { formatAmount(it) } ?: " - "
+                    text = uiState.documentTotalPrices?.totalPriceWithoutTax?.let { formatAmount(it, currencyCode) } ?: " - "
                 )
             }
             if (footerArray.any { it.contains("TAXES") }) {
@@ -121,7 +122,7 @@ fun DocumentBasicTemplateTotalPrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = formatAmount(it.second)
+                            text = formatAmount(it.second, currencyCode)
                         )
                     }
                 }
@@ -129,7 +130,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = uiState.documentTotalPrices?.totalPriceWithTax?.let { formatAmount(it) } ?: " - "
+                    text = uiState.documentTotalPrices?.totalPriceWithTax?.let { formatAmount(it, currencyCode) } ?: " - "
                 )
             }
         }

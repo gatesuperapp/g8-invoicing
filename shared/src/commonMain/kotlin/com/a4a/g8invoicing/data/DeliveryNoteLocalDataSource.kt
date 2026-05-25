@@ -25,6 +25,7 @@ class DeliveryNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val currencyManager: CurrencyManager,
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -64,6 +65,7 @@ class DeliveryNoteLocalDataSource(
                 } ?: getString(Res.string.delivery_note_default_number)),
                 documentDate = todayFormatted,
                 documentIssuer = existingIssuer,
+                currency = TextFieldValue(currencyManager.currentCurrency),
                 footerText = TextFieldValue(getExistingFooter() ?: ""),
                 watermarkText = frozenWatermark,
             )
@@ -201,8 +203,7 @@ class DeliveryNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                // TODO: Currency should come from user preferences, not hardcoded
-                currency = TextFieldValue("EUR"),
+                currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at,
                 watermarkText = it.watermark_text,

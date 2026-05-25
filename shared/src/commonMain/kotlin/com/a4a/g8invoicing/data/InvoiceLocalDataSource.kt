@@ -47,6 +47,7 @@ class InvoiceLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val currencyManager: CurrencyManager,
 ) : InvoiceLocalDataSourceInterface {
     private val invoiceQueries = db.invoiceQueries
     private val invoiceTagQueries = db.invoiceTagQueries
@@ -84,6 +85,7 @@ class InvoiceLocalDataSource(
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = existingIssuer,
+                currency = TextFieldValue(currencyManager.currentCurrency),
                 footerText = TextFieldValue(
                     getExistingFooter() ?: getString(Res.string.document_default_footer)
                 ),
@@ -267,8 +269,7 @@ class InvoiceLocalDataSource(
             documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
             documentProducts = documentProducts?.sortedBy { it.sortOrder },
             documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-            // TODO: Currency should come from user preferences, not hardcoded
-            currency = TextFieldValue("EUR"),
+            currency = TextFieldValue(this.currency ?: CurrencyManager.DEFAULT_FALLBACK),
             dueDate = this.due_date ?: "",
             paymentStatus = this.payment_status.toInt(),
             footerText = TextFieldValue(text = this.footer ?: ""),
@@ -296,6 +297,10 @@ class InvoiceLocalDataSource(
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
                     documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                     documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
+                    currency = TextFieldValue(
+                        deliveryNotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
+                            ?: currencyManager.currentCurrency
+                    ),
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)), // DB call
                     watermarkText = frozenWatermark,
                 )

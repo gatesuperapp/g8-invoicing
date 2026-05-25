@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.data.DatabaseDriverFactory
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
+import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
@@ -56,6 +57,9 @@ val appModule = module {
     // Locale Manager (singleton)
     single { LocaleManager() }
 
+    // Currency Manager (singleton)
+    single { CurrencyManager() }
+
     single { DatabaseDriverFactory(androidContext()) }
 
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
@@ -99,9 +103,9 @@ val appModule = module {
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
-    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get()) }
-    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get()) }
-    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get()) }
+    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get()) }
+    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get()) }
+    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
 
     single { get<Database>().invoiceQueries }

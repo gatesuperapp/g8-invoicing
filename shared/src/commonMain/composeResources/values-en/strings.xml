@@ -329,6 +329,13 @@
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
 
+    <!-- Currency Selection -->
+    <string name="account_currency_title">Currency</string>
+    <string name="currency_picker_search">Search</string>
+    <string name="currency_picker_recent">Recently used</string>
+    <string name="currency_picker_all">All</string>
+    <string name="currency_picker_empty">No currency found</string>
+
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
 

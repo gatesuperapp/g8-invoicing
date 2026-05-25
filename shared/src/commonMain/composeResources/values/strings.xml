@@ -333,6 +333,13 @@
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
 
+    <!-- Currency Selection -->
+    <string name="account_currency_title">Devise</string>
+    <string name="currency_picker_search">Rechercher</string>
+    <string name="currency_picker_recent">Récemment utilisées</string>
+    <string name="currency_picker_all">Toutes</string>
+    <string name="currency_picker_empty">Aucune devise trouvée</string>
+
     <string name="label_separator"> : </string>
     <string name="ok">OK</string>
 

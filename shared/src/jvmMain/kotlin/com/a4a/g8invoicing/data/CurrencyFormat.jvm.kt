@@ -6,29 +6,9 @@ import java.util.Currency
 import java.util.Locale
 import java.math.BigDecimal as JavaBigDecimal
 
-private val localeForCurrencyCache = mutableMapOf<String, Locale>()
-
 private fun localeForCurrency(currencyCode: String): Locale {
-    return localeForCurrencyCache.getOrPut(currencyCode) {
-        if (currencyCode == "EUR") {
-            Locale.FRANCE
-        } else {
-            try {
-                val target = Currency.getInstance(currencyCode)
-                Locale.getAvailableLocales().asSequence()
-                    .filter { it.country.isNotEmpty() }
-                    .firstOrNull {
-                        try {
-                            Currency.getInstance(it) == target
-                        } catch (_: Throwable) {
-                            false
-                        }
-                    } ?: Locale.getDefault()
-            } catch (_: IllegalArgumentException) {
-                Locale.getDefault()
-            }
-        }
-    }
+    if (currencyCode == "EUR") return Locale.FRANCE
+    return jvmLocaleForCurrency(currencyCode) ?: Locale.getDefault()
 }
 
 actual fun formatAmount(amount: BigDecimal, currencyCode: String): String {

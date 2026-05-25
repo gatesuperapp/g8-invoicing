@@ -27,6 +27,7 @@ class CreditNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val currencyManager: CurrencyManager,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -66,6 +67,7 @@ class CreditNoteLocalDataSource(
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = existingIssuer,
+                currency = TextFieldValue(currencyManager.currentCurrency),
                 footerText = TextFieldValue(getExistingFooter() ?: ""),
                 watermarkText = frozenWatermark,
             )
@@ -186,7 +188,7 @@ class CreditNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue("EUR"), // TODO: Currency should come from user preferences
+                currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
                 dueDate = it.due_date ?: "",
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at,
@@ -210,6 +212,10 @@ class CreditNoteLocalDataSource(
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
                         documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
+                        currency = TextFieldValue(
+                            invoices.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
+                                ?: currencyManager.currentCurrency
+                        ),
                         footerText = TextFieldValue(getExistingFooter() ?: ""),
                         watermarkText = frozenWatermark,
                     )

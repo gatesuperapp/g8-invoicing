@@ -120,9 +120,11 @@ class PdfGeneratorImpl(
             doc.add(createFreeText(it, fontRegular).setMarginTop(marginTop))
         }
 
+        val currencyCode = document.currency.text.ifEmpty { "EUR" }
+
         // Products table
         document.documentProducts?.let { products ->
-            createProductsTable(products, fontBold, fontRegular)?.let {
+            createProductsTable(products, fontBold, fontRegular, currencyCode)?.let {
                 val marginTop = if (document.reference?.text.isNullOrEmpty() && document.freeField?.text.isNullOrEmpty()) 20f else 10f
                 doc.add(it.setMarginTop(marginTop).setMarginBottom(12f))
             }
@@ -130,7 +132,7 @@ class PdfGeneratorImpl(
 
         // Prices
         document.documentTotalPrices?.let {
-            doc.add(createPrices(fontBold, it, fontSize))
+            doc.add(createPrices(fontBold, it, fontSize, currencyCode))
         }
 
         // Due date (invoices only)
@@ -422,7 +424,8 @@ class PdfGeneratorImpl(
     private fun createProductsTable(
         products: List<DocumentProductState>,
         fontBold: PdfFont,
-        fontRegular: PdfFont
+        fontRegular: PdfFont,
+        currencyCode: String,
     ): Table? {
         try {
             val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
@@ -450,10 +453,10 @@ class PdfGeneratorImpl(
                         "$docNumber - ${docDate?.substringBefore(" ")}",
                         TextAlignment.LEFT, true, fontBold, fontRegular, isSpan = true
                     )
-                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, fontBold, fontRegular, displayUnitColumn)
+                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, fontBold, fontRegular, displayUnitColumn, currencyCode)
                 }
             } else {
-                addProductRows(products, table, fontBold, fontRegular, displayUnitColumn)
+                addProductRows(products, table, fontBold, fontRegular, displayUnitColumn, currencyCode)
             }
 
             return table
@@ -468,7 +471,8 @@ class PdfGeneratorImpl(
         table: Table,
         fontBold: PdfFont,
         fontRegular: PdfFont,
-        displayUnitColumn: Boolean
+        displayUnitColumn: Boolean,
+        currencyCode: String,
     ) {
         products.forEach { product ->
             val itemName = Paragraph(Text(product.name.text)).setFixedLeading(10F)
@@ -493,19 +497,19 @@ class PdfGeneratorImpl(
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
-                product.priceWithoutTax?.let { formatAmount(it) } ?: "",
+                product.priceWithoutTax?.let { formatAmount(it, currencyCode) } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
                 product.priceWithoutTax?.let { price ->
-                    formatAmount(price * product.quantity)
+                    formatAmount(price * product.quantity, currencyCode)
                 } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
         }
     }
 
-    private fun createPrices(font: PdfFont, prices: DocumentTotalPrices, fontSize: Float): Table {
+    private fun createPrices(font: PdfFont, prices: DocumentTotalPrices, fontSize: Float, currencyCode: String): Table {
         // Auto-layout + right alignment so each column sizes to its content
         // (mirrors the in-app preview). Avoids the wide-amount wrap to a new
         // line that occurred with the previous 90/10 fixed split.
@@ -518,17 +522,17 @@ class PdfGeneratorImpl(
 
         // Total HT
         table.addCellInPrices(Paragraph(strings.totalWithoutTax))
-        table.addCellInPrices(Paragraph(prices.totalPriceWithoutTax?.let { formatAmount(it) } ?: " - "))
+        table.addCellInPrices(Paragraph(prices.totalPriceWithoutTax?.let { formatAmount(it, currencyCode) } ?: " - "))
 
         // TVA par taux
         prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
             table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}%${strings.labelSeparator}"))
-            table.addCellInPrices(Paragraph(formatAmount(taxAmount)))
+            table.addCellInPrices(Paragraph(formatAmount(taxAmount, currencyCode)))
         }
 
         // Total TTC
         table.addCellInPrices(Paragraph(strings.totalWithTax).setFont(font).setFontSize(fontSize))
-        table.addCellInPrices(Paragraph(prices.totalPriceWithTax?.let { formatAmount(it) } ?: " - ").setFont(font).setFontSize(fontSize))
+        table.addCellInPrices(Paragraph(prices.totalPriceWithTax?.let { formatAmount(it, currencyCode) } ?: " - ").setFont(font).setFontSize(fontSize))
 
         return table
     }

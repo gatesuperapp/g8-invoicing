@@ -116,7 +116,8 @@ fun DocumentBasicTemplateContent(
                 ) {
                     if (!productArray.isNullOrEmpty()) {
                         DocumentBasicTemplateProductsTable(
-                            productArray
+                            productArray,
+                            currencyCode = document.currency.text.ifEmpty { "EUR" },
                         )
                     }
                 }

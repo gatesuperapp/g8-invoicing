@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.ButtonDefaults
@@ -56,7 +57,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.AppLanguage
+import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.currencyDisplayName
+import com.a4a.g8invoicing.data.currencySymbol
+import com.a4a.g8invoicing.ui.screens.shared.CurrencyPicker
 import com.a4a.g8invoicing.data.auth.SubscriptionState
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about_language_english
@@ -64,6 +69,7 @@ import com.a4a.g8invoicing.shared.resources.about_language_french
 import com.a4a.g8invoicing.shared.resources.about_language_german
 import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
+import com.a4a.g8invoicing.shared.resources.account_currency_title
 import com.a4a.g8invoicing.shared.resources.account_auth_about_link
 import com.a4a.g8invoicing.shared.resources.account_auth_about_url
 import com.a4a.g8invoicing.shared.resources.account_auth_email_label
@@ -181,6 +187,16 @@ fun Account(
 
                 // ============ Mes entreprises ============
                 MyCompaniesSection(navController = navController)
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                // ============ Devise section ============
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.account_currency_title).uppercase(),
+                    style = MaterialTheme.typography.textTitle,
+                )
+                CurrencySelector()
 
                 Spacer(modifier = Modifier.height(30.dp))
 
@@ -374,6 +390,60 @@ private fun PremiumBadge(label: String) {
         Text(
             text = label,
             color = ColorVioletLight,
+        )
+    }
+}
+
+@Composable
+private fun CurrencySelector(
+    currencyManager: CurrencyManager = koinInject(),
+    localeManager: LocaleManager = koinInject(),
+) {
+    var showPicker by remember { mutableStateOf(false) }
+    val currentCode = currencyManager.currentCurrency
+    val recent = currencyManager.recentCurrencies
+
+    val uiLanguageCode = when (localeManager.currentLanguage) {
+        AppLanguage.SYSTEM -> null
+        else -> localeManager.currentLanguage.code
+    }
+
+    val displayLabel = remember(currentCode, uiLanguageCode) {
+        val name = currencyDisplayName(currentCode, uiLanguageCode)
+        val symbol = currencySymbol(currentCode)
+        "$currentCode — $name ($symbol)"
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .clickable { showPicker = true }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(text = displayLabel, color = Color.Black)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.Gray
+        )
+    }
+
+    if (showPicker) {
+        CurrencyPicker(
+            currentCode = currentCode,
+            recentCodes = recent,
+            onSelect = { code ->
+                currencyManager.setCurrency(code)
+                showPicker = false
+            },
+            onDismiss = { showPicker = false },
         )
     }
 }

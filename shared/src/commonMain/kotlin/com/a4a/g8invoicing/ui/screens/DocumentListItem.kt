@@ -182,7 +182,9 @@ fun DocumentListItem(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = document.documentTotalPrices?.totalPriceWithTax?.let { formatAmount(it) } ?: "",
+                    text = document.documentTotalPrices?.totalPriceWithTax?.let {
+                        formatAmount(it, document.currency.text.ifEmpty { "EUR" })
+                    } ?: "",
                     color = when (document.documentTag) {
                         DocumentTag.PAID -> ColorGreen
                         DocumentTag.LATE -> ColorPinkOrange
