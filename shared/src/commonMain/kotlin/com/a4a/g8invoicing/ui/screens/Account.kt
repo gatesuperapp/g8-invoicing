@@ -23,12 +23,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -448,11 +445,12 @@ private fun CurrencySelector(
     }
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 private fun LanguageSelector(
     localeManager: LocaleManager = koinInject()
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var showSheet by remember { mutableStateOf(false) }
     val currentLanguage = localeManager.currentLanguage
 
     val systemLabel = stringResource(Res.string.about_language_system)
@@ -467,43 +465,48 @@ private fun LanguageSelector(
         AppLanguage.GERMAN -> germanLabel
     }
 
-    Box {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = Color.Gray,
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .clickable { expanded = true }
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = getDisplayName(currentLanguage),
-                color = Color.Black
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = Color.Gray,
+                shape = RoundedCornerShape(4.dp)
             )
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = null,
-                tint = Color.Gray
-            )
-        }
+            .clickable { showSheet = true }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = getDisplayName(currentLanguage),
+            color = Color.Black
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.Gray
+        )
+    }
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            AppLanguage.values().forEach { language ->
-                DropdownMenuItem(
-                    text = { Text(getDisplayName(language)) },
-                    onClick = {
-                        localeManager.setLanguage(language)
-                        expanded = false
-                    }
-                )
+    if (showSheet) {
+        androidx.compose.material3.ModalBottomSheet(onDismissRequest = { showSheet = false }) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                AppLanguage.values().forEach { language ->
+                    Text(
+                        text = getDisplayName(language),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                localeManager.setLanguage(language)
+                                showSheet = false
+                            }
+                            .padding(vertical = 14.dp),
+                        fontWeight = if (language == currentLanguage)
+                            androidx.compose.ui.text.font.FontWeight.SemiBold
+                        else androidx.compose.ui.text.font.FontWeight.Normal,
+                    )
+                }
             }
         }
     }
