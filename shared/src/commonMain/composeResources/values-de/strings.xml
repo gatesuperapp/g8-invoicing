@@ -253,8 +253,9 @@
     <string name="account_auth_about_url">https://the-gate.fr/en</string>
     <string name="account_auth_email_label">E-Mail</string>
     <string name="account_auth_send_link">Meinen Anmeldelink erhalten</string>
-    <string name="account_auth_link_sent">Eine E-Mail wurde gesendet. Klicken Sie auf den Link, um sich anzumelden.</string>
-    <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Bitte in einigen Minuten erneut versuchen oder uns unter contact@the-gate.fr kontaktieren.</string>
+    <string name="account_auth_link_sent">✅ Eine E-Mail mit dem Anmeldelink wurde gesendet. Falls Sie sie nicht erhalten, prüfen Sie Ihren Spam-Ordner, und schreiben Sie uns gerne an </string>
+    <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Sind Sie Premium-Mitglied? Bitte versuchen Sie es in einigen Minuten erneut, und schreiben Sie uns gerne an </string>
+    <string name="account_auth_invalid_email">Ungültige E-Mail-Adresse.</string>
     <string name="drawer_gstore">𝕘Store</string>
 
     <!-- gStore -->

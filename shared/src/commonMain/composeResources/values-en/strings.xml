@@ -253,8 +253,9 @@
     <string name="account_auth_about_url">https://the-gate.fr/en</string>
     <string name="account_auth_email_label">Email</string>
     <string name="account_auth_send_link">Receive my sign-in link</string>
-    <string name="account_auth_link_sent">An email has been sent. Click the link to sign in.</string>
-    <string name="account_auth_error">Could not send the link right now. Please try again in a few minutes or email us at contact@the-gate.fr.</string>
+    <string name="account_auth_link_sent">✅ An email with the sign-in link has been sent. If you don't see it, check your spam folder, and feel free to write to us at </string>
+    <string name="account_auth_error">Could not send the link right now. Are you a Premium member? You can try again in a few minutes, and feel free to write to us at </string>
+    <string name="account_auth_invalid_email">Invalid email address.</string>
     <string name="drawer_gstore">𝕘Store</string>
 
     <!-- gStore -->

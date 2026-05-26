@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -64,7 +65,10 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -87,10 +91,12 @@ import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.account_currency_title
 import com.a4a.g8invoicing.shared.resources.account_currency_and_language_title
+import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.shared.resources.account_auth_about_link
 import com.a4a.g8invoicing.shared.resources.account_auth_about_url
 import com.a4a.g8invoicing.shared.resources.account_auth_email_label
 import com.a4a.g8invoicing.shared.resources.account_auth_error
+import com.a4a.g8invoicing.shared.resources.account_auth_invalid_email
 import com.a4a.g8invoicing.shared.resources.account_auth_link_sent
 import com.a4a.g8invoicing.shared.resources.account_auth_send_link
 import com.a4a.g8invoicing.shared.resources.account_auth_subtitle
@@ -106,6 +112,7 @@ import com.a4a.g8invoicing.shared.resources.account_renewal_date
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fab
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fly
 import com.a4a.g8invoicing.shared.resources.about_backup_text
+import com.a4a.g8invoicing.shared.resources.about_contact_email
 import com.a4a.g8invoicing.shared.resources.about_download_database
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_message
@@ -235,6 +242,8 @@ fun Account(
                     LoggedOutContent(
                         uiState = uiState,
                         onSubmit = { viewModel.requestMagicLink(it) },
+                        onClearError = { viewModel.clearError() },
+                        onClearSuccess = { viewModel.clearSuccess() },
                         uriHandler = uriHandler,
                     )
                 }
@@ -335,12 +344,53 @@ fun Account(
 }
 
 @Composable
+private fun AuthMessageDialog(
+    messagePrefix: String,
+    contactEmail: String,
+    uriHandler: androidx.compose.ui.platform.UriHandler,
+    onDismiss: () -> Unit,
+) {
+    val annotatedString = buildAnnotatedString {
+        append(messagePrefix)
+        pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
+        withStyle(style = SpanStyle(color = ColorVioletLink)) {
+            append(contactEmail)
+        }
+        pop()
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = {
+            ClickableText(
+                text = annotatedString,
+                style = MaterialTheme.typography.bodyLarge,
+                onClick = { offset ->
+                    annotatedString
+                        .getStringAnnotations(tag = "email", start = offset, end = offset)
+                        .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.ok), color = ColorVioletLink)
+            }
+        },
+    )
+}
+
+@Composable
 private fun ColumnScope.LoggedOutContent(
     uiState: AccountUiState,
     onSubmit: (String) -> Unit,
+    onClearError: () -> Unit,
+    onClearSuccess: () -> Unit,
     uriHandler: androidx.compose.ui.platform.UriHandler,
 ) {
     var email by remember { mutableStateOf("") }
+    // Stays false until the user clicks "Receive my link" with an invalid
+    // value. We don't want to flash a red error while they're still typing.
+    var hasAttemptedSubmit by remember { mutableStateOf(false) }
 
     Text(
         text = stringResource(Res.string.account_auth_title),
@@ -353,13 +403,23 @@ private fun ColumnScope.LoggedOutContent(
         handleColor = Color.Transparent,
         backgroundColor = ColorVioletLight.copy(alpha = 0.3f),
     )
+    val trimmedEmail = email.trim()
+    val emailIsValid = FormInputsValidator.isEmailValid(trimmedEmail)
+    val showInvalidEmailError = hasAttemptedSubmit && !emailIsValid
+
     CompositionLocalProvider(LocalTextSelectionColors provides violetSelectionColors) {
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { newValue ->
+                // Cap at RFC 5321 max so we don't ever submit a 1MB string.
+                email = if (newValue.length > FormInputsValidator.EMAIL_MAX_LENGTH) {
+                    newValue.take(FormInputsValidator.EMAIL_MAX_LENGTH)
+                } else newValue
+            },
             label = { Text(stringResource(Res.string.account_auth_email_label)) },
             singleLine = true,
             enabled = !uiState.isLoading && uiState.successMessage == null,
+            isError = showInvalidEmailError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = ColorVioletLight,
@@ -368,46 +428,56 @@ private fun ColumnScope.LoggedOutContent(
                 unfocusedLabelColor = Color.Black,
                 cursorColor = ColorVioletLight,
             ),
+            supportingText = if (showInvalidEmailError) {
+                { Text(stringResource(Res.string.account_auth_invalid_email)) }
+            } else null,
             modifier = Modifier.fillMaxWidth(),
         )
     }
 
-    if (uiState.successMessage != null) {
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(Res.string.account_auth_link_sent),
-            color = Color.Black,
-            fontWeight = FontWeight.Medium,
-        )
-    } else {
-        val isEnabled = !uiState.isLoading && email.isNotBlank()
-        TextButton(
-            onClick = { onSubmit(email.trim()) },
-            enabled = isEnabled,
-            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = ColorVioletLight,
-                disabledContentColor = ColorDarkGrayTransp,
-            ),
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.height(18.dp).width(18.dp),
-                    strokeWidth = 2.dp,
-                    color = ColorVioletLight,
-                )
+    TextButton(
+        onClick = {
+            if (emailIsValid) {
+                hasAttemptedSubmit = false
+                onSubmit(trimmedEmail)
             } else {
-                Text(stringResource(Res.string.account_auth_send_link))
+                hasAttemptedSubmit = true
             }
-        }
-
-        if (uiState.errorMessage != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = stringResource(Res.string.account_auth_error),
-                color = MaterialTheme.colorScheme.error,
+        },
+        enabled = !uiState.isLoading && uiState.successMessage == null,
+        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = ColorVioletLight,
+            disabledContentColor = ColorDarkGrayTransp,
+        ),
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.height(18.dp).width(18.dp),
+                strokeWidth = 2.dp,
+                color = ColorVioletLight,
             )
+        } else {
+            Text(stringResource(Res.string.account_auth_send_link))
         }
+    }
+
+    val contactEmail = stringResource(Res.string.about_contact_email)
+    if (uiState.errorMessage != null) {
+        AuthMessageDialog(
+            messagePrefix = stringResource(Res.string.account_auth_error),
+            contactEmail = contactEmail,
+            uriHandler = uriHandler,
+            onDismiss = onClearError,
+        )
+    }
+    if (uiState.successMessage != null) {
+        AuthMessageDialog(
+            messagePrefix = stringResource(Res.string.account_auth_link_sent),
+            contactEmail = contactEmail,
+            uriHandler = uriHandler,
+            onDismiss = onClearSuccess,
+        )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
