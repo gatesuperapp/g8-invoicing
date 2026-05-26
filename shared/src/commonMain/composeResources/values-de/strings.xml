@@ -55,7 +55,7 @@
     <string name="alert_dialog_delete_invoice_1">Bist du sicher?\n\nWenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:</string>
     <string name="alert_dialog_delete_invoice_2">Mehr erfahren\n</string>
     <string name="alert_dialog_delete_invoice_3">\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
-    <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
+    <string name="alert_dialog_delete_url">https://www.the-gate.fr/en</string>
     <string name="alert_dialog_delete_general">Ganz sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>
     <string name="alert_dialog_cancel">Abbrechen</string>
@@ -244,13 +244,15 @@
     <!-- Account Screen -->
     <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
     <string name="account_donate">Mehr erfahren</string>
-    <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
+    <string name="account_donate_link">https://www.the-gate.fr/en</string>
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing oder auf F-Droid: https://f-droid.org/fr/packages/com.a4a.g8invoicing</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">Bei 𝕘𝟠 anmelden</string>
+    <string name="account_auth_title">🌟 Bereits Premium-Mitglied?</string>
     <string name="account_auth_subtitle">Geben Sie Ihre E-Mail-Adresse ein, um einen Anmeldelink zu erhalten.</string>
+    <string name="account_auth_about_link">Mehr über g8 erfahren…</string>
+    <string name="account_auth_about_url">https://the-gate.fr/en</string>
     <string name="account_auth_email_label">E-Mail</string>
-    <string name="account_auth_send_link">Link erhalten</string>
+    <string name="account_auth_send_link">Meinen Anmeldelink erhalten</string>
     <string name="account_auth_link_sent">Eine E-Mail wurde gesendet. Klicken Sie auf den Link, um sich anzumelden.</string>
     <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Bitte in einigen Minuten erneut versuchen oder uns unter contact@the-gate.fr kontaktieren.</string>
     <string name="drawer_gstore">𝕘Store</string>
@@ -282,7 +284,7 @@
     <string name="account_cancellation_date">Gekündigt — endet am %1$s</string>
     <string name="account_manage_subscription">Abonnement verwalten</string>
     <string name="account_website_label">the-gate.fr</string>
-    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_section_auth">Authentifizierung</string>
     <string name="account_my_companies">Meine Unternehmen</string>
     <string name="account_add_company">+ Unternehmen hinzufügen</string>
@@ -291,33 +293,39 @@
     <string name="about">𝕘𝟠 ist eine praktische und engagierte App:\n• Funktioniert offline\n• Keine Werbung, kein Tracking\n• Freie Software, open-source\n• Entworfen für Bio-Landwirte und -Landwirtinnen\n• Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>
     <string name="about_title_about">Über</string>
     <string name="about_title_early_access">Programm "Early bat"</string>
+    <string name="about_title_website">Webseite</string>
+    <string name="about_website_intro">Besuchen Sie unsere Webseite </string>
+    <string name="about_website_cta">www.the-gate.fr</string>
+    <string name="about_website_link">https://www.the-gate.fr/en</string>
+    <string name="about_website_tail">!</string>
     <string name="about_title_community">Community</string>
     <string name="about_community_text">Kommt vorbei, um eure Wünsche und Ideen zu besprechen und sich über</string>
     <string name="about_community_cta">das Forum der Community auszutauschen.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Hilfe</string>
-    <string name="about_assistance_text_1">Besucht die</string>
-    <string name="about_assistance_forum_link_text">Rubrik "Hilfe" im Forum</string>
+    <string name="about_assistance_intro">Du kannst uns jederzeit schreiben, um einen Fehler zu melden, eine Funktion vorzuschlagen oder um Hilfe zu bitten.</string>
+    <string name="about_assistance_more_lead">Du kannst auch die </string>
+    <string name="about_assistance_forum_link_text">„Hilfe"-Rubrik des Forums</string>
     <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
-    <string name="about_assistance_text_2">, schaut euch die</string>
+    <string name="about_assistance_more_middle"> besuchen, die </string>
     <string name="about_assistance_tutorials_link_text">Tutorials und Ratschläge</string>
-    <string name="about_assistance_tutorials_link">https://the-gate.fr/conseils-et-tutos</string>
-    <string name="about_assistance_text_3">auf der Site an, oder schreibt an</string>
-    <string name="about_assistance_email_link_text">contact@the-gate.fr</string>
+    <string name="about_assistance_tutorials_link">https://the-gate.fr/en</string>
+    <string name="about_assistance_more_tail"> auf der Website durchsehen.</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Datensicherung</string>
     <string name="about_backup_text">Denkt daran eure Datenbank regelmäßig herunterzuladen, um sie wiederherzustellen, sollte das Telefon mal verloren gegangen sein.</string>
-    <string name="about_download_database">💎 Meine Datenbank herunterladen 💎</string>
+    <string name="about_download_database">Herunterladen</string>
+    <string name="account_backup_dialog_title">Sicherung heruntergeladen</string>
+    <string name="account_backup_dialog_message">Ihre Datenbank wurde im Downloads-Ordner gespeichert. Möchten Sie sie auch per E-Mail senden?</string>
+    <string name="account_backup_dialog_yes">Ja, per E-Mail senden</string>
+    <string name="account_backup_dialog_no">Nein, das war's</string>
     <string name="about_title_legal">Rechtliche Hinweise</string>
     <string name="about_terms_of_service_header">Durch Nutzung der App akzeptieren Sie die</string>
     <string name="about_terms_of_service">Nutzungsbedingungen</string>
     <string name="about_terms_of_service_header_2">und die</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
     <string name="about_privacy">Datenschutzerklärung von 𝕘𝟠.</string>
-    <string name="about_share_text">Die App ist Ihnen nützlich?</string>
-    <string name="about_donate_button">Spenden</string>
-    <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
     <string name="about_share_text_2">Teilen Sie sie mit Ihren Freund:innen!</string>
     <string name="about_share_button">Teilen</string>
     <string name="about_build_version">Version der App: </string>
@@ -331,6 +339,7 @@
 
     <!-- Currency Selection -->
     <string name="account_currency_title">Währung</string>
+    <string name="account_currency_and_language_title">Währung und Sprache</string>
     <string name="currency_picker_search">Suchen</string>
     <string name="currency_picker_recent">Zuletzt verwendet</string>
     <string name="currency_picker_all">Alle</string>
@@ -352,7 +361,7 @@
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5">Zu einem anderen Thema…</string>
     <string name="invoice_advice_legal_6">Die Dokumente, die du erstellst, genauso wie alle deine Änderungen werden automatisch im Hintergrund gespeichert.\n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚&apos;𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
-    <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
+    <string name="invoice_advice_legal_url">https://www.the-gate.fr/en</string>
     <string name="invoice_advice_bottom_menu">Halli-Hallo, ich bin dein batmagotchi. Ich muss dir unbedingt einen Tipp geben\n\n …</string>
     <string name="invoice_advice_bottom_menu1">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen,\n\n …</string>
     <string name="invoice_advice_bottom_menu2">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen.\n\n 𝕨𝕚𝕝𝕕</string>

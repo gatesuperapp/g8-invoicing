@@ -1,11 +1,19 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +32,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -43,7 +53,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -67,6 +86,7 @@ import com.a4a.g8invoicing.shared.resources.about_language_german
 import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.account_currency_title
+import com.a4a.g8invoicing.shared.resources.account_currency_and_language_title
 import com.a4a.g8invoicing.shared.resources.account_auth_about_link
 import com.a4a.g8invoicing.shared.resources.account_auth_about_url
 import com.a4a.g8invoicing.shared.resources.account_auth_email_label
@@ -85,15 +105,26 @@ import com.a4a.g8invoicing.shared.resources.account_cancellation_date
 import com.a4a.g8invoicing.shared.resources.account_renewal_date
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fab
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fly
+import com.a4a.g8invoicing.shared.resources.about_backup_text
+import com.a4a.g8invoicing.shared.resources.about_download_database
+import com.a4a.g8invoicing.shared.resources.about_title_backup
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_message
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_no
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_title
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_yes
 import com.a4a.g8invoicing.shared.resources.drawer_my_account
+import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
+import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.textNormalBold
 import com.a4a.g8invoicing.ui.theme.textTitle
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
@@ -110,12 +141,40 @@ fun Account(
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
     onShareContent: (String) -> Unit = {},
+    onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
+    onSendDatabaseByEmail: (String) -> Unit = {},
     viewModel: AccountViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
     val uiState = viewModel.uiState
 
     val isDimActive = remember { mutableStateOf(false) }
+
+    // Backup section local state (export + send-by-email + error dialogs).
+    var exportedFilePath by remember { mutableStateOf<String?>(null) }
+    var exportErrorMessage by remember { mutableStateOf<String?>(null) }
+    var showExportErrorDialog by remember { mutableStateOf(false) }
+    var showSendDatabaseByEmailDialog by remember { mutableStateOf(false) }
+
+    // Animated violet/pink brush, shared by call-to-action buttons in this screen.
+    val infiniteTransition = rememberInfiniteTransition(label = "border")
+    val targetOffset = with(LocalDensity.current) { 1000.dp.toPx() }
+    val brushOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = targetOffset,
+        animationSpec = infiniteRepeatable(
+            animation = tween(10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "offset"
+    )
+    val brushSize = 400f
+    val ctaBrush = Brush.linearGradient(
+        colors = listOf(ColorVioletLight, ColorHotPink),
+        start = Offset(brushOffset, brushOffset),
+        end = Offset(brushOffset + brushSize, brushOffset + brushSize),
+        tileMode = TileMode.Mirror
+    )
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (uiState.isLoggedIn) {
@@ -180,37 +239,103 @@ fun Account(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(60.dp))
+
+                // ============ Sauvegarde ============
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_backup).uppercase(),
+                    style = MaterialTheme.typography.textTitle,
+                )
+
+                Text(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    text = stringResource(Res.string.about_backup_text)
+                )
+
+                Button(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .border(
+                            BorderStroke(width = 4.dp, brush = ctaBrush),
+                            shape = RoundedCornerShape(50)
+                        ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
+                    onClick = {
+                        val result = onExportDatabase()
+                        when (result) {
+                            is ExportResult.Success -> {
+                                exportedFilePath = result.filePath
+                                showSendDatabaseByEmailDialog = true
+                            }
+                            is ExportResult.Error -> {
+                                exportErrorMessage = result.message
+                                showExportErrorDialog = true
+                            }
+                        }
+                    },
+                ) {
+                    Text(stringResource(Res.string.about_download_database))
+                }
+
+                Spacer(modifier = Modifier.height(60.dp))
 
                 // ============ Mes entreprises ============
                 MyCompaniesSection(navController = navController)
 
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(60.dp))
 
-                // ============ Devise section ============
+                // ============ Devise & Langue section ============
                 Text(
                     modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.account_currency_title).uppercase(),
+                    text = stringResource(Res.string.account_currency_and_language_title).uppercase(),
                     style = MaterialTheme.typography.textTitle,
                 )
                 CurrencySelector()
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                // ============ Langue section ============
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_language).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
+                Spacer(modifier = Modifier.height(8.dp))
                 LanguageSelector()
+
+                Spacer(modifier = Modifier.height(60.dp))
             }
+        }
+
+        if (showSendDatabaseByEmailDialog && exportedFilePath != null) {
+            AlertDialog(
+                onDismissRequest = { showSendDatabaseByEmailDialog = false },
+                title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
+                text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showSendDatabaseByEmailDialog = false
+                        exportedFilePath?.let { onSendDatabaseByEmail(it) }
+                    }) {
+                        Text(stringResource(Res.string.account_backup_dialog_yes), color = ColorVioletLink)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSendDatabaseByEmailDialog = false }) {
+                        Text(stringResource(Res.string.account_backup_dialog_no), color = ColorVioletLink)
+                    }
+                }
+            )
+        }
+
+        if (showExportErrorDialog) {
+            AlertDialog(
+                onDismissRequest = { showExportErrorDialog = false },
+                text = { Text(exportErrorMessage ?: "") },
+                confirmButton = {
+                    TextButton(onClick = { showExportErrorDialog = false }) {
+                        Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-private fun LoggedOutContent(
+private fun ColumnScope.LoggedOutContent(
     uiState: AccountUiState,
     onSubmit: (String) -> Unit,
     uriHandler: androidx.compose.ui.platform.UriHandler,
@@ -220,12 +345,6 @@ private fun LoggedOutContent(
     Text(
         text = stringResource(Res.string.account_auth_title),
         fontWeight = FontWeight.Bold,
-    )
-
-    Spacer(modifier = Modifier.height(8.dp))
-
-    Text(
-        text = stringResource(Res.string.account_auth_subtitle),
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -253,9 +372,8 @@ private fun LoggedOutContent(
         )
     }
 
-    Spacer(modifier = Modifier.height(12.dp))
-
     if (uiState.successMessage != null) {
+        Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(Res.string.account_auth_link_sent),
             color = Color.Black,
@@ -266,7 +384,7 @@ private fun LoggedOutContent(
         TextButton(
             onClick = { onSubmit(email.trim()) },
             enabled = isEnabled,
-            contentPadding = PaddingValues(horizontal = 0.dp),
+            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
             colors = ButtonDefaults.textButtonColors(
                 contentColor = ColorVioletLight,
                 disabledContentColor = ColorDarkGrayTransp,
@@ -300,8 +418,7 @@ private fun LoggedOutContent(
         modifier = Modifier.clickable { uriHandler.openUri(aboutUrl) },
         text = aboutLabel,
         fontSize = 13.sp,
-        color = Color.Black,
-        textDecoration = TextDecoration.Underline,
+        color = ColorVioletLink,
     )
 }
 
@@ -550,25 +667,17 @@ private fun MyCompaniesSection(
         Spacer(modifier = Modifier.height(8.dp))
     }
 
-    // "+ Ajouter une entreprise" — same look as ProductAddEditForm's
-    // AddPriceButton (light-grey rounded pill, callForActions typo).
-    Box(
+    // "+ Ajouter une entreprise" — violet plain CTA, no fill, tight to the list.
+    Text(
+        style = MaterialTheme.typography.callForActions,
+        color = ColorVioletLink,
         modifier = Modifier
-            .padding(top = if (issuers.isEmpty()) 0.dp else 4.dp)
-            .background(
-                color = Color(0xFFE8E8E8),
-                shape = RoundedCornerShape(6.dp),
-            )
+            .padding(start = 4.dp, top = 4.dp)
             .clickable {
                 navController.navigate(Screen.ClientAddEdit.name + "?type=issuer")
-            }
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Text(
-            style = MaterialTheme.typography.callForActions,
-            text = stringResource(Res.string.account_add_company),
-        )
-    }
+            },
+        text = stringResource(Res.string.account_add_company),
+    )
 }
 
 @Composable

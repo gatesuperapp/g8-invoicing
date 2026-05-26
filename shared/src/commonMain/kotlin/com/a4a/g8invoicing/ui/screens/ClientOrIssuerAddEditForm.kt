@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -84,6 +85,7 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import org.jetbrains.compose.resources.stringResource
 
@@ -620,14 +622,23 @@ fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
 
 @Composable
 fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String) {
-    Text(
-        style = MaterialTheme.typography.callForActions,
+    Box(
         modifier = Modifier
-            .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
+            .padding(start = 4.dp, top = 10.dp, bottom = bottomPadding)
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(6.dp)
+            )
             .clickable(enabled = true) {
                 onClick()
-            },
-        text = AnnotatedString(text),
-    )
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            style = MaterialTheme.typography.callForActions,
+            color = ColorVioletLink,
+            text = AnnotatedString(text),
+        )
+    }
 }
 

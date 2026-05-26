@@ -59,12 +59,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about
-import com.a4a.g8invoicing.shared.resources.about_assistance_email_link_text
+import com.a4a.g8invoicing.shared.resources.about_assistance_intro
+import com.a4a.g8invoicing.shared.resources.about_assistance_more_lead
+import com.a4a.g8invoicing.shared.resources.about_assistance_more_middle
+import com.a4a.g8invoicing.shared.resources.about_assistance_more_tail
 import com.a4a.g8invoicing.shared.resources.about_assistance_forum_link
 import com.a4a.g8invoicing.shared.resources.about_assistance_forum_link_text
-import com.a4a.g8invoicing.shared.resources.about_assistance_text_1
-import com.a4a.g8invoicing.shared.resources.about_assistance_text_2
-import com.a4a.g8invoicing.shared.resources.about_assistance_text_3
 import com.a4a.g8invoicing.shared.resources.about_assistance_tutorials_link
 import com.a4a.g8invoicing.shared.resources.about_assistance_tutorials_link_text
 import com.a4a.g8invoicing.shared.resources.about_backup_text
@@ -73,12 +73,9 @@ import com.a4a.g8invoicing.shared.resources.about_community_cta
 import com.a4a.g8invoicing.shared.resources.about_community_link
 import com.a4a.g8invoicing.shared.resources.about_community_text
 import com.a4a.g8invoicing.shared.resources.about_contact_email
-import com.a4a.g8invoicing.shared.resources.about_donate_button
-import com.a4a.g8invoicing.shared.resources.about_donate_link
 import com.a4a.g8invoicing.shared.resources.about_download_database
 import com.a4a.g8invoicing.shared.resources.about_privacy
 import com.a4a.g8invoicing.shared.resources.about_share_button
-import com.a4a.g8invoicing.shared.resources.about_share_text
 import com.a4a.g8invoicing.shared.resources.about_share_text_2
 import com.a4a.g8invoicing.shared.resources.about_terms_of_service
 import com.a4a.g8invoicing.shared.resources.about_terms_of_service_header
@@ -90,6 +87,11 @@ import com.a4a.g8invoicing.shared.resources.about_title_assistance
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.about_title_community
 import com.a4a.g8invoicing.shared.resources.about_title_legal
+import com.a4a.g8invoicing.shared.resources.about_title_website
+import com.a4a.g8invoicing.shared.resources.about_website_cta
+import com.a4a.g8invoicing.shared.resources.about_website_intro
+import com.a4a.g8invoicing.shared.resources.about_website_link
+import com.a4a.g8invoicing.shared.resources.about_website_tail
 import com.a4a.g8invoicing.shared.resources.account_bat_love
 import com.a4a.g8invoicing.shared.resources.account_share_content
 import com.a4a.g8invoicing.shared.resources.drawer_g8
@@ -121,8 +123,6 @@ fun About(
     onClickBack: () -> Unit,
     versionName: String = "?",
     onShareContent: (String) -> Unit = {},
-    onExportDatabase: () -> ExportResult = { ExportResult.Error("Not implemented") },
-    onSendDatabaseByEmail: (String) -> Unit = {},
     onComposeEmail: (address: String, subject: String, body: String) -> Unit = { _, _, _ -> },
     // Callbacks for categories menu state (managed by NavGraph for BackHandler)
     isCategoriesMenuOpen: Boolean = false,
@@ -131,12 +131,6 @@ fun About(
 ) {
     val uriHandler = LocalUriHandler.current
     val isDimActive = remember { mutableStateOf(false) }
-
-    // Export db popup
-    var exportedFilePath by remember { mutableStateOf<String?>(null) }
-    var exportErrorMessage by remember { mutableStateOf<String?>(null) }
-    var showExportErrorDialog by remember { mutableStateOf(false) }
-    var showSendDatabaseByEmailDialog by remember { mutableStateOf(false) }
 
     // Animation pour le bouton "En savoir plus"
     val infiniteTransition = rememberInfiniteTransition(label = "border")
@@ -159,7 +153,6 @@ fun About(
     )
 
     // String resources
-    val donateLinkAbout = stringResource(Res.string.about_donate_link)
     val shareContent = stringResource(Res.string.account_share_content)
     val contactEmail = stringResource(Res.string.about_contact_email)
 
@@ -207,6 +200,39 @@ fun About(
                 horizontalAlignment = Alignment.Start
             ) {
                 // =====================
+                // SECTION: Site internet
+                // =====================
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_website).uppercase(),
+                    style = MaterialTheme.typography.textTitle,
+                )
+
+                WebsiteText(uriHandler)
+
+                Spacer(modifier = Modifier.height(60.dp))
+
+                // =====================
+                // SECTION: Assistance
+                // =====================
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_assistance).uppercase(),
+                    style = MaterialTheme.typography.textTitle,
+                )
+
+                AssistanceText(
+                    uriHandler = uriHandler,
+                    contactEmail = contactEmail,
+                    brush = brush,
+                    onComposeEmail = { address, body ->
+                        onComposeEmail(address, "[G8] ", body)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(60.dp))
+
+                // =====================
                 // SECTION: À propos
                 // =====================
                 Text(
@@ -219,29 +245,6 @@ fun About(
                     modifier = Modifier.padding(bottom = 16.dp),
                     text = stringResource(Res.string.about)
                 )
-
-                // Donation dans À propos
-                Text(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    text = stringResource(Res.string.about_share_text)
-                )
-
-                Button(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .border(
-                            BorderStroke(width = 4.dp, brush = brush),
-                            shape = RoundedCornerShape(50)
-                        ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = {
-                        uriHandler.openUri(donateLinkAbout)
-                    },
-                ) {
-                    Text(stringResource(Res.string.about_donate_button))
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
 
                 // Partage dans À propos
                 Text(
@@ -264,9 +267,52 @@ fun About(
                     Text(stringResource(Res.string.about_share_button))
                 }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(60.dp))
 
-                // Animation chauve-souris
+                // =====================
+                // SECTION: Communauté
+                // =====================
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_community).uppercase(),
+                    style = MaterialTheme.typography.textTitle,
+                )
+
+                CommunityText(uriHandler)
+
+                Spacer(modifier = Modifier.height(60.dp))
+
+                // =====================
+                // SECTION: Mentions légales
+                // =====================
+                Text(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    text = stringResource(Res.string.about_title_legal).uppercase(),
+                    style = MaterialTheme.typography.textTitle,
+                )
+
+                TermsOfService(uriHandler)
+
+                Spacer(modifier = Modifier.height(60.dp))
+
+                // Language section moved to Mon Compte (Account.kt).
+
+                // =====================
+                // SECTION: Version (en dernier)
+                // =====================
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.about_build_version),
+                        style = MaterialTheme.typography.textNormalBold
+                    )
+                    Text(text = versionName)
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Animation chauve-souris (tout en bas, en easter egg).
                 val numberOfIterations = remember { mutableIntStateOf(2) }
                 var visibleText by remember { mutableStateOf(false) }
 
@@ -303,150 +349,10 @@ fun About(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-
-                // =====================
-                // SECTION: Communauté
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_community).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                CommunityText(uriHandler)
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                // =====================
-                // SECTION: Assistance
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_assistance).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                AssistanceText(
-                    uriHandler = uriHandler,
-                    onComposeEmail = { address, body ->
-                        onComposeEmail(address, "[G8] ", body)
-                    }
-                )
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                // =====================
-                // SECTION: Sauvegarde
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_backup).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_backup_text)
-                )
-
-                Text(
-                    text = stringResource(Res.string.about_download_database),
-                    color = ColorVioletLink,
-                    style = MaterialTheme.typography.textNormalBold,
-                    modifier = Modifier
-                        .padding(bottom = 30.dp)
-                        .clickable {
-                            val result = onExportDatabase()
-                            when (result) {
-                                is ExportResult.Success -> {
-                                    exportedFilePath = result.filePath
-                                    showSendDatabaseByEmailDialog = true
-                                }
-                                is ExportResult.Error -> {
-                                    exportErrorMessage = result.message
-                                    showExportErrorDialog = true
-                                }
-                            }
-                        }
-                )
-
-                // =====================
-                // SECTION: Mentions légales
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_legal).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                TermsOfService(uriHandler)
-
-                Spacer(modifier = Modifier.height(30.dp))
-
-                // Language section moved to Mon Compte (Account.kt).
-
-                // =====================
-                // SECTION: Version (en dernier)
-                // =====================
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.about_build_version),
-                        style = MaterialTheme.typography.textNormalBold
-                    )
-                    Text(text = versionName)
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
             }
         }
 
-        if (showSendDatabaseByEmailDialog && exportedFilePath != null) {
-            DatabaseEmailDialogShared(
-                onDismiss = { showSendDatabaseByEmailDialog = false },
-                onConfirm = {
-                    showSendDatabaseByEmailDialog = false
-                    exportedFilePath?.let { onSendDatabaseByEmail(it) }
-                }
-            )
-        }
-
-        if (showExportErrorDialog) {
-            AlertDialog(
-                onDismissRequest = { showExportErrorDialog = false },
-                text = { Text(exportErrorMessage ?: "") },
-                confirmButton = {
-                    TextButton(onClick = { showExportErrorDialog = false }) {
-                        Text(stringResource(Res.string.ok), color = ColorVioletLink)
-                    }
-                }
-            )
-        }
     }
-}
-
-@Composable
-private fun DatabaseEmailDialogShared(
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit
-) {
-    // Simplified dialog - strings will be added if needed
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Envoyer par email ?") },
-        text = { Text("Voulez-vous envoyer la base de données par email pour la sauvegarder ?") },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Oui", color = ColorVioletLink)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Non", color = ColorVioletLink)
-            }
-        }
-    )
 }
 
 @Composable
@@ -490,6 +396,33 @@ private fun TermsOfService(uriHandler: UriHandler) {
 }
 
 @Composable
+private fun WebsiteText(uriHandler: UriHandler) {
+    val intro = stringResource(Res.string.about_website_intro)
+    val cta = stringResource(Res.string.about_website_cta)
+    val link = stringResource(Res.string.about_website_link)
+    val tail = stringResource(Res.string.about_website_tail)
+
+    val annotatedString = buildAnnotatedString {
+        append(intro)
+        pushStringAnnotation(tag = "website", annotation = link)
+        withStyle(style = SpanStyle(color = ColorVioletLink)) {
+            append(cta)
+        }
+        pop()
+        append(tail)
+    }
+
+    ClickableText(
+        text = annotatedString,
+        style = MaterialTheme.typography.bodyLarge,
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(tag = "website", start = offset, end = offset)
+                .firstOrNull()?.let { uriHandler.openUri(it.item) }
+        }
+    )
+}
+
+@Composable
 private fun CommunityText(uriHandler: UriHandler) {
     val communityText = stringResource(Res.string.about_community_text)
     val communityCta = stringResource(Res.string.about_community_cta)
@@ -519,58 +452,67 @@ private fun CommunityText(uriHandler: UriHandler) {
 @Composable
 private fun AssistanceText(
     uriHandler: UriHandler,
-    onComposeEmail: (address: String, body: String) -> Unit
+    contactEmail: String,
+    brush: Brush,
+    onComposeEmail: (address: String, body: String) -> Unit,
 ) {
-    val text1 = stringResource(Res.string.about_assistance_text_1)
+    val intro = stringResource(Res.string.about_assistance_intro)
+    val moreLead = stringResource(Res.string.about_assistance_more_lead)
     val forumLinkText = stringResource(Res.string.about_assistance_forum_link_text)
     val forumLink = stringResource(Res.string.about_assistance_forum_link)
-    val text2 = stringResource(Res.string.about_assistance_text_2)
+    val moreMiddle = stringResource(Res.string.about_assistance_more_middle)
     val tutorialsLinkText = stringResource(Res.string.about_assistance_tutorials_link_text)
     val tutorialsLink = stringResource(Res.string.about_assistance_tutorials_link)
-    val text3 = stringResource(Res.string.about_assistance_text_3)
-    val emailLinkText = stringResource(Res.string.about_assistance_email_link_text)
-    val emailAddress = stringResource(Res.string.about_contact_email)
+    val moreTail = stringResource(Res.string.about_assistance_more_tail)
 
-    val annotatedString = buildAnnotatedString {
-        append("$text1 ")
-        pushStringAnnotation(tag = "forum", annotation = forumLink)
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
-            append(forumLinkText)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            modifier = Modifier.padding(bottom = 16.dp),
+            text = intro,
+        )
+
+        Button(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .border(
+                    BorderStroke(width = 4.dp, brush = brush),
+                    shape = RoundedCornerShape(50)
+                ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
+            onClick = { onComposeEmail(contactEmail, "") },
+        ) {
+            Text(contactEmail)
         }
-        pop()
-        append("$text2 ")
-        pushStringAnnotation(tag = "tutorials", annotation = tutorialsLink)
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
-            append("$tutorialsLinkText ")
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val annotatedString = buildAnnotatedString {
+            append(moreLead)
+            pushStringAnnotation(tag = "forum", annotation = forumLink)
+            withStyle(style = SpanStyle(color = ColorVioletLight)) {
+                append(forumLinkText)
+            }
+            pop()
+            append(moreMiddle)
+            pushStringAnnotation(tag = "tutorials", annotation = tutorialsLink)
+            withStyle(style = SpanStyle(color = ColorVioletLight)) {
+                append(tutorialsLinkText)
+            }
+            pop()
+            append(moreTail)
         }
-        pop()
-        append("$text3 ")
-        pushStringAnnotation(tag = "email", annotation = emailAddress)
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
-            append(emailLinkText)
-        }
-        pop()
+
+        ClickableText(
+            text = annotatedString,
+            style = MaterialTheme.typography.bodyLarge,
+            onClick = { offset ->
+                annotatedString.getStringAnnotations(tag = "forum", start = offset, end = offset)
+                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                annotatedString.getStringAnnotations(tag = "tutorials", start = offset, end = offset)
+                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
+            }
+        )
     }
-
-    ClickableText(
-        text = annotatedString,
-        style = MaterialTheme.typography.bodyLarge,
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "forum", start = offset, end = offset)
-                .firstOrNull()?.let {
-                    uriHandler.openUri(it.item)
-                }
-            annotatedString.getStringAnnotations(tag = "tutorials", start = offset, end = offset)
-                .firstOrNull()?.let {
-                    uriHandler.openUri(it.item)
-                }
-            annotatedString.getStringAnnotations(tag = "email", start = offset, end = offset)
-                .firstOrNull()?.let { annotation ->
-                    // Debug info will be added by the platform-specific implementation
-                    onComposeEmail(annotation.item, "")
-                }
-        }
-    )
 }
 
 // LanguageSelector moved to Account.kt (Mon Compte → section "Langue").

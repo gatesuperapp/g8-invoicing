@@ -51,8 +51,6 @@ fun NavGraph(
                 navigateBack(navController)
             },
             onShareContent = onShareContent,
-            onExportDatabase = onExportDatabase,
-            onSendDatabaseByEmail = onSendDatabaseByEmail,
             onComposeEmail = onComposeEmail,
             showCategoryButton = showCategoryButton
         )
@@ -67,6 +65,8 @@ fun NavGraph(
                 navigateBack(navController)
             },
             onShareContent = onShareContent,
+            onExportDatabase = onExportDatabase,
+            onSendDatabaseByEmail = onSendDatabaseByEmail,
         )
 
         // gStore (premium modules showcase, no commercial CTA)

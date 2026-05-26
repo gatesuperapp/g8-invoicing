@@ -59,6 +59,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
@@ -348,7 +349,7 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
         modifier = Modifier
             .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
             .background(
-                color = Color(0xFFE8E8E8), // Gris clair
+                color = Color.White,
                 shape = RoundedCornerShape(6.dp)
             )
             .clickable(enabled = true) {
@@ -358,6 +359,7 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
     ) {
         Text(
             style = MaterialTheme.typography.callForActions,
+            color = ColorVioletLink,
             text = AnnotatedString(addPriceText),
         )
     }

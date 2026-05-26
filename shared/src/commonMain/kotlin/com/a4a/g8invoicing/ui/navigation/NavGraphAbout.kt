@@ -9,7 +9,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.getAppVersion
 import com.a4a.g8invoicing.ui.screens.About
-import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.currentTimeMillis
 
@@ -19,8 +18,6 @@ fun NavGraphBuilder.about(
     onClickBack: () -> Unit,
     // Platform-specific callbacks
     onShareContent: (String) -> Unit = {},
-    onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
-    onSendDatabaseByEmail: (String) -> Unit = {},
     onComposeEmail: (String, String, String) -> Unit = { _, _, _ -> },
     showCategoryButton: Boolean = true,
 ) {
@@ -45,8 +42,6 @@ fun NavGraphBuilder.about(
             onClickBack = onClickBack,
             versionName = versionName,
             onShareContent = onShareContent,
-            onExportDatabase = onExportDatabase,
-            onSendDatabaseByEmail = onSendDatabaseByEmail,
             onComposeEmail = onComposeEmail,
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
