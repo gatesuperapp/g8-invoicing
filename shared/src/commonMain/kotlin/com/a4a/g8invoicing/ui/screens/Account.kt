@@ -46,6 +46,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -115,6 +116,7 @@ import com.a4a.g8invoicing.shared.resources.about_backup_text
 import com.a4a.g8invoicing.shared.resources.about_contact_email
 import com.a4a.g8invoicing.shared.resources.about_download_database
 import com.a4a.g8invoicing.shared.resources.about_title_backup
+import com.a4a.g8invoicing.shared.resources.account_auth_link_expired
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_message
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_no
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_title
@@ -150,6 +152,8 @@ fun Account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    pendingMagicLinkToken: String? = null,
+    onMagicLinkTokenConsumed: () -> Unit = {},
     viewModel: AccountViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
@@ -186,6 +190,17 @@ fun Account(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (uiState.isLoggedIn) {
             viewModel.refreshSubscription()
+        }
+    }
+
+    // Consume the magic link token from the deep link on this screen's own VM so the
+    // success (logged-in UI) or error (expired-link dialog) lands on the same instance
+    // that renders here — calling consume from MainCompose would target the Activity-
+    // scoped VM, leaving this NavBackStackEntry-scoped one with stale null state.
+    LaunchedEffect(pendingMagicLinkToken) {
+        if (pendingMagicLinkToken != null) {
+            viewModel.consumeMagicLink(pendingMagicLinkToken)
+            onMagicLinkTokenConsumed()
         }
     }
 
@@ -245,6 +260,17 @@ fun Account(
                         onClearError = { viewModel.clearError() },
                         onClearSuccess = { viewModel.clearSuccess() },
                         uriHandler = uriHandler,
+                    )
+                }
+
+                // Shown regardless of login state — a stale magic link clicked while
+                // already logged in still gets explained, instead of silently doing nothing.
+                if (uiState.consumeErrorMessage != null) {
+                    AuthMessageDialog(
+                        messagePrefix = stringResource(Res.string.account_auth_link_expired),
+                        contactEmail = stringResource(Res.string.about_contact_email),
+                        uriHandler = uriHandler,
+                        onDismiss = { viewModel.clearConsumeError() },
                     )
                 }
 

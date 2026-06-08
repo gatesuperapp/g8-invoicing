@@ -69,7 +69,7 @@ class AccountViewModel(
 
     fun consumeMagicLink(token: String) {
         viewModelScope.launch {
-            uiState = uiState.copy(isLoading = true, errorMessage = null)
+            uiState = uiState.copy(isLoading = true, consumeErrorMessage = null)
             when (val result = authRepository.consumeMagicLink(token)) {
                 is AuthResult.Success -> {
                     uiState = uiState.copy(
@@ -81,7 +81,7 @@ class AccountViewModel(
                 is AuthResult.Error -> {
                     uiState = uiState.copy(
                         isLoading = false,
-                        errorMessage = result.message
+                        consumeErrorMessage = result.message
                     )
                 }
             }
@@ -129,6 +129,10 @@ class AccountViewModel(
     fun clearSuccess() {
         uiState = uiState.copy(successMessage = null)
     }
+
+    fun clearConsumeError() {
+        uiState = uiState.copy(consumeErrorMessage = null)
+    }
 }
 
 data class AccountUiState(
@@ -136,7 +140,8 @@ data class AccountUiState(
     val userEmail: String? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val successMessage: String? = null
+    val successMessage: String? = null,
+    val consumeErrorMessage: String? = null
 )
 
 // Wait this long before refreshing /v1/me on screen resume — Stripe webhooks usually

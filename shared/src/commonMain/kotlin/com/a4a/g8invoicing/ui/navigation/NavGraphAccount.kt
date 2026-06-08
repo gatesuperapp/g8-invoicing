@@ -13,6 +13,8 @@ fun NavGraphBuilder.account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    pendingMagicLinkToken: String? = null,
+    onMagicLinkTokenConsumed: () -> Unit = {},
 ) {
     composable(route = Screen.Account.name) {
         Account(
@@ -22,6 +24,8 @@ fun NavGraphBuilder.account(
             onShareContent = onShareContent,
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
+            pendingMagicLinkToken = pendingMagicLinkToken,
+            onMagicLinkTokenConsumed = onMagicLinkTokenConsumed,
         )
     }
 }

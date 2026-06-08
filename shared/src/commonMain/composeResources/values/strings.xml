@@ -275,6 +275,7 @@
     <string name="account_auth_send_link">Recevoir mon lien de connexion</string>
     <string name="account_auth_link_sent">✅ Un email avec le lien de connexion vous a été envoyé. Si vous ne le recevez pas, vérifiez dans vos spams, et n'hésitez pas à nous écrire à </string>
     <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Êtes-vous bien membre premium ? Vous pouvez réessayer dans quelques minutes, et n'hésitez pas à nous écrire à </string>
+    <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Vous pouvez demander un nouveau lien. Si le problème persiste, écrivez-nous à </string>
     <string name="account_auth_invalid_email">Adresse e-mail invalide.</string>
     <string name="account_auth_about_link">En savoir plus sur g8…</string>
     <string name="account_auth_about_url">https://the-gate.fr</string>

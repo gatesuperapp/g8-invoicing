@@ -25,7 +25,6 @@ import com.a4a.g8invoicing.data.auth.AuthState
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.navigation.Screen
-import com.a4a.g8invoicing.ui.screens.AccountViewModel
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
@@ -37,7 +36,6 @@ import java.io.File
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainCompose(
@@ -48,7 +46,6 @@ fun MainCompose(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val accountViewModel: AccountViewModel = koinViewModel()
     val authRepository: AuthRepository = koinInject()
     val subscriptionRepository: SubscriptionRepository = koinInject()
     val authState by authRepository.authState.collectAsState()
@@ -75,12 +72,14 @@ fun MainCompose(
     // Track navController for deep link navigation
     var navControllerRef by remember { mutableStateOf<NavHostController?>(null) }
 
-    // Handle magic link token coming from a deep link
-    LaunchedEffect(pendingMagicLinkToken) {
-        if (pendingMagicLinkToken != null) {
-            accountViewModel.consumeMagicLink(pendingMagicLinkToken)
-            onMagicLinkTokenConsumed()
-            navControllerRef?.navigate(Screen.Account.name)
+    // Handle magic link token coming from a deep link: navigate to Account so its own
+    // NavBackStackEntry-scoped ViewModel can consume the token (and own the consume
+    // success/error state). navControllerRef is part of the key so we wait until the
+    // NavHost has wired it up — otherwise on cold start the navigate() no-ops.
+    LaunchedEffect(pendingMagicLinkToken, navControllerRef) {
+        val nav = navControllerRef
+        if (pendingMagicLinkToken != null && nav != null) {
+            nav.navigate(Screen.Account.name)
         }
     }
 
@@ -153,7 +152,9 @@ fun MainCompose(
                         if (intent.resolveActivity(context.packageManager) != null) {
                             context.startActivity(intent)
                         }
-                    }
+                    },
+                    pendingMagicLinkToken = pendingMagicLinkToken,
+                    onMagicLinkTokenConsumed = onMagicLinkTokenConsumed,
                 )
             }
         }
