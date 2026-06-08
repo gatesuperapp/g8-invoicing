@@ -330,7 +330,7 @@
     <string name="about_privacy">privacy policy of 𝕘𝟠.</string>
     <string name="about_share_text_2">Share it with your friends!</string>
     <string name="about_share_button">Share</string>
-    <string name="about_build_version">App version: </string>
+    <string name="about_title_version">App version</string>
 
     <!-- Language Selection -->
     <string name="about_title_language">Language</string>

@@ -92,6 +92,7 @@ import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.account_currency_title
 import com.a4a.g8invoicing.shared.resources.account_currency_and_language_title
+import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.shared.resources.account_auth_about_link
 import com.a4a.g8invoicing.shared.resources.account_auth_about_url
@@ -134,7 +135,6 @@ import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import com.a4a.g8invoicing.ui.theme.textNormalBold
-import com.a4a.g8invoicing.ui.theme.textTitle
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -274,63 +274,55 @@ fun Account(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-                // ============ Sauvegarde ============
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_backup).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
+                CollapsibleSection(title = stringResource(Res.string.about_title_backup)) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        text = stringResource(Res.string.about_backup_text)
+                    )
 
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about_backup_text)
-                )
-
-                Button(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .border(
-                            BorderStroke(width = 4.dp, brush = ctaBrush),
-                            shape = RoundedCornerShape(50)
-                        ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = {
-                        val result = onExportDatabase()
-                        when (result) {
-                            is ExportResult.Success -> {
-                                exportedFilePath = result.filePath
-                                showSendDatabaseByEmailDialog = true
+                    Button(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .border(
+                                BorderStroke(width = 4.dp, brush = ctaBrush),
+                                shape = RoundedCornerShape(50)
+                            ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
+                        onClick = {
+                            val result = onExportDatabase()
+                            when (result) {
+                                is ExportResult.Success -> {
+                                    exportedFilePath = result.filePath
+                                    showSendDatabaseByEmailDialog = true
+                                }
+                                is ExportResult.Error -> {
+                                    exportErrorMessage = result.message
+                                    showExportErrorDialog = true
+                                }
                             }
-                            is ExportResult.Error -> {
-                                exportErrorMessage = result.message
-                                showExportErrorDialog = true
-                            }
-                        }
-                    },
-                ) {
-                    Text(stringResource(Res.string.about_download_database))
+                        },
+                    ) {
+                        Text(stringResource(Res.string.about_download_database))
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-                // ============ Mes entreprises ============
-                MyCompaniesSection(navController = navController)
+                CollapsibleSection(title = stringResource(Res.string.account_my_companies)) {
+                    MyCompaniesSection(navController = navController)
+                }
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
-                // ============ Devise & Langue section ============
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.account_currency_and_language_title).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-                CurrencySelector()
-                Spacer(modifier = Modifier.height(8.dp))
-                LanguageSelector()
+                CollapsibleSection(title = stringResource(Res.string.account_currency_and_language_title)) {
+                    CurrencySelector()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LanguageSelector()
+                }
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
 
@@ -741,12 +733,6 @@ private fun MyCompaniesSection(
 ) {
     val issuersUiState by listViewModel.issuersUiState.collectAsState()
     val issuers = issuersUiState.clientsOrIssuerList.orEmpty()
-
-    Text(
-        modifier = Modifier.padding(bottom = 8.dp),
-        text = stringResource(Res.string.account_my_companies).uppercase(),
-        style = MaterialTheme.typography.textTitle,
-    )
 
     issuers.forEach { issuer ->
         IssuerListRow(

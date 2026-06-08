@@ -332,7 +332,7 @@
     <string name="about_privacy">politique de confidentialité de 𝕘𝟠.</string>
     <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
-    <string name="about_build_version">Version de l'application : \u00A0</string>
+    <string name="about_title_version">Version de l'application</string>
 
     <!-- Language Selection -->
     <string name="about_title_language">Langue</string>

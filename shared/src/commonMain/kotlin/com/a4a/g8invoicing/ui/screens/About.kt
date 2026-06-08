@@ -68,7 +68,6 @@ import com.a4a.g8invoicing.shared.resources.about_assistance_forum_link_text
 import com.a4a.g8invoicing.shared.resources.about_assistance_tutorials_link
 import com.a4a.g8invoicing.shared.resources.about_assistance_tutorials_link_text
 import com.a4a.g8invoicing.shared.resources.about_backup_text
-import com.a4a.g8invoicing.shared.resources.about_build_version
 import com.a4a.g8invoicing.shared.resources.about_community_cta
 import com.a4a.g8invoicing.shared.resources.about_community_link
 import com.a4a.g8invoicing.shared.resources.about_community_text
@@ -87,6 +86,7 @@ import com.a4a.g8invoicing.shared.resources.about_title_assistance
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.about_title_community
 import com.a4a.g8invoicing.shared.resources.about_title_legal
+import com.a4a.g8invoicing.shared.resources.about_title_version
 import com.a4a.g8invoicing.shared.resources.about_title_website
 import com.a4a.g8invoicing.shared.resources.about_website_cta
 import com.a4a.g8invoicing.shared.resources.about_website_intro
@@ -99,13 +99,13 @@ import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
+import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.animations.BatKiss
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textNormalBold
-import com.a4a.g8invoicing.ui.theme.textTitle
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -199,59 +199,80 @@ fun About(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
-                // =====================
-                // SECTION: Site internet
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_website).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
+                CollapsibleSection(title = stringResource(Res.string.about_title_website)) {
+                    WebsiteText(uriHandler)
+                }
 
-                WebsiteText(uriHandler)
+                Spacer(modifier = Modifier.height(30.dp))
 
-                Spacer(modifier = Modifier.height(60.dp))
+                CollapsibleSection(title = stringResource(Res.string.about_title_assistance)) {
+                    AssistanceText(
+                        uriHandler = uriHandler,
+                        contactEmail = contactEmail,
+                        brush = brush,
+                        onComposeEmail = { address, body ->
+                            onComposeEmail(address, "[G8] ", body)
+                        }
+                    )
+                }
 
-                // =====================
-                // SECTION: Assistance
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_assistance).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
+                Spacer(modifier = Modifier.height(30.dp))
 
-                AssistanceText(
-                    uriHandler = uriHandler,
-                    contactEmail = contactEmail,
-                    brush = brush,
-                    onComposeEmail = { address, body ->
-                        onComposeEmail(address, "[G8] ", body)
+                CollapsibleSection(title = stringResource(Res.string.about_title_about)) {
+                    Text(
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        text = stringResource(Res.string.about)
+                    )
+
+                    Text(
+                        modifier = Modifier.padding(bottom = 12.dp),
+                        text = stringResource(Res.string.about_share_text_2)
+                    )
+
+                    Button(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .border(
+                                BorderStroke(width = 4.dp, brush = brush),
+                                shape = RoundedCornerShape(50)
+                            ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
+                        onClick = {
+                            onShareContent(shareContent)
+                        },
+                    ) {
+                        Text(stringResource(Res.string.about_share_button))
                     }
-                )
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                CollapsibleSection(title = stringResource(Res.string.about_title_community)) {
+                    CommunityText(uriHandler)
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                CollapsibleSection(title = stringResource(Res.string.about_title_legal)) {
+                    TermsOfService(uriHandler)
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                CollapsibleSection(title = stringResource(Res.string.about_title_version)) {
+                    Text(
+                        text = versionName,
+                        style = MaterialTheme.typography.textNormalBold,
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(60.dp))
 
-                // =====================
-                // SECTION: À propos
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_about).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
+                // Language section moved to Mon Compte (Account.kt).
 
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(Res.string.about)
-                )
-
-                // Partage dans À propos
-                Text(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    text = stringResource(Res.string.about_share_text_2)
-                )
-
+                // Bouton "contact" centré juste au-dessus du kaomoji : accès direct au
+                // mail support depuis le bas de la page (doublon volontaire avec la
+                // section Assistance, qui peut être repliée).
                 Button(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -260,54 +281,9 @@ fun About(
                             shape = RoundedCornerShape(50)
                         ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = {
-                        onShareContent(shareContent)
-                    },
+                    onClick = { onComposeEmail(contactEmail, "[G8] ", "") },
                 ) {
-                    Text(stringResource(Res.string.about_share_button))
-                }
-
-                Spacer(modifier = Modifier.height(60.dp))
-
-                // =====================
-                // SECTION: Communauté
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_community).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                CommunityText(uriHandler)
-
-                Spacer(modifier = Modifier.height(60.dp))
-
-                // =====================
-                // SECTION: Mentions légales
-                // =====================
-                Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    text = stringResource(Res.string.about_title_legal).uppercase(),
-                    style = MaterialTheme.typography.textTitle,
-                )
-
-                TermsOfService(uriHandler)
-
-                Spacer(modifier = Modifier.height(60.dp))
-
-                // Language section moved to Mon Compte (Account.kt).
-
-                // =====================
-                // SECTION: Version (en dernier)
-                // =====================
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.about_build_version),
-                        style = MaterialTheme.typography.textNormalBold
-                    )
-                    Text(text = versionName)
+                    Text(contactEmail)
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -348,7 +324,7 @@ fun About(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(30.dp))
             }
         }
 
