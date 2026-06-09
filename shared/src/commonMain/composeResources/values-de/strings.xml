@@ -290,6 +290,15 @@
     <string name="account_section_auth">Authentifizierung</string>
     <string name="account_my_companies">Meine Unternehmen</string>
     <string name="account_add_company">+ Unternehmen hinzufügen</string>
+    <string name="account_section_advanced">Erweitert</string>
+    <string name="account_delete_cta">Mein Konto löschen</string>
+    <string name="account_delete_dialog_title">Konto endgültig löschen?</string>
+    <string name="account_delete_dialog_message">Diese Aktion ist unwiderruflich. Ihr Abonnement wird sofort gekündigt, Ihr Konto wird von unseren Servern entfernt und Sie werden abgemeldet. Lokal auf Ihrem Gerät gespeicherte Rechnungen und Daten bleiben unverändert.</string>
+    <string name="account_delete_dialog_confirm">Ja, löschen</string>
+    <string name="account_delete_dialog_cancel">Abbrechen</string>
+    <string name="account_delete_error">Ihr Konto kann derzeit nicht gelöscht werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut, oder schreiben Sie uns an </string>
+    <string name="account_delete_success_title">Konto gelöscht</string>
+    <string name="account_delete_success_message">Ihr Konto wurde gelöscht. Lokal auf diesem Gerät gespeicherte Rechnungen und Daten bleiben erhalten.</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 ist eine praktische und engagierte App:\n• Funktioniert offline\n• Keine Werbung, kein Tracking\n• Freie Software, open-source\n• Entworfen für Bio-Landwirte und -Landwirtinnen\n• Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>

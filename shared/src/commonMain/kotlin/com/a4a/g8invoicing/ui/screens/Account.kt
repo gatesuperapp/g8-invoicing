@@ -122,6 +122,15 @@ import com.a4a.g8invoicing.shared.resources.account_backup_dialog_message
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_no
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_title
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_yes
+import com.a4a.g8invoicing.shared.resources.account_delete_cta
+import com.a4a.g8invoicing.shared.resources.account_delete_dialog_cancel
+import com.a4a.g8invoicing.shared.resources.account_delete_dialog_confirm
+import com.a4a.g8invoicing.shared.resources.account_delete_dialog_message
+import com.a4a.g8invoicing.shared.resources.account_delete_dialog_title
+import com.a4a.g8invoicing.shared.resources.account_delete_error
+import com.a4a.g8invoicing.shared.resources.account_delete_success_message
+import com.a4a.g8invoicing.shared.resources.account_delete_success_title
+import com.a4a.g8invoicing.shared.resources.account_section_advanced
 import com.a4a.g8invoicing.shared.resources.drawer_my_account
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
@@ -131,6 +140,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
@@ -166,6 +176,9 @@ fun Account(
     var exportErrorMessage by remember { mutableStateOf<String?>(null) }
     var showExportErrorDialog by remember { mutableStateOf(false) }
     var showSendDatabaseByEmailDialog by remember { mutableStateOf(false) }
+
+    // Delete-account confirmation dialog (Avancé section).
+    var showDeleteAccountDialog by remember { mutableStateOf(false) }
 
     // Animated violet/pink brush, shared by call-to-action buttons in this screen.
     val infiniteTransition = rememberInfiniteTransition(label = "border")
@@ -322,8 +335,92 @@ fun Account(
                     LanguageSelector()
                 }
 
+                // "Avancé" — only relevant while logged in, since the only action
+                // (account deletion) targets the server-side user record.
+                if (uiState.isLoggedIn) {
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    CollapsibleSection(title = stringResource(Res.string.account_section_advanced)) {
+                        Text(
+                            modifier = Modifier
+                                .clickable(enabled = !uiState.isDeleting) {
+                                    showDeleteAccountDialog = true
+                                },
+                            text = stringResource(Res.string.account_delete_cta),
+                            fontSize = 13.sp,
+                            color = ColorRedLate,
+                            textDecoration = TextDecoration.Underline,
+                        )
+                    }
+                }
+
                 Spacer(modifier = Modifier.height(30.dp))
             }
+        }
+
+        if (showDeleteAccountDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    if (!uiState.isDeleting) showDeleteAccountDialog = false
+                },
+                title = { Text(stringResource(Res.string.account_delete_dialog_title)) },
+                text = { Text(stringResource(Res.string.account_delete_dialog_message)) },
+                confirmButton = {
+                    TextButton(
+                        enabled = !uiState.isDeleting,
+                        onClick = {
+                            showDeleteAccountDialog = false
+                            viewModel.deleteAccount()
+                        },
+                    ) {
+                        if (uiState.isDeleting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.height(18.dp).width(18.dp),
+                                strokeWidth = 2.dp,
+                                color = ColorRedLate,
+                            )
+                        } else {
+                            Text(
+                                stringResource(Res.string.account_delete_dialog_confirm),
+                                color = ColorRedLate,
+                            )
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        enabled = !uiState.isDeleting,
+                        onClick = { showDeleteAccountDialog = false },
+                    ) {
+                        Text(
+                            stringResource(Res.string.account_delete_dialog_cancel),
+                            color = ColorVioletLink,
+                        )
+                    }
+                },
+            )
+        }
+
+        if (uiState.deleteErrorMessage != null) {
+            AuthMessageDialog(
+                messagePrefix = stringResource(Res.string.account_delete_error),
+                contactEmail = stringResource(Res.string.about_contact_email),
+                uriHandler = uriHandler,
+                onDismiss = { viewModel.clearDeleteError() },
+            )
+        }
+
+        if (uiState.accountDeleted) {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearAccountDeleted() },
+                title = { Text(stringResource(Res.string.account_delete_success_title)) },
+                text = { Text(stringResource(Res.string.account_delete_success_message)) },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearAccountDeleted() }) {
+                        Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                    }
+                },
+            )
         }
 
         if (showSendDatabaseByEmailDialog && exportedFilePath != null) {

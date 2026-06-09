@@ -292,6 +292,15 @@
     <string name="account_section_auth">Authentification</string>
     <string name="account_my_companies">Mes entreprises</string>
     <string name="account_add_company">+ Ajouter une entreprise</string>
+    <string name="account_section_advanced">Avancé</string>
+    <string name="account_delete_cta">Supprimer mon compte</string>
+    <string name="account_delete_dialog_title">Supprimer définitivement votre compte ?</string>
+    <string name="account_delete_dialog_message">Cette action est irréversible. Votre abonnement sera annulé immédiatement, votre compte sera supprimé de nos serveurs et vous serez déconnecté·e. Vos factures et données enregistrées localement sur votre appareil resteront intactes.</string>
+    <string name="account_delete_dialog_confirm">Oui, supprimer</string>
+    <string name="account_delete_dialog_cancel">Annuler</string>
+    <string name="account_delete_error">Impossible de supprimer votre compte pour le moment. Vérifiez votre connexion et réessayez, ou écrivez-nous à </string>
+    <string name="account_delete_success_title">Compte supprimé</string>
+    <string name="account_delete_success_message">Votre compte a bien été supprimé. Vos factures et données enregistrées localement sur cet appareil sont conservées.</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 est une application pratique et engagée :\n• Fonctionne hors-ligne \n• Ni pub ni traceur \n• Logiciel libre, open-source\n• Conçue pour les producteur·ices bio\n• Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.</string>

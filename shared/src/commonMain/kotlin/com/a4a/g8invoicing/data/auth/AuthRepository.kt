@@ -100,6 +100,21 @@ class AuthRepository(
         tokenStorage.clear()
         _authState.value = AuthState.LoggedOut
     }
+
+    /**
+     * Permanently delete the account on the server (cancels Stripe subscription,
+     * soft-deletes the user, revokes sessions, purges personal data) and clear local
+     * tokens on success. The LaunchedEffect on authState in MainCompose will catch the
+     * LoggedOut transition and clear the cached subscription state.
+     */
+    suspend fun deleteAccount(): DeleteAccountResult {
+        val result = apiClient.deleteAccount()
+        if (result is DeleteAccountResult.Success) {
+            tokenStorage.clear()
+            _authState.value = AuthState.LoggedOut
+        }
+        return result
+    }
 }
 
 sealed class AuthState {

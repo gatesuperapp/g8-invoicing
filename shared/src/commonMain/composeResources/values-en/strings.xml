@@ -290,6 +290,15 @@
     <string name="account_section_auth">Authentication</string>
     <string name="account_my_companies">My companies</string>
     <string name="account_add_company">+ Add a company</string>
+    <string name="account_section_advanced">Advanced</string>
+    <string name="account_delete_cta">Delete my account</string>
+    <string name="account_delete_dialog_title">Permanently delete your account?</string>
+    <string name="account_delete_dialog_message">This action is irreversible. Your subscription will be cancelled immediately, your account will be removed from our servers and you will be signed out. Invoices and data stored locally on your device will remain intact.</string>
+    <string name="account_delete_dialog_confirm">Yes, delete</string>
+    <string name="account_delete_dialog_cancel">Cancel</string>
+    <string name="account_delete_error">We couldn't delete your account right now. Check your connection and try again, or contact us at </string>
+    <string name="account_delete_success_title">Account deleted</string>
+    <string name="account_delete_success_message">Your account has been deleted. Invoices and data stored locally on this device are kept.</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>

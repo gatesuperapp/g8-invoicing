@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.auth.AuthRepository
 import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.data.auth.AuthState
+import com.a4a.g8invoicing.data.auth.DeleteAccountResult
 import com.a4a.g8invoicing.data.auth.MagicLinkResult
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionState
@@ -122,6 +123,33 @@ class AccountViewModel(
         }
     }
 
+    /**
+     * Permanently delete the account. On success the user is also logged out locally
+     * (handled inside the repository, which flips authState — that cascades to a
+     * SubscriptionRepository.clear() through MainCompose's LaunchedEffect).
+     */
+    fun deleteAccount() {
+        viewModelScope.launch {
+            uiState = uiState.copy(isDeleting = true, deleteErrorMessage = null)
+            when (val result = authRepository.deleteAccount()) {
+                is DeleteAccountResult.Success -> {
+                    uiState = uiState.copy(
+                        isDeleting = false,
+                        isLoggedIn = false,
+                        userEmail = null,
+                        accountDeleted = true,
+                    )
+                }
+                is DeleteAccountResult.Error -> {
+                    uiState = uiState.copy(
+                        isDeleting = false,
+                        deleteErrorMessage = result.message,
+                    )
+                }
+            }
+        }
+    }
+
     fun clearError() {
         uiState = uiState.copy(errorMessage = null)
     }
@@ -133,6 +161,14 @@ class AccountViewModel(
     fun clearConsumeError() {
         uiState = uiState.copy(consumeErrorMessage = null)
     }
+
+    fun clearDeleteError() {
+        uiState = uiState.copy(deleteErrorMessage = null)
+    }
+
+    fun clearAccountDeleted() {
+        uiState = uiState.copy(accountDeleted = false)
+    }
 }
 
 data class AccountUiState(
@@ -141,7 +177,10 @@ data class AccountUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val consumeErrorMessage: String? = null
+    val consumeErrorMessage: String? = null,
+    val isDeleting: Boolean = false,
+    val deleteErrorMessage: String? = null,
+    val accountDeleted: Boolean = false,
 )
 
 // Wait this long before refreshing /v1/me on screen resume — Stripe webhooks usually

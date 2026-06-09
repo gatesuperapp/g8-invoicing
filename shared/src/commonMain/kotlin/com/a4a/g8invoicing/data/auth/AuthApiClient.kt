@@ -113,6 +113,24 @@ class AuthApiClient(
     }
 
     /**
+     * DELETE /v1/me — terminates the account: cancels the Stripe subscription
+     * immediately, soft-deletes the user, revokes all refresh sessions and purges
+     * personal data on the server side. Bearer token attached by AuthInterceptor.
+     */
+    suspend fun deleteAccount(): DeleteAccountResult {
+        return try {
+            val response = httpClient.delete("$baseUrl/v1/me")
+            if (response.status.isSuccess()) {
+                DeleteAccountResult.Success
+            } else {
+                DeleteAccountResult.Error(tryParseError(response))
+            }
+        } catch (e: Exception) {
+            DeleteAccountResult.Error(e.message ?: "Network error")
+        }
+    }
+
+    /**
      * POST /v1/billing/portal-session — creates a Stripe Customer Portal session bound
      * to the authenticated user's stripe_customer_id. Returns a one-shot URL the app
      * opens in a browser. Bearer token attached by AuthInterceptor.
@@ -214,4 +232,9 @@ sealed class MeResult {
 sealed class PortalSessionResult {
     data class Success(val url: String) : PortalSessionResult()
     data class Error(val message: String) : PortalSessionResult()
+}
+
+sealed class DeleteAccountResult {
+    data object Success : DeleteAccountResult()
+    data class Error(val message: String) : DeleteAccountResult()
 }
