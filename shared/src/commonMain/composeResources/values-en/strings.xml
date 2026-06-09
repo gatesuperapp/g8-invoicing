@@ -256,6 +256,7 @@
     <string name="account_auth_link_sent">✅ An email with the sign-in link has been sent. If you don't see it, check your spam folder, and feel free to write to us at </string>
     <string name="account_auth_error">Could not send the link right now. Are you a Premium member? You can try again in a few minutes, and feel free to write to us at </string>
     <string name="account_auth_link_expired">⏰ This link has expired or has already been used. You can request a new one. If the problem persists, please write to us at </string>
+    <string name="account_auth_login_failed">Sign-in is currently unavailable. You can try again a bit later.\n\nIf the problem persists, please write to us at </string>
     <string name="account_auth_invalid_email">Invalid email address.</string>
     <string name="drawer_gstore">𝕘Store</string>
 

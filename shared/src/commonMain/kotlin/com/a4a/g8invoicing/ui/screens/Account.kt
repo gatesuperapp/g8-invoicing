@@ -118,6 +118,7 @@ import com.a4a.g8invoicing.shared.resources.about_contact_email
 import com.a4a.g8invoicing.shared.resources.about_download_database
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.account_auth_link_expired
+import com.a4a.g8invoicing.shared.resources.account_auth_login_failed
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_message
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_no
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_title
@@ -278,9 +279,21 @@ fun Account(
 
                 // Shown regardless of login state — a stale magic link clicked while
                 // already logged in still gets explained, instead of silently doing nothing.
+                // Backend distinguishes "Lien invalide ou expiré" (401, link itself dead)
+                // from generic 500s (other failures, e.g. user-creation conflicts) — we
+                // pick the right copy based on the message so a 500 doesn't get mislabelled
+                // as "link expired".
                 if (uiState.consumeErrorMessage != null) {
+                    val msg = uiState.consumeErrorMessage!!
+                    val isLinkExpired = msg.contains("expir", ignoreCase = true)
+                        || msg.contains("invalide", ignoreCase = true)
+                        || msg.contains("invalid", ignoreCase = true)
+                        || msg.contains("abgelaufen", ignoreCase = true)
                     AuthMessageDialog(
-                        messagePrefix = stringResource(Res.string.account_auth_link_expired),
+                        messagePrefix = stringResource(
+                            if (isLinkExpired) Res.string.account_auth_link_expired
+                            else Res.string.account_auth_login_failed
+                        ),
                         contactEmail = stringResource(Res.string.about_contact_email),
                         uriHandler = uriHandler,
                         onDismiss = { viewModel.clearConsumeError() },
