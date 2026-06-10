@@ -572,7 +572,9 @@ private fun ColumnScope.LoggedOutContent(
                 hasAttemptedSubmit = true
             }
         },
-        enabled = !uiState.isLoading && uiState.successMessage == null,
+        enabled = !uiState.isLoading
+            && uiState.successMessage == null
+            && trimmedEmail.isNotEmpty(),
         contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
         colors = ButtonDefaults.textButtonColors(
             contentColor = ColorVioletLight,
