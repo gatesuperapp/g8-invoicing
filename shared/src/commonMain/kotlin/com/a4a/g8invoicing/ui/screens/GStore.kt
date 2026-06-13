@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,8 +19,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -29,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -50,6 +56,7 @@ import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
 import com.a4a.g8invoicing.shared.resources.gstore_footer_free
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_title
 import com.a4a.g8invoicing.shared.resources.gstore_premium_badge
 import com.a4a.g8invoicing.shared.resources.gstore_title
@@ -64,6 +71,7 @@ private data class GStoreModule(
     val id: String,
     val titleRes: StringResource,
     val descRes: StringResource,
+    val detailRes: StringResource,
     val icon: ImageVector,
 )
 
@@ -73,6 +81,7 @@ private val MODULES = listOf(
         id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
         titleRes = Res.string.gstore_module_watermark_title,
         descRes = Res.string.gstore_module_watermark_desc,
+        detailRes = Res.string.gstore_module_watermark_detail,
         icon = Icons.Outlined.WaterDrop,
     ),
 )
@@ -105,6 +114,9 @@ fun GStore(
     val uriHandler = LocalUriHandler.current
     val websiteUrl = stringResource(Res.string.account_website_url)
     val websiteLabel = stringResource(Res.string.account_website_label)
+
+    // Tapping a card opens a fullscreen detail dialog for that module. Null = no dialog.
+    var selectedModule: GStoreModule? by remember { mutableStateOf(null) }
 
     Scaffold(
         topBar = {
@@ -147,6 +159,7 @@ fun GStore(
                         isPremium = isPremium,
                         isActivated = module.id in activated,
                         onToggle = { viewModel.toggleModule(module.id) },
+                        onClick = { selectedModule = module },
                     )
                 }
             }
@@ -166,6 +179,18 @@ fun GStore(
             }
         }
     }
+
+    selectedModule?.let { module ->
+        ModuleDetailDialog(
+            title = stringResource(module.titleRes),
+            detail = stringResource(module.detailRes),
+            icon = module.icon,
+            isPremium = isPremium,
+            isActivated = module.id in activated,
+            onToggle = { viewModel.toggleModule(module.id) },
+            onDismiss = { selectedModule = null },
+        )
+    }
 }
 
 @Composable
@@ -176,14 +201,18 @@ private fun GStoreModuleCard(
     isPremium: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
+    onClick: () -> Unit,
 ) {
     // Tall rectangular card. Vertical stack: icon top → big gap → title + desc → Switch bottom.
-    // PREMIUM pill sits top-right only for non-premium users; once premium it disappears
-    // (no need to reiterate what they already are).
+    // PREMIUM pill sits top-right and stays visible even for premium users — the GStore
+    // will mix premium and free modules, so the pill labels the *module*, not the *user*.
+    // The card itself is clickable to open the detail dialog ; the Switch keeps its own
+    // tap target (Compose's nested clickables resolve to the innermost handler).
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(230.dp)
+            .clickable(onClick = onClick)
             .background(Color.White, shape = RoundedCornerShape(14.dp))
             .padding(14.dp),
     ) {
@@ -207,9 +236,7 @@ private fun GStoreModuleCard(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                if (!isPremium) {
-                    PremiumPill()
-                }
+                PremiumPill()
             }
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -247,6 +274,117 @@ private fun GStoreModuleCard(
                     disabledUncheckedBorderColor = Color.Transparent,
                 ),
             )
+        }
+    }
+}
+
+@Composable
+private fun ModuleDetailDialog(
+    title: String,
+    detail: String,
+    icon: ImageVector,
+    isPremium: Boolean,
+    isActivated: Boolean,
+    onToggle: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    // Centered modal taking ~2/3 of the screen height, so the GStore TopBar and
+    // BottomBar stay visible around it — the user keeps the context that they're still
+    // on the GStore screen. usePlatformDefaultWidth=false lets us widen beyond the
+    // built-in modal width.
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .fillMaxHeight(2f / 3f)
+                .background(Color.White, shape = RoundedCornerShape(16.dp)),
+        ) {
+            // Close (X) in the top-right — mirrors the WhatsNewDialog pattern so the
+            // dismissal affordance stays consistent across the app.
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    tint = Color.Gray,
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 48.dp, bottom = 20.dp, start = 20.dp, end = 20.dp),
+            ) {
+                // Top row mirrors the card: icon left, PREMIUM pill right. Same rationale
+                // as on the card — the pill labels the module, not the user.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(IconBackground, shape = RoundedCornerShape(10.dp)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = ColorVioletLight,
+                            modifier = Modifier.size(22.dp),
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    PremiumPill()
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color.Black,
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = detail,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    color = Color.DarkGray,
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Switch sits directly under the text — not pushed to the bottom of the
+                // modal, per design. Same colors as on the card so toggle behaviour and
+                // disabled-when-not-premium affordance stay identical.
+                Switch(
+                    checked = isActivated,
+                    onCheckedChange = { onToggle() },
+                    enabled = isPremium,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorVioletLight,
+                        uncheckedThumbColor = Color.White,
+                        uncheckedTrackColor = Color(0xFFB8B5BC),
+                        uncheckedBorderColor = Color.Transparent,
+                        disabledUncheckedThumbColor = Color.White,
+                        disabledUncheckedTrackColor = Color(0xFFE5E2E7),
+                        disabledUncheckedBorderColor = Color.Transparent,
+                    ),
+                )
+            }
         }
     }
 }

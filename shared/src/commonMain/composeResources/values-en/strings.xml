@@ -247,7 +247,7 @@
     <string name="account_donate_link">https://www.the-gate.fr/en</string>
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">🌟 Already a Premium member?</string>
+    <string name="account_auth_title">Sign in</string>
     <string name="account_auth_subtitle">Enter your email to receive a sign-in link.</string>
     <string name="account_auth_about_link">Learn more about g8…</string>
     <string name="account_auth_about_url">https://the-gate.fr/en</string>
@@ -273,6 +273,7 @@
     <string name="gstore_module_facturx_desc">Electronic invoicing</string>
     <string name="gstore_module_watermark_title">g8 mark</string>
     <string name="gstore_module_watermark_desc">Remove the g8 mention from your documents</string>
+    <string name="gstore_module_watermark_detail">Activate this module to remove the « Made with g8, mobile invoicing app » mention from your invoices, delivery notes and credit notes.</string>
     <string name="invoice_watermark_default">Made with g8 (www.the-gate.fr), mobile invoicing app</string>
     <string name="gstore_module_payments_title">Payments</string>
     <string name="gstore_module_payments_desc">Record card, check, cash payments</string>

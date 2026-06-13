@@ -257,6 +257,7 @@
     <string name="gstore_module_facturx_desc">Facturation électronique</string>
     <string name="gstore_module_watermark_title">Mention g8</string>
     <string name="gstore_module_watermark_desc">Retirer la mention g8 de vos documents</string>
+    <string name="gstore_module_watermark_detail">Activez ce module pour supprimer la mention « Fait avec g8, application mobile de facturation » de vos factures, bons de livraison et avoirs.</string>
     <string name="invoice_watermark_default">Fait avec g8 (www.the-gate.fr), application mobile de facturation</string>
     <string name="gstore_module_payments_title">Paiements</string>
     <string name="gstore_module_payments_desc">Enregistrez CB, chèques, espèces</string>
@@ -269,7 +270,7 @@
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">🌟 Déjà membre Premium ?</string>
+    <string name="account_auth_title">Connexion</string>
     <string name="account_auth_subtitle">Recevez un lien de connexion par email.</string>
     <string name="account_auth_email_label">Email</string>
     <string name="account_auth_send_link">Recevoir mon lien de connexion</string>
