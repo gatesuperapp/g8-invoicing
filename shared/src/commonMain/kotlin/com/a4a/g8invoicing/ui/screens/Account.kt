@@ -180,6 +180,10 @@ fun Account(
 
     // Delete-account confirmation dialog (Avancé section).
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
+    // Result dialog opens immediately on confirm and morphs between loader → success →
+    // error as the DELETE /v1/me call resolves. Keeping it a single dialog means the
+    // user sees an instant response to their click instead of "nothing happens for 3s".
+    var showDeletionResult by remember { mutableStateOf(false) }
 
     // Animated violet/pink brush, shared by call-to-action buttons in this screen.
     val infiniteTransition = rememberInfiniteTransition(label = "border")
@@ -373,38 +377,25 @@ fun Account(
 
         if (showDeleteAccountDialog) {
             AlertDialog(
-                onDismissRequest = {
-                    if (!uiState.isDeleting) showDeleteAccountDialog = false
-                },
+                onDismissRequest = { showDeleteAccountDialog = false },
                 title = { Text(stringResource(Res.string.account_delete_dialog_title)) },
                 text = { Text(stringResource(Res.string.account_delete_dialog_message)) },
                 confirmButton = {
                     TextButton(
-                        enabled = !uiState.isDeleting,
                         onClick = {
                             showDeleteAccountDialog = false
+                            showDeletionResult = true
                             viewModel.deleteAccount()
                         },
                     ) {
-                        if (uiState.isDeleting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.height(18.dp).width(18.dp),
-                                strokeWidth = 2.dp,
-                                color = ColorRedLate,
-                            )
-                        } else {
-                            Text(
-                                stringResource(Res.string.account_delete_dialog_confirm),
-                                color = ColorRedLate,
-                            )
-                        }
+                        Text(
+                            stringResource(Res.string.account_delete_dialog_confirm),
+                            color = ColorRedLate,
+                        )
                     }
                 },
                 dismissButton = {
-                    TextButton(
-                        enabled = !uiState.isDeleting,
-                        onClick = { showDeleteAccountDialog = false },
-                    ) {
+                    TextButton(onClick = { showDeleteAccountDialog = false }) {
                         Text(
                             stringResource(Res.string.account_delete_dialog_cancel),
                             color = ColorVioletLink,
@@ -414,23 +405,68 @@ fun Account(
             )
         }
 
-        if (uiState.deleteErrorMessage != null) {
-            AuthMessageDialog(
-                messagePrefix = stringResource(Res.string.account_delete_error),
-                contactEmail = stringResource(Res.string.about_contact_email),
-                uriHandler = uriHandler,
-                onDismiss = { viewModel.clearDeleteError() },
-            )
-        }
+        if (showDeletionResult) {
+            val contactEmail = stringResource(Res.string.about_contact_email)
+            val errorPrefix = stringResource(Res.string.account_delete_error)
 
-        if (uiState.accountDeleted) {
+            // Errors include a tappable mailto: contact@the-gate.fr — same construction
+            // as AuthMessageDialog, inlined here so we can drop it into the same dialog
+            // body as the loader/success state.
+            val errorAnnotated = remember(uiState.deleteErrorMessage) {
+                if (uiState.deleteErrorMessage == null) null else buildAnnotatedString {
+                    append(errorPrefix)
+                    pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
+                    withStyle(style = SpanStyle(color = ColorVioletLink)) { append(contactEmail) }
+                    pop()
+                }
+            }
+
+            val closeAndReset: () -> Unit = {
+                showDeletionResult = false
+                viewModel.clearAccountDeleted()
+                viewModel.clearDeleteError()
+            }
+
             AlertDialog(
-                onDismissRequest = { viewModel.clearAccountDeleted() },
-                title = { Text(stringResource(Res.string.account_delete_success_title)) },
-                text = { Text(stringResource(Res.string.account_delete_success_message)) },
+                // Block dismissal (back button / tap outside) while the call is in flight
+                // so the user can't accidentally close mid-delete and end up unsure
+                // whether it succeeded.
+                onDismissRequest = { if (!uiState.isDeleting) closeAndReset() },
+                title = {
+                    if (uiState.accountDeleted) {
+                        Text(stringResource(Res.string.account_delete_success_title))
+                    }
+                },
+                text = {
+                    when {
+                        uiState.isDeleting -> Box(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(color = ColorVioletLight)
+                        }
+                        uiState.accountDeleted -> Text(
+                            stringResource(Res.string.account_delete_success_message)
+                        )
+                        errorAnnotated != null -> ClickableText(
+                            text = errorAnnotated,
+                            style = MaterialTheme.typography.bodyLarge,
+                            onClick = { offset ->
+                                errorAnnotated
+                                    .getStringAnnotations(tag = "email", start = offset, end = offset)
+                                    .firstOrNull()
+                                    ?.let { uriHandler.openUri(it.item) }
+                            },
+                        )
+                    }
+                },
                 confirmButton = {
-                    TextButton(onClick = { viewModel.clearAccountDeleted() }) {
-                        Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                    // Hide the OK while loading — there's nothing to confirm yet, and
+                    // we don't want the user to dismiss the dialog mid-call.
+                    if (!uiState.isDeleting) {
+                        TextButton(onClick = closeAndReset) {
+                            Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                        }
                     }
                 },
             )
