@@ -254,7 +254,7 @@
     <string name="account_auth_email_label">E-Mail</string>
     <string name="account_auth_send_link">Meinen Anmeldelink erhalten</string>
     <string name="account_auth_link_sent">✅ Eine E-Mail mit dem Anmeldelink wurde gesendet. Falls Sie sie nicht erhalten, prüfen Sie Ihren Spam-Ordner, und schreiben Sie uns gerne an </string>
-    <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Sind Sie Premium-Mitglied? Bitte versuchen Sie es in einigen Minuten erneut, und schreiben Sie uns gerne an </string>
+    <string name="account_auth_error">Der Link konnte momentan nicht gesendet werden. Bitte versuchen Sie es in einigen Minuten erneut, und schreiben Sie uns gerne an </string>
     <string name="account_auth_link_expired">⏰ Dieser Link ist abgelaufen oder wurde bereits verwendet. Sie können einen neuen anfordern. Bei anhaltenden Problemen schreiben Sie uns an </string>
     <string name="account_auth_login_failed">Die Anmeldung ist derzeit nicht möglich. Bitte versuchen Sie es etwas später erneut.\n\nBei anhaltenden Problemen schreiben Sie uns an </string>
     <string name="account_auth_invalid_email">Ungültige E-Mail-Adresse.</string>
