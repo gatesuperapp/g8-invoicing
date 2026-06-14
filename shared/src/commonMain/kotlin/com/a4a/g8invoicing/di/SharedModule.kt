@@ -69,7 +69,7 @@ val sharedModule = module {
     }
     single { TokenStorage() }
     single { AuthApiClient(get()) }
-    single { AuthRepository(get(), get()) }
+    single { AuthRepository(get(), get(), get()) }
 
     // Queries
     single { get<Database>().invoiceQueries }

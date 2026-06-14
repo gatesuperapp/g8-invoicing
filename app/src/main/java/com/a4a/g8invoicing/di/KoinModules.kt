@@ -96,7 +96,7 @@ val appModule = module {
     }
     single { TokenStorage(get()) }
     single { AuthApiClient(get(), "https://api.the-gate.fr") }
-    single { AuthRepository(get(), get()) }
+    single { AuthRepository(get(), get(), get()) }
     single { SubscriptionRepository(get(), get(), get()) }
     single { ActivatedModulesRepository(get()) }
 

@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.data.auth
 
+import com.a4a.g8invoicing.data.LocaleManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class AuthRepository(
     private val tokenStorage: TokenStorage,
-    private val apiClient: AuthApiClient
+    private val apiClient: AuthApiClient,
+    private val localeManager: LocaleManager,
 ) {
     private val _authState = MutableStateFlow<AuthState>(
         if (tokenStorage.isLoggedIn()) AuthState.LoggedIn(tokenStorage.userEmail ?: "")
@@ -24,10 +26,12 @@ class AuthRepository(
     fun getRefreshToken(): String? = tokenStorage.refreshToken
 
     /**
-     * Request a magic link email. Always succeeds from the user's perspective.
+     * Request a magic link email. Always succeeds from the user's perspective. We
+     * forward the app's current language so the email is rendered in the same locale
+     * (server defaults to English if we send null or an unknown code).
      */
     suspend fun requestMagicLink(email: String): MagicLinkResult {
-        return apiClient.requestMagicLink(email)
+        return apiClient.requestMagicLink(email, localeManager.currentLanguage.code)
     }
 
     /**

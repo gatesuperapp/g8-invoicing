@@ -20,11 +20,11 @@ class AuthApiClient(
     /**
      * POST /v1/auth/magic-link/request — sends a magic link email. Always 204.
      */
-    suspend fun requestMagicLink(email: String): MagicLinkResult {
+    suspend fun requestMagicLink(email: String, locale: String? = null): MagicLinkResult {
         return try {
             val response = httpClient.post("$baseUrl/v1/auth/magic-link/request") {
                 contentType(ContentType.Application.Json)
-                setBody(MagicLinkRequest(email))
+                setBody(MagicLinkRequest(email, locale))
             }
             if (response.status.isSuccess()) {
                 MagicLinkResult.Success
@@ -161,7 +161,7 @@ class AuthApiClient(
 
 // Request DTOs
 @Serializable
-data class MagicLinkRequest(val email: String)
+data class MagicLinkRequest(val email: String, val locale: String? = null)
 
 @Serializable
 data class ConsumeRequest(val token: String)
