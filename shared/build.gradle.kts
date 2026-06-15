@@ -139,6 +139,12 @@ sqldelight {
     databases {
         create("Database") {
             packageName.set("com.a4a.g8invoicing")
+            // Pin the expected schema as a checked-in <version>.db file. Run
+            // `./gradlew :shared:generateCommonMainDatabaseSchema` after bumping the
+            // schema + adding the corresponding .sqm to refresh it. Run
+            // `./gradlew :shared:verifyCommonMainDatabaseMigration` manually before
+            // shipping a schema change to verify migrations against the snapshot.
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
         }
     }
 }

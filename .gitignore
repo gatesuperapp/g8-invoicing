@@ -26,6 +26,7 @@ app/*/release/
 # desktop. They're scratch data, never the source of truth.
 *.db
 *.db-journal
+!shared/src/commonMain/sqldelight/databases/*.db
 
 # One-off screenshots / dropped assets that should not slip into git.
 /Sans-titre.jpg
