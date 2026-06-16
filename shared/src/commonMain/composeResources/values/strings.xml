@@ -351,6 +351,7 @@
     <string name="about_language_french">Français</string>
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
+    <string name="about_language_spanish">Español</string>
 
     <!-- Currency Selection -->
     <string name="account_currency_title">Devise</string>
@@ -400,7 +401,11 @@
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
     <string name="export_email_subject_credit_note">avoir</string>
-    <string name="alert_dialog_error">Une erreur s&apos;est produite : </string>
+    <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
+ ((˃ᯅ˂)ノ) 
+
+Une erreur s'est produite : 
+</string>
     <string name="alert_dialog_error_confirm">OK</string>
 
     <!-- Version mismatch dialog -->

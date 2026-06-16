@@ -349,6 +349,7 @@
     <string name="about_language_french">Français</string>
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
+    <string name="about_language_spanish">Español</string>
 
     <!-- Currency Selection -->
     <string name="account_currency_title">Currency</string>

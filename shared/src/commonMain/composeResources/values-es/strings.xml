@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Default document numbers -->
+    <string name="invoice_default_number">F001</string>
+    <string name="delivery_note_default_number">NE001</string>
+    <string name="credit_note_default_number">NC001</string>
+
+    <!-- Currency -->
+    <string name="currency">€</string>
+
+    <!-- Product -->
+    <string name="product_duplicate_suffix"> - Copiar</string>
+
+    <!-- Document footer -->
+    <string name="document_default_footer">Descuento por pago anticipado: ninguno\nTasa de penalización por retraso en el pago: ninguna\n\n\nIBAN: ES76 1234 1234 1234 1234 1234</string>
+
+    <!-- Document labels -->
+    <string name="invoice_number">Factura Nº</string>
+    <string name="delivery_note_number">Nota de entrega Nº</string>
+    <string name="credit_note_number">Nota crédito Nº</string>
+    <string name="document_date">Fecha</string>
+    <string name="document_date_label">Fecha: </string>
+    <string name="document_date_emitting">Fecha de emisión</string>
+    <string name="document_reference">Referencia</string>
+    <string name="document_reference_label">Referencia: </string>
+    <string name="addressed_to">Dirigido a</string>
+    <string name="invoice_pdf_due_date">Fecha límite de pago</string>
+    <string name="invoice_paid">Pagado ✔</string>
+
+    <!-- Document table -->
+    <string name="document_table_description">Descripción</string>
+    <string name="document_table_quantity">Ctd</string>
+    <string name="document_table_unit">Unidad</string>
+    <string name="document_table_unit_price_without_tax">PU s/IVA</string>
+    <string name="document_table_total_price_without_tax">Total s/IVA</string>
+    <string name="document_table_tax_rate">IVA</string>
+
+    <!-- Document totals -->
+    <string name="document_total_without_tax">Total s/IVA:</string>
+    <string name="document_total_with_tax">Total c/IVA:</string>
+    <string name="document_tax">IVA</string>
+    <string name="document_tax_label">IVA %1$s: </string>
+
+    <!-- Document totals aliases for PDF -->
+    <string name="total_without_tax">Total s/IVA:</string>
+    <string name="total_with_tax">Total c/IVA:</string>
+    <string name="vat">IVA</string>
+
+    <!-- UI Labels -->
+    <string name="form_label_edit">Editar</string>
+    <string name="product_price_without_tax">s/IVA</string>
+    <string name="product_price_with_tax">c/IVA</string>
+
+    <!-- Alert Dialog Strings -->
+    <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nSi ya has enviado la factura, no es legal eliminarla:</string>
+    <string name="alert_dialog_delete_invoice_2">Más información\n</string>
+    <string name="alert_dialog_delete_invoice_3">\nEn cualquier caso, la eliminación es irreversible.</string>
+    <string name="alert_dialog_delete_url">https://www.the-gate.fr/es</string>
+    <string name="alert_dialog_delete_general">¿Estás seguro? Esta acción es irreversible.</string>
+    <string name="alert_dialog_delete_confirm">Sí, eliminar</string>
+    <string name="alert_dialog_cancel">Cancelar</string>
+
+    <!-- Bottom Sheet Strings -->
+    <string name="document_bottom_sheet_list_add_new_client">Nuevo cliente</string>
+    <string name="document_bottom_sheet_list_add_new_issuer">Nuevo emisor</string>
+    <string name="document_bottom_sheet_document_product_add">Escoge desde mi lista</string>
+    <string name="document_modal_product_cancel">Anular</string>
+    <string name="document_modal_product_save">Confirmar</string>
+    <string name="document_modal_product_back">Volver</string>
+
+    <!-- Invoice Created Dialog -->
+    <string name="invoice_created_title">¡Tu factura se ha creado correctamente!</string>
+    <string name="invoice_created_button">Ver mi factura</string>
+
+    <!-- Document Form Strings -->
+    <string name="document_number_short">Nº</string>
+    <string name="document_due_date">Fecha límite</string>
+    <string name="invoice_due_date">Fecha límite:</string>
+    <string name="document_issuer">Emisor</string>
+    <string name="document_client">Cliente</string>
+    <string name="document_free_field">Campo libre</string>
+    <string name="document_footer">Pie de pagina</string>
+    <string name="document_default_reference">XFGDTSF</string>
+
+    <!-- Product Bottom Sheet Strings -->
+    <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
+    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
+    <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
+    <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
+
+    <!-- Product Form Strings -->
+    <string name="product_name">Nombre</string>
+    <string name="product_name_input">Remolachas</string>
+    <string name="product_description">Descripción</string>
+    <string name="product_description_input">Variedad Rose Lutz</string>
+    <string name="product_unit">Unidad</string>
+    <string name="product_unit_input">kg</string>
+    <string name="product_tax">Impuesto</string>
+    <string name="tax_rate_screen_title">Tasa de IVA</string>
+    <string name="tax_rate_edit_title">Modificar IVA</string>
+    <string name="tax_rate_edit_rates">Modificar las tasas</string>
+    <string name="tax_rate_add_rate">+ Añadir una tasa</string>
+    <string name="product_price">Precio</string>
+    <string name="product_price_input">3</string>
+    <string name="product_price_default">Precio por defecto</string>
+    <string name="product_price_client">Cliente(s)</string>
+    <string name="product_add_price">+ Añadir un precio</string>
+    <string name="product_delete_price">Eliminar este precio</string>
+    <string name="document_product_quantity">Cantidad</string>
+    <string name="document_product_quantity_input">1</string>
+    <string name="product_clientprice_select_placeholder">Seleccionar…</string>
+    <string name="product_select_placeholder">Seleccionar…</string>
+
+
+    <!-- Client/Issuer Form Strings -->
+    <string name="client_section_identity">IDENTIDAD</string>
+    <string name="client_section_address">DIRECCIÓN</string>
+    <string name="client_section_legal">INFORMACIÓN LEGAL</string>
+    <string name="client_section_complement">Complemento</string>
+    <string name="client_add_title">Nuevo cliente</string>
+    <string name="client_edit_title">Modificar cliente</string>
+    <string name="client_form_cancel">Cancelar</string>
+    <string name="client_form_validate">Validar</string>
+    <string name="client_name">Nombre</string>
+    <string name="client_name_input">RhinoCorp</string>
+    <string name="client_first_name">Primer nombre</string>
+    <string name="client_first_name_input">Hipposideros</string>
+    <string name="client_email">Correo electrónico</string>
+    <string name="client_email_input">petitrhino@ecomail.fr</string>
+    <string name="client_phone">Teléfono</string>
+    <string name="client_phone_input">612345678</string>
+    <string name="client_address_title">Título</string>
+    <string name="client_address_title_invoicing_placeholder">Facturar a</string>
+    <string name="client_address_title_delivery_placeholder">Dirección de entrega</string>
+    <string name="client_address_title_head_office_placeholder">Dirección de facturación</string>
+    <string name="client_address1">Dirección</string>
+    <string name="client_address1_input">Calle de la Iglesia 6</string>
+    <string name="client_address2"></string>
+    <string name="client_address2_input">Lugar beròi</string>
+    <string name="client_city">Ciudad</string>
+    <string name="client_city_input">Écholoc</string>
+    <string name="client_zip_code">Código postal</string>
+    <string name="client_zip_code_input">28001</string>
+    <string name="company_identification1">N° NIF</string>
+    <string name="company_identification2">N° IVA</string>
+    <string name="company_identification3">N° Registro Mercantil</string>
+    <string name="client_company_identification1_input">B12345678</string>
+    <string name="client_company_identification2_input">ES12345678</string>
+    <string name="client_company_identification3_input">Tomo 1234, Folio 56</string>
+    <string name="client_notes">Notas privadas</string>
+    <string name="client_notes_input">El pequeño herradura es una especie de murciélago vinculada a los bosques de frondosas.</string>
+    <string name="issuer_logo_label">Logo</string>
+    <string name="issuer_logo_select">Elegir un logo</string>
+    <string name="issuer_logo_remove">Eliminar el logo</string>
+    <string name="issuer_logo_error_title">Error</string>
+    <string name="issuer_logo_error_dismiss">OK</string>
+    <string name="client_add_address">+ Añadir una dirección</string>
+    <string name="client_delete_address">Eliminar dirección</string>
+    <string name="client_selection_title">Seleccionar los clientes</string>
+    <string name="client_selection_empty">Todavía no has creado ningún cliente. Puedes hacerlo desde la categoría "Clientes".</string>
+    <string name="client_selection_all_used">Todos los clientes ya están asignados a otros precios.</string>
+    <string name="client_selection_validate">Validar</string>
+    <string name="select_placeholder">Seleccionar…</string>
+    <string name="clients_selected_count">%1$d clientes seleccionados</string>
+
+    <!-- Document Modal Strings -->
+    <string name="document_modal_add_product">Añadir producto</string>
+    <string name="document_modal_edit_product">Editar producto</string>
+    <string name="document_modal_new_product">Nuevo producto</string>
+    <string name="document_modal_new_issuer">Nuevo emisor</string>
+    <string name="document_modal_edit_issuer">Editar emisor</string>
+    <string name="document_modal_new_client">Nuevo cliente</string>
+    <string name="document_modal_edit_client">Editar cliente</string>
+
+    <!-- WhatsNew Dialog -->
+    <string name="whats_new_close">Cerrar</string>
+    <string name="whats_new_done">¡Adelante!</string>
+    <string name="whats_new_welcome">Bienvenido a la versión %1$s</string>
+    <string name="whats_new_discover">Descubre las novedades...</string>
+    <string name="whats_new_emails_title">Varios correos por cliente</string>
+    <string name="whats_new_emails_description">Asocia hasta 4 direcciones de correo a un cliente para enviar tus facturas a varios destinatarios.</string>
+    <string name="whats_new_translations_title">Nuevos idiomas</string>
+    <string name="whats_new_translations_description">La aplicación ya está disponible en inglés y en alemán.</string>
+    <string name="whats_new_taxes_title">Tasa de IVA</string>
+    <string name="whats_new_taxes_description">Puedes personalizar las tasas desde la categoría Productos, haciendo clic en el icono de ajustes cuando añadas una tasa.</string>
+    <string name="whats_new_logo_title">Logo</string>
+    <string name="whats_new_logo_description">Añade tu logo al crear o modificar un emisor desde un documento.</string>
+
+    <!-- Toast messages -->
+    <string name="feature_coming_soon">Próximamente :)</string>
+
+    <!-- Corrected Invoice -->
+    <string name="corrected_invoice_cancel_and_replace">Anula y reemplaza la factura</string>
+
+    <!-- AppBar actions -->
+    <string name="appbar_invoices">Facturas</string>
+    <string name="appbar_credit_notes">Notas crédito</string>
+    <string name="appbar_delivery_notes">Notas de entrega</string>
+    <string name="appbar_products">Productos</string>
+    <string name="appbar_client_list">Clientes</string>
+    <string name="appbar_new">Nuevo</string>
+    <string name="appbar_new_label">Crear</string>
+    <string name="appbar_categories">Categorías</string>
+    <string name="appbar_menu_label">Menú</string>
+    <string name="appbar_label_description">Añade una etiqueta</string>
+    <string name="appbar_tag">Marcador</string>
+    <string name="appbar_send_reminder">Enviar recordatorio</string>
+    <string name="appbar_text">Editar texto</string>
+    <string name="appbar_list">Añadir productos</string>
+    <string name="appbar_list_label">Productos</string>
+    <string name="appbar_components">Editar elementos</string>
+    <string name="appbar_text_label">Texto</string>
+    <string name="appbar_style">Modificar el estilo</string>
+    <string name="appbar_style_label">Estilo</string>
+    <string name="appbar_more">Otras opciones</string>
+    <string name="appbar_more_label">Más</string>
+    <string name="appbar_delete">Borrar</string>
+    <string name="appbar_create_corrected_invoice">Crear factura corregida</string>
+    <string name="appbar_create_credit_note">Crear nota crédito</string>
+    <string name="appbar_convert">Convertir</string>
+    <string name="appbar_convert_label">Factura</string>
+    <string name="appbar_unselect_all">Anular selección</string>
+    <string name="appbar_unselect_all_label">Atrás</string>
+    <string name="appbar_edit">Editar factura</string>
+    <string name="appbar_duplicate">Duplicar</string>
+    <string name="appbar_duplicate_label">Duplicar</string>
+    <string name="appbar_save_payment">Registrar pago</string>
+    <string name="appbar_save_payment_label">Pago</string>
+    <string name="appbar_send">Enviar</string>
+    <string name="appbar_save">Guardar</string>
+    <string name="appbar_export">Exportar</string>
+    <string name="appbar_tag_draft">Borrador</string>
+    <string name="appbar_tag_paid">Pagado</string>
+    <string name="appbar_tag_sent">Enviado</string>
+    <string name="appbar_tag_late">En mora</string>
+    <string name="appbar_tag_cancelled">Anulado</string>
+    <string name="appbar_tag_reminded">Recordado</string>
+    <string name="appbar_product_add">Añadir producto</string>
+    <string name="appbar_product_edit">Modificar producto</string>
+    <string name="appbar_g8">𝕘𝟠</string>
+
+    <!-- Drawer / Categories -->
+    <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_my_account">Mi cuenta</string>
+    <string name="drawer_gstore">𝕘Store</string>
+
+    <!-- gStore (premium modules showcase) -->
+    <string name="gstore_title">𝕘Store</string>
+    <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
+    <string name="gstore_subtitle_premium">Activa los módulos que quieras usar.</string>
+    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_footer_free">Más información en </string>
+    <string name="gstore_footer_premium">Gestiona tu cuenta en </string>
+    <string name="gstore_module_orders_title">Pedido</string>
+    <string name="gstore_module_orders_desc">Gestiona los pedidos de tus clientes</string>
+    <string name="gstore_module_facturx_title">Factur-X</string>
+    <string name="gstore_module_facturx_desc">Facturación electrónica</string>
+    <string name="gstore_module_watermark_title">Mención g8</string>
+    <string name="gstore_module_watermark_desc">Retira la mención g8 de tus documentos</string>
+    <string name="gstore_module_watermark_detail">Activa este módulo para eliminar la mención « Hecho con g8, aplicación móvil de facturación » de tus facturas, albaranes y notas de crédito.</string>
+    <string name="invoice_watermark_default">Hecho con g8 (www.the-gate.fr), aplicación móvil de facturación</string>
+    <string name="gstore_module_payments_title">Pagos</string>
+    <string name="gstore_module_payments_desc">Registra tarjetas, cheques, efectivo</string>
+    <string name="gstore_module_themes_title">Temas premium</string>
+    <string name="gstore_module_themes_desc">Colores y diseños adicionales</string>
+
+    <!-- Account Screen -->
+    <string name="account_subscribe">Apoya el proyecto y disfruta de ventajas exclusivas: acceso anticipado a las próximas funcionalidades (app de escritorio, facturación electrónica..), insignia en el foro, pegatina "Petit Rhino".. ¡y mucho más!</string>
+    <string name="account_donate">Más información</string>
+    <string name="account_donate_link">https://www.the-gate.fr/es</string>
+    <string name="account_share_content">¡Uso la app 𝕘𝟠 para crear mis albaranes y facturas en un instante! Además es un software libre y comprometido. ¿Quieres probarla? Es gratuita y está disponible en Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing o en F-Droid: https://f-droid.org/es/packages/com.a4a.g8invoicing/</string>
+    <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="account_auth_title">Iniciar sesión</string>
+    <string name="account_auth_subtitle">Recibe un enlace de inicio de sesión por correo.</string>
+    <string name="account_auth_email_label">Correo electrónico</string>
+    <string name="account_auth_send_link">Recibir mi enlace de inicio de sesión</string>
+    <string name="account_auth_link_sent">✅ Te hemos enviado un correo con el enlace de inicio de sesión. Si no lo recibes, revisa tu carpeta de spam, y no dudes en escribirnos a </string>
+    <string name="account_auth_error">No se puede enviar el enlace por el momento. Puedes volver a intentarlo en unos minutos, y no dudes en escribirnos a </string>
+    <string name="account_auth_link_expired">⏰ Este enlace ha caducado o ya se ha utilizado. Puedes solicitar un nuevo enlace. Si el problema persiste, escríbenos a </string>
+    <string name="account_auth_login_failed">Por ahora no se puede iniciar sesión. Puedes volver a intentarlo más tarde.\n\nSi el problema persiste, escríbenos a </string>
+    <string name="account_auth_invalid_email">Dirección de correo no válida.</string>
+    <string name="account_auth_about_link">Más información sobre g8…</string>
+    <string name="account_auth_about_url">https://the-gate.fr</string>
+    <string name="account_logged_in_as">Conectado como:</string>
+    <string name="account_logout">Cerrar sesión</string>
+    <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Miembro Premium</string>
+    <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Miembro Premium</string>
+    <string name="account_renewal_date">Renovación el %1$s</string>
+    <string name="account_cancellation_date">Cancelado — termina el %1$s</string>
+    <string name="account_manage_subscription">Gestionar mi suscripción</string>
+    <string name="account_manage_subscription_url">https://billing.stripe.com/p/login/test_5kQ9ASbgrcPl6113Sm1RC00</string>
+    <string name="account_website_label">the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_section_auth">Autenticación</string>
+    <string name="account_my_companies">Mis empresas</string>
+    <string name="account_add_company">+ Añadir una empresa</string>
+    <string name="account_section_advanced">Avanzado</string>
+    <string name="account_delete_cta">Eliminar mi cuenta</string>
+    <string name="account_delete_dialog_title">¿Eliminar definitivamente tu cuenta?</string>
+    <string name="account_delete_dialog_message">Esta acción es irreversible. Tu suscripción se cancelará de inmediato, tu cuenta se eliminará de nuestros servidores y se cerrará tu sesión. Tus facturas y datos guardados localmente en tu dispositivo permanecerán intactos.</string>
+    <string name="account_delete_dialog_confirm">Sí, eliminar</string>
+    <string name="account_delete_dialog_cancel">Cancelar</string>
+    <string name="account_delete_error">No se puede eliminar tu cuenta por el momento. Comprueba tu conexión e inténtalo de nuevo, o escríbenos a </string>
+    <string name="account_delete_success_title">Cuenta eliminada</string>
+    <string name="account_delete_success_message">Tu cuenta se ha eliminado correctamente. Tus facturas y datos guardados localmente en este dispositivo se conservan.</string>
+
+    <!-- About Screen -->
+    <string name="about">𝕘𝟠 es una aplicación práctica y comprometida:\n• Funciona sin conexión \n• Sin publicidad ni rastreadores \n• Software libre, open source\n• Diseñada para productores ecológicos\n• Busca financiar proyectos de protección de la fauna salvaje, en particular los quirópteros.</string>
+    <string name="about_title_about">Acerca de</string>
+    <string name="about_title_early_access">Programa "Early bat"</string>
+    <string name="about_title_website">Sitio web</string>
+    <string name="about_website_intro">Visita nuestro sitio web </string>
+    <string name="about_website_cta">www.the-gate.fr</string>
+    <string name="about_website_link">https://www.the-gate.fr</string>
+    <string name="about_website_tail"> !</string>
+    <string name="about_title_community">Comunidad</string>
+    <string name="about_community_text">Ven a hablar de tus necesidades, ideas e intercambia en el</string>
+    <string name="about_community_cta">Foro de la comunidad.</string>
+    <string name="about_community_link">https://forum.the-gate.fr/</string>
+    <string name="about_title_assistance">Soporte</string>
+    <string name="about_assistance_intro">Puedes escribirnos en cualquier momento para informar de un error, proponer una funcionalidad o pedir ayuda.</string>
+    <string name="about_assistance_more_lead">También puedes consultar la </string>
+    <string name="about_assistance_forum_link_text">sección "Ayuda" del foro</string>
+    <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
+    <string name="about_assistance_more_middle">, explorar los </string>
+    <string name="about_assistance_tutorials_link_text">tutoriales y consejos</string>
+    <string name="about_assistance_tutorials_link">https://the-gate.fr/es</string>
+    <string name="about_assistance_more_tail"> en el sitio.</string>
+    <string name="about_contact_email">contact@the-gate.fr</string>
+    <string name="about_title_backup">Copia de seguridad</string>
+    <string name="about_backup_text">Acuérdate de descargar tu base de datos regularmente, para restaurarla en caso de pérdida del teléfono.</string>
+    <string name="about_download_database">Descargar</string>
+    <string name="account_backup_dialog_title">Copia de seguridad descargada</string>
+    <string name="account_backup_dialog_message">Tu base de datos se ha guardado en la carpeta Descargas. ¿También quieres enviarla por correo?</string>
+    <string name="account_backup_dialog_yes">Sí, enviar por correo</string>
+    <string name="account_backup_dialog_no">No, es todo</string>
+    <string name="about_title_legal">Aviso legal</string>
+    <string name="about_terms_of_service_header">Al usar la aplicación, aceptas las</string>
+    <string name="about_terms_of_service">condiciones de uso</string>
+    <string name="about_terms_of_service_header_2">y la</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/es</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/es</string>
+    <string name="about_privacy">política de privacidad de 𝕘𝟠.</string>
+    <string name="about_share_text_2">¡Compártela con tus amigos!</string>
+    <string name="about_share_button">Compartir</string>
+    <string name="about_title_version">Versión de la aplicación</string>
+
+    <!-- Language Selection -->
+    <string name="about_title_language">Idioma</string>
+    <string name="about_language_system">Idioma del sistema</string>
+    <string name="about_language_french">Français</string>
+    <string name="about_language_english">English</string>
+    <string name="about_language_german">Deutsch</string>
+    <string name="about_language_spanish">Español</string>
+
+    <!-- Currency Selection -->
+    <string name="account_currency_title">Moneda</string>
+    <string name="account_currency_and_language_title">Moneda e idioma</string>
+    <string name="currency_picker_search">Buscar</string>
+    <string name="currency_picker_recent">Usadas recientemente</string>
+    <string name="currency_picker_all">Todas</string>
+    <string name="currency_picker_empty">No se ha encontrado ninguna moneda</string>
+
+    <string name="label_separator">: </string>
+    <string name="ok">OK</string>
+
+    <!-- Delivery Note List Advice -->
+    <string name="delivery_note_advice_convert">Aprendí este movimiento en el hip-hop, súper estiloso lo sé. Todavía tengo que practicarlo, no soy muy rápido, creo que mi patagio frena la ola. En fin, quería decirte \n\n …   </string>
+    <string name="delivery_note_advice_convert1">que si quieres convertir uno o varios albaranes en una factura, puedes seleccionarlos en la lista haciendo clic largo (o haciendo clic en ○) \n\n …   </string>
+    <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+
+    <!-- Invoice List Advice -->
+    <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
+    <string name="invoice_advice_legal_1">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡ \n\n …   </string>
+    <string name="invoice_advice_legal_2">información útil. Estás en la categoría «Facturas».\n\n Antes de crear una factura, te aconsejo que revises las …   </string>
+    <string name="invoice_advice_legal_3">menciones obligatorias para una factura conforme. Para facilitarte la vida lo he resumido todo aquí: \n</string>
+    <string name="invoice_advice_legal_4">the-gate.fr</string>
+    <string name="invoice_advice_legal_5"> \n\n Sobre otro tema… \n …   </string>
+    <string name="invoice_advice_legal_6">los documentos que creas, así como todas tus modificaciones, se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n …   </string>
+    <string name="invoice_advice_legal_url">https://www.the-gate.fr/es</string>
+    <string name="invoice_advice_bottom_menu">Hey hey, soy tu batmagotchi. Te tengo que enseñar un truco \n\n …   </string>
+    <string name="invoice_advice_bottom_menu1">Para que aparezcan opciones muy útiles, como eliminar un documento \n\n …   </string>
+    <string name="invoice_advice_bottom_menu2">haz clic en el círculo ○ delante del número de la factura. Incluso puedes seleccionar varios documentos a la vez.\n\n 𝕨𝕚𝕝𝕕 </string>
+
+    <!-- Export PDF -->
+    <string name="export_waiting_permission">Permiso requerido…</string>
+    <string name="export_ongoing">Exportación en curso…</string>
+    <string name="export_done">Exportación completada</string>
+    <string name="export_error">Error al exportar.</string>
+    <string name="export_permission_denied">Se necesita acceso al almacenamiento para guardar el PDF. Puedes permitir el acceso en los ajustes de la aplicación.</string>
+    <string name="export_done_file_location">Guardado en el dispositivo (Descargas/g8) </string>
+    <string name="export_clickable_text">• ֊ •</string>
+    <string name="export_info_popup">• El archivo puede tardar a veces un poco en aparecer en la carpeta de descargas (actualizar puede ayudar).\n\n• Si el archivo no aparece, es posible que esté en una subcarpeta de la carpeta de descargas (sobre todo si pasas por una app de archivos tipo Samsung)\n\n• También puedes encontrar el archivo haciendo una búsqueda con el nombre del archivo.</string>
+    <string name="export_info_popup_validate">ok</string>
+    <string name="export_send_file">Enviar por correo</string>
+    <string name="export_send_file_content">Hola, \n\nAdjunto encontrarás tu documento.\n\nUn saludo</string>
+    <string name="export_share_file">Compartir</string>
+    <string name="export_close">Finalizar</string>
+    <string name="export_error_sharing">No se ha podido compartir el archivo.\n\nÁbrelo directamente desde la carpeta Descargas/g8.</string>
+    <string name="export_email_subject">Tu %1$s N°%2$s</string>
+    <string name="export_email_subject_invoice">factura</string>
+    <string name="export_email_subject_delivery_note">albarán</string>
+    <string name="export_email_subject_credit_note">nota de crédito</string>
+    <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
+ ((˃ᯅ˂)ノ) 
+
+Une erreur s'est produite : 
+</string>
+    <string name="alert_dialog_error_confirm">OK</string>
+
+    <!-- Version mismatch dialog -->
+    <string name="version_mismatch_title">Emisor modificado</string>
+    <string name="version_mismatch_message">El emisor se ha modificado desde otro documento. ¿Quieres cargar la última versión?</string>
+    <string name="version_mismatch_load_latest">Cargar la última versión</string>
+    <string name="version_mismatch_keep_current">Mantener la versión actual</string>
+
+    <!-- Version mismatch dialog for clients -->
+    <string name="version_mismatch_client_title">Cliente modificado</string>
+    <string name="version_mismatch_client_message">El cliente se ha modificado desde otro documento. ¿Quieres cargar la última versión?</string>
+
+    <!-- Sync client to master dialog -->
+    <string name="sync_client_title">¿Actualizar el cliente?</string>
+    <string name="sync_client_message">¿Quieres aplicar estos cambios al cliente en tu lista de clientes?</string>
+    <string name="sync_client_yes">Sí, actualizar</string>
+    <string name="sync_client_no">No, solo este documento</string>
+</resources>

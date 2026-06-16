@@ -11,7 +11,8 @@ enum class AppLanguage(val code: String?, val displayName: String) {
     SYSTEM(null, "Système"),
     FRENCH("fr", "Français"),
     ENGLISH("en", "English"),
-    GERMAN("de", "Deutsch");
+    GERMAN("de", "Deutsch"),
+    SPANISH("es", "Español");
 
     companion object {
         fun fromCode(code: String?): AppLanguage {

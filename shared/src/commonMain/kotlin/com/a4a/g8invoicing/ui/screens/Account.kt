@@ -88,6 +88,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about_language_english
 import com.a4a.g8invoicing.shared.resources.about_language_french
 import com.a4a.g8invoicing.shared.resources.about_language_german
+import com.a4a.g8invoicing.shared.resources.about_language_spanish
 import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.account_currency_title
@@ -810,12 +811,14 @@ private fun LanguageSelector(
     val frenchLabel = stringResource(Res.string.about_language_french)
     val englishLabel = stringResource(Res.string.about_language_english)
     val germanLabel = stringResource(Res.string.about_language_german)
+    val spanishLabel = stringResource(Res.string.about_language_spanish)
 
     fun getDisplayName(language: AppLanguage): String = when (language) {
         AppLanguage.SYSTEM -> systemLabel
         AppLanguage.FRENCH -> frenchLabel
         AppLanguage.ENGLISH -> englishLabel
         AppLanguage.GERMAN -> germanLabel
+        AppLanguage.SPANISH -> spanishLabel
     }
 
     Row(
