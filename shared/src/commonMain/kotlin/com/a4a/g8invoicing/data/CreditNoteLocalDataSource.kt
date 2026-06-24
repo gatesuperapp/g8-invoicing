@@ -13,6 +13,7 @@ import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -55,6 +56,7 @@ class CreditNoteLocalDataSource(
         // Récupérer l'émetteur depuis la table maître
         val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
 
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -70,6 +72,7 @@ class CreditNoteLocalDataSource(
                 currency = TextFieldValue(currencyManager.currentCurrency),
                 footerText = TextFieldValue(getExistingFooter() ?: ""),
                 watermarkText = frozenWatermark,
+                labelsSnapshot = frozenLabels,
             )
 
             saveInfoInCreditNoteTable(creditNote)
@@ -193,12 +196,14 @@ class CreditNoteLocalDataSource(
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at,
                 watermarkText = it.watermark_text,
+                labelsSnapshot = it.labels_snapshot,
             )
         }
     }
 
     override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
         val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -218,6 +223,7 @@ class CreditNoteLocalDataSource(
                         ),
                         footerText = TextFieldValue(getExistingFooter() ?: ""),
                         watermarkText = frozenWatermark,
+                        labelsSnapshot = frozenLabels,
                     )
                 )
                 invoices.forEach {
@@ -253,6 +259,7 @@ class CreditNoteLocalDataSource(
 
     override suspend fun duplicate(documents: List<CreditNoteState>) {
         val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach {
@@ -262,6 +269,7 @@ class CreditNoteLocalDataSource(
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
                     creditNote.watermarkText = frozenWatermark
+                    creditNote.labelsSnapshot = frozenLabels
 
                     saveInfoInCreditNoteTable(creditNote)
                     saveInfoInOtherTables(creditNote)
@@ -454,6 +462,7 @@ class CreditNoteLocalDataSource(
                 due_date = document.dueDate,
                 footer = document.footerText.text,
                 watermark_text = document.watermarkText,
+                labels_snapshot = document.labelsSnapshot,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

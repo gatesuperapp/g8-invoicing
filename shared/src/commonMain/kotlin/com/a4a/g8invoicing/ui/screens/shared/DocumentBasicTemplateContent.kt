@@ -24,7 +24,6 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 
 
 @Composable
@@ -38,6 +37,23 @@ fun DocumentBasicTemplateContent(
     selectedItem: ScreenElement? = null,
 ) {
     val pagePadding = 24.dp
+    // Labels frozen at the document's creation locale. null = legacy doc → fallback
+    // to current locale via `stringResource` inside each child template.
+    val labels = rememberDocumentLabels(document.labelsSnapshot)
+
+    // Avoid a one-frame flash where the template renders with the app's current locale
+    // before the actual document state (with its frozen labels) arrives from the DB.
+    // We keep an empty white page of the same dimensions so layout doesn't jump.
+    if (document.documentId == null) {
+        Box(
+            modifier = Modifier
+                .width(screenWidth)
+                .padding(pagePadding)
+                .background(Color.White)
+                .heightIn(min = screenWidth * 1.28f)
+        )
+        return
+    }
 
     Box(
         modifier = Modifier
@@ -69,7 +85,7 @@ fun DocumentBasicTemplateContent(
                 .background(Color.White)
         ) {
 
-            DocumentBasicTemplateHeader(document, onClickElement, selectedItem)
+            DocumentBasicTemplateHeader(document, onClickElement, selectedItem, labels)
 
             if (!document.reference?.text.isNullOrEmpty()) {
                 document.reference?.let {
@@ -78,7 +94,8 @@ fun DocumentBasicTemplateContent(
                         DocumentBasicTemplateReference(
                             it.text,
                             onClickElement,
-                            selectedItem
+                            selectedItem,
+                            labels,
                         )
                 }
             }
@@ -118,6 +135,7 @@ fun DocumentBasicTemplateContent(
                         DocumentBasicTemplateProductsTable(
                             productArray,
                             currencyCode = document.currency.text.ifEmpty { "EUR" },
+                            labels = labels,
                         )
                     }
                 }
@@ -127,15 +145,16 @@ fun DocumentBasicTemplateContent(
                             .align(Alignment.TopCenter)
                             .width(100.dp),
                         painter = painterResource(Res.drawable.img_paid),
-                        contentDescription = stringResource(Res.string.invoice_paid),
+                        contentDescription = documentLabel(labels, "invoice_paid", Res.string.invoice_paid),
                     )
                 }
             }
-            DocumentBasicTemplateTotalPrices(document, prices)
+            DocumentBasicTemplateTotalPrices(document, prices, labels)
 
             DocumentBasicTemplateFooter(
                 document,
-                onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) }
+                onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) },
+                labels = labels,
             )
         }
     }

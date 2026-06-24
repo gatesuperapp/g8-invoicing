@@ -28,4 +28,8 @@ abstract class DocumentState {
     // module active when the doc was created, OR pre-feature legacy doc). Not edited
     // afterwards — toggling the module later doesn't retroactively change existing docs.
     abstract var watermarkText: String?
+    // Frozen at document creation. JSON map of the template labels resolved in the
+    // current locale ({"invoice_number": "Facture N°", ...}). null = pre-feature legacy
+    // doc — at render we fall back to `stringResource` (follows current locale).
+    abstract var labelsSnapshot: String?
 }

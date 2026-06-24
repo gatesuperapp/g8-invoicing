@@ -1,12 +1,23 @@
 -- Migration de la version 4 vers la version 5
--- Changement:
+-- Changements:
 -- 1. Ajout de watermark_text sur les 3 types de documents (Invoice, DeliveryNote, CreditNote).
 --    Cette colonne stocke la mention "Fait avec g8 (www.the-gate.fr), …" choisie à la
 --    création du document. NULL = pas de watermark sur ce doc.
---    Les documents préexistants ne sont PAS mis à jour : ils restent à NULL et n'auront
---    donc pas de watermark (intention utilisateur — la feature est neuve, on ne
---    rétro-marque pas les anciennes factures).
+-- 2. Ajout de labels_snapshot sur les 3 types de documents. JSON sérialisé des labels
+--    du template ({"invoice_number": "Facture N°", "addressed_to": "Adressé à", …})
+--    résolus dans la langue courante au moment de la création. Au rendu, on lit cette
+--    snapshot — la facture reste donc en français même si l'utilisateur passe ensuite
+--    l'app en allemand. NULL = pas de snapshot (= comportement historique, suit le
+--    locale courant) — pour les docs créés avant cette feature.
+--
+-- Dans les deux cas, les documents préexistants ne sont PAS mis à jour : ils restent
+-- à NULL (intention utilisateur — features neuves, on ne rétro-modifie pas les
+-- anciennes factures).
 
 ALTER TABLE Invoice      ADD COLUMN watermark_text TEXT;
 ALTER TABLE DeliveryNote ADD COLUMN watermark_text TEXT;
 ALTER TABLE CreditNote   ADD COLUMN watermark_text TEXT;
+
+ALTER TABLE Invoice      ADD COLUMN labels_snapshot TEXT;
+ALTER TABLE DeliveryNote ADD COLUMN labels_snapshot TEXT;
+ALTER TABLE CreditNote   ADD COLUMN labels_snapshot TEXT;

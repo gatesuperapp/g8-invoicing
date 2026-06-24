@@ -27,6 +27,7 @@ import org.jetbrains.compose.resources.stringResource
 fun DocumentBasicTemplateTotalPrices(
     uiState: DocumentState,
     footerArray: List<String>,
+    labels: Map<String, String>? = null,
 ) {
     val currencyCode = uiState.currency.text.ifEmpty { "EUR" }
     Row(
@@ -55,7 +56,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = stringResource(Res.string.document_total_without_tax) + " "
+                    text = documentLabel(labels, "document_total_without_tax", Res.string.document_total_without_tax) + " "
                 )
             }
             if (footerArray.any { it.contains("TAXES") }) {
@@ -72,11 +73,14 @@ fun DocumentBasicTemplateTotalPrices(
                     uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
                         tax.stripTrailingZeros().toPlainString() in it.first.stripTrailingZeros().toPlainString()
                     }?.let {
+                        val taxRate = "${it.first.stripTrailingZeros().toPlainString().replace(".", ",")}%"
+                        val taxLabel = labels?.get("document_tax_label")?.replace("%1\$s", taxRate)
+                            ?: stringResource(Res.string.document_tax_label, taxRate)
                         Text(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(Res.string.document_tax_label, "${it.first.stripTrailingZeros().toPlainString().replace(".", ",")}%")
+                            text = taxLabel
                         )
                     }
                 }
@@ -84,7 +88,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = stringResource(Res.string.document_total_with_tax) + " "
+                    text = documentLabel(labels, "document_total_with_tax", Res.string.document_total_with_tax) + " "
                 )
             }
         }

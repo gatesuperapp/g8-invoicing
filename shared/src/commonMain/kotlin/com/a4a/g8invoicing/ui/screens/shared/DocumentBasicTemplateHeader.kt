@@ -49,6 +49,7 @@ fun DocumentBasicTemplateHeader(
     document: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
+    labels: Map<String, String>? = null,
 ) {
     // Initialize image context and load logo
     InitImageContext()
@@ -94,11 +95,11 @@ fun DocumentBasicTemplateHeader(
                         }
                     ),
                 style = MaterialTheme.typography.titleForDocuments,
-                text = stringResource(
-                    if (document is DeliveryNoteState) Res.string.delivery_note_number
-                    else if (document is CreditNoteState) Res.string.credit_note_number
-                    else Res.string.invoice_number
-                ) + " " + document.documentNumber.text
+                text = when (document) {
+                    is DeliveryNoteState -> documentLabel(labels, "delivery_note_number", Res.string.delivery_note_number)
+                    is CreditNoteState -> documentLabel(labels, "credit_note_number", Res.string.credit_note_number)
+                    else -> documentLabel(labels, "invoice_number", Res.string.invoice_number)
+                } + " " + document.documentNumber.text
             )
 
             Spacer(
@@ -117,7 +118,7 @@ fun DocumentBasicTemplateHeader(
                         }
                     ),
                 style = MaterialTheme.typography.subTitleForDocuments,
-                text = stringResource(Res.string.document_date_label) + document.documentDate.substringBefore(
+                text = documentLabel(labels, "document_date_label", Res.string.document_date_label) + document.documentDate.substringBefore(
                     " "
                 )
             )
@@ -137,7 +138,7 @@ fun DocumentBasicTemplateHeader(
 
     // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
     val numberOfAddresses = client?.addresses?.size ?: 0
-    val defaultTitle = stringResource(Res.string.addressed_to)
+    val defaultTitle = documentLabel(labels, "addressed_to", Res.string.addressed_to)
     Row(
         modifier = Modifier.padding(top = 12.dp)
     ) {
@@ -184,7 +185,7 @@ fun DocumentBasicTemplateHeader(
                 )
         ) {
             document.documentIssuer?.let {
-                DocumentBasicTemplateClientOrIssuer(it)
+                DocumentBasicTemplateClientOrIssuer(it, labels = labels)
             }
         }
 
@@ -199,7 +200,8 @@ fun DocumentBasicTemplateHeader(
                     onClickElement,
                     selectedItem,
                     addressIndex = 0,
-                    displayAllInfo = true
+                    displayAllInfo = true,
+                    labels = labels,
                 )
             }
         }
@@ -247,7 +249,8 @@ fun DocumentBasicTemplateHeader(
                                 onClickElement,
                                 selectedItem,
                                 addressIndex = i,
-                                displayAllInfo = false
+                                displayAllInfo = false,
+                                labels = labels,
                             )
                         }
                     }
@@ -265,6 +268,7 @@ fun DocumentClientRectangleAndContent(
     selectedItem: ScreenElement?,
     addressIndex: Int,
     displayAllInfo: Boolean,
+    labels: Map<String, String>? = null,
 ) {
 
     Column(
@@ -307,7 +311,8 @@ fun DocumentClientRectangleAndContent(
             DocumentBasicTemplateClientOrIssuer(
                 documentClient,
                 addressIndex = addressIndex,
-                displayAllInfo = displayAllInfo
+                displayAllInfo = displayAllInfo,
+                labels = labels,
             )
         }
     }

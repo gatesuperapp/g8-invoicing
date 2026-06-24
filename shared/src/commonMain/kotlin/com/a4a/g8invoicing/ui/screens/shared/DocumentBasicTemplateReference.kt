@@ -17,6 +17,7 @@ fun DocumentBasicTemplateReference(
     reference: String,
     onClickElement: (ScreenElement) -> Unit,
     selectedItem: ScreenElement?,
+    labels: Map<String, String>? = null,
 ) {
     Row(
         Modifier
@@ -32,7 +33,7 @@ fun DocumentBasicTemplateReference(
     ) {
         Text(
             style = MaterialTheme.typography.textForDocumentsBold,
-            text = stringResource(Res.string.document_reference_label)
+            text = documentLabel(labels, "document_reference_label", Res.string.document_reference_label)
         )
         Text(
             style = MaterialTheme.typography.textForDocuments,

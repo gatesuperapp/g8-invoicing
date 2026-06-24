@@ -29,6 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 fun DocumentBasicTemplateFooter(
     document: DocumentState,
     onClickElement: (ScreenElement) -> Unit,
+    labels: Map<String, String>? = null,
 ) {
     // The watermark string is frozen at document creation in the DB (watermark_text
     // column). Display whatever is stored — toggling the module later doesn't change
@@ -56,7 +57,7 @@ fun DocumentBasicTemplateFooter(
             if(document is InvoiceState) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = stringResource(Res.string.invoice_pdf_due_date) + document.dueDate.substringBefore(" ")
+                    text = documentLabel(labels, "invoice_pdf_due_date", Res.string.invoice_pdf_due_date) + document.dueDate.substringBefore(" ")
                 )
             }
         }

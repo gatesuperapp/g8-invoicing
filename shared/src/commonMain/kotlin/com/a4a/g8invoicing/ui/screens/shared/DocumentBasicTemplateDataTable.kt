@@ -50,6 +50,7 @@ val borderWidth = 0.7.dp
 fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
     currencyCode: String = "EUR",
+    labels: Map<String, String>? = null,
 ) {
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
@@ -70,7 +71,8 @@ fun DocumentBasicTemplateProductsTable(
         taxColumnWeight,
         unitPriceColumnWeight,
         totalPriceColumnWeight,
-        displayUnitColumn
+        displayUnitColumn,
+        labels,
     )
 
     val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
@@ -114,6 +116,7 @@ fun TitleRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    labels: Map<String, String>? = null,
 ) {
     Row(
         Modifier
@@ -123,20 +126,20 @@ fun TitleRows(
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = stringResource(Res.string.document_table_description),
+            text = documentLabel(labels, "document_table_description", Res.string.document_table_description),
             weight = descriptionColumnWeight,
             alignEnd = false,
             isBold = true
         )
         TableCell(
-            text = stringResource(Res.string.document_table_quantity),
+            text = documentLabel(labels, "document_table_quantity", Res.string.document_table_quantity),
             weight = quantityColumnWeight,
             alignEnd = true,
             isBold = true
         )
         if (displayUnitColumn) {
             TableCell(
-                text = stringResource(Res.string.document_table_unit),
+                text = documentLabel(labels, "document_table_unit", Res.string.document_table_unit),
                 weight = unitColumnWeight,
                 alignEnd = true,
                 isBold = true
@@ -144,19 +147,19 @@ fun TitleRows(
         }
 
         TableCell(
-            text = stringResource(Res.string.document_table_tax_rate),
+            text = documentLabel(labels, "document_table_tax_rate", Res.string.document_table_tax_rate),
             weight = taxColumnWeight,
             alignEnd = true,
             isBold = true
         )
         TableCell(
-            text = stringResource(Res.string.document_table_unit_price_without_tax),
+            text = documentLabel(labels, "document_table_unit_price_without_tax", Res.string.document_table_unit_price_without_tax),
             weight = unitPriceColumnWeight,
             alignEnd = true,
             isBold = true
         )
         TableCell(
-            text = stringResource(Res.string.document_table_total_price_without_tax),
+            text = documentLabel(labels, "document_table_total_price_without_tax", Res.string.document_table_total_price_without_tax),
             weight = totalPriceColumnWeight,
             alignEnd = true,
             isBold = true

@@ -14,6 +14,7 @@ import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.shared.resources.invoice_default_number
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.EmailState
@@ -72,6 +73,7 @@ class InvoiceLocalDataSource(
         // Récupérer l'émetteur depuis la table maître (avec emails et adresses)
         val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
 
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -90,6 +92,7 @@ class InvoiceLocalDataSource(
                     getExistingFooter() ?: getString(Res.string.document_default_footer)
                 ),
                 watermarkText = frozenWatermark,
+                labelsSnapshot = frozenLabels,
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -275,6 +278,7 @@ class InvoiceLocalDataSource(
             footerText = TextFieldValue(text = this.footer ?: ""),
             createdDate = this.created_at,
             watermarkText = this.watermark_text,
+            labelsSnapshot = this.labels_snapshot,
         )
     }
 
@@ -283,6 +287,7 @@ class InvoiceLocalDataSource(
     // Uses withContext(Dispatchers.IO).
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
         val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -303,6 +308,7 @@ class InvoiceLocalDataSource(
                     ),
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)), // DB call
                     watermarkText = frozenWatermark,
+                    labelsSnapshot = frozenLabels,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -364,7 +370,10 @@ class InvoiceLocalDataSource(
     override suspend fun duplicate(documents: List<InvoiceState>) {
         // Duplicating creates new docs → each gets a fresh watermark decision based on
         // the CURRENT premium/module state, not whatever was frozen on the source doc.
+        // Same logic for labelsSnapshot: a duplicated doc is a new doc, snapshotted in
+        // the current locale.
         val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { originalDocument ->
@@ -377,6 +386,7 @@ class InvoiceLocalDataSource(
                         documentTag = DocumentTag.DRAFT,
                         paymentStatus = 0,
                         watermarkText = frozenWatermark,
+                        labelsSnapshot = frozenLabels,
                     )
 
                     saveInfoInInvoiceTable(duplicatedDocumentState) // DB Call
@@ -699,6 +709,7 @@ class InvoiceLocalDataSource(
                 payment_status = document.paymentStatus.toLong(),
                 footer = document.footerText.text,
                 watermark_text = document.watermarkText,
+                labels_snapshot = document.labelsSnapshot,
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")

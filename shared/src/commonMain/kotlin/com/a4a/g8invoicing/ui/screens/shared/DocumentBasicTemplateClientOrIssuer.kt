@@ -22,12 +22,13 @@ import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 fun DocumentBasicTemplateClientOrIssuer(
     clientOrIssuer: ClientOrIssuerState?,
     displayAllInfo: Boolean = true,
-    addressIndex: Int = 0
+    addressIndex: Int = 0,
+    labels: Map<String, String>? = null,
 ) {
-    val labelSeparator = stringResource(Res.string.label_separator)
-    val defaultCompanyId1Label = stringResource(Res.string.company_identification1)
-    val defaultCompanyId2Label = stringResource(Res.string.company_identification2)
-    val defaultCompanyId3Label = stringResource(Res.string.company_identification3)
+    val labelSeparator = documentLabel(labels, "label_separator", Res.string.label_separator)
+    val defaultCompanyId1Label = documentLabel(labels, "company_identification1", Res.string.company_identification1)
+    val defaultCompanyId2Label = documentLabel(labels, "company_identification2", Res.string.company_identification2)
+    val defaultCompanyId3Label = documentLabel(labels, "company_identification3", Res.string.company_identification3)
     val address = clientOrIssuer?.addresses?.get(addressIndex)
     if(displayAllInfo) {
         val clientName = (clientOrIssuer?.firstName?.let { it.text + " " }
