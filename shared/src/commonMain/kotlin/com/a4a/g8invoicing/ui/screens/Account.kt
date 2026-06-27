@@ -182,7 +182,7 @@ fun Account(
     // Delete-account confirmation dialog (Avancé section).
     var showDeleteAccountDialog by remember { mutableStateOf(false) }
     // Result dialog opens immediately on confirm and morphs between loader → success →
-    // error as the DELETE /v1/me call resolves. Keeping it a single dialog means the
+    // error as the DELETE /v1/account call resolves. Keeping it a single dialog means the
     // user sees an instant response to their click instead of "nothing happens for 3s".
     var showDeletionResult by remember { mutableStateOf(false) }
 

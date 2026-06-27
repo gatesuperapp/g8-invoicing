@@ -96,13 +96,13 @@ fun GStore(
     viewModel: GStoreViewModel = koinViewModel(),
 ) {
     val activated by viewModel.activatedState.collectAsState()
-    // Refresh /v1/me on every screen resume so the switch state reflects the latest
+    // Refresh /v1/account on every screen resume so the switch state reflects the latest
     // backend truth (e.g. after a subscription change in the Stripe Portal, or to
     // correct a stale cache entry persisted before the date-parser fix).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refreshSubscription()
     }
-    // Reactive premium check — recomposes when /v1/me lands after screen open.
+    // Reactive premium check — recomposes when /v1/account lands after screen open.
     val subscriptionState by viewModel.subscriptionState.collectAsState()
     val isPremium = remember(subscriptionState) {
         (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->

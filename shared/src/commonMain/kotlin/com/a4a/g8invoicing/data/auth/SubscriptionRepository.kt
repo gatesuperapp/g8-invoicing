@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
  *
  * Strategy (per ACCOUNT_SUBSCRIPTION_PLAN.md):
  * - 6h fresh window: within that window, [refresh] is a no-op (we trust the cache).
- * - 7d stale tolerance: if /v1/me fails (offline, server down) but the cache is
+ * - 7d stale tolerance: if /v1/account fails (offline, server down) but the cache is
  *   under 7 days old, we keep showing the last known state. Past 7 days, premium
  *   is presumed expired.
  *
@@ -40,7 +40,7 @@ class SubscriptionRepository(
     val state: StateFlow<SubscriptionState> = _state.asStateFlow()
 
     /**
-     * Refresh subscription state from /v1/me.
+     * Refresh subscription state from /v1/account.
      *
      * Returns immediately if the cache is still fresh (< [FRESH_WINDOW_MS]).
      * On network failure, falls back to the cache while it's under [STALE_WINDOW_MS].
@@ -64,11 +64,11 @@ class SubscriptionRepository(
             return RefreshResult.UsedFreshCache
         }
 
-        return when (val result = authApi.getMe()) {
-            is MeResult.Success -> {
-                val sub = result.me.subscription
+        return when (val result = authApi.getAccount()) {
+            is AccountResult.Success -> {
+                val sub = result.account.subscription
                 val newState = SubscriptionState.Known(
-                    email = result.me.email,
+                    email = result.account.email,
                     status = sub?.status,
                     plan = sub?.plan,
                     product = sub?.product,
@@ -80,7 +80,7 @@ class SubscriptionRepository(
                 saveToCache(newState)
                 RefreshResult.Refreshed
             }
-            is MeResult.Error -> {
+            is AccountResult.Error -> {
                 if (cached is SubscriptionState.Known && (now - cached.fetchedAtMs) < STALE_WINDOW_MS) {
                     RefreshResult.UsedStaleCache
                 } else {
@@ -135,7 +135,7 @@ class SubscriptionRepository(
 sealed class SubscriptionState {
     data object NotLoggedIn : SubscriptionState()
 
-    /** /v1/me has never returned and we have no usable cache (rare — first launch offline). */
+    /** /v1/account has never returned and we have no usable cache (rare — first launch offline). */
     data object Unknown : SubscriptionState()
 
     @Serializable

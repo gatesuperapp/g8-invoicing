@@ -90,7 +90,7 @@ class AccountViewModel(
     }
 
     /**
-     * Force-refresh the cached subscription state from /v1/me.
+     * Force-refresh the cached subscription state from /v1/account.
      * Called when the screen comes back to the foreground (e.g. after the user returns
      * from the Stripe Customer Portal). A short delay lets the Stripe webhook land on
      * our backend before we re-query — without it, a fast user can race the webhook
@@ -183,6 +183,6 @@ data class AccountUiState(
     val accountDeleted: Boolean = false,
 )
 
-// Wait this long before refreshing /v1/me on screen resume — Stripe webhooks usually
+// Wait this long before refreshing /v1/account on screen resume — Stripe webhooks usually
 // land in well under a second, but a too-eager refresh can race and miss the update.
 private const val WEBHOOK_GRACE_MS = 1500L

@@ -63,19 +63,19 @@ class AuthApiClient(
     }
 
     /**
-     * GET /v1/me — current user info + subscription status. Bearer token attached
+     * GET /v1/account — current user info + subscription status. Bearer token attached
      * automatically by AuthInterceptor; 401 triggers refresh + retry transparently.
      */
-    suspend fun getMe(): MeResult {
+    suspend fun getAccount(): AccountResult {
         return try {
-            val response = httpClient.get("$baseUrl/v1/me")
+            val response = httpClient.get("$baseUrl/v1/account")
             if (response.status == HttpStatusCode.OK) {
-                MeResult.Success(response.body())
+                AccountResult.Success(response.body())
             } else {
-                MeResult.Error(tryParseError(response))
+                AccountResult.Error(tryParseError(response))
             }
         } catch (e: Exception) {
-            MeResult.Error(e.message ?: "Network error")
+            AccountResult.Error(e.message ?: "Network error")
         }
     }
 
@@ -113,13 +113,13 @@ class AuthApiClient(
     }
 
     /**
-     * DELETE /v1/me — terminates the account: cancels the Stripe subscription
+     * DELETE /v1/account — terminates the account: cancels the Stripe subscription
      * immediately, soft-deletes the user, revokes all refresh sessions and purges
      * personal data on the server side. Bearer token attached by AuthInterceptor.
      */
     suspend fun deleteAccount(): DeleteAccountResult {
         return try {
-            val response = httpClient.delete("$baseUrl/v1/me")
+            val response = httpClient.delete("$baseUrl/v1/account")
             if (response.status.isSuccess()) {
                 DeleteAccountResult.Success
             } else {
@@ -185,7 +185,7 @@ data class MagicLinkVerifyResponse(
 )
 
 @Serializable
-data class MeResponse(
+data class AccountResponse(
     val email: String,
     val subscription: SubscriptionInfo? = null
 )
@@ -224,9 +224,9 @@ sealed class AuthTokenResult {
     data class Error(val message: String) : AuthTokenResult()
 }
 
-sealed class MeResult {
-    data class Success(val me: MeResponse) : MeResult()
-    data class Error(val message: String) : MeResult()
+sealed class AccountResult {
+    data class Success(val account: AccountResponse) : AccountResult()
+    data class Error(val message: String) : AccountResult()
 }
 
 sealed class PortalSessionResult {
