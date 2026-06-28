@@ -118,7 +118,6 @@
     <string name="client_address_title_head_office_placeholder">Rechnungsanschrift</string>
     <string name="client_address1">Adresse</string>
     <string name="client_address1_input">Karbener Weg 55</string>
-    <string name="client_address2"/>
     <string name="client_address2_input">Vorderhaus</string>
     <string name="client_city">Ort</string>
     <string name="client_city_input">Karlsruhe</string>

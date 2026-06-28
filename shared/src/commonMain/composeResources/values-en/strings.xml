@@ -1,19 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default document numbers -->
     <string name="invoice_default_number">INV001</string>
     <string name="delivery_note_default_number">DN001</string>
     <string name="credit_note_default_number">CN001</string>
-
     <!-- Currency -->
     <string name="currency">€</string>
-
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copy</string>
-
     <!-- Document footer -->
     <string name="document_default_footer">Discount for early payment: none\nLate payment penalties: none\n\n\nIBAN: FR76 1234 1234 1234 123456 1234</string>
-
     <!-- Document labels -->
     <string name="invoice_number">Invoice No.</string>
     <string name="delivery_note_number">Delivery note No.</string>
@@ -26,7 +22,6 @@
     <string name="addressed_to">Addressed to</string>
     <string name="invoice_pdf_due_date">Payment due date: </string>
     <string name="invoice_paid">Paid ✔</string>
-
     <!-- Document table -->
     <string name="document_table_description">Description</string>
     <string name="document_table_quantity">Qty</string>
@@ -34,23 +29,19 @@
     <string name="document_table_unit_price_without_tax">Unit price excl. tax</string>
     <string name="document_table_total_price_without_tax">Price \n excl. tax</string>
     <string name="document_table_tax_rate">Tax</string>
-
     <!-- Document totals -->
     <string name="document_total_without_tax">Total excl. tax:</string>
     <string name="document_total_with_tax">Total incl. tax:</string>
     <string name="document_tax">Tax</string>
     <string name="document_tax_label">Tax %1$s: </string>
-
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Total excl. tax:</string>
     <string name="total_with_tax">Total incl. tax:</string>
     <string name="vat">Tax</string>
-
     <!-- UI Labels -->
     <string name="form_label_edit">Edit</string>
     <string name="product_price_without_tax">Excl. tax</string>
     <string name="product_price_with_tax">Incl. tax</string>
-
     <!-- Alert Dialog Strings -->
     <string name="alert_dialog_delete_invoice_1">Are you sure? \n\nIf you have already sent the invoice, it is not legal to delete it:</string>
     <string name="alert_dialog_delete_invoice_2">Learn more\n</string>
@@ -59,7 +50,6 @@
     <string name="alert_dialog_delete_general">Are you sure? This action is irreversible.</string>
     <string name="alert_dialog_delete_confirm">Yes, delete</string>
     <string name="alert_dialog_cancel">Cancel</string>
-
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">New client</string>
     <string name="document_bottom_sheet_list_add_new_issuer">New issuer</string>
@@ -67,11 +57,9 @@
     <string name="document_modal_product_cancel">Cancel</string>
     <string name="document_modal_product_save">Confirm</string>
     <string name="document_modal_product_back">Back</string>
-
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Your invoice has been created</string>
     <string name="invoice_created_button">View my invoice</string>
-
     <!-- Document Form Strings -->
     <string name="document_number_short">No.</string>
     <string name="document_due_date">Due date</string>
@@ -81,13 +69,11 @@
     <string name="document_free_field">Free field</string>
     <string name="document_footer">Footer</string>
     <string name="document_default_reference">XFGDTSF</string>
-
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>
     <string name="document_product_advice">To edit a product, click on the grey box…</string>
     <string name="document_product_advice_2">The change only applies to this document…</string>
     <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
-
     <!-- Product Form Strings -->
     <string name="product_name">Name</string>
     <string name="product_name_input">Beetroots</string>
@@ -109,7 +95,6 @@
     <string name="document_product_quantity">Quantity</string>
     <string name="document_product_quantity_input">1</string>
     <string name="product_select_placeholder">Select...</string>
-
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITY</string>
     <string name="client_section_address">ADDRESS</string>
@@ -133,7 +118,6 @@
     <string name="client_address_title_head_office_placeholder">Billing address</string>
     <string name="client_address1">Address</string>
     <string name="client_address1_input">6 Church Street</string>
-    <string name="client_address2"></string>
     <string name="client_address2_input">Apt 2B</string>
     <string name="client_city">City</string>
     <string name="client_city_input">Echoloc</string>
@@ -160,7 +144,6 @@
     <string name="client_selection_validate">Confirm</string>
     <string name="select_placeholder">Select…</string>
     <string name="clients_selected_count">%1$d clients selected</string>
-
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Add product</string>
     <string name="document_modal_edit_product">Edit product</string>
@@ -169,7 +152,6 @@
     <string name="document_modal_edit_issuer">Edit issuer</string>
     <string name="document_modal_new_client">New client</string>
     <string name="document_modal_edit_client">Edit client</string>
-
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Close</string>
     <string name="whats_new_done">Let's go!</string>
@@ -183,13 +165,10 @@
     <string name="whats_new_taxes_description">Ideal for customizing rates.</string>
     <string name="whats_new_logo_title">Issuer logo</string>
     <string name="whats_new_logo_description">Add your logo when creating or editing an issuer from a document.</string>
-
     <!-- Toast messages -->
     <string name="feature_coming_soon">Coming soon :)</string>
-
     <!-- Corrected Invoice -->
     <string name="corrected_invoice_cancel_and_replace">Cancels and replaces invoice</string>
-
     <!-- AppBar actions -->
     <string name="appbar_invoices">Invoices</string>
     <string name="appbar_credit_notes">Credit notes</string>
@@ -236,11 +215,9 @@
     <string name="appbar_product_add">Add product</string>
     <string name="appbar_product_edit">Edit product</string>
     <string name="appbar_g8">𝕘𝟠</string>
-
     <!-- Drawer / Categories -->
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">My Account</string>
-
     <!-- Account Screen -->
     <string name="account_subscribe">Support the project and enjoy exclusive benefits: early access to upcoming features (desktop app, electronic invoicing..), forum badge, "Little Horseshoe" sticker.. and more!</string>
     <string name="account_donate">Learn more</string>
@@ -259,7 +236,6 @@
     <string name="account_auth_login_failed">Sign-in is currently unavailable. You can try again a bit later.\n\nIf the problem persists, please write to us at </string>
     <string name="account_auth_invalid_email">Invalid email address.</string>
     <string name="drawer_gstore">𝕘Store</string>
-
     <!-- gStore -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Discover the modules available with a g8 premium account.</string>
@@ -279,7 +255,6 @@
     <string name="gstore_module_payments_desc">Record card, check, cash payments</string>
     <string name="gstore_module_themes_title">Premium themes</string>
     <string name="gstore_module_themes_desc">Extra colors and designs</string>
-
     <string name="account_logged_in_as">Signed in as:</string>
     <string name="account_logout">Sign out</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium Member</string>
@@ -301,7 +276,6 @@
     <string name="account_delete_error">We couldn't delete your account right now. Check your connection and try again, or contact us at </string>
     <string name="account_delete_success_title">Account deleted</string>
     <string name="account_delete_success_message">Your account has been deleted. Invoices and data stored locally on this device are kept.</string>
-
     <!-- About Screen -->
     <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>
     <string name="about_title_about">About</string>
@@ -342,7 +316,6 @@
     <string name="about_share_text_2">Share it with your friends!</string>
     <string name="about_share_button">Share</string>
     <string name="about_title_version">App version</string>
-
     <!-- Language Selection -->
     <string name="about_title_language">Language</string>
     <string name="about_language_system">System language</string>
@@ -350,7 +323,6 @@
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
     <string name="about_language_spanish">Español</string>
-
     <!-- Currency Selection -->
     <string name="account_currency_title">Currency</string>
     <string name="account_currency_and_language_title">Currency and language</string>
@@ -358,15 +330,12 @@
     <string name="currency_picker_recent">Recently used</string>
     <string name="currency_picker_all">All</string>
     <string name="currency_picker_empty">No currency found</string>
-
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
-
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">I learned this move in hip-hop, super cool I know. I still need to practice, I'm not super fast, I think my patagium slows down the wave. Anyway, I wanted to tell you \n\n …</string>
     <string name="delivery_note_advice_convert1">that if you want to convert one or more delivery notes into an invoice, you can select them from the list by long pressing (or by clicking on the ○) \n\n …</string>
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
-
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
     <string name="invoice_advice_legal_1">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡ \n\n …</string>
@@ -379,7 +348,6 @@
     <string name="invoice_advice_bottom_menu">Hey hey, your batmagotchi here. I absolutely need to show you a trick \n\n …</string>
     <string name="invoice_advice_bottom_menu1">To reveal very useful options, like deleting a document \n\n …</string>
     <string name="invoice_advice_bottom_menu2">click on the circle ○ next to the invoice number. You can even select multiple documents at once.\n\n 𝕨𝕚𝕝𝕕</string>
-
     <!-- Export PDF -->
     <string name="export_waiting_permission">Permission required…</string>
     <string name="export_ongoing">Export in progress…</string>
@@ -401,17 +369,14 @@
     <string name="export_email_subject_credit_note">credit note</string>
     <string name="alert_dialog_error">An error occurred: </string>
     <string name="alert_dialog_error_confirm">OK</string>
-
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Issuer modified</string>
     <string name="version_mismatch_message">The issuer has been modified from another document. Would you like to load the latest version?</string>
     <string name="version_mismatch_load_latest">Load latest version</string>
     <string name="version_mismatch_keep_current">Keep current version</string>
-
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Client modified</string>
     <string name="version_mismatch_client_message">The client has been modified from another document. Would you like to load the latest version?</string>
-
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">Update client?</string>
     <string name="sync_client_message">Would you like to apply these changes to the client in your client list?</string>
