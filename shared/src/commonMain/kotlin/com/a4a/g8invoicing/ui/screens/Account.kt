@@ -609,6 +609,10 @@ private fun ColumnScope.LoggedOutContent(
                 hasAttemptedSubmit = true
             }
         },
+        // Stays enabled as soon as the user has typed *something* (even invalid):
+        // clicking with a malformed address shows the inline error rather than
+        // silently freezing. Disabling on empty is intentional — there's nothing
+        // to react to until the user has put a character in the field.
         enabled = !uiState.isLoading
             && uiState.successMessage == null
             && trimmedEmail.isNotEmpty(),

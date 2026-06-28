@@ -40,14 +40,19 @@ object FormInputsValidator {
 
     /**
      * Boolean variant: returns true only when the trimmed input is non-empty,
-     * fits the RFC-5321 length cap, and matches the email regex. Use this at
-     * sites where empty input must be treated as invalid (e.g. submit button
-     * enable state), as opposed to [validateEmail] which treats empty as OK
-     * for optional fields.
+     * fits the RFC-5321 length cap, contains no control characters, and matches
+     * the email regex. Use this at sites where empty input must be treated as
+     * invalid (e.g. submit button enable state), as opposed to [validateEmail]
+     * which treats empty as OK for optional fields.
      */
     fun isEmailValid(input: String?): Boolean {
         val trimmed = input?.trim().orEmpty()
         if (trimmed.isEmpty() || trimmed.length > EMAIL_MAX_LENGTH) return false
+        // The regex below already excludes \r and \n (they aren't in any
+        // character class), but this explicit check makes the intent visible:
+        // a CR or LF here would smuggle SMTP headers when the address ends up
+        // in a mail To: field. Belt-and-suspenders survives future regex edits.
+        if (trimmed.any { it.isISOControl() }) return false
         return isEmailFormatValid(trimmed)
     }
 
