@@ -408,7 +408,7 @@ fun ClientOrIssuerAddEditForm(
                     ) {
                         AddAddressButton(
                             onClick = { numberOfClientAddresses += 1 },
-                            bottomPadding = if (i == 1) 16.dp else 0.dp,
+                            bottomPadding = 16.dp,
                             text = clientAddAddressText
                         )
                     }
