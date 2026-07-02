@@ -275,20 +275,24 @@ fun NavGraphBuilder.invoiceAddEdit(
                 invoiceViewModel.removeDocumentProductFromLocalDb(it)
             },
             onSelectClientOrIssuer = { clientOrIssuer ->
-                clientOrIssuer.originalClientOrIssuerId = clientOrIssuer.id
-                clientOrIssuer.originalVersion = clientOrIssuer.version ?: 1
-                // Set id to null because this is a NEW DocumentClientOrIssuer to be created
-                // The actual id will be assigned by the database
-                clientOrIssuer.id = null
-                if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
+                // Copy instead of mutating: clientOrIssuer is the live item from the
+                // master client list; mutating its id to null poisons that list and
+                // makes the item disappear from the picker on the next open.
+                val newType = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
-                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_CLIENT
+                    ClientOrIssuerType.DOCUMENT_CLIENT
                 } else {
                     documentIssuerUiState.type = ClientOrIssuerType.DOCUMENT_ISSUER
-                    clientOrIssuer.type = ClientOrIssuerType.DOCUMENT_ISSUER
+                    ClientOrIssuerType.DOCUMENT_ISSUER
                 }
-                invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(clientOrIssuer)
-                invoiceViewModel.saveDocumentClientOrIssuerInUiState(clientOrIssuer)
+                val documentClientOrIssuer = clientOrIssuer.copy(
+                    id = null,
+                    originalClientOrIssuerId = clientOrIssuer.id,
+                    originalVersion = clientOrIssuer.version ?: 1,
+                    type = newType,
+                )
+                invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientOrIssuer)
+                invoiceViewModel.saveDocumentClientOrIssuerInUiState(documentClientOrIssuer)
             },
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
