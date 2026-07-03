@@ -38,11 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -62,6 +59,7 @@ import com.a4a.g8invoicing.shared.resources.gstore_premium_badge
 import com.a4a.g8invoicing.shared.resources.gstore_title
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
+import com.a4a.g8invoicing.ui.shared.WebsiteFooter
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -170,7 +168,7 @@ fun GStore(
             // Premium users don't see a "manage your account on …" line here because
             // account management lives in Mon Compte → Customer Portal.
             if (!isPremium) {
-                Footer(
+                WebsiteFooter(
                     prefix = stringResource(Res.string.gstore_footer_free),
                     linkLabel = websiteLabel,
                     onClickLink = { uriHandler.openUri(websiteUrl) },
@@ -405,29 +403,3 @@ private fun PremiumPill() {
     }
 }
 
-@Composable
-private fun Footer(
-    prefix: String,
-    linkLabel: String,
-    onClickLink: () -> Unit,
-) {
-    val annotated = buildAnnotatedString {
-        withStyle(SpanStyle(color = Color.DarkGray)) { append(prefix) }
-        withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
-            append(linkLabel)
-        }
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            modifier = Modifier.clickable { onClickLink() },
-            text = annotated,
-            fontSize = 13.sp,
-            textAlign = TextAlign.Center,
-        )
-    }
-}

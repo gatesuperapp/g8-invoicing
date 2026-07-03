@@ -95,16 +95,17 @@ import com.a4a.g8invoicing.shared.resources.account_currency_title
 import com.a4a.g8invoicing.shared.resources.account_currency_and_language_title
 import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
-import com.a4a.g8invoicing.shared.resources.account_auth_about_link
-import com.a4a.g8invoicing.shared.resources.account_auth_about_url
+import com.a4a.g8invoicing.ui.shared.WebsiteFooter
 import com.a4a.g8invoicing.shared.resources.account_auth_email_label
+import com.a4a.g8invoicing.shared.resources.account_website_label
+import com.a4a.g8invoicing.shared.resources.account_website_url
+import com.a4a.g8invoicing.shared.resources.gstore_footer_free
 import com.a4a.g8invoicing.shared.resources.account_auth_error
 import com.a4a.g8invoicing.shared.resources.account_auth_invalid_email
 import com.a4a.g8invoicing.shared.resources.account_auth_link_sent
 import com.a4a.g8invoicing.shared.resources.account_auth_send_link
 import com.a4a.g8invoicing.shared.resources.account_auth_subtitle
 import com.a4a.g8invoicing.shared.resources.account_auth_title
-import com.a4a.g8invoicing.shared.resources.account_logged_in_as
 import com.a4a.g8invoicing.shared.resources.account_add_company
 import com.a4a.g8invoicing.shared.resources.account_logout
 import com.a4a.g8invoicing.shared.resources.account_my_companies
@@ -372,7 +373,14 @@ fun Account(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(30.dp))
+                Spacer(modifier = Modifier.height(100.dp))
+
+                val websiteUrl = stringResource(Res.string.account_website_url)
+                WebsiteFooter(
+                    prefix = stringResource(Res.string.gstore_footer_free),
+                    linkLabel = stringResource(Res.string.account_website_label),
+                    onClickLink = { uriHandler.openUri(websiteUrl) },
+                )
             }
         }
 
@@ -651,16 +659,6 @@ private fun ColumnScope.LoggedOutContent(
         )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    val aboutLabel = stringResource(Res.string.account_auth_about_link)
-    val aboutUrl = stringResource(Res.string.account_auth_about_url)
-    Text(
-        modifier = Modifier.clickable { uriHandler.openUri(aboutUrl) },
-        text = aboutLabel,
-        fontSize = 13.sp,
-        color = ColorVioletLink,
-    )
 }
 
 @Composable
@@ -671,7 +669,6 @@ private fun LoggedInContent(
     onOpenManageSubscription: (fallbackUrl: String) -> Unit,
 ) {
     if (!email.isNullOrBlank()) {
-        Text(text = stringResource(Res.string.account_logged_in_as))
         Text(text = email)
         Spacer(modifier = Modifier.height(12.dp))
     }
