@@ -182,7 +182,7 @@
     <string name="appbar_menu_label">Menú</string>
     <string name="appbar_label_description">Añade una etiqueta</string>
     <string name="appbar_tag">Marcador</string>
-    <string name="appbar_send_reminder">Enviar recordatorio</string>
+    <string name="appbar_send_reminder">Recordatorio</string>
     <string name="appbar_text">Editar texto</string>
     <string name="appbar_list">Añadir productos</string>
     <string name="appbar_list_label">Productos</string>
