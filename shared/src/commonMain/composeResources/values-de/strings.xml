@@ -28,7 +28,7 @@ IBAN: DE71 1234 1234 1234 1234 00</string>
     <string name="document_reference">Referenz</string>
     <string name="document_reference_label">Referenz: </string>
     <string name="addressed_to">Adressiert an</string>
-    <string name="invoice_pdf_due_date">Fällig am</string>
+    <string name="invoice_pdf_due_date">Fällig am </string>
     <string name="invoice_paid">Bezahlt ✔</string>
 
     <!-- Document table -->
