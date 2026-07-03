@@ -249,8 +249,6 @@
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
     <string name="account_auth_title">Sign in</string>
     <string name="account_auth_subtitle">Enter your email to receive a sign-in link.</string>
-    <string name="account_auth_about_link">Learn more about g8…</string>
-    <string name="account_auth_about_url">https://the-gate.fr/en</string>
     <string name="account_auth_email_label">Email</string>
     <string name="account_auth_send_link">Receive my sign-in link</string>
     <string name="account_auth_link_sent">✅ An email with the sign-in link has been sent. If you don't see it, check your spam folder, and feel free to write to us at </string>
@@ -280,7 +278,6 @@
     <string name="gstore_module_themes_title">Premium themes</string>
     <string name="gstore_module_themes_desc">Extra colors and designs</string>
 
-    <string name="account_logged_in_as">Signed in as:</string>
     <string name="account_logout">Sign out</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium Member</string>
     <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Premium Member</string>

@@ -279,9 +279,6 @@
     <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Vous pouvez demander un nouveau lien. Si le problème persiste, écrivez-nous à </string>
     <string name="account_auth_login_failed">La connexion est pour l\'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
     <string name="account_auth_invalid_email">Adresse e-mail invalide.</string>
-    <string name="account_auth_about_link">En savoir plus sur g8…</string>
-    <string name="account_auth_about_url">https://the-gate.fr</string>
-    <string name="account_logged_in_as">Connecté·e en tant que :</string>
     <string name="account_logout">Me déconnecter</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Membre Premium</string>
     <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Membre Premium</string>
