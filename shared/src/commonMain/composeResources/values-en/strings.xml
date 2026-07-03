@@ -181,7 +181,7 @@
     <string name="appbar_menu_label">Menu</string>
     <string name="appbar_label_description">Add a label</string>
     <string name="appbar_tag">Tag</string>
-    <string name="appbar_send_reminder">Send reminder</string>
+    <string name="appbar_send_reminder">Reminder</string>
     <string name="appbar_text">Edit text</string>
     <string name="appbar_list">Add products</string>
     <string name="appbar_list_label">Products</string>
