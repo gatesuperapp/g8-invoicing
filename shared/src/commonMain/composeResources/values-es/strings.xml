@@ -287,7 +287,7 @@
     <string name="account_manage_subscription">Gestionar mi suscripción</string>
     <string name="account_manage_subscription_url">https://billing.stripe.com/p/login/test_5kQ9ASbgrcPl6113Sm1RC00</string>
     <string name="account_website_label">the-gate.fr</string>
-    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_section_auth">Autenticación</string>
     <string name="account_my_companies">Mis empresas</string>
     <string name="account_add_company">+ Añadir una empresa</string>
@@ -335,8 +335,8 @@
     <string name="about_terms_of_service_header">Al usar la aplicación, aceptas las</string>
     <string name="about_terms_of_service">condiciones de uso</string>
     <string name="about_terms_of_service_header_2">y la</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/es</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/es</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
     <string name="about_privacy">política de privacidad de 𝕘𝟠.</string>
     <string name="about_share_text_2">¡Compártela con tus amigos!</string>
     <string name="about_share_button">Compartir</string>

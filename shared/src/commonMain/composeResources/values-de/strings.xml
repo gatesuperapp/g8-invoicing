@@ -348,8 +348,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_terms_of_service_header">Durch Nutzung der App akzeptieren Sie die</string>
     <string name="about_terms_of_service">Nutzungsbedingungen</string>
     <string name="about_terms_of_service_header_2">und die</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
     <string name="about_privacy">Datenschutzerklärung von 𝕘𝟠.</string>
     <string name="about_share_text_2">Teilen Sie sie mit Ihren Freund:innen!</string>
     <string name="about_share_button">Teilen</string>
