@@ -67,10 +67,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,6 +88,8 @@ import com.a4a.g8invoicing.ui.screens.shared.CurrencyPicker
 import com.a4a.g8invoicing.data.auth.SubscriptionState
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about_language_english
+import com.a4a.g8invoicing.shared.resources.about_terms_of_service_url_1
+import com.a4a.g8invoicing.shared.resources.about_terms_of_service_url_2
 import com.a4a.g8invoicing.shared.resources.about_language_french
 import com.a4a.g8invoicing.shared.resources.about_language_german
 import com.a4a.g8invoicing.shared.resources.about_language_spanish
@@ -381,6 +385,8 @@ fun Account(
                     linkLabel = stringResource(Res.string.account_website_label),
                     onClickLink = { uriHandler.openUri(websiteUrl) },
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                LegalLinksFooter(uriHandler = uriHandler)
             }
         }
 
@@ -942,6 +948,45 @@ private fun IssuerListRow(
                 .clickable(onClick = onDelete),
             imageVector = Icons.Outlined.DeleteOutline,
             contentDescription = null,
+        )
+    }
+}
+
+@Composable
+private fun LegalLinksFooter(uriHandler: androidx.compose.ui.platform.UriHandler) {
+    val termsUrl = stringResource(Res.string.about_terms_of_service_url_1)
+    val privacyUrl = stringResource(Res.string.about_terms_of_service_url_2)
+
+    val annotated = buildAnnotatedString {
+        withStyle(SpanStyle(color = Color.DarkGray)) { append("Lire les ") }
+        pushStringAnnotation(tag = "terms", annotation = termsUrl)
+        withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+            append("conditions d'utilisation")
+        }
+        pop()
+        withStyle(SpanStyle(color = Color.DarkGray)) { append(" et la ") }
+        pushStringAnnotation(tag = "policy", annotation = privacyUrl)
+        withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+            append("politique de confidentialité")
+        }
+        pop()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        ClickableText(
+            text = annotated,
+            style = TextStyle(fontSize = 13.sp, textAlign = TextAlign.Center),
+            onClick = { offset ->
+                annotated.getStringAnnotations(tag = "terms", start = offset, end = offset)
+                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                annotated.getStringAnnotations(tag = "policy", start = offset, end = offset)
+                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
+            },
         )
     }
 }
