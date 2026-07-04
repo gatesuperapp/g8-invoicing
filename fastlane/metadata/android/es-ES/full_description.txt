@@ -1,0 +1,18 @@
+𝕘𝟠 es una aplicación de facturación gratuita y eficaz.
+
+Funcionalidades:
+- Crear y gestionar facturas
+- Crear albaranes y convertirlos en facturas
+- Crear notas de crédito
+- Gestionar tus clientes y productos
+- Precios personalizados por cliente
+- Exportación de documentos a PDF
+- No es necesario crear una cuenta
+
+Perfecta para agricultores y agricultoras, autónomos y autónomas, pequeñas empresas y todas aquellas personas que necesiten crear facturas profesionales.
+
+Sin publicidad • Sin rastreadores • Suscripción opcional
+
+Software libre 🇫🇷
+
+Se ha dedicado mucho esfuerzo al desarrollo de esta aplicación, para ayudarte a simplificar los trámites administrativos y, al mismo tiempo, proteger tu privacidad. Si tienes alguna pregunta, problema o solicitud, siempre puedes ponerte en contacto con Aude en contact@the-gate.fr para recibir asistencia.

@@ -1,1 +1,1 @@
-G8 Invoicing
+g8 - invoice, delivery note

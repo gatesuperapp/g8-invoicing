@@ -1,12 +1,17 @@
-G8 Invoicing is a free and open-source invoicing app for Android.
+𝕘𝟠 is a free, efficient, and open-source invoicing app.
 
 Features:
 - Create and manage invoices
-- Create delivery notes and convert them to invoices
-- Create credit notes
-- Manage your clients and products
-- Custom pricing per client
-- Export documents to PDF
-- No account required, all data stored locally
+- Create delivery slips and convert them into invoices
+- Create credit memos
+- Manage your customers and products
+- Custom prices per customer
+- Export documents as PDFs
+- No account required
 
-Perfect for freelancers, small businesses and anyone who needs to create professional invoices on the go.
+Perfect for farmers, freelancers, small businesses, and anyone who needs to create professional invoices.
+
+No ads • No trackers • Optional subscription
+Open-source software 🇫🇷
+
+A great deal of effort has gone into developing this app to help you simplify your administrative tasks while protecting your privacy. If you have a question, a problem, or a request, support is always available—just contact Aude at contact@the-gate.fr
