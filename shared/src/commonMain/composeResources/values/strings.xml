@@ -177,14 +177,12 @@
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvrez les nouveautés...</string>
-    <string name="whats_new_emails_title">Plusieurs emails par client</string>
-    <string name="whats_new_emails_description">Associez jusqu'à 4 adresses email à un·e client·e pour envoyer vos factures à plusieurs destinataires.</string>
-    <string name="whats_new_translations_title">Nouvelles langues</string>
-    <string name="whats_new_translations_description">L'application est maintenant disponible en anglais et en allemand.</string>
-    <string name="whats_new_taxes_title">Taux de TVA</string>
-    <string name="whats_new_taxes_description">Vous pouvez personnaliser les taux depuis la catégorie Produits, en cliquant sur l'icône réglages quand vous ajoutez un taux.</string>
-    <string name="whats_new_logo_title">Logo</string>
-    <string name="whats_new_logo_description">Ajoutez votre logo lors de la création ou modification d'un·e émetteur·ice depuis un document.</string>
+    <string name="whats_new_subscription_title">Abonnement</string>
+    <string name="whats_new_subscription_description">Soutenez g8 avec un abonnement et débloquez des fonctionnalités dans le gStore. Rendez-vous dans Mon compte pour en savoir plus.</string>
+    <string name="whats_new_currency_language_title">¡Hola qué tal!</string>
+    <string name="whats_new_currency_language_description">g8 parle maintenant espagnol, et vous pouvez changer de monnaie. Retrouvez ces réglages dans Mon compte &gt; Devise et langue.</string>
+    <string name="whats_new_companies_title">Mes entreprises</string>
+    <string name="whats_new_companies_description">Gérez plus facilement les émetteurs utilisés dans vos documents depuis Mon compte &gt; Mes entreprises.</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bientôt disponible :)</string>
