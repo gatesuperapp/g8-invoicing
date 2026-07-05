@@ -65,11 +65,13 @@ fun ClientMultiSelectSheet(
                 )
             } else {
                 // Ordre figé à l'ouverture - clients sélectionnés en premier, puis alphabétique
+                // (nom, puis prénom pour départager les homonymes)
                 val sortedClients = remember(allClients) {
                     val initialSelectedIds = selectedClients.map { it.id }.toSet()
                     allClients.sortedWith(
                         compareByDescending<ClientRef> { initialSelectedIds.contains(it.id) }
                             .thenBy { it.name.lowercase() }
+                            .thenBy { it.firstName?.lowercase() ?: "" }
                     )
                 }
                 Column(
