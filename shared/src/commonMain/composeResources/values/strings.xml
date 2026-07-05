@@ -184,7 +184,7 @@
     <string name="whats_new_currency_title">Money money</string>
     <string name="whats_new_currency_description">Vous pouvez désormais utiliser d'autres devises que l'euro. Changez de monnaie dans "Mon compte" &gt; "Devise et langue".</string>
     <string name="whats_new_companies_title">Mes entreprises</string>
-    <string name="whats_new_companies_description">Gérez plus facilement les émetteurs utilisés dans vos documents depuis Mon compte &gt; Mes entreprises.</string>
+    <string name="whats_new_companies_description">Gérez plus facilement les émetteurs utilisés dans vos documents depuis "Mon compte" &gt; "Mes entreprises".</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bientôt disponible :)</string>

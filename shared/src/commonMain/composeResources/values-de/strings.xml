@@ -192,7 +192,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="whats_new_currency_title">Money money</string>
     <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter "Mein Konto" &gt; "Währung und Sprache".</string>
     <string name="whats_new_companies_title">Meine Unternehmen</string>
-    <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter Mein Konto &gt; Meine Unternehmen.</string>
+    <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter "Mein Konto" &gt; "Meine Unternehmen".</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bald verfügbar :)</string>
