@@ -186,9 +186,11 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="whats_new_welcome">Willkommen bei %1$s!</string>
     <string name="whats_new_discover">Viele neue Funktionen</string>
     <string name="whats_new_subscription_title">Abonnement</string>
-    <string name="whats_new_subscription_description">Unterstützen Sie g8 mit einem Abonnement und schalten Sie Funktionen im gStore frei. Mehr erfahren unter Mein Konto.</string>
-    <string name="whats_new_currency_language_title">¡Hola qué tal!</string>
-    <string name="whats_new_currency_language_description">g8 spricht jetzt Spanisch, und Sie können die Währung ändern. Diese Einstellungen finden Sie unter Mein Konto &gt; Währung und Sprache.</string>
+    <string name="whats_new_subscription_description">Unterstützen Sie 𝕘8 mit einem Abonnement und schalten Sie Funktionen im 𝕘Store frei. Mehr erfahren unter \"Mein Konto\".</string>
+    <string name="whats_new_spanish_title">Hola, qué tal ?</string>
+    <string name="whats_new_spanish_description">𝕘8 spricht jetzt Spanisch!</string>
+    <string name="whats_new_currency_title">Money money</string>
+    <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter \"Mein Konto\" &gt; \"Währung und Sprache\".</string>
     <string name="whats_new_companies_title">Meine Unternehmen</string>
     <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter Mein Konto &gt; Meine Unternehmen.</string>
 
