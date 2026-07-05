@@ -172,6 +172,9 @@ fun RowWithLabelAndInput(
 ) {
     // for the ripple on the row
     val interactionSource = remember { MutableInteractionSource() }
+    // Separate focus target for the editable label so the "Modifier" affordance can focus it
+    // without competing with the value field (both used to share the row-level requester).
+    val labelFocusRequester = remember { FocusRequester() }
 
     Row(
         verticalAlignment = Alignment.Top, // For label to stay on top when multiline input
@@ -218,7 +221,7 @@ fun RowWithLabelAndInput(
                 input = formInput.label,
                 keyboardOption = imeAction,
                 formActions = formActions,
-                focusRequester = focusRequester,
+                focusRequester = labelFocusRequester,
                 errorMessage = errorMessage,
                 isEditableLabel = true
             )
@@ -268,7 +271,8 @@ fun RowWithLabelAndInput(
             // Used for email list with chips
             is EmailListInput ->
                 FormInputCreatorEmailList(
-                    input = formInput.inputType
+                    input = formInput.inputType,
+                    focusRequester = focusRequester,
                 )
         }
     }

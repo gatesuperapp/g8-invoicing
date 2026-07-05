@@ -29,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -52,6 +54,7 @@ data class EmailListInput(
 @Composable
 fun FormInputCreatorEmailList(
     input: EmailListInput,
+    focusRequester: FocusRequester? = null,
 ) {
     val nonEmptyEmails = input.emails.filter { it.email.text.isNotEmpty() }
     val canAddMore = nonEmptyEmails.size < input.maxEmails
@@ -119,6 +122,7 @@ fun FormInputCreatorEmailList(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = if (nonEmptyEmails.isNotEmpty()) 4.dp else 0.dp)
+                        .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
                         .onFocusChanged { focusState ->
                             // When focus is lost, try to add the email
                             if (!focusState.isFocused) {
