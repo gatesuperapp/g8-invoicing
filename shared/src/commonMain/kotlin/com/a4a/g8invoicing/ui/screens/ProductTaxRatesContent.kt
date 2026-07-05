@@ -315,7 +315,23 @@ private fun TaxRateEditRow(
                             text = filtered,
                             selection = TextRange(newCursorPos)
                         )
-                        // Don't update rate here - only update when user clicks Done
+                        // Commit to parent state on every keystroke so the top-bar
+                        // Valider sees the current value even if the user never taps
+                        // the per-row Done checkmark. Empty/invalid → BigDecimal.ZERO
+                        // (which the parent drops on save).
+                        val normalized = filtered.replace(",", ".")
+                        val parsed = if (normalized.isEmpty()) {
+                            BigDecimal.ZERO
+                        } else {
+                            try {
+                                BigDecimal.parseString(normalized)
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                        if (parsed != null) {
+                            onUpdateRate(parsed)
+                        }
                     }
                 },
                 modifier = Modifier

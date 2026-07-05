@@ -56,7 +56,9 @@ fun ProductTaxRates(
                         isEditMode = false
                     },
                     onClickValidate = {
-                        onSaveTaxRates(editingRates)
+                        // Drop rows left empty/at 0 — if the user validates without
+                        // filling a row we silently ignore it (spec: don't warn).
+                        onSaveTaxRates(editingRates.filter { it.second.signum() != 0 })
                         isEditMode = false
                     }
                 )
