@@ -178,11 +178,11 @@
     <string name="whats_new_welcome">Bienvenido a la versión %1$s</string>
     <string name="whats_new_discover">Descubre las novedades...</string>
     <string name="whats_new_subscription_title">Suscripción</string>
-    <string name="whats_new_subscription_description">Apoya 𝕘8 con una suscripción y desbloquea funciones en la 𝕘Store. Ve a \"Mi cuenta\" para saber más.</string>
+    <string name="whats_new_subscription_description">Apoya 𝕘8 con una suscripción y desbloquea funciones en la 𝕘Store. Ve a "Mi cuenta" para saber más.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">¡𝕘8 habla ahora español!</string>
     <string name="whats_new_currency_title">Money money</string>
-    <string name="whats_new_currency_description">Ya puedes usar otras monedas además del euro. Cámbiala en \"Mi cuenta\" &gt; \"Moneda e idioma\".</string>
+    <string name="whats_new_currency_description">Ya puedes usar otras monedas además del euro. Cámbiala en "Mi cuenta" &gt; "Moneda e idioma".</string>
     <string name="whats_new_companies_title">Mis empresas</string>
     <string name="whats_new_companies_description">Gestiona más fácilmente los emisores usados en tus documentos desde Mi cuenta &gt; Mis empresas.</string>
 
