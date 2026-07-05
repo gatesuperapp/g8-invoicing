@@ -24,7 +24,7 @@
     <string name="document_reference">Referencia</string>
     <string name="document_reference_label">Referencia: </string>
     <string name="addressed_to">Dirigido a</string>
-    <string name="invoice_pdf_due_date">Fecha límite de pago</string>
+    <string name="invoice_pdf_due_date">Fecha límite de pago: </string>
     <string name="invoice_paid">Pagado ✔</string>
 
     <!-- Document table -->
@@ -177,14 +177,14 @@
     <string name="whats_new_done">¡Adelante!</string>
     <string name="whats_new_welcome">Bienvenido a la versión %1$s</string>
     <string name="whats_new_discover">Descubre las novedades...</string>
-    <string name="whats_new_emails_title">Varios correos por cliente</string>
-    <string name="whats_new_emails_description">Asocia hasta 4 direcciones de correo a un cliente para enviar tus facturas a varios destinatarios.</string>
-    <string name="whats_new_translations_title">Nuevos idiomas</string>
-    <string name="whats_new_translations_description">La aplicación ya está disponible en inglés y en alemán.</string>
-    <string name="whats_new_taxes_title">Tasa de IVA</string>
-    <string name="whats_new_taxes_description">Puedes personalizar las tasas desde la categoría Productos, haciendo clic en el icono de ajustes cuando añadas una tasa.</string>
-    <string name="whats_new_logo_title">Logo</string>
-    <string name="whats_new_logo_description">Añade tu logo al crear o modificar un emisor desde un documento.</string>
+    <string name="whats_new_subscription_title">Suscripción</string>
+    <string name="whats_new_subscription_description">Apoya 𝕘8 con una suscripción y desbloquea funciones en la 𝕘Store. Ve a "Mi cuenta" para saber más.</string>
+    <string name="whats_new_spanish_title">Hola, qué tal ?</string>
+    <string name="whats_new_spanish_description">¡𝕘8 habla ahora español!</string>
+    <string name="whats_new_currency_title">Money money</string>
+    <string name="whats_new_currency_description">Ya puedes usar otras monedas además del euro. Cámbiala en "Mi cuenta" &gt; "Moneda e idioma".</string>
+    <string name="whats_new_companies_title">Mis empresas</string>
+    <string name="whats_new_companies_description">Gestiona más fácilmente los emisores usados en tus documentos desde "Mi cuenta" &gt; "Mis empresas".</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Próximamente :)</string>
@@ -279,9 +279,6 @@
     <string name="account_auth_link_expired">⏰ Este enlace ha caducado o ya se ha utilizado. Puedes solicitar un nuevo enlace. Si el problema persiste, escríbenos a </string>
     <string name="account_auth_login_failed">Por ahora no se puede iniciar sesión. Puedes volver a intentarlo más tarde.\n\nSi el problema persiste, escríbenos a </string>
     <string name="account_auth_invalid_email">Dirección de correo no válida.</string>
-    <string name="account_auth_about_link">Más información sobre g8…</string>
-    <string name="account_auth_about_url">https://the-gate.fr</string>
-    <string name="account_logged_in_as">Conectado como:</string>
     <string name="account_logout">Cerrar sesión</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Miembro Premium</string>
     <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Miembro Premium</string>
@@ -290,7 +287,7 @@
     <string name="account_manage_subscription">Gestionar mi suscripción</string>
     <string name="account_manage_subscription_url">https://billing.stripe.com/p/login/test_5kQ9ASbgrcPl6113Sm1RC00</string>
     <string name="account_website_label">the-gate.fr</string>
-    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_section_auth">Autenticación</string>
     <string name="account_my_companies">Mis empresas</string>
     <string name="account_add_company">+ Añadir una empresa</string>
@@ -338,8 +335,8 @@
     <string name="about_terms_of_service_header">Al usar la aplicación, aceptas las</string>
     <string name="about_terms_of_service">condiciones de uso</string>
     <string name="about_terms_of_service_header_2">y la</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/es</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/es</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
     <string name="about_privacy">política de privacidad de 𝕘𝟠.</string>
     <string name="about_share_text_2">¡Compártela con tus amigos!</string>
     <string name="about_share_button">Compartir</string>

@@ -37,16 +37,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.whats_new_close
+import com.a4a.g8invoicing.shared.resources.whats_new_companies_title
+import com.a4a.g8invoicing.shared.resources.whats_new_companies_description
+import com.a4a.g8invoicing.shared.resources.whats_new_currency_title
+import com.a4a.g8invoicing.shared.resources.whats_new_currency_description
 import com.a4a.g8invoicing.shared.resources.whats_new_discover
 import com.a4a.g8invoicing.shared.resources.whats_new_done
-import com.a4a.g8invoicing.shared.resources.whats_new_emails_title
-import com.a4a.g8invoicing.shared.resources.whats_new_emails_description
-import com.a4a.g8invoicing.shared.resources.whats_new_translations_title
-import com.a4a.g8invoicing.shared.resources.whats_new_translations_description
-import com.a4a.g8invoicing.shared.resources.whats_new_taxes_title
-import com.a4a.g8invoicing.shared.resources.whats_new_taxes_description
-import com.a4a.g8invoicing.shared.resources.whats_new_logo_title
-import com.a4a.g8invoicing.shared.resources.whats_new_logo_description
+import com.a4a.g8invoicing.shared.resources.whats_new_spanish_title
+import com.a4a.g8invoicing.shared.resources.whats_new_spanish_description
+import com.a4a.g8invoicing.shared.resources.whats_new_subscription_title
+import com.a4a.g8invoicing.shared.resources.whats_new_subscription_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import kotlinx.coroutines.launch
@@ -64,28 +64,28 @@ fun WhatsNewDialog(
     onDismiss: () -> Unit
 ) {
     // Page de bienvenue + pages de fonctionnalités
-    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Corylus avellana")
+    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Castanea sativa")
 
     val featurePages = listOf(
         WhatsNewPage(
-            emoji = "💌",
-            title = stringResource(Res.string.whats_new_emails_title),
-            description = stringResource(Res.string.whats_new_emails_description)
+            emoji = "💎",
+            title = stringResource(Res.string.whats_new_subscription_title),
+            description = stringResource(Res.string.whats_new_subscription_description)
         ),
         WhatsNewPage(
-            emoji = "🌍",
-            title = stringResource(Res.string.whats_new_translations_title),
-            description = stringResource(Res.string.whats_new_translations_description)
+            emoji = "🇪🇸",
+            title = stringResource(Res.string.whats_new_spanish_title),
+            description = stringResource(Res.string.whats_new_spanish_description)
         ),
         WhatsNewPage(
-            emoji = "💶",
-            title = stringResource(Res.string.whats_new_taxes_title),
-            description = stringResource(Res.string.whats_new_taxes_description)
+            emoji = "💱",
+            title = stringResource(Res.string.whats_new_currency_title),
+            description = stringResource(Res.string.whats_new_currency_description)
         ),
         WhatsNewPage(
-            emoji = "🖼️",
-            title = stringResource(Res.string.whats_new_logo_title),
-            description = stringResource(Res.string.whats_new_logo_description)
+            emoji = "🏢",
+            title = stringResource(Res.string.whats_new_companies_title),
+            description = stringResource(Res.string.whats_new_companies_description)
         )
     )
 
