@@ -358,13 +358,14 @@ class ClientOrIssuerLocalDataSource(
                         } else {
                             client.name = TextFieldValue("${client.name.text} - Copie")
                         }
-                        // Save new client
-                        saveInfoInClientOrIssuerTable(client)
-                        // Get the ID of the newly created client
-                        val newClientId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-                        // Save addresses with the NEW client ID
-                        newClientId?.let { newId ->
-                            saveInfoInClientOrIssuerAddressTables(newId, client.addresses)
+                        // Wrap in a transaction so the list flow only re-emits once the
+                        // client, addresses and emails are all committed together.
+                        clientOrIssuerQueries.transaction {
+                            saveClientOrIssuerRow(client)
+                            val newClientId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                                ?: return@transaction
+                            saveClientOrIssuerAddressRows(newClientId, client.addresses)
+                            saveClientOrIssuerEmailRows(newClientId, client.emails)
                         }
                     }
                 }
