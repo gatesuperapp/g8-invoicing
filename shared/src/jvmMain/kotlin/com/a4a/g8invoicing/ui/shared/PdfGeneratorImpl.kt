@@ -135,13 +135,15 @@ class PdfGeneratorImpl(
             doc.add(createPrices(fontBold, it, fontSize, currencyCode))
         }
 
-        // Due date (invoices only)
+        // On invoices, keep the footer close to the due date (as in the preview) and
+        // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
+        // get the extra breathing room applied directly on the footer.
         if (document is InvoiceState) {
             doc.add(createDueDate(fontBold, document.dueDate.substringBefore(" "), fontSize))
+            doc.add(createFooter(document.footerText.text, fontSize))
+        } else {
+            doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
         }
-
-        // Footer
-        doc.add(createFooter(document.footerText.text, fontSize))
 
         // g8 watermark — text is frozen on the document at creation (watermark_text column).
         // null/blank → no watermark for this doc.
@@ -636,10 +638,23 @@ class RoundedCellRenderer(
     }
 
     override fun drawBackground(drawContext: DrawContext) {
-        val rect: Rectangle = occupiedAreaBBox
+        val fullRect: Rectangle = occupiedAreaBBox
         val canvas: PdfCanvas = drawContext.canvas
+
+        // The cell can be stretched vertically to match the tallest cell in its row
+        // (typically the issuer cell). Draw the rounded border around the actual
+        // content bottom instead of the full cell frame so the box hugs the client
+        // info even when the issuer has more lines.
+        val contentBottom = childRenderers
+            .mapNotNull { it.occupiedArea?.bBox?.bottom }
+            .minOrNull()
+            ?: fullRect.bottom
+        val contentPadding = 6.0
+        val drawBottom = (contentBottom - contentPadding).coerceAtLeast(fullRect.bottom + 2.5)
+        val drawHeight = (fullRect.top - 2.5) - drawBottom
+
         canvas.saveState()
-            .roundRectangle(rect.left + 2.5, rect.bottom + 2.5, rect.width - 5.0, rect.height - 5.0, 24.0)
+            .roundRectangle(fullRect.left + 2.5, drawBottom, fullRect.width - 5.0, drawHeight, 24.0)
             .setStrokeColor(color)
             .setLineWidth(1.5f)
         if (isColoredBackground) {
