@@ -90,6 +90,9 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about_language_english
 import com.a4a.g8invoicing.shared.resources.about_terms_of_service_url_1
 import com.a4a.g8invoicing.shared.resources.about_terms_of_service_url_2
+import com.a4a.g8invoicing.shared.resources.account_legal_line
+import com.a4a.g8invoicing.shared.resources.account_legal_privacy_label
+import com.a4a.g8invoicing.shared.resources.account_legal_terms_label
 import com.a4a.g8invoicing.shared.resources.about_language_french
 import com.a4a.g8invoicing.shared.resources.about_language_german
 import com.a4a.g8invoicing.shared.resources.about_language_spanish
@@ -956,20 +959,44 @@ private fun IssuerListRow(
 private fun LegalLinksFooter(uriHandler: androidx.compose.ui.platform.UriHandler) {
     val termsUrl = stringResource(Res.string.about_terms_of_service_url_1)
     val privacyUrl = stringResource(Res.string.about_terms_of_service_url_2)
+    val termsLabel = stringResource(Res.string.account_legal_terms_label)
+    val privacyLabel = stringResource(Res.string.account_legal_privacy_label)
+    // Template like "Lire les %1$s et la %2$s" (FR) or "%1$s und %2$s lesen" (DE).
+    // We walk the placeholders in appearance order to preserve grammar per locale.
+    val template = stringResource(Res.string.account_legal_line)
 
     val annotated = buildAnnotatedString {
-        withStyle(SpanStyle(color = Color.DarkGray)) { append("Lire les ") }
-        pushStringAnnotation(tag = "terms", annotation = termsUrl)
-        withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
-            append("conditions d'utilisation")
+        var cursor = 0
+        while (cursor < template.length) {
+            val nextTerms = template.indexOf("%1\$s", cursor)
+            val nextPrivacy = template.indexOf("%2\$s", cursor)
+            val next = listOf(nextTerms, nextPrivacy).filter { it >= 0 }.minOrNull() ?: -1
+            if (next < 0) {
+                withStyle(SpanStyle(color = Color.DarkGray)) {
+                    append(template.substring(cursor))
+                }
+                break
+            }
+            if (next > cursor) {
+                withStyle(SpanStyle(color = Color.DarkGray)) {
+                    append(template.substring(cursor, next))
+                }
+            }
+            if (next == nextTerms) {
+                pushStringAnnotation(tag = "terms", annotation = termsUrl)
+                withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+                    append(termsLabel)
+                }
+                pop()
+            } else {
+                pushStringAnnotation(tag = "policy", annotation = privacyUrl)
+                withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+                    append(privacyLabel)
+                }
+                pop()
+            }
+            cursor = next + 4 // length of "%1$s" or "%2$s"
         }
-        pop()
-        withStyle(SpanStyle(color = Color.DarkGray)) { append(" et la ") }
-        pushStringAnnotation(tag = "policy", annotation = privacyUrl)
-        withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
-            append("politique de confidentialité")
-        }
-        pop()
     }
 
     Box(
