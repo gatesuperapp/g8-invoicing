@@ -1,0 +1,5 @@
+- Nuevo: suscripción Premium
+- Español disponible
+- Multi-divisa: otras monedas además del euro
+- Sección "Mis empresas": gestiona los emisores
+- Correcciones de visualización y navegación
