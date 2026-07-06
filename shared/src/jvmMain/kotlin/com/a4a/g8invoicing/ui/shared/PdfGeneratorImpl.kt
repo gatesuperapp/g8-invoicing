@@ -236,6 +236,9 @@ class PdfGeneratorImpl(
                 val logoImage = Image(imageData)
                     .setMaxHeight(80f)
                     .setMaxWidth(200f)
+                    // TextAlignment.RIGHT on the cell only affects text — for a block
+                    // Image element we need to opt into right alignment explicitly.
+                    .setHorizontalAlignment(HorizontalAlignment.RIGHT)
                 logoCell.add(logoImage)
             }
         } catch (e: Exception) {
