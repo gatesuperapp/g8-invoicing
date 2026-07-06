@@ -121,7 +121,7 @@ fun WhatsNewDialog(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 40.dp, start = 24.dp, end = 24.dp, bottom = 16.dp),
+                        .padding(top = 40.dp, bottom = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Pager pour les pages (prend tout l'espace disponible)
@@ -138,7 +138,9 @@ fun WhatsNewDialog(
                             if (pageIndex == 0) {
                                 // Page de bienvenue
                                 Column(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
@@ -170,7 +172,9 @@ fun WhatsNewDialog(
                                 // Pages de fonctionnalités
                                 val page = featurePages[pageIndex - 1]
                                 Column(
-                                    modifier = Modifier.fillMaxWidth(),
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
                                 ) {
