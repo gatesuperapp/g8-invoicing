@@ -336,6 +336,10 @@
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
     <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
     <string name="about_privacy">privacy policy of 𝕘𝟠.</string>
+    <!-- Legal links footer on Mon Compte. %1$s = terms label, %2$s = privacy label -->
+    <string name="account_legal_line">Read the %1$s and the %2$s</string>
+    <string name="account_legal_terms_label">terms of service</string>
+    <string name="account_legal_privacy_label">privacy policy</string>
     <string name="about_share_text_2">Share it with your friends!</string>
     <string name="about_share_button">Share</string>
     <string name="about_title_version">App version</string>
@@ -367,7 +371,7 @@
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
     <string name="invoice_advice_legal_1">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡ \n\n …</string>
-    <string name="invoice_advice_legal_2">useful information. You are currently in the "Invoices" category.\n\n Before creating an invoice, I recommend you check the …</string>
+    <string name="invoice_advice_legal_2">You are currently in the "Invoices" category.\n\n Before creating an invoice, I recommend you check the …</string>
     <string name="invoice_advice_legal_3">mandatory information for a compliant invoice. To make your life easier, I've summarised everything here: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n On another note… \n …</string>

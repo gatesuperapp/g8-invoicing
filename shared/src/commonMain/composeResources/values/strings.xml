@@ -338,6 +338,10 @@
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
     <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
     <string name="about_privacy">politique de confidentialité de 𝕘𝟠.</string>
+    <!-- Legal links footer on Mon Compte. %1$s = terms label, %2$s = privacy label -->
+    <string name="account_legal_line">Lire les %1$s et la %2$s</string>
+    <string name="account_legal_terms_label">conditions d'utilisation</string>
+    <string name="account_legal_privacy_label">politique de confidentialité</string>
     <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
     <string name="about_title_version">Version de l'application</string>
@@ -369,7 +373,7 @@
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n …   </string>
-    <string name="invoice_advice_legal_2">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des …   </string>
+    <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des …   </string>
     <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n …   </string>
