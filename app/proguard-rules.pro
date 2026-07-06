@@ -33,3 +33,7 @@
 -dontwarn javax.xml.stream.**
 -dontwarn org.codehaus.stax2.**
 -dontwarn com.ctc.wstx.**
+
+# Tink (pulled in by androidx.security EncryptedSharedPreferences) references
+# ErrorProne annotations that are compile-time only and absent at runtime.
+-dontwarn com.google.errorprone.annotations.**
