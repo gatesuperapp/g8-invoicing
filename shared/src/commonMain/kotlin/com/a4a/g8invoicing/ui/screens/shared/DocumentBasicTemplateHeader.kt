@@ -210,7 +210,13 @@ fun DocumentBasicTemplateHeader(
     document.documentClient?.addresses?.let { addresses ->
         if (addresses.size > 1) {
             // ROW 3:  CLIENT ADDRESS TITLE 2 ------- TITLE 3
-            Row {
+            // Explicit top padding so the additional-address titles don't stick to
+            // the bottom of the issuer block when the issuer is taller than the
+            // primary client rectangle. The PDF renderer already spaces this via
+            // dedicated iText spacer cells.
+            Row(
+                modifier = Modifier.padding(top = 14.dp)
+            ) {
                 // When there are only 2 addresses, put address 2 on the right (below address 1)
                 if (addresses.size == 2) {
                     Spacer(modifier = Modifier.fillMaxWidth(0.5f))
