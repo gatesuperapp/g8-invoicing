@@ -20,3 +20,6 @@ actual fun setAppLocale(languageCode: String?) {
     NSUserDefaults.standardUserDefaults.setObject(listOf(code), forKey = "AppleLanguages")
     NSUserDefaults.standardUserDefaults.synchronize()
 }
+
+actual fun getSystemLocaleCode(): String =
+    NSLocale.currentLocale.languageCode.takeIf { it.isNotEmpty() } ?: "en"

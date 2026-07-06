@@ -26,7 +26,10 @@ import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
 import com.a4a.g8invoicing.ui.screens.GStoreViewModel
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
@@ -61,9 +64,15 @@ val sharedModule = module {
 
     // Auth
     single {
+        val localeManager: LocaleManager = get()
         HttpClient {
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true })
+            }
+            // DefaultRequest re-evaluates its block on every request, so we always
+            // send the currently effective locale.
+            install(DefaultRequest) {
+                header(HttpHeaders.AcceptLanguage, localeManager.effectiveLanguageCode)
             }
         }
     }

@@ -34,7 +34,10 @@ import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
@@ -70,12 +73,19 @@ val appModule = module {
     single { AuthInterceptor(get()) }
     single {
         val interceptor: AuthInterceptor = get()
+        val localeManager: LocaleManager = get()
         HttpClient(OkHttp) {
             engine {
                 addInterceptor(interceptor)
             }
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true })
+            }
+            // DefaultRequest re-evaluates its block on every request, so we always
+            // send the currently effective locale — the user changing language
+            // mid-session is picked up on the next call.
+            install(DefaultRequest) {
+                header(HttpHeaders.AcceptLanguage, localeManager.effectiveLanguageCode)
             }
         }
     }
