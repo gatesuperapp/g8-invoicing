@@ -213,7 +213,7 @@ class PdfGeneratorImpl(
             Paragraph(title + " " + documentNumber)
                 .setFont(fontBold)
                 .setFontSize(titleFontSize)
-                .setMarginBottom(-6F)
+                .setMarginBottom(-2F)
         )
 
         val dateLabel = strings.documentDate.trimEnd() + " "
@@ -254,7 +254,7 @@ class PdfGeneratorImpl(
         return Paragraph(title + " " + documentNumber)
             .setFont(font)
             .setFontSize(fontSize)
-            .setMarginBottom(-6F)
+            .setMarginBottom(-2F)
     }
 
     private fun createDate(date: String, font: PdfFont, fontSize: Float): Paragraph {
