@@ -351,6 +351,10 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
     <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
     <string name="about_privacy">Datenschutzerklärung von 𝕘𝟠.</string>
+    <!-- Legal links footer on Mon Compte. %1$s = terms label, %2$s = privacy label -->
+    <string name="account_legal_line">%1$s und %2$s lesen</string>
+    <string name="account_legal_terms_label">Nutzungsbedingungen</string>
+    <string name="account_legal_privacy_label">Datenschutzerklärung</string>
     <string name="about_share_text_2">Teilen Sie sie mit Ihren Freund:innen!</string>
     <string name="about_share_button">Teilen</string>
     <string name="about_title_version">Version der App</string>
@@ -395,7 +399,7 @@ Ich bin Kleine Hufnase, deine neue Freundin ♡
  Du kannst jederzeit auf mich klicken, wenn du mich siehst, ich gebe 
 
  …</string>
-    <string name="invoice_advice_legal_2">hilfreiche Informationen. Du bist gerade in der Kategorie "Rechnungen".
+    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie "Rechnungen".
 
 Bevor du eine Rechnung erstellst empfehle ich dir, dich über
 
