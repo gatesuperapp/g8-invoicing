@@ -89,7 +89,7 @@ fun DocumentBasicTemplateContent(
 
             if (!document.reference?.text.isNullOrEmpty()) {
                 document.reference?.let {
-                    Spacer(Modifier.height(14.dp))
+                    Spacer(Modifier.height(26.dp))
                     if (it.text.isNotEmpty())
                         DocumentBasicTemplateReference(
                             it.text,
