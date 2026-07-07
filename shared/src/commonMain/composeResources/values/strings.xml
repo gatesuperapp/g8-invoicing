@@ -286,7 +286,7 @@
     <string name="account_renewal_date">Renouvellement le %1$s</string>
     <string name="account_cancellation_date">Annulé — se termine le %1$s</string>
     <string name="account_manage_subscription">Gérer mon abonnement</string>
-    <string name="account_manage_subscription_url">https://billing.stripe.com/p/login/test_5kQ9ASbgrcPl6113Sm1RC00</string>
+    <string name="account_manage_subscription_url" translatable="false">https://billing.stripe.com/p/login/9AQ5oe5mr7tT7m0bII</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr</string>
     <string name="account_section_auth">Authentification</string>
