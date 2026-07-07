@@ -427,8 +427,8 @@ Une erreur s'est produite :
     <string name="sync_client_no">Non, uniquement ce document</string>
 
     <!-- Reminder email (invoice past due) -->
-    <string name="send_reminder_email_subject">Relance : facture N°%s</string>
-    <string name="send_reminder_email_content">Bonjour, \n\n Votre facture %s d'un montant de %s€ est arrivée à échéance le %s. Nous n'avons à ce jour pas reçu de paiement de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n Cordialement\n</string>
+    <string name="send_reminder_email_subject">Relance : facture N°%1$s</string>
+    <string name="send_reminder_email_content">Bonjour, \n\n Votre facture %1$s d'un montant de %2$s€ est arrivée à échéance le %3$s. Nous n'avons à ce jour pas reçu de paiement de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n Cordialement\n</string>
 
     <!-- Database export dialog -->
     <string name="database_export_dialog_title">^._.^</string>
