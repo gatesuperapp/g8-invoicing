@@ -422,4 +422,32 @@ Une erreur s'est produite :
     <string name="sync_client_message">¿Quieres aplicar estos cambios al cliente en tu lista de clientes?</string>
     <string name="sync_client_yes">Sí, actualizar</string>
     <string name="sync_client_no">No, solo este documento</string>
+
+    <!-- What's New watermark page -->
+    <string name="whats_new_watermark_title">Hecho con 𝕘8</string>
+    <string name="whats_new_watermark_description">Una discreta mención « Hecho con 𝕘8 » aparece ahora en tus documentos. La suscripción te permite quitarla y apoyar la app al mismo tiempo.</string>
+
+    <!-- Reminder email (invoice past due) -->
+    <string name="send_reminder_email_subject">Recordatorio: factura N°%1$s</string>
+    <string name="send_reminder_email_content">Hola, \n\n Tu factura %1$s por un importe de %2$s€ venció el %3$s. Aún no hemos recibido tu pago.\n\n Te rogamos que procedas con el pago lo antes posible.\n\n Un saludo\n</string>
+
+    <!-- Database export dialog -->
+    <string name="database_export_dialog_title">^._.^</string>
+    <string name="database_export_dialog_intro">¡Hey! Te recomiendo descargar tu base de datos 💎\n\n</string>
+    <string name="database_export_dialog_explanation">Es útil en caso de pérdida del teléfono o si hay un problema durante una actualización.\n\n</string>
+    <string name="database_export_dialog_where">Encuentra la opción en Menú &gt; 𝕘𝟠.</string>
+    <string name="database_export_dialog_error">Error al guardar la base de datos: %1$s</string>
+    <string name="database_export_dialog_confirm">Descargar mis datos</string>
+    <string name="database_export_dialog_dismiss">Lo haré más tarde</string>
+
+    <!-- Database email dialog -->
+    <string name="database_email_dialog_title">✅ Exportación exitosa</string>
+    <string name="database_email_dialog_text">La base de datos se ha guardado en la carpeta Descargas. ¿Quieres enviártela por correo electrónico?</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+
+    <!-- Database email intent -->
+    <string name="database_email_subject">Exportación de mis datos g8</string>
+    <string name="database_email_body">Mi base de datos SQLite de la aplicación g8. Contiene todos mis datos (clientes, productos, datos de facturación..). Si pierdo mi teléfono, esta base de datos podrá utilizarse para restaurar mis datos. Para cualquier pregunta: contact@the-gate.fr.</string>
+    <string name="database_email_chooser">Enviar la base de datos por correo</string>
 </resources>
