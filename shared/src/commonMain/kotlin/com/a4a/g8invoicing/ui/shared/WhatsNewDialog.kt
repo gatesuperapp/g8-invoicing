@@ -47,6 +47,8 @@ import com.a4a.g8invoicing.shared.resources.whats_new_spanish_title
 import com.a4a.g8invoicing.shared.resources.whats_new_spanish_description
 import com.a4a.g8invoicing.shared.resources.whats_new_subscription_title
 import com.a4a.g8invoicing.shared.resources.whats_new_subscription_description
+import com.a4a.g8invoicing.shared.resources.whats_new_watermark_title
+import com.a4a.g8invoicing.shared.resources.whats_new_watermark_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import kotlinx.coroutines.launch
@@ -71,6 +73,11 @@ fun WhatsNewDialog(
             emoji = "💎",
             title = stringResource(Res.string.whats_new_subscription_title),
             description = stringResource(Res.string.whats_new_subscription_description)
+        ),
+        WhatsNewPage(
+            emoji = "✍️",
+            title = stringResource(Res.string.whats_new_watermark_title),
+            description = stringResource(Res.string.whats_new_watermark_description)
         ),
         WhatsNewPage(
             emoji = "🇪🇸",
