@@ -268,7 +268,8 @@ fun RowWithLabelAndInput(
             // Used for email list with chips
             is EmailListInput ->
                 FormInputCreatorEmailList(
-                    input = formInput.inputType
+                    input = formInput.inputType,
+                    focusRequester = focusRequester,
                 )
         }
     }
