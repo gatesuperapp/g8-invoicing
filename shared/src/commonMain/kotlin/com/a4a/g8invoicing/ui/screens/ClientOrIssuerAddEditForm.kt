@@ -43,7 +43,6 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.client_add_address
 import com.a4a.g8invoicing.shared.resources.client_address1
 import com.a4a.g8invoicing.shared.resources.client_address1_input
-import com.a4a.g8invoicing.shared.resources.client_address2
 import com.a4a.g8invoicing.shared.resources.client_address2_input
 import com.a4a.g8invoicing.shared.resources.client_address_title
 import com.a4a.g8invoicing.shared.resources.client_address_title_delivery_placeholder
@@ -128,7 +127,6 @@ fun ClientOrIssuerAddEditForm(
     val clientAddressTitleHeadOfficePlaceholder = stringResource(Res.string.client_address_title_head_office_placeholder)
     val clientAddress1Label = stringResource(Res.string.client_address1)
     val clientAddress1Placeholder = stringResource(Res.string.client_address1_input)
-    val clientAddress2Label = stringResource(Res.string.client_address2)
     val clientAddress2Placeholder = stringResource(Res.string.client_address2_input)
     val clientCityLabel = stringResource(Res.string.client_city)
     val clientCityPlaceholder = stringResource(Res.string.client_city_input)
@@ -307,7 +305,7 @@ fun ClientOrIssuerAddEditForm(
                         else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
                     ),
                     FormInput(
-                        label = clientAddress2Label,
+                        label = "",
                         inputType = TextInput(
                             text = address?.addressLine2,
                             placeholder = clientAddress2Placeholder,
