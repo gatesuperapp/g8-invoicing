@@ -176,8 +176,8 @@
     <string name="whats_new_done">¡Adelante!</string>
     <string name="whats_new_welcome">Bienvenido a la versión %1$s</string>
     <string name="whats_new_discover">Descubre las novedades...</string>
-    <string name="whats_new_subscription_title">Suscripción</string>
-    <string name="whats_new_subscription_description">Apoya 𝕘8 con una suscripción y desbloquea funciones en la 𝕘Store. Ve a "Mi cuenta" para saber más.</string>
+    <string name="whats_new_gstore_title">𝕘Store</string>
+    <string name="whats_new_gstore_description">Una pequeña tienda para desbloquear funciones.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">¡𝕘8 habla ahora español!</string>
     <string name="whats_new_currency_title">Money money</string>
@@ -425,7 +425,7 @@ Une erreur s'est produite :
 
     <!-- What's New watermark page -->
     <string name="whats_new_watermark_title">Hecho con 𝕘8</string>
-    <string name="whats_new_watermark_description">Una discreta mención « Hecho con 𝕘8 » aparece ahora en tus documentos. La suscripción te permite quitarla y apoyar la app al mismo tiempo.</string>
+    <string name="whats_new_watermark_description">Una discreta mención « Hecho con 𝕘8 » aparece ahora en tus documentos. Puedes quitarla haciéndote miembro premium y apoyar la app al mismo tiempo.</string>
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Recordatorio: factura N°%1$s</string>

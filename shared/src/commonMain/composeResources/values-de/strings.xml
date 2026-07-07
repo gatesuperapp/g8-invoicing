@@ -184,8 +184,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="whats_new_done">Los geht's!</string>
     <string name="whats_new_welcome">Willkommen bei Version %1$s!</string>
     <string name="whats_new_discover">Viele neue Funktionen...</string>
-    <string name="whats_new_subscription_title">Abonnement</string>
-    <string name="whats_new_subscription_description">Unterstützen Sie 𝕘8 mit einem Abonnement und schalten Sie Funktionen im 𝕘Store frei. Mehr erfahren unter "Mein Konto".</string>
+    <string name="whats_new_gstore_title">𝕘Store</string>
+    <string name="whats_new_gstore_description">Ein kleiner Shop, um Funktionen freizuschalten.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">𝕘8 spricht jetzt Spanisch!</string>
     <string name="whats_new_currency_title">Money money</string>
@@ -473,7 +473,7 @@ Es ist ein Fehler aufgetreten :
 
     <!-- What's New watermark page -->
     <string name="whats_new_watermark_title">Erstellt mit 𝕘8</string>
-    <string name="whats_new_watermark_description">Ein dezenter Hinweis « Erstellt mit 𝕘8 » erscheint jetzt auf Ihren Dokumenten. Mit einem Abonnement können Sie ihn entfernen und gleichzeitig die App unterstützen!</string>
+    <string name="whats_new_watermark_description">Ein dezenter Hinweis « Erstellt mit 𝕘8 » erscheint jetzt auf Ihren Dokumenten. Sie können ihn entfernen, indem Sie Premium-Mitglied werden, und gleichzeitig die App unterstützen!</string>
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Mahnung: Rechnung Nr. %1$s</string>

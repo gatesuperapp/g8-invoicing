@@ -174,8 +174,8 @@
     <string name="whats_new_done">Let's go!</string>
     <string name="whats_new_welcome">Welcome to %1$s!</string>
     <string name="whats_new_discover">Lots of new features</string>
-    <string name="whats_new_subscription_title">Subscription</string>
-    <string name="whats_new_subscription_description">Support 𝕘8 with a subscription and unlock features in the 𝕘Store. Head to "My Account" to learn more.</string>
+    <string name="whats_new_gstore_title">𝕘Store</string>
+    <string name="whats_new_gstore_description">A little shop to unlock features.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">𝕘8 now speaks Spanish!</string>
     <string name="whats_new_currency_title">Money money</string>
@@ -420,7 +420,7 @@
 
     <!-- What's New watermark page -->
     <string name="whats_new_watermark_title">Made with 𝕘8</string>
-    <string name="whats_new_watermark_description">A discreet « Made with 𝕘8 » mention now appears on your documents. A subscription lets you remove it and support the app at the same time!</string>
+    <string name="whats_new_watermark_description">A discreet « Made with 𝕘8 » mention now appears on your documents. You can remove it by becoming a premium member, and support the app at the same time!</string>
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Reminder: invoice #%1$s</string>

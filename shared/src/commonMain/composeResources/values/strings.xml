@@ -176,10 +176,10 @@
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvrez les nouveautés...</string>
-    <string name="whats_new_subscription_title">Abonnement</string>
-    <string name="whats_new_subscription_description">Soutenez 𝕘8 avec un abonnement et débloquez des fonctionnalités dans le 𝕘Store. Rendez-vous dans "Mon compte" pour en savoir plus.</string>
+    <string name="whats_new_gstore_title">𝕘Store</string>
+    <string name="whats_new_gstore_description">Un petit magasin pour débloquer des fonctionnalités.</string>
     <string name="whats_new_watermark_title">Fait avec 𝕘8</string>
-    <string name="whats_new_watermark_description">Une discrète mention « Fait avec 𝕘8 » apparaît maintenant sur vos documents. L'abonnement permet de la retirer et de soutenir l'app par la même occasion !</string>
+    <string name="whats_new_watermark_description">Une discrète mention « Fait avec 𝕘8 » apparaît maintenant sur vos documents. Vous pouvez la retirer en devenant membre premium, et soutenir l'app par la même occasion !</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">𝕘8 parle maintenant espagnol !</string>
     <string name="whats_new_currency_title">Money money</string>
