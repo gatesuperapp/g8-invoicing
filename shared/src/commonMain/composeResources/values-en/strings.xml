@@ -133,7 +133,6 @@
     <string name="client_address_title_head_office_placeholder">Billing address</string>
     <string name="client_address1">Address</string>
     <string name="client_address1_input">6 Church Street</string>
-    <string name="client_address2"></string>
     <string name="client_address2_input">Apt 2B</string>
     <string name="client_city">City</string>
     <string name="client_city_input">Echoloc</string>
