@@ -45,8 +45,8 @@ import com.a4a.g8invoicing.shared.resources.whats_new_discover
 import com.a4a.g8invoicing.shared.resources.whats_new_done
 import com.a4a.g8invoicing.shared.resources.whats_new_spanish_title
 import com.a4a.g8invoicing.shared.resources.whats_new_spanish_description
-import com.a4a.g8invoicing.shared.resources.whats_new_subscription_title
-import com.a4a.g8invoicing.shared.resources.whats_new_subscription_description
+import com.a4a.g8invoicing.shared.resources.whats_new_gstore_title
+import com.a4a.g8invoicing.shared.resources.whats_new_gstore_description
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_title
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
@@ -71,8 +71,8 @@ fun WhatsNewDialog(
     val featurePages = listOf(
         WhatsNewPage(
             emoji = "💎",
-            title = stringResource(Res.string.whats_new_subscription_title),
-            description = stringResource(Res.string.whats_new_subscription_description)
+            title = stringResource(Res.string.whats_new_gstore_title),
+            description = stringResource(Res.string.whats_new_gstore_description)
         ),
         WhatsNewPage(
             emoji = "✍️",
