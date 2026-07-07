@@ -135,7 +135,6 @@
     <string name="client_address_title_head_office_placeholder">Dirección de facturación</string>
     <string name="client_address1">Dirección</string>
     <string name="client_address1_input">Calle de la Iglesia 6</string>
-    <string name="client_address2"></string>
     <string name="client_address2_input">Lugar beròi</string>
     <string name="client_city">Ciudad</string>
     <string name="client_city_input">Écholoc</string>
