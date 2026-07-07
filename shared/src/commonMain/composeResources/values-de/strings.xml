@@ -66,7 +66,7 @@ Wenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:
     <string name="alert_dialog_delete_invoice_3">
 In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
-    <string name="alert_dialog_delete_general">Ganz sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_general">Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>
     <string name="alert_dialog_cancel">Abbrechen</string>
 
@@ -79,7 +79,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_modal_product_back">Zurück</string>
 
     <!-- Invoice Created Dialog -->
-    <string name="invoice_created_title">Ihre Rechnung wurde erstellt</string>
+    <string name="invoice_created_title">Ihre Rechnung wurde erstellt.</string>
     <string name="invoice_created_button">Meine Rechnung ansehen</string>
 
     <!-- Document Form Strings -->
@@ -118,7 +118,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="product_delete_price">Diesen Preis löschen</string>
     <string name="document_product_quantity">Menge</string>
     <string name="document_product_quantity_input">1</string>
-    <string name="product_select_placeholder">Auswählen...</string>
+    <string name="product_select_placeholder">Auswählen…</string>
 
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITÄT</string>
@@ -146,7 +146,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="client_address2"></string>
     <string name="client_address2_input">Vorderhaus</string>
     <string name="client_city">Ort</string>
-    <string name="client_city_input">Karben</string>
+    <string name="client_city_input">Karlsruhe</string>
     <string name="client_zip_code">Postleitzahl</string>
     <string name="client_zip_code_input">61184</string>
     <string name="company_identification1">HRB</string>
@@ -183,8 +183,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Schließen</string>
     <string name="whats_new_done">Los geht's!</string>
-    <string name="whats_new_welcome">Willkommen bei %1$s!</string>
-    <string name="whats_new_discover">Viele neue Funktionen</string>
+    <string name="whats_new_welcome">Willkommen bei Version %1$s!</string>
+    <string name="whats_new_discover">Viele neue Funktionen...</string>
     <string name="whats_new_subscription_title">Abonnement</string>
     <string name="whats_new_subscription_description">Unterstützen Sie 𝕘8 mit einem Abonnement und schalten Sie Funktionen im 𝕘Store frei. Mehr erfahren unter "Mein Konto".</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
@@ -226,7 +226,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="appbar_create_corrected_invoice">Korrekturrechnung erstellen</string>
     <string name="appbar_create_credit_note">Gutschrift erstellen</string>
     <string name="appbar_convert">Konvertieren</string>
-    <string name="appbar_convert_label">Rg. stellen</string>
+    <string name="appbar_convert_label">In Rechnung stellen</string>
     <string name="appbar_unselect_all">Auswahl entfernen</string>
     <string name="appbar_unselect_all_label">Zurück</string>
     <string name="appbar_edit">Rg. bearbeiten</string>
