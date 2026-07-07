@@ -137,11 +137,7 @@ fun FormInputCreatorText(
             }
 
             if (isEditableLabel) {
-                Row(
-                    modifier = Modifier
-                        .padding(top = 3.dp)
-                        .clickable { focusRequester?.requestFocus() }
-                ) {
+                Row(modifier = Modifier.padding(top = 3.dp)) {
                     Icon(
                         modifier = Modifier
                             .width(10.dp),
