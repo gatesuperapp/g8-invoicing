@@ -470,4 +470,32 @@ Es ist ein Fehler aufgetreten :
     <string name="sync_client_message">Möchten Sie diese Änderungen auf den Kunden in Ihrer Kundenliste anwenden?</string>
     <string name="sync_client_yes">Ja, aktualisieren</string>
     <string name="sync_client_no">Nein, nur dieses Dokument</string>
+
+    <!-- What's New watermark page -->
+    <string name="whats_new_watermark_title">Erstellt mit 𝕘8</string>
+    <string name="whats_new_watermark_description">Ein dezenter Hinweis « Erstellt mit 𝕘8 » erscheint jetzt auf Ihren Dokumenten. Mit einem Abonnement können Sie ihn entfernen und gleichzeitig die App unterstützen!</string>
+
+    <!-- Reminder email (invoice past due) -->
+    <string name="send_reminder_email_subject">Mahnung: Rechnung Nr. %1$s</string>
+    <string name="send_reminder_email_content">Hallo, \n\n Ihre Rechnung %1$s über einen Betrag von %2$s€ war am %3$s fällig. Wir haben bisher keine Zahlung von Ihnen erhalten.\n\n Wir bitten Sie, die Zahlung so bald wie möglich vorzunehmen.\n\n Mit freundlichen Grüßen\n</string>
+
+    <!-- Database export dialog -->
+    <string name="database_export_dialog_title">^._.^</string>
+    <string name="database_export_dialog_intro">Hey! Ich empfehle dir, deine Datenbank herunterzuladen 💎\n\n</string>
+    <string name="database_export_dialog_explanation">Das ist nützlich, falls du dein Telefon verlierst oder es ein Problem bei einem Update gibt.\n\n</string>
+    <string name="database_export_dialog_where">Finde die Option in Menü &gt; 𝕘𝟠.</string>
+    <string name="database_export_dialog_error">Fehler beim Speichern der Datenbank: %1$s</string>
+    <string name="database_export_dialog_confirm">Meine Daten herunterladen</string>
+    <string name="database_export_dialog_dismiss">Ich mache das später</string>
+
+    <!-- Database email dialog -->
+    <string name="database_email_dialog_title">✅ Export erfolgreich</string>
+    <string name="database_email_dialog_text">Die Datenbank wurde im Downloads-Ordner gespeichert. Möchtest du sie dir per E-Mail schicken?</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+
+    <!-- Database email intent -->
+    <string name="database_email_subject">Export meiner g8-Daten</string>
+    <string name="database_email_body">Meine SQLite-Datenbank der g8-App. Sie enthält alle meine Daten (Kund·innen, Produkte, Rechnungsdaten..). Falls ich mein Telefon verliere, kann diese Datenbank verwendet werden, um meine Daten wiederherzustellen. Bei Fragen: contact@the-gate.fr.</string>
+    <string name="database_email_chooser">Datenbank per E-Mail senden</string>
 </resources>
