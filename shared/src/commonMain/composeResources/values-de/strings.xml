@@ -1,23 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default document numbers -->
     <string name="invoice_default_number">Rg-001</string>
     <string name="delivery_note_default_number">LS001</string>
     <string name="credit_note_default_number">Rg. 001</string>
-
     <!-- Currency -->
     <string name="currency">€</string>
-
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Kopie</string>
-
     <!-- Document footer -->
     <string name="document_default_footer">Skonto bei Vorauszahlung: kein
 Verzugsgebühr bei Zahlungsverzug: keine
 
 
 IBAN: DE71 1234 1234 1234 1234 00</string>
-
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -30,7 +26,6 @@ IBAN: DE71 1234 1234 1234 1234 00</string>
     <string name="addressed_to">Adressiert an</string>
     <string name="invoice_pdf_due_date">Fällig am </string>
     <string name="invoice_paid">Bezahlt ✔</string>
-
     <!-- Document table -->
     <string name="document_table_description">Bezeichnung</string>
     <string name="document_table_quantity">Menge</string>
@@ -38,23 +33,19 @@ IBAN: DE71 1234 1234 1234 1234 00</string>
     <string name="document_table_unit_price_without_tax">Einzelpreis ohne MwSt.</string>
     <string name="document_table_total_price_without_tax">Netto-Betrag</string>
     <string name="document_table_tax_rate">MwSt.</string>
-
     <!-- Document totals -->
     <string name="document_total_without_tax">Netto-Betrag:</string>
     <string name="document_total_with_tax">Gesamtbetrag:</string>
     <string name="document_tax">MwSt.</string>
     <string name="document_tax_label">MwSt. %1$s: </string>
-
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Netto-Betrag:</string>
     <string name="total_with_tax">Gesamtbetrag:</string>
     <string name="vat">MwSt.</string>
-
     <!-- UI Labels -->
     <string name="form_label_edit">Bearbeiten</string>
     <string name="product_price_without_tax">Netto</string>
     <string name="product_price_with_tax">Brutto</string>
-
     <!-- Alert Dialog Strings -->
     <string name="alert_dialog_delete_invoice_1">Bist du sicher?
 
@@ -69,7 +60,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_general">Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>
     <string name="alert_dialog_cancel">Abbrechen</string>
-
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Neuer Kunde</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Neuer Ersteller</string>
@@ -77,11 +67,9 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_modal_product_cancel">Abbrechen</string>
     <string name="document_modal_product_save">Speichern</string>
     <string name="document_modal_product_back">Zurück</string>
-
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Ihre Rechnung wurde erstellt.</string>
     <string name="invoice_created_button">Meine Rechnung ansehen</string>
-
     <!-- Document Form Strings -->
     <string name="document_number_short">Nr.</string>
     <string name="document_due_date">Fälligkeitsdatum</string>
@@ -91,13 +79,11 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_free_field">Freies Feld</string>
     <string name="document_footer">Fußzeile</string>
     <string name="document_default_reference">XFGDTSF</string>
-
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Neues Produkt</string>
     <string name="document_product_advice">Um ein Produkt zu ändern, klicke auf das graue Rechteck …</string>
     <string name="document_product_advice_2">Die Änderung wirkt sich ausschließlich auf dieses Dokument aus …</string>
     <string name="document_product_advice_3">Sie beeinflusst nicht das gespeicherte Produkt im Reiter "Produkte".</string>
-
     <!-- Product Form Strings -->
     <string name="product_name">Bezeichnung</string>
     <string name="product_name_input">Runkelrüben</string>
@@ -119,7 +105,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_product_quantity">Menge</string>
     <string name="document_product_quantity_input">1</string>
     <string name="product_select_placeholder">Auswählen…</string>
-
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITÄT</string>
     <string name="client_section_address">ADRESSE</string>
@@ -169,7 +154,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="client_selection_validate">Bestätigen</string>
     <string name="select_placeholder">Auswählen…</string>
     <string name="clients_selected_count">%1$d Kunden ausgewählt</string>
-
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Produkt hinzufügen</string>
     <string name="document_modal_edit_product">Produkt bearbeiten</string>
@@ -178,7 +162,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_modal_edit_issuer">Ersteller bearbeiten</string>
     <string name="document_modal_new_client">Neuer Kunde</string>
     <string name="document_modal_edit_client">Kunde bearbeiten</string>
-
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Schließen</string>
     <string name="whats_new_done">Los geht's!</string>
@@ -192,13 +175,10 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter "Mein Konto" &gt; "Währung und Sprache".</string>
     <string name="whats_new_companies_title">Meine Unternehmen</string>
     <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter "Mein Konto" &gt; "Meine Unternehmen".</string>
-
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bald verfügbar :)</string>
-
     <!-- Corrected Invoice -->
     <string name="corrected_invoice_cancel_and_replace">Rechnung annullieren und ersetzen</string>
-
     <!-- AppBar actions -->
     <string name="appbar_invoices">Rechnungen</string>
     <string name="appbar_credit_notes">Gutschriften</string>
@@ -245,11 +225,9 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="appbar_product_add">Produkt hinzufügen</string>
     <string name="appbar_product_edit">Produkt bearbeiten</string>
     <string name="appbar_g8">𝕘𝟠</string>
-
     <!-- Drawer / Categories -->
     <string name="drawer_g8">𝕘𝟠</string>
     <string name="drawer_my_account">Mein Konto</string>
-
     <!-- Account Screen -->
     <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
     <string name="account_donate">Mehr erfahren</string>
@@ -266,7 +244,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="account_auth_login_failed">Die Anmeldung ist derzeit nicht möglich. Bitte versuchen Sie es etwas später erneut.\n\nBei anhaltenden Problemen schreiben Sie uns an </string>
     <string name="account_auth_invalid_email">Ungültige E-Mail-Adresse.</string>
     <string name="drawer_gstore">𝕘Store</string>
-
     <!-- gStore -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Entdecken Sie die mit einem g8-Premium-Konto verfügbaren Module.</string>
@@ -287,7 +264,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="gstore_module_payments_desc">Erfassen Sie Karten-, Scheck- und Barzahlungen</string>
     <string name="gstore_module_themes_title">Premium-Themes</string>
     <string name="gstore_module_themes_desc">Mehr Farben und Designs</string>
-
     <string name="account_logout">Abmelden</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium-Mitglied</string>
     <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Premium-Mitglied</string>
@@ -308,7 +284,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="account_delete_error">Ihr Konto kann derzeit nicht gelöscht werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut, oder schreiben Sie uns an </string>
     <string name="account_delete_success_title">Konto gelöscht</string>
     <string name="account_delete_success_message">Ihr Konto wurde gelöscht. Lokal auf diesem Gerät gespeicherte Rechnungen und Daten bleiben erhalten.</string>
-
     <!-- About Screen -->
     <string name="about">𝕘𝟠 ist eine praktische und engagierte App:
  • Funktioniert offline
@@ -358,7 +333,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_share_text_2">Teilen Sie sie mit Ihren Freund:innen!</string>
     <string name="about_share_button">Teilen</string>
     <string name="about_title_version">Version der App</string>
-
     <!-- Language Selection -->
     <string name="about_title_language">Sprache</string>
     <string name="about_language_system">Systemsprache</string>
@@ -366,7 +340,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
     <string name="about_language_spanish">Español</string>
-
     <!-- Currency Selection -->
     <string name="account_currency_title">Währung</string>
     <string name="account_currency_and_language_title">Währung und Sprache</string>
@@ -374,10 +347,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="currency_picker_recent">Zuletzt verwendet</string>
     <string name="currency_picker_all">Alle</string>
     <string name="currency_picker_empty">Keine Währung gefunden</string>
-
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
-
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte
 
@@ -388,7 +359,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="delivery_note_advice_convert2">und dann auf "In Rechnung stellen" klicken. Sie erscheint dann im Reiter "Rechnungen" oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer.
 
  𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
-
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
     <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠,
@@ -421,7 +391,6 @@ Bevor du eine Rechnung erstellst empfehle ich dir, dich über
     <string name="invoice_advice_bottom_menu2">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen.
 
  𝕨𝕚𝕝𝕕</string>
-
     <!-- Export PDF -->
     <string name="export_waiting_permission">Genehmigung erforderlich…</string>
     <string name="export_ongoing">Export läuft…</string>
@@ -455,17 +424,14 @@ Bitte öffne sie direkt im Ordner Downloads/g8.</string>
 Es ist ein Fehler aufgetreten : 
 </string>
     <string name="alert_dialog_error_confirm">Autsch</string>
-
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Aussteller geändert</string>
     <string name="version_mismatch_message">Der Aussteller wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
     <string name="version_mismatch_load_latest">Neueste Version laden</string>
     <string name="version_mismatch_keep_current">Aktuelle Version behalten</string>
-
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Kunde geändert</string>
     <string name="version_mismatch_client_message">Der Kunde wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
-
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">Kunde aktualisieren?</string>
     <string name="sync_client_message">Möchten Sie diese Änderungen auf den Kunden in Ihrer Kundenliste anwenden?</string>
