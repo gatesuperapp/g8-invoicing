@@ -140,7 +140,9 @@ fun MainCompose(
                         }
                     },
                     onSendDatabaseByEmail = { filePath ->
-                        sendDatabaseByEmail(context, File(filePath))
+                        coroutineScope.launch {
+                            sendDatabaseByEmail(context, File(filePath))
+                        }
                     },
                     onComposeEmail = { address, subject, body ->
                         val intent = Intent(Intent.ACTION_SENDTO).apply {

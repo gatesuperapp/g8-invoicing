@@ -57,7 +57,9 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(compose.ui)
-            implementation(compose.components.resources)
+            // api() so the app module can call getString(Res.string.…) / stringResource(Res.string.…)
+            // for strings that were migrated from app/src/main/res/ to the shared source.
+            api(compose.components.resources)
 
             // Compottie - Lottie for Compose Multiplatform
             implementation("io.github.alexzhirkevich:compottie:2.0.0-rc01")
