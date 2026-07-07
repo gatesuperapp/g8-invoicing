@@ -425,4 +425,28 @@ Une erreur s'est produite :
     <string name="sync_client_message">Voulez-vous appliquer ces modifications au client dans votre liste de clients ?</string>
     <string name="sync_client_yes">Oui, mettre à jour</string>
     <string name="sync_client_no">Non, uniquement ce document</string>
+
+    <!-- Reminder email (invoice past due) -->
+    <string name="send_reminder_email_subject">Relance : facture N°%s</string>
+    <string name="send_reminder_email_content">Bonjour, \n\n Votre facture %s d'un montant de %s€ est arrivée à échéance le %s. Nous n'avons à ce jour pas reçu de paiement de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n Cordialement\n</string>
+
+    <!-- Database export dialog -->
+    <string name="database_export_dialog_title">^._.^</string>
+    <string name="database_export_dialog_intro">Hey ! Je te conseille de télécharger ta base de données 💎\n\n</string>
+    <string name="database_export_dialog_explanation">C'est utile en cas de perte du téléphone ou s'il y a un problème lors d'une mise à jour.\n\n</string>
+    <string name="database_export_dialog_where">Retrouve l'option dans Menu &gt; 𝕘𝟠.</string>
+    <string name="database_export_dialog_error">Erreur lors de l'enregistrement de la base : %1$s</string>
+    <string name="database_export_dialog_confirm">Télécharger mes données</string>
+    <string name="database_export_dialog_dismiss">Je le ferai plus tard</string>
+
+    <!-- Database email dialog -->
+    <string name="database_email_dialog_title">✅Export réussi</string>
+    <string name="database_email_dialog_text">La base de données a été enregistrée dans le dossier Téléchargements. Veux-tu te l'envoyer par mail ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+
+    <!-- Database email intent -->
+    <string name="database_email_subject">Export de mes données g8</string>
+    <string name="database_email_body">Ma base de données SQLite de l'application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
+    <string name="database_email_chooser">Envoyer la base de données par mail</string>
 </resources>
