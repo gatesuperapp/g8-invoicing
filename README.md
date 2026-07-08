@@ -2,7 +2,8 @@
 A privacy-focused app for creating delivery notes and invoices. Designed for farmers, suits any small organisation.
 
 **Multiplatform**
-The app is available on Android, can be downloaded on [f-droid](https://f-droid.org/fr/packages/com.a4a.g8invoicing/) or [Play Store](https://play.google.com/store/apps/details?id=com.a4a.g8invoicing)
+The app is available on Android, can be downloaded on [f-droid](https://f-droid.org/fr/packages/com.a4a.g8invoicing/) or [Play Store](https://play.google.com/store/apps/details?id=com.a4a.g8invoicing).
+
 iOS and desktop versions are under development.
 
 **Community**
