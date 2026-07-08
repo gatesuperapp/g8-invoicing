@@ -1,5 +1,9 @@
-- Neu: Premium-Abonnement
-- Spanisch verfügbar
-- Mehrere Währungen: andere Währungen als den Euro nutzen
-- Bereich "Meine Unternehmen": Ersteller verwalten
-- Korrekturen an Darstellung und Navigation
+- „Mein Konto": als Premium-Mitglied anmelden, Ihre Unternehmen verwalten, Sprache und Währung wählen.
+
+- Neu: 𝕘Store! Kleine Hufnase hat eine Werkstatt in der App eröffnet. Wählen Sie Module, um 𝕘8 nach und nach anzupassen. Zum Auftakt: den Hinweis „Erstellt mit 𝕘8" von Ihren Dokumenten entfernen. Weitere folgen im Lauf der Jahreszeiten.
+
+- Spanisch jetzt verfügbar.
+
+- Mehrere Währungen: andere Währungen als den Euro nutzen.
+
+- Anzeige- und Navigationskorrekturen.

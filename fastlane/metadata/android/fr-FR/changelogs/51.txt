@@ -1,5 +1,9 @@
-- Nouveau : abonnement Premium
-- Espagnol disponible
-- Multi-devise : d'autres monnaies que l'euro
-- Section "Mes entreprises" : gérer les émetteurs
-- Correctifs d'affichage et de navigation
+- « Mon compte » : connectez-vous en tant que membre premium, gérez vos entreprises, choisissez langue et devise.
+
+- Nouveau : 𝕘Store ! Petit Rhino a ouvert un atelier dans l'app. Piochez des modules pour personnaliser 𝕘8 peu à peu. Pour commencer : retirer la mention « Fait avec 𝕘8 » de vos documents. D'autres à venir au fil des saisons.
+
+- Espagnol maintenant disponible.
+
+- Multi-devises : utilisez d'autres devises que l'euro.
+
+- Corrections d'affichage et de navigation.

@@ -1,5 +1,9 @@
-- New: Premium subscription
-- Spanish now available
-- Multi-currency: use other currencies than the euro
-- "My companies" section: manage your issuers
-- Display and navigation fixes
+- "My account": log in as a premium member, manage your companies, set your language and currency.
+
+- New: 𝕘Store! Little Horseshoe has opened an in-app workshop. Grab modules to customise g8 as you go. First up: remove the « Made with g8 » mention from your documents. More to come over the seasons.
+
+- Spanish now available.
+
+- Multi-currency: use currencies other than the euro.
+
+- Display and navigation fixes.
