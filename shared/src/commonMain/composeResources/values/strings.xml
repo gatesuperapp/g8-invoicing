@@ -135,7 +135,6 @@
     <string name="client_address_title_head_office_placeholder">Adresse de facturation</string>
     <string name="client_address1">Adresse</string>
     <string name="client_address1_input">6 rue de l'église</string>
-    <string name="client_address2"></string>
     <string name="client_address2_input">Lieu-dit beròi</string>
     <string name="client_city">Ville</string>
     <string name="client_city_input">Écholoc</string>
@@ -177,14 +176,16 @@
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvrez les nouveautés...</string>
-    <string name="whats_new_emails_title">Plusieurs emails par client</string>
-    <string name="whats_new_emails_description">Associez jusqu'à 4 adresses email à un·e client·e pour envoyer vos factures à plusieurs destinataires.</string>
-    <string name="whats_new_translations_title">Nouvelles langues</string>
-    <string name="whats_new_translations_description">L'application est maintenant disponible en anglais et en allemand.</string>
-    <string name="whats_new_taxes_title">Taux de TVA</string>
-    <string name="whats_new_taxes_description">Vous pouvez personnaliser les taux depuis la catégorie Produits, en cliquant sur l'icône réglages quand vous ajoutez un taux.</string>
-    <string name="whats_new_logo_title">Logo</string>
-    <string name="whats_new_logo_description">Ajoutez votre logo lors de la création ou modification d'un·e émetteur·ice depuis un document.</string>
+    <string name="whats_new_gstore_title">𝕘Store</string>
+    <string name="whats_new_gstore_description">Un petit magasin pour débloquer des fonctionnalités.</string>
+    <string name="whats_new_watermark_title">Fait avec 𝕘8</string>
+    <string name="whats_new_watermark_description">Une discrète mention « Fait avec 𝕘8 » apparaît maintenant sur vos documents. Vous pouvez la retirer en devenant membre premium, et soutenir l'app par la même occasion !</string>
+    <string name="whats_new_spanish_title">Hola, qué tal ?</string>
+    <string name="whats_new_spanish_description">𝕘8 parle maintenant espagnol !</string>
+    <string name="whats_new_currency_title">Money money</string>
+    <string name="whats_new_currency_description">Vous pouvez désormais utiliser d'autres devises que l'euro. Changez de monnaie dans "Mon compte" &gt; "Devise et langue".</string>
+    <string name="whats_new_companies_title">Mes entreprises</string>
+    <string name="whats_new_companies_description">Gérez plus facilement les émetteurs utilisés dans vos documents depuis "Mon compte" &gt; "Mes entreprises".</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bientôt disponible :)</string>
@@ -240,7 +241,30 @@
     <string name="appbar_g8">𝕘𝟠</string>
 
     <!-- Drawer / Categories -->
-    <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_g8">Infos</string>
+    <string name="drawer_my_account">Mon Compte</string>
+    <string name="drawer_gstore">𝕘Store</string>
+
+    <!-- gStore (premium modules showcase) -->
+    <string name="gstore_title">𝕘Store</string>
+    <string name="gstore_subtitle_free">Découvrez les modules disponibles avec un compte g8 premium.</string>
+    <string name="gstore_subtitle_premium">Activez les modules que vous souhaitez utiliser.</string>
+    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_footer_free">Plus d'informations sur </string>
+    <string name="gstore_premium_only_message">Cette fonctionnalité est réservée aux membres premium.</string>
+    <string name="gstore_footer_premium">Gérez votre compte sur </string>
+    <string name="gstore_module_orders_title">Bon de commande</string>
+    <string name="gstore_module_orders_desc">Gérez les commandes de vos clients</string>
+    <string name="gstore_module_facturx_title">Factur-X</string>
+    <string name="gstore_module_facturx_desc">Facturation électronique</string>
+    <string name="gstore_module_watermark_title">Mention g8</string>
+    <string name="gstore_module_watermark_desc">Retirer la mention g8 de vos documents</string>
+    <string name="gstore_module_watermark_detail">Activez ce module pour supprimer la mention « Fait avec g8, application mobile de facturation » de vos factures, bons de livraison et avoirs.</string>
+    <string name="invoice_watermark_default">Fait avec g8 (www.the-gate.fr), application mobile de facturation</string>
+    <string name="gstore_module_payments_title">Paiements</string>
+    <string name="gstore_module_payments_desc">Enregistrez CB, chèques, espèces</string>
+    <string name="gstore_module_themes_title">Thèmes premium</string>
+    <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
@@ -248,28 +272,67 @@
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
+    <string name="account_auth_title">Vous êtes membre premium ? Connectez-vous ci-dessous :</string>
+    <string name="account_auth_subtitle">Recevez un lien de connexion par email.</string>
+    <string name="account_auth_email_label">Email</string>
+    <string name="account_auth_send_link">Recevoir mon lien de connexion</string>
+    <string name="account_auth_link_sent">✅ Un email avec le lien de connexion vous a été envoyé. Si vous ne le recevez pas, vérifiez dans vos spams, et n'hésitez pas à nous écrire à </string>
+    <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Vous pouvez réessayer dans quelques minutes, et n'hésitez pas à nous écrire à </string>
+    <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Vous pouvez demander un nouveau lien. Si le problème persiste, écrivez-nous à </string>
+    <string name="account_auth_login_failed">La connexion est pour l\'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
+    <string name="account_auth_invalid_email">Adresse e-mail invalide.</string>
+    <string name="account_logout">Me déconnecter</string>
+    <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Membre Premium</string>
+    <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Membre Premium</string>
+    <string name="account_renewal_date">Renouvellement le %1$s</string>
+    <string name="account_cancellation_date">Annulé — se termine le %1$s</string>
+    <string name="account_manage_subscription">Gérer mon abonnement</string>
+    <string name="account_manage_subscription_url" translatable="false">https://billing.stripe.com/p/login/9AQ5oe5mr7tT7m0bII</string>
+    <string name="account_website_label">the-gate.fr</string>
+    <string name="account_website_url">https://the-gate.fr</string>
+    <string name="account_section_auth">Authentification</string>
+    <string name="account_my_companies">Mes entreprises</string>
+    <string name="account_add_company">+ Ajouter une entreprise</string>
+    <string name="account_section_advanced">Avancé</string>
+    <string name="account_delete_cta">Supprimer mon compte</string>
+    <string name="account_delete_dialog_title">Supprimer définitivement votre compte ?</string>
+    <string name="account_delete_dialog_message">Cette action est irréversible. Votre abonnement sera annulé immédiatement, votre compte sera supprimé de nos serveurs et vous serez déconnecté·e. Vos factures et données enregistrées localement sur votre appareil resteront intactes.</string>
+    <string name="account_delete_dialog_confirm">Oui, supprimer</string>
+    <string name="account_delete_dialog_cancel">Annuler</string>
+    <string name="account_delete_error">Impossible de supprimer votre compte pour le moment. Vérifiez votre connexion et réessayez, ou écrivez-nous à </string>
+    <string name="account_delete_success_title">Compte supprimé</string>
+    <string name="account_delete_success_message">Votre compte a bien été supprimé. Vos factures et données enregistrées localement sur cet appareil sont conservées.</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 est une application pratique et engagée :\n• Fonctionne hors-ligne \n• Ni pub ni traceur \n• Logiciel libre, open-source\n• Conçue pour les producteur·ices bio\n• Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.</string>
     <string name="about_title_about">À propos</string>
     <string name="about_title_early_access">Programme "Early bat"</string>
+    <string name="about_title_website">Site internet</string>
+    <string name="about_website_intro">Rendez-vous sur notre site internet </string>
+    <string name="about_website_cta">www.the-gate.fr</string>
+    <string name="about_website_link">https://www.the-gate.fr</string>
+    <string name="about_website_tail"> !</string>
     <string name="about_title_community">Communauté</string>
     <string name="about_community_text">Venez discuter de vos besoins, vos idées et échanger sur le</string>
     <string name="about_community_cta">forum de la communauté.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Assistance</string>
-    <string name="about_assistance_text_1">Consultez la</string>
-    <string name="about_assistance_forum_link_text">rubrique "Aide" du forum</string>
+    <string name="about_assistance_intro">Vous pouvez nous écrire à tout moment pour signaler un bug, proposer une fonctionnalité ou demander de l'aide.</string>
+    <string name="about_assistance_more_lead">Vous pouvez également consulter la </string>
+    <string name="about_assistance_forum_link_text">rubrique « Aide » du forum</string>
     <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
-    <string name="about_assistance_text_2">, parcourez les</string>
+    <string name="about_assistance_more_middle">, parcourir les </string>
     <string name="about_assistance_tutorials_link_text">tutoriels et conseils</string>
     <string name="about_assistance_tutorials_link">https://the-gate.fr/conseils-et-tutos</string>
-    <string name="about_assistance_text_3">sur le site, ou écrivez à</string>
-    <string name="about_assistance_email_link_text">contact@the-gate.fr</string>
+    <string name="about_assistance_more_tail"> sur le site.</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Sauvegarde</string>
     <string name="about_backup_text">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
-    <string name="about_download_database">💎 Télécharger ma base de données 💎</string>
+    <string name="about_download_database">Télécharger</string>
+    <string name="account_backup_dialog_title">Sauvegarde téléchargée</string>
+    <string name="account_backup_dialog_message">Votre base de données a été enregistrée dans le dossier Téléchargements. Voulez-vous également l'envoyer par e-mail ?</string>
+    <string name="account_backup_dialog_yes">Oui, envoyer par e-mail</string>
+    <string name="account_backup_dialog_no">Non, c'est tout</string>
     <string name="about_title_legal">Mentions légales</string>
     <string name="about_terms_of_service_header">En utilisant l'application, vous acceptez les</string>
     <string name="about_terms_of_service">conditions d'utilisation</string>
@@ -277,12 +340,13 @@
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
     <string name="about_terms_of_service_url_2">https://www.the-gate.fr/politique-confidentialite</string>
     <string name="about_privacy">politique de confidentialité de 𝕘𝟠.</string>
-    <string name="about_share_text">L'application vous est utile ?</string>
-    <string name="about_donate_button">Faire un don</string>
-    <string name="about_donate_link">https://donate.stripe.com/5kAg047u3erm3jacMN</string>
+    <!-- Legal links footer on Mon Compte. %1$s = terms label, %2$s = privacy label -->
+    <string name="account_legal_line">Lire les %1$s et la %2$s</string>
+    <string name="account_legal_terms_label">conditions d'utilisation</string>
+    <string name="account_legal_privacy_label">politique de confidentialité</string>
     <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
-    <string name="about_build_version">Version de l'application : \u00A0</string>
+    <string name="about_title_version">Version de l'application</string>
 
     <!-- Language Selection -->
     <string name="about_title_language">Langue</string>
@@ -290,6 +354,15 @@
     <string name="about_language_french">Français</string>
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
+    <string name="about_language_spanish">Español</string>
+
+    <!-- Currency Selection -->
+    <string name="account_currency_title">Devise</string>
+    <string name="account_currency_and_language_title">Devise et langue</string>
+    <string name="currency_picker_search">Rechercher</string>
+    <string name="currency_picker_recent">Récemment utilisées</string>
+    <string name="currency_picker_all">Toutes</string>
+    <string name="currency_picker_empty">Aucune devise trouvée</string>
 
     <string name="label_separator"> : </string>
     <string name="ok">OK</string>
@@ -302,7 +375,7 @@
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n …   </string>
-    <string name="invoice_advice_legal_2">informations utiles. Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des …   </string>
+    <string name="invoice_advice_legal_2">Tu es actuellement dans la catégorie «Factures».\n\n Avant de créer une facture, je te conseille de prendre connaissance des …   </string>
     <string name="invoice_advice_legal_3">mentions obligatoires pour une facture conforme. Pour te facilier la vie j'ai tout résumé ici : \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sur un autre sujet… \n …   </string>
@@ -331,7 +404,11 @@
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
     <string name="export_email_subject_credit_note">avoir</string>
-    <string name="alert_dialog_error">Une erreur s&apos;est produite : </string>
+    <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
+ ((˃ᯅ˂)ノ) 
+
+Une erreur s'est produite : 
+</string>
     <string name="alert_dialog_error_confirm">OK</string>
 
     <!-- Version mismatch dialog -->
@@ -349,4 +426,28 @@
     <string name="sync_client_message">Voulez-vous appliquer ces modifications au client dans votre liste de clients ?</string>
     <string name="sync_client_yes">Oui, mettre à jour</string>
     <string name="sync_client_no">Non, uniquement ce document</string>
+
+    <!-- Reminder email (invoice past due) -->
+    <string name="send_reminder_email_subject">Relance : facture N°%1$s</string>
+    <string name="send_reminder_email_content">Bonjour, \n\n Votre facture %1$s d'un montant de %2$s€ est arrivée à échéance le %3$s. Nous n'avons à ce jour pas reçu de paiement de votre part.\n\n Nous vous remercions de procéder au règlement dès que possible.\n\n Cordialement\n</string>
+
+    <!-- Database export dialog -->
+    <string name="database_export_dialog_title">^._.^</string>
+    <string name="database_export_dialog_intro">Hey ! Je te conseille de télécharger ta base de données 💎\n\n</string>
+    <string name="database_export_dialog_explanation">C'est utile en cas de perte du téléphone ou s'il y a un problème lors d'une mise à jour.\n\n</string>
+    <string name="database_export_dialog_where">Retrouve l'option dans Menu &gt; 𝕘𝟠.</string>
+    <string name="database_export_dialog_error">Erreur lors de l'enregistrement de la base : %1$s</string>
+    <string name="database_export_dialog_confirm">Télécharger mes données</string>
+    <string name="database_export_dialog_dismiss">Je le ferai plus tard</string>
+
+    <!-- Database email dialog -->
+    <string name="database_email_dialog_title">✅Export réussi</string>
+    <string name="database_email_dialog_text">La base de données a été enregistrée dans le dossier Téléchargements. Veux-tu te l'envoyer par mail ?</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+
+    <!-- Database email intent -->
+    <string name="database_email_subject">Export de mes données g8</string>
+    <string name="database_email_body">Ma base de données SQLite de l'application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
+    <string name="database_email_chooser">Envoyer la base de données par mail</string>
 </resources>

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.a4a.g8invoicing.getSystemLocaleCode
 import com.a4a.g8invoicing.setAppLocale
 import com.russhwolf.settings.Settings
 
@@ -11,7 +12,8 @@ enum class AppLanguage(val code: String?, val displayName: String) {
     SYSTEM(null, "Système"),
     FRENCH("fr", "Français"),
     ENGLISH("en", "English"),
-    GERMAN("de", "Deutsch");
+    GERMAN("de", "Deutsch"),
+    SPANISH("es", "Español");
 
     companion object {
         fun fromCode(code: String?): AppLanguage {
@@ -27,6 +29,15 @@ class LocaleManager(private val settings: Settings = Settings()) {
 
     var currentLanguage: AppLanguage by mutableStateOf(loadSavedLanguage())
         private set
+
+    /**
+     * Resolved BCP-47 language code for the currently active locale — same as
+     * [currentLanguage].code except that SYSTEM falls back to the actual device
+     * locale (never null). Used for HTTP Accept-Language on outgoing API calls so
+     * server-side email localization matches what the user sees on screen.
+     */
+    val effectiveLanguageCode: String
+        get() = currentLanguage.code ?: getSystemLocaleCode()
 
     private fun loadSavedLanguage(): AppLanguage {
         val savedCode = settings.getStringOrNull(KEY_LANGUAGE)

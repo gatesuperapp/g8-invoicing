@@ -13,12 +13,25 @@ import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.AuthApiClient
+import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
+import com.a4a.g8invoicing.ui.screens.GStoreViewModel
+import io.ktor.client.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
 import com.a4a.g8invoicing.ui.viewmodels.AlertDialogViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
@@ -42,9 +55,30 @@ val sharedModule = module {
     // Locale Manager (singleton)
     single { LocaleManager() }
 
+    // Currency Manager (singleton)
+    single { CurrencyManager() }
+
     // Database
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
     single { Database(get()) }
+
+    // Auth
+    single {
+        val localeManager: LocaleManager = get()
+        HttpClient {
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+            // DefaultRequest re-evaluates its block on every request, so we always
+            // send the currently effective locale.
+            install(DefaultRequest) {
+                header(HttpHeaders.AcceptLanguage, localeManager.effectiveLanguageCode)
+            }
+        }
+    }
+    single { TokenStorage() }
+    single { AuthApiClient(get()) }
+    single { AuthRepository(get(), get(), get()) }
 
     // Queries
     single { get<Database>().invoiceQueries }
@@ -53,12 +87,13 @@ val sharedModule = module {
     single { get<Database>().clientOrIssuerQueries }
 
     // Data Sources
+    single { ActivatedModulesRepository(get()) }
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
-    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get()) }
-    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get()) }
-    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get()) }
+    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get()) }
+    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get()) }
+    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
 
     // ViewModels
@@ -90,5 +125,6 @@ val sharedModule = module {
         val itemId: String? = params.getOrNull()
         CreditNoteAddEditViewModel(get(), get(), itemId)
     }
-    viewModel { AccountViewModel() }
+    viewModel { AccountViewModel(get(), get()) }
+    viewModel { GStoreViewModel(get(), get()) }
 }

@@ -9,26 +9,43 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import com.a4a.g8invoicing.data.setSeenDbExportPopup
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.FileProvider
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.androidx.compose.koinViewModel
 import androidx.lifecycle.viewModelScope
 import java.io.File
-import com.a4a.g8invoicing.R
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.database_email_body
+import com.a4a.g8invoicing.shared.resources.database_email_chooser
+import com.a4a.g8invoicing.shared.resources.database_email_dialog_text
+import com.a4a.g8invoicing.shared.resources.database_email_dialog_title
+import com.a4a.g8invoicing.shared.resources.database_email_subject
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_confirm
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_dismiss
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_error
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_explanation
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_intro
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_title
+import com.a4a.g8invoicing.shared.resources.database_export_dialog_where
+import com.a4a.g8invoicing.shared.resources.no
+import com.a4a.g8invoicing.shared.resources.yes
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
 
 @Composable
 fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (File) -> Unit) {
     val viewModel: InvoiceListViewModel = koinViewModel()
+    val scope = rememberCoroutineScope()
 
     var exportMessage by remember { mutableStateOf<String?>(null) }
 
@@ -37,15 +54,15 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
             viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
             onDismiss()
         },
-        title = { Text(stringResource(id = R.string.database_export_dialog_title)) },
+        title = { Text(stringResource(Res.string.database_export_dialog_title)) },
         text = {
             Text(
                 buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append(stringResource(id = R.string.database_export_dialog_intro))
+                        append(stringResource(Res.string.database_export_dialog_intro))
                     }
-                    append(stringResource(id = R.string.database_export_dialog_explanation))
-                    append(stringResource(id = R.string.database_export_dialog_where))
+                    append(stringResource(Res.string.database_export_dialog_explanation))
+                    append(stringResource(Res.string.database_export_dialog_where))
 
                     exportMessage?.let {
                         append("\n\n$it")
@@ -58,17 +75,19 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
                 val file = try {
                     exportDatabaseToDownloads(context)
                 } catch (e: Exception) {
-                    exportMessage = context.getString(
-                        R.string.database_export_dialog_error,
-                        e.message ?: ""
-                    )
+                    scope.launch {
+                        exportMessage = getString(
+                            Res.string.database_export_dialog_error,
+                            e.message ?: ""
+                        )
+                    }
                     return@TextButton
                 }
                 viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
                 onDismiss()
                 onResult(file)
             }) {
-                Text(stringResource(id = R.string.database_export_dialog_confirm), color = ColorVioletLink)
+                Text(stringResource(Res.string.database_export_dialog_confirm), color = ColorVioletLink)
             }
         },
         dismissButton = {
@@ -76,7 +95,7 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
                 viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
                 onDismiss()
             }) {
-                Text(stringResource(id = R.string.database_export_dialog_dismiss), color = ColorVioletLink)
+                Text(stringResource(Res.string.database_export_dialog_dismiss), color = ColorVioletLink)
             }
         }
     )
@@ -84,21 +103,23 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
 
 @Composable
 fun DatabaseEmailDialog(context: Context, onDismiss: () -> Unit, file: File) {
+    val scope = rememberCoroutineScope()
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(id = R.string.database_email_dialog_title)) },
-        text = { Text(stringResource(id = R.string.database_email_dialog_text)) },
+        title = { Text(stringResource(Res.string.database_email_dialog_title)) },
+        text = { Text(stringResource(Res.string.database_email_dialog_text)) },
         confirmButton = {
             TextButton(onClick = {
                 onDismiss()
-                sendDatabaseByEmail(context, file)
+                scope.launch { sendDatabaseByEmail(context, file) }
             }) {
-                Text(stringResource(id = R.string.yes), color = ColorVioletLink)
+                Text(stringResource(Res.string.yes), color = ColorVioletLink)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(id = R.string.no), color = ColorVioletLink)
+                Text(stringResource(Res.string.no), color = ColorVioletLink)
             }
         }
     )
@@ -116,7 +137,7 @@ fun exportDatabaseToDownloads(context: Context): File {
     return exportFile
 }
 
-fun sendDatabaseByEmail(context: Context, file: File) {
+suspend fun sendDatabaseByEmail(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(
         context,
         "${context.packageName}.fileprovider",
@@ -125,16 +146,13 @@ fun sendDatabaseByEmail(context: Context, file: File) {
 
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "application/octet-stream"
-        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.database_email_subject))
-        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.database_email_body))
+        putExtra(Intent.EXTRA_SUBJECT, getString(Res.string.database_email_subject))
+        putExtra(Intent.EXTRA_TEXT, getString(Res.string.database_email_body))
         putExtra(Intent.EXTRA_STREAM, uri)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
 
     context.startActivity(
-        Intent.createChooser(
-            intent,
-            context.getString(R.string.database_email_chooser)
-        )
+        Intent.createChooser(intent, getString(Res.string.database_email_chooser))
     )
 }

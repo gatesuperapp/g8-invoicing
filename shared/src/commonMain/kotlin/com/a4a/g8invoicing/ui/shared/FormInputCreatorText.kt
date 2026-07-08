@@ -38,6 +38,7 @@ import com.a4a.g8invoicing.shared.resources.form_label_edit
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
+import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import com.a4a.g8invoicing.ui.theme.textVerySmall
 
@@ -155,9 +156,9 @@ fun FormInputCreatorText(
     }
 }
 
-// The handle is the "drop" shaped under the cursor -> we don't want to display it
+// The handle is the "drop" shaped under the cursor, useful to navigate in the text
 // The background is the color when text is selected
 val customTextSelectionColors = TextSelectionColors(
-    handleColor = Color.Transparent,
+    handleColor = ColorVioletLight,
     backgroundColor = ColorLoudGrey
 )

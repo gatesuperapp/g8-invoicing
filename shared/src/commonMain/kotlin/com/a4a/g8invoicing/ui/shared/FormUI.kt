@@ -209,8 +209,8 @@ fun RowWithLabelAndInput(
             is String -> Text(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
-                    .padding(end = 3.dp),
-                text = formInput.label,
+                    .padding(end = 12.dp),
+                text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
                 style = MaterialTheme.typography.inputLabel
             )
 
@@ -268,7 +268,8 @@ fun RowWithLabelAndInput(
             // Used for email list with chips
             is EmailListInput ->
                 FormInputCreatorEmailList(
-                    input = formInput.inputType
+                    input = formInput.inputType,
+                    focusRequester = focusRequester,
                 )
         }
     }
@@ -279,7 +280,8 @@ class FormInput(
     val inputType: Any,
     val inputType2: Any? = null, // Used for DoubleInputCreator
     val pageElement: ScreenElement,
-    val extraId: String? = null
+    val extraId: String? = null,
+    val isMandatory: Boolean = false
 )
 
 class TextInput(

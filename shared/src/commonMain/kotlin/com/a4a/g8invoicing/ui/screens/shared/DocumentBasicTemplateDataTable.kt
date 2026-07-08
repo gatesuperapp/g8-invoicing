@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.document_table_description
 import com.a4a.g8invoicing.shared.resources.document_table_quantity
 import com.a4a.g8invoicing.shared.resources.document_table_tax_rate
@@ -35,9 +34,9 @@ import com.a4a.g8invoicing.shared.resources.document_table_unit_price_without_ta
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.setScale
 import com.a4a.g8invoicing.data.stripTrailingZeros
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import org.jetbrains.compose.resources.stringResource
 
@@ -50,6 +49,8 @@ val borderWidth = 0.7.dp
 @Composable
 fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
+    currencyCode: String = "EUR",
+    labels: Map<String, String>? = null,
 ) {
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
@@ -70,7 +71,8 @@ fun DocumentBasicTemplateProductsTable(
         taxColumnWeight,
         unitPriceColumnWeight,
         totalPriceColumnWeight,
-        displayUnitColumn
+        displayUnitColumn,
+        labels,
     )
 
     val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
@@ -86,7 +88,8 @@ fun DocumentBasicTemplateProductsTable(
                 taxColumnWeight,
                 unitPriceColumnWeight,
                 totalPriceColumnWeight,
-                displayUnitColumn
+                displayUnitColumn,
+                currencyCode,
             )
         }
     } else {
@@ -98,7 +101,8 @@ fun DocumentBasicTemplateProductsTable(
             taxColumnWeight,
             unitPriceColumnWeight,
             totalPriceColumnWeight,
-            displayUnitColumn
+            displayUnitColumn,
+            currencyCode,
         )
     }
 }
@@ -112,6 +116,7 @@ fun TitleRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    labels: Map<String, String>? = null,
 ) {
     Row(
         Modifier
@@ -121,20 +126,20 @@ fun TitleRows(
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = stringResource(Res.string.document_table_description),
+            text = documentLabel(labels, "document_table_description", Res.string.document_table_description),
             weight = descriptionColumnWeight,
             alignEnd = false,
             isBold = true
         )
         TableCell(
-            text = stringResource(Res.string.document_table_quantity),
+            text = documentLabel(labels, "document_table_quantity", Res.string.document_table_quantity),
             weight = quantityColumnWeight,
             alignEnd = true,
             isBold = true
         )
         if (displayUnitColumn) {
             TableCell(
-                text = stringResource(Res.string.document_table_unit),
+                text = documentLabel(labels, "document_table_unit", Res.string.document_table_unit),
                 weight = unitColumnWeight,
                 alignEnd = true,
                 isBold = true
@@ -142,19 +147,19 @@ fun TitleRows(
         }
 
         TableCell(
-            text = stringResource(Res.string.document_table_tax_rate),
+            text = documentLabel(labels, "document_table_tax_rate", Res.string.document_table_tax_rate),
             weight = taxColumnWeight,
             alignEnd = true,
             isBold = true
         )
         TableCell(
-            text = stringResource(Res.string.document_table_unit_price_without_tax),
+            text = documentLabel(labels, "document_table_unit_price_without_tax", Res.string.document_table_unit_price_without_tax),
             weight = unitPriceColumnWeight,
             alignEnd = true,
             isBold = true
         )
         TableCell(
-            text = stringResource(Res.string.document_table_total_price_without_tax),
+            text = documentLabel(labels, "document_table_total_price_without_tax", Res.string.document_table_total_price_without_tax),
             weight = totalPriceColumnWeight,
             alignEnd = true,
             isBold = true
@@ -208,9 +213,8 @@ fun DocumentProductsRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    currencyCode: String = "EUR",
 ) {
-    val currencySymbol = stringResource(Res.string.currency)
-
     tableData.forEach { data ->
 
         Row(
@@ -246,16 +250,12 @@ fun DocumentProductsRows(
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let {
-                    it.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
-                } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it, currencyCode) } ?: "",
                 weight = unitPriceColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let {
-                    (it * data.quantity).toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
-                } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it * data.quantity, currencyCode) } ?: "",
                 weight = totalPriceColumnWeight,
                 alignEnd = true
             )

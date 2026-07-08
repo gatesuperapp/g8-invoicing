@@ -1,0 +1,5 @@
+- New: Premium subscription
+- Spanish now available
+- Multi-currency: use other currencies than the euro
+- "My companies" section: manage your issuers
+- Display and navigation fixes

@@ -22,6 +22,7 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.states.ProductsUiState
 import org.jetbrains.compose.resources.stringResource
@@ -56,6 +57,11 @@ fun ProductList(
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
+    // System back clears selection before navigating.
+    PlatformBackHandler(enabled = selectedItems.isNotEmpty()) {
+        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+    }
+
     ScaffoldWithDimmedOverlay(
         isDimmed = isDimActive.value,
         onDismissDim = { isDimActive.value = false },
@@ -63,7 +69,13 @@ fun ProductList(
             TopBar(
                 title = stringResource(Res.string.appbar_products),
                 navController = navController,
-                onClickBackArrow = onClickBack,
+                onClickBackArrow = {
+                    if (selectedItems.isNotEmpty()) {
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    } else {
+                        onClickBack()
+                    }
+                },
                 isCancelCtaDisplayed = false
             )
         },

@@ -7,6 +7,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.dmsansmedium
@@ -74,12 +75,18 @@ fun createCustomTypography(): Typography {
     )
 }
 
+// Section title: small uppercase, muted black, slight letter-spacing.
+// Matches the section title style used in the desktop forms.
+// Call sites should pass already-uppercased text (e.g. `text.uppercase()`).
 val Typography.textTitle: TextStyle
     @Composable
     get() {
         return TextStyle(
             fontFamily = getUiFontBold(),
-            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 12.sp,
+            color = Color.Black.copy(alpha = 0.6f),
+            letterSpacing = 0.08.em,
         )
     }
 

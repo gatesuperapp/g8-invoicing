@@ -6,6 +6,8 @@ CREATE TABLE DeliveryNote (
   free_field TEXT,
   currency TEXT,
   footer TEXT,
+  watermark_text TEXT,
+  labels_snapshot TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -36,8 +38,8 @@ SELECT delivery_note_id
 FROM DeliveryNote;
 
 save:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer)
-VALUES (?,  ?,  ?, ?, ?,?, ?);
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot)
+VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?);
 
 update:
 UPDATE DeliveryNote

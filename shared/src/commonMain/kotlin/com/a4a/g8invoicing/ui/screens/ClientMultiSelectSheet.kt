@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -40,7 +41,14 @@ fun ClientMultiSelectSheet(
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(Modifier.padding(16.dp)) {
+        // navigationBarsPadding keeps the Valider button clear of the system nav bar
+        // (3-button or gesture home indicator) — otherwise the tap can land on the
+        // system home button.
+        Column(
+            Modifier
+                .padding(16.dp)
+                .navigationBarsPadding()
+        ) {
 
             Text(
                 text = stringResource(Res.string.client_selection_title),
@@ -65,11 +73,13 @@ fun ClientMultiSelectSheet(
                 )
             } else {
                 // Ordre figé à l'ouverture - clients sélectionnés en premier, puis alphabétique
+                // (nom, puis prénom pour départager les homonymes)
                 val sortedClients = remember(allClients) {
                     val initialSelectedIds = selectedClients.map { it.id }.toSet()
                     allClients.sortedWith(
                         compareByDescending<ClientRef> { initialSelectedIds.contains(it.id) }
                             .thenBy { it.name.lowercase() }
+                            .thenBy { it.firstName?.lowercase() ?: "" }
                     )
                 }
                 Column(

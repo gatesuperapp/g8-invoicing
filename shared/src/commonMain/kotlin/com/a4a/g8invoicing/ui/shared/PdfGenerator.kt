@@ -33,10 +33,12 @@ data class PdfStrings(
     val totalWithTax: String,
     val tax: String,
     val dueDate: String,
-    val currency: String,
     val invoicePaid: String,
     val labelSeparator: String,
     val addressedTo: String,
+    val companyId1Label: String,
+    val companyId2Label: String,
+    val companyId3Label: String,
 )
 
 /**
@@ -76,7 +78,8 @@ expect class PdfFileManager() {
  */
 expect class PdfGenerator(strings: PdfStrings, fileManager: PdfFileManager) {
     /**
-     * Generate a PDF for the given document.
+     * Generate a PDF for the given document. The watermark, if any, is read from
+     * [DocumentState.watermarkText] (frozen at document creation).
      * Returns the final file name.
      */
     fun generatePdf(document: DocumentState): String

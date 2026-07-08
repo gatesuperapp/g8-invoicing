@@ -7,11 +7,21 @@ import android.os.StrictMode
 import android.os.StrictMode.VmPolicy
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.send_reminder_email_content
+import com.a4a.g8invoicing.shared.resources.send_reminder_email_subject
 import com.a4a.g8invoicing.ui.MainCompose
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 class MainActivity : AppCompatActivity() {
+
+    private val pendingMagicLinkToken = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,44 +35,64 @@ class MainActivity : AppCompatActivity() {
         // Compulsory for the bottom sheet modal to not overlap native navbar
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        handleDeepLink(intent)
+
         setContent {
             MainCompose(
                 onSendReminder = { invoice ->
                     sendReminderEmail(invoice)
+                },
+                pendingMagicLinkToken = pendingMagicLinkToken.value,
+                onMagicLinkTokenConsumed = {
+                    pendingMagicLinkToken.value = null
                 }
             )
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        val token = intent?.data?.getQueryParameter("token")
+        if (token != null) {
+            pendingMagicLinkToken.value = token
+        }
+    }
+
     private fun sendReminderEmail(invoice: InvoiceState) {
-        try {
-            val clientEmails = invoice.documentClient?.emails
-                ?.map { it.email.text }
-                ?.filter { it.isNotEmpty() }
-                ?: emptyList()
+        lifecycleScope.launch {
+            try {
+                val clientEmails = invoice.documentClient?.emails
+                    ?.map { it.email.text }
+                    ?.filter { it.isNotEmpty() }
+                    ?: emptyList()
 
-            val documentNumber = invoice.documentNumber.text
-            val totalAmount = invoice.documentTotalPrices?.totalPriceWithTax
-                ?.toStringExpanded() ?: "0"
-            val dueDate = invoice.dueDate
+                val documentNumber = invoice.documentNumber.text
+                val totalAmount = invoice.documentTotalPrices?.totalPriceWithTax
+                    ?.toStringExpanded() ?: "0"
+                val dueDate = invoice.dueDate
 
-            val subject = getString(R.string.send_reminder_email_subject, documentNumber)
-            val body = getString(R.string.send_reminder_email_content, documentNumber, totalAmount, dueDate)
+                val subject = getString(Res.string.send_reminder_email_subject, documentNumber)
+                val body = getString(Res.string.send_reminder_email_content, documentNumber, totalAmount, dueDate)
 
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:")
-                putExtra(Intent.EXTRA_EMAIL, clientEmails.toTypedArray())
-                putExtra(Intent.EXTRA_SUBJECT, subject)
-                putExtra(Intent.EXTRA_TEXT, body)
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:")
+                    putExtra(Intent.EXTRA_EMAIL, clientEmails.toTypedArray())
+                    putExtra(Intent.EXTRA_SUBJECT, subject)
+                    putExtra(Intent.EXTRA_TEXT, body)
+                }
+
+                // On Android 11+, resolveActivity() returns null due to package visibility restrictions
+                // Use startActivity directly with try-catch instead
+                startActivity(intent)
+            } catch (e: android.content.ActivityNotFoundException) {
+                // No email app available - silently ignore
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-
-            // On Android 11+, resolveActivity() returns null due to package visibility restrictions
-            // Use startActivity directly with try-catch instead
-            startActivity(intent)
-        } catch (e: android.content.ActivityNotFoundException) {
-            // No email app available - silently ignore
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 }

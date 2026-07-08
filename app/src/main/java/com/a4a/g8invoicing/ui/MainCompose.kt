@@ -20,7 +20,11 @@ import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.setSeenWhatsNew
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
+import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.AuthState
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.ui.navigation.NavGraph
+import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
@@ -36,10 +40,15 @@ import org.koin.compose.koinInject
 @Composable
 fun MainCompose(
     onSendReminder: (InvoiceState) -> Unit = {},
+    pendingMagicLinkToken: String? = null,
+    onMagicLinkTokenConsumed: () -> Unit = {},
     localeManager: LocaleManager = koinInject()
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val authRepository: AuthRepository = koinInject()
+    val subscriptionRepository: SubscriptionRepository = koinInject()
+    val authState by authRepository.authState.collectAsState()
 
     // Initialize locale and version tracking on first composition
     LaunchedEffect(Unit) {
@@ -60,6 +69,32 @@ fun MainCompose(
         }
     }
 
+    // Track navController for deep link navigation
+    var navControllerRef by remember { mutableStateOf<NavHostController?>(null) }
+
+    // Handle magic link token coming from a deep link: navigate to Account so its own
+    // NavBackStackEntry-scoped ViewModel can consume the token (and own the consume
+    // success/error state). navControllerRef is part of the key so we wait until the
+    // NavHost has wired it up — otherwise on cold start the navigate() no-ops.
+    LaunchedEffect(pendingMagicLinkToken, navControllerRef) {
+        val nav = navControllerRef
+        if (pendingMagicLinkToken != null && nav != null) {
+            nav.navigate(Screen.Account.name)
+        }
+    }
+
+    // Sync subscription status when auth state changes:
+    // - On LoggedIn (boot or after magic-link consume), refresh /v1/me. The cache
+    //   short-circuits if the data is < 6h old, so this is cheap on every cold start.
+    // - On LoggedOut, clear the cached subscription so a stale "premium" doesn't bleed
+    //   across sessions.
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.LoggedIn -> subscriptionRepository.refresh()
+            is AuthState.LoggedOut -> subscriptionRepository.clear()
+        }
+    }
+
     G8InvoicingTheme {
         // Use Crossfade for smooth transition when language changes
         Crossfade(
@@ -68,6 +103,10 @@ fun MainCompose(
             label = "language_transition"
         ) { _ ->
             val navController: NavHostController = rememberNavController()
+
+            LaunchedEffect(navController) {
+                navControllerRef = navController
+            }
 
             Surface(
                 modifier = Modifier.fillMaxSize()
@@ -101,7 +140,9 @@ fun MainCompose(
                         }
                     },
                     onSendDatabaseByEmail = { filePath ->
-                        sendDatabaseByEmail(context, File(filePath))
+                        coroutineScope.launch {
+                            sendDatabaseByEmail(context, File(filePath))
+                        }
                     },
                     onComposeEmail = { address, subject, body ->
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -113,7 +154,9 @@ fun MainCompose(
                         if (intent.resolveActivity(context.packageManager) != null) {
                             context.startActivity(intent)
                         }
-                    }
+                    },
+                    pendingMagicLinkToken = pendingMagicLinkToken,
+                    onMagicLinkTokenConsumed = onMagicLinkTokenConsumed,
                 )
             }
         }

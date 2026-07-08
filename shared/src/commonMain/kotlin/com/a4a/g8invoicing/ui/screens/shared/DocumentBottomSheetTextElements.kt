@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -82,6 +83,12 @@ fun DocumentBottomSheetTextElements(
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
 
+        // Back inside a slid-in sub-screen (client/issuer list, date picker, footer…)
+        // returns to the elements list instead of dismissing the whole sheet.
+        PlatformBackHandler(enabled = slideOtherComponent.value != null) {
+            slideOtherComponent.value = null
+        }
+
         Box(
             modifier = Modifier
                 .background(Color.Transparent)
@@ -96,54 +103,60 @@ fun DocumentBottomSheetTextElements(
                 )
                 .focusable(false)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight(0.5f)
-            ) {
-                Row(
-                    Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
-                        modifier = Modifier
-                            .height(50.dp)
-                            .width(70.dp)
-                            .clickable {
-                                // Hides keyboard if it was opened
-                                if (keyboard.name == "Opened") {
-                                    keyboardController?.hide()
-                                } else { // Hides bottom sheet
-                                    onDismissBottomSheet()
-                                }
-                            }) {
-                        Icon(
-                            modifier = Modifier
-                                .padding(end = 10.dp)
-                                .size(30.dp)
-                                .align(alignment = Alignment.CenterEnd),
-                            imageVector = Icons.Filled.ArrowDropDown,
-                            contentDescription = "Close bottom sheet"
-                        )
-                    }
-                }
+            // Show the main elements list only when no slide-in is open.
+            // Otherwise the elements (close icon, clickable rows) sit underneath
+            // the slide-in and catch taps that fall on its empty areas, which
+            // makes the sheet feel like it has a transparent background.
+            if (slideOtherComponent.value == null) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(bottom = 50.dp)
+                        .fillMaxHeight(0.5f)
                 ) {
-                    // MAIN ELEMENTS
-                    DocumentBottomSheetElementsContent(
-                        document = document,
-                        onValueChange = onValueChange,
-                        onClickForward = {
-                            //  localFocusManager.clearFocus(force = true)
-                            slideOtherComponent.value = it
-                        },
-                        placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                        localFocusManager = localFocusManager
-                    )
+                    Row(
+                        Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(70.dp)
+                                .clickable {
+                                    // Hides keyboard if it was opened
+                                    if (keyboard.name == "Opened") {
+                                        keyboardController?.hide()
+                                    } else { // Hides bottom sheet
+                                        onDismissBottomSheet()
+                                    }
+                                }) {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(30.dp)
+                                    .align(alignment = Alignment.CenterEnd),
+                                imageVector = Icons.Filled.ArrowDropDown,
+                                contentDescription = "Close bottom sheet"
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 50.dp)
+                    ) {
+                        // MAIN ELEMENTS
+                        DocumentBottomSheetElementsContent(
+                            document = document,
+                            onValueChange = onValueChange,
+                            onClickForward = {
+                                //  localFocusManager.clearFocus(force = true)
+                                slideOtherComponent.value = it
+                            },
+                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                            localFocusManager = localFocusManager
+                        )
+                    }
                 }
             }
 

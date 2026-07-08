@@ -8,9 +8,12 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_default_number
+import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -24,6 +27,8 @@ import kotlinx.coroutines.withContext
 class CreditNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
+    private val activatedModules: ActivatedModulesRepository,
+    private val currencyManager: CurrencyManager,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -38,9 +43,20 @@ class CreditNoteLocalDataSource(
         db.linkCreditNoteToDocumentClientOrIssuerQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
 
+    // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
+    private suspend fun computeWatermark(): String? {
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
+            null
+        } else {
+            getString(Res.string.invoice_watermark_default)
+        }
+    }
+
     override suspend fun createNew(): Long? {
         // Récupérer l'émetteur depuis la table maître
         val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
 
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -53,7 +69,10 @@ class CreditNoteLocalDataSource(
                 documentDate = todayFormatted,
                 dueDate = dueDateFormatted,
                 documentIssuer = existingIssuer,
-                footerText = TextFieldValue(getExistingFooter() ?: "")
+                currency = TextFieldValue(currencyManager.currentCurrency),
+                footerText = TextFieldValue(getExistingFooter() ?: ""),
+                watermarkText = frozenWatermark,
+                labelsSnapshot = frozenLabels,
             )
 
             saveInfoInCreditNoteTable(creditNote)
@@ -172,15 +191,19 @@ class CreditNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                currency = TextFieldValue("EUR"), // TODO: Currency should come from user preferences
+                currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
                 dueDate = it.due_date ?: "",
                 footerText = TextFieldValue(text = it.footer ?: ""),
-                createdDate = it.created_at
+                createdDate = it.created_at,
+                watermarkText = it.watermark_text,
+                labelsSnapshot = it.labels_snapshot,
             )
         }
     }
 
     override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -194,7 +217,13 @@ class CreditNoteLocalDataSource(
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
                         documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
-                        footerText = TextFieldValue(getExistingFooter() ?: "")
+                        currency = TextFieldValue(
+                            invoices.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
+                                ?: currencyManager.currentCurrency
+                        ),
+                        footerText = TextFieldValue(getExistingFooter() ?: ""),
+                        watermarkText = frozenWatermark,
+                        labelsSnapshot = frozenLabels,
                     )
                 )
                 invoices.forEach {
@@ -229,6 +258,8 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun duplicate(documents: List<CreditNoteState>) {
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach {
@@ -237,6 +268,8 @@ class CreditNoteLocalDataSource(
                     } ?: getString(Res.string.credit_note_default_number)
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
+                    creditNote.watermarkText = frozenWatermark
+                    creditNote.labelsSnapshot = frozenLabels
 
                     saveInfoInCreditNoteTable(creditNote)
                     saveInfoInOtherTables(creditNote)
@@ -427,7 +460,9 @@ class CreditNoteLocalDataSource(
                 free_field = document.freeField?.text,
                 currency = document.currency.text,
                 due_date = document.dueDate,
-                footer = document.footerText.text
+                footer = document.footerText.text,
+                watermark_text = document.watermarkText,
+                labels_snapshot = document.labelsSnapshot,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

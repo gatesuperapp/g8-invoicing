@@ -24,8 +24,8 @@ android {
         minSdk = 26
 
         targetSdk = 36
-        versionCode = 50
-        versionName = "1.6.4"
+        versionCode = 51
+        versionName = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -101,6 +101,9 @@ dependencies {
     // Koin (aligned with shared/ KMP version 4.0.2)
     implementation("io.insert-koin:koin-android:4.0.2")
     implementation("io.insert-koin:koin-androidx-compose:4.0.2")
+
+    // Encrypted token storage
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.2.0")

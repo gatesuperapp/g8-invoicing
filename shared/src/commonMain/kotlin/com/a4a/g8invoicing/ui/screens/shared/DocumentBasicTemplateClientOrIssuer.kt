@@ -9,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.company_identification1
+import com.a4a.g8invoicing.shared.resources.company_identification2
+import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import org.jetbrains.compose.resources.stringResource
@@ -19,9 +22,13 @@ import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 fun DocumentBasicTemplateClientOrIssuer(
     clientOrIssuer: ClientOrIssuerState?,
     displayAllInfo: Boolean = true,
-    addressIndex: Int = 0
+    addressIndex: Int = 0,
+    labels: Map<String, String>? = null,
 ) {
-    val labelSeparator = stringResource(Res.string.label_separator)
+    val labelSeparator = documentLabel(labels, "label_separator", Res.string.label_separator)
+    val defaultCompanyId1Label = documentLabel(labels, "company_identification1", Res.string.company_identification1)
+    val defaultCompanyId2Label = documentLabel(labels, "company_identification2", Res.string.company_identification2)
+    val defaultCompanyId3Label = documentLabel(labels, "company_identification3", Res.string.company_identification3)
     val address = clientOrIssuer?.addresses?.get(addressIndex)
     if(displayAllInfo) {
         val clientName = (clientOrIssuer?.firstName?.let { it.text + " " }
@@ -104,7 +111,8 @@ fun DocumentBasicTemplateClientOrIssuer(
                     .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = (clientOrIssuer?.companyId1Label?.text ?: "") + labelSeparator
+                text = (clientOrIssuer?.companyId1Label?.text?.takeUnless { it.isBlank() }
+                    ?: defaultCompanyId1Label) + labelSeparator
                         + clientOrIssuer?.companyId1Number?.text
             )
         }
@@ -115,7 +123,8 @@ fun DocumentBasicTemplateClientOrIssuer(
                     .padding(bottom = 1.dp)
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = (clientOrIssuer?.companyId2Label?.text ?: "") + labelSeparator
+                text = (clientOrIssuer?.companyId2Label?.text?.takeUnless { it.isBlank() }
+                    ?: defaultCompanyId2Label) + labelSeparator
                         + clientOrIssuer?.companyId2Number?.text
             )
         }
@@ -125,7 +134,8 @@ fun DocumentBasicTemplateClientOrIssuer(
                 modifier = Modifier
                     .wrapContentHeight(),
                 style = MaterialTheme.typography.textForDocuments,
-                text = (clientOrIssuer?.companyId3Label?.text ?: "") + labelSeparator
+                text = (clientOrIssuer?.companyId3Label?.text?.takeUnless { it.isBlank() }
+                    ?: defaultCompanyId3Label) + labelSeparator
                         + clientOrIssuer?.companyId3Number?.text
             )
         }

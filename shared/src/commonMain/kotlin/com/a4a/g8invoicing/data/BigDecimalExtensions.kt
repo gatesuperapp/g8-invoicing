@@ -36,14 +36,3 @@ fun BigDecimal.stripTrailingZeros(): BigDecimal {
 
 // Conversion vers Int
 fun BigDecimal.toIntKmp(): Int = this.intValue(false)
-
-// Format avec exactement 2 décimales (ex: 3.5 -> "3.50", 3 -> "3.00")
-fun BigDecimal.toStringWithTwoDecimals(): String {
-    val rounded = this.roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
-    val str = rounded.toPlainString()
-    return when {
-        !str.contains('.') -> "$str.00"
-        str.substringAfter('.').length == 1 -> "${str}0"
-        else -> str
-    }
-}

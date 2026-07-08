@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore by preferencesDataStore("settings")
 
 // Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "1.6"
+const val CURRENT_APP_VERSION = "1.7"
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")
@@ -25,6 +25,10 @@ suspend fun setSeenDbExportPopup(context: Context) {
     }
 }
 
+// QA helper — uncomment both lines to force the What's New popup on every launch
+// (useful when testing the dialog without bumping CURRENT_APP_VERSION).
+// private const val FORCE_SHOW_WHATS_NEW_FOR_QA = true
+
 // Vérifier si on doit afficher les nouveautés (mise à jour uniquement, pas nouvelle installation)
 fun shouldShowWhatsNew(context: Context) =
     context.dataStore.data.map { prefs ->
@@ -32,6 +36,7 @@ fun shouldShowWhatsNew(context: Context) =
         val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
 
         when {
+            // FORCE_SHOW_WHATS_NEW_FOR_QA -> true
             // Version déjà vue → ne pas afficher
             lastSeenVersion == CURRENT_APP_VERSION -> false
             // Version précédente existe et différente → mise à jour → afficher

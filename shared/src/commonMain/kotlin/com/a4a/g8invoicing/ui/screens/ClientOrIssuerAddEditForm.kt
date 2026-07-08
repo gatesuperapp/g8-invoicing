@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +43,6 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.client_add_address
 import com.a4a.g8invoicing.shared.resources.client_address1
 import com.a4a.g8invoicing.shared.resources.client_address1_input
-import com.a4a.g8invoicing.shared.resources.client_address2
 import com.a4a.g8invoicing.shared.resources.client_address2_input
 import com.a4a.g8invoicing.shared.resources.client_address_title
 import com.a4a.g8invoicing.shared.resources.client_address_title_delivery_placeholder
@@ -84,6 +84,7 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import org.jetbrains.compose.resources.stringResource
 
@@ -126,7 +127,6 @@ fun ClientOrIssuerAddEditForm(
     val clientAddressTitleHeadOfficePlaceholder = stringResource(Res.string.client_address_title_head_office_placeholder)
     val clientAddress1Label = stringResource(Res.string.client_address1)
     val clientAddress1Placeholder = stringResource(Res.string.client_address1_input)
-    val clientAddress2Label = stringResource(Res.string.client_address2)
     val clientAddress2Placeholder = stringResource(Res.string.client_address2_input)
     val clientCityLabel = stringResource(Res.string.client_city)
     val clientCityPlaceholder = stringResource(Res.string.client_city_input)
@@ -196,7 +196,8 @@ fun ClientOrIssuerAddEditForm(
                         }
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
-                    else ScreenElement.CLIENT_OR_ISSUER_NAME
+                    else ScreenElement.CLIENT_OR_ISSUER_NAME,
+                    isMandatory = true
                 ),
                 FormInput(
                     label = clientFirstNameLabel,
@@ -304,7 +305,7 @@ fun ClientOrIssuerAddEditForm(
                         else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
                     ),
                     FormInput(
-                        label = clientAddress2Label,
+                        label = "",
                         inputType = TextInput(
                             text = address?.addressLine2,
                             placeholder = clientAddress2Placeholder,
@@ -405,7 +406,7 @@ fun ClientOrIssuerAddEditForm(
                     ) {
                         AddAddressButton(
                             onClick = { numberOfClientAddresses += 1 },
-                            bottomPadding = if (i == 1) 16.dp else 0.dp,
+                            bottomPadding = 16.dp,
                             text = clientAddAddressText
                         )
                     }
@@ -619,14 +620,23 @@ fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
 
 @Composable
 fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String) {
-    Text(
-        style = MaterialTheme.typography.callForActions,
+    Box(
         modifier = Modifier
-            .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
+            .padding(start = 4.dp, top = 10.dp, bottom = bottomPadding)
+            .background(
+                color = Color.White,
+                shape = RoundedCornerShape(6.dp)
+            )
             .clickable(enabled = true) {
                 onClick()
-            },
-        text = AnnotatedString(text),
-    )
+            }
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Text(
+            style = MaterialTheme.typography.callForActions,
+            color = ColorVioletLink,
+            text = AnnotatedString(text),
+        )
+    }
 }
 

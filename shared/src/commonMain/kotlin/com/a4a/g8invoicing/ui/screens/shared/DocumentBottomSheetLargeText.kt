@@ -11,10 +11,6 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
@@ -22,13 +18,11 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 
-// User can either select an item (client or product) in the list, or add a new item
 @Composable
 fun DocumentBottomSheetLargeText(
-    initialText: TextFieldValue,
+    text: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
 ) {
-    var text by remember { mutableStateOf(initialText) }
     val scrollState = rememberScrollState()
 
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
@@ -45,10 +39,7 @@ fun DocumentBottomSheetLargeText(
                     .verticalScroll(scrollState)
                     .padding(30.dp),
                 value = text,
-                onValueChange = {
-                    text = it
-                    onValueChange(it)
-                }
+                onValueChange = onValueChange
             )
         }
     }

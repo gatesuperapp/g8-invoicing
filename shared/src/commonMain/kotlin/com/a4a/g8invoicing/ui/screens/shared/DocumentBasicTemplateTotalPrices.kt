@@ -12,15 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.document_tax_label
 import com.a4a.g8invoicing.shared.resources.document_total_with_tax
 import com.a4a.g8invoicing.shared.resources.document_total_without_tax
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.stripTrailingZeros
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -28,9 +27,9 @@ import org.jetbrains.compose.resources.stringResource
 fun DocumentBasicTemplateTotalPrices(
     uiState: DocumentState,
     footerArray: List<String>,
+    labels: Map<String, String>? = null,
 ) {
-    val currencySymbol = stringResource(Res.string.currency)
-
+    val currencyCode = uiState.currency.text.ifEmpty { "EUR" }
     Row(
         Modifier
             .fillMaxWidth()
@@ -57,7 +56,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = stringResource(Res.string.document_total_without_tax) + " "
+                    text = documentLabel(labels, "document_total_without_tax", Res.string.document_total_without_tax) + " "
                 )
             }
             if (footerArray.any { it.contains("TAXES") }) {
@@ -74,11 +73,14 @@ fun DocumentBasicTemplateTotalPrices(
                     uiState.documentTotalPrices?.totalAmountsOfEachTax?.firstOrNull {
                         tax.stripTrailingZeros().toPlainString() in it.first.stripTrailingZeros().toPlainString()
                     }?.let {
+                        val taxRate = "${it.first.stripTrailingZeros().toPlainString().replace(".", ",")}%"
+                        val taxLabel = labels?.get("document_tax_label")?.replace("%1\$s", taxRate)
+                            ?: stringResource(Res.string.document_tax_label, taxRate)
                         Text(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = stringResource(Res.string.document_tax_label, "${it.first.stripTrailingZeros().toPlainString().replace(".", ",")}%")
+                            text = taxLabel
                         )
                     }
                 }
@@ -86,7 +88,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = stringResource(Res.string.document_total_with_tax) + " "
+                    text = documentLabel(labels, "document_total_with_tax", Res.string.document_total_with_tax) + " "
                 )
             }
         }
@@ -103,8 +105,7 @@ fun DocumentBasicTemplateTotalPrices(
                     modifier = Modifier
                         .padding(bottom = paddingBottom),
                     style = MaterialTheme.typography.textForDocuments,
-                    text = (uiState.documentTotalPrices?.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")
-                        ?: " - ") + " " + currencySymbol
+                    text = uiState.documentTotalPrices?.totalPriceWithoutTax?.let { formatAmount(it, currencyCode) } ?: " - "
                 )
             }
             if (footerArray.any { it.contains("TAXES") }) {
@@ -125,7 +126,7 @@ fun DocumentBasicTemplateTotalPrices(
                             modifier = Modifier
                                 .padding(bottom = paddingBottom),
                             style = MaterialTheme.typography.textForDocuments,
-                            text = it.second.toStringWithTwoDecimals().replace(".", ",") + " " + currencySymbol
+                            text = formatAmount(it.second, currencyCode)
                         )
                     }
                 }
@@ -133,8 +134,7 @@ fun DocumentBasicTemplateTotalPrices(
             if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {
                 Text(
                     style = MaterialTheme.typography.textForDocumentsBold,
-                    text = (uiState.documentTotalPrices?.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",")
-                        ?: " - ") + " " + currencySymbol
+                    text = uiState.documentTotalPrices?.totalPriceWithTax?.let { formatAmount(it, currencyCode) } ?: " - "
                 )
             }
         }

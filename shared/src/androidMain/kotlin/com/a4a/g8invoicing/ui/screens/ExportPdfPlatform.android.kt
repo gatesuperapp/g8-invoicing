@@ -47,8 +47,10 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.addressed_to
 import com.a4a.g8invoicing.shared.resources.alert_dialog_error
 import com.a4a.g8invoicing.shared.resources.alert_dialog_error_confirm
+import com.a4a.g8invoicing.shared.resources.company_identification1
+import com.a4a.g8invoicing.shared.resources.company_identification2
+import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.credit_note_number
-import com.a4a.g8invoicing.shared.resources.currency
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.document_reference_label
@@ -136,10 +138,12 @@ actual fun ExportPdfPlatform(
         totalWithTax = stringResource(Res.string.total_with_tax),
         tax = stringResource(Res.string.vat),
         dueDate = stringResource(Res.string.invoice_pdf_due_date),
-        currency = stringResource(Res.string.currency),
         invoicePaid = stringResource(Res.string.invoice_paid),
         labelSeparator = stringResource(Res.string.label_separator),
         addressedTo = stringResource(Res.string.addressed_to),
+        companyId1Label = stringResource(Res.string.company_identification1),
+        companyId2Label = stringResource(Res.string.company_identification2),
+        companyId3Label = stringResource(Res.string.company_identification3),
     )
 
     // Strings for UI

@@ -1,0 +1,5 @@
+- Nouveau : abonnement Premium
+- Espagnol disponible
+- Multi-devise : d'autres monnaies que l'euro
+- Section "Mes entreprises" : gérer les émetteurs
+- Correctifs d'affichage et de navigation

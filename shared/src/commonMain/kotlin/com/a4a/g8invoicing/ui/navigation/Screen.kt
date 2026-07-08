@@ -16,6 +16,7 @@ enum class Screen {
     DeliveryNoteList,
     DeliveryNoteAddEdit,
     Account,
+    GStore,
     Settings,
     About
 }

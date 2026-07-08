@@ -36,6 +36,10 @@ fun NavGraph(
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
     onComposeEmail: (String, String, String) -> Unit = { _, _, _ -> },
+    // Magic link token from a deep link (Android only — null on desktop/iOS). Forwarded
+    // to the Account screen so its own scoped VM consumes it and owns the result UI.
+    pendingMagicLinkToken: String? = null,
+    onMagicLinkTokenConsumed: () -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -51,10 +55,35 @@ fun NavGraph(
                 navigateBack(navController)
             },
             onShareContent = onShareContent,
-            onExportDatabase = onExportDatabase,
-            onSendDatabaseByEmail = onSendDatabaseByEmail,
             onComposeEmail = onComposeEmail,
             showCategoryButton = showCategoryButton
+        )
+
+        // Account (magic link auth + subscription)
+        account(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            },
+            onShareContent = onShareContent,
+            onExportDatabase = onExportDatabase,
+            onSendDatabaseByEmail = onSendDatabaseByEmail,
+            pendingMagicLinkToken = pendingMagicLinkToken,
+            onMagicLinkTokenConsumed = onMagicLinkTokenConsumed,
+        )
+
+        // gStore (premium modules showcase, no commercial CTA)
+        gStore(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            },
         )
 
         // Delivery Notes

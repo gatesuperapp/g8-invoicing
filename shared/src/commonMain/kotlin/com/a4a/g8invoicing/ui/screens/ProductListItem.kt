@@ -28,15 +28,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.currency
+import com.a4a.g8invoicing.data.CurrencyManager
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.textSmall
-import org.jetbrains.compose.resources.stringResource
-
+import org.koin.compose.koinInject
 
 @Composable
 fun ProductListItem(
@@ -62,7 +61,8 @@ fun ProductListItem(
         product.defaultPriceWithTax
     }
 
-    val currencySymbol = stringResource(Res.string.currency)
+    val currencyManager: CurrencyManager = koinInject()
+    val currencyCode = currencyManager.currentCurrency
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -145,9 +145,7 @@ fun ProductListItem(
                     )
 
                     Text(
-                        text = displayPrice?.let {
-                            it.toPlainString().replace(".", ",") + " " + currencySymbol
-                        } ?: " - "
+                        text = displayPrice?.let { formatAmount(it, currencyCode) } ?: " - "
                     )
                 }
                 Row(

@@ -9,8 +9,11 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.delivery_note_default_number
+import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
@@ -22,6 +25,8 @@ import kotlinx.coroutines.withContext
 class DeliveryNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
+    private val activatedModules: ActivatedModulesRepository,
+    private val currencyManager: CurrencyManager,
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -35,12 +40,23 @@ class DeliveryNoteLocalDataSource(
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
 
+    // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
+    private suspend fun computeWatermark(): String? {
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
+            null
+        } else {
+            getString(Res.string.invoice_watermark_default)
+        }
+    }
+
     // --- createNew ---
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
         // Récupérer l'émetteur depuis la table maître
         val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
 
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -51,7 +67,10 @@ class DeliveryNoteLocalDataSource(
                 } ?: getString(Res.string.delivery_note_default_number)),
                 documentDate = todayFormatted,
                 documentIssuer = existingIssuer,
-                footerText = TextFieldValue(getExistingFooter() ?: "")
+                currency = TextFieldValue(currencyManager.currentCurrency),
+                footerText = TextFieldValue(getExistingFooter() ?: ""),
+                watermarkText = frozenWatermark,
+                labelsSnapshot = frozenLabels,
             )
 
             saveInfoInDocumentTable(newDeliveryNoteState)
@@ -187,10 +206,11 @@ class DeliveryNoteLocalDataSource(
                 documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
-                // TODO: Currency should come from user preferences, not hardcoded
-                currency = TextFieldValue("EUR"),
+                currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
                 footerText = TextFieldValue(text = it.footer ?: ""),
-                createdDate = it.created_at
+                createdDate = it.created_at,
+                watermarkText = it.watermark_text,
+                labelsSnapshot = it.labels_snapshot,
             )
         }
     }
@@ -219,6 +239,8 @@ class DeliveryNoteLocalDataSource(
     // --- duplicate ---
     // Uses withContext(Dispatchers.IO).
     override suspend fun duplicate(documents: List<DeliveryNoteState>) {
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { originalDocument ->
@@ -228,6 +250,8 @@ class DeliveryNoteLocalDataSource(
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),
+                        watermarkText = frozenWatermark,
+                        labelsSnapshot = frozenLabels,
                     )
 
                     saveInfoInDocumentTable(duplicatedDocumentState)
@@ -432,7 +456,9 @@ class DeliveryNoteLocalDataSource(
                 reference = document.reference?.text,
                 free_field = document.freeField?.text,
                 currency = document.currency.text,
-                footer = document.footerText.text
+                footer = document.footerText.text,
+                watermark_text = document.watermarkText,
+                labels_snapshot = document.labelsSnapshot,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

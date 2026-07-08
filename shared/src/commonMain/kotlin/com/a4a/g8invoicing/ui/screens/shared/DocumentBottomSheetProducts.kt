@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.shared.Keyboard
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -72,6 +73,12 @@ fun DocumentBottomSheetProducts(
             mutableStateOf(
                 DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
             )
+        }
+
+        // Back inside the products picker goes back to the chosen list
+        // rather than dismissing the whole sheet.
+        PlatformBackHandler(enabled = isProductListVisible) {
+            isProductListVisible = false
         }
 
         val parameters = Pair(

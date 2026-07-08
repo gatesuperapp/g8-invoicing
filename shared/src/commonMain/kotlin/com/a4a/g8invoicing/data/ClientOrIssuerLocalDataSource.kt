@@ -110,55 +110,94 @@ class ClientOrIssuerLocalDataSource(
 
 
     override suspend fun createNew(clientOrIssuer: ClientOrIssuerState): Boolean {
+        return createNewAndReturnId(clientOrIssuer) != null
+    }
+
+    override suspend fun createNewAndReturnId(clientOrIssuer: ClientOrIssuerState): Long? {
+        // Wrapped in a single transaction so the clients-table Flow only re-emits once
+        // all related rows (client, addresses, emails) are committed together. Otherwise
+        // the list refreshes on the client insert alone and fetches an empty emails list.
         return withContext(DispatcherProvider.IO) {
             try {
-                // 1: Save main info
-                saveInfoInClientOrIssuerTable(clientOrIssuer)
+                clientOrIssuerQueries.transactionWithResult<Long?> {
+                    saveClientOrIssuerRow(clientOrIssuer)
 
-                // 2: Get the entity ID
-                val newEntityId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-                    ?: run {
-                        return@withContext false
+                    val newEntityId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                        ?: return@transactionWithResult null
+
+                    if (!saveClientOrIssuerAddressRows(newEntityId, clientOrIssuer.addresses)) {
+                        rollback(null)
                     }
 
-                // 3: Save linked addresses
-                val addressesSavedSuccessfully = saveInfoInClientOrIssuerAddressTables(newEntityId, clientOrIssuer.addresses)
-                if (!addressesSavedSuccessfully) {
-                    return@withContext false
+                    saveClientOrIssuerEmailRows(newEntityId, clientOrIssuer.emails)
+
+                    newEntityId
                 }
-
-                // 4: Save linked emails
-                saveInfoInClientOrIssuerEmailTable(newEntityId, clientOrIssuer.emails)
-
-                true
             } catch (e: Exception) {
-                false
+                null
             }
         }
     }
 
-    override suspend fun createNewAndReturnId(clientOrIssuer: ClientOrIssuerState): Long? {
-        return withContext(DispatcherProvider.IO) {
-            try {
-                // 1: Save main info
-                saveInfoInClientOrIssuerTable(clientOrIssuer)
+    private fun saveClientOrIssuerRow(clientOrIssuer: ClientOrIssuerState) {
+        clientOrIssuerQueries.save(
+            id = null,
+            type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+            ) ClientOrIssuerType.CLIENT.name.lowercase()
+            else ClientOrIssuerType.ISSUER.name.lowercase(),
+            clientOrIssuer.firstName?.text?.trim(),
+            clientOrIssuer.name.text.trim(),
+            clientOrIssuer.phone?.text?.trim(),
+            clientOrIssuer.emails?.firstOrNull()?.email?.text?.trim(),
+            clientOrIssuer.notes?.text?.trim(),
+            clientOrIssuer.companyId1Label?.text?.trim(),
+            clientOrIssuer.companyId1Number?.text?.trim(),
+            clientOrIssuer.companyId2Label?.text?.trim(),
+            clientOrIssuer.companyId2Number?.text?.trim(),
+            clientOrIssuer.companyId3Label?.text?.trim(),
+            clientOrIssuer.companyId3Number?.text?.trim(),
+            clientOrIssuer.logoPath,
+        )
+    }
 
-                // 2: Get the entity ID
-                val newEntityId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-                    ?: return@withContext null
+    private fun saveClientOrIssuerAddressRows(
+        clientOrIssuerId: Long,
+        addresses: List<AddressState>?,
+    ): Boolean {
+        if (addresses.isNullOrEmpty()) return true
+        for (address in addresses) {
+            clientOrIssuerAddressQueries.save(
+                id = null,
+                address_title = address.addressTitle?.text?.trim(),
+                address_line_1 = address.addressLine1?.text?.trim(),
+                address_line_2 = address.addressLine2?.text?.trim(),
+                zip_code = address.zipCode?.text?.trim(),
+                city = address.city?.text?.trim(),
+            )
+            val newAddressId = clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
+                ?: return false
+            linkClientOrIssuerToAddressQueries.save(
+                id = null,
+                client_or_issuer_id = clientOrIssuerId,
+                address_id = newAddressId,
+            )
+        }
+        return true
+    }
 
-                // 3: Save linked addresses
-                val addressesSavedSuccessfully = saveInfoInClientOrIssuerAddressTables(newEntityId, clientOrIssuer.addresses)
-                if (!addressesSavedSuccessfully) {
-                    return@withContext null
-                }
-
-                // 4: Save linked emails
-                saveInfoInClientOrIssuerEmailTable(newEntityId, clientOrIssuer.emails)
-
-                newEntityId
-            } catch (e: Exception) {
-                null
+    private fun saveClientOrIssuerEmailRows(
+        clientOrIssuerId: Long,
+        emails: List<EmailState>?,
+    ) {
+        if (emails.isNullOrEmpty()) return
+        for (email in emails) {
+            if (email.email.text.isNotEmpty()) {
+                clientOrIssuerEmailQueries.save(
+                    id = null,
+                    client_or_issuer_id = clientOrIssuerId,
+                    email = email.email.text.trim(),
+                )
             }
         }
     }
@@ -319,13 +358,14 @@ class ClientOrIssuerLocalDataSource(
                         } else {
                             client.name = TextFieldValue("${client.name.text} - Copie")
                         }
-                        // Save new client
-                        saveInfoInClientOrIssuerTable(client)
-                        // Get the ID of the newly created client
-                        val newClientId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
-                        // Save addresses with the NEW client ID
-                        newClientId?.let { newId ->
-                            saveInfoInClientOrIssuerAddressTables(newId, client.addresses)
+                        // Wrap in a transaction so the list flow only re-emits once the
+                        // client, addresses and emails are all committed together.
+                        clientOrIssuerQueries.transaction {
+                            saveClientOrIssuerRow(client)
+                            val newClientId = clientOrIssuerQueries.getLastInsertedRowId().executeAsOneOrNull()
+                                ?: return@transaction
+                            saveClientOrIssuerAddressRows(newClientId, client.addresses)
+                            saveClientOrIssuerEmailRows(newClientId, client.emails)
                         }
                     }
                 }

@@ -51,9 +51,10 @@ actual class PdfFileManager actual constructor() {
         val tempFile = File(tempFilePath)
 
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10+: use MediaStore
-            deleteFromMediaStore(finalFileName)
-
+            // Android 10+: use MediaStore. Let MediaStore auto-suffix on name
+            // collision (e.g. "F001 (1).pdf") so re-exporting doesn't clobber the
+            // previous PDF. Previously we tried to delete first, which succeeded
+            // for credit notes (silent overwrite) but not for invoices.
             val contentValues = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, finalFileName)
                 put(MediaStore.Downloads.MIME_TYPE, "application/pdf")

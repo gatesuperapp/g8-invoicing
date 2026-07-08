@@ -1,0 +1,5 @@
+- Neu: Premium-Abonnement
+- Spanisch verfügbar
+- Mehrere Währungen: andere Währungen als den Euro nutzen
+- Bereich "Meine Unternehmen": Ersteller verwalten
+- Korrekturen an Darstellung und Navigation

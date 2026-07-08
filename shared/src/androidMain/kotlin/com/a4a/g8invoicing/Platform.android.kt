@@ -25,3 +25,5 @@ actual fun setAppLocale(languageCode: String?) {
     }
     AppCompatDelegate.setApplicationLocales(localeList)
 }
+
+actual fun getSystemLocaleCode(): String = java.util.Locale.getDefault().language.ifEmpty { "en" }

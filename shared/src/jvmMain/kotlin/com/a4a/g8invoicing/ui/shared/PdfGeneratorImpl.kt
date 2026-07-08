@@ -1,8 +1,8 @@
 package com.a4a.g8invoicing.ui.shared
 
+import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.stripTrailingZeros
-import com.a4a.g8invoicing.data.toStringWithTwoDecimals
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -20,15 +20,18 @@ import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Image
+import com.itextpdf.layout.element.Link
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
+import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import com.itextpdf.layout.properties.VerticalAlignment
@@ -117,9 +120,11 @@ class PdfGeneratorImpl(
             doc.add(createFreeText(it, fontRegular).setMarginTop(marginTop))
         }
 
+        val currencyCode = document.currency.text.ifEmpty { "EUR" }
+
         // Products table
         document.documentProducts?.let { products ->
-            createProductsTable(products, fontBold, fontRegular)?.let {
+            createProductsTable(products, fontBold, fontRegular, currencyCode)?.let {
                 val marginTop = if (document.reference?.text.isNullOrEmpty() && document.freeField?.text.isNullOrEmpty()) 20f else 10f
                 doc.add(it.setMarginTop(marginTop).setMarginBottom(12f))
             }
@@ -127,16 +132,24 @@ class PdfGeneratorImpl(
 
         // Prices
         document.documentTotalPrices?.let {
-            doc.add(createPrices(fontBold, it, fontSize))
+            doc.add(createPrices(fontBold, it, fontSize, currencyCode))
         }
 
-        // Due date (invoices only)
+        // On invoices, keep the footer close to the due date (as in the preview) and
+        // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
+        // get the extra breathing room applied directly on the footer.
         if (document is InvoiceState) {
             doc.add(createDueDate(fontBold, document.dueDate.substringBefore(" "), fontSize))
+            doc.add(createFooter(document.footerText.text, fontSize))
+        } else {
+            doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
         }
 
-        // Footer
-        doc.add(createFooter(document.footerText.text, fontSize))
+        // g8 watermark — text is frozen on the document at creation (watermark_text column).
+        // null/blank → no watermark for this doc.
+        document.watermarkText?.takeIf { it.isNotBlank() }?.let { watermark ->
+            doc.add(createWatermark(watermark, fontRegular))
+        }
     }
 
     private fun addPageNumbering(document: DocumentState, tempFileName: String): String {
@@ -200,7 +213,7 @@ class PdfGeneratorImpl(
             Paragraph(title + " " + documentNumber)
                 .setFont(fontBold)
                 .setFontSize(titleFontSize)
-                .setMarginBottom(-6F)
+                .setMarginBottom(-2F)
         )
 
         val dateLabel = strings.documentDate.trimEnd() + " "
@@ -223,6 +236,9 @@ class PdfGeneratorImpl(
                 val logoImage = Image(imageData)
                     .setMaxHeight(80f)
                     .setMaxWidth(200f)
+                    // TextAlignment.RIGHT on the cell only affects text — for a block
+                    // Image element we need to opt into right alignment explicitly.
+                    .setHorizontalAlignment(HorizontalAlignment.RIGHT)
                 logoCell.add(logoImage)
             }
         } catch (e: Exception) {
@@ -238,7 +254,7 @@ class PdfGeneratorImpl(
         return Paragraph(title + " " + documentNumber)
             .setFont(font)
             .setFontSize(fontSize)
-            .setMarginBottom(-6F)
+            .setMarginBottom(-2F)
     }
 
     private fun createDate(date: String, font: PdfFont, fontSize: Float): Paragraph {
@@ -384,13 +400,16 @@ class PdfGeneratorImpl(
 
             val companyInfo = Paragraph().setFixedLeading(12F).setPaddingBottom(4f)
             clientOrIssuer?.companyId1Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId1Label?.text ?: ""}${strings.labelSeparator}$it\n"))
+                val label = clientOrIssuer.companyId1Label?.text?.takeUnless { it.isBlank() } ?: strings.companyId1Label
+                companyInfo.add(Text("$label${strings.labelSeparator}$it\n"))
             }
             clientOrIssuer?.companyId2Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId2Label?.text ?: ""}${strings.labelSeparator}$it\n"))
+                val label = clientOrIssuer.companyId2Label?.text?.takeUnless { it.isBlank() } ?: strings.companyId2Label
+                companyInfo.add(Text("$label${strings.labelSeparator}$it\n"))
             }
             clientOrIssuer?.companyId3Number?.text?.let {
-                companyInfo.add(Text("${clientOrIssuer.companyId3Label?.text ?: ""}${strings.labelSeparator}$it\n"))
+                val label = clientOrIssuer.companyId3Label?.text?.takeUnless { it.isBlank() } ?: strings.companyId3Label
+                companyInfo.add(Text("$label${strings.labelSeparator}$it\n"))
             }
             result.add(companyInfo)
         }
@@ -410,7 +429,8 @@ class PdfGeneratorImpl(
     private fun createProductsTable(
         products: List<DocumentProductState>,
         fontBold: PdfFont,
-        fontRegular: PdfFont
+        fontRegular: PdfFont,
+        currencyCode: String,
     ): Table? {
         try {
             val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
@@ -438,10 +458,10 @@ class PdfGeneratorImpl(
                         "$docNumber - ${docDate?.substringBefore(" ")}",
                         TextAlignment.LEFT, true, fontBold, fontRegular, isSpan = true
                     )
-                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, fontBold, fontRegular, displayUnitColumn)
+                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, fontBold, fontRegular, displayUnitColumn, currencyCode)
                 }
             } else {
-                addProductRows(products, table, fontBold, fontRegular, displayUnitColumn)
+                addProductRows(products, table, fontBold, fontRegular, displayUnitColumn, currencyCode)
             }
 
             return table
@@ -456,7 +476,8 @@ class PdfGeneratorImpl(
         table: Table,
         fontBold: PdfFont,
         fontRegular: PdfFont,
-        displayUnitColumn: Boolean
+        displayUnitColumn: Boolean,
+        currencyCode: String,
     ) {
         products.forEach { product ->
             val itemName = Paragraph(Text(product.name.text)).setFixedLeading(10F)
@@ -481,38 +502,42 @@ class PdfGeneratorImpl(
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
-                product.priceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",")?.plus(" ${strings.currency}") ?: "",
+                product.priceWithoutTax?.let { formatAmount(it, currencyCode) } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
             table.addCustomCell(
                 product.priceWithoutTax?.let { price ->
-                    (price * product.quantity).toStringWithTwoDecimals().replace(".", ",") + " ${strings.currency}"
+                    formatAmount(price * product.quantity, currencyCode)
                 } ?: "",
                 fontBold = fontBold, fontRegular = fontRegular
             )
         }
     }
 
-    private fun createPrices(font: PdfFont, prices: DocumentTotalPrices, fontSize: Float): Table {
-        val table = Table(UnitValue.createPercentArray(floatArrayOf(90f, 10f)))
-            .useAllAvailableWidth()
+    private fun createPrices(font: PdfFont, prices: DocumentTotalPrices, fontSize: Float, currencyCode: String): Table {
+        // Auto-layout + right alignment so each column sizes to its content
+        // (mirrors the in-app preview). Avoids the wide-amount wrap to a new
+        // line that occurred with the previous 90/10 fixed split.
+        val table = Table(2)
+            .setAutoLayout()
+            .setHorizontalAlignment(HorizontalAlignment.RIGHT)
             .setTextAlignment(TextAlignment.RIGHT)
             .setPaddingBottom(8f)
             .setPaddingRight(4f)
 
         // Total HT
         table.addCellInPrices(Paragraph(strings.totalWithoutTax))
-        table.addCellInPrices(Paragraph("${prices.totalPriceWithoutTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "} ${strings.currency}"))
+        table.addCellInPrices(Paragraph(prices.totalPriceWithoutTax?.let { formatAmount(it, currencyCode) } ?: " - "))
 
         // TVA par taux
         prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
             table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}%${strings.labelSeparator}"))
-            table.addCellInPrices(Paragraph("${taxAmount.toStringWithTwoDecimals().replace(".", ",")} ${strings.currency}"))
+            table.addCellInPrices(Paragraph(formatAmount(taxAmount, currencyCode)))
         }
 
         // Total TTC
         table.addCellInPrices(Paragraph(strings.totalWithTax).setFont(font).setFontSize(fontSize))
-        table.addCellInPrices(Paragraph("${prices.totalPriceWithTax?.toStringWithTwoDecimals()?.replace(".", ",") ?: " - "} ${strings.currency}").setFont(font).setFontSize(fontSize))
+        table.addCellInPrices(Paragraph(prices.totalPriceWithTax?.let { formatAmount(it, currencyCode) } ?: " - ").setFont(font).setFontSize(fontSize))
 
         return table
     }
@@ -531,6 +556,36 @@ class PdfGeneratorImpl(
         return Paragraph(text)
             .setFontSize(fontSize)
             .setFixedLeading(14F)
+            .setTextAlignment(TextAlignment.CENTER)
+    }
+
+    private fun createWatermark(text: String, font: PdfFont): Paragraph {
+        // Tiny watermark, smaller than the document body. We split on the URL marker
+        // to make only that substring a clickable Link in PDF readers, but the entire
+        // line is underlined to match the in-app preview (Text with TextDecoration.Underline).
+        // If the (translated) text doesn't contain the marker, we render plain underlined text.
+        // The underline uses an explicit thin thickness (0.2pt) — iText's default thickness
+        // is too heavy relative to the small font and reads as a smudged bar.
+        val urlMarker = "www.the-gate.fr"
+        val underlineThickness = 0.2F
+        val underlineYPosition = -1F
+        val paragraph = Paragraph()
+        if (text.contains(urlMarker)) {
+            paragraph.add(Text(text.substringBefore(urlMarker)).setUnderline(underlineThickness, underlineYPosition))
+            paragraph.add(
+                Link(urlMarker, PdfAction.createURI("https://the-gate.fr")).setUnderline(underlineThickness, underlineYPosition)
+            )
+            paragraph.add(Text(text.substringAfter(urlMarker)).setUnderline(underlineThickness, underlineYPosition))
+        } else {
+            paragraph.add(Text(text).setUnderline(underlineThickness, underlineYPosition))
+        }
+        return paragraph
+            .setFont(font)
+            .setFontSize(7F)
+            .setFixedLeading(9F)
+            .setCharacterSpacing(0.4F)
+            .setFontColor(ColorConstants.GRAY)
+            .setMarginTop(8F)
             .setTextAlignment(TextAlignment.CENTER)
     }
 
@@ -586,10 +641,23 @@ class RoundedCellRenderer(
     }
 
     override fun drawBackground(drawContext: DrawContext) {
-        val rect: Rectangle = occupiedAreaBBox
+        val fullRect: Rectangle = occupiedAreaBBox
         val canvas: PdfCanvas = drawContext.canvas
+
+        // The cell can be stretched vertically to match the tallest cell in its row
+        // (typically the issuer cell). Draw the rounded border around the actual
+        // content bottom instead of the full cell frame so the box hugs the client
+        // info even when the issuer has more lines.
+        val contentBottom = childRenderers
+            .mapNotNull { it.occupiedArea?.bBox?.bottom }
+            .minOrNull()
+            ?: fullRect.bottom
+        val contentPadding = 6.0
+        val drawBottom = (contentBottom - contentPadding).coerceAtLeast(fullRect.bottom + 2.5)
+        val drawHeight = (fullRect.top - 2.5) - drawBottom
+
         canvas.saveState()
-            .roundRectangle(rect.left + 2.5, rect.bottom + 2.5, rect.width - 5.0, rect.height - 5.0, 24.0)
+            .roundRectangle(fullRect.left + 2.5, drawBottom, fullRect.width - 5.0, drawHeight, 24.0)
             .setStrokeColor(color)
             .setLineWidth(1.5f)
         if (isColoredBackground) {
