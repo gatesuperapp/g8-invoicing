@@ -1,4 +1,4 @@
-**The Gate (G8)**
+**The Gate (𝕘𝟠)**
 
 A privacy-focused app for creating delivery notes and invoices. Designed for farmers, suits any small organisation.
 
