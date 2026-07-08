@@ -246,7 +246,7 @@
     <string name="account_donate_link">https://www.the-gate.fr/en</string>
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">Sign in</string>
+    <string name="account_auth_title">Are you a premium member? Sign in below:</string>
     <string name="account_auth_subtitle">Enter your email to receive a sign-in link.</string>
     <string name="account_auth_email_label">Email</string>
     <string name="account_auth_send_link">Receive my sign-in link</string>
@@ -263,6 +263,7 @@
     <string name="gstore_subtitle_premium">Activate the modules you want to use.</string>
     <string name="gstore_premium_badge">★ PREMIUM</string>
     <string name="gstore_footer_free">More information at </string>
+    <string name="gstore_premium_only_message">This feature is reserved for premium members.</string>
     <string name="gstore_footer_premium">Manage your account at </string>
     <string name="gstore_module_orders_title">Purchase orders</string>
     <string name="gstore_module_orders_desc">Manage your clients' orders</string>

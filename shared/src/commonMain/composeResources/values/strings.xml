@@ -251,6 +251,7 @@
     <string name="gstore_subtitle_premium">Activez les modules que vous souhaitez utiliser.</string>
     <string name="gstore_premium_badge">★ PREMIUM</string>
     <string name="gstore_footer_free">Plus d'informations sur </string>
+    <string name="gstore_premium_only_message">Cette fonctionnalité est réservée aux membres premium.</string>
     <string name="gstore_footer_premium">Gérez votre compte sur </string>
     <string name="gstore_module_orders_title">Bon de commande</string>
     <string name="gstore_module_orders_desc">Gérez les commandes de vos clients</string>
@@ -271,7 +272,7 @@
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">Connexion</string>
+    <string name="account_auth_title">Vous êtes membre premium ? Connectez-vous ci-dessous :</string>
     <string name="account_auth_subtitle">Recevez un lien de connexion par email.</string>
     <string name="account_auth_email_label">Email</string>
     <string name="account_auth_send_link">Recevoir mon lien de connexion</string>

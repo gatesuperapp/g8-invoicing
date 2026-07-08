@@ -256,7 +256,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="account_donate_link">https://www.the-gate.fr/soutenir-g8</string>
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich (https://play.google.com/store/apps/details?id=com.a4a.g8invoicing) sowie auf F-Droid: https://f-droid.org/de/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">Anmeldung</string>
+    <string name="account_auth_title">Sind Sie Premium-Mitglied? Melden Sie sich unten an:</string>
     <string name="account_auth_subtitle">Geben Sie Ihre E-Mail-Adresse ein, um einen Anmeldelink zu erhalten.</string>
     <string name="account_auth_email_label">E-Mail</string>
     <string name="account_auth_send_link">Meinen Anmeldelink erhalten</string>
@@ -273,6 +273,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="gstore_subtitle_premium">Aktivieren Sie die Module, die Sie verwenden möchten.</string>
     <string name="gstore_premium_badge">★ PREMIUM</string>
     <string name="gstore_footer_free">Mehr Informationen auf </string>
+    <string name="gstore_premium_only_message">Diese Funktion ist Premium-Mitgliedern vorbehalten.</string>
     <string name="gstore_footer_premium">Verwalten Sie Ihr Konto auf </string>
     <string name="gstore_module_orders_title">Bestellungen</string>
     <string name="gstore_module_orders_desc">Verwalten Sie die Bestellungen Ihrer Kunden</string>
