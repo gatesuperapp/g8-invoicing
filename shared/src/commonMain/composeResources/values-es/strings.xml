@@ -249,6 +249,7 @@
     <string name="gstore_subtitle_premium">Activa los módulos que quieras usar.</string>
     <string name="gstore_premium_badge">★ PREMIUM</string>
     <string name="gstore_footer_free">Más información en </string>
+    <string name="gstore_premium_only_message">Esta función está reservada para miembros premium.</string>
     <string name="gstore_footer_premium">Gestiona tu cuenta en </string>
     <string name="gstore_module_orders_title">Pedido</string>
     <string name="gstore_module_orders_desc">Gestiona los pedidos de tus clientes</string>
@@ -269,7 +270,7 @@
     <string name="account_donate_link">https://www.the-gate.fr/es</string>
     <string name="account_share_content">¡Uso la app 𝕘𝟠 para crear mis albaranes y facturas en un instante! Además es un software libre y comprometido. ¿Quieres probarla? Es gratuita y está disponible en Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing o en F-Droid: https://f-droid.org/es/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">Iniciar sesión</string>
+    <string name="account_auth_title">¿Eres miembro premium? Inicia sesión a continuación:</string>
     <string name="account_auth_subtitle">Recibe un enlace de inicio de sesión por correo.</string>
     <string name="account_auth_email_label">Correo electrónico</string>
     <string name="account_auth_send_link">Recibir mi enlace de inicio de sesión</string>
