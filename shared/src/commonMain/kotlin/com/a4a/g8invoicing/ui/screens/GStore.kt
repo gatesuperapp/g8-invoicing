@@ -56,6 +56,7 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_title
 import com.a4a.g8invoicing.shared.resources.gstore_premium_badge
+import com.a4a.g8invoicing.shared.resources.gstore_premium_only_message
 import com.a4a.g8invoicing.shared.resources.gstore_title
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
@@ -113,6 +114,13 @@ fun GStore(
     val websiteUrl = stringResource(Res.string.account_website_url)
     val websiteLabel = stringResource(Res.string.account_website_label)
 
+    // Small centered dialog shown when a non-premium user taps a premium-only toggle.
+    // Kept as a Dialog rather than a Scaffold snackbar so it stacks on top of the
+    // ModuleDetailDialog when the tap originates from there.
+    var showPremiumHint by remember { mutableStateOf(false) }
+    val premiumOnlyMessage = stringResource(Res.string.gstore_premium_only_message)
+    val onPremiumHint: () -> Unit = { showPremiumHint = true }
+
     // Tapping a card opens a fullscreen detail dialog for that module. Null = no dialog.
     var selectedModule: GStoreModule? by remember { mutableStateOf(null) }
 
@@ -157,6 +165,7 @@ fun GStore(
                         isPremium = isPremium,
                         isActivated = module.id in activated,
                         onToggle = { viewModel.toggleModule(module.id) },
+                        onPremiumHint = onPremiumHint,
                         onClick = { selectedModule = module },
                     )
                 }
@@ -186,8 +195,42 @@ fun GStore(
             isPremium = isPremium,
             isActivated = module.id in activated,
             onToggle = { viewModel.toggleModule(module.id) },
+            onPremiumHint = onPremiumHint,
             onDismiss = { selectedModule = null },
         )
+    }
+
+    if (showPremiumHint) {
+        PremiumHintDialog(
+            message = premiumOnlyMessage,
+            onDismiss = { showPremiumHint = false },
+        )
+    }
+}
+
+@Composable
+private fun PremiumHintDialog(
+    message: String,
+    onDismiss: () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .clickable(onClick = onDismiss)
+                .background(Color.White, shape = RoundedCornerShape(14.dp))
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+        ) {
+            Text(
+                text = message,
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                color = Color.DarkGray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
     }
 }
 
@@ -199,6 +242,7 @@ private fun GStoreModuleCard(
     isPremium: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
+    onPremiumHint: () -> Unit,
     onClick: () -> Unit,
 ) {
     // Tall rectangular card. Vertical stack: icon top → big gap → title + desc → Switch bottom.
@@ -255,21 +299,19 @@ private fun GStoreModuleCard(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Switch at the bottom — disabled (grayed) when not premium so the affordance
-            // stays visible but uninteractable.
+            // Switch at the bottom. Always enabled so non-premium taps can surface the
+            // premium-only hint snackbar instead of being silently swallowed by a
+            // disabled Switch. The grayed uncheckedTrack color for non-premium keeps the
+            // "off / not-yours" affordance without hiding the tap target.
             Switch(
                 checked = isActivated,
-                onCheckedChange = { onToggle() },
-                enabled = isPremium,
+                onCheckedChange = { if (isPremium) onToggle() else onPremiumHint() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = ColorVioletLight,
                     uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = Color(0xFFB8B5BC),
+                    uncheckedTrackColor = if (isPremium) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                     uncheckedBorderColor = Color.Transparent,
-                    disabledUncheckedThumbColor = Color.White,
-                    disabledUncheckedTrackColor = Color(0xFFE5E2E7),
-                    disabledUncheckedBorderColor = Color.Transparent,
                 ),
             )
         }
@@ -284,6 +326,7 @@ private fun ModuleDetailDialog(
     isPremium: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
+    onPremiumHint: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     // Centered modal taking ~2/3 of the screen height, so the GStore TopBar and
@@ -365,21 +408,17 @@ private fun ModuleDetailDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Switch sits directly under the text — not pushed to the bottom of the
-                // modal, per design. Same colors as on the card so toggle behaviour and
-                // disabled-when-not-premium affordance stay identical.
+                // modal, per design. Same colors + always-enabled behaviour as on the
+                // card so non-premium taps consistently trigger the hint snackbar.
                 Switch(
                     checked = isActivated,
-                    onCheckedChange = { onToggle() },
-                    enabled = isPremium,
+                    onCheckedChange = { if (isPremium) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = ColorVioletLight,
                         uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color(0xFFB8B5BC),
+                        uncheckedTrackColor = if (isPremium) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                         uncheckedBorderColor = Color.Transparent,
-                        disabledUncheckedThumbColor = Color.White,
-                        disabledUncheckedTrackColor = Color(0xFFE5E2E7),
-                        disabledUncheckedBorderColor = Color.Transparent,
                     ),
                 )
             }
