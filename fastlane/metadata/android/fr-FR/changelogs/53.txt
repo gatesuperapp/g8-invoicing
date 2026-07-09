@@ -1,0 +1,1 @@
+- Zones de clic améliorées dans les formulaires client et produit : plus de fermetures involontaires du clavier quand on passe rapidement d'un champ à un autre.
