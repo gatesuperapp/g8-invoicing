@@ -1,0 +1,1 @@
+- Improved tap zones in the client and product forms: no more accidental keyboard dismissals when moving between fields.
