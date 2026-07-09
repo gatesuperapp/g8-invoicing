@@ -1,1 +1,1 @@
-- Zonas de toque mejoradas en los formularios de cliente y producto: se acabaron los cierres involuntarios del teclado al pasar rápido de un campo a otro.
+- Zonas de toque mejoradas en los formularios de cliente y producto: se acabaron los cierres involuntarios del teclado al pasar de un campo a otro.
