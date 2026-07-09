@@ -22,6 +22,9 @@ app/*/release/
 .claude/
 .kotlin/
 
+# Release signing credentials — read by app/build.gradle.kts. Never commit.
+keystore.properties
+
 # Local SQLite DBs created when running the app from Android Studio /
 # desktop. They're scratch data, never the source of truth.
 *.db
