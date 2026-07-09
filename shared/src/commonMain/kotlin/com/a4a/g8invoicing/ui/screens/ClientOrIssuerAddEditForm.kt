@@ -3,7 +3,7 @@ package com.a4a.g8invoicing.ui.screens
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
@@ -155,6 +154,7 @@ fun ClientOrIssuerAddEditForm(
             typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_ISSUER ||
             typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER
 
+    val dismissKeyboardInteractionSource = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
@@ -163,13 +163,11 @@ fun ClientOrIssuerAddEditForm(
             .padding(12.dp)
             .padding(top = paddingTop, bottom = 60.dp)
             .imePadding()
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    localFocusManager.clearFocus()
-                    // So when we click outside of a text input,
-                    // the selection is cleared
-                })
-            }
+            .clickable(
+                interactionSource = dismissKeyboardInteractionSource,
+                indication = null,
+                onClick = { localFocusManager.clearFocus() }
+            )
     ) {
         Column(
             modifier = Modifier
