@@ -14,11 +14,13 @@
 
     <!-- Document footer -->
     <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234</string>
+    <string name="quote_default_footer">Durée de validité de l'offre : 6 mois ;\nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
     <string name="invoice_number">Facture N°</string>
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
+    <string name="quote_number">Devis N°</string>
     <string name="document_date">Date</string>
     <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d'émission</string>
