@@ -1,0 +1,2 @@
+- Formularkorrektur: Die Tastatur schließt sich nicht mehr versehentlich, wenn zwischen Feldern getippt wird.
+- Die Zurück-Taste schließt jetzt die Dokument-Exportseite (wie die "Abschließen"-Taste).

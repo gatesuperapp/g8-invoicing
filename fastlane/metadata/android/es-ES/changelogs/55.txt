@@ -1,0 +1,2 @@
+- Corrección en formularios: el teclado ya no se cierra accidentalmente al tocar entre campos.
+- El botón atrás ahora cierra la pantalla de exportación del documento (como el botón "Finalizar").

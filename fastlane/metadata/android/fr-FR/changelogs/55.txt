@@ -1,0 +1,2 @@
+- Correction dans les formulaires : le clavier ne se ferme plus par accident quand on tape entre deux champs.
+- Le bouton retour ferme maintenant la page d'export du document (comme le bouton "Terminer").

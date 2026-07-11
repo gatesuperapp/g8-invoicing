@@ -1,0 +1,2 @@
+- Form fix: the keyboard no longer accidentally closes when tapping between fields.
+- The back button now closes the document export screen (like the "Done" button).
