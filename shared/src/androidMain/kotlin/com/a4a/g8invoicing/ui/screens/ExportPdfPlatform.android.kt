@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -120,6 +121,8 @@ actual fun ExportPdfPlatform(
     LaunchedEffect(Unit) {
         AndroidPdfContext.context = context
     }
+
+    BackHandler(onBack = onDismissRequest)
 
     // Collect all strings from Compose Resources
     val strings = PdfStrings(
