@@ -2,11 +2,15 @@ package com.a4a.g8invoicing.ui.shared
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -61,6 +65,13 @@ fun FormUI(
         remember { inputsWithFocusRequester }
 
 
+    // Row Y bounds tracked by each wrapper Box below; used by
+    // absorbAndDispatchTap to focus the closest field on an unconsumed tap.
+    // In release APKs, .clickable on Row / wrapper Column silently fails to
+    // fire, so tap-to-focus has to be routed via a single pointerInput at this
+    // level with explicit Y dispatch — see absorbAndDispatchTap for the why.
+    val rowYRanges = remember { mutableStateListOf<Triple<ScreenElement, Int, Int>>() }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,6 +79,21 @@ fun FormUI(
                 start = 10.dp,
                 bottom = 8.dp
             )
+            .absorbAndDispatchTap("formui") { pos ->
+                val y = pos.y.toInt()
+                val exact = rowYRanges.firstOrNull { y in it.second..it.third }
+                val hit = exact ?: rowYRanges.minByOrNull {
+                    minOf(kotlin.math.abs(y - it.second), kotlin.math.abs(y - it.third))
+                }
+                if (hit != null) {
+                    val hitElement = hit.first
+                    val input = inputList.firstOrNull { it.pageElement == hitElement }
+                    if (input?.inputType is TextInput) {
+                        placeCursorAtTheEndOfText(hitElement)
+                    }
+                    focusRequesters.firstOrNull { it.first == hitElement }?.second?.requestFocus()
+                }
+            }
     ) {
         inputList.forEach { input ->
             // Keyboard actions and options
@@ -91,29 +117,41 @@ fun FormUI(
                 )
             }
 
-            PageElementCreator(
-                input = input,
-                isLastInput = input == inputList.last(),
-                imeAction = imeAction,
-                onClickForward = onClickForward,
-                onClickOpenClientSelection = onClickOpenClientSelection,
-                formActions = formActions,
-                focusRequester = focusRequesters.firstOrNull { it.first == input.pageElement }?.second,
-                onClickRow = {
-                    if (input.inputType is TextInput) {
-                        placeCursorAtTheEndOfText(input.pageElement)
-                    }
-                    focusRequesters.firstOrNull { it.first == input.pageElement }?.second?.requestFocus()
-                },
-                errorMessage = errors?.firstOrNull { it.first == input.pageElement }?.second,
-                onClickExpandFullScreen = {
-                    onClickExpandFullScreen(input.pageElement)
-                }, // Used to expand product description field,
-                clearFocusForAllRows = {
-                    focusManager.clearFocus(force = true)
-
+            Box(modifier = Modifier.onGloballyPositioned { coords ->
+                val bounds = coords.boundsInParent()
+                val top = bounds.top.toInt()
+                val bottom = bounds.bottom.toInt()
+                val existing = rowYRanges.indexOfFirst { it.first == input.pageElement }
+                if (existing >= 0) {
+                    rowYRanges[existing] = Triple(input.pageElement, top, bottom)
+                } else {
+                    rowYRanges.add(Triple(input.pageElement, top, bottom))
                 }
-            )
+            }) {
+                PageElementCreator(
+                    input = input,
+                    isLastInput = input == inputList.last(),
+                    imeAction = imeAction,
+                    onClickForward = onClickForward,
+                    onClickOpenClientSelection = onClickOpenClientSelection,
+                    formActions = formActions,
+                    focusRequester = focusRequesters.firstOrNull { it.first == input.pageElement }?.second,
+                    onClickRow = {
+                        if (input.inputType is TextInput) {
+                            placeCursorAtTheEndOfText(input.pageElement)
+                        }
+                        focusRequesters.firstOrNull { it.first == input.pageElement }?.second?.requestFocus()
+                    },
+                    errorMessage = errors?.firstOrNull { it.first == input.pageElement }?.second,
+                    onClickExpandFullScreen = {
+                        onClickExpandFullScreen(input.pageElement)
+                    }, // Used to expand product description field,
+                    clearFocusForAllRows = {
+                        focusManager.clearFocus(force = true)
+
+                    }
+                )
+            }
         }
     }
 }
@@ -132,21 +170,23 @@ fun PageElementCreator(
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
     clearFocusForAllRows: () -> Unit,
 ) {
-    RowWithLabelAndInput(
-        formInput = input,
-        imeAction = imeAction,
-        formActions = formActions,
-        focusRequester = focusRequester,
-        onClickRow = onClickRow,
-        onClickForward = onClickForward,
-        onClickOpenClientSelection = onClickOpenClientSelection,
-        errorMessage = errorMessage,
-        onClickExpandFullScreen = onClickExpandFullScreen,
-        clearFocusForAllRows = clearFocusForAllRows
-    )
+    Column {
+        RowWithLabelAndInput(
+            formInput = input,
+            imeAction = imeAction,
+            formActions = formActions,
+            focusRequester = focusRequester,
+            onClickRow = onClickRow,
+            onClickForward = onClickForward,
+            onClickOpenClientSelection = onClickOpenClientSelection,
+            errorMessage = errorMessage,
+            onClickExpandFullScreen = onClickExpandFullScreen,
+            clearFocusForAllRows = clearFocusForAllRows
+        )
 
-    if (!isLastInput) {
-        Separator()
+        if (!isLastInput) {
+            Separator()
+        }
     }
 }
 

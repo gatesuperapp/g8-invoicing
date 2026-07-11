@@ -3,7 +3,6 @@ package com.a4a.g8invoicing.ui.screens
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,6 +76,7 @@ import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.EmailListInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
+import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
@@ -154,20 +154,15 @@ fun ClientOrIssuerAddEditForm(
             typeOfCreation == DocumentBottomSheetTypeOfForm.NEW_ISSUER ||
             typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER
 
-    val dismissKeyboardInteractionSource = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
             .background(ColorBackgroundGrey)
             .fillMaxSize()
+            .dismissKeyboardOnUnconsumedTap()
             .padding(12.dp)
             .padding(top = paddingTop, bottom = 60.dp)
             .imePadding()
-            .clickable(
-                interactionSource = dismissKeyboardInteractionSource,
-                indication = null,
-                onClick = { localFocusManager.clearFocus() }
-            )
     ) {
         Column(
             modifier = Modifier
