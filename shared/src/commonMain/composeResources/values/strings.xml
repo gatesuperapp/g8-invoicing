@@ -4,7 +4,7 @@
     <string name="invoice_default_number">F001</string>
     <string name="delivery_note_default_number">BL001</string>
     <string name="credit_note_default_number">FA001</string>
-    <string name="quote_default_number">DEV001</string>
+    <string name="quote_default_number">D001</string>
 
     <!-- Currency -->
     <string name="currency">€</string>
@@ -14,7 +14,7 @@
 
     <!-- Document footer -->
     <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234</string>
-    <string name="quote_default_footer">Durée de validité de l'offre : 6 mois ;\nDélai d'exécution : 6 mois</string>
+    <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
     <string name="invoice_number">Facture N°</string>
