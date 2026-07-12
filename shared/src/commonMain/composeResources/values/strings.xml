@@ -143,6 +143,11 @@
     <string name="client_city_input">Écholoc</string>
     <string name="client_zip_code">Code Postal</string>
     <string name="client_zip_code_input">81000</string>
+    <string name="client_country">Pays</string>
+    <string name="country_picker_search">Rechercher un pays</string>
+    <string name="country_picker_recent">Courants</string>
+    <string name="country_picker_all">Tous</string>
+    <string name="country_picker_empty">Aucun pays trouvé</string>
     <string name="company_identification1">N° SIRET</string>
     <string name="company_identification2">N° TVA</string>
     <string name="company_identification3">N° RCS</string>
