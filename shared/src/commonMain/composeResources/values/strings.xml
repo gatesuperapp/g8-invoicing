@@ -271,7 +271,7 @@
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
     <string name="gstore_module_quote_title">Devis</string>
     <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
-    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Chaque devis reste tracé jusqu'à la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
