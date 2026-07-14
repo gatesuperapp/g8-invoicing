@@ -166,6 +166,10 @@
     <string name="product_type_info_desc">Info type de produit</string>
     <string name="product_legacy_type_warning_title">Vérifiez le type</string>
     <string name="product_legacy_type_warning_content">Vérifiez bien que le champ « Type » correspond bien à votre produit — c'est un nouveau champ, ajouté à cette version pour la conformité facture électronique.</string>
+    <string name="issuer_intra_eu_sales_label">Ventes hors de mon pays (UE)</string>
+    <string name="issuer_intra_eu_sales_info_modal_title">Ventes intra-UE</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Cochez si :\n- votre entreprise est dans l'Union européenne\n\net\n\n- vous facturez un·e client·e situé·e dans un autre pays de l'UE que le vôtre.\n\ng8 vous demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans votre pays, ou hors UE ? Laissez décoché.</string>
+    <string name="issuer_intra_eu_sales_info_desc">Info ventes intra-UE</string>
     <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à votre pays sur les factures.</string>
