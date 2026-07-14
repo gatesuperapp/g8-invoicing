@@ -160,7 +160,7 @@
     <string name="unit_picker_category_packaging">Emballage</string>
     <string name="product_type_label">Type</string>
     <string name="product_type_service">Service</string>
-    <string name="product_type_goods">Bien</string>
+    <string name="product_type_goods">Produit</string>
     <string name="product_type_info_modal_title">Type de produit</string>
     <string name="product_type_info_modal_content">Utile pour la conformité facture électronique. Permet à g8 de déterminer si votre facture concerne un service ou un bien — utile en cas de facturation à un client dans un autre pays de l'UE.</string>
     <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
