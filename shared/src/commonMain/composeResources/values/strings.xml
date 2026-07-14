@@ -168,7 +168,7 @@
     <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à votre pays sur les factures.</string>
     <string name="product_unit_code_label">Code unité</string>
     <string name="product_unit_code_info_modal_title">Code unité</string>
-    <string name="product_unit_code_info_modal_content">Il est déduit automatiquement de l'unité que vous saisissez, utile pour la conformité facture électronique (Factur-X).\n\nIl n'apparaît pas sur la facture PDF.\n\nSi l'unité que vous utilisez ne correspond à aucun code, pas de souci — c'est aussi valable.</string>
+    <string name="product_unit_code_info_modal_content">Il est déduit automatiquement de l'unité que vous saisissez. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.\n\nSi l'unité que vous utilisez ne correspond à aucun code, pas de souci — c'est aussi valable.</string>
     <string name="info_tooltip_dismiss">Ne plus afficher</string>
     <string name="info_tooltip_ok">OK</string>
     <string name="product_unit_code_info_desc">Info code unité</string>
