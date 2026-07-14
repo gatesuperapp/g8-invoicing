@@ -165,7 +165,12 @@
     <string name="product_type_info_modal_content">Utile pour la conformité facture électronique. Permet à g8 de déterminer si votre facture concerne un service ou un bien — utile en cas de facturation à un client dans un autre pays de l'UE.</string>
     <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
-    <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale « TVA non applicable, art. 293 B du CGI » sur les factures.</string>
+    <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à votre pays sur les factures.</string>
+    <string name="product_unit_code_label">Code unité</string>
+    <string name="product_unit_code_info_modal_title">Code unité</string>
+    <string name="product_unit_code_info_modal_content">Ce code sert à la conformité facture électronique (Factur-X). Il n'apparaît pas sur la facture PDF que vous envoyez — c'est uniquement pour la couche XML sous-jacente.</string>
+    <string name="product_unit_code_info_desc">Info code unité</string>
+    <string name="issuer_vat_exempt_info_desc">Info franchise TVA</string>
     <string name="company_identification1">N° SIRET</string>
     <string name="company_identification2">N° TVA</string>
     <string name="company_identification3">N° RCS</string>
