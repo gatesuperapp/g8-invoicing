@@ -1,0 +1,1 @@
+- Création de produit facilitée : la TVA et l'unité sont automatiquement pré-remplies à partir du dernier produit créé.

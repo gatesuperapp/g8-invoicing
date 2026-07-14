@@ -1,0 +1,1 @@
+- Vereinfachte Produkterstellung: Mehrwertsteuer und Einheit werden automatisch aus dem zuletzt erstellten Produkt übernommen.

@@ -1,0 +1,1 @@
+- Facilitate product creation by automatically filling in tax rate and unit based on last product created.

@@ -1,0 +1,1 @@
+- Creación de producto simplificada: el IVA y la unidad se rellenan automáticamente a partir del último producto creado.
