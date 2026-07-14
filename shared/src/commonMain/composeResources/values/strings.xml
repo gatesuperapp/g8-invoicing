@@ -164,6 +164,8 @@
     <string name="product_type_info_modal_title">Type de produit</string>
     <string name="product_type_info_modal_content">Il est utilisé pour déterminer automatiquement la catégorie de TVA à appliquer. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.</string>
     <string name="product_type_info_desc">Info type de produit</string>
+    <string name="product_legacy_type_warning_title">Vérifiez le type</string>
+    <string name="product_legacy_type_warning_content">Vérifiez bien que le champ « Type » correspond bien à votre produit — c'est un nouveau champ, ajouté à cette version pour la conformité facture électronique.</string>
     <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à votre pays sur les factures.</string>
