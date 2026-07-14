@@ -163,7 +163,7 @@
     <string name="product_type_goods">Bien</string>
     <string name="product_type_info_modal_title">Type de produit</string>
     <string name="product_type_info_modal_content">Utile pour la conformité facture électronique. Permet à g8 de déterminer si votre facture concerne un service ou un bien — utile en cas de facturation à un client dans un autre pays de l'UE.</string>
-    <string name="issuer_vat_exempt_label">Franchise en base de TVA (micro-entrepreneur)</string>
+    <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale « TVA non applicable, art. 293 B du CGI » sur les factures.</string>
     <string name="company_identification1">N° SIRET</string>
