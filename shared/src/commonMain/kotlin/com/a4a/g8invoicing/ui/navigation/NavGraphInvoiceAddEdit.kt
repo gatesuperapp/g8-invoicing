@@ -431,7 +431,9 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 val documentProductId = invoiceViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     invoiceViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
-                                    productAddEditViewModel.clearProductUiState()
+                                    // Deliberately no clearProductUiState() here: keep unit + taxRate
+                                    // in state so the next creation (onClickNewDocumentProduct →
+                                    // clearProductNameAndDescription) can carry them over.
                                     showDocumentForm = false
                                 }
                             }

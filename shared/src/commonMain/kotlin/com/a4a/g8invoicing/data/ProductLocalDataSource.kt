@@ -34,6 +34,13 @@ class ProductLocalDataSource(
         }
     }
 
+    override suspend fun fetchLastCreatedProduct(): ProductState? {
+        return withContext(DispatcherProvider.IO) {
+            productQueries.getLastCreatedProduct().executeAsOneOrNull()
+                ?.transformIntoEditableProduct(taxQueries, productPriceQueries)
+        }
+    }
+
     override fun fetchAllProducts(): Flow<List<ProductState>> {
         return productQueries.getAllProducts()
             .asFlow()

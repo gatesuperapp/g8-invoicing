@@ -74,14 +74,41 @@ class ProductAddEditViewModel(
                 }
             } ?: run {
                 _isLoading.value = false
+                primeStateWithLastProductSticky()
             }
         } else {
             _isLoading.value = false
+            primeStateWithLastProductSticky()
         }
 
         viewModelScope.launch {
             clientOrIssuerDataSource.fetchAll(type = PersonType.CLIENT).collect { clients ->
                 _availableClients.value = clients
+            }
+        }
+    }
+
+    // Pre-fill unit + taxRate from the most recently created product so a fresh
+    // form (master product creation OR first document-product after app restart)
+    // starts with the same values the user last used. In-session stickiness is
+    // handled separately by clearProductNameAndDescription() preserving those
+    // fields between successive creations without hitting the DB.
+    private fun primeStateWithLastProductSticky() {
+        viewModelScope.launch {
+            val last = dataSource.fetchLastCreatedProduct() ?: return@launch
+            if (_productUiState.value.unit?.text.isNullOrEmpty() && _productUiState.value.taxRate == null) {
+                _productUiState.value = _productUiState.value.copy(
+                    unit = last.unit ?: TextFieldValue(""),
+                    taxRate = last.taxRate,
+                )
+            }
+            if ((_documentProductUiState.value.unit?.text.isNullOrEmpty()) &&
+                _documentProductUiState.value.taxRate == null
+            ) {
+                _documentProductUiState.value = _documentProductUiState.value.copy(
+                    unit = last.unit,
+                    taxRate = last.taxRate,
+                )
             }
         }
     }

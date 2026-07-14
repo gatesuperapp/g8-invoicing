@@ -28,6 +28,10 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
         return products.find { it.id == id.toInt() }
     }
 
+    override suspend fun fetchLastCreatedProduct(): ProductState? {
+        return products.maxByOrNull { it.id ?: 0 }
+    }
+
     override fun fetchAllProducts(): Flow<List<ProductState>> {
         return productsFlow
     }

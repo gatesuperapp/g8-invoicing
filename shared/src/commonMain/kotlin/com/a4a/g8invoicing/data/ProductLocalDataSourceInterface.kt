@@ -13,6 +13,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 interface ProductLocalDataSourceInterface {
     suspend fun fetchProduct(id: Long): ProductState?
+    suspend fun fetchLastCreatedProduct(): ProductState?
     fun fetchAllProducts(): Flow<List<ProductState>>
     suspend fun saveProduct(product: ProductState)
     suspend fun duplicateProducts(products: List<ProductState>, duplicateNameSuffix: String)
