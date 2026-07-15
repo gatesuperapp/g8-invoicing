@@ -160,7 +160,7 @@
     <string name="unit_picker_category_packaging">Emballage</string>
     <string name="product_type_label">Type</string>
     <string name="product_type_service">Service</string>
-    <string name="product_type_goods">Produit</string>
+    <string name="product_type_goods">Bien</string>
     <string name="product_type_info_modal_title">Type de produit</string>
     <string name="product_type_info_modal_content">Il est utilisé pour déterminer automatiquement la catégorie de TVA à appliquer. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.</string>
     <string name="product_type_info_desc">Info type de produit</string>
