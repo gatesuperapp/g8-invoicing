@@ -326,7 +326,7 @@
     <string name="account_auth_link_sent">✅ Un email avec le lien de connexion vous a été envoyé. Si vous ne le recevez pas, vérifiez dans vos spams, et n'hésitez pas à nous écrire à </string>
     <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Vous pouvez réessayer dans quelques minutes, et n'hésitez pas à nous écrire à </string>
     <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Vous pouvez demander un nouveau lien. Si le problème persiste, écrivez-nous à </string>
-    <string name="account_auth_login_failed">La connexion est pour l\'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
+    <string name="account_auth_login_failed">La connexion est pour l'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
     <string name="account_auth_invalid_email">Adresse e-mail invalide.</string>
     <string name="account_logout">Me déconnecter</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Membre Premium</string>
@@ -502,4 +502,42 @@ Une erreur s'est produite :
     <string name="database_email_subject">Export de mes données g8</string>
     <string name="database_email_body">Ma base de données SQLite de l'application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
     <string name="database_email_chooser">Envoyer la base de données par mail</string>
+
+    <!-- Onboarding 1.8 -->
+    <string name="onboarding_previous">Précédent</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_yes">Oui</string>
+    <string name="onboarding_no">Non</string>
+
+    <string name="onboarding_step0_welcome">Coucou !</string>
+    <string name="onboarding_step0_body">Excellente nouvelle : les Devis sont maintenant disponibles, illimités et gratuits. Actives-en le module dans le gStore et convertis un devis en facture en un geste.</string>
+    <string name="onboarding_step0_cta_activate">Activer</string>
+    <string name="onboarding_step0_cta_later">Plus tard</string>
+
+    <string name="onboarding_step1_body">J'ai aussi des réglages à te montrer : j'ai ajouté des champs pour avoir des factures normées, donc plus lisibles et prêtes pour la facturation électronique.</string>
+
+    <string name="onboarding_step2_body">Tiens, je vois que tu gères plusieurs entreprises. On va les régler une par une. Mais d'abord, s'il y en a que tu n'utilises plus, tu peux les supprimer ici. Ne t'inquiète pas, les documents liés ne bougeront pas.</string>
+    <string name="onboarding_step2_delete_confirm_title">Supprimer cette entreprise ?</string>
+    <string name="onboarding_step2_delete_confirm_body">Les documents liés ne seront pas modifiés.</string>
+    <string name="onboarding_step2_delete_confirm_yes">Supprimer</string>
+    <string name="onboarding_step2_delete_confirm_no">Annuler</string>
+
+    <string name="onboarding_step3_title">Es-tu en franchise en base de TVA pour %1$s ?</string>
+    <string name="onboarding_step3_body">La franchise signifie que tu ne factures pas la TVA. Si c'est le cas, le code TVA « exempt » sera automatiquement appliqué à tes factures.</string>
+
+    <string name="onboarding_step4_title">Est-ce que %1$s est basée dans l'Union européenne ?</string>
+    <string name="onboarding_step4_body">Cela conditionne le fait que l'exonération de TVA « intra-UE » puisse s'appliquer.</string>
+
+    <string name="onboarding_step5_title">T'arrive-t-il de vendre à des clients dans un autre pays de l'UE avec %1$s ?</string>
+
+    <string name="onboarding_step6_title">Est-ce que tu vends que des services, que des biens, ou un peu des deux ?</string>
+    <string name="onboarding_step6_only_services">Que des services</string>
+    <string name="onboarding_step6_only_goods">Que des biens</string>
+    <string name="onboarding_step6_mixed">Un peu des deux</string>
+    <string name="onboarding_step6_mixed_hint">OK, tu pourras définir ça au fil de l'eau en créant tes documents.</string>
+
+    <string name="onboarding_step7_body">Chaque produit a maintenant une unité (heure, kilo, pièce) et un code normalisé qui va avec. Pour tes produits existants, je retrouve le code tout seul quand je reconnais l'unité. Si l'unité que tu souhaites ne correspond à aucun code, c'est valable aussi, pas d'inquiétude (dans la facture électronique le code sera « pièce » avec ton unité dans un champ descriptif).</string>
+
+    <string name="onboarding_step8_body">C'est tout ! Merci de me faire confiance. À bientôt !</string>
+    <string name="onboarding_step8_cta_finish">Terminer</string>
 </resources>
