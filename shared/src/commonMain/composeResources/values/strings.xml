@@ -537,7 +537,11 @@ Une erreur s'est produite :
     <string name="onboarding_step6_mixed">Un peu des deux</string>
     <string name="onboarding_step6_mixed_hint">OK, tu pourras définir ça au fil de l'eau en créant tes documents.</string>
 
-    <string name="onboarding_step7_body">Chaque produit a maintenant une unité (heure, kilo, pièce) et un code normalisé qui va avec. Pour tes produits existants, je retrouve le code tout seul quand je reconnais l'unité. Si l'unité que tu souhaites ne correspond à aucun code, c'est valable aussi, pas d'inquiétude (dans la facture électronique le code sera « pièce » avec ton unité dans un champ descriptif).</string>
+    <string name="onboarding_step7_body_before_unite">Chaque produit a maintenant une </string>
+    <string name="onboarding_step7_bold_unite">unité</string>
+    <string name="onboarding_step7_body_between"> (heure, kilo, pièce) et un code normalisé qui va avec.\n\nPour tes produits existants, </string>
+    <string name="onboarding_step7_bold_retrouve">je retrouve le code unité tout seul</string>
+    <string name="onboarding_step7_body_after"> quand je reconnais l'unité.\n\nSi l'unité que tu souhaites ne correspond à aucun code, c'est valable aussi, pas d'inquiétude (dans la facture électronique le code sera « pièce » avec ton unité dans un champ descriptif).</string>
 
     <string name="onboarding_step8_body">C'est tout ! Merci de me faire confiance. À bientôt !</string>
     <string name="onboarding_step8_cta_finish">Terminer</string>
