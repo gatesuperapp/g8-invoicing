@@ -509,10 +509,11 @@ Une erreur s'est produite :
     <string name="onboarding_yes">Oui</string>
     <string name="onboarding_no">Non</string>
 
-    <string name="onboarding_step0_welcome">Coucou !</string>
-    <string name="onboarding_step0_body">Excellente nouvelle : les Devis sont maintenant disponibles, illimités et gratuits. Actives-en le module dans le gStore et convertis un devis en facture en un geste.</string>
+    <string name="onboarding_step0_welcome">Bienvenue sur la 1.8 : Rosa Canina !</string>
+    <string name="onboarding_step0_body">Une bonne nouvelle pour commencer : les devis sont disponibles et illimités. Et tu peux convertir un ou plusieurs devis en facture ;)</string>
     <string name="onboarding_step0_cta_activate">Activer</string>
-    <string name="onboarding_step0_cta_later">Je ne fais pas de devis</string>
+    <string name="onboarding_step0_cta_later_gstore">Plus tard dans le gStore</string>
+    <string name="onboarding_step0_cta_no_devis">Je ne fais pas de devis</string>
 
     <string name="onboarding_step1_body">J'ai aussi des réglages à te montrer : j'ai ajouté des champs pour avoir des factures normées, donc plus lisibles et prêtes pour la facturation électronique.</string>
 
