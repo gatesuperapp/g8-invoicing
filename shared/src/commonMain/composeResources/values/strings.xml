@@ -562,6 +562,7 @@ Une erreur s'est produite :
     <string name="onboarding_mixed_hint_body">Dans ce cas, il faudra que tu indiques le type de produit au fil de l'eau, quand tu les ajoutes dans tes documents.</string>
 
     <!-- Unit code -->
+    <string name="onboarding_unitcode_cta">D'accord</string>
     <string name="onboarding_unitcode_title">Code unité</string>
     <string name="onboarding_unitcode_part1">Le dernier champ que j'ai changé dans cette version, c'est le </string>
     <string name="onboarding_unitcode_bold1">code unité</string>
