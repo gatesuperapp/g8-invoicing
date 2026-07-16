@@ -509,54 +509,70 @@ Une erreur s'est produite :
     <string name="onboarding_yes">Oui</string>
     <string name="onboarding_no">Non</string>
 
-    <string name="onboarding_step0_welcome">Bienvenue sur la version\n1.8 - Rosa Canina</string>
-    <string name="onboarding_step0_body">Tu peux maintenant créer des devis ! C'est illimité, gratuit, et convertible en facture.</string>
-    <string name="onboarding_step0_cta_activate">Activer les devis</string>
-    <string name="onboarding_step0_cta_later_gstore">Plus tard dans le gStore</string>
-    <string name="onboarding_step0_cta_no_devis">Cool, mais pas besoin !</string>
+    <!-- Welcome (standalone) -->
+    <string name="onboarding_welcome_body">Bienvenue sur la version\n1.8 - Rosa Canina</string>
+    <string name="onboarding_welcome_cta">Découvrir</string>
 
-    <string name="onboarding_step1_title">Facturation électronique</string>
-    <string name="onboarding_step1_body">J'ai aussi des réglages à te montrer : j'ai ajouté des champs pour avoir des factures normées, donc plus lisibles et prêtes pour la facturation électronique.</string>
+    <!-- Devis intro -->
+    <string name="onboarding_devis_title">Devis illimités</string>
+    <string name="onboarding_devis_body">Tu peux maintenant créer des devis. C'est gratuit et convertible en facture.</string>
+    <string name="onboarding_devis_cta_activate">Activer les devis</string>
+    <string name="onboarding_devis_cta_later_gstore">Plus tard dans le gStore</string>
+    <string name="onboarding_devis_cta_no_devis">Cool, mais pas besoin !</string>
 
-    <string name="onboarding_step2_title">Tes entreprises</string>
-    <string name="onboarding_step2_body_part1">Tiens, je vois que tu gères plusieurs entreprises.\n\n</string>
-    <string name="onboarding_step2_body_bold_one_by_one">On va les régler une par une.</string>
-    <string name="onboarding_step2_body_part2">\n\nMais d'abord, s'il y en a que tu n'utilises plus, </string>
-    <string name="onboarding_step2_body_bold_delete_here">tu peux les supprimer ici</string>
-    <string name="onboarding_step2_body_part3">. Ne t'inquiète pas, les documents liés ne bougeront pas.</string>
-    <string name="onboarding_step2_delete_confirm_title">Supprimer cette entreprise ?</string>
-    <string name="onboarding_step2_delete_confirm_body">Les documents liés ne seront pas modifiés.</string>
-    <string name="onboarding_step2_delete_confirm_yes">Supprimer</string>
-    <string name="onboarding_step2_delete_confirm_no">Annuler</string>
+    <!-- Factur-X intro -->
+    <string name="onboarding_facturx_title">Nouveaux champs</string>
+    <string name="onboarding_facturx_body_before_bold">J'ai ajouté des champs pour avoir des factures normées, plus lisibles et prêtes pour la facturation électronique.\n\n</string>
+    <string name="onboarding_facturx_body_bold">J'ai besoin de toi pour quelques réglages.</string>
+    <string name="onboarding_facturx_cta">Allons-y</string>
 
-    <string name="onboarding_step3_title">Es-tu en franchise en base de TVA pour %1$s ?</string>
-    <string name="onboarding_step3_body">La franchise signifie que tu ne factures pas la TVA. Si c'est le cas, le code TVA « exempt » sera automatiquement appliqué à tes factures.</string>
+    <!-- Multi-issuer cleanup -->
+    <string name="onboarding_cleanup_title">Tes entreprises</string>
+    <string name="onboarding_cleanup_body_part1">Tiens, je vois que tu gères plusieurs entreprises.\n\n</string>
+    <string name="onboarding_cleanup_body_bold_one_by_one">On va les régler une par une.</string>
+    <string name="onboarding_cleanup_body_part2">\n\nMais d'abord, s'il y en a que tu n'utilises plus, </string>
+    <string name="onboarding_cleanup_body_bold_delete_here">tu peux les supprimer ici</string>
+    <string name="onboarding_cleanup_body_part3">. Ne t'inquiète pas, les documents liés ne bougeront pas.</string>
+    <string name="onboarding_cleanup_cta">C'est bon</string>
+    <string name="onboarding_cleanup_delete_confirm_title">Supprimer cette entreprise ?</string>
+    <string name="onboarding_cleanup_delete_confirm_body">Les documents liés ne seront pas modifiés.</string>
+    <string name="onboarding_cleanup_delete_confirm_yes">Supprimer</string>
+    <string name="onboarding_cleanup_delete_confirm_no">Annuler</string>
 
-    <string name="onboarding_step4_title">Est-ce que %1$s est basée dans l'Union européenne ?</string>
-    <string name="onboarding_step4_body">Cela conditionne le fait que l'exonération de TVA « intra-UE » puisse s'appliquer.</string>
+    <!-- Per-issuer questions (title reused = issuer name) -->
+    <string name="onboarding_vat_subtitle">Es-tu en franchise en base de TVA ?</string>
+    <string name="onboarding_vat_body">Cela signifie que tu ne factures pas la TVA. Le code TVA « exempt » sera automatiquement appliqué à tes factures électroniques (ce sera invisible dans l'interface).</string>
+    <string name="onboarding_vat_yes">Oui, je suis en franchise</string>
 
-    <string name="onboarding_step5_title">T'arrive-t-il de vendre à des clients dans un autre pays de l'UE avec %1$s ?</string>
+    <string name="onboarding_ineu_subtitle">Est-ce que %1$s est basée dans l'Union européenne ?</string>
+    <string name="onboarding_ineu_body">Cela conditionne le fait que l'exonération de TVA « intra-UE » puisse s'appliquer.</string>
 
-    <string name="onboarding_step6_title">Biens ou services ?</string>
-    <string name="onboarding_step6_intro">Pour des entreprises en exonération intra-UE, le code de taxe dépend du fait que tu vendes des biens ou des services.</string>
-    <string name="onboarding_step6_question">Est-ce que tes produits correspondent à…</string>
-    <string name="onboarding_step6_only_services">Uniquement des services</string>
-    <string name="onboarding_step6_only_goods">Uniquement des biens</string>
-    <string name="onboarding_step6_mixed">Un peu des deux</string>
-    <string name="onboarding_step6_mixed_hint">OK, tu pourras définir ça au fil de l'eau en créant tes documents.</string>
+    <string name="onboarding_intraeu_subtitle">Est-ce qu'il t'arrive de vendre à des clients dans un autre pays de l'UE ?</string>
 
-    <string name="onboarding_step7_title">Code unité</string>
-    <string name="onboarding_step7_part1">Le dernier champ que j'ai changé dans cette version, c'est le </string>
-    <string name="onboarding_step7_bold1">code unité</string>
-    <string name="onboarding_step7_part2">.\n\nChacun de tes produits avait déjà une </string>
-    <string name="onboarding_step7_bold2">unité</string>
-    <string name="onboarding_step7_part3"> (heure, kilo, pièce). Il y aura désormais un </string>
-    <string name="onboarding_step7_bold3">code normalisé</string>
-    <string name="onboarding_step7_part4"> qui va avec.\n\nPour tes produits existants comme pour tes nouveaux produits, </string>
-    <string name="onboarding_step7_bold4">je retrouve le code unité tout seul</string>
-    <string name="onboarding_step7_part5"> quand je reconnais l'unité.\n\nSi je ne reconnais pas l'unité, c'est tout aussi valable, pas d'inquiétude (dans la facture électronique le code sera pièce avec ton unité dans un champ descriptif).</string>
+    <!-- Product nature -->
+    <string name="onboarding_nature_title">Type de produit</string>
+    <string name="onboarding_nature_intro">Pour des entreprises en exonération intra-UE, le code de taxe dépend du fait que tu vendes des biens ou des services.</string>
+    <string name="onboarding_nature_question">Est-ce que tes produits correspondent à…</string>
+    <string name="onboarding_nature_only_services">Uniquement des services</string>
+    <string name="onboarding_nature_only_goods">Uniquement des biens</string>
+    <string name="onboarding_nature_mixed">Un peu des deux</string>
 
-    <string name="onboarding_step8_title">Merci !</string>
-    <string name="onboarding_step8_body">C'est tout ! Merci de me faire confiance. À bientôt !</string>
-    <string name="onboarding_step8_cta_finish">Terminer</string>
+    <!-- Mixed nature hint (separate screen) -->
+    <string name="onboarding_mixed_hint_title">Un peu des deux</string>
+    <string name="onboarding_mixed_hint_body">Dans ce cas, il faudra que tu indiques le type de produit au fil de l'eau, quand tu les ajoutes dans tes documents.</string>
+
+    <!-- Unit code -->
+    <string name="onboarding_unitcode_title">Code unité</string>
+    <string name="onboarding_unitcode_part1">Le dernier champ que j'ai changé dans cette version, c'est le </string>
+    <string name="onboarding_unitcode_bold1">code unité</string>
+    <string name="onboarding_unitcode_part2">.\n\nChacun de tes produits avait déjà une </string>
+    <string name="onboarding_unitcode_bold2">unité</string>
+    <string name="onboarding_unitcode_part3"> (heure, kilo, pièce). Il y aura désormais un </string>
+    <string name="onboarding_unitcode_bold3">code normalisé</string>
+    <string name="onboarding_unitcode_part4"> qui va avec.\n\n⚡ Tu n'as rien à faire, je trouve le code unité tout seul !\n\nSi je ne reconnais pas l'unité, c'est valable aussi ✅</string>
+
+    <!-- Thank you -->
+    <string name="onboarding_thanks_title">C'est tout bon !</string>
+    <string name="onboarding_thanks_body">Merci de ta confiance. À bientôt !</string>
+    <string name="onboarding_thanks_cta">Terminer</string>
 </resources>
