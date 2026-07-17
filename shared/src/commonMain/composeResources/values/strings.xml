@@ -577,7 +577,7 @@ Une erreur s'est produite :
     <string name="onboarding_mixed_hint_body">Dans ce cas, il faudra que tu indiques le type de produit au fil de l'eau, quand tu les ajoutes dans tes documents.</string>
 
     <!-- Client country flow (before unit code) -->
-    <string name="onboarding_client_country_intro_title">Tes client·es</string>
+    <string name="onboarding_client_country_intro_title">Pays des client·es</string>
     <string name="onboarding_client_country_intro_body">Est-ce que tes client·es sont, pour la plupart, dans le même pays ?\n\nSi oui, je pourrai le pré-remplir pour tous ceux qui n'ont pas encore de pays renseigné.</string>
     <string name="onboarding_client_country_intro_yes">Oui, majoritairement</string>
     <string name="onboarding_client_country_intro_no">Non, c'est mélangé</string>
