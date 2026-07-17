@@ -306,9 +306,15 @@
     <string name="gstore_module_payments_desc">Enregistrez CB, chèques, espèces</string>
     <string name="gstore_module_themes_title">Thèmes premium</string>
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
-    <string name="gstore_module_quote_title">Devis</string>
+    <string name="gstore_module_quote_title">Devis illimités</string>
     <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
     <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_trial_title">Devis découverte</string>
+    <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
+    <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle vous convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.\n\nActivez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_quote_trial_exhausted_title">Période découverte écoulée</string>
+    <string name="gstore_quote_trial_exhausted_body">Votre période découverte de devis est écoulée. Si vous souhaitez continuer d'utiliser les devis, vous pouvez devenir membre premium.</string>
+    <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
     <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
@@ -514,8 +520,8 @@ Une erreur s'est produite :
     <string name="onboarding_welcome_cta">Découvrir</string>
 
     <!-- Devis intro -->
-    <string name="onboarding_devis_title">Devis illimités</string>
-    <string name="onboarding_devis_body">Tu peux maintenant créer des devis. C'est gratuit et convertible en facture.</string>
+    <string name="onboarding_devis_title">Devis</string>
+    <string name="onboarding_devis_body">Tu peux maintenant créer des devis et les transformer en facture.\n\nCette fonctionnalité est réservée aux membres premium, mais tu peux la tester pour voir si elle te convient (5 devis maximum).</string>
     <string name="onboarding_devis_cta_activate">Activer les devis</string>
     <string name="onboarding_devis_cta_later_gstore">Plus tard dans le gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, mais pas besoin !</string>
