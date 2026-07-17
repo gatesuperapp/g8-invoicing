@@ -539,14 +539,24 @@ Une erreur s'est produite :
     <string name="onboarding_cleanup_delete_confirm_yes">Supprimer</string>
     <string name="onboarding_cleanup_delete_confirm_no">Annuler</string>
 
-    <!-- Per-issuer questions (title reused = issuer name) -->
+    <!-- Per-issuer country picker (after cleanup, before VAT) -->
+    <string name="onboarding_issuer_country_subtitle">Dans quel pays est basée %1$s ?</string>
+    <string name="onboarding_issuer_country_body">Ça me permettra de te proposer les bons régimes de TVA.</string>
+    <string name="onboarding_issuer_country_pick">Choisir un pays</string>
+
+    <!-- Per-issuer VAT (3 options) -->
     <string name="onboarding_vat_subtitle">Es-tu en franchise en base de TVA ?</string>
-    <string name="onboarding_vat_body">Cela signifie que tu ne factures pas la TVA. Le code TVA « exempt » sera automatiquement appliqué à tes factures électroniques (ce sera invisible dans l'interface).</string>
-    <string name="onboarding_vat_yes">Oui, je suis en franchise</string>
+    <string name="onboarding_vat_body">Cela signifie que tu ne factures pas la TVA. Si c'est le cas, le code TVA « exempt » sera automatiquement appliqué à tes factures électroniques (ce sera invisible dans l'interface).</string>
+    <string name="onboarding_vat_option_franchise">Je suis en franchise de TVA</string>
+    <string name="onboarding_vat_option_tva">Je facture la TVA</string>
+    <string name="onboarding_vat_option_dontknow">Je ne sais pas</string>
 
-    <string name="onboarding_ineu_subtitle">Est-ce que %1$s est basée dans l'Union européenne ?</string>
-    <string name="onboarding_ineu_body">Cela conditionne le fait que l'exonération de TVA « intra-UE » puisse s'appliquer.</string>
+    <!-- VAT don't-know hint (separate screen) -->
+    <string name="onboarding_vat_dontknow_title">Pas de souci</string>
+    <string name="onboarding_vat_dontknow_body">Pour savoir si tu es concerné·e, regarde ton dernier avis d'imposition ou demande à ton comptable.\n\nEn attendant, je pars du principe que tu factures la TVA. Tu pourras modifier ça plus tard dans les paramètres de ton entreprise.</string>
+    <string name="onboarding_vat_dontknow_cta">D'accord</string>
 
+    <!-- Per-issuer intra-EU sales -->
     <string name="onboarding_intraeu_subtitle">Est-ce qu'il t'arrive de vendre à des clients dans un autre pays de l'UE ?</string>
 
     <!-- Product nature -->
@@ -560,6 +570,20 @@ Une erreur s'est produite :
     <!-- Mixed nature hint (separate screen) -->
     <string name="onboarding_mixed_hint_title">Un peu des deux</string>
     <string name="onboarding_mixed_hint_body">Dans ce cas, il faudra que tu indiques le type de produit au fil de l'eau, quand tu les ajoutes dans tes documents.</string>
+
+    <!-- Client country flow (before unit code) -->
+    <string name="onboarding_client_country_intro_title">Tes client·es</string>
+    <string name="onboarding_client_country_intro_body">Est-ce que tes client·es sont, pour la plupart, dans le même pays ?\n\nSi oui, je pourrai le pré-remplir pour tous ceux qui n'ont pas encore de pays renseigné.</string>
+    <string name="onboarding_client_country_intro_yes">Oui, majoritairement</string>
+    <string name="onboarding_client_country_intro_no">Non, c'est mélangé</string>
+
+    <string name="onboarding_client_country_picker_subtitle">Dans quel pays ?</string>
+    <string name="onboarding_client_country_picker_body">Je vais l'appliquer aux client·es qui n'ont pas encore de pays renseigné.</string>
+    <string name="onboarding_client_country_picker_pick">Choisir un pays</string>
+
+    <string name="onboarding_client_country_done_title">Enchantée</string>
+    <string name="onboarding_client_country_done_body">C'est tout pour tes client·es. On finit avec un dernier détail.</string>
+    <string name="onboarding_client_country_done_cta">Suivant</string>
 
     <!-- Unit code -->
     <string name="onboarding_unitcode_cta">D'accord</string>
