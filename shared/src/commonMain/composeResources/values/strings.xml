@@ -601,7 +601,7 @@ Une erreur s'est produite :
     <!-- Unit code -->
     <string name="onboarding_unitcode_cta">D'accord</string>
     <string name="onboarding_unitcode_title">Code unité</string>
-    <string name="onboarding_unitcode_part1">Le dernier champ que j'ai changé dans cette version, c'est le </string>
+    <string name="onboarding_unitcode_part1">Un autre champ que j'ai changé dans cette version, c'est le </string>
     <string name="onboarding_unitcode_bold1">code unité</string>
     <string name="onboarding_unitcode_part2">.\n\nChacun de tes produits avait déjà une </string>
     <string name="onboarding_unitcode_bold2">unité</string>
