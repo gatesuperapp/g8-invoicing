@@ -567,6 +567,11 @@ Une erreur s'est produite :
     <string name="onboarding_nature_only_goods">Uniquement des biens</string>
     <string name="onboarding_nature_mixed">Un peu des deux</string>
 
+    <!-- Issuers configured confirmation (after last per-issuer step) -->
+    <string name="onboarding_issuers_done_title">C'est bon</string>
+    <string name="onboarding_issuers_done_body_singular">Les réglages de ton entreprise sont enregistrés. Tu peux toujours les modifier dans Mon compte &gt; Mes entreprises.</string>
+    <string name="onboarding_issuers_done_body_plural">Les réglages de tes entreprises sont enregistrés. Tu peux toujours les modifier dans Mon compte &gt; Mes entreprises.</string>
+
     <!-- Mixed nature hint (separate screen) -->
     <string name="onboarding_mixed_hint_title">Un peu des deux</string>
     <string name="onboarding_mixed_hint_body">Dans ce cas, il faudra que tu indiques le type de produit au fil de l'eau, quand tu les ajoutes dans tes documents.</string>
