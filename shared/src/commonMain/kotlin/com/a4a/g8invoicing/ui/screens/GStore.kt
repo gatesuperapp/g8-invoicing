@@ -147,7 +147,7 @@ fun GStore(
     val isPremium = remember(subscriptionState) {
         (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->
             s.status == "active" &&
-                (s.currentPeriodEndMs ?: 0L) > kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+                (s.currentPeriodEndMs ?: 0L) > kotlin.time.Clock.System.now().toEpochMilliseconds()
         } ?: false
     }
     val isDimActive = remember { mutableStateOf(false) }

@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.data.util
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -16,7 +15,7 @@ object DateUtils {
      * Get current date formatted as dd/MM/yyyy
      */
     fun getCurrentDateFormatted(): String {
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         val localDate = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
         return formatDate(localDate)
     }
@@ -25,7 +24,7 @@ object DateUtils {
      * Get date N days from now formatted as dd/MM/yyyy
      */
     fun getDatePlusDaysFormatted(days: Int): String {
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         val localDate = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
         val futureDate = localDate.plus(days, DateTimeUnit.DAY)
         return formatDate(futureDate)
@@ -45,7 +44,7 @@ object DateUtils {
      * Format current datetime as yyyy-MM-dd HH:mm:ss for database timestamps
      */
     fun getCurrentTimestamp(): String {
-        val now = Clock.System.now()
+        val now = kotlin.time.Clock.System.now()
         val localDateTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
         val date = localDateTime.date
         val time = localDateTime.time
@@ -83,7 +82,7 @@ object DateUtils {
      */
     fun isDateBeforeToday(dateString: String): Boolean {
         val date = parseDate(dateString) ?: return false
-        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val today = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         return date < today
     }
 
@@ -91,6 +90,6 @@ object DateUtils {
      * Get current time in milliseconds
      */
     fun currentTimeMillis(): Long {
-        return Clock.System.now().toEpochMilliseconds()
+        return kotlin.time.Clock.System.now().toEpochMilliseconds()
     }
 }
