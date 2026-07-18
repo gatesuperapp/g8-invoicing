@@ -499,4 +499,109 @@ Es ist ein Fehler aufgetreten :
     <string name="database_email_subject">Export meiner g8-Daten</string>
     <string name="database_email_body">Meine SQLite-Datenbank der g8-App. Sie enthält alle meine Daten (Kund·innen, Produkte, Rechnungsdaten..). Falls ich mein Telefon verliere, kann diese Datenbank verwendet werden, um meine Daten wiederherzustellen. Bei Fragen: contact@the-gate.fr.</string>
     <string name="database_email_chooser">Datenbank per E-Mail senden</string>
+
+    <!-- gStore Quote (unlimited + trial) -->
+    <string name="gstore_module_quote_title">Unbegrenzte Kostenvoranschläge</string>
+    <string name="gstore_module_quote_desc">Kostenvoranschläge erstellen und in Rechnungen umwandeln</string>
+    <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
+    <string name="gstore_module_quote_trial_title">Kostenvoranschläge entdecken</string>
+    <string name="gstore_module_quote_trial_desc">5 kostenlose Kostenvoranschläge, um die Funktion zu entdecken</string>
+    <string name="gstore_module_quote_trial_detail">Wenn du dieses Modul aktivierst, erhältst du 5 kostenlose Kostenvoranschläge, um die Funktion auszuprobieren und zu sehen, ob sie dir zusagt. Danach musst du Premium-Mitglied werden, um unbegrenzt Kostenvoranschläge zu haben.\n\nAktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
+    <string name="gstore_quote_trial_exhausted_title">Entdeckungszeitraum abgelaufen</string>
+    <string name="gstore_quote_trial_exhausted_body">Dein Entdeckungszeitraum für Kostenvoranschläge ist abgelaufen. Wenn du weiterhin Kostenvoranschläge nutzen möchtest, kannst du Premium-Mitglied werden.</string>
+    <string name="gstore_quote_trial_exhausted_cta">OK</string>
+
+    <!-- Onboarding 1.8 -->
+    <string name="onboarding_previous">Zurück</string>
+    <string name="onboarding_next">Weiter</string>
+    <string name="onboarding_yes">Ja</string>
+    <string name="onboarding_no">Nein</string>
+
+    <string name="onboarding_welcome_body">Willkommen bei Version\n1.8 - Rosa Canina</string>
+    <string name="onboarding_welcome_cta">Entdecken</string>
+
+    <string name="onboarding_devis_title">Kostenvoranschläge</string>
+    <string name="onboarding_devis_body_bold">Kostenvoranschläge sind jetzt verfügbar</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nKostenvoranschläge können in Rechnungen umgewandelt werden.\n\nDu kannst die Funktion ausprobieren (max. 5 Kostenvoranschläge) und danach Premium-Mitglied werden für unbegrenzte Kostenvoranschläge!</string>
+    <string name="onboarding_devis_cta_activate">Kostenvoranschläge aktivieren</string>
+    <string name="onboarding_devis_cta_later_gstore">Später im gStore</string>
+    <string name="onboarding_devis_cta_no_devis">Cool, aber brauche ich nicht!</string>
+
+    <string name="onboarding_facturx_title">Neue Felder</string>
+    <string name="onboarding_facturx_body_before_bold">Ich habe begonnen, Felder hinzuzufügen, damit deine Rechnungen standardisiert, besser lesbar und bereit für die elektronische Rechnungsstellung sind.\n\n</string>
+    <string name="onboarding_facturx_body_bold">Ich brauche dich für ein paar Einstellungen.</string>
+    <string name="onboarding_facturx_cta">OK</string>
+
+    <string name="onboarding_privacy_title">Datenschutz</string>
+    <string name="onboarding_privacy_body_p1">Damit du es weißt: Ich habe keinen Zugriff auf deine Antworten. Deine Daten werden nur auf deinem Telefon gespeichert.</string>
+    <string name="onboarding_privacy_body_p2">Möchtest du übrigens schnell ein Backup machen?</string>
+    <string name="onboarding_privacy_cta_backup">Meine Datenbank sichern</string>
+
+    <string name="onboarding_cleanup_title">Deine Unternehmen</string>
+    <string name="onboarding_cleanup_body_part1">Ich sehe, du verwaltest mehrere Unternehmen.\n\nWenn du einige davon nicht mehr nutzt, </string>
+    <string name="onboarding_cleanup_body_bold_delete_here">kannst du sie hier löschen</string>
+    <string name="onboarding_cleanup_body_part3">. Keine Sorge, die zugehörigen Dokumente bleiben unverändert.</string>
+    <string name="onboarding_cleanup_cta">Weiter</string>
+    <string name="onboarding_cleanup_delete_confirm_title">Dieses Unternehmen löschen?</string>
+    <string name="onboarding_cleanup_delete_confirm_yes">Löschen</string>
+    <string name="onboarding_cleanup_delete_confirm_no">Abbrechen</string>
+
+    <string name="onboarding_issuer_country_subtitle">In welchem Land ist %1$s ansässig?</string>
+    <string name="onboarding_issuer_country_body">Für jedes Unternehmen musst du das Land des Firmensitzes angeben. Es ist ein Pflichtfeld für die elektronische Rechnungsstellung.</string>
+    <string name="onboarding_issuer_country_pick">Land auswählen</string>
+
+    <string name="onboarding_vat_subtitle">Bist du von der Umsatzsteuer befreit?</string>
+    <string name="onboarding_vat_body">Das bedeutet, dass du keine Umsatzsteuer in Rechnung stellst. In dem Fall wird der USt-Code „befreit&quot; automatisch auf deine elektronischen Rechnungen angewendet (in der Oberfläche unsichtbar).</string>
+    <string name="onboarding_vat_option_franchise">Ich bin von der Umsatzsteuer befreit</string>
+    <string name="onboarding_vat_option_tva">Ich stelle Umsatzsteuer in Rechnung</string>
+    <string name="onboarding_vat_option_dontknow">Ich weiß nicht</string>
+
+    <string name="onboarding_vat_dontknow_title">Kein Problem</string>
+    <string name="onboarding_vat_dontknow_body">Um herauszufinden, ob es dich betrifft, sieh in deinen letzten Steuerbescheid oder frag deine·n Steuerberater·in.\n\nBis dahin gehe ich davon aus, dass du Umsatzsteuer in Rechnung stellst. Du kannst das später in den Einstellungen deines Unternehmens ändern.</string>
+    <string name="onboarding_vat_dontknow_cta">OK</string>
+
+    <string name="onboarding_intraeu_subtitle">Verkaufst du manchmal an Kund·innen in einem anderen EU-Land?</string>
+
+    <string name="onboarding_nature_title">Produkttyp</string>
+    <string name="onboarding_nature_intro">Bei Unternehmen mit innergemeinschaftlicher Befreiung hängt der Steuercode davon ab, ob du Waren oder Dienstleistungen verkaufst.</string>
+    <string name="onboarding_nature_question">Fallen deine Produkte unter…</string>
+    <string name="onboarding_nature_only_services">Nur Dienstleistungen</string>
+    <string name="onboarding_nature_only_goods">Nur Waren</string>
+    <string name="onboarding_nature_mixed">Ein bisschen von beidem</string>
+
+    <string name="onboarding_issuers_done_title">Fertig</string>
+    <string name="onboarding_issuers_done_body_singular">Die Einstellungen deines Unternehmens sind gespeichert. Du kannst sie jederzeit unter Mein Konto &gt; Meine Unternehmen ändern.</string>
+    <string name="onboarding_issuers_done_body_plural">Die Einstellungen deiner Unternehmen sind gespeichert. Du kannst sie jederzeit unter Mein Konto &gt; Meine Unternehmen ändern.</string>
+
+    <string name="onboarding_mixed_hint_title">Ein bisschen von beidem</string>
+    <string name="onboarding_mixed_hint_body">In dem Fall musst du den Produkttyp jeweils angeben, wenn du sie zu deinen Dokumenten hinzufügst.</string>
+
+    <string name="onboarding_client_country_intro_title">Länder der Kund·innen</string>
+    <string name="onboarding_client_country_intro_body">Sind deine Kund·innen meistens im gleichen Land?\n\nWenn ja, kann ich es automatisch vorausfüllen.</string>
+    <string name="onboarding_client_country_intro_yes">Ja</string>
+    <string name="onboarding_client_country_intro_no">Nein, gemischt</string>
+
+    <string name="onboarding_client_country_picker_subtitle">In welchem Land?</string>
+    <string name="onboarding_client_country_picker_body">Ich wende es auf die Kund·innen an, die noch kein Land angegeben haben.</string>
+    <string name="onboarding_client_country_picker_pick">Land auswählen</string>
+
+    <string name="onboarding_client_country_done_applied_title">Erledigt</string>
+    <string name="onboarding_client_country_done_applied_body">Ich habe dieses Land für deine Kund·innen gespeichert, die noch keines hatten.</string>
+    <string name="onboarding_client_country_done_skipped_title">Kein Problem</string>
+    <string name="onboarding_client_country_done_skipped_body">Du kannst das Land deiner Kund·innen jeweils einstellen, wenn du sie einem Dokument hinzufügst.</string>
+    <string name="onboarding_client_country_done_cta">Weiter</string>
+
+    <string name="onboarding_unitcode_cta">OK</string>
+    <string name="onboarding_unitcode_title">Einheitscode</string>
+    <string name="onboarding_unitcode_part1">Ein weiteres Feld, das ich in dieser Version geändert habe, ist der </string>
+    <string name="onboarding_unitcode_bold1">Einheitscode</string>
+    <string name="onboarding_unitcode_part2">.\n\nJedes deiner Produkte hatte bereits eine </string>
+    <string name="onboarding_unitcode_bold2">Einheit</string>
+    <string name="onboarding_unitcode_part3"> (Stunde, Kilo, Stück). Ab jetzt gibt es einen </string>
+    <string name="onboarding_unitcode_bold3">normierten Code</string>
+    <string name="onboarding_unitcode_part4"> der dazugehört.\n\n⚡ Du musst nichts tun, ich finde den Einheitscode ganz allein!\n\nWenn ich die Einheit nicht erkenne, ist das auch okay ✅</string>
+
+    <string name="onboarding_thanks_title">Perfekt!</string>
+    <string name="onboarding_thanks_body">Danke für dein Vertrauen. Bis bald!</string>
+    <string name="onboarding_thanks_cta">Fertig</string>
 </resources>

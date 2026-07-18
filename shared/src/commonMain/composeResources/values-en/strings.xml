@@ -446,4 +446,109 @@
     <string name="database_email_subject">Export of my g8 data</string>
     <string name="database_email_body">My SQLite database from the g8 app. It contains all my data (clients, products, invoicing data..). If I lose my phone, this database can be used to restore my data. For any questions: contact@the-gate.fr.</string>
     <string name="database_email_chooser">Send the database by email</string>
+
+    <!-- gStore Quote (unlimited + trial) -->
+    <string name="gstore_module_quote_title">Unlimited quotes</string>
+    <string name="gstore_module_quote_desc">Create quotes and convert them to invoices</string>
+    <string name="gstore_module_quote_detail">Enable this module to create quotes, send them to your clients, and convert them to an invoice once accepted. The quote number will appear on the corresponding invoice for accounting traceability.</string>
+    <string name="gstore_module_quote_trial_title">Discover quotes</string>
+    <string name="gstore_module_quote_trial_desc">5 free quotes to try the feature</string>
+    <string name="gstore_module_quote_trial_detail">Enabling this module gives you 5 free quotes to try the feature and see if it suits you. You will then need to become a premium member to get unlimited quotes.\n\nEnable this module to create quotes, send them to your clients, and convert them to an invoice once accepted. The quote number will appear on the corresponding invoice for accounting traceability.</string>
+    <string name="gstore_quote_trial_exhausted_title">Discovery period ended</string>
+    <string name="gstore_quote_trial_exhausted_body">Your quote discovery period has ended. If you would like to keep using quotes, you can become a premium member.</string>
+    <string name="gstore_quote_trial_exhausted_cta">OK</string>
+
+    <!-- Onboarding 1.8 -->
+    <string name="onboarding_previous">Back</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_yes">Yes</string>
+    <string name="onboarding_no">No</string>
+
+    <string name="onboarding_welcome_body">Welcome to version\n1.8 - Rosa Canina</string>
+    <string name="onboarding_welcome_cta">Discover</string>
+
+    <string name="onboarding_devis_title">Quotes</string>
+    <string name="onboarding_devis_body_bold">Quotes are now available</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nQuotes can be converted to invoices.\n\nYou can try the feature (5 quotes max) then become a premium member for unlimited quotes!</string>
+    <string name="onboarding_devis_cta_activate">Enable quotes</string>
+    <string name="onboarding_devis_cta_later_gstore">Later in the gStore</string>
+    <string name="onboarding_devis_cta_no_devis">Cool, but I do not need it!</string>
+
+    <string name="onboarding_facturx_title">New fields</string>
+    <string name="onboarding_facturx_body_before_bold">I have started adding fields to make invoices standardised, more readable and ready for electronic invoicing.\n\n</string>
+    <string name="onboarding_facturx_body_bold">I need you for a few settings.</string>
+    <string name="onboarding_facturx_cta">OK</string>
+
+    <string name="onboarding_privacy_title">Privacy</string>
+    <string name="onboarding_privacy_body_p1">Just so you know, I do not have access to the answers you will give me — your data is only stored on your phone.</string>
+    <string name="onboarding_privacy_body_p2">By the way, would you like to make a quick backup?</string>
+    <string name="onboarding_privacy_cta_backup">Back up my database</string>
+
+    <string name="onboarding_cleanup_title">Your businesses</string>
+    <string name="onboarding_cleanup_body_part1">I see you are managing several businesses.\n\nIf there are any you no longer use, </string>
+    <string name="onboarding_cleanup_body_bold_delete_here">you can delete them here</string>
+    <string name="onboarding_cleanup_body_part3">. Do not worry, the related documents will stay untouched.</string>
+    <string name="onboarding_cleanup_cta">Next</string>
+    <string name="onboarding_cleanup_delete_confirm_title">Delete this business?</string>
+    <string name="onboarding_cleanup_delete_confirm_yes">Delete</string>
+    <string name="onboarding_cleanup_delete_confirm_no">Cancel</string>
+
+    <string name="onboarding_issuer_country_subtitle">Which country is %1$s based in?</string>
+    <string name="onboarding_issuer_country_body">You need to indicate each business country of domicile. It is a required field for electronic invoicing.</string>
+    <string name="onboarding_issuer_country_pick">Choose a country</string>
+
+    <string name="onboarding_vat_subtitle">Are you exempt from VAT?</string>
+    <string name="onboarding_vat_body">It means you do not charge VAT. If so, the &quot;exempt&quot; VAT code will be automatically applied to your electronic invoices (invisible in the interface).</string>
+    <string name="onboarding_vat_option_franchise">I am VAT-exempt</string>
+    <string name="onboarding_vat_option_tva">I charge VAT</string>
+    <string name="onboarding_vat_option_dontknow">I do not know</string>
+
+    <string name="onboarding_vat_dontknow_title">No worries</string>
+    <string name="onboarding_vat_dontknow_body">To find out whether it applies to you, check your latest tax notice or ask your accountant.\n\nMeanwhile, I will assume you charge VAT. You can change this later in your business settings.</string>
+    <string name="onboarding_vat_dontknow_cta">OK</string>
+
+    <string name="onboarding_intraeu_subtitle">Do you ever sell to customers in another EU country?</string>
+
+    <string name="onboarding_nature_title">Product type</string>
+    <string name="onboarding_nature_intro">For businesses with intra-EU exemption, the tax code depends on whether you sell goods or services.</string>
+    <string name="onboarding_nature_question">Do your products fall under…</string>
+    <string name="onboarding_nature_only_services">Services only</string>
+    <string name="onboarding_nature_only_goods">Goods only</string>
+    <string name="onboarding_nature_mixed">A bit of both</string>
+
+    <string name="onboarding_issuers_done_title">Done</string>
+    <string name="onboarding_issuers_done_body_singular">Your business settings are saved. You can always change them in My account &gt; My businesses.</string>
+    <string name="onboarding_issuers_done_body_plural">Your business settings are saved. You can always change them in My account &gt; My businesses.</string>
+
+    <string name="onboarding_mixed_hint_title">A bit of both</string>
+    <string name="onboarding_mixed_hint_body">In that case, you will indicate the product type as you go, when adding them to your documents.</string>
+
+    <string name="onboarding_client_country_intro_title">Client countries</string>
+    <string name="onboarding_client_country_intro_body">Are your clients mostly in the same country?\n\nIf so, I can pre-fill it automatically.</string>
+    <string name="onboarding_client_country_intro_yes">Yes</string>
+    <string name="onboarding_client_country_intro_no">No, they are mixed</string>
+
+    <string name="onboarding_client_country_picker_subtitle">Which country?</string>
+    <string name="onboarding_client_country_picker_body">I will apply it to the clients who do not have a country set yet.</string>
+    <string name="onboarding_client_country_picker_pick">Choose a country</string>
+
+    <string name="onboarding_client_country_done_applied_title">Done</string>
+    <string name="onboarding_client_country_done_applied_body">I saved this country for your clients who did not have one yet.</string>
+    <string name="onboarding_client_country_done_skipped_title">No worries</string>
+    <string name="onboarding_client_country_done_skipped_body">You can set your clients countries as you go, when adding them to a document.</string>
+    <string name="onboarding_client_country_done_cta">Next</string>
+
+    <string name="onboarding_unitcode_cta">OK</string>
+    <string name="onboarding_unitcode_title">Unit code</string>
+    <string name="onboarding_unitcode_part1">Another field I have changed in this version is the </string>
+    <string name="onboarding_unitcode_bold1">unit code</string>
+    <string name="onboarding_unitcode_part2">.\n\nEach of your products already had a </string>
+    <string name="onboarding_unitcode_bold2">unit</string>
+    <string name="onboarding_unitcode_part3"> (hour, kilo, piece). There will now be a </string>
+    <string name="onboarding_unitcode_bold3">standardised code</string>
+    <string name="onboarding_unitcode_part4"> to go with it.\n\n⚡ You do not need to do anything — I will figure out the unit code on my own!\n\nIf I do not recognise the unit, that is fine too ✅</string>
+
+    <string name="onboarding_thanks_title">Perfect!</string>
+    <string name="onboarding_thanks_body">Thanks for your trust. See you soon!</string>
+    <string name="onboarding_thanks_cta">Finish</string>
 </resources>

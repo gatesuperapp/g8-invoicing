@@ -4,6 +4,7 @@
     <string name="invoice_default_number">F001</string>
     <string name="delivery_note_default_number">BL001</string>
     <string name="credit_note_default_number">FA001</string>
+    <string name="quote_default_number">D001</string>
 
     <!-- Currency -->
     <string name="currency">€</string>
@@ -13,11 +14,13 @@
 
     <!-- Document footer -->
     <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234</string>
+    <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
     <string name="invoice_number">Facture N°</string>
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
+    <string name="quote_number">Devis N°</string>
     <string name="document_date">Date</string>
     <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d'émission</string>
@@ -140,6 +143,43 @@
     <string name="client_city_input">Écholoc</string>
     <string name="client_zip_code">Code Postal</string>
     <string name="client_zip_code_input">81000</string>
+    <string name="client_country">Pays</string>
+    <string name="country_picker_search">Rechercher un pays</string>
+    <string name="country_picker_empty">Aucun pays trouvé</string>
+    <string name="unit_picker_search">Rechercher une unité</string>
+    <string name="unit_picker_empty">Aucune unité trouvée</string>
+    <string name="unit_picker_recent">Récentes</string>
+    <string name="unit_picker_category_count">Comptage</string>
+    <string name="unit_picker_category_length">Longueur</string>
+    <string name="unit_picker_category_area">Surface</string>
+    <string name="unit_picker_category_volume">Volume</string>
+    <string name="unit_picker_category_weight">Poids</string>
+    <string name="unit_picker_category_time">Temps</string>
+    <string name="unit_picker_category_energy">Énergie</string>
+    <string name="unit_picker_category_service">Service</string>
+    <string name="unit_picker_category_packaging">Emballage</string>
+    <string name="product_type_label">Type</string>
+    <string name="product_type_service">Service</string>
+    <string name="product_type_goods">Bien</string>
+    <string name="product_type_info_modal_title">Type de produit</string>
+    <string name="product_type_info_modal_content">Il est utilisé pour déterminer automatiquement la catégorie de TVA à appliquer. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.</string>
+    <string name="product_type_info_desc">Info type de produit</string>
+    <string name="product_legacy_type_warning_title">Vérifiez le type</string>
+    <string name="product_legacy_type_warning_content">Vérifiez bien que le champ « Type » correspond bien à votre produit — c'est un nouveau champ, ajouté à cette version pour la conformité facture électronique.</string>
+    <string name="issuer_intra_eu_sales_label">Ventes hors de mon pays (UE)</string>
+    <string name="issuer_intra_eu_sales_info_modal_title">Ventes intra-UE</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Cochez si :\n- votre entreprise est dans l'Union européenne\n\net\n\n- vous facturez un·e client·e situé·e dans un autre pays de l'UE que le vôtre.\n\ng8 vous demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans votre pays, ou hors UE ? Laissez décoché.</string>
+    <string name="issuer_intra_eu_sales_info_desc">Info ventes intra-UE</string>
+    <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
+    <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
+    <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à votre pays sur les factures.</string>
+    <string name="product_unit_code_label">Code unité</string>
+    <string name="product_unit_code_info_modal_title">Code unité</string>
+    <string name="product_unit_code_info_modal_content">Il est déduit automatiquement de l'unité que vous saisissez. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.\n\nSi l'unité que vous utilisez ne correspond à aucun code, pas de souci — c'est aussi valable.</string>
+    <string name="info_tooltip_dismiss">Ne plus afficher</string>
+    <string name="info_tooltip_ok">OK</string>
+    <string name="product_unit_code_info_desc">Info code unité</string>
+    <string name="issuer_vat_exempt_info_desc">Info franchise TVA</string>
     <string name="company_identification1">N° SIRET</string>
     <string name="company_identification2">N° TVA</string>
     <string name="company_identification3">N° RCS</string>
@@ -197,6 +237,7 @@
     <string name="appbar_invoices">Factures</string>
     <string name="appbar_credit_notes">Avoirs</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
+    <string name="appbar_quotes">Devis</string>
     <string name="appbar_products">Produits</string>
     <string name="appbar_client_list">Client·es</string>
     <string name="appbar_new">Nouveau</string>
@@ -265,6 +306,18 @@
     <string name="gstore_module_payments_desc">Enregistrez CB, chèques, espèces</string>
     <string name="gstore_module_themes_title">Thèmes premium</string>
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
+    <string name="gstore_module_quote_title">Devis illimités</string>
+    <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
+    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_trial_title">Devis découverte</string>
+    <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
+    <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle vous convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.\n\nActivez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_quote_trial_exhausted_title">Période découverte écoulée</string>
+    <string name="gstore_quote_trial_exhausted_body">Votre période découverte de devis est écoulée. Si vous souhaitez continuer d'utiliser les devis, vous pouvez devenir membre premium.</string>
+    <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
+    <string name="gstore_module_delivery_note_title">Bons de livraison</string>
+    <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
+    <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
@@ -279,7 +332,7 @@
     <string name="account_auth_link_sent">✅ Un email avec le lien de connexion vous a été envoyé. Si vous ne le recevez pas, vérifiez dans vos spams, et n'hésitez pas à nous écrire à </string>
     <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Vous pouvez réessayer dans quelques minutes, et n'hésitez pas à nous écrire à </string>
     <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Vous pouvez demander un nouveau lien. Si le problème persiste, écrivez-nous à </string>
-    <string name="account_auth_login_failed">La connexion est pour l\'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
+    <string name="account_auth_login_failed">La connexion est pour l'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
     <string name="account_auth_invalid_email">Adresse e-mail invalide.</string>
     <string name="account_logout">Me déconnecter</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Membre Premium</string>
@@ -372,6 +425,11 @@
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
+    <!-- Quote List Advice -->
+    <string name="quote_advice_convert">J'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="quote_advice_convert1">que si tu veux convertir un ou plusieurs devis en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
+    <string name="quote_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
     <string name="invoice_advice_legal_1">Bienvenue au 𝕘𝟠 aka The Gate !\n\n Je suis Petit Rhino, ton nouvel amigo ♡ \n\n …   </string>
@@ -450,4 +508,113 @@ Une erreur s'est produite :
     <string name="database_email_subject">Export de mes données g8</string>
     <string name="database_email_body">Ma base de données SQLite de l'application g8. Elle contient toutes mes données (client·es, produits, données de facturation..). Si je perds mon téléphone, cette base pourra être utilisée pour restaurer mes données. Pour toute question : contact@the-gate.fr.</string>
     <string name="database_email_chooser">Envoyer la base de données par mail</string>
+
+    <!-- Onboarding 1.8 -->
+    <string name="onboarding_previous">Précédent</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_yes">Oui</string>
+    <string name="onboarding_no">Non</string>
+
+    <!-- Welcome (standalone) -->
+    <string name="onboarding_welcome_body">Bienvenue sur la version\n1.8 - Rosa Canina</string>
+    <string name="onboarding_welcome_cta">Découvrir</string>
+
+    <!-- Devis intro -->
+    <string name="onboarding_devis_title">Devis</string>
+    <string name="onboarding_devis_body_bold">Les devis sont maintenant disponibles</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nIl est possible de convertir les devis en facture.\n\nTu peux tester la fonctionnalité (5 devis max) puis devenir membre premium pour des devis illimités !</string>
+    <string name="onboarding_devis_cta_activate">Activer les devis</string>
+    <string name="onboarding_devis_cta_later_gstore">Plus tard dans le gStore</string>
+    <string name="onboarding_devis_cta_no_devis">Cool, mais pas besoin !</string>
+
+    <!-- Factur-X intro -->
+    <string name="onboarding_facturx_title">Nouveaux champs</string>
+    <string name="onboarding_facturx_body_before_bold">J'ai commencé à ajouter des champs pour avoir des factures normées, plus lisibles et prêtes pour la facturation électronique.\n\n</string>
+    <string name="onboarding_facturx_body_bold">J'ai besoin de toi pour quelques réglages.</string>
+    <string name="onboarding_facturx_cta">D'accord</string>
+
+    <!-- Privacy / backup intermediate step (between Factur-X intro and per-issuer loop) -->
+    <string name="onboarding_privacy_title">Confidentialité</string>
+    <string name="onboarding_privacy_body_p1">Sache que je n'ai pas accès aux réponses que tu vas me donner, car tes données sont seulement enregistrées dans ton téléphone.</string>
+    <string name="onboarding_privacy_body_p2">D'ailleurs, souhaites-tu faire une sauvegarde rapide ?</string>
+    <string name="onboarding_privacy_cta_backup">Sauvegarder ma base de données</string>
+
+    <!-- Multi-issuer cleanup -->
+    <string name="onboarding_cleanup_title">Tes entreprises</string>
+    <string name="onboarding_cleanup_body_part1">Tiens, je vois que tu gères plusieurs entreprises.\n\nS'il y en a que tu n'utilises plus, </string>
+    <string name="onboarding_cleanup_body_bold_delete_here">tu peux les supprimer ici</string>
+    <string name="onboarding_cleanup_body_part3">. Ne t'inquiète pas, les documents liés ne bougeront pas.</string>
+    <string name="onboarding_cleanup_cta">Suivant</string>
+    <string name="onboarding_cleanup_delete_confirm_title">Supprimer cette entreprise ?</string>
+    <string name="onboarding_cleanup_delete_confirm_yes">Supprimer</string>
+    <string name="onboarding_cleanup_delete_confirm_no">Annuler</string>
+
+    <!-- Per-issuer country picker (after cleanup, before VAT) -->
+    <string name="onboarding_issuer_country_subtitle">Dans quel pays est basée %1$s ?</string>
+    <string name="onboarding_issuer_country_body">Il faut indiquer pour chaque entreprise son pays de domiciliation. C'est un champ obligatoire pour la facturation électronique.</string>
+    <string name="onboarding_issuer_country_pick">Choisir un pays</string>
+
+    <!-- Per-issuer VAT (3 options) -->
+    <string name="onboarding_vat_subtitle">Es-tu en franchise en base de TVA ?</string>
+    <string name="onboarding_vat_body">Cela signifie que tu ne factures pas la TVA. Si c'est le cas, le code TVA « exempt » sera automatiquement appliqué à tes factures électroniques (ce sera invisible dans l'interface).</string>
+    <string name="onboarding_vat_option_franchise">Je suis en franchise de TVA</string>
+    <string name="onboarding_vat_option_tva">Je facture la TVA</string>
+    <string name="onboarding_vat_option_dontknow">Je ne sais pas</string>
+
+    <!-- VAT don't-know hint (separate screen) -->
+    <string name="onboarding_vat_dontknow_title">Pas de souci</string>
+    <string name="onboarding_vat_dontknow_body">Pour savoir si tu es concerné·e, regarde ton dernier avis d'imposition ou demande à ton comptable.\n\nEn attendant, je pars du principe que tu factures la TVA. Tu pourras modifier ça plus tard dans les paramètres de ton entreprise.</string>
+    <string name="onboarding_vat_dontknow_cta">D'accord</string>
+
+    <!-- Per-issuer intra-EU sales -->
+    <string name="onboarding_intraeu_subtitle">Est-ce qu'il t'arrive de vendre à des clients dans un autre pays de l'UE ?</string>
+
+    <!-- Product nature -->
+    <string name="onboarding_nature_title">Type de produit</string>
+    <string name="onboarding_nature_intro">Pour des entreprises en exonération intra-UE, le code de taxe dépend du fait que tu vendes des biens ou des services.</string>
+    <string name="onboarding_nature_question">Est-ce que tes produits correspondent à…</string>
+    <string name="onboarding_nature_only_services">Uniquement des services</string>
+    <string name="onboarding_nature_only_goods">Uniquement des biens</string>
+    <string name="onboarding_nature_mixed">Un peu des deux</string>
+
+    <!-- Issuers configured confirmation (after last per-issuer step) -->
+    <string name="onboarding_issuers_done_title">C'est bon</string>
+    <string name="onboarding_issuers_done_body_singular">Les réglages de ton entreprise sont enregistrés. Tu peux toujours les modifier dans Mon compte &gt; Mes entreprises.</string>
+    <string name="onboarding_issuers_done_body_plural">Les réglages de tes entreprises sont enregistrés. Tu peux toujours les modifier dans Mon compte &gt; Mes entreprises.</string>
+
+    <!-- Mixed nature hint (separate screen) -->
+    <string name="onboarding_mixed_hint_title">Un peu des deux</string>
+    <string name="onboarding_mixed_hint_body">Dans ce cas, il faudra que tu indiques le type de produit au fil de l'eau, quand tu les ajoutes dans tes documents.</string>
+
+    <!-- Client country flow (before unit code) -->
+    <string name="onboarding_client_country_intro_title">Pays des client·es</string>
+    <string name="onboarding_client_country_intro_body">Est-ce que tes client·es sont, pour la plupart, dans le même pays ?\n\nSi oui, je pourrai le pré-remplir automatiquement.</string>
+    <string name="onboarding_client_country_intro_yes">Oui</string>
+    <string name="onboarding_client_country_intro_no">Non, c'est mélangé</string>
+
+    <string name="onboarding_client_country_picker_subtitle">Dans quel pays ?</string>
+    <string name="onboarding_client_country_picker_body">Je vais l'appliquer aux client·es qui n'ont pas encore de pays renseigné.</string>
+    <string name="onboarding_client_country_picker_pick">Choisir un pays</string>
+
+    <string name="onboarding_client_country_done_applied_title">C'est fait</string>
+    <string name="onboarding_client_country_done_applied_body">J'ai enregistré ce pays pour tes client·es qui n'en avaient pas encore.</string>
+    <string name="onboarding_client_country_done_skipped_title">Pas de souci</string>
+    <string name="onboarding_client_country_done_skipped_body">Tu pourras régler le pays de tes client·es au fil de l'eau quand tu les ajoutes à un document.</string>
+    <string name="onboarding_client_country_done_cta">Suivant</string>
+
+    <!-- Unit code -->
+    <string name="onboarding_unitcode_cta">D'accord</string>
+    <string name="onboarding_unitcode_title">Code unité</string>
+    <string name="onboarding_unitcode_part1">Un autre champ que j'ai changé dans cette version, c'est le </string>
+    <string name="onboarding_unitcode_bold1">code unité</string>
+    <string name="onboarding_unitcode_part2">.\n\nChacun de tes produits avait déjà une </string>
+    <string name="onboarding_unitcode_bold2">unité</string>
+    <string name="onboarding_unitcode_part3"> (heure, kilo, pièce). Il y aura désormais un </string>
+    <string name="onboarding_unitcode_bold3">code normalisé</string>
+    <string name="onboarding_unitcode_part4"> qui va avec.\n\n⚡ Tu n'as rien à faire, je trouve le code unité tout seul !\n\nSi je ne reconnais pas l'unité, c'est valable aussi ✅</string>
+
+    <!-- Thank you -->
+    <string name="onboarding_thanks_title">C'est parfait !</string>
+    <string name="onboarding_thanks_body">Merci de ta confiance. À bientôt !</string>
+    <string name="onboarding_thanks_cta">Terminer</string>
 </resources>
