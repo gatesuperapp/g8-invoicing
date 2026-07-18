@@ -521,7 +521,8 @@ Une erreur s'est produite :
 
     <!-- Devis intro -->
     <string name="onboarding_devis_title">Devis</string>
-    <string name="onboarding_devis_body">Les devis sont maintenant disponibles 🥳 Il est possible de convertir les devis en facture.\n\nLe module est activable dans le 𝕘Store pour les membres premium — tu peux cependant tester les devis gratuitement (5 max) pour voir si la fonctionnalité te convient.</string>
+    <string name="onboarding_devis_body_bold">Les devis sont maintenant disponibles</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nIl est possible de convertir les devis en facture.\n\nTu peux tester la fonctionnalité (5 devis max) puis devenir membre premium pour des devis illimités !</string>
     <string name="onboarding_devis_cta_activate">Activer les devis</string>
     <string name="onboarding_devis_cta_later_gstore">Plus tard dans le gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, mais pas besoin !</string>
@@ -530,9 +531,13 @@ Une erreur s'est produite :
     <string name="onboarding_facturx_title">Nouveaux champs</string>
     <string name="onboarding_facturx_body_before_bold">J'ai commencé à ajouter des champs pour avoir des factures normées, plus lisibles et prêtes pour la facturation électronique.\n\n</string>
     <string name="onboarding_facturx_body_bold">J'ai besoin de toi pour quelques réglages.</string>
-    <string name="onboarding_facturx_body_after_bold">\n\nSache que je n'ai pas accès aux réponses que tu vas me donner, car tes données sont seulement enregistrées dans ton téléphone.\n\nD'ailleurs, souhaites-tu faire une sauvegarde rapide ?</string>
-    <string name="onboarding_facturx_cta_backup">Sauvegarder ma base de données</string>
-    <string name="onboarding_facturx_cta">C'est bon, commençons les réglages</string>
+    <string name="onboarding_facturx_cta">D'accord</string>
+
+    <!-- Privacy / backup intermediate step (between Factur-X intro and per-issuer loop) -->
+    <string name="onboarding_privacy_title">Confidentialité</string>
+    <string name="onboarding_privacy_body_p1">Sache que je n'ai pas accès aux réponses que tu vas me donner, car tes données sont seulement enregistrées dans ton téléphone.</string>
+    <string name="onboarding_privacy_body_p2">D'ailleurs, souhaites-tu faire une sauvegarde rapide ?</string>
+    <string name="onboarding_privacy_cta_backup">Sauvegarder ma base de données</string>
 
     <!-- Multi-issuer cleanup -->
     <string name="onboarding_cleanup_title">Tes entreprises</string>
@@ -541,7 +546,6 @@ Une erreur s'est produite :
     <string name="onboarding_cleanup_body_part3">. Ne t'inquiète pas, les documents liés ne bougeront pas.</string>
     <string name="onboarding_cleanup_cta">Suivant</string>
     <string name="onboarding_cleanup_delete_confirm_title">Supprimer cette entreprise ?</string>
-    <string name="onboarding_cleanup_delete_confirm_body">Les documents liés ne seront pas modifiés.</string>
     <string name="onboarding_cleanup_delete_confirm_yes">Supprimer</string>
     <string name="onboarding_cleanup_delete_confirm_no">Annuler</string>
 
