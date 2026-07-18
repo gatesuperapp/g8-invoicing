@@ -451,4 +451,109 @@ Une erreur s'est produite :
     <string name="database_email_subject">Exportación de mis datos g8</string>
     <string name="database_email_body">Mi base de datos SQLite de la aplicación g8. Contiene todos mis datos (clientes, productos, datos de facturación..). Si pierdo mi teléfono, esta base de datos podrá utilizarse para restaurar mis datos. Para cualquier pregunta: contact@the-gate.fr.</string>
     <string name="database_email_chooser">Enviar la base de datos por correo</string>
+
+    <!-- gStore Quote (unlimited + trial) -->
+    <string name="gstore_module_quote_title">Presupuestos ilimitados</string>
+    <string name="gstore_module_quote_desc">Crear presupuestos y convertirlos en facturas</string>
+    <string name="gstore_module_quote_detail">Activa este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados. El número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
+    <string name="gstore_module_quote_trial_title">Descubre los presupuestos</string>
+    <string name="gstore_module_quote_trial_desc">5 presupuestos gratis para probar la función</string>
+    <string name="gstore_module_quote_trial_detail">Activar este módulo permite obtener 5 presupuestos gratis para probar la función y ver si te conviene. Después habrá que hacerse miembro premium para tener presupuestos ilimitados.\n\nActiva este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados. El número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
+    <string name="gstore_quote_trial_exhausted_title">Período de descubrimiento agotado</string>
+    <string name="gstore_quote_trial_exhausted_body">Tu período de descubrimiento de presupuestos ha terminado. Si deseas seguir usando los presupuestos, puedes hacerte miembro premium.</string>
+    <string name="gstore_quote_trial_exhausted_cta">De acuerdo</string>
+
+    <!-- Onboarding 1.8 -->
+    <string name="onboarding_previous">Anterior</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_yes">Sí</string>
+    <string name="onboarding_no">No</string>
+
+    <string name="onboarding_welcome_body">Bienvenida a la versión\n1.8 - Rosa Canina</string>
+    <string name="onboarding_welcome_cta">Descubrir</string>
+
+    <string name="onboarding_devis_title">Presupuestos</string>
+    <string name="onboarding_devis_body_bold">Los presupuestos ya están disponibles</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nLos presupuestos se pueden convertir en factura.\n\n¡Puedes probar la función (5 presupuestos máx.) y después hacerte miembro premium para tener presupuestos ilimitados!</string>
+    <string name="onboarding_devis_cta_activate">Activar presupuestos</string>
+    <string name="onboarding_devis_cta_later_gstore">Más tarde en la gStore</string>
+    <string name="onboarding_devis_cta_no_devis">¡Genial, pero no lo necesito!</string>
+
+    <string name="onboarding_facturx_title">Nuevos campos</string>
+    <string name="onboarding_facturx_body_before_bold">He empezado a añadir campos para tener facturas normalizadas, más legibles y listas para la facturación electrónica.\n\n</string>
+    <string name="onboarding_facturx_body_bold">Necesito tu ayuda para algunos ajustes.</string>
+    <string name="onboarding_facturx_cta">De acuerdo</string>
+
+    <string name="onboarding_privacy_title">Confidencialidad</string>
+    <string name="onboarding_privacy_body_p1">Que sepas que no tengo acceso a las respuestas que me vas a dar: tus datos solo se guardan en tu teléfono.</string>
+    <string name="onboarding_privacy_body_p2">Por cierto, ¿te gustaría hacer una copia de seguridad rápida?</string>
+    <string name="onboarding_privacy_cta_backup">Guardar mi base de datos</string>
+
+    <string name="onboarding_cleanup_title">Tus empresas</string>
+    <string name="onboarding_cleanup_body_part1">Veo que gestionas varias empresas.\n\nSi hay alguna que ya no usas, </string>
+    <string name="onboarding_cleanup_body_bold_delete_here">puedes eliminarlas aquí</string>
+    <string name="onboarding_cleanup_body_part3">. No te preocupes, los documentos vinculados no se moverán.</string>
+    <string name="onboarding_cleanup_cta">Siguiente</string>
+    <string name="onboarding_cleanup_delete_confirm_title">¿Eliminar esta empresa?</string>
+    <string name="onboarding_cleanup_delete_confirm_yes">Eliminar</string>
+    <string name="onboarding_cleanup_delete_confirm_no">Cancelar</string>
+
+    <string name="onboarding_issuer_country_subtitle">¿En qué país está domiciliada %1$s?</string>
+    <string name="onboarding_issuer_country_body">Debes indicar el país de domicilio de cada empresa. Es un campo obligatorio para la facturación electrónica.</string>
+    <string name="onboarding_issuer_country_pick">Elegir un país</string>
+
+    <string name="onboarding_vat_subtitle">¿Estás en régimen de franquicia de IVA?</string>
+    <string name="onboarding_vat_body">Significa que no facturas IVA. Si es así, el código IVA «exento» se aplicará automáticamente a tus facturas electrónicas (será invisible en la interfaz).</string>
+    <string name="onboarding_vat_option_franchise">Estoy en franquicia de IVA</string>
+    <string name="onboarding_vat_option_tva">Facturo IVA</string>
+    <string name="onboarding_vat_option_dontknow">No lo sé</string>
+
+    <string name="onboarding_vat_dontknow_title">Sin problema</string>
+    <string name="onboarding_vat_dontknow_body">Para saber si te afecta, mira tu último aviso fiscal o pregunta a tu contable.\n\nMientras tanto, asumo que facturas IVA. Podrás modificarlo más tarde en los ajustes de tu empresa.</string>
+    <string name="onboarding_vat_dontknow_cta">De acuerdo</string>
+
+    <string name="onboarding_intraeu_subtitle">¿A veces vendes a clientes en otro país de la UE?</string>
+
+    <string name="onboarding_nature_title">Tipo de producto</string>
+    <string name="onboarding_nature_intro">Para las empresas con exención intracomunitaria, el código de impuestos depende de si vendes bienes o servicios.</string>
+    <string name="onboarding_nature_question">¿Tus productos son…</string>
+    <string name="onboarding_nature_only_services">Solo servicios</string>
+    <string name="onboarding_nature_only_goods">Solo bienes</string>
+    <string name="onboarding_nature_mixed">Un poco de ambos</string>
+
+    <string name="onboarding_issuers_done_title">Listo</string>
+    <string name="onboarding_issuers_done_body_singular">Los ajustes de tu empresa están guardados. Siempre podrás modificarlos en Mi cuenta &gt; Mis empresas.</string>
+    <string name="onboarding_issuers_done_body_plural">Los ajustes de tus empresas están guardados. Siempre podrás modificarlos en Mi cuenta &gt; Mis empresas.</string>
+
+    <string name="onboarding_mixed_hint_title">Un poco de ambos</string>
+    <string name="onboarding_mixed_hint_body">En ese caso, tendrás que indicar el tipo de producto sobre la marcha, cuando los añadas a tus documentos.</string>
+
+    <string name="onboarding_client_country_intro_title">País de los clientes</string>
+    <string name="onboarding_client_country_intro_body">¿Tus clientes están, en su mayoría, en el mismo país?\n\nSi es así, podré rellenarlo automáticamente.</string>
+    <string name="onboarding_client_country_intro_yes">Sí</string>
+    <string name="onboarding_client_country_intro_no">No, están mezclados</string>
+
+    <string name="onboarding_client_country_picker_subtitle">¿En qué país?</string>
+    <string name="onboarding_client_country_picker_body">Lo aplicaré a los clientes que aún no tengan un país indicado.</string>
+    <string name="onboarding_client_country_picker_pick">Elegir un país</string>
+
+    <string name="onboarding_client_country_done_applied_title">Hecho</string>
+    <string name="onboarding_client_country_done_applied_body">He guardado este país para tus clientes que aún no tenían uno.</string>
+    <string name="onboarding_client_country_done_skipped_title">Sin problema</string>
+    <string name="onboarding_client_country_done_skipped_body">Podrás configurar el país de tus clientes sobre la marcha, cuando los añadas a un documento.</string>
+    <string name="onboarding_client_country_done_cta">Siguiente</string>
+
+    <string name="onboarding_unitcode_cta">De acuerdo</string>
+    <string name="onboarding_unitcode_title">Código de unidad</string>
+    <string name="onboarding_unitcode_part1">Otro campo que he cambiado en esta versión es el </string>
+    <string name="onboarding_unitcode_bold1">código de unidad</string>
+    <string name="onboarding_unitcode_part2">.\n\nCada uno de tus productos ya tenía una </string>
+    <string name="onboarding_unitcode_bold2">unidad</string>
+    <string name="onboarding_unitcode_part3"> (hora, kilo, pieza). Ahora habrá un </string>
+    <string name="onboarding_unitcode_bold3">código normalizado</string>
+    <string name="onboarding_unitcode_part4"> que va con ella.\n\n⚡ No tienes que hacer nada, ¡yo encuentro el código de unidad por mi cuenta!\n\nSi no reconozco la unidad, también vale ✅</string>
+
+    <string name="onboarding_thanks_title">¡Perfecto!</string>
+    <string name="onboarding_thanks_body">Gracias por tu confianza. ¡Hasta pronto!</string>
+    <string name="onboarding_thanks_cta">Terminar</string>
 </resources>
