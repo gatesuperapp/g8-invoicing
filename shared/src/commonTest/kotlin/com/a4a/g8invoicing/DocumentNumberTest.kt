@@ -67,6 +67,12 @@ class DocumentNumberTest {
     }
 
     @Test
+    fun incrementDocumentNumber_quote() {
+        val result = incrementDocumentNumber("D-2024-007")
+        assertEquals("D-2024-008", result)
+    }
+
+    @Test
     fun incrementDocumentNumber_preservesPadding() {
         val result = incrementDocumentNumber("FA-005")
         assertEquals("FA-006", result) // Padding to 3 digits minimum

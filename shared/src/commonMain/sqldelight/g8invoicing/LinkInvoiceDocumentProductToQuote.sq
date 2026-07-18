@@ -1,0 +1,19 @@
+CREATE TABLE LinkInvoiceDocumentProductToQuote (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  quote_number TEXT,
+  delivery_date TEXT
+);
+
+getInfoLinkedToDocumentProduct:
+SELECT *
+FROM LinkInvoiceDocumentProductToQuote
+WHERE document_product_id = :document_product_id;
+
+saveInfoLinkedToDocumentProduct:
+INSERT
+INTO LinkInvoiceDocumentProductToQuote (document_product_id, quote_number, delivery_date)
+VALUES (?, ?, ?);
+
+deleteInfoLinkedToDocumentProduct:
+DELETE FROM LinkInvoiceDocumentProductToQuote
+WHERE  document_product_id = :document_product_id;

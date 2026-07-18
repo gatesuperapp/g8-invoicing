@@ -18,5 +18,6 @@ sealed class Category(
     data object Products : Category(Screen.ProductList.name, Res.string.appbar_products, null, null)
     data object CreditNotes : Category(Screen.CreditNoteList.name, Res.string.appbar_credit_notes, null, null)
     data object DeliveryNotes : Category(Screen.DeliveryNoteList.name, Res.string.appbar_delivery_notes, null, null)
+    data object Quotes : Category(Screen.QuoteList.name, Res.string.appbar_quotes, null, null)
     data object Invoices : Category(Screen.InvoiceList.name, Res.string.appbar_invoices, null, null)
 }

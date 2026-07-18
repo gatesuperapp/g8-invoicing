@@ -13,6 +13,13 @@ data class DeliveryNotesUiState(
     val createdInvoiceId: Long? = null
 )
 
+data class QuotesUiState(
+    val quoteStates: List<QuoteState> = listOf(),
+    val userMessages: List<Message> = listOf(),
+    val isFetchingQuotes: Boolean = false,
+    val createdInvoiceId: Long? = null
+)
+
 data class CreditNotesUiState(
     val documentStates: List<CreditNoteState> = listOf(),
     val userMessages: List<Message> = listOf(),

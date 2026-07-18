@@ -69,7 +69,7 @@ fun ClientAddEdit(
             onAddEmail = onAddEmail,
             typeOfCreation = typeOfCreation,
             scrollState = scrollState,
-            onPendingEmailValidationResult = onPendingEmailValidationResult
+            onPendingEmailValidationResult = onPendingEmailValidationResult,
         )
     }
 }

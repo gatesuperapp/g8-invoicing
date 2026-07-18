@@ -1,0 +1,73 @@
+CREATE TABLE Quote (
+  quote_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  delivery_date TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  footer TEXT,
+  watermark_text TEXT,
+  labels_snapshot TEXT,
+
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
+
+get:
+SELECT *
+FROM Quote
+WHERE quote_id = :id;
+
+getId:
+SELECT quote_id
+FROM Quote
+WHERE quote_id = :id;
+
+getLastQuoteNumber:
+SELECT number
+FROM Quote
+ORDER BY quote_id DESC
+LIMIT 1;
+
+getAll:
+SELECT *
+FROM Quote;
+
+getAllIds:
+SELECT quote_id
+FROM Quote;
+
+save:
+INSERT INTO Quote (quote_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot)
+VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?);
+
+update:
+UPDATE Quote
+SET number = :number,
+    delivery_date = :delivery_date,
+    reference = :reference,
+    free_field = :free_field,
+    currency =: currency,
+    footer  =: footer,
+    updated_at =: updated_at
+WHERE
+    quote_id = :quote_id;
+
+delete:
+DELETE FROM Quote
+WHERE quote_id = :id;
+
+getLastInsertedRowId:
+SELECT quote_id
+FROM Quote
+ORDER BY quote_id DESC
+LIMIT 1;
+
+getLastInsertedFooter:
+SELECT footer
+FROM Quote
+ORDER BY quote_id DESC
+LIMIT 1;
+
+countAll:
+SELECT COUNT(*) FROM Quote;

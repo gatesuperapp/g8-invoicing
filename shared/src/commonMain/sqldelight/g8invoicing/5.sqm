@@ -1,0 +1,43 @@
+-- Migration de la version 5 vers la version 6
+-- Changement:
+-- Ajout de la feature "Devis" (Quote), clone de DeliveryNote avec préfixe "D"
+-- au lieu de "BL". Trois nouvelles tables (Quote et ses deux liens
+-- N-N vers DocumentClientOrIssuer / DocumentProduct) + une table de
+-- traçage de la conversion Quote → Facture (LinkInvoiceDocumentProductToQuote,
+-- pattern identique à LinkInvoiceDocumentProductToDeliveryNote pour permettre
+-- de retrouver l'origine d'une ligne de facture générée depuis un devis).
+--
+-- Feature premium activable via le module "quote" (ActivatedModulesRepository).
+-- Documents existants: pas de rétro-modification.
+
+CREATE TABLE Quote (
+  quote_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  delivery_date TEXT,
+  order_number TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  footer TEXT,
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE LinkQuoteToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  quote_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL
+);
+
+CREATE TABLE LinkQuoteToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  quote_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+  sort_order INTEGER
+);
+
+CREATE TABLE LinkInvoiceDocumentProductToQuote (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  quote_number TEXT,
+  delivery_date TEXT
+);

@@ -27,3 +27,5 @@ actual fun setAppLocale(languageCode: String?) {
 }
 
 actual fun getSystemLocaleCode(): String = java.util.Locale.getDefault().language.ifEmpty { "en" }
+
+actual fun getSystemCountryCode(): String = java.util.Locale.getDefault().country.uppercase()

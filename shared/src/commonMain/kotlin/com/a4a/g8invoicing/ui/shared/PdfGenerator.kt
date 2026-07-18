@@ -21,6 +21,7 @@ data class PdfStrings(
     val invoiceNumber: String,
     val deliveryNoteNumber: String,
     val creditNoteNumber: String,
+    val quoteNumber: String,
     val documentDate: String,
     val documentReference: String,
     val tableDescription: String,
@@ -93,5 +94,6 @@ fun getDocumentTypeName(documentType: DocumentType, strings: PdfStrings): String
         DocumentType.INVOICE -> strings.invoiceNumber
         DocumentType.DELIVERY_NOTE -> strings.deliveryNoteNumber
         DocumentType.CREDIT_NOTE -> strings.creditNoteNumber
+        DocumentType.QUOTE -> strings.quoteNumber
     }
 }
