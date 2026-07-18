@@ -19,7 +19,10 @@ class GStoreViewModel(
     fun isPremium(): Boolean = subscriptionRepository.isPremium()
 
     fun toggleModule(moduleId: String) {
-        if (!isPremium()) return // Defensive: UI should already prevent this, but never trust UI alone
+        // Free modules bypass the premium check. Defense-in-depth: UI should already
+        // prevent premium-only toggles for non-premium users via the pill + hint dialog,
+        // but never trust UI alone.
+        if (moduleId !in ActivatedModulesRepository.FREE_MODULES && !isPremium()) return
         activatedModules.toggle(moduleId)
     }
 

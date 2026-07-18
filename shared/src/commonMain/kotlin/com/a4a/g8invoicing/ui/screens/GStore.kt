@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.RequestQuote
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +54,12 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
 import com.a4a.g8invoicing.shared.resources.gstore_footer_free
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_title
@@ -72,9 +80,12 @@ private data class GStoreModule(
     val descRes: StringResource,
     val detailRes: StringResource,
     val icon: ImageVector,
+    // A module marked isFree = true is togglable by every user (no premium check) and
+    // its card/dialog hide the PREMIUM pill. Kept per-module (not a global list) so a
+    // future free-tier module needs only a flag flip, no cross-file wiring.
+    val isFree: Boolean = false,
 )
 
-// Only watermark-removal is shipping at launch — other modules will be added when ready.
 private val MODULES = listOf(
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
@@ -82,6 +93,22 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_watermark_desc,
         detailRes = Res.string.gstore_module_watermark_detail,
         icon = Icons.Outlined.WaterDrop,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE,
+        titleRes = Res.string.gstore_module_delivery_note_title,
+        descRes = Res.string.gstore_module_delivery_note_desc,
+        detailRes = Res.string.gstore_module_delivery_note_detail,
+        icon = Icons.Outlined.LocalShipping,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_QUOTE,
+        titleRes = Res.string.gstore_module_quote_title,
+        descRes = Res.string.gstore_module_quote_desc,
+        detailRes = Res.string.gstore_module_quote_detail,
+        icon = Icons.Outlined.RequestQuote,
+        isFree = true,
     ),
 )
 
@@ -153,9 +180,14 @@ fun GStore(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
+                // weight(1f) with default fill=true so the grid takes ALL remaining
+                // Column height (minus the footer, which sits below with no weight).
+                // The previous fill=false + Spacer(weight=1f) split the leftover space
+                // 50/50 and clipped the grid at mid-column when more than one row
+                // fit, hiding the bottom of the second row.
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false),
+                    .weight(1f),
             ) {
                 items(MODULES) { module ->
                     GStoreModuleCard(
@@ -163,6 +195,7 @@ fun GStore(
                         description = stringResource(module.descRes),
                         icon = module.icon,
                         isPremium = isPremium,
+                        isFree = module.isFree,
                         isActivated = module.id in activated,
                         onToggle = { viewModel.toggleModule(module.id) },
                         onPremiumHint = onPremiumHint,
@@ -170,8 +203,6 @@ fun GStore(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
 
             // Footer: info pointer to the-gate.fr root — only for non-premium users.
             // Premium users don't see a "manage your account on …" line here because
@@ -193,6 +224,7 @@ fun GStore(
             detail = stringResource(module.detailRes),
             icon = module.icon,
             isPremium = isPremium,
+            isFree = module.isFree,
             isActivated = module.id in activated,
             onToggle = { viewModel.toggleModule(module.id) },
             onPremiumHint = onPremiumHint,
@@ -240,11 +272,13 @@ private fun GStoreModuleCard(
     description: String,
     icon: ImageVector,
     isPremium: Boolean,
+    isFree: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
     onPremiumHint: () -> Unit,
     onClick: () -> Unit,
 ) {
+    val isUnlocked = isFree || isPremium
     // Tall rectangular card. Vertical stack: icon top → big gap → title + desc → Switch bottom.
     // PREMIUM pill sits top-right and stays visible even for premium users — the GStore
     // will mix premium and free modules, so the pill labels the *module*, not the *user*.
@@ -278,7 +312,7 @@ private fun GStoreModuleCard(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                PremiumPill()
+                if (!isFree) PremiumPill()
             }
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -305,12 +339,12 @@ private fun GStoreModuleCard(
             // "off / not-yours" affordance without hiding the tap target.
             Switch(
                 checked = isActivated,
-                onCheckedChange = { if (isPremium) onToggle() else onPremiumHint() },
+                onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = ColorVioletLight,
                     uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = if (isPremium) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
+                    uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                     uncheckedBorderColor = Color.Transparent,
                 ),
             )
@@ -324,11 +358,13 @@ private fun ModuleDetailDialog(
     detail: String,
     icon: ImageVector,
     isPremium: Boolean,
+    isFree: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
     onPremiumHint: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val isUnlocked = isFree || isPremium
     // Centered modal taking ~2/3 of the screen height, so the GStore TopBar and
     // BottomBar stay visible around it — the user keeps the context that they're still
     // on the GStore screen. usePlatformDefaultWidth=false lets us widen beyond the
@@ -384,7 +420,7 @@ private fun ModuleDetailDialog(
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    PremiumPill()
+                    if (!isFree) PremiumPill()
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -412,12 +448,12 @@ private fun ModuleDetailDialog(
                 // card so non-premium taps consistently trigger the hint snackbar.
                 Switch(
                     checked = isActivated,
-                    onCheckedChange = { if (isPremium) onToggle() else onPremiumHint() },
+                    onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = ColorVioletLight,
                         uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = if (isPremium) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
+                        uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                         uncheckedBorderColor = Color.Transparent,
                     ),
                 )
