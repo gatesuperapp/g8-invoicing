@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.data
 import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.sqldelight.coroutines.asFlow
 import com.a4a.g8invoicing.Database
+import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.data.util.calculatePriceWithTax
 import com.a4a.g8invoicing.ui.states.ClientRef
@@ -34,13 +35,6 @@ class ProductLocalDataSource(
         }
     }
 
-    override suspend fun fetchLastCreatedProduct(): ProductState? {
-        return withContext(DispatcherProvider.IO) {
-            productQueries.getLastCreatedProduct().executeAsOneOrNull()
-                ?.transformIntoEditableProduct(taxQueries, productPriceQueries)
-        }
-    }
-
     override fun fetchAllProducts(): Flow<List<ProductState>> {
         return productQueries.getAllProducts()
             .asFlow()
@@ -61,7 +55,9 @@ class ProductLocalDataSource(
                         product_tax_id = product.taxRate?.let {
                             taxQueries.getTaxRateId(it.doubleValue(false)).executeAsOneOrNull()
                         },
-                        unit = product.unit?.text
+                        unit = product.unit?.text,
+                        unit_code = product.unitCode,
+                        type = product.type?.name
                     )
 
                     val lastInsertedProductId = productQueries.lastInsertRowId().executeAsOne()
@@ -111,7 +107,9 @@ class ProductLocalDataSource(
                                 product_tax_id = product.taxRate?.let {
                                     taxQueries.getTaxRateId(it.doubleValue(false)).executeAsOneOrNull()
                                 },
-                                unit = product.unit?.text
+                                unit = product.unit?.text,
+                                unit_code = product.unitCode,
+                                type = product.type?.name
                             )
 
                             val newProductId = productQueries.lastInsertRowId().executeAsOne()
@@ -162,7 +160,9 @@ class ProductLocalDataSource(
                         product_tax_id = product.taxRate?.let {
                             taxQueries.getTaxRateId(it.doubleValue(false)).executeAsOneOrNull()
                         },
-                        unit = product.unit?.text
+                        unit = product.unit?.text,
+                        unit_code = product.unitCode,
+                        type = product.type?.name
                     )
 
                     productPriceQueries.deleteAllPricesForProduct(productId)
@@ -204,6 +204,8 @@ class ProductLocalDataSource(
                         quantity = documentProduct.quantity.doubleValue(false),
                         description = documentProduct.description?.text,
                         unit = documentProduct.unit?.text,
+                        unit_code = documentProduct.unitCode,
+                        type = documentProduct.type?.name,
                         tax_rate = documentProduct.taxRate?.doubleValue(false),
                         price_without_tax = documentProduct.priceWithoutTax?.doubleValue(false)
                     )
@@ -267,6 +269,33 @@ class ProductLocalDataSource(
             } catch (cause: Throwable) {
                 println("Error clearing tax rate $taxId from products: ${cause.message}")
             }
+        }
+    }
+
+    override suspend fun fetchLast5UnitCodes(): List<String> =
+        withContext(DispatcherProvider.IO) {
+            productQueries.getLast5DistinctUnitCodes()
+                .executeAsList()
+                .mapNotNull { it }
+        }
+
+    override suspend fun fetchLastUsedProductType(): ProductNature? =
+        withContext(DispatcherProvider.IO) {
+            productQueries.getLastUsedProductType()
+                .executeAsOneOrNull()
+                ?.let { ProductNature.fromString(it) }
+        }
+
+    override suspend fun fetchLastCreatedProduct(): ProductState? =
+        withContext(DispatcherProvider.IO) {
+            productQueries.lastInsertRowId().executeAsOneOrNull()
+                ?.let { productQueries.getProduct(it).executeAsOneOrNull() }
+                ?.transformIntoEditableProduct(taxQueries, productPriceQueries)
+        }
+
+    override suspend fun updateAllProductTypes(newType: ProductNature) {
+        withContext(DispatcherProvider.IO) {
+            productQueries.updateAllTypes(newType.name)
         }
     }
 }
@@ -343,6 +372,8 @@ fun Product.transformIntoEditableProduct(
         defaultPriceWithTax = defaultPriceWithTax,
         taxRate = taxRate,
         unit = this.unit?.let { TextFieldValue(it) } ?: TextFieldValue(""),
+        unitCode = this.unit_code,
+        type = ProductNature.fromString(this.type),
         additionalPrices = additionalPrices
     )
 }
@@ -367,6 +398,8 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(
         taxRate = this.tax_rate?.let { BigDecimal.fromDouble(it) },
         quantity = BigDecimal.fromDouble(this.quantity),
         unit = TextFieldValue(this.unit ?: ""),
+        unitCode = this.unit_code,
+        type = ProductNature.fromString(this.type),
         productId = this.product_id?.toInt(),
         linkedDate = linkedDate,
         linkedDocNumber = linkedDocNumber,

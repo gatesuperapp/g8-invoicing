@@ -67,6 +67,7 @@ fun DocumentBottomSheetForm(
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
+    showProductType: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -211,7 +212,8 @@ fun DocumentBottomSheetForm(
                     fullScreenElementToShow.value = screenElement
                     // fullScreenEditorText is initialized by the LaunchedEffect
                 },
-                onNavigateToTaxSelection = { isTaxSelectionVisible = true } // Callback to show tax selection
+                onNavigateToTaxSelection = { isTaxSelectionVisible = true }, // Callback to show tax selection
+                showProductType = showProductType,
             )
         }
     }
@@ -380,7 +382,8 @@ private fun DocumentBottomSheetContent(
     pendingEmailStateHolder: MutableState<String>,
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit,
     onNavigateToFullScreenText: (ScreenElement) -> Unit, // Callback to request full screen view
-    onNavigateToTaxSelection: (ScreenElement) -> Unit // Callback to request tax selection view
+    onNavigateToTaxSelection: (ScreenElement) -> Unit, // Callback to request tax selection view
+    showProductType: Boolean = false,
 ) {
     // Determine which form or view to show based on the current state
     when {
@@ -449,7 +452,8 @@ private fun DocumentBottomSheetContent(
                         bottomFormPlaceCursor(screenElement, null)
                     },
                     onClickForward = onNavigateToTaxSelection,
-                    showFullScreenText = onNavigateToFullScreenText
+                    showFullScreenText = onNavigateToFullScreenText,
+                    showProductType = showProductType,
                 )
             }
         }

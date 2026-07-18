@@ -10,6 +10,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.states.QuoteState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -159,6 +160,36 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
             documentProducts = allProducts,
             documentClient = deliveryNotes.firstOrNull()?.documentClient,
             documentIssuer = deliveryNotes.firstOrNull()?.documentIssuer,
+            footerText = TextFieldValue(defaultFooterText),
+            createdDate = DateUtils.getCurrentTimestamp()
+        )
+        invoices.add(newInvoice)
+        invoicesFlow.value = invoices.toList()
+        return newId.toLong()
+    }
+
+    override suspend fun convertQuotesToInvoice(quotes: List<QuoteState>): Long? {
+        val newId = nextInvoiceId++
+        val todayFormatted = DateUtils.getCurrentDateFormatted()
+        val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
+
+        val allProducts = quotes.flatMap { quote ->
+            quote.documentProducts?.map { product ->
+                product.copy(
+                    linkedDate = quote.documentDate,
+                    linkedDocNumber = quote.documentNumber.text
+                )
+            } ?: emptyList()
+        }
+
+        val newInvoice = InvoiceState(
+            documentId = newId,
+            documentNumber = TextFieldValue("FA-${newId.toString().padStart(3, '0')}"),
+            documentDate = todayFormatted,
+            dueDate = dueDateFormatted,
+            documentProducts = allProducts,
+            documentClient = quotes.firstOrNull()?.documentClient,
+            documentIssuer = quotes.firstOrNull()?.documentIssuer,
             footerText = TextFieldValue(defaultFooterText),
             createdDate = DateUtils.getCurrentTimestamp()
         )

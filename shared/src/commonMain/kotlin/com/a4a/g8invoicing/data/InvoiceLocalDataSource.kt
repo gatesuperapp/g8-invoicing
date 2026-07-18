@@ -23,6 +23,7 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.states.QuoteState
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import g8invoicing.DocumentClientOrIssuer
@@ -37,7 +38,10 @@ import g8invoicing.LinkCreditNoteToDocumentProductQueries
 import g8invoicing.LinkDeliveryNoteToDocumentClientOrIssuerQueries
 import g8invoicing.LinkDeliveryNoteToDocumentProductQueries
 import g8invoicing.LinkDocumentClientOrIssuerToAddressQueries
+import g8invoicing.LinkQuoteToDocumentClientOrIssuerQueries
+import g8invoicing.LinkQuoteToDocumentProductQueries
 import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
+import g8invoicing.LinkInvoiceDocumentProductToQuoteQueries
 import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
 import g8invoicing.LinkInvoiceToDocumentProductQueries
 import kotlinx.coroutines.flow.Flow
@@ -62,6 +66,8 @@ class InvoiceLocalDataSource(
     private val linkInvoiceToTagQueries = db.linkInvoiceToTagQueries
     private val linkInvoiceDocumentProductToDeliveryNoteQueries =
         db.linkInvoiceDocumentProductToDeliveryNoteQueries
+    private val linkInvoiceDocumentProductToQuoteQueries =
+        db.linkInvoiceDocumentProductToQuoteQueries
     private val linkInvoiceToDocumentClientOrIssuerQueries =
         db.linkInvoiceToDocumentClientOrIssuerQueries
 
@@ -217,14 +223,31 @@ class InvoiceLocalDataSource(
                     .executeAsList() // DB call
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
-                    val additionalInfo = linkInvoiceDocumentProductToDeliveryNoteQueries
+                    // Each invoice product carries at most one source-doc trace: it was
+                    // either cloned from a delivery note or from a quote (never both).
+                    // Try the delivery-note link table first, fall back to the quote one
+                    // so the product exposes a linkedDocNumber the display layer can
+                    // group on (see getLinkedDeliveryNotes / LinkedDeliveryNoteRow).
+                    val dnInfo = linkInvoiceDocumentProductToDeliveryNoteQueries
                         .getInfoLinkedToDocumentProduct(it.document_product_id)
-                        .executeAsOneOrNull()// DB call
+                        .executeAsOneOrNull() // DB call
+                    val linkedDate: String?
+                    val linkedDocNumber: String?
+                    if (dnInfo != null) {
+                        linkedDate = dnInfo.delivery_date
+                        linkedDocNumber = dnInfo.delivery_note_number
+                    } else {
+                        val qInfo = linkInvoiceDocumentProductToQuoteQueries
+                            .getInfoLinkedToDocumentProduct(it.document_product_id)
+                            .executeAsOneOrNull() // DB call
+                        linkedDate = qInfo?.delivery_date
+                        linkedDocNumber = qInfo?.quote_number
+                    }
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()// DB call
                         .transformIntoEditableDocumentProduct(
-                            additionalInfo?.delivery_date,
-                            additionalInfo?.delivery_note_number,
+                            linkedDate,
+                            linkedDocNumber,
                             sortOrder = it.sort_order?.toInt() // Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
@@ -328,6 +351,80 @@ class InvoiceLocalDataSource(
                 newInvoiceId
             } catch (e: Exception) {
                 //Log.e("InvoiceDS", "Error convertDeliveryNotes: ${e.message}")
+                null
+            }
+        }
+    }
+
+    // --- convertQuotesToInvoice ---
+    // Mirrors convertDeliveryNotesToInvoice but writes trace rows to
+    // LinkInvoiceDocumentProductToQuote so each invoice product remembers
+    // which quote it was cloned from. We bypass saveInfoInOtherTables here
+    // because we need the returned new-document-product-id to build the trace.
+    override suspend fun convertQuotesToInvoice(quotes: List<QuoteState>): Long? {
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
+        return withContext(DispatcherProvider.IO) {
+            val docNumber = getLastDocumentNumber()?.let {
+                incrementDocumentNumber(it)
+            } ?: getString(Res.string.invoice_default_number)
+
+            try {
+                val newInvoiceState = InvoiceState(
+                    documentNumber = TextFieldValue(docNumber),
+                    documentDate = DateUtils.getCurrentDateFormatted(),
+                    dueDate = DateUtils.getDatePlusDaysFormatted(30),
+                    reference = quotes.firstOrNull { it.reference != null }?.reference,
+                    freeField = quotes.firstOrNull { it.freeField != null }?.freeField,
+                    documentIssuer = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentClient = quotes.firstOrNull { it.documentClient != null }?.documentClient,
+                    currency = TextFieldValue(
+                        quotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
+                            ?: currencyManager.currentCurrency
+                    ),
+                    footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)),
+                    watermarkText = frozenWatermark,
+                    labelsSnapshot = frozenLabels,
+                )
+                saveInfoInInvoiceTable(newInvoiceState)
+
+                val newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+                newInvoiceId?.let { id ->
+                    val firstQuoteForTag = quotes.first().copy(documentTag = DocumentTag.DRAFT)
+                    saveTag(id, firstQuoteForTag)
+
+                    quotes.forEach { quote ->
+                        quote.documentProducts?.forEach { documentProduct ->
+                            val newDocProductId = saveDocumentProductInDbAndLinkToDocument(
+                                documentProduct = documentProduct,
+                                documentId = id,
+                                deliveryNoteDate = null,
+                                deliveryNoteNumber = null,
+                            )
+                            newDocProductId?.let { pid ->
+                                linkInvoiceDocumentProductToQuoteQueries.saveInfoLinkedToDocumentProduct(
+                                    document_product_id = pid.toLong(),
+                                    quote_number = quote.documentNumber.text,
+                                    delivery_date = quote.documentDate,
+                                )
+                            }
+                        }
+                        quote.documentClient?.let {
+                            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                                documentClientOrIssuer = it,
+                                documentId = id,
+                            )
+                        }
+                        quote.documentIssuer?.let {
+                            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                                documentClientOrIssuer = it,
+                                documentId = id,
+                            )
+                        }
+                    }
+                }
+                newInvoiceId
+            } catch (e: Exception) {
                 null
             }
         }
@@ -841,6 +938,8 @@ fun saveDocumentProductInDbAndLink(
         price_without_tax = documentProduct.priceWithoutTax?.doubleValue(false),
         tax_rate = documentProduct.taxRate?.doubleValue(false),
         unit = documentProduct.unit?.text,
+        unit_code = documentProduct.unitCode,
+        type = documentProduct.type?.name,
         product_id = documentProduct.productId?.toLong()
     )
     // Get the id after inserting
@@ -923,6 +1022,12 @@ fun linkDocumentProductToParentDocument(
                 (result?.maxOrder ?: -1L) + 1L
             }
 
+            is LinkQuoteToDocumentProductQueries -> {
+                val result = linkQueries.getMaxSortOrderForQuote(parentId)
+                    .executeAsOneOrNull() // DB call
+                (result?.maxOrder ?: -1L) + 1L
+            }
+
             else -> {
                 //Log.w("GlobalHelpers", "Unsupported query type for linkDocumentProductToParentDocument (sort order): ${linkQueries::class.simpleName}")
                 0L // Default sort order if type is unknown, or handle error
@@ -952,6 +1057,15 @@ fun linkDocumentProductToParentDocument(
                 linkQueries.saveProductLinkedToCreditNote( // DB call
                     id = null,
                     credit_note_id = parentId,
+                    document_product_id = documentProductId,
+                    sort_order = sortOrder
+                )
+            }
+
+            is LinkQuoteToDocumentProductQueries -> {
+                linkQueries.saveProductLinkedToQuote( // DB call
+                    id = null,
+                    quote_id = parentId,
                     document_product_id = documentProductId,
                     sort_order = sortOrder
                 )
@@ -1022,6 +1136,14 @@ fun linkDocumentClientOrIssuerToDocument(
                 linkQueries.saveDocumentClientOrIssuerLinkedToDeliveryNote(
                     id = null,
                     delivery_note_id = documentId,
+                    document_client_or_issuer_id = documentClientOrIssuerId
+                )
+            }
+
+            is LinkQuoteToDocumentClientOrIssuerQueries -> {
+                linkQueries.saveDocumentClientOrIssuerLinkedToQuote(
+                    id = null,
+                    quote_id = documentId,
                     document_client_or_issuer_id = documentClientOrIssuerId
                 )
             }
@@ -1103,6 +1225,8 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         company_id3_label = documentClientOrIssuer.companyId3Label?.text,
         company_id3_number = documentClientOrIssuer.companyId3Number?.text,
         logo_path = documentClientOrIssuer.logoPath,
+        vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
+        intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
     )
 }
 
@@ -1124,6 +1248,7 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
             address_line_2 = address.addressLine2?.text,
             zip_code = address.zipCode?.text,
             city = address.city?.text,
+            country_code = address.countryCode,
         )
 
         // 2: Link address to client/issuer
@@ -1188,6 +1313,8 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         },
         companyId3Number = documentClientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
         logoPath = documentClientOrIssuer.logo_path,
+        vatExempt = (documentClientOrIssuer.vat_exempt ?: 0L) != 0L,
+        intraEuSales = (documentClientOrIssuer.intra_eu_sales ?: 0L) != 0L,
     )
 }
 
@@ -1212,6 +1339,10 @@ fun fetchClientAndIssuer(
             ).executeAsList().map { it.document_client_or_issuer_id }
         } else if (linkQueries is LinkDeliveryNoteToDocumentClientOrIssuerQueries)
             linkQueries.getDocumentClientOrIssuerLinkedToDeliveryNote(
+                documentId
+            ).executeAsList().map { it.document_client_or_issuer_id }
+        else if (linkQueries is LinkQuoteToDocumentClientOrIssuerQueries)
+            linkQueries.getDocumentClientOrIssuerLinkedToQuote(
                 documentId
             ).executeAsList().map { it.document_client_or_issuer_id }
         else emptyList()
@@ -1322,6 +1453,14 @@ fun updateDocumentProductsOrderInDb(
                 }
 
                 is LinkCreditNoteToDocumentProductQueries -> {
+                    linkQueries.updateSortOrderForDocumentProduct( // DB Call
+                        sort_order = newSortOrder,
+                        id = documentId,
+                        document_product_id = documentProductId
+                    )
+                }
+
+                is LinkQuoteToDocumentProductQueries -> {
                     linkQueries.updateSortOrderForDocumentProduct( // DB Call
                         sort_order = newSortOrder,
                         id = documentId,

@@ -25,6 +25,7 @@ fun ProductAddEdit(
     navController: NavController,
     product: ProductState,
     isLoading: Boolean,
+    showProductType: Boolean = false,
     clientSelectionDialogState: ClientSelectionDialogState?,
     onValueChange: (ScreenElement, Any, String?) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
@@ -77,7 +78,8 @@ fun ProductAddEdit(
                 onClickOpenClientSelection(priceId)
             },
             onRemoveClient = onClickRemoveClient,
-            isLoading = isLoading
+            isLoading = isLoading,
+            showProductType = showProductType,
         )
 
         clientSelectionDialogState?.let { dialogState ->

@@ -3,6 +3,8 @@ CREATE TABLE Product (
   name TEXT NOT NULL,
   description TEXT,
   unit TEXT,
+  unit_code TEXT,
+  type TEXT,
   product_tax_id INTEGER,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -23,15 +25,17 @@ SELECT *
 FROM Product;
 
 saveProduct:
-INSERT INTO Product (id, name, description, product_tax_id,unit)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 updateProduct:
 UPDATE Product
 SET name = :name,
     description = :description,
     product_tax_id = :product_tax_id,
-    unit = :unit
+    unit = :unit,
+    unit_code = :unit_code,
+    type = :type
 WHERE
     id = :id;
 
@@ -53,11 +57,25 @@ FROM Product
 ORDER BY id DESC
 LIMIT 1;
 
-getLastCreatedProduct:
-SELECT *
+countAll:
+SELECT COUNT(*) FROM Product;
+
+getLast5DistinctUnitCodes:
+SELECT unit_code
 FROM Product
+WHERE unit_code IS NOT NULL
+GROUP BY unit_code
+ORDER BY MAX(id) DESC
+LIMIT 5;
+
+getLastUsedProductType:
+SELECT type
+FROM Product
+WHERE type IS NOT NULL
 ORDER BY id DESC
 LIMIT 1;
 
-countAll:
-SELECT COUNT(*) FROM Product;
+updateAllTypes:
+UPDATE Product
+SET type = :new_type,
+    updated_at = datetime('now', 'localtime');

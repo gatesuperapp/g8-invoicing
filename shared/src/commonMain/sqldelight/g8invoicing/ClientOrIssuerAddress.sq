@@ -4,7 +4,8 @@ CREATE TABLE ClientOrIssuerAddress (
   address_line_1 TEXT,
   address_line_2 TEXT,
   zip_code TEXT,
-  city TEXT
+  city TEXT,
+  country_code TEXT
 );
 
 get:
@@ -13,8 +14,8 @@ FROM ClientOrIssuerAddress
 WHERE id = :id;
 
 save:
-INSERT INTO ClientOrIssuerAddress (id, address_title, address_line_1, address_line_2, zip_code, city)
-VALUES (?, ?, ?,?, ?,  ?);
+INSERT INTO ClientOrIssuerAddress (id, address_title, address_line_1, address_line_2, zip_code, city, country_code)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuerAddress
@@ -22,13 +23,33 @@ SET address_title = :address_title,
     address_line_1 = :address_line_1,
     address_line_2 = :address_line_2,
     zip_code = :zip_code,
-    city = :city
+    city = :city,
+    country_code = :country_code
 WHERE
     id = :id;
+
+getLastCountryCode:
+SELECT country_code
+FROM ClientOrIssuerAddress
+WHERE country_code IS NOT NULL AND country_code != ''
+ORDER BY id DESC
+LIMIT 1;
 
 delete:
 DELETE FROM ClientOrIssuerAddress
 WHERE id = :id;
+
+-- Bulk-fill country_code on every client address that has no country yet.
+-- Used by the 1.8 onboarding wizard to apply a default country to legacy
+-- clients whose addresses predate the country_code field. Restricted to
+-- type='client' so an issuer's own address isn't rewritten as a side-effect.
+setCountryForClientsWithoutCountry:
+UPDATE ClientOrIssuerAddress
+SET country_code = :country_code
+WHERE id IN (
+    SELECT address_id FROM LinkClientOrIssuerToAddress
+    WHERE client_or_issuer_id IN (SELECT id FROM ClientOrIssuer WHERE type = 'client')
+) AND (country_code IS NULL OR country_code = '');
 
 getLastInsertedRowId:
 SELECT id

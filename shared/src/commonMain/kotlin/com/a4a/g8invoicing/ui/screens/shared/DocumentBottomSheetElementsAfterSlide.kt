@@ -42,6 +42,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
+    showProductType: Boolean = false,
     ) {
     var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
@@ -189,7 +190,8 @@ fun DocumentBottomSheetElementsAfterSlide(
             onClickDeleteAddress = onClickDeleteAddress,
             onClickDeleteEmail = onClickDeleteEmail,
             onAddEmail = onAddEmail,
-            onPendingEmailValidationResult = onPendingEmailValidationResult
+            onPendingEmailValidationResult = onPendingEmailValidationResult,
+            showProductType = showProductType,
         )
     }
 }

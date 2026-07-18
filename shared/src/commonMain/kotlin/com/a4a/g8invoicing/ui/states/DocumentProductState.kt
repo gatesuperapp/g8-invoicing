@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
@@ -16,6 +17,8 @@ data class DocumentProductState(
     var taxRate: BigDecimal? = null,
     var quantity: BigDecimal = BigDecimal.ONE,
     var unit: TextFieldValue? = null,
+    var unitCode: String? = null,
+    var type: ProductNature? = null,
     var productId: Int? = null,
     val linkedDate: String? = null,
     val linkedDocNumber: String? = null,

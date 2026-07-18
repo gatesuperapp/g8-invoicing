@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import com.a4a.g8invoicing.ui.theme.callForActionsViolet
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.LegacyProductTypeWarningDialog
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -84,6 +86,16 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
 
         val productAddEditViewModel: ProductAddEditViewModel = koinViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
+        // Product.type visibility: read from deliveryNoteUiState.documentIssuer
+        // (authoritative source, set by onSelectClientOrIssuer via
+        // saveDocumentClientOrIssuerInUiState). NOT clientOrIssuerAddEditViewModel
+        // .documentIssuerUiState — that's only for the issuer-edit sub-form.
+        val showProductType = deliveryNoteUiState.documentIssuer?.intraEuSales == true
+        LaunchedEffect(showProductType) {
+            productAddEditViewModel.setShowProductType(showProductType)
+        }
+
+        LegacyProductTypeWarningDialog(productAddEditViewModel)
 
         var showDocumentForm by remember { mutableStateOf(false) }
 
@@ -430,9 +442,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 val documentProductId = deliveryNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
-                                    // Deliberately no clearProductUiState() here: keep unit + taxRate
-                                    // in state so the next creation (onClickNewDocumentProduct →
-                                    // clearProductNameAndDescription) can carry them over.
+                                    productAddEditViewModel.clearProductUiState()
                                     showDocumentForm = false
                                 }
                             }
@@ -469,7 +479,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onOrderChange = deliveryNoteViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
-            exportPdfContent = exportPdfContent
+            exportPdfContent = exportPdfContent,
+            showProductType = showProductType,
         )
     }
 }

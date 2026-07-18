@@ -46,8 +46,10 @@ actual fun DocumentAddEditPlatform(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
+    showProductType: Boolean,
 ) {
     // Desktop uses the desktop-specific UI with side panel
+    // showProductType n'est pas encore relayé — pas de rendu Product.type côté desktop.
     DocumentAddEditDesktop(
         document = document,
         clientList = clientList,

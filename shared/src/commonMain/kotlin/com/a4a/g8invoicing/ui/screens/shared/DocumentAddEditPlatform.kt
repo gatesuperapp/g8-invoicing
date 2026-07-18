@@ -51,4 +51,5 @@ expect fun DocumentAddEditPlatform(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
+    showProductType: Boolean = false,
 )

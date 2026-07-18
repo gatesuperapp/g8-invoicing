@@ -116,6 +116,7 @@ fun DocumentAddEdit(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit, // For showing toast/snackbar messages
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit, // Slot for ExportPdf
+    showProductType: Boolean = false,
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -184,7 +185,8 @@ fun DocumentAddEdit(
                     onClickDeleteAddress = onClickDeleteAddress,
                     onClickDeleteEmail = onClickDeleteEmail,
                     onAddEmail = onAddEmail,
-                    onPendingEmailValidationResult = onPendingEmailValidationResult
+                    onPendingEmailValidationResult = onPendingEmailValidationResult,
+                    showProductType = showProductType,
                 )
             } else {
                 DocumentBottomSheetProducts(
@@ -208,7 +210,8 @@ fun DocumentAddEdit(
                     onSelectTaxRate = onSelectTaxRate,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
-                    onOrderChange = onOrderChange
+                    onOrderChange = onOrderChange,
+                    showProductType = showProductType,
                 )
             }
         },

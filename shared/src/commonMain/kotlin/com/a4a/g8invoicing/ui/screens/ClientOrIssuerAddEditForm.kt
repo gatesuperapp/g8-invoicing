@@ -20,6 +20,8 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -32,11 +34,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.models.CountryCodes
+import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
+import androidx.compose.runtime.LaunchedEffect
+import org.koin.compose.koinInject
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.client_add_address
 import com.a4a.g8invoicing.shared.resources.client_address1
@@ -48,6 +56,7 @@ import com.a4a.g8invoicing.shared.resources.client_address_title_head_office_pla
 import com.a4a.g8invoicing.shared.resources.client_address_title_invoicing_placeholder
 import com.a4a.g8invoicing.shared.resources.client_city
 import com.a4a.g8invoicing.shared.resources.client_city_input
+import com.a4a.g8invoicing.shared.resources.client_country
 import com.a4a.g8invoicing.shared.resources.client_company_identification1_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification2_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification3_input
@@ -70,12 +79,22 @@ import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
 import com.a4a.g8invoicing.shared.resources.issuer_logo_label
 import com.a4a.g8invoicing.shared.resources.issuer_logo_remove
 import com.a4a.g8invoicing.shared.resources.issuer_logo_select
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_desc
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_content
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_title
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_label
+import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_info_desc
+import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_info_modal_content
+import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_info_modal_title
+import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_label
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.EmailListInput
+import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
+import com.a4a.g8invoicing.ui.shared.InfoTooltipButton
 import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -101,6 +120,27 @@ fun ClientOrIssuerAddEditForm(
     pendingEmailStateHolder: MutableState<String>? = null,
     onPendingEmailValidationResult: (Boolean) -> Unit = {},
 ) {
+    val dataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
+    var defaultCountryCode by remember {
+        mutableStateOf(CountryCodes.pickDefaultForNewAddress(null))
+    }
+    LaunchedEffect(clientOrIssuerUiState.id) {
+        val fallback = CountryCodes.pickDefaultForNewAddress(dataSource.getLastCountryCode())
+        defaultCountryCode = fallback
+        // Populate le state pour les adresses migrées pre-1.8 qui ont country_code NULL :
+        // l'affichage montrait le fallback (cascade) mais le state / la DB restaient null,
+        // ce qui trompait l'user et ferait planter la génération Factur-X. On aligne
+        // state = display en émettant onValueChange pour chaque adresse trouvée vide.
+        clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
+            if (address.countryCode.isNullOrBlank()) {
+                val screenEl = if (isInBottomSheetModal)
+                    ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                else
+                    ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                onValueChange(screenEl, TextFieldValue(fallback))
+            }
+        }
+    }
     val localFocusManager = LocalFocusManager.current
     // Use client ID as key to re-calculate when editing a different client
     // Use client ID AND addresses size as key to re-calculate when addresses change
@@ -131,6 +171,11 @@ fun ClientOrIssuerAddEditForm(
     val clientCityPlaceholder = stringResource(Res.string.client_city_input)
     val clientZipCodeLabel = stringResource(Res.string.client_zip_code)
     val clientZipCodePlaceholder = stringResource(Res.string.client_zip_code_input)
+    val clientCountryLabel = stringResource(Res.string.client_country)
+    // Which address-index (1..3) currently has its country picker sheet open. null = none.
+    // Tracked at the outer scope so the sheet renders once, after the address loop, and
+    // the same rendering path is shared by all three possible addresses.
+    var countryPickerAddressIndex: Int? by remember { mutableStateOf(null) }
     val companyId1Label = stringResource(Res.string.company_identification1)
     val companyId2Label = stringResource(Res.string.company_identification2)
     val companyId3Label = stringResource(Res.string.company_identification3)
@@ -146,6 +191,14 @@ fun ClientOrIssuerAddEditForm(
     val issuerLogoRemove = stringResource(Res.string.issuer_logo_remove)
     val issuerLogoErrorTitle = stringResource(Res.string.issuer_logo_error_title)
     val issuerLogoErrorDismiss = stringResource(Res.string.issuer_logo_error_dismiss)
+    val issuerVatExemptLabel = stringResource(Res.string.issuer_vat_exempt_label)
+    val issuerVatExemptInfoTitle = stringResource(Res.string.issuer_vat_exempt_info_modal_title)
+    val issuerVatExemptInfoContent = stringResource(Res.string.issuer_vat_exempt_info_modal_content)
+    val issuerVatExemptInfoDesc = stringResource(Res.string.issuer_vat_exempt_info_desc)
+    val issuerIntraEuSalesLabel = stringResource(Res.string.issuer_intra_eu_sales_label)
+    val issuerIntraEuSalesInfoTitle = stringResource(Res.string.issuer_intra_eu_sales_info_modal_title)
+    val issuerIntraEuSalesInfoContent = stringResource(Res.string.issuer_intra_eu_sales_info_modal_content)
+    val issuerIntraEuSalesInfoDesc = stringResource(Res.string.issuer_intra_eu_sales_info_desc)
 
     // Check if this is an issuer (to show logo field)
     // Also check typeOfCreation for new issuer creation where type might be null
@@ -347,6 +400,21 @@ fun ClientOrIssuerAddEditForm(
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_CITY_$i")
                         else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i")
+                    ),
+                    // Factur-X requires country with ISO 3166-1 code
+                    // New address will default to last country used in an address, else device locale
+                    FormInput(
+                        label = clientCountryLabel,
+                        inputType = ForwardElement(
+                            text = CountryCodes.displayNameOf(
+                                address?.countryCode?.takeIf { it.isNotBlank() }
+                                    ?: defaultCountryCode
+                            ),
+                            isMultiline = false,
+                        ),
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_$i")
                     )
                 )
 
@@ -382,6 +450,15 @@ fun ClientOrIssuerAddEditForm(
                 FormUI(
                     inputList = inputList,
                     localFocusManager = localFocusManager,
+                    onClickForward = { element ->
+                        // The only ForwardElement in this form is the country row; every
+                        // ScreenElement whose name contains "COUNTRY_" opens the picker for
+                        // the address slot pointed to by its trailing digit.
+                        val name = element.name
+                        if ("COUNTRY_" in name) {
+                            countryPickerAddressIndex = name.last().digitToIntOrNull()
+                        }
+                    },
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     errors = clientOrIssuerUiState.errors
                 )
@@ -542,6 +619,99 @@ fun ClientOrIssuerAddEditForm(
             }
 
             Spacer(Modifier.padding(bottom = 16.dp))
+
+            // Franchise en base de TVA (BT-118=E dans Factur-X). Toggle Switch dans un panneau
+            // à part, même style visuel que le logo. La mention légale correspondante est
+            // ajoutée par le sérialiseur XML au moment de la génération, pas ici.
+            Row(
+                modifier = Modifier
+                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = issuerVatExemptLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                InfoTooltipButton(
+                    title = issuerVatExemptInfoTitle,
+                    content = issuerVatExemptInfoContent,
+                    contentDescription = issuerVatExemptInfoDesc,
+                    persistenceKey = "issuer_vat_exempt",
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+                Spacer(Modifier.weight(1f))
+                Switch(
+                    checked = clientOrIssuerUiState.vatExempt,
+                    onCheckedChange = { checked ->
+                        onValueChange(
+                            if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_VAT_EXEMPT
+                            else ScreenElement.ISSUER_VAT_EXEMPT,
+                            checked
+                        )
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorVioletLink,
+                        checkedBorderColor = Color.Transparent,
+                        uncheckedBorderColor = Color.Transparent,
+                    ),
+                )
+            }
+
+            // Ventes intra-UE : n'a de sens que pour un émetteur établi dans un pays UE
+            // (post-Brexit → UK exclu, cf. CountryCodes.EU_COUNTRIES). Pour tous les
+            // autres (Ghana, Mexique, US, UK, CH…), on cache complètement l'option pour
+            // dégonfler l'UI. On applique le même fallback que l'affichage du champ
+            // Pays (line ~410) sinon un issuer pre-1.8 avec country_code NULL en DB
+            // affiche "France" via defaultCountryCode mais le switch resterait caché.
+            val issuerCountry = clientOrIssuerUiState.addresses?.firstOrNull()?.countryCode
+                ?.takeIf { it.isNotBlank() }
+                ?: defaultCountryCode
+            if (CountryCodes.isInEU(issuerCountry)) {
+                Spacer(Modifier.padding(bottom = 16.dp))
+                Row(
+                    modifier = Modifier
+                        .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = issuerIntraEuSalesLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    InfoTooltipButton(
+                        title = issuerIntraEuSalesInfoTitle,
+                        content = issuerIntraEuSalesInfoContent,
+                        contentDescription = issuerIntraEuSalesInfoDesc,
+                        persistenceKey = "issuer_intra_eu_sales",
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Switch(
+                        checked = clientOrIssuerUiState.intraEuSales,
+                        onCheckedChange = { checked ->
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_INTRA_EU_SALES
+                                else ScreenElement.ISSUER_INTRA_EU_SALES,
+                                checked
+                            )
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = ColorVioletLink,
+                            checkedBorderColor = Color.Transparent,
+                            uncheckedBorderColor = Color.Transparent,
+                        ),
+                    )
+                }
+            }
+
+            Spacer(Modifier.padding(bottom = 16.dp))
         }
 
         Column(
@@ -577,6 +747,28 @@ fun ClientOrIssuerAddEditForm(
                 errors = clientOrIssuerUiState.errors
             )
         }
+    }
+
+    // Country picker sheet — one instance shared by the three possible address rows.
+    // Runs outside the form Columns so the ModalBottomSheet floats over the whole
+    // screen. The cascade default (last-used → device locale → "FR") kicks in when
+    // countryCode is null on the selected address.
+    val pickerIndex = countryPickerAddressIndex
+    if (pickerIndex != null) {
+        val currentAddress = clientOrIssuerUiState.addresses?.getOrNull(pickerIndex - 1)
+        val currentCode = currentAddress?.countryCode?.takeIf { it.isNotBlank() }
+        val screenEl = if (isInBottomSheetModal)
+            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_$pickerIndex")
+        else
+            ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_$pickerIndex")
+        CountryPicker(
+            currentCode = currentCode,
+            onSelect = { code ->
+                onValueChange(screenEl, TextFieldValue(code))
+                countryPickerAddressIndex = null
+            },
+            onDismiss = { countryPickerAddressIndex = null },
+        )
     }
 }
 

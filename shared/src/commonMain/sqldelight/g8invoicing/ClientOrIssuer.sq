@@ -14,6 +14,8 @@ CREATE TABLE ClientOrIssuer (
   company_id3_number TEXT,
   logo_path TEXT,
   version INTEGER DEFAULT 1,
+  vat_exempt INTEGER DEFAULT 0,
+  intra_eu_sales INTEGER DEFAULT 0,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -50,8 +52,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path)
-VALUES (?, ?, ?,  ?,?, ?, ?, ?, ?, ?,  ?, ?,  ?, ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -68,6 +70,8 @@ SET type = :type,
     company_id3_label = :company_id3_label,
     company_id3_number = :company_id3_number,
     logo_path = :logo_path,
+    vat_exempt = :vat_exempt,
+    intra_eu_sales = :intra_eu_sales,
     version = COALESCE(version, 0) + 1,
     updated_at = datetime('now', 'localtime')
 WHERE

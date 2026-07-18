@@ -15,6 +15,8 @@ CREATE TABLE DocumentClientOrIssuer (
   company_id3_label TEXT,
   company_id3_number TEXT,
   logo_path TEXT,
+  vat_exempt INTEGER DEFAULT 0,
+  intra_eu_sales INTEGER DEFAULT 0,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -41,8 +43,8 @@ FROM DocumentClientOrIssuer
 WHERE name = :name AND first_name =: first_name;
 
 save:
-INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path)
-VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path);
+INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales)
+VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path, :vat_exempt, :intra_eu_sales);
 
 update:
 UPDATE DocumentClientOrIssuer
@@ -60,7 +62,9 @@ SET type = :type,
     company_id2_number = :company_id2_number,
     company_id3_label = :company_id3_label,
     company_id3_number = :company_id3_number,
-    logo_path = :logo_path
+    logo_path = :logo_path,
+    vat_exempt = :vat_exempt,
+    intra_eu_sales = :intra_eu_sales
 WHERE
     id = :id;
 

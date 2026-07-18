@@ -46,6 +46,7 @@ actual fun DocumentAddEditPlatform(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
+    showProductType: Boolean,
 ) {
     // Android uses the mobile DocumentAddEdit with bottom sheets
     DocumentAddEdit(
@@ -83,5 +84,6 @@ actual fun DocumentAddEditPlatform(
         onOrderChange = onOrderChange,
         onShowMessage = onShowMessage,
         exportPdfContent = exportPdfContent,
+        showProductType = showProductType,
     )
 }

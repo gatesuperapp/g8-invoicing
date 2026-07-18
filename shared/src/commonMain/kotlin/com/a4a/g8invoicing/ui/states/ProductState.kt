@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
+import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlin.uuid.ExperimentalUuidApi
@@ -16,6 +17,8 @@ data class ProductState(
     val description: TextFieldValue? = null,
     val taxRate: BigDecimal? = null,
     val unit: TextFieldValue? = null,
+    val unitCode: String? = null,
+    val type: ProductNature? = null,
     val defaultPriceWithoutTax: BigDecimal? = null,
     val defaultPriceWithTax: BigDecimal? = null,
     // This list would be populated on demand, not when initially fetching all products

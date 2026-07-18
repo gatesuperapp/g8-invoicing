@@ -5,7 +5,8 @@ CREATE TABLE DocumentClientOrIssuerAddress (
   address_line_1 TEXT,
   address_line_2 TEXT,
   zip_code TEXT,
-  city TEXT
+  city TEXT,
+  country_code TEXT
 );
 
 get:
@@ -14,8 +15,8 @@ FROM DocumentClientOrIssuerAddress
 WHERE id = :id;
 
 save:
-INSERT INTO DocumentClientOrIssuerAddress (id, original_address_id, address_title, address_line_1, address_line_2, zip_code, city)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO DocumentClientOrIssuerAddress (id, original_address_id, address_title, address_line_1, address_line_2, zip_code, city, country_code)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE DocumentClientOrIssuerAddress
@@ -23,7 +24,8 @@ SET address_title = :address_title,
     address_line_1 = :address_line_1,
     address_line_2 = :address_line_2,
     zip_code = :zip_code,
-    city = :city
+    city = :city,
+    country_code = :country_code
 WHERE
     id = :id;
 

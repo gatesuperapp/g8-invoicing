@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.AddressState
@@ -46,12 +47,20 @@ class ClientOrIssuerAddEditViewModel(
         _pendingEmailIsValid = isValid
     }
 
+    // Country the write handlers seed on any new AddressState. Cascade
+    // "last-used address country → device locale → FR" — see
+    // CountryCodes.pickDefaultForNewAddress.
+    private var defaultCountryCode: String = CountryCodes.pickDefaultForNewAddress(null)
 
     init {
         if (type == ClientOrIssuerType.CLIENT.name.lowercase()) {
             itemId?.let { fetchFromLocalDb(it.toLong(), ClientOrIssuerType.CLIENT) }
         } else if (type == ClientOrIssuerType.ISSUER.name.lowercase()) {
             itemId?.let { fetchFromLocalDb(it.toLong(), ClientOrIssuerType.ISSUER) }
+        }
+        viewModelScope.launch {
+            defaultCountryCode =
+                CountryCodes.pickDefaultForNewAddress(dataSource.getLastCountryCode())
         }
     }
 
@@ -102,6 +111,9 @@ class ClientOrIssuerAddEditViewModel(
             companyId2Number = clientOrIssuer.companyId2Number,
             companyId3Label = clientOrIssuer.companyId3Label,
             companyId3Number = clientOrIssuer.companyId3Number,
+            logoPath = clientOrIssuer.logoPath,
+            vatExempt = clientOrIssuer.vatExempt,
+            intraEuSales = clientOrIssuer.intraEuSales,
             errors = mutableListOf()
         )
     }
@@ -139,7 +151,10 @@ class ClientOrIssuerAddEditViewModel(
                 companyId2Label = _documentIssuerUiState.value.companyId2Label,
                 companyId2Number = _documentIssuerUiState.value.companyId2Number,
                 companyId3Label = _documentIssuerUiState.value.companyId3Label,
-                companyId3Number = _documentIssuerUiState.value.companyId3Number
+                companyId3Number = _documentIssuerUiState.value.companyId3Number,
+                logoPath = _documentIssuerUiState.value.logoPath,
+                vatExempt = _documentIssuerUiState.value.vatExempt,
+                intraEuSales = _documentIssuerUiState.value.intraEuSales
             )
         }
     }
@@ -633,79 +648,94 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
                 val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
-                    ?: AddressState(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
                 val newAddress = firstAddress?.copy(addressLine1 = value as TextFieldValue)
-                    ?: AddressState(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
                 val newAddress = firstAddress?.copy(addressLine2 = value as TextFieldValue)
-                    ?: AddressState(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.CLIENT_OR_ISSUER_ZIP_1 -> {
                 val newAddress = firstAddress?.copy(zipCode = value as TextFieldValue)
-                    ?: AddressState(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.CLIENT_OR_ISSUER_CITY_1 -> {
                 val newAddress = firstAddress?.copy(city = value as TextFieldValue)
-                    ?: AddressState(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue, countryCode = defaultCountryCode)
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+            ScreenElement.CLIENT_OR_ISSUER_COUNTRY_1 -> {
+                val newAddress = firstAddress?.copy(countryCode = (value as TextFieldValue).text)
+                    ?: AddressState(countryCode = (value as TextFieldValue).text)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
                 val newAddress = secondAddress?.copy(addressTitle = value as TextFieldValue)
-                    ?: AddressState(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
                 val newAddress = secondAddress?.copy(addressLine1 = value as TextFieldValue)
-                    ?: AddressState(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
                 val newAddress = secondAddress?.copy(addressLine2 = value as TextFieldValue)
-                    ?: AddressState(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.CLIENT_OR_ISSUER_ZIP_2 -> {
                 val newAddress = secondAddress?.copy(zipCode = value as TextFieldValue)
-                    ?: AddressState(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.CLIENT_OR_ISSUER_CITY_2 -> {
                 val newAddress = secondAddress?.copy(city = value as TextFieldValue)
-                    ?: AddressState(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue, countryCode = defaultCountryCode)
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+            ScreenElement.CLIENT_OR_ISSUER_COUNTRY_2 -> {
+                val newAddress = secondAddress?.copy(countryCode = (value as TextFieldValue).text)
+                    ?: AddressState(countryCode = (value as TextFieldValue).text)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
                 val newAddress = thirdAddress?.copy(addressTitle = value as TextFieldValue)
-                    ?: AddressState(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine1 = value as TextFieldValue)
-                    ?: AddressState(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine2 = value as TextFieldValue)
-                    ?: AddressState(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.CLIENT_OR_ISSUER_ZIP_3 -> {
                 val newAddress = thirdAddress?.copy(zipCode = value as TextFieldValue)
-                    ?: AddressState(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.CLIENT_OR_ISSUER_CITY_3 -> {
                 val newAddress = thirdAddress?.copy(city = value as TextFieldValue)
-                    ?: AddressState(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue, countryCode = defaultCountryCode)
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+            ScreenElement.CLIENT_OR_ISSUER_COUNTRY_3 -> {
+                val newAddress = thirdAddress?.copy(countryCode = (value as TextFieldValue).text)
+                    ?: AddressState(countryCode = (value as TextFieldValue).text)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
@@ -720,6 +750,14 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.ISSUER_LOGO -> {
                 val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
                 person = person.copy(logoPath = logoPath)
+            }
+
+            ScreenElement.ISSUER_VAT_EXEMPT -> {
+                person = person.copy(vatExempt = value as Boolean)
+            }
+
+            ScreenElement.ISSUER_INTRA_EU_SALES -> {
+                person = person.copy(intraEuSales = value as Boolean)
             }
 
             else -> {}
@@ -787,79 +825,94 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_1 -> {
                 val newAddress = firstAddress?.copy(addressTitle = value as TextFieldValue)
-                    ?: AddressState(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_1 -> {
                 val newAddress = firstAddress?.copy(addressLine1 = value as TextFieldValue)
-                    ?: AddressState(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_1 -> {
                 val newAddress = firstAddress?.copy(addressLine2 = value as TextFieldValue)
-                    ?: AddressState(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_1 -> {
                 val newAddress = firstAddress?.copy(zipCode = value as TextFieldValue)
-                    ?: AddressState(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_1 -> {
                 val newAddress = firstAddress?.copy(city = value as TextFieldValue)
-                    ?: AddressState(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue, countryCode = defaultCountryCode)
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
+            }
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_1 -> {
+                val newAddress = firstAddress?.copy(countryCode = (value as TextFieldValue).text)
+                    ?: AddressState(countryCode = (value as TextFieldValue).text)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 0))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_2 -> {
                 val newAddress = secondAddress?.copy(addressTitle = value as TextFieldValue)
-                    ?: AddressState(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_2 -> {
                 val newAddress = secondAddress?.copy(addressLine1 = value as TextFieldValue)
-                    ?: AddressState(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_2 -> {
                 val newAddress = secondAddress?.copy(addressLine2 = value as TextFieldValue)
-                    ?: AddressState(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_2 -> {
                 val newAddress = secondAddress?.copy(zipCode = value as TextFieldValue)
-                    ?: AddressState(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_2 -> {
                 val newAddress = secondAddress?.copy(city = value as TextFieldValue)
-                    ?: AddressState(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue, countryCode = defaultCountryCode)
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
+            }
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_2 -> {
+                val newAddress = secondAddress?.copy(countryCode = (value as TextFieldValue).text)
+                    ?: AddressState(countryCode = (value as TextFieldValue).text)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 1))
             }
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_3 -> {
                 val newAddress = thirdAddress?.copy(addressTitle = value as TextFieldValue)
-                    ?: AddressState(addressTitle = value as TextFieldValue)
+                    ?: AddressState(addressTitle = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine1 = value as TextFieldValue)
-                    ?: AddressState(addressLine1 = value as TextFieldValue)
+                    ?: AddressState(addressLine1 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_3 -> {
                 val newAddress = thirdAddress?.copy(addressLine2 = value as TextFieldValue)
-                    ?: AddressState(addressLine2 = value as TextFieldValue)
+                    ?: AddressState(addressLine2 = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_ZIP_3 -> {
                 val newAddress = thirdAddress?.copy(zipCode = value as TextFieldValue)
-                    ?: AddressState(zipCode = value as TextFieldValue)
+                    ?: AddressState(zipCode = value as TextFieldValue, countryCode = defaultCountryCode)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_CITY_3 -> {
                 val newAddress = thirdAddress?.copy(city = value as TextFieldValue)
-                    ?: AddressState(city = value as TextFieldValue)
+                    ?: AddressState(city = value as TextFieldValue, countryCode = defaultCountryCode)
+                person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
+            }
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_3 -> {
+                val newAddress = thirdAddress?.copy(countryCode = (value as TextFieldValue).text)
+                    ?: AddressState(countryCode = (value as TextFieldValue).text)
                 person = person.copy(addresses = getNewAddresses(newAddress, person.addresses, 2))
             }
 
@@ -874,6 +927,14 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.DOCUMENT_ISSUER_LOGO -> {
                 val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
                 person = person.copy(logoPath = logoPath)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_VAT_EXEMPT -> {
+                person = person.copy(vatExempt = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_INTRA_EU_SALES -> {
+                person = person.copy(intraEuSales = value as Boolean)
             }
 
             else -> {}
@@ -1068,6 +1129,8 @@ class ClientOrIssuerAddEditViewModel(
             companyId3Label = masterData.companyId3Label,
             companyId3Number = masterData.companyId3Number,
             logoPath = masterData.logoPath,
+            vatExempt = masterData.vatExempt,
+            intraEuSales = masterData.intraEuSales,
             originalVersion = masterData.version // Update to current master version
         )
 

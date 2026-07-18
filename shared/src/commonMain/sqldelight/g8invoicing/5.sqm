@@ -1,39 +1,64 @@
 -- Migration de la version 5 vers la version 6
--- Changement:
--- Ajout de la feature "Devis" (Quote), clone de DeliveryNote avec préfixe "D"
--- au lieu de "BL". Trois nouvelles tables (Quote et ses deux liens
--- N-N vers DocumentClientOrIssuer / DocumentProduct) + une table de
--- traçage de la conversion Quote → Facture (LinkInvoiceDocumentProductToQuote,
--- pattern identique à LinkInvoiceDocumentProductToDeliveryNote pour permettre
--- de retrouver l'origine d'une ligne de facture générée depuis un devis).
+-- Regroupe tous les changements de schéma de la branche 1.8 (non-released) :
 --
--- Feature premium activable via le module "quote" (ActivatedModulesRepository).
--- Documents existants: pas de rétro-modification.
+-- 1) Feature "Devis" (Quote), clone de DeliveryNote avec préfixe "D" au lieu
+--    de "BL". Trois tables (Quote et deux liens N-N vers DocumentClientOrIssuer
+--    / DocumentProduct) + une table de traçage de la conversion Quote → Facture
+--    (LinkInvoiceDocumentProductToQuote, pattern identique à
+--    LinkInvoiceDocumentProductToDeliveryNote pour retrouver l'origine d'une
+--    ligne de facture générée depuis un devis).
+--
+-- 2) Préparation Factur-X — schéma EN16931-compliant (partagé avec UBL Peppol
+--    plus tard) :
+--    - country_code sur les adresses (BT-40 seller, BT-55 buyer, BT-80 ship-to),
+--      nullable, ISO 3166-1 alpha-2.
+--    - unit_code sur Product / DocumentProduct (BT-130, UNECE Rec 20/21),
+--      nullable — fallback H87 (piece) au moment de la génération XML.
+--    - type sur Product / DocumentProduct ('SERVICE' | 'GOODS', BT-151), nullable
+--      pour compat ascendante, défaut GOODS côté UI pour les nouveaux produits.
+--    - vat_exempt sur ClientOrIssuer / DocumentClientOrIssuer (0/1), significatif
+--      seulement pour type=ISSUER, permet d'auto-appliquer BT-118=E + mention
+--      légale « TVA non applicable, art. 293 B du CGI » à la génération XML.
+--
+-- taxCategoryCode (BT-151/BT-118) n'est PAS persisté : auto-déduit à la
+-- génération XML depuis (vat_exempt, country_code émetteur, country_code client,
+-- product.type).
 
 CREATE TABLE Quote (
   quote_id INTEGER PRIMARY KEY NOT NULL,
   number TEXT,
   delivery_date TEXT,
-  order_number TEXT,
   reference TEXT,
   free_field TEXT,
   currency TEXT,
   footer TEXT,
-  created_at REAL DEFAULT (datetime('now', 'localtime')),
-  updated_at REAL DEFAULT (datetime('now', 'localtime'))
+  watermark_text TEXT,
+  labels_snapshot TEXT,
+
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
 
 CREATE TABLE LinkQuoteToDocumentClientOrIssuer (
   id INTEGER PRIMARY KEY NOT NULL,
   quote_id INTEGER NOT NULL,
-  document_client_or_issuer_id INTEGER NOT NULL
+  document_client_or_issuer_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(id)
+          ON DELETE CASCADE
 );
 
 CREATE TABLE LinkQuoteToDocumentProduct (
   id INTEGER PRIMARY KEY NOT NULL,
   quote_id INTEGER NOT NULL,
   document_product_id INTEGER NOT NULL,
-  sort_order INTEGER
+  sort_order INTEGER,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(id)
+          ON DELETE CASCADE
 );
 
 CREATE TABLE LinkInvoiceDocumentProductToQuote (
@@ -41,3 +66,17 @@ CREATE TABLE LinkInvoiceDocumentProductToQuote (
   quote_number TEXT,
   delivery_date TEXT
 );
+
+ALTER TABLE ClientOrIssuerAddress ADD COLUMN country_code TEXT;
+ALTER TABLE DocumentClientOrIssuerAddress ADD COLUMN country_code TEXT;
+
+ALTER TABLE Product ADD COLUMN unit_code TEXT;
+ALTER TABLE Product ADD COLUMN type TEXT;
+ALTER TABLE DocumentProduct ADD COLUMN unit_code TEXT;
+ALTER TABLE DocumentProduct ADD COLUMN type TEXT;
+
+ALTER TABLE ClientOrIssuer ADD COLUMN vat_exempt INTEGER DEFAULT 0;
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN vat_exempt INTEGER DEFAULT 0;
+
+ALTER TABLE ClientOrIssuer ADD COLUMN intra_eu_sales INTEGER DEFAULT 0;
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN intra_eu_sales INTEGER DEFAULT 0;

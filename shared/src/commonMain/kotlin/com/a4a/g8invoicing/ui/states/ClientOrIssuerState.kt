@@ -31,5 +31,14 @@ data class ClientOrIssuerState(
     var companyId3Label: TextFieldValue? = null,
     var companyId3Number: TextFieldValue? = null,
     var logoPath: String? = null,
+    // Franchise en base de TVA (micro-entrepreneur FR / Kleinunternehmer DE / etc.).
+    // Significatif seulement quand type=ISSUER. Utilisé par le générateur Factur-X pour
+    // forcer BT-118=E + mention légale correspondante au pays.
+    var vatExempt: Boolean = false,
+    // Vente intra-UE : émetteur dans un pays UE qui facture parfois à des clients dans
+    // d'autres pays UE. Significatif seulement quand type=ISSUER + countryCode UE.
+    // Débloque l'affichage du champ Product.type (SERVICE/GOODS) — inutile pour un
+    // utilisateur non-UE ou qui ne facture que dans son propre pays.
+    var intraEuSales: Boolean = false,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

@@ -57,7 +57,8 @@ fun DocumentBottomSheetProducts(
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
-    onOrderChange: (List<DocumentProductState>) -> Unit
+    onOrderChange: (List<DocumentProductState>) -> Unit,
+    showProductType: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val keyboard by keyboardAsState()
@@ -178,7 +179,8 @@ fun DocumentBottomSheetProducts(
                 onClickDone = {
                     onClickDoneForm(typeOfCreation)
                 },
-                onSelectTaxRate = onSelectTaxRate
+                onSelectTaxRate = onSelectTaxRate,
+                showProductType = showProductType,
             )
         }
     }

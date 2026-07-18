@@ -11,13 +11,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.data.models.ProductNature
+import com.a4a.g8invoicing.data.models.UnitCodes
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_product_quantity
@@ -29,12 +34,23 @@ import com.a4a.g8invoicing.shared.resources.product_name_input
 import com.a4a.g8invoicing.shared.resources.product_price
 import com.a4a.g8invoicing.shared.resources.product_price_input
 import com.a4a.g8invoicing.shared.resources.product_tax
+import com.a4a.g8invoicing.shared.resources.product_type_goods
+import com.a4a.g8invoicing.shared.resources.product_type_info_desc
+import com.a4a.g8invoicing.shared.resources.product_type_info_modal_content
+import com.a4a.g8invoicing.shared.resources.product_type_info_modal_title
+import com.a4a.g8invoicing.shared.resources.product_type_label
+import com.a4a.g8invoicing.shared.resources.product_type_service
 import com.a4a.g8invoicing.shared.resources.product_unit
+import com.a4a.g8invoicing.shared.resources.product_unit_code_info_desc
+import com.a4a.g8invoicing.shared.resources.product_unit_code_info_modal_content
+import com.a4a.g8invoicing.shared.resources.product_unit_code_info_modal_title
+import com.a4a.g8invoicing.shared.resources.product_unit_code_label
 import com.a4a.g8invoicing.shared.resources.product_unit_input
 import com.a4a.g8invoicing.ui.shared.DecimalInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
+import com.a4a.g8invoicing.ui.shared.LabelInfoTooltip
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -49,7 +65,8 @@ fun DocumentBottomSheetProductAddEditForm(
     bottomFormOnValueChange: (ScreenElement, Any) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     onClickForward: (ScreenElement) -> Unit,
-    showFullScreenText: (ScreenElement) -> Unit
+    showFullScreenText: (ScreenElement) -> Unit,
+    showProductType: Boolean = false,
 ) {
     val localFocusManager = LocalFocusManager.current
 
@@ -62,10 +79,22 @@ fun DocumentBottomSheetProductAddEditForm(
     val descriptionPlaceholder = stringResource(Res.string.product_description_input)
     val unitLabel = stringResource(Res.string.product_unit)
     val unitPlaceholder = stringResource(Res.string.product_unit_input)
+    val productTypeLabel = stringResource(Res.string.product_type_label)
+    val productTypeGoodsLabel = stringResource(Res.string.product_type_goods)
+    val productTypeServiceLabel = stringResource(Res.string.product_type_service)
+    val productTypeInfoTitle = stringResource(Res.string.product_type_info_modal_title)
+    val productTypeInfoContent = stringResource(Res.string.product_type_info_modal_content)
+    val productTypeInfoDesc = stringResource(Res.string.product_type_info_desc)
+    val productUnitCodeLabel = stringResource(Res.string.product_unit_code_label)
+    val unitCodeInfoTitle = stringResource(Res.string.product_unit_code_info_modal_title)
+    val unitCodeInfoContent = stringResource(Res.string.product_unit_code_info_modal_content)
+    val unitCodeInfoDesc = stringResource(Res.string.product_unit_code_info_desc)
     val taxLabel = stringResource(Res.string.product_tax)
     val priceLabel = stringResource(Res.string.product_price)
     val pricePlaceholder = stringResource(Res.string.product_price_input)
 
+    var unitPickerOpen by remember { mutableStateOf(false) }
+    var typePickerOpen by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -94,6 +123,8 @@ fun DocumentBottomSheetProductAddEditForm(
                 documentProduct.quantity,
                 documentProduct.description,
                 documentProduct.unit,
+                documentProduct.unitCode,
+                documentProduct.type,
                 documentProduct.taxRate,
                 documentProduct.priceWithoutTax,
                 documentProduct.priceWithTax
@@ -149,6 +180,43 @@ fun DocumentBottomSheetProductAddEditForm(
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT
                     ),
                     FormInput(
+                        label = productUnitCodeLabel,
+                        inputType = ForwardElement(
+                            text = documentProduct.unitCode
+                                ?.let { code -> UnitCodes.findByCode(code)?.let { "$code — ${it.labelFr}" } ?: code }
+                                ?: "-",
+                            isMultiline = false,
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE,
+                        labelInfoTooltip = LabelInfoTooltip(
+                            title = unitCodeInfoTitle,
+                            content = unitCodeInfoContent,
+                            contentDescription = unitCodeInfoDesc,
+                            persistenceKey = "product_unit_code",
+                        ),
+                    ),
+                    // Type produit (BT-151) — masqué quand l'émetteur n'a pas coché
+                    // "Ventes hors de mon pays (UE)" côté profil : inutile pour un flow
+                    // domestique / hors UE, cf. ProductAddEditViewModel.showProductType.
+                    if (showProductType) FormInput(
+                        label = productTypeLabel,
+                        inputType = ForwardElement(
+                            text = when (documentProduct.type) {
+                                ProductNature.GOODS -> productTypeGoodsLabel
+                                ProductNature.SERVICE -> productTypeServiceLabel
+                                null -> "-"
+                            },
+                            isMultiline = false,
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_TYPE,
+                        labelInfoTooltip = LabelInfoTooltip(
+                            title = productTypeInfoTitle,
+                            content = productTypeInfoContent,
+                            contentDescription = productTypeInfoDesc,
+                            persistenceKey = "product_type",
+                        ),
+                    ) else null,
+                    FormInput(
                         label = taxLabel,
                         inputType = ForwardElement(
                             text = documentProduct.taxRate.let { taxRate ->
@@ -191,7 +259,13 @@ fun DocumentBottomSheetProductAddEditForm(
             FormUI(
                 inputList = inputList,
                 localFocusManager = localFocusManager,
-                onClickForward = onClickForward,
+                onClickForward = { element ->
+                    when (element) {
+                        ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE -> unitPickerOpen = true
+                        ScreenElement.DOCUMENT_PRODUCT_TYPE -> typePickerOpen = true
+                        else -> onClickForward(element)
+                    }
+                },
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 errors = documentProduct.errors,
                 onClickExpandFullScreen = {
@@ -199,5 +273,26 @@ fun DocumentBottomSheetProductAddEditForm(
                 }
             )
         }
+    }
+
+    if (unitPickerOpen) {
+        UnitCodePicker(
+            currentCode = documentProduct.unitCode,
+            onSelect = { code ->
+                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE, code)
+                unitPickerOpen = false
+            },
+            onDismiss = { unitPickerOpen = false },
+        )
+    }
+    if (typePickerOpen) {
+        ProductNaturePicker(
+            current = documentProduct.type,
+            onSelect = { nature ->
+                bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_TYPE, nature)
+                typePickerOpen = false
+            },
+            onDismiss = { typePickerOpen = false },
+        )
     }
 }
