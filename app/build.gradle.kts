@@ -15,7 +15,7 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.a4a.g8invoicing"
-    compileSdk = 36
+    compileSdk = 37
 
     flavorDimensions += "channel"
     productFlavors {
@@ -101,11 +101,11 @@ android {
 
 dependencies {
     implementation(project(":shared"))
-    implementation("androidx.core:core-ktx:1.18.0")
+    implementation("androidx.core:core-ktx:1.19.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
-    implementation("androidx.activity:activity-compose:1.12.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
 
     // Compose BOM - aligns all Compose versions (Compose Multiplatform 1.7.3 ~ Jetpack Compose 1.7.5)
     implementation(platform("androidx.compose:compose-bom:2025.06.01"))
@@ -130,7 +130,7 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:4.2.2")
 
     // Encrypted token storage
-    implementation("androidx.security:security-crypto:1.1.0-beta01")
+    implementation("androidx.security:security-crypto:1.1.0")
 
     // Data Store (shared pref)
     implementation("androidx.datastore:datastore-preferences:1.2.1")

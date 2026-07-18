@@ -117,7 +117,7 @@ kotlin {
                 // Ktor engine Android — api() so the app module can use OkHttp engine
                 api("io.ktor:ktor-client-okhttp:3.5.1")
                 // Encrypted storage for tokens
-                implementation("androidx.security:security-crypto:1.1.0-beta01")
+                implementation("androidx.security:security-crypto:1.1.0")
             }
         }
 
@@ -168,7 +168,7 @@ compose.resources {
 
 android {
     namespace = "com.a4a.g8invoicing.shared"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26
