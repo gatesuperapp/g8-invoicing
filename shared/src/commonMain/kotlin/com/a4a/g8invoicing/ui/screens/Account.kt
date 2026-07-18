@@ -32,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -493,6 +494,13 @@ fun Account(
         if (showSendDatabaseByEmailDialog && exportedFilePath != null) {
             AlertDialog(
                 onDismissRequest = { showSendDatabaseByEmailDialog = false },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = Color(0xFF4CAF50),
+                    )
+                },
                 title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
                 text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
                 confirmButton = {

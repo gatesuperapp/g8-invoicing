@@ -18,7 +18,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.initializeVersionTracking
+import com.a4a.g8invoicing.data.setSeenOnboarding18
 import com.a4a.g8invoicing.data.setSeenWhatsNew
+import com.a4a.g8invoicing.data.shouldShowOnboarding18
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.data.auth.AuthRepository
 import com.a4a.g8invoicing.data.auth.AuthState
@@ -58,15 +60,18 @@ fun MainCompose(
         initializeVersionTracking(context)
     }
 
-    // What's New dialog state
+    // What's New + Onboarding dialog state. The 1.8 onboarding takes priority
+    // over the generic What's New — the onboarding's welcome screen already
+    // mentions the Devis feature, so showing both would be redundant.
     val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = false)
+    val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = false)
     var showWhatsNew by remember { mutableStateOf(false) }
+    var showOnboarding by remember { mutableStateOf(false) }
 
-    // Update showWhatsNew when shouldShow changes
-    LaunchedEffect(shouldShow) {
-        if (shouldShow) {
-            showWhatsNew = true
-        }
+    LaunchedEffect(shouldShow, shouldShowOnboarding) {
+        showOnboarding = shouldShowOnboarding
+        // Only surface What's New when onboarding is NOT going to run.
+        showWhatsNew = shouldShow && !shouldShowOnboarding
     }
 
     // Track navController for deep link navigation
@@ -121,6 +126,17 @@ fun MainCompose(
                     onWhatsNewDismissed = {
                         showWhatsNew = false
                         coroutineScope.launch {
+                            setSeenWhatsNew(context)
+                        }
+                    },
+                    showOnboarding = showOnboarding,
+                    onOnboardingDismissed = {
+                        showOnboarding = false
+                        coroutineScope.launch {
+                            setSeenOnboarding18(context)
+                            // Also mark What's New as seen — the onboarding
+                            // already covered the same ground and we don't
+                            // want it to fire on the next launch.
                             setSeenWhatsNew(context)
                         }
                     },

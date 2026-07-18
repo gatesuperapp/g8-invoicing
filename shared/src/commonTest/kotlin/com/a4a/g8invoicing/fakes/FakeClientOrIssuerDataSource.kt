@@ -206,4 +206,30 @@ class FakeClientOrIssuerDataSource : ClientOrIssuerLocalDataSourceInterface {
     override suspend fun getMasterVersion(masterId: Long): Int? {
         return clientsAndIssuers.find { it.id == masterId.toInt() }?.version
     }
+
+    override suspend fun getLastCountryCode(): String? {
+        // Walk backwards through the fake clients/issuers list, first non-empty countryCode
+        // on any of their addresses. Matches the semantics of the SQLDelight query which
+        // returns the country of the most recently created address that has one.
+        return clientsAndIssuers.reversed()
+            .flatMap { it.addresses.orEmpty().reversed() }
+            .firstOrNull { !it.countryCode.isNullOrBlank() }
+            ?.countryCode
+            ?.uppercase()
+    }
+
+    override suspend fun setCountryForClientsWithoutCountry(countryCode: String) {
+        val normalised = countryCode.trim().uppercase()
+        val updated = clientsAndIssuers.map { entry ->
+            if (entry.type != ClientOrIssuerType.CLIENT) entry
+            else {
+                val newAddresses = entry.addresses?.map { addr ->
+                    if (addr.countryCode.isNullOrBlank()) addr.copy(countryCode = normalised) else addr
+                }
+                entry.copy(addresses = newAddresses)
+            }
+        }
+        clientsAndIssuers.clear()
+        clientsAndIssuers.addAll(updated)
+    }
 }

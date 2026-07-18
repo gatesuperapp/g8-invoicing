@@ -60,6 +60,9 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_trial_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_trial_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_trial_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_title
@@ -107,6 +110,17 @@ private val MODULES = listOf(
         titleRes = Res.string.gstore_module_quote_title,
         descRes = Res.string.gstore_module_quote_desc,
         detailRes = Res.string.gstore_module_quote_detail,
+        icon = Icons.Outlined.RequestQuote,
+    ),
+    // Free discovery variant of MODULE_QUOTE. Only surfaced to non-premium
+    // users (see `visibleModules` in GStore composable). Premium users already
+    // have unlimited via MODULE_QUOTE, so seeing a "5 free quotes" card would
+    // be confusing.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_QUOTE_TRIAL,
+        titleRes = Res.string.gstore_module_quote_trial_title,
+        descRes = Res.string.gstore_module_quote_trial_desc,
+        detailRes = Res.string.gstore_module_quote_trial_detail,
         icon = Icons.Outlined.RequestQuote,
         isFree = true,
     ),
@@ -169,6 +183,13 @@ fun GStore(
             )
         }
     ) { padding ->
+        // The trial "Devis découverte" card is hidden for premium users — they
+        // already have unlimited quotes via MODULE_QUOTE, so surfacing a "5 free"
+        // tile alongside the paid one would be confusing.
+        val visibleModules = remember(isPremium) {
+            if (isPremium) MODULES.filter { it.id != ActivatedModulesRepository.MODULE_QUOTE_TRIAL }
+            else MODULES
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -189,7 +210,7 @@ fun GStore(
                     .fillMaxWidth()
                     .weight(1f),
             ) {
-                items(MODULES) { module ->
+                items(visibleModules) { module ->
                     GStoreModuleCard(
                         title = stringResource(module.titleRes),
                         description = stringResource(module.descRes),

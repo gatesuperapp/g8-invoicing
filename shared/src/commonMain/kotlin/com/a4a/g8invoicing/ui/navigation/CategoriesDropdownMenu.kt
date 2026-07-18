@@ -17,8 +17,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.ui.theme.MainBackground
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.runtime.collectAsState
+import org.koin.compose.koinInject
 
 
 /**
@@ -33,16 +36,21 @@ fun CategoriesDropdownMenu(
     dismissMenu: () -> Unit,
     onClickCategory: ((Category) -> Unit)?,
 ) {
-    val categories = listOf(
-        Category.G8,
-        Category.MyAccount,
-        Category.GStore,
-        Category.Clients,
-        Category.Products,
-        Category.CreditNotes,
-        Category.DeliveryNotes,
-        Category.Invoices,
-    )
+    val activatedModules by koinInject<ActivatedModulesRepository>().state.collectAsState()
+    val categories = buildList {
+        add(Category.G8)
+        add(Category.MyAccount)
+        add(Category.GStore)
+        add(Category.Clients)
+        add(Category.Products)
+        add(Category.CreditNotes)
+        if (
+            ActivatedModulesRepository.MODULE_QUOTE in activatedModules ||
+            ActivatedModulesRepository.MODULE_QUOTE_TRIAL in activatedModules
+        ) add(Category.Quotes)
+        if (ActivatedModulesRepository.MODULE_DELIVERY_NOTE in activatedModules) add(Category.DeliveryNotes)
+        add(Category.Invoices)
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination

@@ -63,6 +63,7 @@ import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
+import com.a4a.g8invoicing.ui.shared.OnboardingDialog
 import com.a4a.g8invoicing.ui.shared.WhatsNewDialog
 import com.a4a.g8invoicing.ui.shared.animations.BatOpenMouth
 import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
@@ -93,6 +94,13 @@ fun InvoiceList(
     showWhatsNewDialog: Boolean = false,
     appVersion: String = "",
     onDismissWhatsNew: () -> Unit = {},
+    // 1.8 Onboarding wizard
+    showOnboardingDialog: Boolean = false,
+    onDismissOnboarding: () -> Unit = {},
+    // Database backup CTA offered inside the wizard's Factur-X intro step —
+    // same handlers as Account → Sauvegarde.
+    onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
+    onSendDatabaseByEmail: (String) -> Unit = {},
     showCategoryButton: Boolean = true,
     showBottomBar: Boolean = true, // False on desktop - actions go to top bar
 ) {
@@ -114,6 +122,18 @@ fun InvoiceList(
         WhatsNewDialog(
             appVersion = appVersion,
             onDismiss = onDismissWhatsNew
+        )
+    }
+
+    // 1.8 Onboarding wizard. Takes over the whole screen, non-dismissable.
+    // Only completes via the ThankYou step's "Terminer" — which triggers the
+    // ViewModel commit that persists per-issuer answers + bulk product type,
+    // then calls onDismissOnboarding to mark it seen.
+    if (showOnboardingDialog) {
+        OnboardingDialog(
+            onDismiss = onDismissOnboarding,
+            onExportDatabase = onExportDatabase,
+            onSendDatabaseByEmail = onSendDatabaseByEmail,
         )
     }
 

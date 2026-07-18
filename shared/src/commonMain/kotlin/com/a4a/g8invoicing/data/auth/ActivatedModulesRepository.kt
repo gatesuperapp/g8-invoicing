@@ -36,6 +36,28 @@ class ActivatedModulesRepository(
         settings.remove(KEY_ACTIVATED)
     }
 
+    // ---- Quote trial counter -----------------------------------------------
+    //
+    // Trial mode caps new-quote creations at [QUOTE_TRIAL_MAX_CLICKS]. The
+    // counter is a persistent click count, not a live COUNT(*) on the Quote
+    // table — the user shouldn't be able to reset the cap by deleting quotes.
+    // Only relevant when the user is on [MODULE_QUOTE_TRIAL] AND doesn't have
+    // premium (which grants unlimited via [MODULE_QUOTE]).
+
+    fun getQuoteTrialCount(): Int = settings.getInt(KEY_QUOTE_TRIAL_COUNT, 0)
+
+    fun incrementQuoteTrialCount() {
+        settings.putInt(KEY_QUOTE_TRIAL_COUNT, getQuoteTrialCount() + 1)
+    }
+
+    /** True when the user is on the free trial module (not the premium unlimited
+     *  one) and has hit the click cap. Callers should also check [isPremium]
+     *  externally — a premium user's trial cap never applies. */
+    fun isQuoteTrialExhausted(): Boolean =
+        isActive(MODULE_QUOTE_TRIAL) &&
+            !isActive(MODULE_QUOTE) &&
+            getQuoteTrialCount() >= QUOTE_TRIAL_MAX_CLICKS
+
     private fun loadFromCache(): Set<String> {
         val raw = settings.getStringOrNull(KEY_ACTIVATED)
         val cached = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
@@ -60,9 +82,16 @@ class ActivatedModulesRepository(
         // Module that removes the "Document généré avec 𝕘𝟠" footer from invoices and PDFs.
         // Default OFF (footer shown). Only togglable by premium users.
         const val MODULE_WATERMARK_REMOVAL = "watermark_removal"
-        // Module that unlocks the "Devis" (quote) category and menu.
-        // Default OFF. Free-tier (see FREE_MODULES below) — everyone can toggle it.
+        // Module that unlocks the "Devis" (quote) category and menu WITHOUT any
+        // creation cap. Premium-only in 1.8. Non-premium users see the free
+        // [MODULE_QUOTE_TRIAL] card instead which is capped at 5 creations.
         const val MODULE_QUOTE = "quote"
+        // Free discovery variant of MODULE_QUOTE — same category unlock, but the
+        // "+ new quote" tap is capped at [QUOTE_TRIAL_MAX_CLICKS]. Never shown
+        // in the gStore for premium users (they already have unlimited via
+        // MODULE_QUOTE). If both modules end up active on a premium account, the
+        // trial cap is skipped since MODULE_QUOTE takes precedence.
+        const val MODULE_QUOTE_TRIAL = "quote_trial"
         // Module that unlocks the "Bons de livraison" category and menu.
         // Default ON (see DEFAULT_ACTIVATED_MODULES). Free-tier — everyone can toggle.
         // Seeded on first load so existing users who used delivery notes before the
@@ -72,7 +101,7 @@ class ActivatedModulesRepository(
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
         // so adding a future free module is one string.
-        val FREE_MODULES = setOf(MODULE_QUOTE, MODULE_DELIVERY_NOTE)
+        val FREE_MODULES = setOf(MODULE_QUOTE_TRIAL, MODULE_DELIVERY_NOTE)
 
         // Modules seeded into the activated set the first time the app boots after this
         // migration is deployed. Guarded by KEY_DEFAULTS_SEEDED so we don't re-add a
@@ -81,5 +110,10 @@ class ActivatedModulesRepository(
 
         private const val KEY_ACTIVATED = "gstore_activated_modules_v1"
         private const val KEY_DEFAULTS_SEEDED = "gstore_defaults_seeded_v1"
+        private const val KEY_QUOTE_TRIAL_COUNT = "gstore_quote_trial_count_v1"
+
+        /** Maximum number of "+ new quote" clicks a trial user can make before
+         *  the exhausted modal takes over. Not user-configurable. */
+        const val QUOTE_TRIAL_MAX_CLICKS = 5
     }
 }

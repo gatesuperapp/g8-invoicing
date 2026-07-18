@@ -31,6 +31,9 @@ fun NavGraph(
     // What's New dialog
     showWhatsNew: Boolean = false,
     onWhatsNewDismissed: () -> Unit = {},
+    // 1.8 Onboarding wizard (fullscreen, non-dismissable)
+    showOnboarding: Boolean = false,
+    onOnboardingDismissed: () -> Unit = {},
     // About screen platform callbacks
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
@@ -109,6 +112,29 @@ fun NavGraph(
             showCategoryButton = showCategoryButton
         )
 
+        // Quotes
+        quoteList(
+            navController = navController,
+            onClickCategory = {
+                navController.navigateAndReplaceStartDestination(it)
+            },
+            onClickListItem = {
+                val params = "?itemId=$it"
+                navController.navigate(Screen.QuoteAddEdit.name + params)
+            },
+            onClickNew = {
+                navController.navigate(Screen.QuoteAddEdit.name)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            },
+            onClickViewCreatedInvoice = { invoiceId ->
+                val params = "?itemId=$invoiceId"
+                navController.navigate(Screen.InvoiceAddEdit.name + params)
+            },
+            showCategoryButton = showCategoryButton
+        )
+
         // Invoices
         invoiceList(
             navController = navController,
@@ -129,7 +155,11 @@ fun NavGraph(
             showCategoryButton = showCategoryButton,
             showBottomBar = showCategoryButton, // Same logic: hide on desktop
             initialShowWhatsNew = showWhatsNew,
-            onWhatsNewDismissed = onWhatsNewDismissed
+            onWhatsNewDismissed = onWhatsNewDismissed,
+            initialShowOnboarding = showOnboarding,
+            onOnboardingDismissed = onOnboardingDismissed,
+            onExportDatabase = onExportDatabase,
+            onSendDatabaseByEmail = onSendDatabaseByEmail,
         )
 
         // Credit Notes
@@ -179,6 +209,16 @@ fun NavGraph(
         )
 
         deliveryNoteAddEdit(
+            navController = navController,
+            onClickBack = {
+                navigateBack(navController)
+            },
+            exportPdfContent = { document, onDismiss ->
+                exportPdfContent(document, onDismiss)
+            }
+        )
+
+        quoteAddEdit(
             navController = navController,
             onClickBack = {
                 navigateBack(navController)
@@ -285,13 +325,20 @@ private fun navigateBack(navController: NavController) {
 private fun NavHostController.navigateAndReplaceStartDestination(
     category: Category,
 ) {
-    // Use route string instead of Int ID for KMP compatibility
-    val currentStartRoute = graph.startDestinationRoute
-    if (currentStartRoute != null) {
-        popBackStack(currentStartRoute, true)
+    // Pop the current top of the backstack and push [category] so back button
+    // from any category exits the app. We deliberately do NOT mutate
+    // graph.startDestination — a NavGraph recomposition (e.g. after the async
+    // setSeenOnboarding18 DataStore write emits a new value) reinstantiates the
+    // NavHost builder lambda, invalidates `remember(startDestination, builder)`
+    // and rebuilds the graph with the hard-coded InvoiceList start, which
+    // would silently teleport the user back to InvoiceList.
+    val current = currentBackStackEntry?.destination?.route
+    navigate(category.route) {
+        if (current != null && current != category.route) {
+            popUpTo(current) { inclusive = true }
+        }
+        launchSingleTop = true
     }
-    graph.setStartDestination(category.route)
-    navigate(category.route)
 }
 
 /**
