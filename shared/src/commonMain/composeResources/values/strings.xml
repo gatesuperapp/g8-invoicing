@@ -521,25 +521,25 @@ Une erreur s'est produite :
 
     <!-- Devis intro -->
     <string name="onboarding_devis_title">Devis</string>
-    <string name="onboarding_devis_body">Tu peux maintenant créer des devis et les transformer en facture.\n\nCette fonctionnalité est réservée aux membres premium, mais tu peux la tester pour voir si elle te convient (5 devis maximum).</string>
+    <string name="onboarding_devis_body">Les devis sont maintenant disponibles 🥳 Il est possible de convertir les devis en facture.\n\nLe module est activable dans le 𝕘Store pour les membres premium — tu peux cependant tester les devis gratuitement (5 max) pour voir si la fonctionnalité te convient.</string>
     <string name="onboarding_devis_cta_activate">Activer les devis</string>
     <string name="onboarding_devis_cta_later_gstore">Plus tard dans le gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, mais pas besoin !</string>
 
     <!-- Factur-X intro -->
     <string name="onboarding_facturx_title">Nouveaux champs</string>
-    <string name="onboarding_facturx_body_before_bold">J'ai ajouté des champs pour avoir des factures normées, plus lisibles et prêtes pour la facturation électronique.\n\n</string>
+    <string name="onboarding_facturx_body_before_bold">J'ai commencé à ajouter des champs pour avoir des factures normées, plus lisibles et prêtes pour la facturation électronique.\n\n</string>
     <string name="onboarding_facturx_body_bold">J'ai besoin de toi pour quelques réglages.</string>
-    <string name="onboarding_facturx_cta">Allons-y</string>
+    <string name="onboarding_facturx_body_after_bold">\n\nSache que je n'ai pas accès aux réponses que tu vas me donner, car tes données sont seulement enregistrées dans ton téléphone.\n\nD'ailleurs, souhaites-tu faire une sauvegarde rapide ?</string>
+    <string name="onboarding_facturx_cta_backup">Sauvegarder ma base de données</string>
+    <string name="onboarding_facturx_cta">C'est bon, commençons les réglages</string>
 
     <!-- Multi-issuer cleanup -->
     <string name="onboarding_cleanup_title">Tes entreprises</string>
-    <string name="onboarding_cleanup_body_part1">Tiens, je vois que tu gères plusieurs entreprises.\n\n</string>
-    <string name="onboarding_cleanup_body_bold_one_by_one">On va les régler une par une.</string>
-    <string name="onboarding_cleanup_body_part2">\n\nMais d'abord, s'il y en a que tu n'utilises plus, </string>
+    <string name="onboarding_cleanup_body_part1">Tiens, je vois que tu gères plusieurs entreprises.\n\nS'il y en a que tu n'utilises plus, </string>
     <string name="onboarding_cleanup_body_bold_delete_here">tu peux les supprimer ici</string>
     <string name="onboarding_cleanup_body_part3">. Ne t'inquiète pas, les documents liés ne bougeront pas.</string>
-    <string name="onboarding_cleanup_cta">C'est bon</string>
+    <string name="onboarding_cleanup_cta">Suivant</string>
     <string name="onboarding_cleanup_delete_confirm_title">Supprimer cette entreprise ?</string>
     <string name="onboarding_cleanup_delete_confirm_body">Les documents liés ne seront pas modifiés.</string>
     <string name="onboarding_cleanup_delete_confirm_yes">Supprimer</string>
@@ -584,8 +584,8 @@ Une erreur s'est produite :
 
     <!-- Client country flow (before unit code) -->
     <string name="onboarding_client_country_intro_title">Pays des client·es</string>
-    <string name="onboarding_client_country_intro_body">Est-ce que tes client·es sont, pour la plupart, dans le même pays ?\n\nSi oui, je pourrai le pré-remplir pour tous ceux qui n'ont pas encore de pays renseigné.</string>
-    <string name="onboarding_client_country_intro_yes">Oui, majoritairement</string>
+    <string name="onboarding_client_country_intro_body">Est-ce que tes client·es sont, pour la plupart, dans le même pays ?\n\nSi oui, je pourrai le pré-remplir automatiquement.</string>
+    <string name="onboarding_client_country_intro_yes">Oui</string>
     <string name="onboarding_client_country_intro_no">Non, c'est mélangé</string>
 
     <string name="onboarding_client_country_picker_subtitle">Dans quel pays ?</string>
@@ -607,10 +607,10 @@ Une erreur s'est produite :
     <string name="onboarding_unitcode_bold2">unité</string>
     <string name="onboarding_unitcode_part3"> (heure, kilo, pièce). Il y aura désormais un </string>
     <string name="onboarding_unitcode_bold3">code normalisé</string>
-    <string name="onboarding_unitcode_part4"> qui va avec.\n\n⚡ Tu n'as rien à faire, je trouve le code unité tout seul !\n\nSi je ne reconnais pas l'unité, c'est valable aussi ✅ (le code unité « pièce » sera ajouté à la facture électronique et ton unité sera indiquée en description).</string>
+    <string name="onboarding_unitcode_part4"> qui va avec.\n\n⚡ Tu n'as rien à faire, je trouve le code unité tout seul !\n\nSi je ne reconnais pas l'unité, c'est valable aussi ✅</string>
 
     <!-- Thank you -->
-    <string name="onboarding_thanks_title">C'est tout bon !</string>
+    <string name="onboarding_thanks_title">C'est parfait !</string>
     <string name="onboarding_thanks_body">Merci de ta confiance. À bientôt !</string>
     <string name="onboarding_thanks_cta">Terminer</string>
 </resources>
