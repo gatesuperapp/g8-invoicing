@@ -401,6 +401,7 @@
     <string name="export_email_subject_invoice">factura</string>
     <string name="export_email_subject_delivery_note">albarán</string>
     <string name="export_email_subject_credit_note">nota de crédito</string>
+    <string name="export_email_subject_quote">presupuesto</string>
     <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
  ((˃ᯅ˂)ノ) 
 

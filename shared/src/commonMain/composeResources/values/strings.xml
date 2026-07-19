@@ -454,7 +454,7 @@
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).\n\n• Si le fichier n&apos;apparaît pas, il est possible qu&apos;il soit dans un sous-dossier du dossier de téléchargement (surtout si tu passes par une app de fichiers type Samsung)\n\n• Tu peux également retrouver le fichier en faisant une recherche à partir du nom de fichier.</string>
     <string name="export_info_popup_validate">ok</string>
     <string name="export_send_file">Envoyer par e-mail</string>
-    <string name="export_send_file_content">Bonjour, \n\nVeuillez trouver ci-joint votre document.\n\nCordialement</string>
+    <string name="export_send_file_content">Bonjour, \n\nVeuillez trouver votre document ci-joint.\n\nCordialement</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
     <string name="export_error_sharing">Le fichier n&apos;a pas pu être partagé.\n\nVeuillez l&apos;ouvrir directement depuis le dossier Téléchargements/g8.</string>
@@ -462,6 +462,7 @@
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
     <string name="export_email_subject_credit_note">avoir</string>
+    <string name="export_email_subject_quote">devis</string>
     <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
  ((˃ᯅ˂)ノ) 
 

@@ -400,6 +400,7 @@
     <string name="export_email_subject_invoice">invoice</string>
     <string name="export_email_subject_delivery_note">delivery note</string>
     <string name="export_email_subject_credit_note">credit note</string>
+    <string name="export_email_subject_quote">quote</string>
     <string name="alert_dialog_error">An error occurred: </string>
     <string name="alert_dialog_error_confirm">OK</string>
 
