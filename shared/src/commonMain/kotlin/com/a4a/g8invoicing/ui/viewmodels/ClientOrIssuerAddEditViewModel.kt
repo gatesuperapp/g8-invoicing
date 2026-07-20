@@ -315,6 +315,15 @@ class ClientOrIssuerAddEditViewModel(
                 )
             }
 
+            ClientOrIssuerType.ISSUER -> {
+                val currentEmails = _issuerUiState.value.emails ?: return
+                if (indexToRemove >= currentEmails.size) return
+                val newEmails = currentEmails.filterIndexed { index, _ -> index != indexToRemove }
+                _issuerUiState.value = _issuerUiState.value.copy(
+                    emails = if (newEmails.isEmpty()) null else newEmails
+                )
+            }
+
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
                 val currentEmails = _documentClientUiState.value.emails ?: return
                 if (indexToRemove >= currentEmails.size) return
@@ -332,8 +341,6 @@ class ClientOrIssuerAddEditViewModel(
                     emails = if (newEmails.isEmpty()) null else newEmails
                 )
             }
-
-            else -> {}
         }
     }
 
@@ -344,6 +351,14 @@ class ClientOrIssuerAddEditViewModel(
                 val currentEmails = _clientUiState.value.emails ?: emptyList()
                 if (currentEmails.size >= 4) return
                 _clientUiState.value = _clientUiState.value.copy(
+                    emails = currentEmails + newEmailState
+                )
+            }
+
+            ClientOrIssuerType.ISSUER -> {
+                val currentEmails = _issuerUiState.value.emails ?: emptyList()
+                if (currentEmails.size >= 4) return
+                _issuerUiState.value = _issuerUiState.value.copy(
                     emails = currentEmails + newEmailState
                 )
             }
@@ -363,8 +378,6 @@ class ClientOrIssuerAddEditViewModel(
                     emails = currentEmails + newEmailState
                 )
             }
-
-            else -> {}
         }
     }
 
