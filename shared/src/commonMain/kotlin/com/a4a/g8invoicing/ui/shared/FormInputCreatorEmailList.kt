@@ -28,14 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentType
-import androidx.compose.ui.autofill.contentType
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -124,12 +123,8 @@ fun FormInputCreatorEmailList(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = if (nonEmptyEmails.isNotEmpty()) 4.dp else 0.dp)
-                        // Compose Multiplatform 1.8 enables autofill on every editable
-                        // BasicTextField by default. Without an explicit hint the system
-                        // heuristically routes an email suggestion into every field on
-                        // screen — address lines, ZIP, city, VAT number. Marking this one
-                        // as EmailAddress keeps the fill scoped to the email chip input.
-                        .contentType(ContentType.EmailAddress)
+                        // Autofill disabled — see FormInputCreatorText for context.
+                        .clearAndSetSemantics {}
                         .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
                         .onFocusChanged { focusState ->
                             // When focus is lost, try to add the email

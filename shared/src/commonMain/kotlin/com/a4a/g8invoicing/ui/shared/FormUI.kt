@@ -363,17 +363,6 @@ class TextInput(
     val onValueChange: (TextFieldValue) -> Unit = {},
     val keyboardType: KeyboardType = KeyboardType.Text,
     val displayFullScreenIcon: Boolean = false,
-    // Compose MP 1.8 auto-registers every BasicTextField with the Android autofill
-    // framework. Without an explicit hint, a saved email suggestion routes into
-    // every field on screen (address, ZIP, VAT number, …). Setting a specific
-    // ContentType per field scopes the fill to the semantically-matching input.
-    val contentType: androidx.compose.ui.autofill.ContentType? = null,
-    // Opt out of autofill entirely. Used for fields that have no matching
-    // ContentType (SIRET / VAT / notes) — otherwise the system offers credit
-    // card / password suggestions that make no sense for the field. Strips
-    // TalkBack semantics too as a side effect, but the audience for
-    // accessible SIRET editing is essentially nil.
-    val disableAutofill: Boolean = false,
 )
 
 class DecimalInput(
