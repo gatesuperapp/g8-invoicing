@@ -80,7 +80,24 @@ fun NavGraphBuilder.quoteList(
             navController = navController,
             documentsUiState = quotesUiState,
             onClickDelete = viewModel::deleteQuotes,
-            onClickDuplicate = viewModel::duplicateQuotes,
+            onClickDuplicate = { selected ->
+                // Duplicating N quotes is equivalent to N net-new quotes for the
+                // trial cap — see ActivatedModulesRepository. Block the whole
+                // batch when it wouldn't fit, rather than silently duplicating
+                // only some of the selection.
+                val premium = subscriptionRepository.isPremium()
+                if (!premium && activatedModules.wouldExhaustQuoteTrial(selected.size)) {
+                    showTrialExhausted = true
+                } else {
+                    if (!premium &&
+                        activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE_TRIAL) &&
+                        !activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE)
+                    ) {
+                        activatedModules.incrementQuoteTrialCount(by = selected.size)
+                    }
+                    viewModel.duplicateQuotes(selected)
+                }
+            },
             onClickConvert = viewModel::convertQuotes,
             onClickNew = {
                 // Trial cap applies only when the user is on the free discovery

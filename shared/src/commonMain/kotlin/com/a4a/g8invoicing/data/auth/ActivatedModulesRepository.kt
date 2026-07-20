@@ -38,25 +38,32 @@ class ActivatedModulesRepository(
 
     // ---- Quote trial counter -----------------------------------------------
     //
-    // Trial mode caps new-quote creations at [QUOTE_TRIAL_MAX_CLICKS]. The
-    // counter is a persistent click count, not a live COUNT(*) on the Quote
-    // table — the user shouldn't be able to reset the cap by deleting quotes.
-    // Only relevant when the user is on [MODULE_QUOTE_TRIAL] AND doesn't have
-    // premium (which grants unlimited via [MODULE_QUOTE]).
+    // Trial mode caps net-new quotes at [QUOTE_TRIAL_MAX_CLICKS]. The counter
+    // is a persistent action count (create + duplicate), not a live COUNT(*)
+    // on the Quote table — the user shouldn't be able to reset the cap by
+    // deleting quotes. Duplicating N quotes bumps the counter by N, mirroring
+    // what a create-N-times session would cost. Only relevant when the user is
+    // on [MODULE_QUOTE_TRIAL] AND doesn't have premium (which grants unlimited
+    // via [MODULE_QUOTE]).
 
     fun getQuoteTrialCount(): Int = settings.getInt(KEY_QUOTE_TRIAL_COUNT, 0)
 
-    fun incrementQuoteTrialCount() {
-        settings.putInt(KEY_QUOTE_TRIAL_COUNT, getQuoteTrialCount() + 1)
+    fun incrementQuoteTrialCount(by: Int = 1) {
+        settings.putInt(KEY_QUOTE_TRIAL_COUNT, getQuoteTrialCount() + by)
     }
 
     /** True when the user is on the free trial module (not the premium unlimited
      *  one) and has hit the click cap. Callers should also check [isPremium]
      *  externally — a premium user's trial cap never applies. */
-    fun isQuoteTrialExhausted(): Boolean =
+    fun isQuoteTrialExhausted(): Boolean = wouldExhaustQuoteTrial(1)
+
+    /** True when performing [additionalActions] more create/duplicate would
+     *  exceed the cap. Returns false when the user is not on the trial gate
+     *  (either not activated, or has the paid [MODULE_QUOTE] override). */
+    fun wouldExhaustQuoteTrial(additionalActions: Int): Boolean =
         isActive(MODULE_QUOTE_TRIAL) &&
             !isActive(MODULE_QUOTE) &&
-            getQuoteTrialCount() >= QUOTE_TRIAL_MAX_CLICKS
+            (getQuoteTrialCount() + additionalActions) > QUOTE_TRIAL_MAX_CLICKS
 
     private fun loadFromCache(): Set<String> {
         val raw = settings.getStringOrNull(KEY_ACTIVATED)
