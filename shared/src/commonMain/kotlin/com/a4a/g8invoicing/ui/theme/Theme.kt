@@ -43,11 +43,10 @@ fun G8InvoicingTheme(
 
     val typography = createCustomTypography()
 
-    // Belt-and-suspenders: FormInputCreatorText already strips autofill
-    // semantics from every text field so this brush should never draw, but
-    // if a stray BasicTextField ever slips through without opting out, the
-    // transparent highlight keeps Compose 1.8's persistent yellow overlay
-    // from showing up under user text.
+    // Suppress the persistent yellow autofill highlight that Compose 1.8 draws
+    // behind any autofilled BasicTextField — Google Password Manager fills the
+    // email chip input and the highlight stays visible under the text even
+    // after focus moves. Transparent brush = no highlight.
     CompositionLocalProvider(
         LocalAutofillHighlightBrush provides SolidColor(Color.Transparent)
     ) {

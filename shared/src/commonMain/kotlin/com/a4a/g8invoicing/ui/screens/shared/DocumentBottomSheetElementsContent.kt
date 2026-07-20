@@ -40,6 +40,7 @@ fun DocumentBottomSheetElementsContent(
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_NUMBER, it)
                 },
+                disableAutofill = true,
             ),
             pageElement = ScreenElement.DOCUMENT_NUMBER
         ),
@@ -77,6 +78,7 @@ fun DocumentBottomSheetElementsContent(
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_REFERENCE, it)
                 },
+                disableAutofill = true,
             ),
             pageElement = ScreenElement.DOCUMENT_REFERENCE
         ),
@@ -87,6 +89,7 @@ fun DocumentBottomSheetElementsContent(
                 onValueChange = {
                     onValueChange(ScreenElement.DOCUMENT_FREE_FIELD, it)
                 },
+                disableAutofill = true,
             ),
             pageElement = ScreenElement.DOCUMENT_FREE_FIELD
         )

@@ -25,6 +25,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.contentType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -92,14 +93,13 @@ fun FormInputCreatorText(
                     modifier = customModifier // focusing on textfield when clinking on label
                         .weight(1F)
                         .padding(end = if (input.displayFullScreenIcon) 4.dp else 0.dp)
-                        // Autofill disabled on every FormInput text field.
-                        // Compose MP 1.8 registered every BasicTextField with the
-                        // Android autofill framework by default; the multi-address
-                        // form was catching cross-field fills (picking a postal
-                        // code overwrote the street, etc.) and the per-field
-                        // ContentType tagging couldn't stop it cleanly. Strip
-                        // all semantics on the input so autofill leaves it alone.
-                        .clearAndSetSemantics {},
+                        .then(
+                            when {
+                                input.disableAutofill -> Modifier.clearAndSetSemantics {}
+                                input.contentType != null -> Modifier.contentType(input.contentType)
+                                else -> Modifier
+                            }
+                        ),
                     //  .horizontalScroll(rememberScrollState()),
                     value = input.text ?: TextFieldValue(""),
                     onValueChange = {
