@@ -449,6 +449,7 @@ Bitte öffne sie direkt im Ordner Downloads/g8.</string>
     <string name="export_email_subject_invoice">Rechnung</string>
     <string name="export_email_subject_delivery_note">Lieferschein</string>
     <string name="export_email_subject_credit_note">Gutschrift</string>
+    <string name="export_email_subject_quote">Angebot</string>
     <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
  ((˃ᯅ˂)ノ) 
 
