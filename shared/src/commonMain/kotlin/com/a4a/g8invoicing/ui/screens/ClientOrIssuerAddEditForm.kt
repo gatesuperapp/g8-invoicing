@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
@@ -239,7 +240,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_NAME,
                                 it
                             )
-                        }
+                        },
+                        contentType = ContentType.PersonLastName
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
                     else ScreenElement.CLIENT_OR_ISSUER_NAME,
@@ -256,7 +258,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME,
                                 it
                             )
-                        }
+                        },
+                        contentType = ContentType.PersonFirstName
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
                     else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
@@ -273,7 +276,8 @@ fun ClientOrIssuerAddEditForm(
                                 it
                             )
                         },
-                        keyboardType = KeyboardType.Phone
+                        keyboardType = KeyboardType.Phone,
+                        contentType = ContentType.PhoneNumber
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
                     else ScreenElement.CLIENT_OR_ISSUER_PHONE
@@ -344,7 +348,8 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i"),
                                     it
                                 )
-                            }
+                            },
+                            contentType = ContentType.AddressStreet
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
@@ -361,7 +366,8 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i"),
                                     it
                                 )
-                            }
+                            },
+                            contentType = ContentType.AddressAuxiliaryDetails
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i")
@@ -378,7 +384,8 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ZIP_$i"),
                                     it
                                 )
-                            }
+                            },
+                            contentType = ContentType.PostalCode
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ZIP_$i")
@@ -395,7 +402,8 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i"),
                                     it
                                 )
-                            }
+                            },
+                            contentType = ContentType.AddressLocality
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_CITY_$i")
@@ -437,7 +445,8 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i"),
                                     it
                                 )
-                            }
+                            },
+                            disableAutofill = true
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
@@ -504,6 +513,9 @@ fun ClientOrIssuerAddEditForm(
                 )
 
         ) {
+            // Company-ID (SIRET / VAT / RCS) have no matching ContentType — opt out of
+            // autofill entirely so the system doesn't offer credit-card or password
+            // suggestions in a business-identifier field.
             val inputList = listOf(
                 FormInput(
                     label = TextInput(
@@ -515,6 +527,7 @@ fun ClientOrIssuerAddEditForm(
                                 it
                             )
                         },
+                        disableAutofill = true
                     ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId1Number,
@@ -525,7 +538,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
                                 it
                             )
-                        }
+                        },
+                        disableAutofill = true
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1
@@ -539,7 +553,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
                                 it
                             )
-                        }
+                        },
+                        disableAutofill = true
                     ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId2Number,
@@ -550,7 +565,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
                                 it
                             )
-                        }
+                        },
+                        disableAutofill = true
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
@@ -564,7 +580,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
                                 it
                             )
-                        }
+                        },
+                        disableAutofill = true
                     ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId3Number,
@@ -575,7 +592,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
                                 it
                             )
-                        }
+                        },
+                        disableAutofill = true
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3
@@ -733,7 +751,8 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_NOTES,
                                 it
                             )
-                        }
+                        },
+                        disableAutofill = true
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
                     else ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES

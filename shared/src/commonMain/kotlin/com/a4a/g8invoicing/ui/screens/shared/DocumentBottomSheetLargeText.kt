@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
@@ -37,7 +38,9 @@ fun DocumentBottomSheetLargeText(
                     .background(Color.White)
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(30.dp),
+                    .padding(30.dp)
+                    // Free-form footer / description — opt out of autofill.
+                    .clearAndSetSemantics {},
                 value = text,
                 onValueChange = onValueChange
             )

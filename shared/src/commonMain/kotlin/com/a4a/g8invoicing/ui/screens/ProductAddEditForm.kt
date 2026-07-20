@@ -171,7 +171,8 @@ fun ProductAddEditForm(
                                     placeholder = productNamePlaceholder,
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_NAME, it, null)
-                                    }
+                                    },
+                                    disableAutofill = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_NAME,
                                 isMandatory = true
@@ -183,7 +184,8 @@ fun ProductAddEditForm(
                                     placeholder = productDescriptionPlaceholder,
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_DESCRIPTION, it, null)
-                                    }
+                                    },
+                                    disableAutofill = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_DESCRIPTION
                             ),
@@ -194,7 +196,8 @@ fun ProductAddEditForm(
                                     placeholder = productUnitPlaceholder,
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_UNIT, it, null)
-                                    }
+                                    },
+                                    disableAutofill = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_UNIT
                             ),

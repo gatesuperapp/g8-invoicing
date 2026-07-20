@@ -138,7 +138,8 @@ fun DocumentBottomSheetProductAddEditForm(
                             onValueChange = {
                                 bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_NAME, it)
                             },
-                            displayFullScreenIcon = true
+                            displayFullScreenIcon = true,
+                            disableAutofill = true,
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_NAME,
                         isMandatory = true
@@ -164,7 +165,8 @@ fun DocumentBottomSheetProductAddEditForm(
                             onValueChange = {
                                 bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION, it)
                             },
-                            displayFullScreenIcon = true
+                            displayFullScreenIcon = true,
+                            disableAutofill = true,
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
                     ),
@@ -175,7 +177,8 @@ fun DocumentBottomSheetProductAddEditForm(
                             placeholder = unitPlaceholder,
                             onValueChange = {
                                 bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT, it)
-                            }
+                            },
+                            disableAutofill = true,
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT
                     ),

@@ -1,10 +1,13 @@
 package com.a4a.g8invoicing.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.text.LocalAutofillHighlightBrush
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 
 private val LightColorScheme = lightColorScheme(
     primary = ColorBlueGrey,
@@ -40,9 +43,17 @@ fun G8InvoicingTheme(
 
     val typography = createCustomTypography()
 
-    MaterialTheme(
-        colorScheme = colors,
-        typography = typography,
-        content = content
-    )
+    // Suppress the persistent yellow autofill highlight that Compose 1.8 draws
+    // behind any autofilled BasicTextField — Google Password Manager fills the
+    // email chip input and the highlight stays visible under the text even
+    // after focus moves. Transparent brush = no highlight.
+    CompositionLocalProvider(
+        LocalAutofillHighlightBrush provides SolidColor(Color.Transparent)
+    ) {
+        MaterialTheme(
+            colorScheme = colors,
+            typography = typography,
+            content = content
+        )
+    }
 }

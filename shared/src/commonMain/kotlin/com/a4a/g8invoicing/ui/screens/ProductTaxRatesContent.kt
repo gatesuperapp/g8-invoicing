@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
@@ -337,7 +338,10 @@ private fun TaxRateEditRow(
                 modifier = Modifier
                     .weight(1F)
                     .padding(start = 20.dp, end = 8.dp)
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    // No autofill dataset makes sense for a VAT rate — opt out so the
+                    // system doesn't offer credit-card or password suggestions.
+                    .clearAndSetSemantics {},
                 textStyle = LocalTextStyle.current,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
