@@ -24,9 +24,14 @@ fun DocumentListContent(
             // so the `key` lambda below never crashes on `!!`.
             items = documents
                 .filter { it.documentId != null }
-                .sortedByDescending { doc ->
-                    parseDate(doc.createdDate ?: "", "yyyy-MM-dd HH:mm:ss") ?: 0L
-                },
+                // Second-precision timestamps collide when several docs are inserted
+                // in the same batch (e.g. duplicate a multi-selection). Break the tie
+                // with documentId so the numerically-newer duplicate stays on top.
+                .sortedWith(
+                    compareByDescending<DocumentState> { doc ->
+                        parseDate(doc.createdDate ?: "", "yyyy-MM-dd HH:mm:ss") ?: 0L
+                    }.thenByDescending { it.documentId ?: 0 }
+                ),
             key = {
                 it.documentId!!
             }
