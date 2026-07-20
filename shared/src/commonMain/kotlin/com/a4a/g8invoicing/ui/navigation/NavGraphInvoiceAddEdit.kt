@@ -35,7 +35,6 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
-import com.a4a.g8invoicing.ui.shared.LegacyProductTypeWarningDialog
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -96,8 +95,6 @@ fun NavGraphBuilder.invoiceAddEdit(
         LaunchedEffect(showProductType) {
             productAddEditViewModel.setShowProductType(showProductType)
         }
-
-        LegacyProductTypeWarningDialog(productAddEditViewModel)
 
         var showDocumentForm by remember { mutableStateOf(false) }
 

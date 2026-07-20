@@ -12,7 +12,6 @@ import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.data.models.UnitCodes
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
-import com.russhwolf.settings.Settings
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.data.util.calculatePriceWithTax
@@ -61,27 +60,6 @@ class ProductAddEditViewModel(
     private val _clientSelectionDialogState = MutableStateFlow<ClientSelectionDialogState?>(null)
     val clientSelectionDialogState: StateFlow<ClientSelectionDialogState?> =
         _clientSelectionDialogState.asStateFlow()
-
-    // Warning one-shot pour les anciens produits qui n'ont pas encore de `type`.
-    // Fire quand on auto-heal un type via fallback (dernier produit / GOODS) — pour
-    // que l'user réalise qu'un nouveau champ est apparu et qu'il vaut mieux vérifier.
-    private val settings = Settings()
-    private val _showLegacyProductTypeWarning = MutableStateFlow(false)
-    val showLegacyProductTypeWarning: StateFlow<Boolean> =
-        _showLegacyProductTypeWarning.asStateFlow()
-
-    fun dismissLegacyProductTypeWarning() {
-        settings.putBoolean(LEGACY_PRODUCT_TYPE_WARNING_KEY, true)
-        _showLegacyProductTypeWarning.value = false
-    }
-
-    private fun maybeFireLegacyProductTypeWarning() {
-        if (_showProductType.value &&
-            !settings.getBoolean(LEGACY_PRODUCT_TYPE_WARNING_KEY, false)
-        ) {
-            _showLegacyProductTypeWarning.value = true
-        }
-    }
 
     // Type visibility flag: driven by the CURRENT document's issuer, not by any
     // global "last issuer" state. Multi-company users have some issuers with
@@ -220,7 +198,6 @@ class ProductAddEditViewModel(
                     _documentProductUiState.value =
                         _documentProductUiState.value.copy(type = stickyType)
                 }
-                maybeFireLegacyProductTypeWarning()
             }
         }
     }
@@ -256,12 +233,6 @@ class ProductAddEditViewModel(
                     last?.type ?: ProductNature.GOODS
                 else null,
             )
-            // Si le dernier produit n'avait pas de type (base pre-1.8), on vient de
-            // faire un fallback aveugle sur GOODS. Warning one-shot pour prévenir.
-            // (maybeFireLegacyProductTypeWarning est déjà gardé par _showProductType)
-            if (last?.type == null) {
-                maybeFireLegacyProductTypeWarning()
-            }
         }
     }
 
@@ -546,9 +517,6 @@ class ProductAddEditViewModel(
         _productUiState.value = _productUiState.value.copy(additionalPrices = updatedPrices)
     }
 
-    companion object {
-        private const val LEGACY_PRODUCT_TYPE_WARNING_KEY = "legacy_product_type_warning_seen"
-    }
 }
 
 private fun updateProductUiState(
