@@ -50,6 +50,7 @@ class PdfGeneratorImpl(
 ) {
     fun generatePdf(document: DocumentState): String {
         val tempFileName = "${document.documentNumber.text}_temp.pdf"
+        val finalFileName = buildFinalFileName(document)
         val tempFilePath = fileManager.getTempFilePath(tempFileName)
 
         // Delete temp file if exists
@@ -74,7 +75,48 @@ class PdfGeneratorImpl(
         pdfDocument.close()
 
         // Add page numbering
-        return addPageNumbering(document, tempFileName)
+        return addPageNumbering(document, tempFileName, finalFileName)
+    }
+
+    /**
+     * Filename format: `DocumentNumber-YYYY.MM.DD-Client-Name.pdf` (all-dash, no spaces).
+     * Falls back gracefully when the date is unparseable or the client is missing —
+     * both parts are skipped instead of leaving empty segments, so the worst case
+     * still yields `DocumentNumber.pdf`.
+     */
+    private fun buildFinalFileName(document: DocumentState): String {
+        val docNumber = sanitizeForFileName(document.documentNumber.text).ifBlank { "document" }
+        val date = formatDateForFileName(document.documentDate)
+        val client = buildClientNameForFileName(document.documentClient)
+        return listOfNotNull(docNumber, date, client).joinToString("-") + ".pdf"
+    }
+
+    private fun formatDateForFileName(rawDate: String): String? {
+        // Stored as "dd/MM/yyyy" (optionally followed by a time), see DateUtils.
+        val parts = rawDate.substringBefore(" ").split("/")
+        if (parts.size != 3) return null
+        val (dd, mm, yyyy) = parts
+        if (dd.length != 2 || mm.length != 2 || yyyy.length != 4) return null
+        return "$yyyy.$mm.$dd"
+    }
+
+    private fun buildClientNameForFileName(client: ClientOrIssuerState?): String? {
+        if (client == null) return null
+        val first = client.firstName?.text?.trim().orEmpty()
+        val last = client.name.text.trim()
+        val full = listOf(first, last).filter { it.isNotEmpty() }.joinToString(" ").uppercase()
+        return sanitizeForFileName(full).ifEmpty { null }
+    }
+
+    /**
+     * Replace every whitespace run with a single dash and strip filesystem-hostile
+     * chars (path separators + Windows reserved). Keeps the filename readable even
+     * for names like "Dédé de la Panouse" → "Dédé-de-la-Panouse".
+     */
+    private fun sanitizeForFileName(value: String): String {
+        return value.trim()
+            .replace(Regex("""[/\\:*?"<>|]"""), "")
+            .replace(Regex("""\s+"""), "-")
     }
 
     private fun buildPdfContent(
@@ -152,9 +194,8 @@ class PdfGeneratorImpl(
         }
     }
 
-    private fun addPageNumbering(document: DocumentState, tempFileName: String): String {
+    private fun addPageNumbering(document: DocumentState, tempFileName: String, finalFileName: String): String {
         val fontRegular = PdfFontFactory.createFont(StandardFonts.HELVETICA)
-        val finalFileName = "${document.documentNumber.text}.pdf"
 
         val tempFilePath = fileManager.getTempFilePath(tempFileName)
         val finalTempPath = fileManager.getTempFilePath(finalFileName)
