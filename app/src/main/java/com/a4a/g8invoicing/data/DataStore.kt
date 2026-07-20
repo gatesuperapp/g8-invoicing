@@ -5,6 +5,10 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import g8invoicing.ClientOrIssuerQueries
+import g8invoicing.DeliveryNoteQueries
+import g8invoicing.InvoiceQueries
+import g8invoicing.ProductQueries
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -100,5 +104,29 @@ fun shouldShowOnboarding18(context: Context) =
 suspend fun setSeenOnboarding18(context: Context) {
     context.dataStore.edit { prefs ->
         prefs[PrefKeys.HAS_SEEN_ONBOARDING_1_8] = true
+        // Onboarding already includes a "Sauvegarder ma base de données" CTA
+        // in the Factur-X intro step, so silently mark the standalone backup
+        // popup as seen — no need to nag the same reminder twice.
+        prefs[PrefKeys.HAS_SEEN_POPUP] = true
     }
+}
+
+// Backup reminder popup — surfaced once when the user has accumulated
+// enough real data (>3 rows in any of the main tables) and hasn't seen the
+// nudge yet. Broken since the KMP migration (f9996022cb2) moved InvoiceList
+// to shared/ and dropped the wiring; restored here in MainCompose since the
+// dialog itself uses Android file APIs and can't move to commonMain.
+suspend fun shouldShowBackupPopupNow(
+    context: Context,
+    invoiceQueries: InvoiceQueries,
+    deliveryNoteQueries: DeliveryNoteQueries,
+    productQueries: ProductQueries,
+    clientOrIssuerQueries: ClientOrIssuerQueries,
+): Boolean {
+    val hasSeen = context.dataStore.data.first()[PrefKeys.HAS_SEEN_POPUP] ?: false
+    if (hasSeen) return false
+    return invoiceQueries.countAll().executeAsOne() > 3 ||
+        deliveryNoteQueries.countAll().executeAsOne() > 3 ||
+        productQueries.countAll().executeAsOne() > 3 ||
+        clientOrIssuerQueries.countAll().executeAsOne() > 3
 }

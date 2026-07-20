@@ -16,10 +16,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import g8invoicing.ClientOrIssuerQueries
+import g8invoicing.DeliveryNoteQueries
+import g8invoicing.InvoiceQueries
+import g8invoicing.ProductQueries
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.setSeenOnboarding18
 import com.a4a.g8invoicing.data.setSeenWhatsNew
+import com.a4a.g8invoicing.data.shouldShowBackupPopupNow
 import com.a4a.g8invoicing.data.shouldShowOnboarding18
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.data.auth.AuthRepository
@@ -27,6 +32,8 @@ import com.a4a.g8invoicing.data.auth.AuthState
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.navigation.Screen
+import com.a4a.g8invoicing.ui.screens.DatabaseEmailDialog
+import com.a4a.g8invoicing.ui.screens.DatabaseExportDialog
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
@@ -51,6 +58,10 @@ fun MainCompose(
     val authRepository: AuthRepository = koinInject()
     val subscriptionRepository: SubscriptionRepository = koinInject()
     val authState by authRepository.authState.collectAsState()
+    val invoiceQueries: InvoiceQueries = koinInject()
+    val deliveryNoteQueries: DeliveryNoteQueries = koinInject()
+    val productQueries: ProductQueries = koinInject()
+    val clientOrIssuerQueries: ClientOrIssuerQueries = koinInject()
 
     // Initialize locale and version tracking on first composition
     LaunchedEffect(Unit) {
@@ -67,11 +78,44 @@ fun MainCompose(
     val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = false)
     var showWhatsNew by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
+    // Backup reminder: shown once when the user has >3 rows in any main table.
+    // Suppressed while onboarding / what's new are pending to avoid stacking
+    // modals at cold start.
+    var showBackupDialog by remember { mutableStateOf(false) }
+    var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
     LaunchedEffect(shouldShow, shouldShowOnboarding) {
         showOnboarding = shouldShowOnboarding
         // Only surface What's New when onboarding is NOT going to run.
         showWhatsNew = shouldShow && !shouldShowOnboarding
+        if (!shouldShow && !shouldShowOnboarding) {
+            showBackupDialog = shouldShowBackupPopupNow(
+                context,
+                invoiceQueries,
+                deliveryNoteQueries,
+                productQueries,
+                clientOrIssuerQueries,
+            )
+        }
+    }
+
+    if (showBackupDialog) {
+        DatabaseExportDialog(
+            context = context,
+            onDismiss = { showBackupDialog = false },
+            onResult = { file ->
+                showBackupDialog = false
+                backupExportedFile = file
+            },
+        )
+    }
+
+    backupExportedFile?.let { file ->
+        DatabaseEmailDialog(
+            context = context,
+            onDismiss = { backupExportedFile = null },
+            file = file,
+        )
     }
 
     // Track navController for deep link navigation
