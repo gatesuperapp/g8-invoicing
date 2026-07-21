@@ -324,7 +324,7 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Backup</string>
     <string name="about_backup_text">Remember to download your database regularly, so you can restore it if you lose your phone.</string>
-    <string name="about_download_database">Download</string>
+    <string name="about_download_database">💎 Save 💎</string>
     <string name="account_backup_dialog_title">Backup downloaded</string>
     <string name="account_backup_dialog_message">Your database has been saved to the Downloads folder. Do you also want to send it by email?</string>
     <string name="account_backup_dialog_yes">Yes, send by email</string>
@@ -552,4 +552,14 @@
     <string name="onboarding_thanks_title">Perfect!</string>
     <string name="onboarding_thanks_body">Thanks for your trust. See you soon!</string>
     <string name="onboarding_thanks_cta">Finish</string>
+
+    <!-- Issuer form: VAT exemption + intra-EU sales toggles -->
+    <string name="issuer_intra_eu_sales_label">Sales outside my country (EU)</string>
+    <string name="issuer_intra_eu_sales_info_modal_title">Intra-EU sales</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Check if:\n- your company is in the European Union\n\nand\n\n- you invoice a client based in another EU country than yours.\n\ng8 will then ask, for each product, whether it is a service or goods — VAT rules differ.\n\nInvoicing only within your country, or outside the EU? Leave unchecked.</string>
+    <string name="issuer_intra_eu_sales_info_desc">Intra-EU sales info</string>
+    <string name="issuer_vat_exempt_label">VAT exemption</string>
+    <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
+    <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
+    <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
 </resources>

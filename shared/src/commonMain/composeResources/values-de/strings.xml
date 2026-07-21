@@ -339,7 +339,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Datensicherung</string>
     <string name="about_backup_text">Denkt daran eure Datenbank regelmäßig herunterzuladen, um sie wiederherzustellen, sollte das Telefon mal verloren gegangen sein.</string>
-    <string name="about_download_database">💎 Meine Datenbank herunterladen 💎</string>
+    <string name="about_download_database">💎 Speichern 💎</string>
     <string name="account_backup_dialog_title">Sicherung heruntergeladen</string>
     <string name="account_backup_dialog_message">Ihre Datenbank wurde im Downloads-Ordner gespeichert. Möchten Sie sie auch per E-Mail senden?</string>
     <string name="account_backup_dialog_yes">Ja, per E-Mail senden</string>
@@ -605,4 +605,14 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_thanks_title">Perfekt!</string>
     <string name="onboarding_thanks_body">Danke für dein Vertrauen. Bis bald!</string>
     <string name="onboarding_thanks_cta">Fertig</string>
+
+    <!-- Issuer form: VAT exemption + intra-EU sales toggles -->
+    <string name="issuer_intra_eu_sales_label">Verkäufe außerhalb meines Landes (EU)</string>
+    <string name="issuer_intra_eu_sales_info_modal_title">Innergemeinschaftliche Verkäufe</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Aktiviere, wenn:\n- dein Unternehmen in der Europäischen Union ist\n\nund\n\n- du eine·n Kund·in in einem anderen EU-Land als deinem eigenen abrechnest.\n\ng8 fragt dich dann bei jedem Produkt, ob es sich um eine Dienstleistung oder eine Ware handelt — die MwSt.-Regeln unterscheiden sich.\n\nRechnungen nur im eigenen Land oder außerhalb der EU? Lasse es deaktiviert.</string>
+    <string name="issuer_intra_eu_sales_info_desc">Info innergemeinschaftliche Verkäufe</string>
+    <string name="issuer_vat_exempt_label">Kleinunternehmerregelung</string>
+    <string name="issuer_vat_exempt_info_modal_title">Kleinunternehmerregelung</string>
+    <string name="issuer_vat_exempt_info_modal_content">Nützlich für die E-Rechnungs-Konformität — g8 fügt den passenden gesetzlichen Hinweis zur Kleinunternehmerregelung für dein Land automatisch auf den Rechnungen ein.</string>
+    <string name="issuer_vat_exempt_info_desc">Info Kleinunternehmerregelung</string>
 </resources>
