@@ -290,7 +290,8 @@
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Découvrez les modules disponibles avec un compte g8 premium.</string>
     <string name="gstore_subtitle_premium">Activez les modules que vous souhaitez utiliser.</string>
-    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_premium_badge">🌟 PREMIUM</string>
+    <string name="gstore_trial_badge">ESSAI</string>
     <string name="gstore_footer_free">Plus d'informations sur </string>
     <string name="gstore_premium_only_message">Cette fonctionnalité est réservée aux membres premium.</string>
     <string name="gstore_footer_premium">Gérez votre compte sur </string>

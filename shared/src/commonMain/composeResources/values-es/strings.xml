@@ -239,7 +239,7 @@
     <string name="appbar_g8">𝕘𝟠</string>
 
     <!-- Drawer / Categories -->
-    <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mi cuenta</string>
     <string name="drawer_gstore">𝕘Store</string>
 
@@ -247,7 +247,8 @@
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
     <string name="gstore_subtitle_premium">Activa los módulos que quieras usar.</string>
-    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_premium_badge">🌟 PREMIUM</string>
+    <string name="gstore_trial_badge">PRUEBA</string>
     <string name="gstore_footer_free">Más información en </string>
     <string name="gstore_premium_only_message">Esta función está reservada para miembros premium.</string>
     <string name="gstore_footer_premium">Gestiona tu cuenta en </string>
@@ -567,4 +568,55 @@ Une erreur s'est produite :
     <string name="issuer_vat_exempt_info_modal_title">Franquicia de IVA</string>
     <string name="issuer_vat_exempt_info_modal_content">Útil para el cumplimiento de la facturación electrónica — permite a g8 añadir automáticamente la mención legal de franquicia de IVA adaptada a tu país en las facturas.</string>
     <string name="issuer_vat_exempt_info_desc">Info franquicia de IVA</string>
+
+    <!-- Quote (Devis) -->
+    <string name="appbar_quotes">Presupuestos</string>
+    <string name="quote_number">Presupuesto Nº</string>
+    <string name="quote_default_number">PR001</string>
+    <string name="quote_default_footer">Duración de validez de la oferta: 6 meses\nPlazo de ejecución: 6 meses</string>
+    <string name="quote_advice_convert">Este paso lo aprendí en hip-hop, súper estiloso lo sé. Aún tengo que trabajarlo, no soy súper rápida, creo que mi patagio frena la ola. En fin, quería decirte\n\n …   </string>
+    <string name="quote_advice_convert1">que si quieres convertir uno o varios presupuestos en una factura, puedes seleccionarlos en la lista con una pulsación larga (o pulsando el ○)\n\n …   </string>
+    <string name="quote_advice_convert2">y pulsar «Facturar». Aparecerá en la parte superior de la pestaña «Facturas» con el número incrementado respecto a la factura anterior.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+
+    <!-- gStore delivery-note module -->
+    <string name="gstore_module_delivery_note_title">Albaranes</string>
+    <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
+    <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados. El número de albarán se indicará en la factura correspondiente para la trazabilidad contable. Puedes agrupar varios albaranes en una sola factura.</string>
+
+    <!-- Country picker (address form) -->
+    <string name="client_country">País</string>
+    <string name="country_picker_search">Buscar un país</string>
+    <string name="country_picker_empty">Ningún país encontrado</string>
+
+    <!-- Info tooltip -->
+    <string name="info_tooltip_ok">OK</string>
+    <string name="info_tooltip_dismiss">No mostrar más</string>
+
+    <!-- Product type (goods / service) -->
+    <string name="product_type_label">Tipo</string>
+    <string name="product_type_goods">Bien</string>
+    <string name="product_type_service">Servicio</string>
+    <string name="product_type_info_modal_title">Tipo de producto</string>
+    <string name="product_type_info_modal_content">Se utiliza para determinar automáticamente la categoría de IVA aplicable. Es un campo obligatorio para el cumplimiento de la facturación electrónica.\n\nNo aparece en la factura PDF.</string>
+    <string name="product_type_info_desc">Info tipo de producto</string>
+
+    <!-- Product unit code (UNECE Rec 20) -->
+    <string name="product_unit_code_label">Código de unidad</string>
+    <string name="product_unit_code_info_modal_title">Código de unidad</string>
+    <string name="product_unit_code_info_modal_content">Se deduce automáticamente de la unidad que introduces. Es un campo obligatorio para el cumplimiento de la facturación electrónica.\n\nNo aparece en la factura PDF.\n\nSi la unidad que usas no corresponde a ningún código, no te preocupes — también es válido.</string>
+    <string name="product_unit_code_info_desc">Info código de unidad</string>
+
+    <!-- Unit picker (UNECE units bottom sheet) -->
+    <string name="unit_picker_search">Buscar una unidad</string>
+    <string name="unit_picker_empty">Ninguna unidad encontrada</string>
+    <string name="unit_picker_recent">Recientes</string>
+    <string name="unit_picker_category_count">Recuento</string>
+    <string name="unit_picker_category_length">Longitud</string>
+    <string name="unit_picker_category_area">Superficie</string>
+    <string name="unit_picker_category_volume">Volumen</string>
+    <string name="unit_picker_category_weight">Peso</string>
+    <string name="unit_picker_category_time">Tiempo</string>
+    <string name="unit_picker_category_energy">Energía</string>
+    <string name="unit_picker_category_service">Servicio</string>
+    <string name="unit_picker_category_packaging">Embalaje</string>
 </resources>

@@ -261,7 +261,8 @@
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Discover the modules available with a g8 premium account.</string>
     <string name="gstore_subtitle_premium">Activate the modules you want to use.</string>
-    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_premium_badge">🌟 PREMIUM</string>
+    <string name="gstore_trial_badge">TRIAL</string>
     <string name="gstore_footer_free">More information at </string>
     <string name="gstore_premium_only_message">This feature is reserved for premium members.</string>
     <string name="gstore_footer_premium">Manage your account at </string>
@@ -562,4 +563,58 @@
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
     <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
+
+    <!-- Quote (Devis) -->
+    <string name="appbar_quotes">Quotes</string>
+    <string name="quote_number">Quote No.</string>
+    <string name="quote_default_number">Q001</string>
+    <string name="quote_default_footer">Offer validity: 6 months\nExecution timeframe: 6 months</string>
+    <string name="quote_advice_convert">I learned this move in hip-hop, super classy I know. Still gotta polish it — I\'m not that fast yet, and my patagium slows the wave a bit. Anyway, I wanted to tell you\n\n …   </string>
+    <string name="quote_advice_convert1">that if you want to convert one or more quotes into an invoice, you can select them from the list with a long tap (or by tapping the ○)\n\n …   </string>
+    <string name="quote_advice_convert2">then tap «Invoice». It will appear at the top of the «Invoices» tab with the number incremented from the previous invoice.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+
+    <!-- gStore delivery-note module -->
+    <string name="gstore_module_delivery_note_title">Delivery notes</string>
+    <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
+    <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted. The delivery note number will be shown on the matching invoice for accounting traceability. You can group several delivery notes into a single invoice.</string>
+
+    <!-- Country picker (address form) -->
+    <string name="client_country">Country</string>
+    <string name="country_picker_search">Search a country</string>
+    <string name="country_picker_empty">No country found</string>
+
+    <!-- Info tooltip -->
+    <string name="info_tooltip_ok">OK</string>
+    <string name="info_tooltip_dismiss">Don\'t show again</string>
+
+    <!-- Client price picker -->
+    <string name="product_clientprice_select_placeholder">Select…</string>
+
+    <!-- Product type (goods / service) -->
+    <string name="product_type_label">Type</string>
+    <string name="product_type_goods">Goods</string>
+    <string name="product_type_service">Service</string>
+    <string name="product_type_info_modal_title">Product type</string>
+    <string name="product_type_info_modal_content">Used to automatically determine the applicable VAT category. It\'s a mandatory field for e-invoicing compliance.\n\nDoes not appear on the PDF invoice.</string>
+    <string name="product_type_info_desc">Product type info</string>
+
+    <!-- Product unit code (UNECE Rec 20) -->
+    <string name="product_unit_code_label">Unit code</string>
+    <string name="product_unit_code_info_modal_title">Unit code</string>
+    <string name="product_unit_code_info_modal_content">Deduced automatically from the unit you type. It\'s a mandatory field for e-invoicing compliance.\n\nDoes not appear on the PDF invoice.\n\nIf the unit you use doesn\'t match any code, no worries — that\'s also valid.</string>
+    <string name="product_unit_code_info_desc">Unit code info</string>
+
+    <!-- Unit picker (UNECE units bottom sheet) -->
+    <string name="unit_picker_search">Search a unit</string>
+    <string name="unit_picker_empty">No unit found</string>
+    <string name="unit_picker_recent">Recent</string>
+    <string name="unit_picker_category_count">Count</string>
+    <string name="unit_picker_category_length">Length</string>
+    <string name="unit_picker_category_area">Area</string>
+    <string name="unit_picker_category_volume">Volume</string>
+    <string name="unit_picker_category_weight">Weight</string>
+    <string name="unit_picker_category_time">Time</string>
+    <string name="unit_picker_category_energy">Energy</string>
+    <string name="unit_picker_category_service">Service</string>
+    <string name="unit_picker_category_packaging">Packaging</string>
 </resources>

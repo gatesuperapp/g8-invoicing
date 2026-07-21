@@ -247,7 +247,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="appbar_g8">𝕘𝟠</string>
 
     <!-- Drawer / Categories -->
-    <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mein Konto</string>
 
     <!-- Account Screen -->
@@ -271,7 +271,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Entdecken Sie die mit einem g8-Premium-Konto verfügbaren Module.</string>
     <string name="gstore_subtitle_premium">Aktivieren Sie die Module, die Sie verwenden möchten.</string>
-    <string name="gstore_premium_badge">★ PREMIUM</string>
+    <string name="gstore_premium_badge">🌟 PREMIUM</string>
+    <string name="gstore_trial_badge">TESTEN</string>
     <string name="gstore_footer_free">Mehr Informationen auf </string>
     <string name="gstore_premium_only_message">Diese Funktion ist Premium-Mitgliedern vorbehalten.</string>
     <string name="gstore_footer_premium">Verwalten Sie Ihr Konto auf </string>
@@ -615,4 +616,58 @@ Es ist ein Fehler aufgetreten :
     <string name="issuer_vat_exempt_info_modal_title">Kleinunternehmerregelung</string>
     <string name="issuer_vat_exempt_info_modal_content">Nützlich für die E-Rechnungs-Konformität — g8 fügt den passenden gesetzlichen Hinweis zur Kleinunternehmerregelung für dein Land automatisch auf den Rechnungen ein.</string>
     <string name="issuer_vat_exempt_info_desc">Info Kleinunternehmerregelung</string>
+
+    <!-- Quote (Devis) -->
+    <string name="appbar_quotes">Kostenvoranschläge</string>
+    <string name="quote_number">Kostenvoranschlag Nr.</string>
+    <string name="quote_default_number">AN001</string>
+    <string name="quote_default_footer">Gültigkeitsdauer des Angebots: 6 Monate\nAusführungsfrist: 6 Monate</string>
+    <string name="quote_advice_convert">Diesen Move habe ich beim Hip-Hop gelernt, ziemlich stylisch, ich weiß. Muss ihn noch üben, ich bin noch nicht so schnell, mein Patagium bremst die Welle wohl ein wenig. Jedenfalls wollte ich dir sagen\n\n …   </string>
+    <string name="quote_advice_convert1">wenn du einen oder mehrere Kostenvoranschläge in eine Rechnung umwandeln möchtest, kannst du sie in der Liste per Lang-Tap auswählen (oder das ○ antippen)\n\n …   </string>
+    <string name="quote_advice_convert2">und dann auf «In Rechnung» tippen. Sie erscheint oben im Reiter «Rechnungen» mit der fortlaufenden Nummer nach der vorherigen Rechnung.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+
+    <!-- gStore delivery-note module -->
+    <string name="gstore_module_delivery_note_title">Lieferscheine</string>
+    <string name="gstore_module_delivery_note_desc">Lieferscheine erstellen und in Rechnungen umwandeln</string>
+    <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit. Du kannst mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
+
+    <!-- Country picker (address form) -->
+    <string name="client_country">Land</string>
+    <string name="country_picker_search">Land suchen</string>
+    <string name="country_picker_empty">Kein Land gefunden</string>
+
+    <!-- Info tooltip -->
+    <string name="info_tooltip_ok">OK</string>
+    <string name="info_tooltip_dismiss">Nicht mehr anzeigen</string>
+
+    <!-- Client price picker -->
+    <string name="product_clientprice_select_placeholder">Auswählen…</string>
+
+    <!-- Product type (goods / service) -->
+    <string name="product_type_label">Typ</string>
+    <string name="product_type_goods">Ware</string>
+    <string name="product_type_service">Dienstleistung</string>
+    <string name="product_type_info_modal_title">Produkttyp</string>
+    <string name="product_type_info_modal_content">Wird verwendet, um die anzuwendende MwSt.-Kategorie automatisch zu bestimmen. Pflichtfeld für die E-Rechnungs-Konformität.\n\nErscheint nicht auf der PDF-Rechnung.</string>
+    <string name="product_type_info_desc">Info Produkttyp</string>
+
+    <!-- Product unit code (UNECE Rec 20) -->
+    <string name="product_unit_code_label">Einheitencode</string>
+    <string name="product_unit_code_info_modal_title">Einheitencode</string>
+    <string name="product_unit_code_info_modal_content">Wird automatisch aus der von dir eingegebenen Einheit abgeleitet. Pflichtfeld für die E-Rechnungs-Konformität.\n\nErscheint nicht auf der PDF-Rechnung.\n\nWenn die von dir verwendete Einheit keinem Code entspricht, kein Problem — das ist auch gültig.</string>
+    <string name="product_unit_code_info_desc">Info Einheitencode</string>
+
+    <!-- Unit picker (UNECE units bottom sheet) -->
+    <string name="unit_picker_search">Einheit suchen</string>
+    <string name="unit_picker_empty">Keine Einheit gefunden</string>
+    <string name="unit_picker_recent">Zuletzt verwendet</string>
+    <string name="unit_picker_category_count">Anzahl</string>
+    <string name="unit_picker_category_length">Länge</string>
+    <string name="unit_picker_category_area">Fläche</string>
+    <string name="unit_picker_category_volume">Volumen</string>
+    <string name="unit_picker_category_weight">Gewicht</string>
+    <string name="unit_picker_category_time">Zeit</string>
+    <string name="unit_picker_category_energy">Energie</string>
+    <string name="unit_picker_category_service">Dienstleistung</string>
+    <string name="unit_picker_category_packaging">Verpackung</string>
 </resources>
