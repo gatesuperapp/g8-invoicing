@@ -164,8 +164,6 @@
     <string name="product_type_info_modal_title">Type de produit</string>
     <string name="product_type_info_modal_content">Il est utilisé pour déterminer automatiquement la catégorie de TVA à appliquer. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.</string>
     <string name="product_type_info_desc">Info type de produit</string>
-    <string name="product_legacy_type_warning_title">Vérifiez le type</string>
-    <string name="product_legacy_type_warning_content">Vérifiez bien que le champ « Type » correspond bien à votre produit — c'est un nouveau champ, ajouté à cette version pour la conformité facture électronique.</string>
     <string name="issuer_intra_eu_sales_label">Ventes hors de mon pays (UE)</string>
     <string name="issuer_intra_eu_sales_info_modal_title">Ventes intra-UE</string>
     <string name="issuer_intra_eu_sales_info_modal_content">Cochez si :\n- votre entreprise est dans l'Union européenne\n\net\n\n- vous facturez un·e client·e situé·e dans un autre pays de l'UE que le vôtre.\n\ng8 vous demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans votre pays, ou hors UE ? Laissez décoché.</string>
@@ -381,7 +379,7 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Sauvegarde</string>
     <string name="about_backup_text">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
-    <string name="about_download_database">Télécharger</string>
+    <string name="about_download_database">💎 Sauvegarder 💎</string>
     <string name="account_backup_dialog_title">Sauvegarde téléchargée</string>
     <string name="account_backup_dialog_message">Votre base de données a été enregistrée dans le dossier Téléchargements. Voulez-vous également l'envoyer par e-mail ?</string>
     <string name="account_backup_dialog_yes">Oui, envoyer par e-mail</string>
