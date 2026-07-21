@@ -9,11 +9,7 @@
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Kopie</string>
     <!-- Document footer -->
-    <string name="document_default_footer">Skonto bei Vorauszahlung: kein
-Verzugsgebühr bei Zahlungsverzug: keine
-
-
-IBAN: DE71 1234 1234 1234 1234 00</string>
+    <string name="document_default_footer">Skonto bei Vorauszahlung: kein \nVerzugsgebühr bei Zahlungsverzug: keine\n\n\n IBAN: DE71 1234 1234 1234 1234 00</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -47,15 +43,9 @@ IBAN: DE71 1234 1234 1234 1234 00</string>
     <string name="product_price_without_tax">Netto</string>
     <string name="product_price_with_tax">Brutto</string>
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Bist du sicher?
-
-Wenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:
-• Wenn sie noch nicht bezahlt wurde, erstelle eine Korrekturrechnung.
-• Wenn sie bereits bezahlt wurde, erstelle eine Gutschrift und eine neue Rechnung.</string>
-    <string name="alert_dialog_delete_invoice_2">Mehr erfahren
-</string>
-    <string name="alert_dialog_delete_invoice_3">
-In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_invoice_1">Bist du sicher? \n\nWenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:</string>
+    <string name="alert_dialog_delete_invoice_2">Mehr erfahren\n</string>
+    <string name="alert_dialog_delete_invoice_3">\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>
@@ -168,13 +158,13 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="whats_new_welcome">Willkommen bei Version %1$s!</string>
     <string name="whats_new_discover">Viele neue Funktionen...</string>
     <string name="whats_new_gstore_title">𝕘Store</string>
-    <string name="whats_new_gstore_description">Ein kleiner Shop, um Funktionen freizuschalten.</string>
+    <string name="whats_new_gstore_description">Ein kleiner Shop, um weitere Funktionen freizuschalten.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">𝕘8 spricht jetzt Spanisch!</string>
     <string name="whats_new_currency_title">Money money</string>
-    <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter "Mein Konto" &gt; "Währung und Sprache".</string>
+    <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter Mein Konto --&gt; Währung und Sprache.</string>
     <string name="whats_new_companies_title">Meine Unternehmen</string>
-    <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter "Mein Konto" &gt; "Meine Unternehmen".</string>
+    <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter Mein Konto --&gt; Meine Unternehmen.</string>
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bald verfügbar :)</string>
     <!-- Corrected Invoice -->
@@ -226,7 +216,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="appbar_product_edit">Produkt bearbeiten</string>
     <string name="appbar_g8">𝕘𝟠</string>
     <!-- Drawer / Categories -->
-    <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_g8">Über 𝕘𝟠</string>
     <string name="drawer_my_account">Mein Konto</string>
     <!-- Account Screen -->
     <string name="account_subscribe">Unterstützen Sie das Projekt und profitieren Sie von exklusiven Vorteilen: Vorabzugang zu den nächsten Funktionen (Desktop-App, elektronische Rechnungsstellung, ...), Abzeichen im Forum, Aufkleber der Kleinen Hufnase ... und noch mehr!</string>
@@ -285,12 +275,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="account_delete_success_title">Konto gelöscht</string>
     <string name="account_delete_success_message">Ihr Konto wurde gelöscht. Lokal auf diesem Gerät gespeicherte Rechnungen und Daten bleiben erhalten.</string>
     <!-- About Screen -->
-    <string name="about">𝕘𝟠 ist eine praktische und engagierte App:
- • Funktioniert offline
- • Keine Werbung, kein Tracking
- • Freie Software, open-source
- • Entworfen für Bio-Landwirte und -Landwirtinnen
- • Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>
+    <string name="about">𝕘𝟠 ist eine praktische und engagierte App: \n• Funktioniert offline \n• Keine Werbung, kein Tracking \n• Freie Software, open-source \n• Entworfen für Bio-Landwirte und -Landwirtinnen \n• Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>
     <string name="about_title_about">Über</string>
     <string name="about_title_early_access">Programm "Early bat"</string>
     <string name="about_title_website">Webseite</string>
@@ -314,7 +299,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Datensicherung</string>
     <string name="about_backup_text">Denkt daran eure Datenbank regelmäßig herunterzuladen, um sie wiederherzustellen, sollte das Telefon mal verloren gegangen sein.</string>
-    <string name="about_download_database">💎 Meine Datenbank herunterladen 💎</string>
+    <string name="about_download_database">Datenbank herunterladen</string>
     <string name="account_backup_dialog_title">Sicherung heruntergeladen</string>
     <string name="account_backup_dialog_message">Ihre Datenbank wurde im Downloads-Ordner gespeichert. Möchten Sie sie auch per E-Mail senden?</string>
     <string name="account_backup_dialog_yes">Ja, per E-Mail senden</string>
@@ -350,47 +335,21 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
     <!-- Delivery Note List Advice -->
-    <string name="delivery_note_advice_convert">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte
-
- …</string>
-    <string name="delivery_note_advice_convert1">Wenn du aus einem oder mehreren Lieferscheinen eine Rechnung erstellen willst, kannst du sie in der Liste über langes Drücken (oder Klicken auf den ○) auswählen
-
- …</string>
-    <string name="delivery_note_advice_convert2">und dann auf "In Rechnung stellen" klicken. Sie erscheint dann im Reiter "Rechnungen" oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer.
-
- 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
+    <string name="delivery_note_advice_convert">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte …\n\n …</string>
+    <string name="delivery_note_advice_convert1">Wenn du aus einem oder mehreren Lieferscheinen eine Rechnung erstellen willst, kannst du sie in der Liste über langes Drücken (oder Klicken auf den ○) auswählen \n\n …</string>
+    <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠,
-genannt: "The Gate"!
-
-Ich bin Kleine Hufnase, deine neue Freundin ♡ 
-
- Du kannst jederzeit auf mich klicken, wenn du mich siehst, ich gebe 
-
- …</string>
-    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie "Rechnungen".
-
-Bevor du eine Rechnung erstellst empfehle ich dir, dich über
-
-…</string>
-    <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: 
-</string>
+    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡ \n\n …</string>
+    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie Rechnungen.\n\n Bevor du eine Rechnung erstellst empfehle ich dir, dich über …</string>
+    <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5">Zu einem anderen Thema…</string>
-    <string name="invoice_advice_legal_6">Die Dokumente die du erstellst werden, genauso wie alle deine Änderungen, automatisch im Hintergrund gespeichert.
-
- 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
+    <string name="invoice_advice_legal_5">Zu einem anderen Thema… \n …</string>
+    <string name="invoice_advice_legal_6">Die Dokumente die du erstellst werden, genauso wie alle deine Änderungen, automatisch im Hintergrund gespeichert.\n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n …</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="invoice_advice_bottom_menu">Halli-Hallo, ich bin dein Batmagotchi. Ich muss dir unbedingt einen Tipp geben:
-
- …</string>
-    <string name="invoice_advice_bottom_menu1">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen,
-
- …</string>
-    <string name="invoice_advice_bottom_menu2">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen.
-
- 𝕨𝕚𝕝𝕕</string>
+    <string name="invoice_advice_bottom_menu">Halli-Hallo, ich bin dein Batmagotchi. Ich muss dir unbedingt einen Tipp geben: \n\n …</string>
+    <string name="invoice_advice_bottom_menu1">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen, \n\n …</string>
+    <string name="invoice_advice_bottom_menu2">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen. \n\n 𝕨𝕚𝕝𝕕</string>
     <!-- Export PDF -->
     <string name="export_waiting_permission">Genehmigung erforderlich…</string>
     <string name="export_ongoing">Export läuft…</string>
@@ -399,22 +358,14 @@ Bevor du eine Rechnung erstellst empfehle ich dir, dich über
     <string name="export_permission_denied">Der Zugriff auf den Speicher ist erforderlich, um PDF-Dateien zu speichern. Sie können den Zugriff in den Einstellungen der Anwendung zulassen.</string>
     <string name="export_done_file_location">Auf dem Gerät gespeichert (Downloads/g8)</string>
     <string name="export_clickable_text">• ֊ •</string>
-    <string name="export_info_popup">• Manchmal kann es etwas dauern, bis die Datei im Download-Ordner erscheint (neu laden kann helfen).
-
-• Denke daran, eine Kopie des PDF in deinen gesendeten E-Mails oder an einem anderen Speicherort aufzubewahren, für den Fall, dass du dein Telefon verlierst.</string>
+    <string name="export_info_popup">• Manchmal kann es etwas dauern, bis die Datei im Download-Ordner erscheint (neu laden kann helfen).\n\n• Wenn die Datei nicht auftaucht, kann es sein, dass sie in einem Unterordner des Download-Ordners gelandet ist (insbesondere, wenn Du einen Dateimanager vom Typ Samsung nutzt)\n\n• Du kannst die Datei auch finden, wenn Du eine Suche nach dem Dateinamen durchführst.</string>
     <string name="export_info_popup_validate">OK</string>
     <string name="export_send_file">Per E-Mail schicken</string>
-    <string name="export_send_file_content">Guten Tag, 
- Sie finden ihre %s im Anhang.
-Herzliche Grüße
-
-</string>
+    <string name="export_send_file_content">Guten Tag,\n\nSie finden ihr Dokument im Anhang. \n\nHerzliche Grüße</string>
     <string name="export_share_file">Teilen</string>
     <string name="export_close">Abschließen</string>
-    <string name="export_error_sharing">Die Datei konnte nicht geteilt werden.
-
-Bitte öffne sie direkt im Ordner Downloads/g8.</string>
-    <string name="export_email_subject">Ihre %s Nr. %s</string>
+    <string name="export_error_sharing">Die Datei konnte nicht geteilt werden.\n\nBitte öffne sie direkt im Ordner Downloads/g8.</string>
+    <string name="export_email_subject">Ihre %1$s Nr. %2$s</string>
     <string name="export_email_subject_invoice">Rechnung</string>
     <string name="export_email_subject_delivery_note">Lieferschein</string>
     <string name="export_email_subject_credit_note">Gutschrift</string>
@@ -423,7 +374,7 @@ Bitte öffne sie direkt im Ordner Downloads/g8.</string>
 
 Es ist ein Fehler aufgetreten : 
 </string>
-    <string name="alert_dialog_error_confirm">Autsch</string>
+    <string name="alert_dialog_error_confirm">OK</string>
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Aussteller geändert</string>
     <string name="version_mismatch_message">Der Aussteller wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
@@ -447,7 +398,7 @@ Es ist ein Fehler aufgetreten :
     <string name="database_export_dialog_title">^._.^</string>
     <string name="database_export_dialog_intro">Hey! Ich empfehle dir, deine Datenbank herunterzuladen 💎\n\n</string>
     <string name="database_export_dialog_explanation">Das ist nützlich, falls du dein Telefon verlierst oder es ein Problem bei einem Update gibt.\n\n</string>
-    <string name="database_export_dialog_where">Finde die Option in Menü &gt; 𝕘𝟠.</string>
+    <string name="database_export_dialog_where">Finde die Option in Menü &gt; Über 𝕘𝟠.</string>
     <string name="database_export_dialog_error">Fehler beim Speichern der Datenbank: %1$s</string>
     <string name="database_export_dialog_confirm">Meine Daten herunterladen</string>
     <string name="database_export_dialog_dismiss">Ich mache das später</string>
@@ -460,4 +411,5 @@ Es ist ein Fehler aufgetreten :
     <string name="database_email_subject">Export meiner g8-Daten</string>
     <string name="database_email_body">Meine SQLite-Datenbank der g8-App. Sie enthält alle meine Daten (Kund·innen, Produkte, Rechnungsdaten..). Falls ich mein Telefon verliere, kann diese Datenbank verwendet werden, um meine Daten wiederherzustellen. Bei Fragen: contact@the-gate.fr.</string>
     <string name="database_email_chooser">Datenbank per E-Mail senden</string>
+    <string name="product_clientprice_select_placeholder">Auswählen…</string>
 </resources>
