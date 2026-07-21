@@ -271,8 +271,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Entdecken Sie die mit einem g8-Premium-Konto verfügbaren Module.</string>
     <string name="gstore_subtitle_premium">Aktivieren Sie die Module, die Sie verwenden möchten.</string>
-    <string name="gstore_premium_badge">🌟 PREMIUM</string>
-    <string name="gstore_trial_badge">TESTEN</string>
+    <string name="gstore_premium_badge">★ PREMIUM</string>
     <string name="gstore_footer_free">Mehr Informationen auf </string>
     <string name="gstore_premium_only_message">Diese Funktion ist Premium-Mitgliedern vorbehalten.</string>
     <string name="gstore_footer_premium">Verwalten Sie Ihr Konto auf </string>
