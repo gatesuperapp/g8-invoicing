@@ -306,16 +306,16 @@
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
     <string name="gstore_module_quote_title">Devis illimités</string>
     <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
-    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es et les convertir en facture une fois acceptés.\n\n🔗 Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
     <string name="gstore_module_quote_trial_title">Devis découverte</string>
     <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
-    <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle vous convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.\n\nActivez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_trial_detail">🎁 Activez ce module pour obtenir 5 devis gratuits et tester la fonctionnalité.\n\nIl faudra ensuite devenir membre premium pour avoir les devis en illimité.\n\nUne fois activé, vous pourrez créer des devis, les envoyer à vos client·es et les convertir en facture une fois acceptés.</string>
     <string name="gstore_quote_trial_exhausted_title">Période découverte écoulée</string>
     <string name="gstore_quote_trial_exhausted_body">Votre période découverte de devis est écoulée. Si vous souhaitez continuer d'utiliser les devis, vous pouvez devenir membre premium.</string>
     <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
-    <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
+    <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés.\n\n🔗 Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\n📦 Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
 
     <!-- Account Screen -->
     <string name="account_subscribe">Soutenez le projet et bénéficiez d'avantages exclusifs : accès en avant-première aux prochaines fonctionnalités (appli bureau, facturation électronique..), badge sur le forum, sticker "Petit Rhino".. et plus encore !</string>
