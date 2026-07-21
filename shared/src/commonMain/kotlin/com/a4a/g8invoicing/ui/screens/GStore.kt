@@ -133,6 +133,8 @@ fun GStore(
     navController: NavController,
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     viewModel: GStoreViewModel = koinViewModel(),
 ) {
     val activated by viewModel.activatedState.collectAsState()
@@ -179,7 +181,9 @@ fun GStore(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = { isDimActive.value = !isDimActive.value },
-                isButtonNewDisplayed = false
+                isButtonNewDisplayed = false,
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
             )
         }
     ) { padding ->

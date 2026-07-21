@@ -175,6 +175,8 @@ fun Account(
     onSendDatabaseByEmail: (String) -> Unit = {},
     pendingMagicLinkToken: String? = null,
     onMagicLinkTokenConsumed: () -> Unit = {},
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     viewModel: AccountViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
@@ -247,7 +249,9 @@ fun Account(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = { isDimActive.value = !isDimActive.value },
-                isButtonNewDisplayed = false
+                isButtonNewDisplayed = false,
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
             )
         },
     ) { _ ->
