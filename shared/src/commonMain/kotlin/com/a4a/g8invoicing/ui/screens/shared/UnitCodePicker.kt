@@ -65,7 +65,11 @@ fun UnitCodePicker(
     onDismiss: () -> Unit,
 ) {
     val dataSource: ProductLocalDataSourceInterface = koinInject()
-    var recentCodes by remember { mutableStateOf<List<String>>(emptyList()) }
+    // Nullable while the fetch is in flight so the list waits for the Récentes
+    // section before rendering. Otherwise the LazyColumn paints the "Comptage"
+    // category at index 0, then the Récentes header inserts at index 0 later
+    // and the sheet stays scrolled past it — user has to drag up to reach it.
+    var recentCodes by remember { mutableStateOf<List<String>?>(null) }
     LaunchedEffect(Unit) {
         recentCodes = dataSource.fetchLast5UnitCodes()
     }
@@ -85,7 +89,7 @@ fun UnitCodePicker(
     }
 
     val recent: List<UnitCodes.UnitCode> = remember(recentCodes) {
-        recentCodes.mapNotNull { UnitCodes.findByCode(it) }
+        recentCodes?.mapNotNull { UnitCodes.findByCode(it) } ?: emptyList()
     }
 
     // Open fully expanded so the top of the list ("Récentes" header + recent codes)
@@ -112,7 +116,11 @@ fun UnitCodePicker(
                 ),
             )
 
-            if (filtered.isEmpty()) {
+            if (recentCodes == null) {
+                // Fetch still in flight — render nothing so the LazyColumn's
+                // initial scroll position matches the final structure (Récentes
+                // header at index 0 when we have recents).
+            } else if (filtered.isEmpty()) {
                 Text(
                     text = stringResource(Res.string.unit_picker_empty),
                     style = MaterialTheme.typography.bodyMedium,
