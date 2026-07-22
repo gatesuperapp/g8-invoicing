@@ -74,9 +74,15 @@ class MainActivity : AppCompatActivity() {
                 val totalAmount = invoice.documentTotalPrices?.totalPriceWithTax
                     ?.toStringExpanded() ?: "0"
                 val dueDate = invoice.dueDate
+                // Reuse the invoice's own currency so multi-currency users don't
+                // read out "100 €" for a USD-denominated bill. Falls back to
+                // EUR when the invoice was created before currency was tracked.
+                val currency = com.a4a.g8invoicing.data.currencySymbol(
+                    invoice.currency.text.ifEmpty { "EUR" }
+                )
 
                 val subject = getString(Res.string.send_reminder_email_subject, documentNumber)
-                val body = getString(Res.string.send_reminder_email_content, documentNumber, totalAmount, dueDate)
+                val body = getString(Res.string.send_reminder_email_content, documentNumber, totalAmount, dueDate, currency)
 
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                     data = Uri.parse("mailto:")
