@@ -441,7 +441,7 @@
     <string name="gstore_module_quote_trial_title">Discover quotes</string>
     <string name="gstore_module_quote_trial_desc">5 free quotes to try the feature</string>
     <string name="gstore_module_quote_trial_detail">Enabling this module gives you 5 free quotes to try the feature and see if it suits you. You will then need to become a premium member to get unlimited quotes.\n\nEnable this module to create quotes, send them to your clients, and convert them to an invoice once accepted.</string>
-    <string name="gstore_quote_trial_exhausted_title">Discovery period ended</string>
+    <string name="gstore_quote_trial_exhausted_title">Free quotes used up</string>
     <string name="gstore_quote_trial_exhausted_body">Your 5 free quotes are used up. If you would like to keep using quotes, you can become a premium member.</string>
     <string name="gstore_quote_trial_exhausted_cta">OK</string>
 

@@ -301,7 +301,7 @@
     <string name="gstore_module_quote_trial_title">Devis découverte</string>
     <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
     <string name="gstore_module_quote_trial_detail">🎁 Activez ce module pour obtenir 5 devis gratuits et tester la fonctionnalité.\n\nIl faudra ensuite devenir membre premium pour avoir les devis en illimité.\n\nUne fois activé, vous pourrez créer des devis, les envoyer à vos client·es et les convertir en facture une fois acceptés.</string>
-    <string name="gstore_quote_trial_exhausted_title">Période découverte écoulée</string>
+    <string name="gstore_quote_trial_exhausted_title">Devis gratuits épuisés</string>
     <string name="gstore_quote_trial_exhausted_body">Vos 5 devis gratuits sont écoulés. Si vous souhaitez continuer à utiliser les devis, vous pouvez devenir membre premium.</string>
     <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
