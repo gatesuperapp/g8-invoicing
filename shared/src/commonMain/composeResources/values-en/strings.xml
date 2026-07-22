@@ -6,7 +6,6 @@
     <string name="credit_note_default_number">CN001</string>
 
     <!-- Currency -->
-    <string name="currency">€</string>
 
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copy</string>
@@ -38,7 +37,6 @@
     <!-- Document totals -->
     <string name="document_total_without_tax">Total excl. tax:</string>
     <string name="document_total_with_tax">Total incl. tax:</string>
-    <string name="document_tax">Tax</string>
     <string name="document_tax_label">Tax %1$s: </string>
 
     <!-- Document totals aliases for PDF -->
@@ -97,8 +95,6 @@
     <string name="product_unit_input">kg</string>
     <string name="product_tax">Tax</string>
     <string name="tax_rate_screen_title">Tax rates</string>
-    <string name="tax_rate_edit_title">Edit tax</string>
-    <string name="tax_rate_edit_rates">Edit rates</string>
     <string name="tax_rate_add_rate">+ Add a rate</string>
     <string name="product_price">Price</string>
     <string name="product_price_input">3</string>
@@ -108,7 +104,6 @@
     <string name="product_delete_price">Delete this price</string>
     <string name="document_product_quantity">Quantity</string>
     <string name="document_product_quantity_input">1</string>
-    <string name="product_select_placeholder">Select...</string>
 
     <!-- Client/Issuer Form Strings -->
     <string name="client_section_identity">IDENTITY</string>
@@ -207,7 +202,6 @@
     <string name="appbar_list_label">Products</string>
     <string name="appbar_components">Edit elements</string>
     <string name="appbar_text_label">Text</string>
-    <string name="appbar_style">Edit style</string>
     <string name="appbar_style_label">Style</string>
     <string name="appbar_more">More options</string>
     <string name="appbar_more_label">More</string>
@@ -223,8 +217,6 @@
     <string name="appbar_duplicate_label">Duplicate</string>
     <string name="appbar_save_payment">Record payment</string>
     <string name="appbar_save_payment_label">Payment</string>
-    <string name="appbar_send">Send</string>
-    <string name="appbar_save">Save</string>
     <string name="appbar_export">Export</string>
     <string name="appbar_tag_draft">Draft</string>
     <string name="appbar_tag_paid">Paid</string>
@@ -234,16 +226,12 @@
     <string name="appbar_tag_reminded">Reminded</string>
     <string name="appbar_product_add">Add product</string>
     <string name="appbar_product_edit">Edit product</string>
-    <string name="appbar_g8">𝕘𝟠</string>
 
     <!-- Drawer / Categories -->
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">My Account</string>
 
     <!-- Account Screen -->
-    <string name="account_subscribe">Support the project and enjoy exclusive benefits: early access to upcoming features (desktop app, electronic invoicing..), forum badge, "Little Horseshoe" sticker.. and more!</string>
-    <string name="account_donate">Learn more</string>
-    <string name="account_donate_link">https://www.the-gate.fr/en</string>
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
     <string name="account_auth_title">Are you a premium member? Sign in below:</string>
@@ -286,7 +274,6 @@
     <string name="account_manage_subscription">Manage subscription</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
-    <string name="account_section_auth">Authentication</string>
     <string name="account_my_companies">My companies</string>
     <string name="account_add_company">+ Add a company</string>
     <string name="account_section_advanced">Advanced</string>
@@ -302,7 +289,6 @@
     <!-- About Screen -->
     <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>
     <string name="about_title_about">About</string>
-    <string name="about_title_early_access">"Early bat" programme</string>
     <string name="about_title_website">Website</string>
     <string name="about_website_intro">Visit our website </string>
     <string name="about_website_cta">www.the-gate.fr</string>
@@ -495,11 +481,9 @@
     <string name="onboarding_cleanup_delete_confirm_no">Cancel</string>
 
     <string name="onboarding_issuer_country_subtitle">Which country is %1$s based in?</string>
-    <string name="onboarding_issuer_country_body">You need to indicate each business country of domicile. It is a required field for electronic invoicing.</string>
     <string name="onboarding_issuer_country_pick">Choose a country</string>
 
     <string name="onboarding_vat_subtitle">Are you exempt from VAT?</string>
-    <string name="onboarding_vat_body">It means you do not charge VAT. If so, the &quot;exempt&quot; VAT code will be automatically applied to your electronic invoices (invisible in the interface).</string>
     <string name="onboarding_vat_option_franchise">I am VAT-exempt</string>
     <string name="onboarding_vat_option_tva">I charge VAT</string>
     <string name="onboarding_vat_option_dontknow">I do not know</string>
@@ -530,7 +514,6 @@
     <string name="onboarding_client_country_intro_no">No, they are mixed</string>
 
     <string name="onboarding_client_country_picker_subtitle">Which country?</string>
-    <string name="onboarding_client_country_picker_body">I will apply it to the clients who do not have a country set yet.</string>
     <string name="onboarding_client_country_picker_pick">Choose a country</string>
 
     <string name="onboarding_client_country_done_applied_title">Done</string>

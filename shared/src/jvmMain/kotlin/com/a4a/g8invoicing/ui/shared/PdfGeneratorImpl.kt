@@ -49,7 +49,10 @@ class PdfGeneratorImpl(
     private val imageStorage: ImageStorage? = null
 ) {
     fun generatePdf(document: DocumentState): String {
-        val tempFileName = "${document.documentNumber.text}_temp.pdf"
+        // Sanitize the document number for the temp filename: users type
+        // things like "F/2026" as their invoice number, and the `/` breaks
+        // File(cacheDir, name) since it treats it as a subdirectory.
+        val tempFileName = "${sanitizeForFileName(document.documentNumber.text).ifBlank { "document" }}_temp.pdf"
         val finalFileName = buildFinalFileName(document)
         val tempFilePath = fileManager.getTempFilePath(tempFileName)
 
