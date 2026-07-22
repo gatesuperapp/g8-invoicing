@@ -123,12 +123,15 @@ fun NavGraphBuilder.invoiceAddEdit(
                 confirmButton = {
                     Button(
                         onClick = {
+                            // Dismiss the dialog synchronously so the bottom-sheet form
+                            // takes over immediately; the master fetch keeps running in
+                            // the background and updates the state when it lands.
+                            showVersionMismatchDialog = false
+                            pendingIssuerToEdit = null
                             scope.launch {
                                 clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
-                                showVersionMismatchDialog = false
-                                pendingIssuerToEdit = null
                             }
                         }
                     ) {
@@ -166,12 +169,15 @@ fun NavGraphBuilder.invoiceAddEdit(
                 confirmButton = {
                     Button(
                         onClick = {
+                            // Dismiss the dialog synchronously so a back tap on the
+                            // bottom-sheet form doesn't slip the dialog back on top
+                            // while loadLatestMasterVersion is still suspended.
+                            showClientVersionMismatchDialog = false
+                            pendingClientToEdit = null
                             scope.launch {
                                 clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
-                                showClientVersionMismatchDialog = false
-                                pendingClientToEdit = null
                             }
                         }
                     ) {

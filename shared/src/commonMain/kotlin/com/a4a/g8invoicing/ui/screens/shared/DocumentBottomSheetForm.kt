@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -388,41 +389,50 @@ private fun DocumentBottomSheetContent(
     // Determine which form or view to show based on the current state
     when {
         typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> {
-            ClientOrIssuerAddEditForm(
-                clientOrIssuerUiState = documentClientUiState,
-                typeOfCreation = typeOfCreation,
-                onValueChange = { screenElement, value ->
-                    bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
-                },
-                placeCursorAtTheEndOfText = { screenElement ->
-                    bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_CLIENT)
-                },
-                isInBottomSheetModal = true,
-                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) },
-                onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
-                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) },
-                pendingEmailStateHolder = pendingEmailStateHolder,
-                onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) }
-            )
+            // Key on originalVersion + emails identity so loadLatestMasterVersion,
+            // which flips originalVersion when the user picks "load latest", forces
+            // the form to re-run its composition and pick up the freshly-fetched
+            // emails / addresses / labels from the master row instead of the stale
+            // snapshot that the bottom sheet mounted with.
+            key(documentClientUiState.originalVersion, documentClientUiState.emails) {
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuerUiState = documentClientUiState,
+                    typeOfCreation = typeOfCreation,
+                    onValueChange = { screenElement, value ->
+                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
+                    },
+                    placeCursorAtTheEndOfText = { screenElement ->
+                        bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_CLIENT)
+                    },
+                    isInBottomSheetModal = true,
+                    onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) },
+                    onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
+                    onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) },
+                    pendingEmailStateHolder = pendingEmailStateHolder,
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) }
+                )
+            }
         }
 
         typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> {
-            ClientOrIssuerAddEditForm(
-                clientOrIssuerUiState = documentIssuerUiState,
-                typeOfCreation = typeOfCreation,
-                onValueChange = { screenElement, value ->
-                    bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
-                },
-                placeCursorAtTheEndOfText = { screenElement ->
-                    bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_ISSUER)
-                },
-                isInBottomSheetModal = true,
-                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) },
-                onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
-                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
-                pendingEmailStateHolder = pendingEmailStateHolder,
-                onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
-            )
+            key(documentIssuerUiState.originalVersion, documentIssuerUiState.emails) {
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuerUiState = documentIssuerUiState,
+                    typeOfCreation = typeOfCreation,
+                    onValueChange = { screenElement, value ->
+                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
+                    },
+                    placeCursorAtTheEndOfText = { screenElement ->
+                        bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_ISSUER)
+                    },
+                    isInBottomSheetModal = true,
+                    onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) },
+                    onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
+                    onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
+                    pendingEmailStateHolder = pendingEmailStateHolder,
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
+                )
+            }
         }
 
         else -> { // Product related content

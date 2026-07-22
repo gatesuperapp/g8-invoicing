@@ -115,12 +115,12 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 confirmButton = {
                     Button(
                         onClick = {
+                            showVersionMismatchDialog = false
+                            pendingIssuerToEdit = null
                             scope.launch {
                                 clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
-                                showVersionMismatchDialog = false
-                                pendingIssuerToEdit = null
                             }
                         }
                     ) {
@@ -158,12 +158,12 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 confirmButton = {
                     Button(
                         onClick = {
+                            showClientVersionMismatchDialog = false
+                            pendingClientToEdit = null
                             scope.launch {
                                 clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
-                                showClientVersionMismatchDialog = false
-                                pendingClientToEdit = null
                             }
                         }
                     ) {
