@@ -501,8 +501,13 @@ class PdfGeneratorImpl(
             val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
             if (linkedDeliveryNotes.isNotEmpty()) {
                 linkedDeliveryNotes.forEach { (docNumber, docDate) ->
+                    val headerText = if (docNumber.isNullOrEmpty()) {
+                        strings.otherLines
+                    } else {
+                        "$docNumber - ${docDate?.substringBefore(" ")}"
+                    }
                     table.addCustomCell(
-                        "$docNumber - ${docDate?.substringBefore(" ")}",
+                        headerText,
                         TextAlignment.LEFT, true, fontBold, fontRegular, isSpan = true
                     )
                     addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, fontBold, fontRegular, displayUnitColumn, currencyCode)

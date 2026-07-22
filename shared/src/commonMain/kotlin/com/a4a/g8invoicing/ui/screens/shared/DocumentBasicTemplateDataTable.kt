@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_table_description
 import com.a4a.g8invoicing.shared.resources.document_table_quantity
 import com.a4a.g8invoicing.shared.resources.document_table_tax_rate
@@ -188,13 +189,19 @@ fun LinkedDeliveryNoteRow(
     linkedNoteColumnWeight: Float,
     docNumberAndDate: Pair<String?, String?>,
 ) {
+    val docNumber = docNumberAndDate.first
+    val text = if (docNumber.isNullOrEmpty()) {
+        stringResource(Res.string.document_products_other_lines)
+    } else {
+        docNumber + " - " + docNumberAndDate.second?.substringBefore(" ")
+    }
     Row(
         Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = docNumberAndDate.first + " - " + docNumberAndDate.second?.substringBefore(" "),
+            text = text,
             weight = linkedNoteColumnWeight,
             alignEnd = false,
             isBold = true

@@ -82,6 +82,7 @@
 
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>
+    <string name="document_products_other_lines">Other lines</string>
     <string name="document_product_advice">To edit a product, click on the grey box…</string>
     <string name="document_product_advice_2">The change only applies to this document…</string>
     <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
@@ -199,7 +200,7 @@
     <string name="appbar_send_reminder">Send reminder</string>
     <string name="appbar_text">Edit text</string>
     <string name="appbar_list">Add a line</string>
-    <string name="appbar_list_label">Line</string>
+    <string name="appbar_list_label">Lines</string>
     <string name="appbar_components">Edit elements</string>
     <string name="appbar_text_label">Text</string>
     <string name="appbar_style_label">Style</string>

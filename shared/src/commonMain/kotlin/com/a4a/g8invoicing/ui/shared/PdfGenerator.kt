@@ -40,6 +40,7 @@ data class PdfStrings(
     val companyId1Label: String,
     val companyId2Label: String,
     val companyId3Label: String,
+    val otherLines: String,
 )
 
 /**

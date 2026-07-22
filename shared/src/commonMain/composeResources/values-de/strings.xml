@@ -92,6 +92,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
 
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Neues Produkt</string>
+    <string name="document_products_other_lines">Weitere Zeilen</string>
     <string name="document_product_advice">Um ein Produkt zu ändern, klicke auf das graue Rechteck …</string>
     <string name="document_product_advice_2">Die Änderung wirkt sich ausschließlich auf dieses Dokument aus …</string>
     <string name="document_product_advice_3">Sie beeinflusst nicht das gespeicherte Produkt im Reiter "Produkte".</string>
@@ -209,7 +210,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="appbar_send_reminder">Erneut senden</string>
     <string name="appbar_text">Text bearbeiten</string>
     <string name="appbar_list">Zeile hinzufügen</string>
-    <string name="appbar_list_label">Zeile</string>
+    <string name="appbar_list_label">Zeilen</string>
     <string name="appbar_components">Elemente bearbeiten</string>
     <string name="appbar_text_label">Text</string>
     <string name="appbar_style_label">Aussehen</string>

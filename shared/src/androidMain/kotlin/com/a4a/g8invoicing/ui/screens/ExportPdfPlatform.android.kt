@@ -54,6 +54,7 @@ import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
+import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.export_clickable_text
 import com.a4a.g8invoicing.shared.resources.export_close
@@ -150,6 +151,7 @@ actual fun ExportPdfPlatform(
         companyId1Label = stringResource(Res.string.company_identification1),
         companyId2Label = stringResource(Res.string.company_identification2),
         companyId3Label = stringResource(Res.string.company_identification3),
+        otherLines = stringResource(Res.string.document_products_other_lines),
     )
 
     // Strings for UI

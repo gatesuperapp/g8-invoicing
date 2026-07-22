@@ -82,6 +82,7 @@
 
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
+    <string name="document_products_other_lines">Otras líneas</string>
     <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
     <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
     <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
@@ -201,7 +202,7 @@
     <string name="appbar_send_reminder">Enviar recordatorio</string>
     <string name="appbar_text">Editar texto</string>
     <string name="appbar_list">Añadir una línea</string>
-    <string name="appbar_list_label">Línea</string>
+    <string name="appbar_list_label">Líneas</string>
     <string name="appbar_components">Editar elementos</string>
     <string name="appbar_text_label">Texto</string>
     <string name="appbar_style_label">Estilo</string>
