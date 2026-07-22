@@ -213,6 +213,7 @@ class CreditNoteLocalDataSource(
                 saveInfoInCreditNoteTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
+                        documentDate = DateUtils.getCurrentDateFormatted(),
                         reference = invoices.firstOrNull { it.reference != null }?.reference,
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
                         documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
