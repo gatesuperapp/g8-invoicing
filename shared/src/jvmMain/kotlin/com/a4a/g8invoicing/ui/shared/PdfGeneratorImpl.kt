@@ -322,12 +322,15 @@ class PdfGeneratorImpl(
             table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(1f))
         }
 
-        // Issuer
+        // Issuer. Always add a cell — even empty — to reserve the left column.
+        // Otherwise iText's fixed 2-column layout drops the following client cell
+        // into column 0 (left) instead of column 1 (right), and every subsequent
+        // additional-address cell cascades to the wrong side too.
+        val issuerCell = Cell().setBorder(Border.NO_BORDER)
         issuer?.let {
-            val issuerCell = Cell().setBorder(Border.NO_BORDER)
             createClientOrIssuerParagraph(it, font, fontSize = fontSize).forEach { p -> issuerCell.add(p) }
-            table.addCell(issuerCell)
         }
+        table.addCell(issuerCell)
 
         // Client
         client?.let {
