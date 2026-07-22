@@ -241,8 +241,8 @@
     <string name="appbar_tag">Marquer</string>
     <string name="appbar_send_reminder">Relancer</string>
     <string name="appbar_text">Modifier le texte</string>
-    <string name="appbar_list">Ajouter des produits</string>
-    <string name="appbar_list_label">Produits</string>
+    <string name="appbar_list">Ajouter une ligne</string>
+    <string name="appbar_list_label">Ligne</string>
     <string name="appbar_components">Modifier les éléments</string>
     <string name="appbar_text_label">Texte</string>
     <string name="appbar_style_label">Style</string>
