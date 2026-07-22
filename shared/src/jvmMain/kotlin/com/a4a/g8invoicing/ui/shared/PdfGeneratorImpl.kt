@@ -602,7 +602,11 @@ class PdfGeneratorImpl(
     private fun createFooter(text: String, fontSize: Float): Paragraph {
         return Paragraph(text)
             .setFontSize(fontSize)
-            .setFixedLeading(14F)
+            // 10pt leading on a 9.5pt font is a tight ~1.05 ratio — matches
+            // the preview's tighter line-height so a user-typed blank line
+            // reads as one blank line, not two. The earlier 14pt inflated
+            // every line gap and blew up empty separators.
+            .setFixedLeading(10F)
             .setTextAlignment(TextAlignment.CENTER)
     }
 

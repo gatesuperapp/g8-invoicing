@@ -68,7 +68,11 @@ fun DocumentBasicTemplateFooter(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.textForDocuments,
                 text = document.footerText.text,
-                lineHeight = 10.sp
+                // 7sp on a 6sp font ≈ 1.15 line-height — the previous 10sp
+                // rendered a user-typed blank line as ~2 blank lines. Halving
+                // would clip; 7 gets the same visual "one blank line" effect
+                // without eating into the glyph metrics.
+                lineHeight = 7.sp
             )
         }
         if (watermark != null) {
