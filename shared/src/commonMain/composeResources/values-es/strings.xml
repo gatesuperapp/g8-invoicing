@@ -200,8 +200,8 @@
     <string name="appbar_tag">Marcador</string>
     <string name="appbar_send_reminder">Enviar recordatorio</string>
     <string name="appbar_text">Editar texto</string>
-    <string name="appbar_list">Añadir productos</string>
-    <string name="appbar_list_label">Productos</string>
+    <string name="appbar_list">Añadir una línea</string>
+    <string name="appbar_list_label">Línea</string>
     <string name="appbar_components">Editar elementos</string>
     <string name="appbar_text_label">Texto</string>
     <string name="appbar_style_label">Estilo</string>

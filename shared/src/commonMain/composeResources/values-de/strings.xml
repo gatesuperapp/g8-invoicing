@@ -208,8 +208,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="appbar_tag">Markieren</string>
     <string name="appbar_send_reminder">Erneut senden</string>
     <string name="appbar_text">Text bearbeiten</string>
-    <string name="appbar_list">Produkte hinzufügen</string>
-    <string name="appbar_list_label">Produkte</string>
+    <string name="appbar_list">Zeile hinzufügen</string>
+    <string name="appbar_list_label">Zeile</string>
     <string name="appbar_components">Elemente bearbeiten</string>
     <string name="appbar_text_label">Text</string>
     <string name="appbar_style_label">Aussehen</string>
