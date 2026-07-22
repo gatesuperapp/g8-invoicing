@@ -65,8 +65,8 @@ LIMIT 1;
 
 getLastInsertedFooter:
 SELECT footer
-FROM CreditNote
-ORDER BY credit_note_id DESC
+FROM DeliveryNote
+ORDER BY delivery_note_id DESC
 LIMIT 1;
 
 countAll:
