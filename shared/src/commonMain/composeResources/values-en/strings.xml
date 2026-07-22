@@ -426,7 +426,7 @@
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Reminder: invoice #%1$s</string>
-    <string name="send_reminder_email_content">Hello, \n\n Your invoice %1$s for the amount of €%2$s was due on %3$s. We have not yet received your payment.\n\n We kindly ask you to proceed with the payment as soon as possible.\n\n Best regards\n</string>
+    <string name="send_reminder_email_content">Hello, \n\n Your invoice %1$s for the amount of %4$s%2$s was due on %3$s. We have not yet received your payment.\n\n We kindly ask you to proceed with the payment as soon as possible.\n\n Best regards\n</string>
 
     <!-- Database export dialog -->
     <string name="database_export_dialog_title">^._.^</string>

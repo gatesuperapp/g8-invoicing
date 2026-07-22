@@ -479,7 +479,7 @@ Es ist ein Fehler aufgetreten :
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Mahnung: Rechnung Nr. %1$s</string>
-    <string name="send_reminder_email_content">Hallo, \n\n Ihre Rechnung %1$s über einen Betrag von %2$s€ war am %3$s fällig. Wir haben bisher keine Zahlung von Ihnen erhalten.\n\n Wir bitten Sie, die Zahlung so bald wie möglich vorzunehmen.\n\n Mit freundlichen Grüßen\n</string>
+    <string name="send_reminder_email_content">Hallo, \n\n Ihre Rechnung %1$s über einen Betrag von %2$s %4$s war am %3$s fällig. Wir haben bisher keine Zahlung von Ihnen erhalten.\n\n Wir bitten Sie, die Zahlung so bald wie möglich vorzunehmen.\n\n Mit freundlichen Grüßen\n</string>
 
     <!-- Database export dialog -->
     <string name="database_export_dialog_title">^._.^</string>

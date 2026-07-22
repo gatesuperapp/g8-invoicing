@@ -431,7 +431,7 @@ Une erreur s'est produite :
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Recordatorio: factura N°%1$s</string>
-    <string name="send_reminder_email_content">Hola, \n\n Tu factura %1$s por un importe de %2$s€ venció el %3$s. Aún no hemos recibido tu pago.\n\n Te rogamos que procedas con el pago lo antes posible.\n\n Un saludo\n</string>
+    <string name="send_reminder_email_content">Hola, \n\n Tu factura %1$s por un importe de %2$s %4$s venció el %3$s. Aún no hemos recibido tu pago.\n\n Te rogamos que procedas con el pago lo antes posible.\n\n Un saludo\n</string>
 
     <!-- Database export dialog -->
     <string name="database_export_dialog_title">^._.^</string>
