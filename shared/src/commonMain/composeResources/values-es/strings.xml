@@ -447,7 +447,7 @@ Une erreur s'est produite :
     <string name="gstore_module_quote_trial_desc">5 presupuestos gratis para probar la función</string>
     <string name="gstore_module_quote_trial_detail">Activar este módulo permite obtener 5 presupuestos gratis para probar la función y ver si te conviene. Después habrá que hacerse miembro premium para tener presupuestos ilimitados.\n\nActiva este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados. El número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
     <string name="gstore_quote_trial_exhausted_title">Período de descubrimiento agotado</string>
-    <string name="gstore_quote_trial_exhausted_body">Tu período de descubrimiento de presupuestos ha terminado. Si deseas seguir usando los presupuestos, puedes hacerte miembro premium.</string>
+    <string name="gstore_quote_trial_exhausted_body">Tus 5 presupuestos gratis se han agotado. Si deseas seguir usando los presupuestos, puedes hacerte miembro premium.</string>
     <string name="gstore_quote_trial_exhausted_cta">De acuerdo</string>
 
     <!-- Onboarding 1.8 -->

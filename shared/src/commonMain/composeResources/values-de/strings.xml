@@ -495,7 +495,7 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_quote_trial_desc">5 kostenlose Kostenvoranschläge</string>
     <string name="gstore_module_quote_trial_detail">Wenn du dieses Modul aktivierst, erhältst du 5 kostenlose Kostenvoranschläge, um die Funktion auszuprobieren und zu sehen, ob sie dir zusagt. Danach musst du Premium-Mitglied werden, um unbegrenzt Kostenvoranschläge zu haben.\n\nAktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
     <string name="gstore_quote_trial_exhausted_title">Entdeckungszeitraum abgelaufen</string>
-    <string name="gstore_quote_trial_exhausted_body">Dein Entdeckungszeitraum für Kostenvoranschläge ist abgelaufen. Wenn du weiterhin Kostenvoranschläge nutzen möchtest, kannst du Premium-Mitglied werden.</string>
+    <string name="gstore_quote_trial_exhausted_body">Deine 5 kostenlosen Kostenvoranschläge sind aufgebraucht. Wenn du weiterhin Kostenvoranschläge nutzen möchtest, kannst du Premium-Mitglied werden.</string>
     <string name="gstore_quote_trial_exhausted_cta">OK</string>
 
     <!-- Onboarding 1.8 -->
