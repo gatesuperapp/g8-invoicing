@@ -53,3 +53,11 @@ SELECT id
 FROM DocumentProduct
 ORDER BY id DESC
 LIMIT 1;
+
+getLast3RecentProductIds:
+SELECT product_id
+FROM DocumentProduct
+WHERE product_id IS NOT NULL
+GROUP BY product_id
+ORDER BY MAX(id) DESC
+LIMIT 3;

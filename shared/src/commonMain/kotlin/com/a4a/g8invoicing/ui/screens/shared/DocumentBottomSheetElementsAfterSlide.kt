@@ -44,7 +44,6 @@ fun DocumentBottomSheetElementsAfterSlide(
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
     showProductType: Boolean = false,
     ) {
-    var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
         mutableStateOf(
             DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
@@ -57,10 +56,37 @@ fun DocumentBottomSheetElementsAfterSlide(
     val documentFooterString = stringResource(Res.string.document_footer)
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
-        DocumentBottomSheetClientOrIssuerPreview(
+        val pair = parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>
+        val snapshot = pair.first
+        val master = pair.second.firstOrNull { it.id == snapshot?.originalClientOrIssuerId }
+        val snapshotVersion = snapshot?.originalVersion
+        val masterVersion = master?.version
+        val hasMasterUpdate = snapshotVersion != null && masterVersion != null &&
+            masterVersion > snapshotVersion
+        ClientOrIssuerPickerBottomSheet(
             pageElement = pageElement,
-            clientOrIssuer = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
-            onClickBack = onClickBack,
+            list = pair.second,
+            currentSelected = snapshot,
+            hasMasterUpdate = hasMasterUpdate,
+            onSelect = { onSelectClientOrIssuer(it) },
+            onClickEdit = {
+                onClickEditDocumentClientOrIssuer(it)
+                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT
+                } else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
+                onShowDocumentForm(true)
+            },
+            onClickDeselect = {
+                onClickDeleteDocumentClientOrIssuer(
+                    if (pageElement == ScreenElement.DOCUMENT_CLIENT) ClientOrIssuerType.DOCUMENT_CLIENT
+                    else ClientOrIssuerType.DOCUMENT_ISSUER
+                )
+            },
+            onClickRefreshFromMaster = {
+                // Fires the existing version-mismatch dialog (wired at the NavGraph
+                // level via onClickDocumentClientOrIssuer / checkVersionMismatch).
+                onClickEditDocumentClientOrIssuer(it)
+            },
             onClickNew = {
                 onClickNewDocumentClientOrIssuer(
                     if (pageElement == ScreenElement.DOCUMENT_CLIENT) ClientOrIssuerType.DOCUMENT_CLIENT
@@ -71,40 +97,8 @@ fun DocumentBottomSheetElementsAfterSlide(
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
                 onShowDocumentForm(true)
             },
-            onClickSelect = { isClientOrIssuerListVisible = true },
-            onClickEdit = {
-                onClickEditDocumentClientOrIssuer(it)
-                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
-                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
-                onShowDocumentForm(true)
-            },
-            onClickDelete = onClickDeleteDocumentClientOrIssuer,
-            isClientOrIssuerListEmpty = parameters.second.isEmpty()
+            onDismiss = onClickBack,
         )
-
-        if (isClientOrIssuerListVisible) {
-            DocumentBottomSheetClientOrIssuerList(
-                list = parameters.second,
-                pageElement = pageElement,
-                onClickBack = { isClientOrIssuerListVisible = false },
-                onClientOrIssuerSelect = {
-                    onSelectClientOrIssuer(it)
-                    isClientOrIssuerListVisible = false
-                    /*typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
-                        DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT
-                    } else DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER
-                    onShowDocumentForm(true)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(TimeUnit.MILLISECONDS.toMillis(500))
-                        // Waits for the bottom form to be opened,
-                        // so previous screen change is in background
-                        isClientOrIssuerListVisible = false
-                    }*/
-                },
-                currentClientId = currentClientId,
-                currentIssuerId = currentIssuerId
-            )
-        }
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DATE) {

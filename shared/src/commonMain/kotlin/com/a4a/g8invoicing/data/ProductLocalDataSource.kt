@@ -279,6 +279,13 @@ class ProductLocalDataSource(
                 .mapNotNull { it }
         }
 
+    override suspend fun fetchLast3RecentProductIds(): List<Long> =
+        withContext(DispatcherProvider.IO) {
+            documentProductQueries.getLast3RecentProductIds()
+                .executeAsList()
+                .mapNotNull { it }
+        }
+
     override suspend fun fetchLastUsedProductType(): ProductNature? =
         withContext(DispatcherProvider.IO) {
             productQueries.getLastUsedProductType()

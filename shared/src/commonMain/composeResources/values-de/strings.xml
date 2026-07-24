@@ -71,6 +71,14 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Neuer Kunde</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Neuer Ersteller</string>
+    <string name="document_bottom_sheet_picker_empty_client">Keine Kunden gefunden</string>
+    <string name="document_bottom_sheet_picker_empty_issuer">Keine Ersteller gefunden</string>
+    <string name="document_bottom_sheet_picker_recent">Zuletzt verwendet</string>
+    <string name="document_bottom_sheet_picker_edit_link">Bearbeiten</string>
+    <string name="document_bottom_sheet_picker_title_client">Kunden</string>
+    <string name="document_bottom_sheet_picker_title_issuer">Ersteller</string>
+    <string name="document_bottom_sheet_picker_title_product">Produkte</string>
+    <string name="document_bottom_sheet_add_product">Produkt hinzufügen</string>
     <string name="document_bottom_sheet_document_product_add">Aus meiner Liste wählen</string>
     <string name="document_modal_product_cancel">Abbrechen</string>
     <string name="document_modal_product_save">Speichern</string>

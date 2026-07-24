@@ -217,6 +217,22 @@ class InvoiceAddEditViewModel(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
+                // Drop the previous document snapshot of the same role first so the
+                // fetch below can't hand back the stale row (firstOrNull on the join
+                // would otherwise return the older insert, causing the picker to
+                // flicker back to the old selection).
+                val documentType = when (documentClientOrIssuer.type) {
+                    ClientOrIssuerType.CLIENT, ClientOrIssuerType.DOCUMENT_CLIENT ->
+                        ClientOrIssuerType.DOCUMENT_CLIENT
+                    ClientOrIssuerType.ISSUER, ClientOrIssuerType.DOCUMENT_ISSUER ->
+                        ClientOrIssuerType.DOCUMENT_ISSUER
+                    else -> null
+                }
+                _documentUiState.value.documentId?.let { docId ->
+                    documentType?.let {
+                        documentDataSource.deleteDocumentClientOrIssuer(docId.toLong(), it)
+                    }
+                }
                 documentDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
                     id = _documentUiState.value.documentId?.toLong()

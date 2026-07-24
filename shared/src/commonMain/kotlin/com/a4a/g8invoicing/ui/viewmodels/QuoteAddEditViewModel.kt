@@ -218,6 +218,18 @@ class QuoteAddEditViewModel(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
+                val documentType = when (documentClientOrIssuer.type) {
+                    ClientOrIssuerType.CLIENT, ClientOrIssuerType.DOCUMENT_CLIENT ->
+                        ClientOrIssuerType.DOCUMENT_CLIENT
+                    ClientOrIssuerType.ISSUER, ClientOrIssuerType.DOCUMENT_ISSUER ->
+                        ClientOrIssuerType.DOCUMENT_ISSUER
+                    else -> null
+                }
+                _documentUiState.value.documentId?.let { docId ->
+                    documentType?.let {
+                        documentDataSource.deleteDocumentClientOrIssuer(docId.toLong(), it)
+                    }
+                }
                 documentDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
                     documentId = _documentUiState.value.documentId?.toLong()

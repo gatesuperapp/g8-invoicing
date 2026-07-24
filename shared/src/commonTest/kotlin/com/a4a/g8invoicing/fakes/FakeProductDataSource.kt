@@ -107,6 +107,12 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
             .distinct()
             .take(5)
 
+    override suspend fun fetchLast3RecentProductIds(): List<Long> =
+        products.asReversed()
+            .mapNotNull { it.id?.toLong() }
+            .distinct()
+            .take(3)
+
     override suspend fun fetchLastUsedProductType(): ProductNature? =
         products.mapNotNull { it.type }.lastOrNull()
 

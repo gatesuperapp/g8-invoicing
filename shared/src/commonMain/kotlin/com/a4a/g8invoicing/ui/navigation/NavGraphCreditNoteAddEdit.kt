@@ -118,9 +118,13 @@ fun NavGraphBuilder.creditNoteAddEdit(
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
+                                if (updated != null) {
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
@@ -161,9 +165,13 @@ fun NavGraphBuilder.creditNoteAddEdit(
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
+                                if (updated != null) {
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {

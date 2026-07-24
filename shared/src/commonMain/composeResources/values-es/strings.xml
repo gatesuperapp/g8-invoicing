@@ -61,6 +61,14 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nuevo cliente</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nuevo emisor</string>
+    <string name="document_bottom_sheet_picker_empty_client">Ningún cliente encontrado</string>
+    <string name="document_bottom_sheet_picker_empty_issuer">Ningún emisor encontrado</string>
+    <string name="document_bottom_sheet_picker_recent">Recientes</string>
+    <string name="document_bottom_sheet_picker_edit_link">Editar</string>
+    <string name="document_bottom_sheet_picker_title_client">Clientes</string>
+    <string name="document_bottom_sheet_picker_title_issuer">Emisores</string>
+    <string name="document_bottom_sheet_picker_title_product">Productos</string>
+    <string name="document_bottom_sheet_add_product">Añadir un producto</string>
     <string name="document_bottom_sheet_document_product_add">Escoge desde mi lista</string>
     <string name="document_modal_product_cancel">Anular</string>
     <string name="document_modal_product_save">Confirmar</string>

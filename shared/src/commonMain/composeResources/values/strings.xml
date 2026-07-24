@@ -64,6 +64,14 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nouveau·elle client·e</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nouvel·le émetteur·ice</string>
+    <string name="document_bottom_sheet_picker_empty_client">Aucun·e client·e trouvé·e</string>
+    <string name="document_bottom_sheet_picker_empty_issuer">Aucun·e émetteur·ice trouvé·e</string>
+    <string name="document_bottom_sheet_picker_recent">Récents</string>
+    <string name="document_bottom_sheet_picker_edit_link">Éditer</string>
+    <string name="document_bottom_sheet_picker_title_client">Client·es</string>
+    <string name="document_bottom_sheet_picker_title_issuer">Émetteur·ices</string>
+    <string name="document_bottom_sheet_picker_title_product">Produits</string>
+    <string name="document_bottom_sheet_add_product">Ajouter un produit</string>
     <string name="document_bottom_sheet_document_product_add">Choisir dans ma liste</string>
     <string name="document_modal_product_cancel">Annuler</string>
     <string name="document_modal_product_save">Valider</string>

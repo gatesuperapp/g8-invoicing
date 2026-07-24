@@ -40,4 +40,8 @@ interface ClientOrIssuerLocalDataSourceInterface {
      *  clients whose addresses predate the country_code field. Issuer addresses
      *  are untouched. */
     suspend fun setCountryForClientsWithoutCountry(countryCode: String)
+
+    /** Master ids of the 3 most recently used clients or issuers in documents,
+     *  most recent first. Powers the "Recents" section in the picker sheets. */
+    suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long>
 }

@@ -93,11 +93,6 @@ fun DocumentBottomSheetProducts(
         // List of selected products
         DocumentBottomSheetProductsChosen(
             list = params.first ?: emptyList(),
-            onClickNew = {
-                typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
-                onShowDocumentForm(true)
-                onClickNewProduct()
-            },
             onClickChooseExisting = {
                 isProductListVisible = true
             },
@@ -107,21 +102,26 @@ fun DocumentBottomSheetProducts(
                 onShowDocumentForm(true)
             },
             onClickDelete = onClickDeleteDocumentProduct,
-            isClientOrIssuerListEmpty = parameters.second.isEmpty(),
             onOrderChange = onOrderChange
         )
         // List of all products to chose from
         if (isProductListVisible) {
-            DocumentBottomSheetProductsAvailable(
-                list = params.second ?: emptyList(),
-                onClickBack = { isProductListVisible = false },
-                onProductClick = {
+            ProductPickerBottomSheet(
+                products = params.second ?: emptyList(),
+                clientId = document.documentClient?.originalClientOrIssuerId,
+                onDismiss = { isProductListVisible = false },
+                onSelect = {
                     onClickProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
                     isProductListVisible = false
                     onShowDocumentForm(true)
                 },
-                clientId = document.documentClient?.originalClientOrIssuerId
+                onClickNew = {
+                    typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
+                    isProductListVisible = false
+                    onShowDocumentForm(true)
+                    onClickNewProduct()
+                },
             )
         }
         // Add new product or edit chosen product

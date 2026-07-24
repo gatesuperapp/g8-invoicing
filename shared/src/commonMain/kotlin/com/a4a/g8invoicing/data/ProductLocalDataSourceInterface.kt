@@ -27,6 +27,9 @@ interface ProductLocalDataSourceInterface {
     /** Last 5 distinct UNECE unit codes ever used on Products, most-recent first.
      * Feeds the "Récentes" section of the UnitCodePicker bottom sheet. */
     suspend fun fetchLast5UnitCodes(): List<String>
+    /** Master Product ids for the 3 most recently used products in documents,
+     * most-recent first. Feeds the "Récents" section of the ProductPicker. */
+    suspend fun fetchLast3RecentProductIds(): List<Long>
     /** Last non-null ProductType used on a Product, for sticky-default on new products. */
     suspend fun fetchLastUsedProductType(): ProductNature?
     /** Most recently created Product (highest id). Used to pre-fill unit / unitCode /

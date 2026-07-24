@@ -30,8 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_document_product_add
-import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_list_add_new_product
+import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_add_product
 import com.a4a.g8invoicing.shared.resources.document_product_advice
 import com.a4a.g8invoicing.shared.resources.document_product_advice_2
 import com.a4a.g8invoicing.shared.resources.document_product_advice_3
@@ -41,16 +40,14 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.textSmall
 import org.jetbrains.compose.resources.stringResource
 
-// Bottom sheet with "New product" and "Choose in list" buttons
-// And the list of chosen products
+// Bottom sheet with the "Add a product" button (opens the picker with search + list)
+// and the list of chosen products underneath.
 @Composable
 fun DocumentBottomSheetProductsChosen(
     list: List<DocumentProductState>,
-    onClickNew: () -> Unit, // Add a new product to the document (product list)
-    onClickChooseExisting: () -> Unit, // Add a new product to the document (product list)
-    onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product (add/edit screen)
-    onClickDelete: (Int) -> Unit, // Delete a document product,
-    isClientOrIssuerListEmpty: Boolean,
+    onClickChooseExisting: () -> Unit, // Opens the product picker bottom sheet
+    onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product
+    onClickDelete: (Int) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit
     ) {
     Column(
@@ -61,19 +58,11 @@ fun DocumentBottomSheetProductsChosen(
         Spacer(modifier = Modifier.height(8.dp))
 
         ButtonAddOrChoose(
-            onClickNew,
-            hasBorder = true,
-            isPickerButton = false,
-            stringResource(Res.string.document_bottom_sheet_list_add_new_product)
+            onClickChooseExisting,
+            hasBorder = false,
+            isPickerButton = true,
+            stringResource(Res.string.document_bottom_sheet_add_product)
         )
-        if(!isClientOrIssuerListEmpty) {
-            ButtonAddOrChoose( // Choosing a product to add to the document
-                onClickChooseExisting,
-                hasBorder = false,
-                isPickerButton = true,
-                stringResource(Res.string.document_bottom_sheet_document_product_add)
-            )
-        }
         // Display the list of chosen products
         Box(modifier = Modifier.weight(1f).fillMaxSize()) {
             DocumentBottomSheetProductListChosenContent(

@@ -124,9 +124,13 @@ fun NavGraphBuilder.quoteAddEdit(
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
+                                if (updated != null) {
+                                    quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
@@ -167,9 +171,13 @@ fun NavGraphBuilder.quoteAddEdit(
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
+                                if (updated != null) {
+                                    quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {

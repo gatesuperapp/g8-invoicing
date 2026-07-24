@@ -790,6 +790,18 @@ class ClientOrIssuerLocalDataSource(
             }
         }
     }
+
+    override suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long> =
+        withContext(DispatcherProvider.IO) {
+            val typeStr = when (type) {
+                PersonType.CLIENT -> ClientOrIssuerType.CLIENT.name.lowercase()
+                PersonType.ISSUER -> ClientOrIssuerType.ISSUER.name.lowercase()
+            }
+            documentClientOrIssuerQueries
+                .getLast3RecentOriginalIdsByType(typeStr)
+                .executeAsList()
+                .mapNotNull { it }
+        }
 }
 
 fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {

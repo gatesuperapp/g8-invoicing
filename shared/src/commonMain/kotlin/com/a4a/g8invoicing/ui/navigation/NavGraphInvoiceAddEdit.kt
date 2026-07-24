@@ -129,9 +129,13 @@ fun NavGraphBuilder.invoiceAddEdit(
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
+                                if (updated != null) {
+                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
@@ -175,9 +179,13 @@ fun NavGraphBuilder.invoiceAddEdit(
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
+                                if (updated != null) {
+                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
