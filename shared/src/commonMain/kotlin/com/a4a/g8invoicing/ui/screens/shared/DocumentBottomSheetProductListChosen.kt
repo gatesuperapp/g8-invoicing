@@ -55,11 +55,10 @@ fun DocumentBottomSheetProductsChosen(
     ) {
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.5f)
+            .fillMaxSize()
             .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
     ) {
-        // Header: display "back" button
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         ButtonAddOrChoose(
             onClickNew,
@@ -76,12 +75,15 @@ fun DocumentBottomSheetProductsChosen(
             )
         }
         // Display the list of chosen products
-        DocumentBottomSheetProductListChosenContent(
-            documentProducts = list,
-            onClickItem = onClickDocumentProduct,
-            onClickDelete = onClickDelete,
-            onOrderChange = onOrderChange
-        )
+        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
+            DocumentBottomSheetProductListChosenContent(
+                documentProducts = list,
+                onClickItem = onClickDocumentProduct,
+                onClickDelete = onClickDelete,
+                onOrderChange = onOrderChange,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
 
         if(list.size == 1) {
             DisplayBatHelperAdvice()

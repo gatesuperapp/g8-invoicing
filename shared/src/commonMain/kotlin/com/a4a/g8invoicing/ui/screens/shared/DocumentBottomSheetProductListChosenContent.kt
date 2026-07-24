@@ -1,7 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -12,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,13 +27,13 @@ import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DocumentBottomSheetProductListChosenContent(
     documentProducts: List<DocumentProductState>,
     onClickItem: (DocumentProductState) -> Unit,
     onClickDelete: (Int) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
 
@@ -45,6 +45,12 @@ fun DocumentBottomSheetProductListChosenContent(
     }
 
     val lazyListState = rememberLazyListState()
+    LaunchedEffect(lazyListState) {
+        snapshotFlow { lazyListState.layoutInfo }.collect { info ->
+            val total = info.visibleItemsInfo.sumOf { it.size }
+            println("[SCROLL] viewport=${info.viewportSize.height}px visibleContentSum=${total}px totalItems=${info.totalItemsCount} visibleItems=${info.visibleItemsInfo.size} canFwd=${lazyListState.canScrollForward} canBack=${lazyListState.canScrollBackward}")
+        }
+    }
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
         val fromKey = from.key
         val toKey = to.key
@@ -88,7 +94,7 @@ fun DocumentBottomSheetProductListChosenContent(
     val otherLinesLabel = stringResource(Res.string.document_products_other_lines)
 
     LazyColumn(
-        modifier = Modifier
+        modifier = modifier
             .padding(
                 top = 20.dp,
                 bottom = 30.dp
@@ -100,19 +106,17 @@ fun DocumentBottomSheetProductListChosenContent(
         orderedKeys.forEach { docNumber ->
             val productsInGroup = groups[docNumber].orEmpty()
             if (docNumber != null) {
-                stickyHeader(key = "header_$docNumber") {
+                item(key = "header_$docNumber") {
                     DocumentBottomSheetProductListSourceBlock(
                         docNumber = docNumber,
                         date = productsInGroup.firstOrNull()?.linkedDate,
-                        modifier = Modifier.animateItem()
                     )
                 }
             } else if (hasLinkedRow) {
-                stickyHeader(key = "header_other_lines") {
+                item(key = "header_other_lines") {
                     DocumentBottomSheetProductListSourceBlock(
                         docNumber = otherLinesLabel,
                         date = null,
-                        modifier = Modifier.animateItem()
                     )
                 }
             }
@@ -121,7 +125,6 @@ fun DocumentBottomSheetProductListChosenContent(
                     val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
                     Surface(
                         shadowElevation = elevation,
-                        modifier = Modifier.animateItem()
                     ) {
                         DocumentBottomSheetProductListChosenItem(
                             documentProduct = product,
