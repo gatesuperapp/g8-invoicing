@@ -70,11 +70,10 @@ import com.a4a.g8invoicing.shared.resources.product_price_without_tax
 import com.a4a.g8invoicing.shared.resources.product_tax
 import com.a4a.g8invoicing.shared.resources.product_unit
 import com.a4a.g8invoicing.shared.resources.product_unit_input
-import com.a4a.g8invoicing.shared.resources.select_placeholder
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
-import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.ColorBlack
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
@@ -280,7 +279,7 @@ fun ProductAddEditFormDesktop(
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Outlined.Delete,
-                                                tint = ColorDarkGray,
+                                                tint = ColorBlack,
                                                 contentDescription = deletePriceText
                                             )
                                         }
