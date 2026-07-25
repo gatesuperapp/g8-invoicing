@@ -552,7 +552,7 @@
     <string name="issuer_intra_eu_sales_info_modal_title">Intra-EU sales</string>
     <string name="issuer_intra_eu_sales_info_modal_content">Check if:\n- your company is in the European Union\n\nand\n\n- you invoice a client based in another EU country than yours.\n\ng8 will then ask, for each product, whether it is a service or goods — VAT rules differ.\n\nInvoicing only within your country, or outside the EU? Leave unchecked.</string>
     <string name="issuer_intra_eu_sales_info_desc">Intra-EU sales info</string>
-    <string name="issuer_vat_exempt_label">VAT exemption</string>
+    <string name="issuer_vat_exempt_label">Business exempt from VAT</string>
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
     <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
