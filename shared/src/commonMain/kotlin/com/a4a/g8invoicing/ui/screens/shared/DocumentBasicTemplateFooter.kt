@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
@@ -35,7 +32,6 @@ fun DocumentBasicTemplateFooter(
     // column). Display whatever is stored — toggling the module later doesn't change
     // existing docs. null/blank = no watermark on this doc.
     val watermark = document.watermarkText?.takeIf { it.isNotBlank() }
-    val uriHandler = LocalUriHandler.current
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,18 +72,17 @@ fun DocumentBasicTemplateFooter(
             )
         }
         if (watermark != null) {
-            // Tiny watermark, smaller than the address text. Whole line is clickable →
-            // opens the website. Underlined to signal interactivity.
+            // Tiny watermark, smaller than the address text. Non-interactive in the
+            // in-app preview to avoid accidental taps launching the browser; the PDF
+            // renders the same watermark with a live hyperlink (PdfGeneratorImpl).
             Text(
                 modifier = Modifier
-                    .clickable { uriHandler.openUri("https://the-gate.fr") }
                     .padding(top = 4.dp, bottom = 6.dp),
                 textAlign = TextAlign.Center,
                 text = watermark,
                 color = Color(0xFF888888),
                 fontSize = 5.sp,
                 lineHeight = 7.sp,
-                textDecoration = TextDecoration.Underline,
             )
         }
     }
