@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.form_label_edit
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
@@ -133,7 +134,7 @@ fun FormInputCreatorText(
                             ),
                         imageVector = Icons.Outlined.Fullscreen,
                         contentDescription = "Icon for description in full screen",
-                        tint = ColorGreyo
+                        tint = AppColors.iconSecondary
                     )
                 }
             }
@@ -152,7 +153,7 @@ fun FormInputCreatorText(
                             .width(10.dp),
                         imageVector = Icons.Outlined.Edit,
                         contentDescription = "Edit label",
-                        tint = ColorGreyo
+                        tint = AppColors.iconSecondary
                     )
                     Text(
                         color = ColorGreyo,

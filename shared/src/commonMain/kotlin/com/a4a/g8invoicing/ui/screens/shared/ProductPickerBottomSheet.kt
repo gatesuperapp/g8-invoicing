@@ -66,6 +66,7 @@ import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_empty_p
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_recent
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_product
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
@@ -193,7 +194,7 @@ fun ProductPickerBottomSheet(
                                     Icon(
                                         imageVector = Icons.Outlined.Search,
                                         contentDescription = null,
-                                        tint = Color.Gray,
+                                        tint = AppColors.iconSecondary,
                                         modifier = Modifier.size(20.dp),
                                     )
                                 }
@@ -229,7 +230,7 @@ fun ProductPickerBottomSheet(
                                 Icon(
                                     imageVector = Icons.Outlined.Search,
                                     contentDescription = null,
-                                    tint = Color.Black,
+                                    tint = AppColors.iconPrimary,
                                     modifier = Modifier.size(22.dp),
                                 )
                             }
@@ -246,7 +247,7 @@ fun ProductPickerBottomSheet(
                     Icon(
                         imageVector = Icons.Outlined.Add,
                         contentDescription = null,
-                        tint = Color.Black,
+                        tint = AppColors.iconPrimary,
                         modifier = Modifier.size(22.dp),
                     )
                 }

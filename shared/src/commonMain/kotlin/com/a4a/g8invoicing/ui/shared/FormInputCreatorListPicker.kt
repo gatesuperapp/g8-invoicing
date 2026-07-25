@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.clients_selected_count
 import com.a4a.g8invoicing.shared.resources.select_placeholder
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 
 
@@ -83,7 +84,7 @@ fun CustomChip(
                 .padding(start = 4.dp)
                 .size(18.dp)
                 .clickable { onRemoveClick() },
-            tint = Color.Gray
+            tint = AppColors.iconSecondary
         )
     }
 }

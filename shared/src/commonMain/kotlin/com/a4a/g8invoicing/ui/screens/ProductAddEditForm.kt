@@ -75,7 +75,7 @@ import com.a4a.g8invoicing.ui.shared.ListPicker
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorBlack
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -480,7 +480,7 @@ fun DeletePriceButton(onClick: () -> Unit) {
         Icon(
             modifier = Modifier.size(18.dp),
             imageVector = Icons.Outlined.Delete,
-            tint = ColorBlack,
+            tint = AppColors.iconPrimary,
             contentDescription = deletePriceText
         )
     }

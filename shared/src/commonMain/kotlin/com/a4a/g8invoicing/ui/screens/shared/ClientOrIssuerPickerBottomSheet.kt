@@ -73,6 +73,7 @@ import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_c
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_issuer
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
@@ -233,7 +234,7 @@ fun ClientOrIssuerPickerBottomSheet(
                                     Icon(
                                         imageVector = Icons.Outlined.Search,
                                         contentDescription = null,
-                                        tint = Color.Gray,
+                                        tint = AppColors.iconSecondary,
                                         modifier = Modifier.size(20.dp),
                                     )
                                 }
@@ -273,7 +274,7 @@ fun ClientOrIssuerPickerBottomSheet(
                                     Icon(
                                         imageVector = Icons.Outlined.Search,
                                         contentDescription = null,
-                                        tint = Color.Black,
+                                        tint = AppColors.iconPrimary,
                                         modifier = Modifier.size(22.dp),
                                     )
                                 }
@@ -291,7 +292,7 @@ fun ClientOrIssuerPickerBottomSheet(
                     Icon(
                         imageVector = Icons.Outlined.Add,
                         contentDescription = null,
-                        tint = Color.Black,
+                        tint = AppColors.iconPrimary,
                         modifier = Modifier.size(22.dp),
                     )
                 }

@@ -48,6 +48,7 @@ import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.tax_rate_add_rate
 import com.a4a.g8invoicing.ui.shared.Separator
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.callForActions
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
@@ -172,7 +173,7 @@ fun ProductTaxRatesContent(
                             imageVector = Icons.Outlined.Settings,
                             contentDescription = "Modifier les taux",
                             modifier = Modifier.size(20.dp),
-                            tint = Color.Gray
+                            tint = AppColors.iconSecondary
                         )
                     }
                 }
@@ -378,7 +379,7 @@ private fun TaxRateEditRow(
                     imageVector = Icons.Outlined.Edit,
                     contentDescription = "Modifier",
                     modifier = Modifier.size(20.dp),
-                    tint = Color.Gray
+                    tint = AppColors.iconSecondary
                 )
             }
         }
@@ -393,7 +394,7 @@ private fun TaxRateEditRow(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Supprimer",
                     modifier = Modifier.size(20.dp),
-                    tint = Color.Gray
+                    tint = AppColors.iconSecondary
                 )
             }
         }

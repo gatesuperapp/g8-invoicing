@@ -73,6 +73,7 @@ import com.a4a.g8invoicing.shared.resources.gstore_title
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.WebsiteFooter
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
@@ -337,7 +338,7 @@ private fun GStoreModuleCard(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = ColorVioletLight,
+                        tint = AppColors.accent,
                         modifier = Modifier.size(22.dp),
                     )
                 }
@@ -418,7 +419,7 @@ private fun ModuleDetailDialog(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    tint = Color.Gray,
+                    tint = AppColors.iconSecondary,
                 )
             }
 
@@ -442,7 +443,7 @@ private fun ModuleDetailDialog(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = ColorVioletLight,
+                            tint = AppColors.accent,
                             modifier = Modifier.size(22.dp),
                         )
                     }

@@ -101,8 +101,8 @@ import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
-import com.a4a.g8invoicing.ui.theme.ColorBlack
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import com.a4a.g8invoicing.ui.theme.inputLabel
@@ -836,7 +836,7 @@ fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
             modifier = Modifier
                 .size(22.dp),
             imageVector = Icons.Outlined.DeleteOutline,
-            tint = ColorBlack,
+            tint = AppColors.iconPrimary,
             contentDescription = contentDescription
         )
     }

@@ -51,6 +51,7 @@ import com.a4a.g8invoicing.shared.resources.whats_new_gstore_description
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_title
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
@@ -127,7 +128,7 @@ fun WhatsNewDialog(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(Res.string.whats_new_close),
-                        tint = Color.Gray
+                        tint = AppColors.iconSecondary
                     )
                 }
 

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.EmailState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.inputField
 
 data class EmailListInput(
@@ -195,7 +196,7 @@ fun EmailChip(
                 .padding(start = 4.dp)
                 .size(18.dp)
                 .clickable { onRemoveClick() },
-            tint = Color.Gray
+            tint = AppColors.iconSecondary
         )
     }
 }

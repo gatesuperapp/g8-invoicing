@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import com.a4a.g8invoicing.ui.theme.inputLabel
 
@@ -193,7 +194,7 @@ fun LogoPickerComponent(
                     Icon(
                         imageVector = Icons.Outlined.AddPhotoAlternate,
                         contentDescription = null,
-                        tint = ColorGreyo,
+                        tint = AppColors.iconSecondary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
