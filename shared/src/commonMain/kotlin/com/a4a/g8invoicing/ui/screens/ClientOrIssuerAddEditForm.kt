@@ -83,9 +83,6 @@ import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_desc
 import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_content
 import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_title
 import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_label
-import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_info_desc
-import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_info_modal_content
-import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_info_modal_title
 import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_label
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
@@ -192,9 +189,6 @@ fun ClientOrIssuerAddEditForm(
     val issuerLogoErrorTitle = stringResource(Res.string.issuer_logo_error_title)
     val issuerLogoErrorDismiss = stringResource(Res.string.issuer_logo_error_dismiss)
     val issuerVatExemptLabel = stringResource(Res.string.issuer_vat_exempt_label)
-    val issuerVatExemptInfoTitle = stringResource(Res.string.issuer_vat_exempt_info_modal_title)
-    val issuerVatExemptInfoContent = stringResource(Res.string.issuer_vat_exempt_info_modal_content)
-    val issuerVatExemptInfoDesc = stringResource(Res.string.issuer_vat_exempt_info_desc)
     val issuerIntraEuSalesLabel = stringResource(Res.string.issuer_intra_eu_sales_label)
     val issuerIntraEuSalesInfoTitle = stringResource(Res.string.issuer_intra_eu_sales_info_modal_title)
     val issuerIntraEuSalesInfoContent = stringResource(Res.string.issuer_intra_eu_sales_info_modal_content)
@@ -623,9 +617,9 @@ fun ClientOrIssuerAddEditForm(
 
             Spacer(Modifier.padding(bottom = 16.dp))
 
-            // Franchise en base de TVA (BT-118=E dans Factur-X). Toggle Switch dans un panneau
-            // à part, même style visuel que le logo. La mention légale correspondante est
-            // ajoutée par le sérialiseur XML au moment de la génération, pas ici.
+            // VAT exemption toggle (BT-118=E in Factur-X). Switch panel styled like the
+            // logo panel above. The matching legal mention is appended by the XML
+            // serializer at generation time, not here.
             Row(
                 modifier = Modifier
                     .background(color = Color.White, shape = RoundedCornerShape(6.dp))
@@ -637,13 +631,6 @@ fun ClientOrIssuerAddEditForm(
                     text = issuerVatExemptLabel,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                )
-                InfoTooltipButton(
-                    title = issuerVatExemptInfoTitle,
-                    content = issuerVatExemptInfoContent,
-                    contentDescription = issuerVatExemptInfoDesc,
-                    persistenceKey = "issuer_vat_exempt",
-                    modifier = Modifier.padding(start = 8.dp),
                 )
                 Spacer(Modifier.weight(1f))
                 Switch(
