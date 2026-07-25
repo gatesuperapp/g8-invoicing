@@ -397,7 +397,16 @@ class PdfGeneratorImpl(
     }
 
     private fun createClientRectangleAndContent(content: List<Paragraph>): Cell {
-        val cell = Cell().setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.CENTER).setPaddingBottom(8f)
+        // RoundedCellRenderer draws the visible border 2.5pt inside the cell edges, so
+        // the effective inner gap is (padding − 2.5)pt. 15pt cell padding gives ~12.5pt
+        // of visible breathing room, matching the 10.dp used by the in-app preview and
+        // keeping long client names clear of the rounded border.
+        val cell = Cell()
+            .setBorder(Border.NO_BORDER)
+            .setTextAlignment(TextAlignment.CENTER)
+            .setPaddingBottom(8f)
+            .setPaddingLeft(15f)
+            .setPaddingRight(15f)
         content.forEach { cell.add(it) }
         cell.setNextRenderer(RoundedCellRenderer(cell, ColorConstants.LIGHT_GRAY, false))
         return cell

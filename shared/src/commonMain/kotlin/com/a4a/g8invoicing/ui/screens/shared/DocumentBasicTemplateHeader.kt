@@ -300,8 +300,8 @@ fun DocumentClientRectangleAndContent(
                 SolidColor(Color.LightGray),
                 shape = RoundedCornerShape(15.dp)
             )
-            .padding(top = 8.dp)
             .fillMaxWidth()
+            .padding(top = 8.dp, start = 10.dp, end = 10.dp)
         customModifier2 = if (addressIndex == 0)
             customModifier2.then(
                 Modifier
