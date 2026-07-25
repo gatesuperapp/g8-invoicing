@@ -72,12 +72,15 @@ fun FormInputCreatorEmailList(
     }
     var emailError by remember { mutableStateOf<String?>(null) }
 
-    // Function to try adding an email with validation
+    // Read the pending value fresh on every call: onDone and onFocusChanged both fire
+    // when the user taps the keyboard "Done" button, and reading through a captured
+    // local would let the second call re-add the value the first call just consumed.
     fun tryAddEmail() {
-        if (pendingEmail.isNotBlank()) {
-            val validationError = FormInputsValidator.validateEmail(pendingEmail.trim())
+        val current = input.pendingEmailStateHolder?.value ?: localPendingEmail
+        if (current.isNotBlank()) {
+            val validationError = FormInputsValidator.validateEmail(current.trim())
             if (validationError == null) {
-                input.onAddEmail(pendingEmail.trim())
+                input.onAddEmail(current.trim())
                 setPendingEmail("")
                 emailError = null
                 input.onPendingEmailValidationResult(true)
