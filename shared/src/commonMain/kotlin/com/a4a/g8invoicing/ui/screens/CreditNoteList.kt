@@ -88,7 +88,6 @@ fun CreditNoteList(
                     openAlertDialog.value = true
                 },
                 onClickDuplicate = {
-                    isDimActive.value = !isDimActive.value
                     onClickDuplicate(selectedItems.toList())
                     resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                 },
