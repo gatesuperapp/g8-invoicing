@@ -107,8 +107,22 @@ class PdfGeneratorImpl(
         if (client == null) return null
         val first = client.firstName?.text?.trim().orEmpty()
         val last = client.name.text.trim()
-        val full = listOf(first, last).filter { it.isNotEmpty() }.joinToString(" ").uppercase()
-        return sanitizeForFileName(full).ifEmpty { null }
+
+        // Cap the client segment so pathological names (users have typed 300+ char
+        // "names") don't push the filename past MediaStore's ~255-byte limit — which
+        // makes resolver.insert() silently return null and the exporter treat it as
+        // success. Rules: the first name is always reduced to its initial ("Last F");
+        // if the last name alone still exceeds 30 chars, truncate it and drop the
+        // initial. No trailing dot — a segment ending in "." would render as
+        // "…F..pdf" once the extension is appended.
+        val display: String = when {
+            last.length > 30 -> last.take(30)
+            first.isNotEmpty() && last.isNotEmpty() -> "$last ${first.take(1)}"
+            last.isNotEmpty() -> last
+            else -> first
+        }
+
+        return sanitizeForFileName(display.uppercase()).ifEmpty { null }
     }
 
     /**

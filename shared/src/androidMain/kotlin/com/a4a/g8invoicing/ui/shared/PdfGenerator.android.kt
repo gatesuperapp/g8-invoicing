@@ -62,17 +62,19 @@ actual class PdfFileManager actual constructor() {
             }
 
             val resolver = context.contentResolver
+            // insert() returns null on failure (e.g. filename too long, quota, disk
+            // full). Throwing surfaces the failure through the exporter's try/catch;
+            // silently continuing would leave the UI in ExportStatus.DONE with no file.
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                ?: throw IllegalStateException("MediaStore.insert returned null for $finalFileName")
 
-            uri?.let {
-                resolver.openOutputStream(it)?.use { outputStream ->
-                    tempFile.inputStream().use { inputStream ->
-                        inputStream.copyTo(outputStream)
-                    }
+            resolver.openOutputStream(uri)?.use { outputStream ->
+                tempFile.inputStream().use { inputStream ->
+                    inputStream.copyTo(outputStream)
                 }
-                AndroidPdfContext.lastExportedPdfUri = it
-                AndroidPdfContext.lastExportedPdfFileName = finalFileName
             }
+            AndroidPdfContext.lastExportedPdfUri = uri
+            AndroidPdfContext.lastExportedPdfFileName = finalFileName
 
             tempFile.delete()
             finalFileName
