@@ -14,7 +14,6 @@ import com.a4a.g8invoicing.shared.resources.dmsansmedium
 import com.a4a.g8invoicing.shared.resources.dmsansregular
 import com.a4a.g8invoicing.shared.resources.helvetica
 import com.a4a.g8invoicing.shared.resources.helveticabold
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.Font
 
 @Composable
@@ -75,155 +74,223 @@ fun createCustomTypography(): Typography {
     )
 }
 
-// Section title: small uppercase, muted black, slight letter-spacing.
-// Matches the section title style used in the desktop forms.
-// Call sites should pass already-uppercased text (e.g. `text.uppercase()`).
-val Typography.textTitle: TextStyle
+// -----------------------------------------------------------------------------
+// Semantic text tokens.
+//
+// Every Text() in the app should reference one of these via
+// `style = MaterialTheme.typography.textXxx`. Never set fontSize / color /
+// weight inline. If a new visual variant is needed, add a token here.
+//
+// Colours are baked in so the call site never touches AppColors for text.
+// For a one-off tint (rare), use `.copy(color = AppColors.xxx)`.
+// -----------------------------------------------------------------------------
+
+val Typography.textDisplay: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFontBold(),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 12.sp,
-            color = Color.Black.copy(alpha = 0.6f),
-            letterSpacing = 0.08.em,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontSize = 40.sp,
+        color = AppColors.textPrimary,
+    )
 
-val Typography.textNormalBold: TextStyle
+val Typography.textHeadline: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFontBold(),
-            fontSize = 16.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontSize = 24.sp,
+        color = AppColors.textPrimary,
+    )
 
-val Typography.textSmall: TextStyle
+val Typography.textScreenTitle: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFont(),
-            fontSize = 14.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontSize = 20.sp,
+        color = AppColors.textPrimary,
+    )
 
-
-val Typography.textVerySmall: TextStyle
+val Typography.textBody: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFont(),
-            fontSize = 9.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 16.sp,
+        color = AppColors.textPrimary,
+    )
 
-val Typography.textWithLinkCenteredMedium: TextStyle
+val Typography.textBodyBold: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFont(),
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = AppColors.textPrimary,
+    )
 
-
-val Typography.callForActions: TextStyle
+val Typography.textInputPlaceholder: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFont(),
-            color = Color.DarkGray,
-            fontSize = 14.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 16.sp,
+        color = AppColors.textDisabled,
+    )
 
-val Typography.callForActionsViolet: TextStyle
+val Typography.textBodySmall: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFontBold(),
-            color = ColorVioletLight,
-            fontSize = 14.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 14.sp,
+        color = AppColors.textPrimary,
+    )
 
-val Typography.callForActionsDisabled: TextStyle
+val Typography.textCta: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFontBold(),
-            color = ColorDarkGrayTransp,
-            fontSize = 14.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = AppColors.textLink,
+    )
 
-
-val Typography.inputLabel: TextStyle
+val Typography.textCtaDisabled: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFont(),
-            color = ColorDarkGray,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = AppColors.textDisabled,
+    )
 
-val Typography.inputField: TextStyle
+val Typography.textSecondary: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getUiFont(),
-            color = Color.LightGray,
-            fontSize = 16.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 13.sp,
+        color = AppColors.textSecondary,
+    )
+
+// Small caps section label with letter-spacing (RÉCENTS, PARAMÈTRES…).
+// Call sites must uppercase the text themselves (e.g. `text.uppercase()`).
+val Typography.textSection: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        letterSpacing = 0.08.em,
+        color = AppColors.textSecondary,
+    )
+
+val Typography.textCaption: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 12.sp,
+        color = AppColors.textSecondary,
+    )
+
+val Typography.textTiny: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        fontSize = 10.sp,
+        color = AppColors.textPrimary,
+    )
+
+// -----------------------------------------------------------------------------
+// PDF-only text styles. Kept separate from the in-app scale because the PDF
+// renders at a fixed physical size — these sp values feed iText/Compose paint
+// on the generated document, not on-screen typography.
+// -----------------------------------------------------------------------------
 
 val Typography.textForDocuments: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getPdfFont(),
-            fontSize = 6.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getPdfFont(),
+        fontSize = 6.sp,
+    )
 
 val Typography.textForDocumentsBold: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getPdfFontBold(),
-            fontSize = 6.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getPdfFontBold(),
+        fontSize = 6.sp,
+    )
 
 val Typography.textForDocumentsSecondary: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            color = Color.DarkGray,
-            fontFamily = getPdfFont(),
-            fontSize = 6.sp,
-        )
-    }
-
+    get() = TextStyle(
+        color = Color.DarkGray,
+        fontFamily = getPdfFont(),
+        fontSize = 6.sp,
+    )
 
 val Typography.titleForDocuments: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getPdfFontBold(),
-            fontSize = 13.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getPdfFontBold(),
+        fontSize = 13.sp,
+    )
 
 val Typography.subTitleForDocuments: TextStyle
     @Composable
-    get() {
-        return TextStyle(
-            fontFamily = getPdfFontBold(),
-            fontSize = 10.sp,
-        )
-    }
+    get() = TextStyle(
+        fontFamily = getPdfFontBold(),
+        fontSize = 10.sp,
+    )
+
+// -----------------------------------------------------------------------------
+// LEGACY tokens — kept only to prevent a compile cascade during the design-
+// token migration. Migrate call sites to the tokens above, then delete these.
+// See migration mapping in the phase-5 cleanup commit.
+// -----------------------------------------------------------------------------
+
+val Typography.textTitle: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = getUiFontBold(),
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp,
+        color = Color.Black.copy(alpha = 0.6f),
+        letterSpacing = 0.08.em,
+    )
+
+val Typography.textNormalBold: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFontBold(), fontSize = 16.sp)
+
+val Typography.textSmall: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFont(), fontSize = 14.sp)
+
+val Typography.textVerySmall: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFont(), fontSize = 9.sp)
+
+val Typography.textWithLinkCenteredMedium: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFont(), fontSize = 16.sp, textAlign = TextAlign.Center)
+
+val Typography.callForActions: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFont(), color = Color.DarkGray, fontSize = 14.sp)
+
+val Typography.callForActionsViolet: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFontBold(), color = ColorVioletLight, fontSize = 14.sp)
+
+val Typography.callForActionsDisabled: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFontBold(), color = ColorDarkGrayTransp, fontSize = 14.sp)
+
+val Typography.inputLabel: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = getUiFont(),
+        color = ColorBlack,
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+    )
+
+val Typography.inputField: TextStyle
+    @Composable
+    get() = TextStyle(fontFamily = getUiFont(), color = Color.LightGray, fontSize = 16.sp)
