@@ -52,13 +52,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.formatAmount
@@ -68,6 +66,11 @@ import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_empty_p
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_recent
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_product
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textCaption
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
+import com.a4a.g8invoicing.ui.theme.textSection
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -170,12 +173,11 @@ fun ProductPickerBottomSheet(
                                 .fillMaxWidth()
                                 .height(52.dp)
                                 .focusRequester(focusRequester),
-                            textStyle = TextStyle(fontSize = 14.sp),
+                            textStyle = MaterialTheme.typography.textBodySmall,
                             placeholder = {
                                 Text(
                                     text = stringResource(Res.string.currency_picker_search),
-                                    fontSize = 14.sp,
-                                    color = Color.Gray,
+                                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.Gray),
                                 )
                             },
                             leadingIcon = {
@@ -214,8 +216,7 @@ fun ProductPickerBottomSheet(
                         ) {
                             Text(
                                 text = stringResource(Res.string.document_bottom_sheet_picker_title_product),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
+                                style = MaterialTheme.typography.textScreenTitle,
                                 modifier = Modifier.padding(start = 12.dp),
                             )
                             Spacer(Modifier.weight(1f))
@@ -278,8 +279,7 @@ fun ProductPickerBottomSheet(
                     ) {
                         Text(
                             text = stringResource(Res.string.document_bottom_sheet_picker_empty_product),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray,
+                            style = MaterialTheme.typography.textBodySmall.copy(color = Color.Gray),
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -313,9 +313,7 @@ fun ProductPickerBottomSheet(
                             stickyHeader(key = "header-$letter") {
                                 Text(
                                     text = letter,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.Gray,
+                                    style = MaterialTheme.typography.textCaption.copy(fontWeight = FontWeight.SemiBold),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .background(Color.White)
@@ -342,9 +340,7 @@ fun ProductPickerBottomSheet(
 private fun RecentProductsHeader(text: String) {
     Text(
         text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.SemiBold,
-        color = Color.Gray,
+        style = MaterialTheme.typography.textSection,
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
@@ -378,17 +374,14 @@ private fun ProductPickerRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = product.name.text,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.textBodyBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             product.description?.text?.takeIf { it.isNotBlank() }?.let { desc ->
                 Text(
                     text = desc,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.textCaption,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -396,8 +389,7 @@ private fun ProductPickerRow(
         }
         Text(
             text = price?.let { formatAmount(it, currencyCode) }.orEmpty(),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodyBold,
         )
     }
 }

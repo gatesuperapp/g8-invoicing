@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +40,8 @@ import com.a4a.g8invoicing.ui.screens.QuoteList
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.currentTimeMillis
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -153,18 +156,15 @@ private fun QuoteTrialExhaustedDialog(onDismiss: () -> Unit) {
             ) {
                 Text(
                     text = stringResource(Res.string.gstore_quote_trial_exhausted_title),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.textBodyBold.copy(fontWeight = FontWeight.Bold),
                     textAlign = TextAlign.Center,
-                    color = Color.Black,
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
                     text = stringResource(Res.string.gstore_quote_trial_exhausted_body),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                     lineHeight = 20.sp,
                     textAlign = TextAlign.Center,
-                    color = Color.DarkGray,
                 )
                 Spacer(Modifier.height(20.dp))
                 Button(

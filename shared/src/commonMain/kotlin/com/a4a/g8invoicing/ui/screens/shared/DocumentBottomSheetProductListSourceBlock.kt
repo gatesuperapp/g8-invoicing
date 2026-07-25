@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 
 // Inert header block shown above a group of product rows that share the same source
 // document (delivery note or quote). Displays "<docNumber> — <date>" so users can tie
@@ -44,10 +45,9 @@ fun DocumentBottomSheetProductListSourceBlock(
     ) {
         Text(
             text = label,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

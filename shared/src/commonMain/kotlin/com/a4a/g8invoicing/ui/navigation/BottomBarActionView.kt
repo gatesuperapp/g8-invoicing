@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,8 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.a4a.g8invoicing.ui.theme.textTiny
 
 @Composable
 fun BottomBarActionView(
@@ -159,7 +160,7 @@ fun AddIconAndLabelInColumn(action: AppBarAction, iconSize: Dp? = null) {
         action.label?.let {
             Text(
                 text = it,
-                fontSize = 10.sp,
+                style = MaterialTheme.typography.textTiny,
             )
         }
     }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -21,9 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 
 @Composable
@@ -66,8 +67,7 @@ fun DocumentClientOrIssuerContent(
             Text(
                 modifier = Modifier.weight(1F),
                 text = item.name.text + (item.firstName?.let { " " + it.text } ?: ""),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
             )
             Icon(
                 modifier = Modifier

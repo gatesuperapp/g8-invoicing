@@ -68,7 +68,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -76,7 +75,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -155,7 +153,9 @@ import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textNormalBold
+import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -378,9 +378,10 @@ fun Account(
                                     showDeleteAccountDialog = true
                                 },
                             text = stringResource(Res.string.account_delete_cta),
-                            fontSize = 13.sp,
-                            color = ColorRedLate,
-                            textDecoration = TextDecoration.Underline,
+                            style = MaterialTheme.typography.textSecondary.copy(
+                                color = ColorRedLate,
+                                textDecoration = TextDecoration.Underline,
+                            ),
                         )
                     }
                 }
@@ -717,8 +718,8 @@ private fun LoggedInContent(
                 stringResource(Res.string.account_renewal_date, dateLabel)
             }
             Text(
-                fontSize = 13.sp,
                 text = text,
+                style = MaterialTheme.typography.textSecondary,
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -728,9 +729,10 @@ private fun LoggedInContent(
         Text(
             modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
             text = manageLabel,
-            fontSize = 13.sp,
-            color = ColorVioletLight,
-            textDecoration = TextDecoration.Underline,
+            style = MaterialTheme.typography.textSecondary.copy(
+                color = ColorVioletLight,
+                textDecoration = TextDecoration.Underline,
+            ),
         )
         Spacer(modifier = Modifier.height(12.dp))
     }
@@ -739,9 +741,10 @@ private fun LoggedInContent(
     Text(
         modifier = Modifier.clickable { onLogout() },
         text = stringResource(Res.string.account_logout),
-        fontSize = 13.sp,
-        color = ColorVioletLight,
-        textDecoration = TextDecoration.Underline,
+        style = MaterialTheme.typography.textSecondary.copy(
+            color = ColorVioletLight,
+            textDecoration = TextDecoration.Underline,
+        ),
     )
 }
 
@@ -954,8 +957,7 @@ private fun IssuerListRow(
         Text(
             modifier = Modifier.weight(1F),
             text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
         )
         Icon(
             modifier = Modifier
@@ -1019,7 +1021,7 @@ private fun LegalLinksFooter(uriHandler: androidx.compose.ui.platform.UriHandler
     ) {
         ClickableText(
             text = annotated,
-            style = TextStyle(fontSize = 13.sp, textAlign = TextAlign.Center),
+            style = MaterialTheme.typography.textSecondary.copy(textAlign = TextAlign.Center),
             onClick = { offset ->
                 annotated.getStringAnnotations(tag = "terms", start = offset, end = offset)
                     .firstOrNull()?.let { uriHandler.openUri(it.item) }

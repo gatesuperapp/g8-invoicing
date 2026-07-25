@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.RequestQuote
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -73,6 +74,11 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.WebsiteFooter
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textCaption
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
+import com.a4a.g8invoicing.ui.theme.textTiny
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -281,9 +287,8 @@ private fun PremiumHintDialog(
         ) {
             Text(
                 text = message,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                 lineHeight = 20.sp,
-                color = Color.DarkGray,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -344,15 +349,12 @@ private fun GStoreModuleCard(
 
             Text(
                 text = title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = Color.Black,
+                style = MaterialTheme.typography.textBodyBold,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
-                fontSize = 12.sp,
-                color = Color.DarkGray,
+                style = MaterialTheme.typography.textCaption,
                 lineHeight = 16.sp,
             )
 
@@ -452,18 +454,15 @@ private fun ModuleDetailDialog(
 
                 Text(
                     text = title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.Black,
+                    style = MaterialTheme.typography.textScreenTitle,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = detail,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                     lineHeight = 20.sp,
-                    color = Color.DarkGray,
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -496,9 +495,10 @@ private fun PremiumPill() {
     ) {
         Text(
             text = stringResource(Res.string.gstore_premium_badge),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = ColorVioletLight,
+            style = MaterialTheme.typography.textTiny.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = ColorVioletLight,
+            ),
         )
     }
 }

@@ -22,10 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
@@ -42,7 +40,8 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
-import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.invoice_due_date
@@ -138,17 +137,16 @@ fun DocumentListItem(
             ) {
                 Text(
                     text = document.documentNumber.text,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.textBodyBold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 document.documentClient?.let {
                     Text(
                         text = it.name.text + (it.firstName?.let { " " + it.text } ?: ""),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSmall,
+                        style = MaterialTheme.typography.textSecondary,
                     )
                 } ?: Text(" - ")
 
@@ -166,7 +164,7 @@ fun DocumentListItem(
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSmall,
+                            style = MaterialTheme.typography.textSecondary,
                         )
                     }
                 }
@@ -178,8 +176,7 @@ fun DocumentListItem(
             ) {
                 Text(
                     text = document.documentDate.substringBefore(" "),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.textBodyBold,
                 )
                 Text(
                     text = document.documentTotalPrices?.totalPriceWithTax?.let {
@@ -190,7 +187,7 @@ fun DocumentListItem(
                         DocumentTag.LATE -> ColorPinkOrange
                         else -> Color.Black
                     },
-                    style = MaterialTheme.typography.textSmall
+                    style = MaterialTheme.typography.textSecondary,
                 )
             }
         }

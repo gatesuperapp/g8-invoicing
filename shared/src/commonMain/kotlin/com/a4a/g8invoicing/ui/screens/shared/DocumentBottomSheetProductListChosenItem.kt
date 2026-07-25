@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -29,10 +30,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 private val RowViolet = ColorVioletLight.copy(alpha = 0.08f)
@@ -116,10 +117,9 @@ fun DocumentBottomSheetProductListChosenItem(
             Text(
                 modifier = Modifier.weight(1F),
                 text = documentProduct.name.text,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Icon(
                 modifier = Modifier
