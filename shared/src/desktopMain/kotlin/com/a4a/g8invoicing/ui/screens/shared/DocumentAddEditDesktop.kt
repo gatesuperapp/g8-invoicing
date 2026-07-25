@@ -108,7 +108,7 @@ fun DocumentAddEditDesktop(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -438,7 +438,7 @@ private fun DocumentDesktopTextTab(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -638,7 +638,7 @@ private fun DocumentDesktopProductsTab(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -736,8 +736,8 @@ private fun DocumentDesktopProductsTab(
                 onClickCancelForm()
                 onShowDocumentForm(false)
             },
-            onClickDone = {
-                onClickDoneForm(typeOfCreation)
+            onClickDone = { syncToMaster ->
+                onClickDoneForm(typeOfCreation, syncToMaster)
                 onShowDocumentForm(false)
             }
         )

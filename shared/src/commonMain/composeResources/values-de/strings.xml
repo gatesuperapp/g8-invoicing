@@ -76,6 +76,9 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_bottom_sheet_picker_empty_product">Keine Produkte gefunden.\nTippe auf +, um eines hinzuzufügen.</string>
     <string name="document_bottom_sheet_picker_recent">Zuletzt verwendet</string>
     <string name="document_bottom_sheet_picker_edit_link">Bearbeiten</string>
+    <string name="document_form_sync_client_to_master">Änderungen auch auf die Kundenkarte anwenden</string>
+    <string name="document_form_sync_issuer_to_master">Änderungen auch auf die Erstellerkarte anwenden</string>
+    <string name="document_form_sync_product_to_master">Änderungen auch auf die Produktkarte anwenden</string>
     <string name="document_bottom_sheet_picker_title_client">Kunden</string>
     <string name="document_bottom_sheet_picker_title_issuer">Ersteller</string>
     <string name="document_bottom_sheet_picker_title_product">Produkte</string>

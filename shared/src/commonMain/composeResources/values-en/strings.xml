@@ -66,6 +66,9 @@
     <string name="document_bottom_sheet_picker_empty_product">No product found.\nTap + to add one.</string>
     <string name="document_bottom_sheet_picker_recent">Recent</string>
     <string name="document_bottom_sheet_picker_edit_link">Edit</string>
+    <string name="document_form_sync_client_to_master">Also apply these changes to the client card</string>
+    <string name="document_form_sync_issuer_to_master">Also apply these changes to the issuer card</string>
+    <string name="document_form_sync_product_to_master">Also apply these changes to the product card</string>
     <string name="document_bottom_sheet_picker_title_client">Clients</string>
     <string name="document_bottom_sheet_picker_title_issuer">Issuers</string>
     <string name="document_bottom_sheet_picker_title_product">Products</string>

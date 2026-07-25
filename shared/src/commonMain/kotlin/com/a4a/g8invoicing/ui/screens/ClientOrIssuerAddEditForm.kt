@@ -30,7 +30,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
@@ -74,6 +76,8 @@ import com.a4a.g8invoicing.shared.resources.client_notes
 import com.a4a.g8invoicing.shared.resources.client_notes_input
 import com.a4a.g8invoicing.shared.resources.client_phone
 import com.a4a.g8invoicing.shared.resources.client_phone_input
+import com.a4a.g8invoicing.shared.resources.document_form_sync_client_to_master
+import com.a4a.g8invoicing.shared.resources.document_form_sync_issuer_to_master
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_dismiss
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
 import com.a4a.g8invoicing.shared.resources.issuer_logo_label
@@ -98,9 +102,10 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
-import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.ColorBlack
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.inputLabel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -116,6 +121,8 @@ fun ClientOrIssuerAddEditForm(
     scrollState: ScrollState = rememberScrollState(),
     pendingEmailStateHolder: MutableState<String>? = null,
     onPendingEmailValidationResult: (Boolean) -> Unit = {},
+    syncToMasterChecked: Boolean = false,
+    onSyncToMasterChange: (Boolean) -> Unit = {},
 ) {
     val dataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
     var defaultCountryCode by remember {
@@ -737,6 +744,48 @@ fun ClientOrIssuerAddEditForm(
                 errors = clientOrIssuerUiState.errors
             )
         }
+
+        // Sync-to-master switch — only when editing a document snapshot of an
+        // existing master client / issuer. Sits in its own white block, detached
+        // from the notes block above so the toggle reads as a separate decision.
+        // Style matches the VAT-exempt / intra-EU switches above.
+        val showSyncSwitch = isInBottomSheetModal && (
+            typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_CLIENT ||
+                typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER
+            )
+        if (showSyncSwitch) {
+            Spacer(modifier = Modifier.padding(top = 12.dp))
+            Row(
+                modifier = Modifier
+                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        if (typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER)
+                            Res.string.document_form_sync_issuer_to_master
+                        else Res.string.document_form_sync_client_to_master
+                    ),
+                    style = MaterialTheme.typography.inputLabel,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 15.dp),
+                )
+                Switch(
+                    checked = syncToMasterChecked,
+                    onCheckedChange = { onSyncToMasterChange(it) },
+                    modifier = Modifier.scale(0.8f),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorVioletLink,
+                        checkedBorderColor = Color.Transparent,
+                        uncheckedBorderColor = Color.Transparent,
+                    ),
+                )
+            }
+        }
     }
 
     // Country picker sheet — one instance shared by the three possible address rows.
@@ -787,7 +836,7 @@ fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
             modifier = Modifier
                 .size(22.dp),
             imageVector = Icons.Outlined.DeleteOutline,
-            tint = ColorDarkGray,
+            tint = ColorBlack,
             contentDescription = contentDescription
         )
     }

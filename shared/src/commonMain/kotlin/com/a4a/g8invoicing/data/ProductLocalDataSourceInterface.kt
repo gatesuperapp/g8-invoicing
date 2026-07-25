@@ -15,7 +15,11 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 interface ProductLocalDataSourceInterface {
     suspend fun fetchProduct(id: Long): ProductState?
     fun fetchAllProducts(): Flow<List<ProductState>>
-    suspend fun saveProduct(product: ProductState)
+    /** Insert a new Product row (+ its default price row). Returns the row id of
+     * the created Product, or null if the insert failed. Callers building a
+     * DocumentProduct in the same flow need the id to backfill
+     * DocumentProduct.product_id and keep the master-to-document link. */
+    suspend fun saveProduct(product: ProductState): Long?
     suspend fun duplicateProducts(products: List<ProductState>, duplicateNameSuffix: String)
     suspend fun updateProduct(product: ProductState)
     suspend fun updateDocumentProduct(documentProduct: DocumentProductState)
@@ -30,6 +34,13 @@ interface ProductLocalDataSourceInterface {
     /** Master Product ids for the 3 most recently used products in documents,
      * most-recent first. Feeds the "Récents" section of the ProductPicker. */
     suspend fun fetchLast3RecentProductIds(): List<Long>
+
+    /** Push the fields of an edited DocumentProduct back to the master Product
+     * row it originated from (name, description, prices, tax, unit, unit_code,
+     * type). No-op if [documentProduct].productId is null or the master row is
+     * gone. Additional prices are not touched — those live on the master and
+     * aren't representable on a DocumentProduct. */
+    suspend fun syncMasterFromDocumentProduct(documentProduct: DocumentProductState)
     /** Last non-null ProductType used on a Product, for sticky-default on new products. */
     suspend fun fetchLastUsedProductType(): ProductNature?
     /** Most recently created Product (highest id). Used to pre-fill unit / unitCode /

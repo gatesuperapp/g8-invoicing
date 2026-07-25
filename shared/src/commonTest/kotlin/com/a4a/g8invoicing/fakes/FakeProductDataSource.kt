@@ -33,10 +33,11 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
         return productsFlow
     }
 
-    override suspend fun saveProduct(product: ProductState) {
+    override suspend fun saveProduct(product: ProductState): Long? {
         val newProduct = product.copy(id = nextId++)
         products.add(newProduct)
         productsFlow.value = products.toList()
+        return newProduct.id?.toLong()
     }
 
     override suspend fun duplicateProducts(products: List<ProductState>, duplicateNameSuffix: String) {
@@ -112,6 +113,22 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
             .mapNotNull { it.id?.toLong() }
             .distinct()
             .take(3)
+
+    override suspend fun syncMasterFromDocumentProduct(documentProduct: com.a4a.g8invoicing.ui.states.DocumentProductState) {
+        val masterId = documentProduct.productId ?: return
+        val index = products.indexOfFirst { it.id == masterId }
+        if (index < 0) return
+        val existing = products[index]
+        products[index] = existing.copy(
+            name = documentProduct.name,
+            description = documentProduct.description,
+            unit = documentProduct.unit,
+            unitCode = documentProduct.unitCode,
+            type = documentProduct.type,
+            defaultPriceWithoutTax = documentProduct.priceWithoutTax ?: existing.defaultPriceWithoutTax,
+        )
+        productsFlow.value = products.toList()
+    }
 
     override suspend fun fetchLastUsedProductType(): ProductNature? =
         products.mapNotNull { it.type }.lastOrNull()

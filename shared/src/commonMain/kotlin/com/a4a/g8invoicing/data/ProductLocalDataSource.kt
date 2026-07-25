@@ -44,9 +44,10 @@ class ProductLocalDataSource(
             }
     }
 
-    override suspend fun saveProduct(product: ProductState) {
+    override suspend fun saveProduct(product: ProductState): Long? {
         return withContext(DispatcherProvider.IO) {
             try {
+                var insertedId: Long? = null
                 productQueries.transaction {
                     productQueries.saveProduct(
                         id = null,
@@ -61,6 +62,7 @@ class ProductLocalDataSource(
                     )
 
                     val lastInsertedProductId = productQueries.lastInsertRowId().executeAsOne()
+                    insertedId = lastInsertedProductId
 
                     product.defaultPriceWithoutTax?.let { price ->
                         productPriceQueries.saveProductPrice(
@@ -82,8 +84,10 @@ class ProductLocalDataSource(
                         }
                     }
                 }
+                insertedId
             } catch (cause: Throwable) {
                 println("Error saving product: ${cause.message}")
+                null
             }
         }
     }
@@ -285,6 +289,40 @@ class ProductLocalDataSource(
                 .executeAsList()
                 .mapNotNull { it }
         }
+
+    override suspend fun syncMasterFromDocumentProduct(documentProduct: DocumentProductState) {
+        withContext(DispatcherProvider.IO) {
+            val masterId = documentProduct.productId?.toLong() ?: return@withContext
+            try {
+                productQueries.transaction {
+                    productQueries.updateProduct(
+                        id = masterId,
+                        name = documentProduct.name.text,
+                        description = documentProduct.description?.text,
+                        product_tax_id = documentProduct.taxRate?.let {
+                            taxQueries.getTaxRateId(it.doubleValue(false)).executeAsOneOrNull()
+                        },
+                        unit = documentProduct.unit?.text,
+                        unit_code = documentProduct.unitCode,
+                        type = documentProduct.type?.name,
+                    )
+                    // Replace only the default price row (client_id IS NULL) so
+                    // per-client "additional prices" on the master survive the sync.
+                    productPriceQueries.deleteDefaultPriceForProduct(masterId)
+                    documentProduct.priceWithoutTax?.let { price ->
+                        productPriceQueries.saveProductPrice(
+                            id = null,
+                            product_id = masterId,
+                            client_id = null,
+                            price_without_tax = price.doubleValue(false),
+                        )
+                    }
+                }
+            } catch (cause: Throwable) {
+                println("Error syncing master product $masterId from document product: ${cause.message}")
+            }
+        }
+    }
 
     override suspend fun fetchLastUsedProductType(): ProductNature? =
         withContext(DispatcherProvider.IO) {

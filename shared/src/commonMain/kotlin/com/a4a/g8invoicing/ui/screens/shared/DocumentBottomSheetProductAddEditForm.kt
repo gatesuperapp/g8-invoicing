@@ -3,6 +3,8 @@ package com.a4a.g8invoicing.ui.screens.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -10,14 +12,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -53,7 +62,10 @@ import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.LabelInfoTooltip
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.shared.resources.document_form_sync_product_to_master
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.inputLabel
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -67,6 +79,9 @@ fun DocumentBottomSheetProductAddEditForm(
     onClickForward: (ScreenElement) -> Unit,
     showFullScreenText: (ScreenElement) -> Unit,
     showProductType: Boolean = false,
+    showSyncToMasterSwitch: Boolean = false,
+    syncToMasterChecked: Boolean = false,
+    onSyncToMasterChange: (Boolean) -> Unit = {},
 ) {
     val localFocusManager = LocalFocusManager.current
 
@@ -272,6 +287,39 @@ fun DocumentBottomSheetProductAddEditForm(
                     showFullScreenText(it)
                 }
             )
+        }
+
+        // Sync-to-master switch — appears in its own white block below the main
+        // product form, only when editing a document product tied to a master
+        // Product row. Same visual pattern as the client/issuer sync switch.
+        if (showSyncToMasterSwitch) {
+            Spacer(modifier = Modifier.padding(top = 12.dp))
+            Row(
+                modifier = Modifier
+                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .fillMaxWidth()
+                    .padding(start = 35.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(Res.string.document_form_sync_product_to_master),
+                    style = MaterialTheme.typography.inputLabel,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 15.dp),
+                )
+                Switch(
+                    checked = syncToMasterChecked,
+                    onCheckedChange = { onSyncToMasterChange(it) },
+                    modifier = Modifier.scale(0.8f),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorVioletLink,
+                        checkedBorderColor = Color.Transparent,
+                        uncheckedBorderColor = Color.Transparent,
+                    ),
+                )
+            }
         }
     }
 

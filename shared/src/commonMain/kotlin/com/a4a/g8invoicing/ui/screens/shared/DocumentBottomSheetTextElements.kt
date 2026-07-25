@@ -59,7 +59,7 @@ fun DocumentBottomSheetTextElements(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     localFocusManager: FocusManager,
@@ -177,9 +177,9 @@ fun DocumentBottomSheetTextElements(
                 currentIssuerId = currentIssuerId,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
-                onClickDoneForm = {
+                onClickDoneForm = { type, syncToMaster ->
                     slideOtherComponent.value = null
-                    onClickDoneForm(it)
+                    onClickDoneForm(type, syncToMaster)
                 },
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate,

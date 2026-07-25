@@ -233,8 +233,7 @@ class ClientOrIssuerAddEditViewModel(
                     if (documentClientOrIssuer == null || documentClientOrIssuer.id == null) {
                         return false
                     }
-                    // Issuers always sync to master (automatic sync for issuers)
-                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer, true)
+                    dataSource.updateDocumentClientOrIssuer(documentClientOrIssuer, syncToMaster)
                 }
             }
             true

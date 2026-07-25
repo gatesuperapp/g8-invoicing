@@ -19,10 +19,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.sync_client_message
-import com.a4a.g8invoicing.shared.resources.sync_client_no
-import com.a4a.g8invoicing.shared.resources.sync_client_title
-import com.a4a.g8invoicing.shared.resources.sync_client_yes
 import com.a4a.g8invoicing.shared.resources.version_mismatch_client_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_client_title
 import com.a4a.g8invoicing.shared.resources.version_mismatch_keep_current
@@ -100,8 +96,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
         var showClientVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingClientToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
-        var showSyncClientDialog by remember { mutableStateOf(false) }
-        var pendingClientToSave by remember { mutableStateOf<ClientOrIssuerState?>(null) }
 
         // Version mismatch dialog for issuer
         if (showVersionMismatchDialog && pendingIssuerToEdit != null) {
@@ -190,67 +184,6 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
-                        )
-                    }
-                }
-            )
-        }
-
-        // Sync client to master dialog
-        if (showSyncClientDialog && pendingClientToSave != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    // On dismiss, save without syncing to master
-                    scope.launch {
-                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                            ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = false
-                        )
-                        creditNoteViewModel.reloadDocument()
-                        showSyncClientDialog = false
-                        pendingClientToSave = null
-                        showDocumentForm = false
-                    }
-                },
-                title = { Text(stringResource(Res.string.sync_client_title)) },
-                text = { Text(stringResource(Res.string.sync_client_message)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = true
-                                )
-                                // Reload document to get updated originalVersion after sync
-                                creditNoteViewModel.reloadDocument()
-                                showSyncClientDialog = false
-                                pendingClientToSave = null
-                                showDocumentForm = false
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.sync_client_yes),
-                            style = MaterialTheme.typography.callForActionsViolet
-                        )
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = false
-                                )
-                                creditNoteViewModel.reloadDocument()
-                                showSyncClientDialog = false
-                                pendingClientToSave = null
-                                showDocumentForm = false
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.sync_client_no),
                             style = MaterialTheme.typography.callForActionsViolet
                         )
                     }
@@ -368,7 +301,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     )
                 }
             },
-            onClickDoneForm = { typeOfCreation ->
+            onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
@@ -386,20 +319,11 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                                // Check if there are actual changes from master
-                                val hasChanges = clientOrIssuerAddEditViewModel.hasChangesFromMaster(documentClientUiState)
-                                if (hasChanges) {
-                                    // Show sync dialog to ask user if they want to update master client
-                                    pendingClientToSave = documentClientUiState.copy()
-                                    showSyncClientDialog = true
-                                } else {
-                                    // No changes from master, just save document without sync dialog
-                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                        ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = false
-                                    )
-                                    creditNoteViewModel.reloadDocument()
-                                    showDocumentForm = false
-                                }
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                )
+                                creditNoteViewModel.reloadDocument()
+                                showDocumentForm = false
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -418,9 +342,8 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState
+                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
-                                // Reload document to get updated originalVersion after sync
                                 creditNoteViewModel.reloadDocument()
                                 showDocumentForm = false
                             }
@@ -437,10 +360,11 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
                             if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                                 productAddEditViewModel.setProductUiState()
-                                productAddEditViewModel.saveProductInLocalDb()
-                                val documentProductId = creditNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
+                                val masterProductId = productAddEditViewModel.saveProductInLocalDbAndGetId()
+                                val docProductWithLink = documentProduct.copy(productId = masterProductId?.toInt())
+                                val documentProductId = creditNoteViewModel.saveDocumentProductInLocalDbAndGetId(docProductWithLink)
                                 if (documentProductId != null) {
-                                    creditNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    creditNoteViewModel.saveDocumentProductInUiState(docProductWithLink.copy(id = documentProductId))
                                     productAddEditViewModel.clearProductUiState()
                                     showDocumentForm = false
                                 }
@@ -450,6 +374,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                             if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                                 creditNoteViewModel.updateUiState(ScreenElement.DOCUMENT_PRODUCT, documentProduct)
                                 productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                                if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                 productAddEditViewModel.clearProductUiState()
                                 showDocumentForm = false
                             }

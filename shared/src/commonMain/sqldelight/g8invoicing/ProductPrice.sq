@@ -53,6 +53,11 @@ deleteAllPricesForProduct:
 DELETE FROM ProductPrice
 WHERE product_id = ?;
 
+deleteDefaultPriceForProduct:
+DELETE FROM ProductPrice
+WHERE product_id = :product_id
+AND client_id IS NULL;
+
 deletePriceForClient:
 DELETE FROM ProductPrice
 WHERE product_id = :product_id

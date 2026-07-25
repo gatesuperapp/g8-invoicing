@@ -352,6 +352,18 @@ class ProductAddEditViewModel(
         }
     }
 
+    /** Same as [saveProductInLocalDb] but awaits the insert and returns the new
+     * master Product id. Used by the "create product from a document" flow so
+     * the caller can backfill DocumentProduct.product_id in the same
+     * transaction batch and keep the master ↔ document link intact from row 1. */
+    suspend fun saveProductInLocalDbAndGetId(): Long? {
+        return try {
+            dataSource.saveProduct(productUiState.value)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun updateInLocalDb(type: ProductType) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
@@ -364,6 +376,17 @@ class ProductAddEditViewModel(
             } catch (e: Exception) {
                 // Error handling
             }
+        }
+    }
+
+    /** Called after saving a DocumentProduct edit when the user ticked the
+     *  "Also apply to the product card" switch. Pushes the edited fields back
+     *  to the master Product row. Runs on the same scope as updateInLocalDb
+     *  so callers can just await both in order. */
+    suspend fun syncDocumentProductToMaster() {
+        try {
+            dataSource.syncMasterFromDocumentProduct(documentProductUiState.value)
+        } catch (_: Exception) {
         }
     }
 

@@ -42,7 +42,7 @@ fun DocumentBottomSheetProducts(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean = false,
@@ -136,8 +136,8 @@ fun DocumentBottomSheetProducts(
                     onClickCancelForm()
                     onShowDocumentForm(false)
                 },
-                onClickDone = {
-                    onClickDoneForm(typeOfCreation)
+                onClickDone = { syncToMaster ->
+                    onClickDoneForm(typeOfCreation, syncToMaster)
                 },
                 onSelectTaxRate = onSelectTaxRate,
                 showProductType = showProductType,

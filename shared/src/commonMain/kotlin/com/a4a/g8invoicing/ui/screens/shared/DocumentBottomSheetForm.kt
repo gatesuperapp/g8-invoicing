@@ -60,7 +60,8 @@ fun DocumentBottomSheetForm(
     documentProduct: DocumentProductState = DocumentProductState(),
     taxRates: List<BigDecimal>? = null,
     onClickCancel: () -> Unit, // Called when the bottom sheet is fully dismissed by cancel/back
-    onClickDone: () -> Unit,   // Called when the main form is submitted
+    onClickDone: (syncToMaster: Boolean) -> Unit,   // Called when the main form is submitted
+
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
@@ -86,6 +87,14 @@ fun DocumentBottomSheetForm(
 
     // State to manage visibility of the tax selection screen
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
+    // Sync-to-master checkbox lives here so it persists across in-sheet navigations
+    // (tax selection, full-screen text) but resets when the sheet mounts a different
+    // client / issuer / product snapshot.
+    var syncToMasterChecked by remember(
+        documentClientUiState.id,
+        documentIssuerUiState.id,
+        documentProduct.id,
+    ) { mutableStateOf(false) }
     // State to determine if a text field (name or description) should be shown in full screen
     val fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
     // State to hold the text being edited in the full-screen text editor
@@ -175,7 +184,7 @@ fun DocumentBottomSheetForm(
                         pendingEmailState.value = ""
                     }
                     // Proceed with saving
-                    onClickDone()
+                    onClickDone(syncToMasterChecked)
                 }, // Main "Done" action for the form
                 onClickDoneFullScreen = { // "Done" action for the full-screen text editor
                     fullScreenElementToShow.value?.let { screenElement ->
@@ -215,6 +224,8 @@ fun DocumentBottomSheetForm(
                 },
                 onNavigateToTaxSelection = { isTaxSelectionVisible = true }, // Callback to show tax selection
                 showProductType = showProductType,
+                syncToMasterChecked = syncToMasterChecked,
+                onSyncToMasterChange = { syncToMasterChecked = it },
             )
         }
     }
@@ -385,6 +396,8 @@ private fun DocumentBottomSheetContent(
     onNavigateToFullScreenText: (ScreenElement) -> Unit, // Callback to request full screen view
     onNavigateToTaxSelection: (ScreenElement) -> Unit, // Callback to request tax selection view
     showProductType: Boolean = false,
+    syncToMasterChecked: Boolean,
+    onSyncToMasterChange: (Boolean) -> Unit,
 ) {
     // Determine which form or view to show based on the current state
     when {
@@ -409,7 +422,9 @@ private fun DocumentBottomSheetContent(
                     onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
                     onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) },
                     pendingEmailStateHolder = pendingEmailStateHolder,
-                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) }
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) },
+                    syncToMasterChecked = syncToMasterChecked,
+                    onSyncToMasterChange = onSyncToMasterChange,
                 )
             }
         }
@@ -464,6 +479,12 @@ private fun DocumentBottomSheetContent(
                     onClickForward = onNavigateToTaxSelection,
                     showFullScreenText = onNavigateToFullScreenText,
                     showProductType = showProductType,
+                    // Sync switch only makes sense when editing an existing document
+                    // product that is still linked to a master Product row.
+                    showSyncToMasterSwitch = typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_PRODUCT &&
+                        documentProduct.productId != null,
+                    syncToMasterChecked = syncToMasterChecked,
+                    onSyncToMasterChange = onSyncToMasterChange,
                 )
             }
         }
