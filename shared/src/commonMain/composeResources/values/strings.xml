@@ -64,8 +64,9 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nouveau·elle client·e</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nouvel·le émetteur·ice</string>
-    <string name="document_bottom_sheet_picker_empty_client">Aucun·e client·e trouvé·e</string>
-    <string name="document_bottom_sheet_picker_empty_issuer">Aucun·e émetteur·ice trouvé·e</string>
+    <string name="document_bottom_sheet_picker_empty_client">Aucun·e client·e trouvé·e.\nClique sur + pour en ajouter un·e.</string>
+    <string name="document_bottom_sheet_picker_empty_issuer">Aucun·e émetteur·ice trouvé·e.\nClique sur + pour ajouter ton entreprise.</string>
+    <string name="document_bottom_sheet_picker_empty_product">Aucun produit trouvé.\nClique sur + pour en ajouter un.</string>
     <string name="document_bottom_sheet_picker_recent">Récents</string>
     <string name="document_bottom_sheet_picker_edit_link">Éditer</string>
     <string name="document_bottom_sheet_picker_title_client">Client·es</string>
@@ -94,9 +95,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
     <string name="document_products_other_lines">Autres lignes</string>
-    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
-    <string name="document_product_advice_2">La modification s'applique uniquement à ce document …</string>
-    <string name="document_product_advice_3">Elle n'impacte pas le produit enregistré dans l'onglet "Produits".</string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle violet.</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Nom</string>

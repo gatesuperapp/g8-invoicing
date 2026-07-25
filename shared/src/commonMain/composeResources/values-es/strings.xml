@@ -61,8 +61,9 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nuevo cliente</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nuevo emisor</string>
-    <string name="document_bottom_sheet_picker_empty_client">Ningún cliente encontrado</string>
-    <string name="document_bottom_sheet_picker_empty_issuer">Ningún emisor encontrado</string>
+    <string name="document_bottom_sheet_picker_empty_client">Ningún cliente encontrado.\nToca + para añadir uno.</string>
+    <string name="document_bottom_sheet_picker_empty_issuer">Ningún emisor encontrado.\nToca + para añadir tu empresa.</string>
+    <string name="document_bottom_sheet_picker_empty_product">Ningún producto encontrado.\nToca + para añadir uno.</string>
     <string name="document_bottom_sheet_picker_recent">Recientes</string>
     <string name="document_bottom_sheet_picker_edit_link">Editar</string>
     <string name="document_bottom_sheet_picker_title_client">Clientes</string>
@@ -91,9 +92,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
     <string name="document_products_other_lines">Otras líneas</string>
-    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
-    <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
-    <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
+    <string name="document_product_advice">Para modificar un producto, toca el rectángulo violeta.</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Nombre</string>

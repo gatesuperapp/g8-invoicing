@@ -32,8 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import sh.calvin.reorderable.ReorderableCollectionItemScope
+
+private val RowViolet = ColorVioletLight.copy(alpha = 0.08f)
+private val RowVioletDragging = ColorVioletLight.copy(alpha = 0.20f)
 
 @Composable
 fun DocumentBottomSheetProductListChosenItem(
@@ -56,12 +59,7 @@ fun DocumentBottomSheetProductListChosenItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(5.dp))
-            .background(
-                when {
-                    isDragging -> Color(0xFFD1D1D1)
-                    else -> ColorLightGrey
-                }
-            )
+            .background(if (isDragging) RowVioletDragging else RowViolet)
             .clickable(
                 interactionSource = rowInteractionSource,
                 indication = ripple(color = Color.Black, bounded = false)
@@ -93,7 +91,7 @@ fun DocumentBottomSheetProductListChosenItem(
         ) {
             Icon(
                 imageVector = Icons.Outlined.DragHandle,
-                contentDescription = "Reorder"
+                contentDescription = "Reorder",
             )
         }
 
@@ -113,7 +111,7 @@ fun DocumentBottomSheetProductListChosenItem(
             Text(
                 text = documentProduct.quantity.stripTrailingZeros().toPlainString()
                     .replace(".", ","),
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
             Text(
                 modifier = Modifier.weight(1F),
@@ -130,7 +128,7 @@ fun DocumentBottomSheetProductListChosenItem(
                         onClick = onClickDeleteDocumentProduct
                     ),
                 imageVector = Icons.Outlined.DeleteOutline,
-                contentDescription = "Delete line item"
+                contentDescription = "Delete line item",
             )
         }
     }

@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -10,9 +11,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -55,6 +58,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -98,9 +102,17 @@ fun ClientOrIssuerPickerBottomSheet(
     var query by remember { mutableStateOf(TextFieldValue("")) }
     var searchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    val sheetState = rememberModalBottomSheetState()
 
+    // Preemptively expand the sheet BEFORE the IME animates in. Otherwise the
+    // partial→expanded reconciliation triggered by the keyboard insets makes
+    // the sheet drop down for a frame then snap back up. Someone opening a
+    // search wants max viewport anyway, so expand is the right behaviour.
     LaunchedEffect(searchExpanded) {
-        if (searchExpanded) focusRequester.requestFocus()
+        if (searchExpanded) {
+            sheetState.expand()
+            focusRequester.requestFocus()
+        }
     }
 
     // Only clients get a "Récents" section, and only when the list is long enough
@@ -140,7 +152,6 @@ fun ClientOrIssuerPickerBottomSheet(
         filteredAlphaSorted.groupBy { it.name.text.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
     }
 
-    val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -173,6 +184,7 @@ fun ClientOrIssuerPickerBottomSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(64.dp)
                     .padding(horizontal = 24.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -286,21 +298,39 @@ fun ClientOrIssuerPickerBottomSheet(
 
             val showEmpty = filteredAlphaSorted.isEmpty() && currentSelected == null
             if (showEmpty) {
-                Box(
+                var emptyHelpVisible by remember { mutableStateOf(false) }
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .padding(horizontal = 24.dp),
-                    contentAlignment = Alignment.Center,
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
-                        text = stringResource(
-                            if (isIssuer) Res.string.document_bottom_sheet_picker_empty_issuer
-                            else Res.string.document_bottom_sheet_picker_empty_client
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "( ´ཀ` )",
+                        style = MaterialTheme.typography.bodyLarge,
                         color = Color.Gray,
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) { emptyHelpVisible = !emptyHelpVisible },
                     )
+                    AnimatedVisibility(
+                        visible = emptyHelpVisible,
+                        enter = fadeIn(tween(500)),
+                        exit = fadeOut(tween(100)),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (isIssuer) Res.string.document_bottom_sheet_picker_empty_issuer
+                                else Res.string.document_bottom_sheet_picker_empty_client
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
             } else {
                 LazyColumn(
@@ -308,6 +338,7 @@ fun ClientOrIssuerPickerBottomSheet(
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(horizontal = 24.dp),
+                    contentPadding = PaddingValues(top = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     val showRecent = query.text.isBlank() && recentEntries.isNotEmpty()
@@ -326,8 +357,9 @@ fun ClientOrIssuerPickerBottomSheet(
                             )
                         }
                     }
+                    val showAlphabetHeaders = !isIssuer && list.size >= 10
                     grouped.forEach { (letter, entries) ->
-                        if (!isIssuer) {
+                        if (showAlphabetHeaders) {
                             stickyHeader(key = "header-$letter") {
                                 Text(
                                     text = letter,

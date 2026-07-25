@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -10,9 +11,11 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -52,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +64,7 @@ import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.currency_picker_search
+import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_empty_product
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_recent
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_product
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -83,9 +88,15 @@ fun ProductPickerBottomSheet(
     var query by remember { mutableStateOf(TextFieldValue("")) }
     var searchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    val sheetState = rememberModalBottomSheetState()
 
+    // Preemptively expand the sheet BEFORE the IME animates in — see the
+    // matching note in ClientOrIssuerPickerBottomSheet.
     LaunchedEffect(searchExpanded) {
-        if (searchExpanded) focusRequester.requestFocus()
+        if (searchExpanded) {
+            sheetState.expand()
+            focusRequester.requestFocus()
+        }
     }
 
     val nonNullProducts = remember(products) { products.filter { it.id != null } }
@@ -119,7 +130,6 @@ fun ProductPickerBottomSheet(
         filteredAlphaSorted.groupBy { it.name.text.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
     }
 
-    val sheetState = rememberModalBottomSheetState()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -134,6 +144,7 @@ fun ProductPickerBottomSheet(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(64.dp)
                     .padding(horizontal = 24.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -240,47 +251,86 @@ fun ProductPickerBottomSheet(
                 }
             }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                val showRecent = query.text.isBlank() && recentEntries.isNotEmpty()
-                if (showRecent) {
-                    stickyHeader(key = "header-recent") {
-                        RecentProductsHeader(stringResource(Res.string.document_bottom_sheet_picker_recent))
-                    }
-                    items(recentEntries, key = { "recent-${it.id}" }) { product ->
-                        ProductPickerRow(
-                            product = product,
-                            clientId = clientId,
-                            currencyCode = currencyCode,
-                            onClick = { onSelect(product) },
+            val showEmpty = filteredAlphaSorted.isEmpty() && recentEntries.isEmpty()
+            if (showEmpty) {
+                var emptyHelpVisible by remember { mutableStateOf(false) }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 24.dp, vertical = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Text(
+                        text = "( ´ཀ` )",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray,
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                        ) { emptyHelpVisible = !emptyHelpVisible },
+                    )
+                    AnimatedVisibility(
+                        visible = emptyHelpVisible,
+                        enter = fadeIn(tween(500)),
+                        exit = fadeOut(tween(100)),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.document_bottom_sheet_picker_empty_product),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
-                grouped.forEach { (letter, entries) ->
-                    stickyHeader(key = "header-$letter") {
-                        Text(
-                            text = letter,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.Gray,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.White)
-                                .padding(top = 4.dp, bottom = 4.dp, start = 12.dp),
-                        )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 24.dp),
+                    contentPadding = PaddingValues(top = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    val showRecent = query.text.isBlank() && recentEntries.isNotEmpty()
+                    if (showRecent) {
+                        stickyHeader(key = "header-recent") {
+                            RecentProductsHeader(stringResource(Res.string.document_bottom_sheet_picker_recent))
+                        }
+                        items(recentEntries, key = { "recent-${it.id}" }) { product ->
+                            ProductPickerRow(
+                                product = product,
+                                clientId = clientId,
+                                currencyCode = currencyCode,
+                                onClick = { onSelect(product) },
+                            )
+                        }
                     }
-                    items(entries, key = { "alpha-${it.id}" }) { product ->
-                        ProductPickerRow(
-                            product = product,
-                            clientId = clientId,
-                            currencyCode = currencyCode,
-                            onClick = { onSelect(product) },
-                        )
+                    val showAlphabetHeaders = nonNullProducts.size >= 10
+                    grouped.forEach { (letter, entries) ->
+                        if (showAlphabetHeaders) {
+                            stickyHeader(key = "header-$letter") {
+                                Text(
+                                    text = letter,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.Gray,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color.White)
+                                        .padding(top = 4.dp, bottom = 4.dp, start = 12.dp),
+                                )
+                            }
+                        }
+                        items(entries, key = { "alpha-${it.id}" }) { product ->
+                            ProductPickerRow(
+                                product = product,
+                                clientId = clientId,
+                                currencyCode = currencyCode,
+                                onClick = { onSelect(product) },
+                            )
+                        }
                     }
                 }
             }
