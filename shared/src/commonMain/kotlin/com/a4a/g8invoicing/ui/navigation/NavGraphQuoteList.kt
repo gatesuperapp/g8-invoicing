@@ -39,6 +39,7 @@ import com.a4a.g8invoicing.shared.resources.gstore_quote_trial_exhausted_title
 import com.a4a.g8invoicing.ui.screens.QuoteList
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.currentTimeMillis
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
@@ -147,7 +148,7 @@ private fun QuoteTrialExhaustedDialog(onDismiss: () -> Unit) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .background(Color.White, shape = RoundedCornerShape(14.dp))
+                .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
                 .padding(horizontal = 20.dp, vertical = 24.dp),
         ) {
             Column(

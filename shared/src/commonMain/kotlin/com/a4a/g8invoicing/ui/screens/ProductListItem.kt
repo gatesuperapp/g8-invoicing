@@ -31,7 +31,7 @@ import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import org.koin.compose.koinInject
@@ -92,7 +92,7 @@ fun ProductListItem(
                     }
                 )
             }
-            .background(if (checkedState.value) ColorLightGreyo else Color.White)
+            .background(if (checkedState.value) AppColors.surfaceMuted else AppColors.surface)
     ) {
         // Adding padding in the inside row, to keep the click & the ripple in all row
         // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
@@ -109,8 +109,8 @@ fun ProductListItem(
             if (isCheckboxDisplayed) {
                 Column {
                     FlippyCheckBox(
-                        fillColorWhenSelectionOff = Color.White, // was actionTagUndefined().iconColor
-                        backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
+                        fillColorWhenSelectionOff = AppColors.surface, // was actionTagUndefined().iconColor
+                        backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                         onItemCheckboxClick = {
                             checkedState.value = !checkedState.value
                             onItemCheckboxClick(checkedState.value)

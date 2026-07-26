@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ProductListContent
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun DocumentBottomSheetProductsAvailable(
@@ -28,7 +29,7 @@ fun DocumentBottomSheetProductsAvailable(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(AppColors.surface)
     ) {
         // Header: display "back" button
         Row(

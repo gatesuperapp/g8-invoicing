@@ -37,8 +37,8 @@ import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreen
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
@@ -99,7 +99,7 @@ fun DocumentListItem(
                     }
                 )
             }
-            .background(if (checkedState.value) ColorLightGreyo else Color.White)
+            .background(if (checkedState.value) AppColors.surfaceMuted else AppColors.surface)
     ) {
 
         // Adding padding in the inside row, to keep the click & the ripple in all row
@@ -117,7 +117,7 @@ fun DocumentListItem(
             Column {
                 FlippyCheckBox(
                     fillColorWhenSelectionOff = action.iconColor,
-                    backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
+                    backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                     onItemCheckboxClick = {
                         checkedState.value = !checkedState.value
                         onItemCheckboxClick(checkedState.value)

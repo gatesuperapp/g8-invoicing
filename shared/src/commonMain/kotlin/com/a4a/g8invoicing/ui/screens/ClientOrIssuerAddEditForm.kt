@@ -102,7 +102,6 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.callForActions
 import com.a4a.g8invoicing.ui.theme.inputLabel
@@ -211,7 +210,7 @@ fun ClientOrIssuerAddEditForm(
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
-            .background(ColorBackgroundGrey)
+            .background(AppColors.divider)
             .fillMaxSize()
             .dismissKeyboardOnUnconsumedTap()
             .padding(12.dp)
@@ -220,7 +219,7 @@ fun ClientOrIssuerAddEditForm(
     ) {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(
                     //start = 20.dp,
                     top = 8.dp,
@@ -294,7 +293,7 @@ fun ClientOrIssuerAddEditForm(
         // Email section with chips
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(top = 8.dp)
         ) {
             val emailInputList = listOf(
@@ -330,7 +329,7 @@ fun ClientOrIssuerAddEditForm(
 
             Column(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .padding(top = 8.dp)
             ) {
                 val inputList = mutableListOf(
@@ -499,7 +498,7 @@ fun ClientOrIssuerAddEditForm(
 
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(
                     top = 8.dp
                 )
@@ -601,7 +600,7 @@ fun ClientOrIssuerAddEditForm(
         if (isIssuer) {
             Column(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .padding(top = 8.dp, bottom = 8.dp)
             ) {
                 LogoPickerComponent(
@@ -629,7 +628,7 @@ fun ClientOrIssuerAddEditForm(
             // serializer at generation time, not here.
             Row(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -671,7 +670,7 @@ fun ClientOrIssuerAddEditForm(
                 Spacer(Modifier.padding(bottom = 16.dp))
                 Row(
                     modifier = Modifier
-                        .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                        .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -713,7 +712,7 @@ fun ClientOrIssuerAddEditForm(
 
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(
                     top = 8.dp
                 )
@@ -757,7 +756,7 @@ fun ClientOrIssuerAddEditForm(
             Spacer(modifier = Modifier.padding(top = 12.dp))
             Row(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
                     .padding(start = 10.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -848,7 +847,7 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String
         modifier = Modifier
             .padding(start = 4.dp, top = 10.dp, bottom = bottomPadding)
             .background(
-                color = Color.White,
+                color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
             )
             .clickable(enabled = true) {

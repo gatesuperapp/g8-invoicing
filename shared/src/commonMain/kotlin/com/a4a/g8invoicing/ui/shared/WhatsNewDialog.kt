@@ -115,7 +115,7 @@ fun WhatsNewDialog(
                 .height(420.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = AppColors.surface)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 // Croix en haut à droite
@@ -230,7 +230,7 @@ fun WhatsNewDialog(
                                     .size(if (isSelected) 10.dp else 8.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSelected) ColorVioletLight else Color.LightGray
+                                        if (isSelected) ColorVioletLight else AppColors.surfaceMuted
                                     )
                                     .clickable {
                                         coroutineScope.launch {

@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun BottomBarAction(
@@ -21,7 +21,7 @@ fun BottomBarAction(
 ) {
     BottomAppBar(
         modifier = Modifier
-            .border(1.dp, ColorLoudGrey),
+            .border(1.dp, AppColors.surfaceMuted),
         actions = {
             BottomBarActionView(
                 navController,

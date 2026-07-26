@@ -283,7 +283,7 @@ private fun PremiumHintDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .clickable(onClick = onDismiss)
-                .background(Color.White, shape = RoundedCornerShape(14.dp))
+                .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
                 .padding(horizontal = 20.dp, vertical = 20.dp),
         ) {
             Text(
@@ -320,7 +320,7 @@ private fun GStoreModuleCard(
             .fillMaxWidth()
             .height(230.dp)
             .clickable(onClick = onClick)
-            .background(Color.White, shape = RoundedCornerShape(14.dp))
+            .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
             .padding(14.dp),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -406,7 +406,7 @@ private fun ModuleDetailDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .fillMaxHeight(2f / 3f)
-                .background(Color.White, shape = RoundedCornerShape(16.dp)),
+                .background(AppColors.surface, shape = RoundedCornerShape(16.dp)),
         ) {
             // Close (X) in the top-right — mirrors the WhatsNewDialog pattern so the
             // dismissal affordance stays consistent across the app.

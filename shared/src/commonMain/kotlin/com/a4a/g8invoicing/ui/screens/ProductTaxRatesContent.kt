@@ -69,7 +69,7 @@ fun ProductTaxRatesContent(
     modifier = if (isDisplayedInBottomSheet)
         modifier.then(Modifier
             .fillMaxHeight(0.5f)
-            .background(Color.LightGray.copy(alpha = 0.4f))
+            .background(AppColors.surfaceMuted.copy(alpha = 0.4f))
             .verticalScroll(scrollState)
             .padding(top = 30.dp, end = 60.dp, start = 60.dp, bottom = 30.dp))
     else
@@ -84,7 +84,7 @@ fun ProductTaxRatesContent(
     {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
         ) {
             // Adds the no tax ("-") choice to the list
@@ -197,7 +197,7 @@ fun ProductTaxRatesEditContent(
     ) {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
                 .padding(
                     top = 8.dp,

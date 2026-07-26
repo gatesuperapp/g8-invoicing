@@ -75,7 +75,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.feature_coming_soon
@@ -308,7 +308,7 @@ fun DocumentAddEdit(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(ColorLightGreyo)
+                    .background(AppColors.surfaceMuted)
             ) {
                 // A4 aspect ratio: 210mm / 297mm ≈ 0.707
                 val a4AspectRatio = 210f / 297f

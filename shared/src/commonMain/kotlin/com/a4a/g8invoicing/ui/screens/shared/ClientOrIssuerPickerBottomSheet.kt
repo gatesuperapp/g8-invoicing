@@ -368,7 +368,7 @@ fun ClientOrIssuerPickerBottomSheet(
                                     style = MaterialTheme.typography.textCaption.copy(fontWeight = FontWeight.SemiBold),
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.White)
+                                        .background(AppColors.surface)
                                         .padding(top = 4.dp, bottom = 4.dp, start = 12.dp),
                                 )
                             }
@@ -397,7 +397,7 @@ private fun RecentlyChosenHeader(text: String) {
         style = MaterialTheme.typography.textSection,
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(AppColors.surface)
             .padding(top = 12.dp, bottom = 4.dp, start = 12.dp),
     )
 }

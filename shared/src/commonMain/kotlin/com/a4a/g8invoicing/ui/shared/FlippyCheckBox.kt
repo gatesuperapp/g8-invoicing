@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGrayTransp
 
 @Composable
@@ -98,7 +99,7 @@ fun FlippyCheckBox(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(fillColorWhenSelectionOff ?: Color.White)
+                        .background(fillColorWhenSelectionOff ?: AppColors.surface)
                 )
             }
         }

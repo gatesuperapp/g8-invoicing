@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerListContent
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 // User can either select an item (client or product) in the list, or add a new item
 @Composable
@@ -32,7 +33,7 @@ fun DocumentBottomSheetClientOrIssuerList(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(AppColors.surface)
     ) {
         // Header: display "back" button
         Row(

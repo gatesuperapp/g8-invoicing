@@ -23,6 +23,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -49,7 +50,7 @@ fun DocumentBasicTemplateContent(
             modifier = Modifier
                 .width(screenWidth)
                 .padding(pagePadding)
-                .background(Color.White)
+                .background(AppColors.surface)
                 .heightIn(min = screenWidth * 1.28f)
         )
         return
@@ -64,7 +65,7 @@ fun DocumentBasicTemplateContent(
                 bottom = pagePadding,
                 end = pagePadding
             )
-            .background(Color.White)
+            .background(AppColors.surface)
             .heightIn(min = screenWidth * 1.28f)
             .customCombinedClickable(
                 onClick = {
@@ -82,7 +83,7 @@ fun DocumentBasicTemplateContent(
                     bottom = 20.dp,
                     end = 20.dp
                 )
-                .background(Color.White)
+                .background(AppColors.surface)
         ) {
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem, labels)

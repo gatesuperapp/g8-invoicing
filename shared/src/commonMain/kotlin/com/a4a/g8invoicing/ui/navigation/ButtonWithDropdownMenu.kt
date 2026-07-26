@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 /**
  * Menu displaying secondary icons, accessed after clicking "More" icon
@@ -45,7 +46,7 @@ fun ButtonWithDropdownMenu(
 
         DropdownMenu(
             modifier = Modifier
-                .background(Color.White),
+                .background(AppColors.surface),
             expanded = isExpanded,
             onDismissRequest = {
                 onChangeBackground()

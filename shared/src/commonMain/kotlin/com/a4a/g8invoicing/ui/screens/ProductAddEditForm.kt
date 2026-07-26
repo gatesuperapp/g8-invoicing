@@ -128,7 +128,7 @@ fun ProductAddEditForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray)
+            .background(AppColors.surfaceMuted)
             .verticalScroll(rememberScrollState())
             .dismissKeyboardOnUnconsumedTap()
             .padding(12.dp)
@@ -142,7 +142,7 @@ fun ProductAddEditForm(
             Column {
                 Column(
                     modifier = Modifier
-                        .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                        .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                         .fillMaxWidth()
                         .padding(
                             top = 6.dp,
@@ -329,7 +329,7 @@ fun ProductAddEditForm(
                 key(currentPrice.idStr) {
                     Column(
                         modifier = Modifier
-                            .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                            .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     ) {
 
                         // 🗑️ Suppression du prix - padding réduit
@@ -450,7 +450,7 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
         modifier = Modifier
             .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
             .background(
-                color = Color.White,
+                color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
             )
             .clickable(enabled = true) {

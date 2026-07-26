@@ -149,7 +149,6 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
-import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
@@ -236,7 +235,7 @@ fun Account(
     }
 
     Scaffold(
-        containerColor = Color.White,
+        containerColor = AppColors.surface,
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = stringResource(Res.string.drawer_my_account),
@@ -950,7 +949,7 @@ private fun IssuerListRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(5.dp))
-            .background(ColorLightGrey)
+            .background(AppColors.surfaceMuted)
             .clickable(onClick = onClick)
             .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),

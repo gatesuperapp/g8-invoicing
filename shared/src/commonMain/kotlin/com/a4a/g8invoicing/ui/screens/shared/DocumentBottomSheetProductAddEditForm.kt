@@ -64,6 +64,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.shared.resources.document_form_sync_product_to_master
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.inputLabel
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -114,14 +115,14 @@ fun DocumentBottomSheetProductAddEditForm(
     Column(
         modifier = Modifier
             .fillMaxHeight(0.5f)
-            .background(Color.LightGray.copy(alpha = 0.4f))
+            .background(AppColors.surfaceMuted.copy(alpha = 0.4f))
             .verticalScroll(rememberScrollState())
             .padding(12.dp)
             .imePadding()
     ) {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
                 .padding(
                     top = 18.dp,
@@ -296,7 +297,7 @@ fun DocumentBottomSheetProductAddEditForm(
             Spacer(modifier = Modifier.padding(top = 12.dp))
             Row(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
                     .padding(start = 35.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,

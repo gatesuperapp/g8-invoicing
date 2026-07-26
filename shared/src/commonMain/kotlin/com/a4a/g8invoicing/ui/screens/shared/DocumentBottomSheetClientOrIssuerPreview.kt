@@ -23,6 +23,7 @@ import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 
 // User can either select an item (client or product) in the list, or add a new item
@@ -40,7 +41,7 @@ fun DocumentBottomSheetClientOrIssuerPreview(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(AppColors.surface)
     ) {
         // Header: display "back" button
         Row(

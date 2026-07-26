@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 
@@ -44,7 +44,7 @@ fun DocumentClientOrIssuerContent(
                 end = 20.dp
             )
             .clip(RoundedCornerShape(5.dp))
-            .background(ColorLightGrey)
+            .background(AppColors.surfaceMuted)
             .clickable(
                 interactionSource = interactionSource,
                 indication = ripple(color = Color.Black, bounded = false)

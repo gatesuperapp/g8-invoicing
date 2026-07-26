@@ -18,7 +18,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
-import com.a4a.g8invoicing.ui.theme.MainBackground
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.runtime.collectAsState
 import org.koin.compose.koinInject
@@ -67,7 +67,7 @@ fun CategoriesDropdownMenu(
 
             DropdownMenuItem(
                 modifier = (if (selected) {
-                    Modifier.background(MainBackground)
+                    Modifier.background(AppColors.screen)
                 } else {
                     Modifier.background(Color.Transparent)
                 }).height(40.dp), // tighter rows (Material default ≈ 48dp) but tap-friendly
