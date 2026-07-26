@@ -40,11 +40,16 @@ object AppColors {
     val buttonActive  = Color(0xFF932092)
     val buttonDisabled= Color(0xFFC1C1C1)
 
-    // Document statuses — already role-named, kept as-is
-    val statusDraft     = Color(0xFFC1C1C1)
-    val statusSent      = Color(0xFF3B97D3)
-    val statusPaid      = Color(0xFF09D981)
-    val statusLate      = Color(0xFFFC5A58)
-    val statusReminded  = Color(0xFFF374AE)
-    val statusCancelled = Color(0xFFFFF4CC)
+    // Document statuses — shared between the tag pill (list item + AppBar dropdown)
+    // and the invoice list row text (price + status label). Reminded / draft / sent
+    // use muted "workflow off" hues so they don't compete with paid/late for
+    // attention; paid / late are the strong signals.
+    val statusDraft     = Color(0xFFB0AEAA)   // muted grey
+    val statusSent      = Color(0xFF7E96B8)   // dusty blue
+    val statusPaid      = Color(0xFF12B76A)   // green
+    val statusLate      = Color(0xFFDC2A2A)   // red
+    val statusReminded  = Color(0xFFBC8FB0)   // muted mauve
+    val statusCancelled = Color(0xFFFFF4CC)   // pale yellow — kept but overridden as
+                                              // transparent-fill + grey outline in
+                                              // DocumentListItem (see cancelled block)
 }

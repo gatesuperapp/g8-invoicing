@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
@@ -38,15 +39,10 @@ import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorGreen
-import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
 import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
-import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.invoice_due_date
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DocumentListItem(
@@ -115,9 +111,25 @@ fun DocumentListItem(
                 )
         ) {
 
+            // Cancelled invoices are visually greyed out: no pill fill (just a
+            // grey outline), primary text in secondary grey, price struck-through.
+            // The tag lookup above still returns actionTagCancelled() so the tag
+            // dropdown / bottom bar keep their pale-yellow chip semantics.
+            val isCancelled = document is InvoiceState &&
+                document.documentTag == DocumentTag.CANCELLED
+
+            val statusColor: Color = when (document.documentTag) {
+                DocumentTag.PAID -> AppColors.statusPaid
+                DocumentTag.LATE -> AppColors.statusLate
+                else -> AppColors.textPrimary
+            }
+            // Body text turns secondary-grey when the invoice is cancelled so the
+            // whole row reads as "no longer relevant".
+            val bodyColor: Color = if (isCancelled) AppColors.textSecondary else AppColors.textPrimary
+
             Column {
                 FlippyCheckBox(
-                    fillColorWhenSelectionOff = action.iconColor,
+                    fillColorWhenSelectionOff = if (isCancelled) Color.Transparent else action.iconColor,
                     backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                     onItemCheckboxClick = {
                         checkedState.value = !checkedState.value
@@ -126,7 +138,7 @@ fun DocumentListItem(
                     checkboxFace = if (checkedState.value) CheckboxFace.Front
                     else CheckboxFace.Back,
                     checkedState = checkedState.value,
-                    displayBorder = document.documentType != DocumentType.INVOICE
+                    displayBorder = document.documentType != DocumentType.INVOICE || isCancelled,
                 )
             }
 
@@ -138,7 +150,7 @@ fun DocumentListItem(
             ) {
                 Text(
                     text = document.documentNumber.text,
-                    style = MaterialTheme.typography.textBodyBold,
+                    style = MaterialTheme.typography.textBodyBold.copy(color = bodyColor),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -147,28 +159,21 @@ fun DocumentListItem(
                         text = it.name.text + (it.firstName?.let { " " + it.text } ?: ""),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textBody,
+                        style = MaterialTheme.typography.textBody.copy(color = bodyColor),
                     )
                 } ?: Text(" - ")
 
                 if (document is InvoiceState) {
-                    if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
-                        action.label?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.textSecondary,
-                            )
-                        }
-                    } else {
-                        Text(
-                            text = stringResource(Res.string.invoice_due_date) + " " + document.dueDate.substringBefore(
-                                " "
-                            ),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSecondary,
-                        )
-                    }
+                    // "creation · due" — compact two-date summary. Middle dot per
+                    // French typography (point médian). Both dates use the same
+                    // secondary style so neither dominates.
+                    Text(
+                        text = document.documentDate.substringBefore(" ") +
+                            " · " + document.dueDate.substringBefore(" "),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.textSecondary,
+                    )
                 }
             }
 
@@ -180,17 +185,32 @@ fun DocumentListItem(
                     text = document.documentTotalPrices?.totalPriceWithTax?.let {
                         formatAmount(it, document.currency.text.ifEmpty { "EUR" })
                     } ?: "",
-                    color = when (document.documentTag) {
-                        DocumentTag.PAID -> ColorGreen
-                        DocumentTag.LATE -> ColorPinkOrange
-                        else -> Color.Black
-                    },
-                    style = MaterialTheme.typography.textBodyBold,
+                    style = MaterialTheme.typography.textBodyBold.copy(
+                        color = if (isCancelled) AppColors.textSecondary else statusColor,
+                        textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
+                    ),
                 )
-                Text(
-                    text = document.documentDate.substringBefore(" "),
-                    style = MaterialTheme.typography.textSecondary,
-                )
+                if (document is InvoiceState) {
+                    // Status label under the price, colour-matched with the price
+                    // for paid/late (both green or both red) so the eye ties them
+                    // together as a single signal.
+                    action.label?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.textSecondary.copy(
+                                color = if (isCancelled) AppColors.textSecondary else statusColor,
+                            ),
+                        )
+                    }
+                } else {
+                    // Non-invoice documents don't carry a status — surface the
+                    // creation date here instead, since the centre column doesn't
+                    // repeat it for them.
+                    Text(
+                        text = document.documentDate.substringBefore(" "),
+                        style = MaterialTheme.typography.textSecondary,
+                    )
+                }
             }
         }
     }
