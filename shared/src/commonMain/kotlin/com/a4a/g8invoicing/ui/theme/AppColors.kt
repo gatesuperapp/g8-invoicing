@@ -15,12 +15,13 @@ object AppColors {
     // Surfaces / backgrounds
     val screen        = Color(0xFFF9F9F9)   // full-screen background
     val surface       = Color(0xFFFFFFFF)   // cards, form blocks, sheets
+    val surfaceSubtle = Color(0xFFF5F5F5)   // barely-distinct row background (lighter than muted)
     val surfaceMuted  = Color(0xFFEEEEEE)   // list row alt, greyed panels
     val bottomBar     = Color(0xFFC1C1C1)   // navigation bar background
 
     // Text (referenced by Typography tokens — rarely used directly)
     val textPrimary   = Color(0xFF1A1A1A)
-    val textSecondary = Color(0xFF7D7B77)
+    val textSecondary = Color(0xFF57544F)   // warm dark grey — WCAG AA on white (6.5:1)
     val textDisabled  = Color(0x8A57544F)
     val textOnAccent  = Color(0xFFFFFFFF)
     val textLink      = Color(0xFF932092)

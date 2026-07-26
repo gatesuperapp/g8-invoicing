@@ -144,18 +144,16 @@ val Typography.textBodySmall: TextStyle
 val Typography.textCta: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = getUiFontBold(),
+        fontFamily = getUiFont(),
         fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
         color = AppColors.textLink,
     )
 
 val Typography.textCtaDisabled: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = getUiFontBold(),
+        fontFamily = getUiFont(),
         fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
         color = AppColors.textDisabled,
     )
 

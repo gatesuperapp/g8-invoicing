@@ -75,7 +75,6 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
@@ -439,7 +438,7 @@ private fun ClientOrIssuerPickerRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = displayName,
-                style = MaterialTheme.typography.textBodyBold,
+                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

@@ -308,7 +308,7 @@ fun DocumentAddEdit(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(AppColors.surfaceMuted)
+                    .background(AppColors.divider)
             ) {
                 // A4 aspect ratio: 210mm / 297mm ≈ 0.707
                 val a4AspectRatio = 210f / 297f

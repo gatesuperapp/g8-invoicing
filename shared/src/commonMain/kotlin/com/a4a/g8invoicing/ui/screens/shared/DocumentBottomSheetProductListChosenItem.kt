@@ -32,12 +32,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import sh.calvin.reorderable.ReorderableCollectionItemScope
-
-private val RowViolet = ColorVioletLight.copy(alpha = 0.08f)
-private val RowVioletDragging = ColorVioletLight.copy(alpha = 0.20f)
 
 @Composable
 fun DocumentBottomSheetProductListChosenItem(
@@ -60,7 +57,7 @@ fun DocumentBottomSheetProductListChosenItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(5.dp))
-            .background(if (isDragging) RowVioletDragging else RowViolet)
+            .background(if (isDragging) AppColors.surfaceMuted else AppColors.surfaceSubtle)
             .clickable(
                 interactionSource = rowInteractionSource,
                 indication = ripple(color = Color.Black, bounded = false)

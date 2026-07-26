@@ -40,6 +40,7 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreen
 import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
+import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
@@ -146,7 +147,7 @@ fun DocumentListItem(
                         text = it.name.text + (it.firstName?.let { " " + it.text } ?: ""),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSecondary,
+                        style = MaterialTheme.typography.textBody,
                     )
                 } ?: Text(" - ")
 
@@ -155,6 +156,7 @@ fun DocumentListItem(
                         action.label?.let {
                             Text(
                                 text = it,
+                                style = MaterialTheme.typography.textSecondary,
                             )
                         }
                     } else {
@@ -175,10 +177,6 @@ fun DocumentListItem(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = document.documentDate.substringBefore(" "),
-                    style = MaterialTheme.typography.textBodyBold,
-                )
-                Text(
                     text = document.documentTotalPrices?.totalPriceWithTax?.let {
                         formatAmount(it, document.currency.text.ifEmpty { "EUR" })
                     } ?: "",
@@ -187,6 +185,10 @@ fun DocumentListItem(
                         DocumentTag.LATE -> ColorPinkOrange
                         else -> Color.Black
                     },
+                    style = MaterialTheme.typography.textBodyBold,
+                )
+                Text(
+                    text = document.documentDate.substringBefore(" "),
                     style = MaterialTheme.typography.textSecondary,
                 )
             }
