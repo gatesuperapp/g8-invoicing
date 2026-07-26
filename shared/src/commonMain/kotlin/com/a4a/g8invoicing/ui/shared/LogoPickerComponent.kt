@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
-import com.a4a.g8invoicing.ui.theme.inputLabel
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 
 /**
  * A self-contained logo picker component that handles image selection internally.
@@ -144,7 +144,7 @@ fun LogoPickerComponent(
                 .fillMaxWidth(0.4f)
                 .padding(end = 3.dp),
             text = label,
-            style = MaterialTheme.typography.inputLabel
+            style = MaterialTheme.typography.textBodyBold
         )
 
         // Logo area
@@ -200,7 +200,7 @@ fun LogoPickerComponent(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = selectButtonText,
-                        style = MaterialTheme.typography.inputLabel,
+                        style = MaterialTheme.typography.textBodyBold,
                         color = ColorGreyo
                     )
                 }

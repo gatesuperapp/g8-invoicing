@@ -103,8 +103,8 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.callForActions
-import com.a4a.g8invoicing.ui.theme.inputLabel
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -767,7 +767,7 @@ fun ClientOrIssuerAddEditForm(
                             Res.string.document_form_sync_issuer_to_master
                         else Res.string.document_form_sync_client_to_master
                     ),
-                    style = MaterialTheme.typography.inputLabel,
+                    style = MaterialTheme.typography.textBodyBold,
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 15.dp),
@@ -856,7 +856,7 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
-            style = MaterialTheme.typography.callForActions,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             color = ColorVioletLink,
             text = AnnotatedString(text),
         )

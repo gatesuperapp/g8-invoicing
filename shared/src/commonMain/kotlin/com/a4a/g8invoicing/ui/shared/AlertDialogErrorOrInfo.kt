@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 
 @Composable
 fun AlertDialogErrorOrInfo(
@@ -37,7 +37,7 @@ fun AlertDialogErrorOrInfo(
             ) {
                 Text(
                     text = confirmationText,
-                    style = MaterialTheme.typography.callForActionsViolet
+                    style = MaterialTheme.typography.textCta
                 )
             }
         }

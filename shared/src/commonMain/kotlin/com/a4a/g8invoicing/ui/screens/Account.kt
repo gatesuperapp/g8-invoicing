@@ -152,9 +152,7 @@ import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.callForActions
 import com.a4a.g8invoicing.ui.theme.textBodySmall
-import com.a4a.g8invoicing.ui.theme.textNormalBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
@@ -927,7 +925,7 @@ private fun MyCompaniesSection(
 
     // "+ Ajouter une entreprise" — violet plain CTA, no fill, tight to the list.
     Text(
-        style = MaterialTheme.typography.callForActions,
+        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
         color = ColorVioletLink,
         modifier = Modifier
             .padding(start = 4.dp, top = 4.dp)

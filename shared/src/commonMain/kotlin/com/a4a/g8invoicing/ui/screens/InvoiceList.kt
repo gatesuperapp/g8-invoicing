@@ -70,7 +70,7 @@ import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.textWithLinkCenteredMedium
+import com.a4a.g8invoicing.ui.theme.textBody
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -531,7 +531,7 @@ private fun TextAdvice(uriHandler: UriHandler) {
 
     ClickableText(
         text = annotatedString,
-        style = MaterialTheme.typography.textWithLinkCenteredMedium,
+        style = MaterialTheme.typography.textBody.copy(textAlign = TextAlign.Center),
         onClick = { offset ->
             annotatedString.getStringAnnotations(tag = "link", start = offset, end = offset)
                 .firstOrNull()?.let {

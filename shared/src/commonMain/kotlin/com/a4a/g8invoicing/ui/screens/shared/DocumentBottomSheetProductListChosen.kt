@@ -34,7 +34,7 @@ import com.a4a.g8invoicing.shared.resources.document_product_advice
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.animations.BatWavyArms
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import org.jetbrains.compose.resources.stringResource
 
 // Bottom sheet with the "Add a product" button (opens the picker with search + list)
@@ -104,7 +104,7 @@ private fun DisplayBatHelperAdvice() {
             Text(
                 text = stringResource(Res.string.document_product_advice),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.textSmall,
+                style = MaterialTheme.typography.textBodySmall,
             )
         }
 

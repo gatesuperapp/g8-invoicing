@@ -49,7 +49,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.tax_rate_add_rate
 import com.a4a.g8invoicing.ui.shared.Separator
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -232,7 +232,7 @@ fun ProductTaxRatesEditContent(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
-                style = MaterialTheme.typography.callForActions,
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                 text = AnnotatedString(stringResource(Res.string.tax_rate_add_rate)),
             )
         }

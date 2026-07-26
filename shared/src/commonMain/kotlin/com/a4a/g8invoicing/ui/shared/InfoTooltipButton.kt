@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.info_tooltip_ok
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.stringResource
 
@@ -106,7 +106,7 @@ fun InfoTooltipButton(
                     Button(onClick = closeAndDismiss) {
                         Text(
                             text = stringResource(Res.string.info_tooltip_ok),
-                            style = MaterialTheme.typography.callForActionsViolet,
+                            style = MaterialTheme.typography.textCta,
                         )
                     }
                 }

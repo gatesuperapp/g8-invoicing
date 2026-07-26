@@ -45,8 +45,8 @@ import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
+import com.a4a.g8invoicing.ui.theme.textCtaDisabled
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
@@ -315,7 +315,7 @@ private fun DocumentBottomSheetHeader(
         Box(modifier = Modifier.fillMaxWidth()) {
             // Cancel or Back button
             Text(
-                style = MaterialTheme.typography.callForActionsViolet,
+                style = MaterialTheme.typography.textCta,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(top = 20.dp) // Consistent padding
@@ -347,8 +347,8 @@ private fun DocumentBottomSheetHeader(
 
             // Done or Save button
             Text(
-                style = if (isDoneButtonEnabled) MaterialTheme.typography.callForActionsViolet
-                else MaterialTheme.typography.callForActionsDisabled,
+                style = if (isDoneButtonEnabled) MaterialTheme.typography.textCta
+                else MaterialTheme.typography.textCtaDisabled,
                 modifier = Modifier
                     .padding(top = 20.dp, bottom = 20.dp) // Consistent padding
                     .align(Alignment.TopEnd)

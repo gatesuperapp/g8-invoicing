@@ -66,7 +66,7 @@ import com.a4a.g8invoicing.shared.resources.document_form_sync_product_to_master
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.inputLabel
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -304,7 +304,7 @@ fun DocumentBottomSheetProductAddEditForm(
             ) {
                 Text(
                     text = stringResource(Res.string.document_form_sync_product_to_master),
-                    style = MaterialTheme.typography.inputLabel,
+                    style = MaterialTheme.typography.textBodyBold,
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 15.dp),

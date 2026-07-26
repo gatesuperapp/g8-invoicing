@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.invoice_created_button
 import com.a4a.g8invoicing.shared.resources.invoice_created_title
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -43,7 +43,7 @@ fun AlertDialogInvoiceCreated(
                 ) {
                     Text(
                         text = stringResource(Res.string.invoice_created_button),
-                        style = MaterialTheme.typography.callForActionsViolet
+                        style = MaterialTheme.typography.textCta
                     )
                 }
             }

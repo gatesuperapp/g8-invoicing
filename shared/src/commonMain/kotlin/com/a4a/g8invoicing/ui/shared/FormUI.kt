@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientRef
-import com.a4a.g8invoicing.ui.theme.inputLabel
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @Composable
@@ -250,7 +250,7 @@ fun RowWithLabelAndInput(
                     ) {
                         Text(
                             text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
-                            style = MaterialTheme.typography.inputLabel,
+                            style = MaterialTheme.typography.textBodyBold,
                         )
                         Spacer(Modifier.weight(1f))
                         // Pastille "?" alignée au bord droit de la colonne label — les
@@ -269,7 +269,7 @@ fun RowWithLabelAndInput(
                             .fillMaxWidth(0.4f)
                             .padding(end = 12.dp),
                         text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
-                        style = MaterialTheme.typography.inputLabel
+                        style = MaterialTheme.typography.textBodyBold
                     )
                 }
             }

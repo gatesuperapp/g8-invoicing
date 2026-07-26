@@ -21,7 +21,7 @@ import com.a4a.g8invoicing.shared.resources.document_modal_product_back
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import org.jetbrains.compose.resources.stringResource
 
 
@@ -58,7 +58,7 @@ fun DocumentBottomSheetFormSimple(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        style = MaterialTheme.typography.callForActionsViolet,
+                        style = MaterialTheme.typography.textCta,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(top = 20.dp)
@@ -81,7 +81,7 @@ fun DocumentBottomSheetFormSimple(
 
                     if (!isDatePicker)
                         Text(
-                            style = MaterialTheme.typography.callForActionsViolet,
+                            style = MaterialTheme.typography.textCta,
                             modifier = Modifier
                                 .padding(top = 20.dp)
                                 .clickable {

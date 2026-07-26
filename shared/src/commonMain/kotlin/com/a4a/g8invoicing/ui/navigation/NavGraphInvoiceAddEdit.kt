@@ -8,7 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -135,7 +135,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 },
@@ -148,7 +148,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 }
@@ -185,7 +185,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 },
@@ -198,7 +198,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 }

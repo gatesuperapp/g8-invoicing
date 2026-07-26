@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.form_label_edit
 import com.a4a.g8invoicing.ui.theme.AppColors
@@ -41,8 +42,8 @@ import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.inputLabel
-import com.a4a.g8invoicing.ui.theme.textVerySmall
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textCaption
 
 @Composable
 fun FormInputCreatorText(
@@ -106,7 +107,7 @@ fun FormInputCreatorText(
                     onValueChange = {
                         input.onValueChange(it)
                     },
-                    textStyle = if (isEditableLabel) MaterialTheme.typography.inputLabel
+                    textStyle = if (isEditableLabel) MaterialTheme.typography.textBodyBold
                     else LocalTextStyle.current,
                     keyboardOptions = KeyboardOptions(
                         imeAction = keyboardOption,
@@ -157,7 +158,7 @@ fun FormInputCreatorText(
                     )
                     Text(
                         color = ColorGreyo,
-                        style = MaterialTheme.typography.textVerySmall,
+                        style = MaterialTheme.typography.textCaption.copy(fontSize = 9.sp),
                         text = stringResource(Res.string.form_label_edit)
                     )
                 }

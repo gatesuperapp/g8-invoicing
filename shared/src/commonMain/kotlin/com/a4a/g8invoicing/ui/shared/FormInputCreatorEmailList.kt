@@ -41,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.EmailState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.inputField
+import com.a4a.g8invoicing.ui.theme.textInputPlaceholder
 
 data class EmailListInput(
     val emails: List<EmailState>,
@@ -151,7 +151,7 @@ fun FormInputCreatorEmailList(
                         if (pendingEmail.isEmpty()) {
                             Text(
                                 text = input.placeholder,
-                                style = MaterialTheme.typography.inputField
+                                style = MaterialTheme.typography.textInputPlaceholder
                             )
                         }
                         innerTextField()

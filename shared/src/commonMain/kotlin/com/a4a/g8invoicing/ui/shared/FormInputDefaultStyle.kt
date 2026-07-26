@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.inputField
+import com.a4a.g8invoicing.ui.theme.textInputPlaceholder
 
 
 @Composable
@@ -36,7 +36,7 @@ fun FormInputDefaultStyle(
                         bottom = 0.dp
                     ),
                 text = placeholder ?: "",
-                style = MaterialTheme.typography.inputField
+                style = MaterialTheme.typography.textInputPlaceholder
             )
         },
         interactionSource = interactionSource,

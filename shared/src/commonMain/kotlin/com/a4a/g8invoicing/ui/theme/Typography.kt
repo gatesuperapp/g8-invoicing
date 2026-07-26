@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
@@ -238,59 +237,3 @@ val Typography.subTitleForDocuments: TextStyle
         fontSize = 10.sp,
     )
 
-// -----------------------------------------------------------------------------
-// LEGACY tokens — kept only to prevent a compile cascade during the design-
-// token migration. Migrate call sites to the tokens above, then delete these.
-// See migration mapping in the phase-5 cleanup commit.
-// -----------------------------------------------------------------------------
-
-val Typography.textTitle: TextStyle
-    @Composable
-    get() = TextStyle(
-        fontFamily = getUiFontBold(),
-        fontWeight = FontWeight.SemiBold,
-        fontSize = 12.sp,
-        color = Color.Black.copy(alpha = 0.6f),
-        letterSpacing = 0.08.em,
-    )
-
-val Typography.textNormalBold: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFontBold(), fontSize = 16.sp)
-
-val Typography.textSmall: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFont(), fontSize = 14.sp)
-
-val Typography.textVerySmall: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFont(), fontSize = 9.sp)
-
-val Typography.textWithLinkCenteredMedium: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFont(), fontSize = 16.sp, textAlign = TextAlign.Center)
-
-val Typography.callForActions: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFont(), color = Color.DarkGray, fontSize = 14.sp)
-
-val Typography.callForActionsViolet: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFontBold(), color = ColorVioletLight, fontSize = 14.sp)
-
-val Typography.callForActionsDisabled: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFontBold(), color = ColorDarkGrayTransp, fontSize = 14.sp)
-
-val Typography.inputLabel: TextStyle
-    @Composable
-    get() = TextStyle(
-        fontFamily = getUiFont(),
-        color = ColorBlack,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.SemiBold,
-    )
-
-val Typography.inputField: TextStyle
-    @Composable
-    get() = TextStyle(fontFamily = getUiFont(), color = Color.LightGray, fontSize = 16.sp)

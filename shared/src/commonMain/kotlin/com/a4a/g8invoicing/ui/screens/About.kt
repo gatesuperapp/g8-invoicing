@@ -106,7 +106,7 @@ import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.textNormalBold
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -263,7 +263,7 @@ fun About(
                 CollapsibleSection(title = stringResource(Res.string.about_title_version)) {
                     Text(
                         text = versionName,
-                        style = MaterialTheme.typography.textNormalBold,
+                        style = MaterialTheme.typography.textBodyBold,
                     )
                 }
 

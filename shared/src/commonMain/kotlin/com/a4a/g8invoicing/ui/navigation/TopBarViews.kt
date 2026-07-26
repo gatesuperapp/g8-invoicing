@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
+import com.a4a.g8invoicing.ui.theme.textCtaDisabled
 
 @Composable
 fun TopBarActionView(
@@ -52,8 +52,8 @@ fun TopBarCtaView(
         ) else customModifier
 
     Text(
-        style = if (requiredFieldsAreFilled) MaterialTheme.typography.callForActionsViolet
-        else MaterialTheme.typography.callForActionsDisabled,
+        style = if (requiredFieldsAreFilled) MaterialTheme.typography.textCta
+        else MaterialTheme.typography.textCtaDisabled,
         modifier = customModifier,
         text = ctaText ?: ""
     )
