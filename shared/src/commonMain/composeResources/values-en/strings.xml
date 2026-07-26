@@ -95,7 +95,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>
     <string name="document_products_other_lines">Other lines</string>
-    <string name="document_product_advice">To edit a product, tap the violet box.</string>
+    <string name="document_product_advice">To edit a product, tap the grey box.</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Name</string>
@@ -451,7 +451,7 @@
     <string name="gstore_module_quote_detail">Enable this module to create quotes, send them to your clients, and convert them to an invoice once accepted. The quote number will appear on the corresponding invoice for accounting traceability.</string>
     <string name="gstore_module_quote_trial_title">Discover quotes</string>
     <string name="gstore_module_quote_trial_desc">5 free quotes to try the feature</string>
-    <string name="gstore_module_quote_trial_detail">Enabling this module gives you 5 free quotes to try the feature and see if it suits you. You will then need to become a premium member to get unlimited quotes.\n\nEnable this module to create quotes, send them to your clients, and convert them to an invoice once accepted.</string>
+    <string name="gstore_module_quote_trial_detail">Enabling this module gives you 5 free quotes to try the feature and see if it suits you. You will then need to become a premium member to get unlimited quotes.</string>
     <string name="gstore_quote_trial_exhausted_title">Free quotes used up</string>
     <string name="gstore_quote_trial_exhausted_body">Your 5 free quotes are used up. If you would like to keep using quotes, you can become a premium member.</string>
     <string name="gstore_quote_trial_exhausted_cta">OK</string>

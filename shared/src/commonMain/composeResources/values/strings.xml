@@ -98,7 +98,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
     <string name="document_products_other_lines">Autres lignes</string>
-    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle violet.</string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé.</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Nom</string>
@@ -311,7 +311,7 @@
     <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es et les convertir en facture une fois acceptés.\n\n🔗 Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
     <string name="gstore_module_quote_trial_title">Devis découverte</string>
     <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
-    <string name="gstore_module_quote_trial_detail">🎁 Activez ce module pour obtenir 5 devis gratuits et tester la fonctionnalité.\n\nIl faudra ensuite devenir membre premium pour avoir les devis en illimité.\n\nUne fois activé, vous pourrez créer des devis, les envoyer à vos client·es et les convertir en facture une fois acceptés.</string>
+    <string name="gstore_module_quote_trial_detail">🎁 Activez ce module pour obtenir 5 devis gratuits et tester la fonctionnalité.\n\nIl faudra ensuite devenir membre premium pour avoir les devis en illimité.</string>
     <string name="gstore_quote_trial_exhausted_title">Devis gratuits épuisés</string>
     <string name="gstore_quote_trial_exhausted_body">Vos 5 devis gratuits sont écoulés. Si vous souhaitez continuer à utiliser les devis, vous pouvez devenir membre premium.</string>
     <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
