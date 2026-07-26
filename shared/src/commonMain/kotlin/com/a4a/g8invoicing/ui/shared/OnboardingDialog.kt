@@ -28,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -136,7 +137,13 @@ import com.a4a.g8invoicing.ui.states.OnboardingIssuerAnswers
 import com.a4a.g8invoicing.ui.states.OnboardingStep
 import com.a4a.g8invoicing.ui.states.ProductNatureAnswer
 import com.a4a.g8invoicing.ui.states.VatAnswer
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBody
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textDisplay
+import com.a4a.g8invoicing.ui.theme.textHeadline
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.viewmodels.OnboardingViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -193,7 +200,7 @@ fun OnboardingDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(AppColors.surface)
         ) {
             Column(
                 modifier = Modifier
@@ -267,11 +274,11 @@ fun OnboardingDialog(
                 TextButton(onClick = {
                     showSendByEmailDialog = false
                     exportedFilePath?.let { onSendDatabaseByEmail(it) }
-                }) { Text(stringResource(Res.string.account_backup_dialog_yes), color = ColorVioletLink) }
+                }) { Text(stringResource(Res.string.account_backup_dialog_yes), color = AppColors.textLink) }
             },
             dismissButton = {
                 TextButton(onClick = { showSendByEmailDialog = false }) {
-                    Text(stringResource(Res.string.account_backup_dialog_no), color = ColorVioletLink)
+                    Text(stringResource(Res.string.account_backup_dialog_no), color = AppColors.textLink)
                 }
             },
         )
@@ -283,7 +290,7 @@ fun OnboardingDialog(
             text = { Text(msg) },
             confirmButton = {
                 TextButton(onClick = { exportErrorMessage = null }) {
-                    Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                    Text(stringResource(Res.string.ok), color = AppColors.textLink)
                 }
             },
         )
@@ -418,7 +425,7 @@ private fun OnboardingNavRow(
         if (showPrev) {
             TextButton(
                 onClick = onPrevious,
-                colors = ButtonDefaults.textButtonColors(contentColor = ColorVioletLink),
+                colors = ButtonDefaults.textButtonColors(contentColor = AppColors.textLink),
             ) { Text(stringResource(Res.string.onboarding_previous)) }
         }
         if (showNextButton) {
@@ -426,8 +433,8 @@ private fun OnboardingNavRow(
                 onClick = { if (isFinal) onFinish() else onNext() },
                 enabled = nextEnabled,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ColorVioletLink,
-                    contentColor = Color.White,
+                    containerColor = AppColors.buttonActive,
+                    contentColor = AppColors.textOnAccent,
                 ),
             ) { Text(nextLabel) }
         }
@@ -454,8 +461,7 @@ private fun MascotSlot(content: @Composable () -> Unit) {
 private fun StepTitle(text: String) {
     Text(
         text = text,
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.textScreenTitle,
         textAlign = TextAlign.Center,
     )
 }
@@ -463,7 +469,11 @@ private fun StepTitle(text: String) {
 @Composable
 private fun StepEmoji(emoji: String) {
     MascotSlot {
-        Text(text = emoji, fontSize = 40.sp, textAlign = TextAlign.Center)
+        Text(
+            text = emoji,
+            style = MaterialTheme.typography.textDisplay,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
@@ -491,8 +501,7 @@ private fun WelcomeStep(onDiscover: () -> Unit) {
         Spacer(Modifier.height(40.dp))
         Text(
             text = stringResource(Res.string.onboarding_welcome_body),
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.textHeadline,
             textAlign = TextAlign.Center,
             lineHeight = 30.sp,
         )
@@ -500,8 +509,8 @@ private fun WelcomeStep(onDiscover: () -> Unit) {
         Button(
             onClick = onDiscover,
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
             contentPadding = PaddingValues(horizontal = 32.dp, vertical = 8.dp),
         ) { Text(stringResource(Res.string.onboarding_welcome_cta)) }
@@ -529,30 +538,29 @@ private fun DevisIntroStep(
         Spacer(Modifier.height(32.dp))
         Text(
             text = body,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
         Spacer(Modifier.height(24.dp))
         Button(
             onClick = onActivate,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_devis_cta_activate)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = onLaterGstore,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_devis_cta_later_gstore)) }
         Spacer(Modifier.height(4.dp))
         TextButton(
             onClick = onNoDevis,
-            colors = ButtonDefaults.textButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.textButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_devis_cta_no_devis)) }
     }
 }
@@ -574,18 +582,17 @@ private fun FacturXIntroStep(onNext: () -> Unit) {
         Spacer(Modifier.height(32.dp))
         Text(
             text = body,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
         Spacer(Modifier.height(24.dp))
         Button(
             onClick = onNext,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_facturx_cta)) }
     }
@@ -604,7 +611,7 @@ private fun PrivacyStep(onBackup: () -> Unit, onNext: () -> Unit) {
             Icon(
                 imageVector = Icons.Outlined.Shield,
                 contentDescription = null,
-                tint = ColorVioletLink,
+                tint = AppColors.accent,
                 modifier = Modifier.size(44.dp),
             )
         }
@@ -613,33 +620,31 @@ private fun PrivacyStep(onBackup: () -> Unit, onNext: () -> Unit) {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_privacy_body_p1),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
         Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(Res.string.onboarding_privacy_body_p2),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
         Spacer(Modifier.height(24.dp))
         Button(
             onClick = onBackup,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_privacy_cta_backup)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = onNext,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_next)) }
     }
 }
@@ -666,14 +671,18 @@ private fun IssuerCleanupStep(
         Spacer(Modifier.height(24.dp))
         StepTitle(stringResource(Res.string.onboarding_cleanup_title))
         Spacer(Modifier.height(32.dp))
-        Text(text = body, fontSize = 15.sp, lineHeight = 22.sp, color = Color.DarkGray)
+        Text(
+            text = body,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            lineHeight = 22.sp,
+        )
         Spacer(Modifier.height(20.dp))
         issuers.forEach { issuer ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(6.dp))
-                    .background(Color.LightGray.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                    .background(AppColors.surfaceMuted.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
                     .clickable { pendingDetails = issuer }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -681,13 +690,13 @@ private fun IssuerCleanupStep(
                 Text(
                     text = issuer.name.text.ifBlank { "—" },
                     modifier = Modifier.weight(1f),
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.textBodySmall,
                 )
                 IconButton(onClick = { pendingDelete = issuer }) {
                     Icon(
                         imageVector = Icons.Outlined.DeleteOutline,
                         contentDescription = null,
-                        tint = Color.DarkGray,
+                        tint = AppColors.iconSecondary,
                     )
                 }
             }
@@ -733,18 +742,19 @@ private fun IssuerDetailsDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .background(Color.White, shape = RoundedCornerShape(14.dp))
+                .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
                 .padding(horizontal = 20.dp, vertical = 20.dp),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = issuer.name.text.ifBlank { "—" },
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
+                    style = MaterialTheme.typography.textScreenTitle,
                 )
                 issuer.firstName?.text?.takeIf { it.isNotBlank() }?.let {
-                    Text(text = it, fontSize = 14.sp, color = Color.DarkGray)
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                    )
                 }
                 Spacer(Modifier.height(16.dp))
                 issuer.addresses.orEmpty().forEach { addr ->
@@ -759,16 +769,25 @@ private fun IssuerDetailsDialog(
                     )
                     if (lines.isNotEmpty()) {
                         lines.forEach {
-                            Text(text = it, fontSize = 14.sp, color = Color.DarkGray)
+                            Text(
+                                text = it,
+                                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                            )
                         }
                         Spacer(Modifier.height(10.dp))
                     }
                 }
                 issuer.phone?.text?.takeIf { it.isNotBlank() }?.let {
-                    Text(text = it, fontSize = 14.sp, color = Color.DarkGray)
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                    )
                 }
                 issuer.emails?.firstOrNull()?.email?.text?.takeIf { it.isNotBlank() }?.let {
-                    Text(text = it, fontSize = 14.sp, color = Color.DarkGray)
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                    )
                 }
                 val companyIds = listOfNotNull(
                     issuer.companyId1Label?.text to issuer.companyId1Number?.text,
@@ -780,8 +799,7 @@ private fun IssuerDetailsDialog(
                     val prefix = label?.takeIf { it.isNotBlank() }?.let { "$it : " } ?: ""
                     Text(
                         text = "$prefix$number",
-                        fontSize = 14.sp,
-                        color = Color.DarkGray,
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                     )
                 }
                 Spacer(Modifier.height(20.dp))
@@ -789,8 +807,8 @@ private fun IssuerDetailsDialog(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ColorVioletLink,
-                        contentColor = Color.White,
+                        containerColor = AppColors.buttonActive,
+                        contentColor = AppColors.textOnAccent,
                     ),
                 ) { Text(stringResource(Res.string.whats_new_close)) }
             }
@@ -819,8 +837,7 @@ private fun IssuerCountryStep(
         Spacer(Modifier.height(20.dp))
         Text(
             text = stringResource(Res.string.onboarding_issuer_country_subtitle, name),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodyBold,
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
         )
@@ -864,13 +881,14 @@ private fun CountryDropdownField(
         Text(
             text = label,
             modifier = Modifier.weight(1f),
-            color = if (currentCountry != null) Color.Black else Color.DarkGray,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(
+                color = if (currentCountry != null) AppColors.textPrimary else AppColors.textSecondary,
+            ),
         )
         Icon(
             imageVector = Icons.Filled.ArrowDropDown,
             contentDescription = null,
-            tint = ColorVioletLink,
+            tint = AppColors.accent,
         )
     }
 }
@@ -890,8 +908,7 @@ private fun VatExemptStep(
         Spacer(Modifier.height(20.dp))
         Text(
             text = stringResource(Res.string.onboarding_vat_subtitle),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodyBold,
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
         )
@@ -900,8 +917,8 @@ private fun VatExemptStep(
             onClick = { onAnswer(id, VatAnswer.FRANCHISE) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_vat_option_franchise)) }
         Spacer(Modifier.height(8.dp))
@@ -909,15 +926,15 @@ private fun VatExemptStep(
             onClick = { onAnswer(id, VatAnswer.TVA) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_vat_option_tva)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { onAnswer(id, VatAnswer.DONT_KNOW) },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_vat_option_dontknow)) }
     }
 }
@@ -934,10 +951,9 @@ private fun VatDontKnowHintStep() {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_vat_dontknow_body),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
     }
 }
@@ -957,8 +973,7 @@ private fun IntraEuStep(
         Spacer(Modifier.height(20.dp))
         Text(
             text = stringResource(Res.string.onboarding_intraeu_subtitle),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodyBold,
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
         )
@@ -967,15 +982,15 @@ private fun IntraEuStep(
             onClick = { onAnswer(id, true) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_yes)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { onAnswer(id, false) },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_no)) }
     }
 }
@@ -998,16 +1013,14 @@ private fun ProductNatureStep(
         Spacer(Modifier.height(20.dp))
         Text(
             text = stringResource(Res.string.onboarding_nature_intro),
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 20.sp,
-            color = Color.DarkGray,
         )
         Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(Res.string.onboarding_nature_question),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodyBold,
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
         )
@@ -1016,8 +1029,8 @@ private fun ProductNatureStep(
             onClick = { onAnswer(id, ProductNatureAnswer.ONLY_SERVICES) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_nature_only_services)) }
         Spacer(Modifier.height(8.dp))
@@ -1025,15 +1038,15 @@ private fun ProductNatureStep(
             onClick = { onAnswer(id, ProductNatureAnswer.ONLY_GOODS) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_nature_only_goods)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { onAnswer(id, ProductNatureAnswer.MIXED) },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_nature_mixed)) }
     }
 }
@@ -1050,10 +1063,9 @@ private fun MixedHintStep() {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_mixed_hint_body),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
     }
 }
@@ -1072,25 +1084,24 @@ private fun ClientCountryQuestionStep(onAnswer: (Boolean) -> Unit) {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_client_country_intro_body),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
         Spacer(Modifier.height(28.dp))
         Button(
             onClick = { onAnswer(true) },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = ColorVioletLink,
-                contentColor = Color.White,
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
             ),
         ) { Text(stringResource(Res.string.onboarding_client_country_intro_yes)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = { onAnswer(false) },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = ColorVioletLink),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
         ) { Text(stringResource(Res.string.onboarding_client_country_intro_no)) }
     }
 }
@@ -1137,10 +1148,9 @@ private fun ClientCountryDoneAppliedStep() {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_client_country_done_applied_body),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
     }
 }
@@ -1157,10 +1167,9 @@ private fun ClientCountryDoneSkippedStep() {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_client_country_done_skipped_body),
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
     }
 }
@@ -1187,10 +1196,9 @@ private fun UnitCodeInfoStep() {
         Spacer(Modifier.height(32.dp))
         Text(
             text = body,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
     }
 }
@@ -1211,10 +1219,9 @@ private fun IssuersDoneStep(issuerCount: Int) {
         Spacer(Modifier.height(32.dp))
         Text(
             text = body,
-            fontSize = 15.sp,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
             lineHeight = 22.sp,
-            color = Color.DarkGray,
         )
     }
 }
@@ -1231,7 +1238,7 @@ private fun ThankYouStep() {
         Spacer(Modifier.height(32.dp))
         Text(
             text = stringResource(Res.string.onboarding_thanks_body),
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.textBody,
             textAlign = TextAlign.Center,
             lineHeight = 24.sp,
         )
