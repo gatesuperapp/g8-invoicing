@@ -43,6 +43,9 @@ import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.invoice_due_date
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DocumentListItem(
@@ -108,13 +111,15 @@ fun DocumentListItem(
                     end = 20.dp,
                     top = 14.dp,
                     bottom = 14.dp
-                )
+                ),
+            verticalAlignment = CenterVertically,
         ) {
 
-            // Cancelled invoices are visually greyed out: no pill fill (just a
-            // grey outline), primary text in secondary grey, price struck-through.
-            // The tag lookup above still returns actionTagCancelled() so the tag
-            // dropdown / bottom bar keep their pale-yellow chip semantics.
+            // Cancelled invoices are visually greyed out: white pill (not the
+            // yellow "cancelled" fill), primary text in a light muted grey,
+            // price struck-through. The tag lookup still returns
+            // actionTagCancelled() so the tag dropdown / bottom bar keep their
+            // pale-yellow chip semantics elsewhere.
             val isCancelled = document is InvoiceState &&
                 document.documentTag == DocumentTag.CANCELLED
 
@@ -123,13 +128,15 @@ fun DocumentListItem(
                 DocumentTag.LATE -> AppColors.statusLate
                 else -> AppColors.textPrimary
             }
-            // Body text turns secondary-grey when the invoice is cancelled so the
-            // whole row reads as "no longer relevant".
-            val bodyColor: Color = if (isCancelled) AppColors.textSecondary else AppColors.textPrimary
+            // Body text greys out when the invoice is cancelled so the whole
+            // row reads as "no longer relevant". textMuted (light grey) rather
+            // than textSecondary (dark grey) because cancelled shouldn't
+            // compete with active rows for attention.
+            val bodyColor: Color = if (isCancelled) AppColors.textMuted else AppColors.textPrimary
 
             Column {
                 FlippyCheckBox(
-                    fillColorWhenSelectionOff = if (isCancelled) Color.Transparent else action.iconColor,
+                    fillColorWhenSelectionOff = if (isCancelled) AppColors.surface else action.iconColor,
                     backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                     onItemCheckboxClick = {
                         checkedState.value = !checkedState.value
@@ -164,15 +171,25 @@ fun DocumentListItem(
                 } ?: Text(" - ")
 
                 if (document is InvoiceState) {
-                    // "creation · due" — compact two-date summary. Middle dot per
-                    // French typography (point médian). Both dates use the same
-                    // secondary style so neither dominates.
+                    // "creation · Échéance : due" — full two-date summary.
+                    // Middle dot per French typography (point médian); the
+                    // "Échéance :" prefix (localised) reminds which is which.
                     Text(
                         text = document.documentDate.substringBefore(" ") +
-                            " · " + document.dueDate.substringBefore(" "),
+                            " · " + stringResource(Res.string.invoice_due_date) + " " +
+                            document.dueDate.substringBefore(" "),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSecondary,
+                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                    )
+                } else {
+                    // Non-invoice types (quotes, credit notes, delivery notes)
+                    // drop the due date — they only carry a creation date.
+                    Text(
+                        text = document.documentDate.substringBefore(" "),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
                     )
                 }
             }
@@ -186,31 +203,25 @@ fun DocumentListItem(
                         formatAmount(it, document.currency.text.ifEmpty { "EUR" })
                     } ?: "",
                     style = MaterialTheme.typography.textBodyBold.copy(
-                        color = if (isCancelled) AppColors.textSecondary else statusColor,
+                        color = if (isCancelled) AppColors.textMuted else statusColor,
                         textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
                     ),
                 )
                 if (document is InvoiceState) {
-                    // Status label under the price, colour-matched with the price
-                    // for paid/late (both green or both red) so the eye ties them
-                    // together as a single signal.
+                    // Status label under the price, colour-matched with the
+                    // price for paid/late (both green or both red) so the eye
+                    // ties them together as a single signal.
                     action.label?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.textSecondary.copy(
-                                color = if (isCancelled) AppColors.textSecondary else statusColor,
+                                color = if (isCancelled) AppColors.textMuted else statusColor,
                             ),
                         )
                     }
-                } else {
-                    // Non-invoice documents don't carry a status — surface the
-                    // creation date here instead, since the centre column doesn't
-                    // repeat it for them.
-                    Text(
-                        text = document.documentDate.substringBefore(" "),
-                        style = MaterialTheme.typography.textSecondary,
-                    )
                 }
+                // Non-invoice types: no second line on the right — the price
+                // sits alone and centres vertically with the left column.
             }
         }
     }
