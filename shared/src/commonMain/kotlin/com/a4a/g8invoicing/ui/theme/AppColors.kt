@@ -22,7 +22,7 @@ object AppColors {
     // Text (referenced by Typography tokens — rarely used directly)
     val textPrimary   = Color(0xFF1A1A1A)
     val textSecondary = Color(0xFF57544F)   // warm dark grey — WCAG AA on white (6.5:1)
-    val textMuted     = Color(0xFFB0AEAA)   // greyed-out / inactive text (cancelled invoices…)
+    val textMuted     = Color(0xFF7D7B77)   // greyed-out / inactive text (cancelled invoices…)
     val textDisabled  = Color(0x8A57544F)
     val textOnAccent  = Color(0xFFFFFFFF)
     val textLink      = Color(0xFF932092)

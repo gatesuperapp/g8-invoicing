@@ -166,7 +166,10 @@ fun DocumentListItem(
                         text = it.name.text + (it.firstName?.let { " " + it.text } ?: ""),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textBody.copy(color = bodyColor),
+                        style = MaterialTheme.typography.textBody.copy(
+                            color = bodyColor,
+                            textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
+                        ),
                     )
                 } ?: Text(" - ")
 
