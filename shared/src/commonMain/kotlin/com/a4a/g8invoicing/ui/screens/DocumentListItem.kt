@@ -43,9 +43,6 @@ import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
-import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.invoice_due_date
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DocumentListItem(
@@ -173,28 +170,15 @@ fun DocumentListItem(
                     )
                 } ?: Text(" - ")
 
-                if (document is InvoiceState) {
-                    // "creation · Échéance : due" — full two-date summary.
-                    // Middle dot per French typography (point médian); the
-                    // "Échéance :" prefix (localised) reminds which is which.
-                    Text(
-                        text = document.documentDate.substringBefore(" ") +
-                            " · " + stringResource(Res.string.invoice_due_date) + " " +
-                            document.dueDate.substringBefore(" "),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                    )
-                } else {
-                    // Non-invoice types (quotes, credit notes, delivery notes)
-                    // drop the due date — they only carry a creation date.
-                    Text(
-                        text = document.documentDate.substringBefore(" "),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                    )
-                }
+                // Creation date only — the due date moved under the status
+                // label on the right so the two dates don't compete for the
+                // same line and the eye reads status + when-due together.
+                Text(
+                    text = document.documentDate.substringBefore(" "),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                )
             }
 
             Column(
@@ -222,6 +206,12 @@ fun DocumentListItem(
                             ),
                         )
                     }
+                    // Due date under the status label — small, secondary, so
+                    // it doesn't compete with the status signal above it.
+                    Text(
+                        text = document.dueDate.substringBefore(" "),
+                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                    )
                 }
                 // Non-invoice types: no second line on the right — the price
                 // sits alone and centres vertically with the left column.
