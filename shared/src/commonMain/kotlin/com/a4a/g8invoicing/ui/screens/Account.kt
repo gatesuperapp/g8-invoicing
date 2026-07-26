@@ -587,7 +587,7 @@ private fun ColumnScope.LoggedOutContent(
 
     Text(
         text = stringResource(Res.string.account_auth_title),
-        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.textBodyBold,
     )
 
     Spacer(modifier = Modifier.height(16.dp))
