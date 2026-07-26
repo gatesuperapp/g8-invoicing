@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.HourglassBottom
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -170,15 +174,35 @@ fun DocumentListItem(
                     )
                 } ?: Text(" - ")
 
-                // Creation date only — the due date moved under the status
-                // label on the right so the two dates don't compete for the
-                // same line and the eye reads status + when-due together.
                 Text(
                     text = document.documentDate.substringBefore(" "),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
                 )
+
+                if (document is InvoiceState) {
+                    // Due date under the creation date, prefixed with a small
+                    // hourglass so no "Échéance:" label is needed. The icon
+                    // colour is bound to bodyColor so cancelled rows grey it
+                    // out with the rest of the block.
+                    Row(verticalAlignment = CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.HourglassBottom,
+                            contentDescription = null,
+                            tint = bodyColor,
+                            modifier = Modifier
+                                .size(12.dp)
+                                .padding(end = 4.dp),
+                        )
+                        Text(
+                            text = document.dueDate.substringBefore(" "),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                        )
+                    }
+                }
             }
 
             Column(
@@ -206,12 +230,6 @@ fun DocumentListItem(
                             ),
                         )
                     }
-                    // Due date under the status label — small, secondary, so
-                    // it doesn't compete with the status signal above it.
-                    Text(
-                        text = document.dueDate.substringBefore(" "),
-                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                    )
                 }
                 // Non-invoice types: no second line on the right — the price
                 // sits alone and centres vertically with the left column.
