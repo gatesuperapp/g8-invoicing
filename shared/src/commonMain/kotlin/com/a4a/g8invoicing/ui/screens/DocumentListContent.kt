@@ -2,16 +2,16 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.shared.parseDate
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -50,16 +50,29 @@ fun DocumentListContent(
         grouped.getOrPut(key) { mutableListOf() }.add(doc)
     }
 
-    LazyColumn {
+    // Grey container behind everything: shows through the space between rows
+    // (1dp gap via spacedBy) and behind the sticky headers, so a header sits
+    // on the list's grey — not on the same white as the rows underneath.
+    // `divider` (#E3E3E3) is one shade darker than the surfaceMuted used for
+    // the row-selected state, so a selected row still visibly pops.
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.divider),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
         grouped.forEach { (key, docsInMonth) ->
             stickyHeader(key = "month-$key") {
+                // Transparent so the LazyColumn's grey background shows
+                // through. 15dp above, 30dp below to give the section title
+                // breathing room and to separate it clearly from the first
+                // row of the group.
                 Text(
                     text = monthLabel(key),
                     style = MaterialTheme.typography.textSection,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(AppColors.surface)
-                        .padding(start = 20.dp, top = 16.dp, bottom = 6.dp),
+                        .padding(start = 20.dp, top = 15.dp, bottom = 30.dp),
                 )
             }
             items(
@@ -82,11 +95,6 @@ fun DocumentListContent(
                         }
                     },
                     keyToResetCheckbox = keyToResetCheckboxes
-                )
-
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = Color.LightGray.copy(alpha = 0.6f)
                 )
             }
         }
