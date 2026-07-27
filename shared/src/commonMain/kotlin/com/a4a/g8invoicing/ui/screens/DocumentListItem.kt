@@ -154,15 +154,6 @@ fun DocumentListItem(
                     .padding(end = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(space = 2.dp)
             ) {
-                // Creation date sits above the document number now — small
-                // secondary text without the year, so the eye reads "when →
-                // which doc → for whom" top to bottom.
-                Text(
-                    text = dateWithoutYear(document.documentDate),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                )
                 Text(
                     text = document.documentNumber.text,
                     style = MaterialTheme.typography.textBodyBold.copy(color = bodyColor),
@@ -180,6 +171,16 @@ fun DocumentListItem(
                         ),
                     )
                 } ?: Text(" - ")
+
+                // Creation date without year sits between the client name and
+                // the due-date countdown. Kept above the hourglass so the eye
+                // reads "issued on → due in" top to bottom.
+                Text(
+                    text = dateWithoutYear(document.documentDate),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                )
 
                 // Countdown to due date (J-30, J-0, J+3…) with an hourglass
                 // that fills from top → half → bottom depending on how close
