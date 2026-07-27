@@ -2,7 +2,6 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.HourglassBottom
-import androidx.compose.material.icons.outlined.HourglassEmpty
 import androidx.compose.material.icons.outlined.HourglassTop
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.datetime.LocalDate
@@ -61,11 +60,12 @@ fun daysUntilDueDate(dueDateString: String?): Int? {
 fun formatDayCountdown(days: Int): String =
     if (days >= 0) "J-$days" else "J+${-days}"
 
-// Sand-at-top when there's still plenty of time; empty (transitioning) inside
-// the last 15 days; sand-at-bottom once the due date has passed.
+// Sand-at-top when there's still plenty of time; half-drained inside the last
+// 15 days (custom icon — no Material variant fits between top and bottom);
+// sand-at-bottom once the due date has passed.
 fun hourglassFor(days: Int): ImageVector = when {
     days > 15 -> Icons.Outlined.HourglassTop
-    days >= 0 -> Icons.Outlined.HourglassEmpty
+    days >= 0 -> HourglassHalfIcon
     else -> Icons.Outlined.HourglassBottom
 }
 
