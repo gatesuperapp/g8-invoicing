@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -45,6 +43,7 @@ import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DocumentListItem(
@@ -172,15 +171,27 @@ fun DocumentListItem(
                     )
                 } ?: Text(" - ")
 
-                // Creation date, optionally followed by " · [hourglass] J-N"
-                // on the same line for invoices that still have a live
-                // deadline. Everything sits on one row so the eye can read
-                // "issued on … due in …" left-to-right; when the invoice is
-                // paid or cancelled only the creation date shows.
-                val days = (document as? InvoiceState)?.takeIf {
-                    it.documentTag != DocumentTag.PAID &&
-                        it.documentTag != DocumentTag.CANCELLED
-                }?.let { daysUntilDueDate(it.dueDate) }
+                // Creation date, optionally followed by " · Éch. dans X
+                // jour(s)" or " · En retard de X jour(s)" for invoices that
+                // still have a live deadline. Skipped for draft / paid /
+                // cancelled — the countdown doesn't tell the user anything
+                // useful for those states.
+                val invoice = document as? InvoiceState
+                val showCountdown = invoice != null &&
+                    invoice.documentTag != DocumentTag.DRAFT &&
+                    invoice.documentTag != DocumentTag.PAID &&
+                    invoice.documentTag != DocumentTag.CANCELLED
+                val days = if (showCountdown) daysUntilDueDate(invoice!!.dueDate) else null
+
+                // Countdown gets a red urgency shade once overdue, an amber
+                // pre-alarm inside the last 5 days, and the row's regular
+                // secondary tone otherwise.
+                val countdownColor: Color = when {
+                    days == null -> bodyColor
+                    days < 0 -> AppColors.statusLate
+                    days <= 5 -> AppColors.statusUrgent
+                    else -> bodyColor
+                }
 
                 Row(verticalAlignment = CenterVertically) {
                     Text(
@@ -194,19 +205,13 @@ fun DocumentListItem(
                             text = " · ",
                             style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
                         )
-                        Icon(
-                            imageVector = hourglassFor(days),
-                            contentDescription = null,
-                            tint = bodyColor,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(end = 4.dp),
-                        )
+                        val res = countdownStringFor(days)
+                        val absDays = if (days < 0) -days else days
                         Text(
-                            text = formatDayCountdown(days),
+                            text = stringResource(res, absDays),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                            style = MaterialTheme.typography.textSecondary.copy(color = countdownColor),
                         )
                     }
                 }

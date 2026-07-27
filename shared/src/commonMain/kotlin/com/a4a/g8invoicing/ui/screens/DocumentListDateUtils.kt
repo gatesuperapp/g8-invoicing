@@ -1,18 +1,20 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.HourglassBottom
-import androidx.compose.material.icons.outlined.HourglassTop
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.document_list_due_in_day
+import com.a4a.g8invoicing.shared.resources.document_list_due_in_days
+import com.a4a.g8invoicing.shared.resources.document_list_overdue_day
+import com.a4a.g8invoicing.shared.resources.document_list_overdue_days
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.StringResource
 
-// Small helpers for the document-list row layout: day-countdown pill, hourglass
-// icon variant, month grouping header. Kept out of DocumentListItem so the row
-// composable stays focused on layout and the maths + labels can be reused in
-// the sticky-header sort inside DocumentListContent.
+// Small helpers for the document-list row layout: day-countdown text, month
+// grouping header. Kept out of DocumentListItem so the row composable stays
+// focused on layout and the maths + labels can be reused in the month sort
+// inside DocumentListContent.
 
 private val monthsFr = arrayOf(
     "JANVIER", "FÉVRIER", "MARS", "AVRIL", "MAI", "JUIN",
@@ -56,17 +58,13 @@ fun daysUntilDueDate(dueDateString: String?): Int? {
     return today().daysUntil(due)
 }
 
-// "J-30" for 30 days out, "J-0" for today, "J+3" for 3 days late.
-fun formatDayCountdown(days: Int): String =
-    if (days >= 0) "J-$days" else "J+${-days}"
-
-// Sand-at-top when there's still plenty of time; half-drained inside the last
-// 15 days (custom icon — no Material variant fits between top and bottom);
-// sand-at-bottom once the due date has passed.
-fun hourglassFor(days: Int): ImageVector = when {
-    days > 15 -> Icons.Outlined.HourglassTop
-    days >= 0 -> HourglassHalfIcon
-    else -> Icons.Outlined.HourglassBottom
+// Picks the singular / plural, future / overdue variant of the countdown
+// string. Caller passes the absolute day count to the resource formatter.
+fun countdownStringFor(days: Int): StringResource = when {
+    days < 0 && days == -1 -> Res.string.document_list_overdue_day
+    days < 0 -> Res.string.document_list_overdue_days
+    days == 1 -> Res.string.document_list_due_in_day
+    else -> Res.string.document_list_due_in_days
 }
 
 // Sort key for grouping by (year, month) descending: "2026-03" > "2026-02".
@@ -75,8 +73,8 @@ fun monthKey(dateString: String): String {
     return "${d.year}-${d.monthNumber.toString().padStart(2, '0')}"
 }
 
-// Localised uppercase month + year, e.g. "MARS 2026". FR-only for now — mirror
-// arrays for EN/DE/ES land here when we add proper i18n.
+// Localised uppercase month + year, e.g. "MARS 2026". FR-only for now —
+// mirror arrays for EN/DE/ES land here when we add proper i18n.
 fun monthLabel(monthKey: String): String {
     val parts = monthKey.split("-")
     if (parts.size < 2) return monthKey

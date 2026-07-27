@@ -15,14 +15,15 @@ object AppColors {
     // Surfaces / backgrounds
     val screen        = Color(0xFFF9F9F9)   // full-screen background
     val surface       = Color(0xFFFFFFFF)   // cards, form blocks, sheets
-    val surfaceSubtle = Color(0xFFF5F5F5)   // barely-distinct row background (lighter than muted)
-    val surfaceMuted  = Color(0xFFEEEEEE)   // list row alt, greyed panels
+    val surfaceSubtle = Color(0xFFF6F5F2)   // list container behind rows — warm, barely tinted
+    val surfaceMuted  = Color(0xFFEEEEEE)   // greyed panels, alt-row backgrounds
     val bottomBar     = Color(0xFFC1C1C1)   // navigation bar background
 
     // Text (referenced by Typography tokens — rarely used directly)
     val textPrimary   = Color(0xFF1A1A1A)
     val textSecondary = Color(0xFF57544F)   // warm dark grey — WCAG AA on white (6.5:1)
     val textMuted     = Color(0xFF7D7B77)   // greyed-out / inactive text (cancelled invoices…)
+    val textPale      = Color(0xFFB9B9B7)   // very discreet — list section titles, watermarks
     val textDisabled  = Color(0x8A57544F)
     val textOnAccent  = Color(0xFFFFFFFF)
     val textLink      = Color(0xFF932092)
@@ -53,4 +54,6 @@ object AppColors {
     val statusCancelled = Color(0xFFFFF4CC)   // pale yellow — kept but overridden as
                                               // transparent-fill + grey outline in
                                               // DocumentListItem (see cancelled block)
+    val statusUrgent    = Color(0xFFF59E0B)   // amber — countdown text when the due
+                                              // date is 5 days out or less
 }

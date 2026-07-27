@@ -48,15 +48,15 @@ fun DocumentListContent(
         grouped.getOrPut(key) { mutableListOf() }.add(doc)
     }
 
-    // Grey container behind everything: shows through the space between rows
-    // (1dp gap via spacedBy) and behind the month labels. Uses surfaceMuted
-    // (#EEEEEE) — one shade lighter than divider — for a softer feel; the
-    // row-selected state pops down to `divider` in DocumentListItem so the
-    // two never clash.
+    // Warm off-white container behind everything: shows through the space
+    // between rows (1dp gap via spacedBy) and behind the month labels.
+    // surfaceSubtle (#F6F5F2) is barely tinted so the white rows still stand
+    // clearly on top; the row-selected state uses `divider` (a full shade
+    // darker) so a checked row visibly pops on this softer background.
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.surfaceMuted),
+            .background(AppColors.surfaceSubtle),
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         grouped.forEach { (key, docsInMonth) ->
@@ -66,9 +66,11 @@ fun DocumentListContent(
             item(key = "month-$key") {
                 // start = 32dp aligns the label with the tag pill's left
                 // edge (FlippyCheckBox Card has 12+20dp start padding).
+                // textPale (#B9B9B7) rather than textSection's default so the
+                // month reads as a whisper, not a heading.
                 Text(
                     text = monthLabel(key),
-                    style = MaterialTheme.typography.textSection,
+                    style = MaterialTheme.typography.textSection.copy(color = AppColors.textPale),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 32.dp, top = 20.dp, bottom = 7.dp),

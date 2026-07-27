@@ -100,6 +100,12 @@
     <string name="document_products_other_lines">Autres lignes</string>
     <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé.</string>
 
+    <!-- Invoice list row — due-date countdown -->
+    <string name="document_list_due_in_day">Éch. dans %1$d jour</string>
+    <string name="document_list_due_in_days">Éch. dans %1$d jours</string>
+    <string name="document_list_overdue_day">En retard de %1$d jour</string>
+    <string name="document_list_overdue_days">En retard de %1$d jours</string>
+
     <!-- Product Form Strings -->
     <string name="product_name">Nom</string>
     <string name="product_name_input">Betteraves</string>

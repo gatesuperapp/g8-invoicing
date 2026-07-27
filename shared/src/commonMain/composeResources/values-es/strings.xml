@@ -97,6 +97,12 @@
     <string name="document_products_other_lines">Otras líneas</string>
     <string name="document_product_advice">Para modificar un producto, toca el rectángulo gris.</string>
 
+    <!-- Invoice list row — due-date countdown -->
+    <string name="document_list_due_in_day">Vence en %1$d día</string>
+    <string name="document_list_due_in_days">Vence en %1$d días</string>
+    <string name="document_list_overdue_day">%1$d día de retraso</string>
+    <string name="document_list_overdue_days">%1$d días de retraso</string>
+
     <!-- Product Form Strings -->
     <string name="product_name">Nombre</string>
     <string name="product_name_input">Remolachas</string>
