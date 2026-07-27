@@ -90,6 +90,12 @@
     <string name="document_product_advice_2">La modification s'applique uniquement à ce document …</string>
     <string name="document_product_advice_3">Elle n'impacte pas le produit enregistré dans l'onglet "Produits".</string>
 
+    <!-- Invoice list row — due-date countdown -->
+    <string name="document_list_due_in_day">Éch. dans %1$d jour</string>
+    <string name="document_list_due_in_days">Éch. dans %1$d jours</string>
+    <string name="document_list_overdue_day">En retard de %1$d jour</string>
+    <string name="document_list_overdue_days">En retard de %1$d jours</string>
+
     <!-- Product Form Strings -->
     <string name="product_name">Nom</string>
     <string name="product_name_input">Betteraves</string>

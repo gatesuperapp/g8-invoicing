@@ -87,6 +87,12 @@
     <string name="document_product_advice_2">The change only applies to this document…</string>
     <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
 
+    <!-- Invoice list row — due-date countdown -->
+    <string name="document_list_due_in_day">Due in %1$d day</string>
+    <string name="document_list_due_in_days">Due in %1$d days</string>
+    <string name="document_list_overdue_day">%1$d day overdue</string>
+    <string name="document_list_overdue_days">%1$d days overdue</string>
+
     <!-- Product Form Strings -->
     <string name="product_name">Name</string>
     <string name="product_name_input">Beetroots</string>

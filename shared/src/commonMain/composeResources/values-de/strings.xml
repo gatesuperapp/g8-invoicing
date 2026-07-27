@@ -97,6 +97,13 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_product_advice_2">Die Änderung wirkt sich ausschließlich auf dieses Dokument aus …</string>
     <string name="document_product_advice_3">Sie beeinflusst nicht das gespeicherte Produkt im Reiter "Produkte".</string>
 
+    <!-- Invoice list row — due-date countdown. \"T.\" = Tag abbreviated so the
+         line stays as compact as the other locales. -->
+    <string name="document_list_due_in_day">Fällig in %1$d T.</string>
+    <string name="document_list_due_in_days">Fällig in %1$d T.</string>
+    <string name="document_list_overdue_day">%1$d T. überfällig</string>
+    <string name="document_list_overdue_days">%1$d T. überfällig</string>
+
     <!-- Product Form Strings -->
     <string name="product_name">Bezeichnung</string>
     <string name="product_name_input">Runkelrüben</string>
