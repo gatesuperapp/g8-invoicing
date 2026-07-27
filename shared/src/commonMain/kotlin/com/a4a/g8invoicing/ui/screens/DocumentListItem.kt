@@ -181,33 +181,32 @@ fun DocumentListItem(
                 // Creation date, optionally followed by " · Éch. dans X
                 // jour(s)" for invoices whose deadline is still ahead. Late
                 // invoices skip the left-hand countdown because their overdue
-                // signal already sits on the right, under the price.
+                // signal already sits on the right, under the price. Draft
+                // is included — customers still like the deadline reminder
+                // even before the invoice is sent. Colour is textSecondary
+                // (dark grey) — cancelled falls back to textMuted so the
+                // whole row still greys out.
                 val leftCountdownDays = when {
                     invoice == null -> null
-                    invoice.documentTag == DocumentTag.DRAFT -> null
                     invoice.documentTag == DocumentTag.PAID -> null
                     invoice.documentTag == DocumentTag.CANCELLED -> null
                     invoice.documentTag == DocumentTag.LATE -> null
                     daysUntilDue == null || daysUntilDue < 0 -> null
                     else -> daysUntilDue
                 }
-                val leftCountdownColor: Color = when {
-                    leftCountdownDays == null -> bodyColor
-                    leftCountdownDays <= 5 -> AppColors.statusUrgent
-                    else -> bodyColor
-                }
+                val dateColor: Color = if (isCancelled) AppColors.textMuted else AppColors.textSecondary
 
                 Row(verticalAlignment = CenterVertically) {
                     Text(
                         text = dateWithoutYear(document.documentDate),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                        style = MaterialTheme.typography.textSecondary.copy(color = dateColor),
                     )
                     if (leftCountdownDays != null) {
                         Text(
                             text = " · ",
-                            style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                            style = MaterialTheme.typography.textSecondary.copy(color = dateColor),
                         )
                         Text(
                             text = stringResource(
@@ -216,7 +215,7 @@ fun DocumentListItem(
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSecondary.copy(color = leftCountdownColor),
+                            style = MaterialTheme.typography.textSecondary.copy(color = dateColor),
                         )
                     }
                 }

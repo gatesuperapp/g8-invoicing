@@ -100,8 +100,8 @@
     <!-- Invoice list row — due-date countdown -->
     <string name="document_list_due_in_day">Due in %1$d day</string>
     <string name="document_list_due_in_days">Due in %1$d days</string>
-    <string name="document_list_overdue_day">%1$d day overdue</string>
-    <string name="document_list_overdue_days">%1$d days overdue</string>
+    <string name="document_list_overdue_day">%1$d d overdue</string>
+    <string name="document_list_overdue_days">%1$d d overdue</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Name</string>

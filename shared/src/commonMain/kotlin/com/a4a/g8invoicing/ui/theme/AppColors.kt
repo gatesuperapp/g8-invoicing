@@ -54,6 +54,4 @@ object AppColors {
     val statusCancelled = Color(0xFFFFF4CC)   // pale yellow — kept but overridden as
                                               // transparent-fill + grey outline in
                                               // DocumentListItem (see cancelled block)
-    val statusUrgent    = Color(0xFFF59E0B)   // amber — countdown text when the due
-                                              // date is 5 days out or less
 }
