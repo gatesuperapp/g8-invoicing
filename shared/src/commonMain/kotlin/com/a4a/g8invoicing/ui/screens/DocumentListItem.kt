@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.HourglassBottom
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -156,6 +154,15 @@ fun DocumentListItem(
                     .padding(end = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(space = 2.dp)
             ) {
+                // Creation date sits above the document number now — small
+                // secondary text without the year, so the eye reads "when →
+                // which doc → for whom" top to bottom.
+                Text(
+                    text = dateWithoutYear(document.documentDate),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                )
                 Text(
                     text = document.documentNumber.text,
                     style = MaterialTheme.typography.textBodyBold.copy(color = bodyColor),
@@ -174,33 +181,32 @@ fun DocumentListItem(
                     )
                 } ?: Text(" - ")
 
-                Text(
-                    text = document.documentDate.substringBefore(" "),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                )
-
-                if (document is InvoiceState) {
-                    // Due date under the creation date, prefixed with a small
-                    // hourglass so no "Échéance:" label is needed. The icon
-                    // colour is bound to bodyColor so cancelled rows grey it
-                    // out with the rest of the block.
-                    Row(verticalAlignment = CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Outlined.HourglassBottom,
-                            contentDescription = null,
-                            tint = bodyColor,
-                            modifier = Modifier
-                                .size(12.dp)
-                                .padding(end = 4.dp),
-                        )
-                        Text(
-                            text = document.dueDate.substringBefore(" "),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                        )
+                // Countdown to due date (J-30, J-0, J+3…) with an hourglass
+                // that fills from top → half → bottom depending on how close
+                // we are. Hidden once the invoice is paid or cancelled (the
+                // deadline no longer matters).
+                if (document is InvoiceState &&
+                    document.documentTag != DocumentTag.PAID &&
+                    document.documentTag != DocumentTag.CANCELLED
+                ) {
+                    val days = daysUntilDueDate(document.dueDate)
+                    if (days != null) {
+                        Row(verticalAlignment = CenterVertically) {
+                            Icon(
+                                imageVector = hourglassFor(days),
+                                contentDescription = null,
+                                tint = bodyColor,
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .padding(end = 4.dp),
+                            )
+                            Text(
+                                text = formatDayCountdown(days),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                            )
+                        }
                     }
                 }
             }
