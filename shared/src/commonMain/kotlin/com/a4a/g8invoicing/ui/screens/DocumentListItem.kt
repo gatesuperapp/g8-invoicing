@@ -172,42 +172,42 @@ fun DocumentListItem(
                     )
                 } ?: Text(" - ")
 
-                // Creation date without year sits between the client name and
-                // the due-date countdown. Kept above the hourglass so the eye
-                // reads "issued on → due in" top to bottom.
-                Text(
-                    text = dateWithoutYear(document.documentDate),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                )
+                // Creation date, optionally followed by " · [hourglass] J-N"
+                // on the same line for invoices that still have a live
+                // deadline. Everything sits on one row so the eye can read
+                // "issued on … due in …" left-to-right; when the invoice is
+                // paid or cancelled only the creation date shows.
+                val days = (document as? InvoiceState)?.takeIf {
+                    it.documentTag != DocumentTag.PAID &&
+                        it.documentTag != DocumentTag.CANCELLED
+                }?.let { daysUntilDueDate(it.dueDate) }
 
-                // Countdown to due date (J-30, J-0, J+3…) with an hourglass
-                // that fills from top → half → bottom depending on how close
-                // we are. Hidden once the invoice is paid or cancelled (the
-                // deadline no longer matters).
-                if (document is InvoiceState &&
-                    document.documentTag != DocumentTag.PAID &&
-                    document.documentTag != DocumentTag.CANCELLED
-                ) {
-                    val days = daysUntilDueDate(document.dueDate)
+                Row(verticalAlignment = CenterVertically) {
+                    Text(
+                        text = dateWithoutYear(document.documentDate),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                    )
                     if (days != null) {
-                        Row(verticalAlignment = CenterVertically) {
-                            Icon(
-                                imageVector = hourglassFor(days),
-                                contentDescription = null,
-                                tint = bodyColor,
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .padding(end = 4.dp),
-                            )
-                            Text(
-                                text = formatDayCountdown(days),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
-                            )
-                        }
+                        Text(
+                            text = " · ",
+                            style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                        )
+                        Icon(
+                            imageVector = hourglassFor(days),
+                            contentDescription = null,
+                            tint = bodyColor,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .padding(end = 4.dp),
+                        )
+                        Text(
+                            text = formatDayCountdown(days),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
+                        )
                     }
                 }
             }
