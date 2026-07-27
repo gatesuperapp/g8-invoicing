@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +18,6 @@ import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textSection
 
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DocumentListContent(
     documents: List<DocumentState>,
@@ -62,17 +60,16 @@ fun DocumentListContent(
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         grouped.forEach { (key, docsInMonth) ->
-            stickyHeader(key = "month-$key") {
-                // Transparent so the LazyColumn's grey background shows
-                // through. 15dp above, 30dp below to give the section title
-                // breathing room and to separate it clearly from the first
-                // row of the group.
+            // Regular list item (not sticky) so the header scrolls off with
+            // its group. Sticky mode was leaving the scrolling rows visible
+            // behind the (transparent) header — cleaner to let it disappear.
+            item(key = "month-$key") {
                 Text(
                     text = monthLabel(key),
                     style = MaterialTheme.typography.textSection,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, top = 15.dp, bottom = 30.dp),
+                        .padding(start = 20.dp, top = 20.dp, bottom = 7.dp),
                 )
             }
             items(
