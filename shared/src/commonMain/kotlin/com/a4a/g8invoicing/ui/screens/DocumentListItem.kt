@@ -132,6 +132,13 @@ fun DocumentListItem(
             // compete with active rows for attention.
             val bodyColor: Color = if (isCancelled) AppColors.textMuted else AppColors.textPrimary
 
+            // Hoisted here so both the left column (countdown text) and the
+            // right column (LATE status label wants the same day count) can
+            // share it — otherwise the right column has no way to see the
+            // value computed inside the left column's scope.
+            val invoice = document as? InvoiceState
+            val daysUntilDue = invoice?.let { daysUntilDueDate(it.dueDate) }
+
             Column {
                 FlippyCheckBox(
                     fillColorWhenSelectionOff = if (isCancelled) AppColors.surface else action.iconColor,
@@ -172,24 +179,21 @@ fun DocumentListItem(
                 } ?: Text(" - ")
 
                 // Creation date, optionally followed by " · Éch. dans X
-                // jour(s)" or " · En retard de X jour(s)" for invoices that
-                // still have a live deadline. Skipped for draft / paid /
-                // cancelled — the countdown doesn't tell the user anything
-                // useful for those states.
-                val invoice = document as? InvoiceState
-                val showCountdown = invoice != null &&
-                    invoice.documentTag != DocumentTag.DRAFT &&
-                    invoice.documentTag != DocumentTag.PAID &&
-                    invoice.documentTag != DocumentTag.CANCELLED
-                val days = if (showCountdown) daysUntilDueDate(invoice!!.dueDate) else null
-
-                // Countdown gets a red urgency shade once overdue, an amber
-                // pre-alarm inside the last 5 days, and the row's regular
-                // secondary tone otherwise.
-                val countdownColor: Color = when {
-                    days == null -> bodyColor
-                    days < 0 -> AppColors.statusLate
-                    days <= 5 -> AppColors.statusUrgent
+                // jour(s)" for invoices whose deadline is still ahead. Late
+                // invoices skip the left-hand countdown because their overdue
+                // signal already sits on the right, under the price.
+                val leftCountdownDays = when {
+                    invoice == null -> null
+                    invoice.documentTag == DocumentTag.DRAFT -> null
+                    invoice.documentTag == DocumentTag.PAID -> null
+                    invoice.documentTag == DocumentTag.CANCELLED -> null
+                    invoice.documentTag == DocumentTag.LATE -> null
+                    daysUntilDue == null || daysUntilDue < 0 -> null
+                    else -> daysUntilDue
+                }
+                val leftCountdownColor: Color = when {
+                    leftCountdownDays == null -> bodyColor
+                    leftCountdownDays <= 5 -> AppColors.statusUrgent
                     else -> bodyColor
                 }
 
@@ -200,18 +204,19 @@ fun DocumentListItem(
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
                     )
-                    if (days != null) {
+                    if (leftCountdownDays != null) {
                         Text(
                             text = " · ",
                             style = MaterialTheme.typography.textSecondary.copy(color = bodyColor),
                         )
-                        val res = countdownStringFor(days)
-                        val absDays = if (days < 0) -days else days
                         Text(
-                            text = stringResource(res, absDays),
+                            text = stringResource(
+                                countdownStringFor(leftCountdownDays),
+                                leftCountdownDays,
+                            ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSecondary.copy(color = countdownColor),
+                            style = MaterialTheme.typography.textSecondary.copy(color = leftCountdownColor),
                         )
                     }
                 }
@@ -231,10 +236,21 @@ fun DocumentListItem(
                     ),
                 )
                 if (document is InvoiceState) {
-                    // Status label under the price, colour-matched with the
-                    // price for paid/late (both green or both red) so the eye
-                    // ties them together as a single signal.
-                    action.label?.let {
+                    // Status label under the price. For late invoices the
+                    // flat 'En retard' label swells to 'En retard de X jour(s)'
+                    // so the row surfaces exactly how overdue it is; the
+                    // colour still matches the price so paid/late read as one
+                    // green / one red signal.
+                    val overdueDays = if (document.documentTag == DocumentTag.LATE &&
+                        daysUntilDue != null && daysUntilDue < 0) -daysUntilDue else null
+                    val labelText = when {
+                        overdueDays != null -> stringResource(
+                            countdownStringFor(-overdueDays),
+                            overdueDays,
+                        )
+                        else -> action.label
+                    }
+                    labelText?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.textSecondary.copy(

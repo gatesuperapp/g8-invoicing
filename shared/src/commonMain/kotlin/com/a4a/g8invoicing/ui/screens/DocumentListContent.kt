@@ -64,16 +64,16 @@ fun DocumentListContent(
             // its group. Sticky mode was leaving the scrolling rows visible
             // behind the (transparent) header — cleaner to let it disappear.
             item(key = "month-$key") {
-                // start = 32dp aligns the label with the tag pill's left
-                // edge (FlippyCheckBox Card has 12+20dp start padding).
-                // textPale (#B9B9B7) rather than textSection's default so the
-                // month reads as a whisper, not a heading.
+                // start = 16dp lines the month up with the pill (which
+                // FlippyCheckBox now positions at 16dp too) and with the
+                // Material-3 TopAppBar title above the list. textPale keeps
+                // the label discreet — a whisper, not a heading.
                 Text(
                     text = monthLabel(key),
                     style = MaterialTheme.typography.textSection.copy(color = AppColors.textPale),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 32.dp, top = 20.dp, bottom = 7.dp),
+                        .padding(start = 16.dp, top = 20.dp, bottom = 7.dp),
                 )
             }
             items(

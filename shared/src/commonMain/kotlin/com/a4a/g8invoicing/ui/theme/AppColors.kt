@@ -23,7 +23,7 @@ object AppColors {
     val textPrimary   = Color(0xFF1A1A1A)
     val textSecondary = Color(0xFF57544F)   // warm dark grey — WCAG AA on white (6.5:1)
     val textMuted     = Color(0xFF7D7B77)   // greyed-out / inactive text (cancelled invoices…)
-    val textPale      = Color(0xFFB9B9B7)   // very discreet — list section titles, watermarks
+    val textPale      = Color(0xFF9C9A96)   // discreet section headers — darker than the very-pale statusDraft so it still reads on a light background
     val textDisabled  = Color(0x8A57544F)
     val textOnAccent  = Color(0xFFFFFFFF)
     val textLink      = Color(0xFF932092)

@@ -42,13 +42,13 @@ fun FlippyCheckBox(
         ), label = ""
     )
 
+    // 12dp uniform padding + 4dp extra start → 16dp from the row's left edge,
+    // matching the Material-3 TopAppBar title position so the pill visually
+    // sits under the screen title in the top bar.
     Card(
         modifier = Modifier
             .padding(12.dp)
-            .padding(
-                //to increase the click touch zone
-                start = 20.dp,
-            )
+            .padding(start = 4.dp)
             .height(16.dp)
             .width(16.dp)
             .graphicsLayer {
