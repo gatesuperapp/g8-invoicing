@@ -49,14 +49,14 @@ fun DocumentListContent(
     }
 
     // Grey container behind everything: shows through the space between rows
-    // (1dp gap via spacedBy) and behind the sticky headers, so a header sits
-    // on the list's grey — not on the same white as the rows underneath.
-    // `divider` (#E3E3E3) is one shade darker than the surfaceMuted used for
-    // the row-selected state, so a selected row still visibly pops.
+    // (1dp gap via spacedBy) and behind the month labels. Uses surfaceMuted
+    // (#EEEEEE) — one shade lighter than divider — for a softer feel; the
+    // row-selected state pops down to `divider` in DocumentListItem so the
+    // two never clash.
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.divider),
+            .background(AppColors.surfaceMuted),
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         grouped.forEach { (key, docsInMonth) ->
@@ -64,12 +64,14 @@ fun DocumentListContent(
             // its group. Sticky mode was leaving the scrolling rows visible
             // behind the (transparent) header — cleaner to let it disappear.
             item(key = "month-$key") {
+                // start = 32dp aligns the label with the tag pill's left
+                // edge (FlippyCheckBox Card has 12+20dp start padding).
                 Text(
                     text = monthLabel(key),
                     style = MaterialTheme.typography.textSection,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 20.dp, top = 20.dp, bottom = 7.dp),
+                        .padding(start = 32.dp, top = 20.dp, bottom = 7.dp),
                 )
             }
             items(

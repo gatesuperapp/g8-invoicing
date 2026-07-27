@@ -98,7 +98,7 @@ fun DocumentListItem(
                     }
                 )
             }
-            .background(if (checkedState.value) AppColors.surfaceMuted else AppColors.surface)
+            .background(if (checkedState.value) AppColors.divider else AppColors.surface)
     ) {
 
         // Adding padding in the inside row, to keep the click & the ripple in all row
@@ -136,7 +136,7 @@ fun DocumentListItem(
             Column {
                 FlippyCheckBox(
                     fillColorWhenSelectionOff = if (isCancelled) AppColors.surface else action.iconColor,
-                    backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
+                    backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.divider else AppColors.surface,
                     onItemCheckboxClick = {
                         checkedState.value = !checkedState.value
                         onItemCheckboxClick(checkedState.value)
