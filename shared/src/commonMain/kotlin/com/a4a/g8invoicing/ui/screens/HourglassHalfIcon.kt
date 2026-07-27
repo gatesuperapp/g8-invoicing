@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
@@ -30,8 +31,10 @@ val HourglassHalfIcon: ImageVector by lazy {
         viewportWidth = 24f,
         viewportHeight = 24f,
     ).apply {
-        // Outer frame (matches HourglassEmpty's outline).
-        path(fill = SolidColor(Color.Black)) {
+        // Outer frame (matches HourglassEmpty's outline). Even-odd fill lets
+        // the two inner triangle sub-paths carve the interior out of the
+        // outer diamond so we end up with a hollow hourglass silhouette.
+        path(fill = SolidColor(Color.Black), pathFillType = PathFillType.EvenOdd) {
             moveTo(6f, 2f)
             verticalLineToRelative(6f)
             lineToRelative(4f, 4f)
