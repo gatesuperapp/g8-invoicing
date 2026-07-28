@@ -28,6 +28,7 @@
     <string name="addressed_to">Adressé à</string>
     <string name="invoice_pdf_due_date">Date limite de paiement : </string>
     <string name="invoice_paid">Payée ✔</string>
+    <string name="pdf_currency_notice">Devise : %1$s</string>
 
     <!-- Document table -->
     <string name="document_table_description">Désignation</string>

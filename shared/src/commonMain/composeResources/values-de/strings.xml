@@ -29,6 +29,7 @@ IBAN: DE71 1234 1234 1234 1234 00</string>
     <string name="addressed_to">Adressiert an</string>
     <string name="invoice_pdf_due_date">Fällig am </string>
     <string name="invoice_paid">Bezahlt ✔</string>
+    <string name="pdf_currency_notice">Währung: %1$s</string>
 
     <!-- Document table -->
     <string name="document_table_description">Bezeichnung</string>
