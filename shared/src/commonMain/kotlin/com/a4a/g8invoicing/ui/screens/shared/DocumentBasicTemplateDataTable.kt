@@ -51,6 +51,7 @@ val borderWidth = 0.7.dp
 fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
     currencyCode: String = "EUR",
+    formatLocale: String? = null,
     labels: Map<String, String>? = null,
 ) {
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
@@ -91,6 +92,7 @@ fun DocumentBasicTemplateProductsTable(
                 totalPriceColumnWeight,
                 displayUnitColumn,
                 currencyCode,
+                formatLocale,
             )
         }
     } else {
@@ -104,6 +106,7 @@ fun DocumentBasicTemplateProductsTable(
             totalPriceColumnWeight,
             displayUnitColumn,
             currencyCode,
+            formatLocale,
         )
     }
 }
@@ -221,6 +224,7 @@ fun DocumentProductsRows(
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
     currencyCode: String = "EUR",
+    formatLocale: String? = null,
 ) {
     tableData.forEach { data ->
 
@@ -257,12 +261,12 @@ fun DocumentProductsRows(
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let { formatAmount(it, currencyCode) } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: "",
                 weight = unitPriceColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let { formatAmount(it * data.quantity, currencyCode) } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it * data.quantity, currencyCode, formatLocale) } ?: "",
                 weight = totalPriceColumnWeight,
                 alignEnd = true
             )

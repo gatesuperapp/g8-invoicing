@@ -10,6 +10,8 @@ import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.itextpdf.io.font.FontProgramFactory
+import com.itextpdf.io.font.PdfEncodings
 import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
@@ -24,14 +26,20 @@ import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.IPropertyContainer
 import com.itextpdf.layout.borders.SolidBorder
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Image
 import com.itextpdf.layout.element.Link
 import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Tab
+import com.itextpdf.layout.element.TabStop
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
+import com.itextpdf.layout.properties.TabAlignment
+import com.itextpdf.layout.font.FontProvider
 import com.itextpdf.layout.properties.HorizontalAlignment
+import com.itextpdf.layout.properties.Property
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
 import com.itextpdf.layout.properties.VerticalAlignment
@@ -48,6 +56,25 @@ class PdfGeneratorImpl(
     private val fileManager: PdfFileManager,
     private val imageStorage: ImageStorage? = null
 ) {
+    private companion object {
+        // Primary family name. The FontProvider matches the embedded
+        // helvetica.ttf / helveticabold.ttf; unknown-glyph runs fall through
+        // to whichever registered font covers them.
+        const val FONT_FAMILY = "Helvetica"
+
+        // Right edge of the totals block, in points from the start of the
+        // paragraph. Amounts right-align there; the label's right edge is
+        // computed per document from the widest actual amount so labels sit
+        // right next to their amounts (no fixed gap when amounts are short).
+        const val PRICES_AMOUNT_RIGHT = 230f
+        // Breathing room between the ":" at the end of the label and the
+        // first digit of the amount. Compose preview looks tight at ~4px but
+        // the PDF needs more because per-glyph width measurement of a few
+        // currency symbols missing from helvetica.ttf (₪ ₼ ₽ ₾) is estimated,
+        // not exact — the buffer absorbs any under-estimation.
+        const val PRICES_LABEL_AMOUNT_GAP = 12f
+    }
+
     fun generatePdf(document: DocumentState): String {
         // Sanitize the document number for the temp filename: users type
         // things like "F/2026" as their invoice number, and the `/` breaks
@@ -63,15 +90,13 @@ class PdfGeneratorImpl(
         val writer = PdfWriter(tempFilePath)
         val pdfDocument = PdfDocument(writer)
 
-        val fontRegular = PdfFontFactory.createFont(StandardFonts.HELVETICA)
-        val fontBold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD)
-
         val doc = Document(pdfDocument, PageSize.A4)
-            .setFont(fontRegular)
-            .setFontSize(9.5F)
+        doc.fontProvider = buildFontProvider()
+        doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+        doc.setFontSize(9.5F)
 
         // Add content
-        buildPdfContent(doc, document, fontRegular, fontBold)
+        buildPdfContent(doc, document)
 
         doc.close()
         writer.close()
@@ -136,15 +161,47 @@ class PdfGeneratorImpl(
             .replace(Regex("""\s+"""), "-")
     }
 
+    /**
+     * Font stack for the whole PDF. The primary family is Helvetica (embedded
+     * from assets to get access to symbols like ₹ that WinAnsi lacks). We then
+     * pile every readable system font on top so iText's FontSelector can
+     * character-by-character fall back to whichever font covers each glyph —
+     * this is what makes exotic currency symbols (৳ ֏ ₽ د.إ …) and any
+     * user-typed content (CJK names, emoji in a footer) render instead of
+     * disappearing.
+     *
+     * Registration order doesn't matter: FontSelector picks by family+coverage,
+     * not order. We silently swallow per-font failures because a few system
+     * .ttc entries (colour emoji, some CJK collections) trip up iText's parser
+     * and one bad file must not sink the whole PDF.
+     */
+    private fun buildFontProvider(): FontProvider {
+        val provider = FontProvider()
+        fun addBytes(name: String) {
+            try {
+                fileManager.loadAssetBytes(name)?.let { provider.addFont(it) }
+            } catch (_: Throwable) { }
+        }
+        addBytes("helvetica.ttf")
+        addBytes("helveticabold.ttf")
+        // Always keep the standard 14 available as a last-resort fallback: even
+        // if every asset+system add above fails, the PDF still renders ASCII.
+        provider.addStandardPdfFonts()
+        fileManager.listSystemFontFiles().forEach { path ->
+            try { provider.addFont(path) } catch (_: Throwable) { }
+        }
+        return provider
+    }
+
     private fun buildPdfContent(
         doc: Document,
-        document: DocumentState,
-        fontRegular: PdfFont,
-        fontBold: PdfFont
+        document: DocumentState
     ) {
         val titleFontSize = 20F
         val dateFontSize = 16F
         val fontSize = 9.5F
+        val currencyCodeForHeader = document.currency.text.ifEmpty { "EUR" }
+        val showCurrencyNotice = document.showCurrencyNotice && currencyCodeForHeader != "EUR"
 
         // Header with Logo and Title/Date
         val logoPath = document.documentIssuer?.logoPath
@@ -154,36 +211,45 @@ class PdfGeneratorImpl(
                 documentNumber = document.documentNumber.text,
                 documentType = document.documentType,
                 documentDate = document.documentDate.substringBefore(" "),
-                fontBold = fontBold,
                 titleFontSize = titleFontSize,
-                dateFontSize = dateFontSize
+                dateFontSize = dateFontSize,
+                trimDateMargin = showCurrencyNotice,
             ))
         } else {
             // Title (no logo)
-            doc.add(createTitle(document.documentNumber.text, document.documentType, fontBold, titleFontSize))
+            doc.add(createTitle(document.documentNumber.text, document.documentType, titleFontSize))
             // Date
-            doc.add(createDate(document.documentDate.substringBefore(" "), fontBold, dateFontSize))
+            doc.add(createDate(document.documentDate.substringBefore(" "), dateFontSize, trimMargin = showCurrencyNotice))
+        }
+
+        if (showCurrencyNotice) {
+            doc.add(createCurrencyNotice(currencyCodeForHeader))
         }
 
         // Issuer and Client
-        doc.add(createIssuerAndClientTable(document.documentIssuer, document.documentClient, fontBold, fontSize))
+        doc.add(createIssuerAndClientTable(document.documentIssuer, document.documentClient, fontSize))
 
         // Reference
         document.reference?.text?.takeIf { it.isNotEmpty() }?.let {
-            doc.add(createReference(it, fontBold).setMarginTop(4F))
+            doc.add(createReference(it).setMarginTop(4F))
         }
 
         // Free field
         document.freeField?.text?.takeIf { it.isNotEmpty() }?.let {
             val marginTop = if (document.reference?.text.isNullOrEmpty()) 10F else 2F
-            doc.add(createFreeText(it, fontRegular).setMarginTop(marginTop))
+            doc.add(createFreeText(it).setMarginTop(marginTop))
         }
 
         val currencyCode = document.currency.text.ifEmpty { "EUR" }
+        // Freeze the formatting locale to whatever was persisted on the doc at
+        // creation. null on pre-feature legacy docs → formatAmount falls back
+        // to the current app language (same behaviour as before the freeze
+        // feature landed).
+        val formatLocale = document.formatLocale
 
         // Products table
         document.documentProducts?.let { products ->
-            createProductsTable(products, fontBold, fontRegular, currencyCode)?.let {
+            createProductsTable(products, currencyCode, formatLocale)?.let {
                 val marginTop = if (document.reference?.text.isNullOrEmpty() && document.freeField?.text.isNullOrEmpty()) 20f else 10f
                 doc.add(it.setMarginTop(marginTop).setMarginBottom(12f))
             }
@@ -191,14 +257,14 @@ class PdfGeneratorImpl(
 
         // Prices
         document.documentTotalPrices?.let {
-            doc.add(createPrices(fontBold, it, fontSize, currencyCode))
+            doc.add(createPrices(it, fontSize, currencyCode, formatLocale))
         }
 
         // On invoices, keep the footer close to the due date (as in the preview) and
         // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
         // get the extra breathing room applied directly on the footer.
         if (document is InvoiceState) {
-            doc.add(createDueDate(fontBold, document.dueDate.substringBefore(" "), fontSize))
+            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize))
             doc.add(createFooter(document.footerText.text, fontSize))
         } else {
             doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
@@ -207,12 +273,15 @@ class PdfGeneratorImpl(
         // g8 watermark — text is frozen on the document at creation (watermark_text column).
         // null/blank → no watermark for this doc.
         document.watermarkText?.takeIf { it.isNotBlank() }?.let { watermark ->
-            doc.add(createWatermark(watermark, fontRegular))
+            doc.add(createWatermark(watermark))
         }
     }
 
     private fun addPageNumbering(document: DocumentState, tempFileName: String, finalFileName: String): String {
-        val fontRegular = PdfFontFactory.createFont(StandardFonts.HELVETICA)
+        // No local fontRegular here anymore — the doc opened below sets
+        // `fontProvider = buildFontProvider()` so every Paragraph resolves its
+        // font through the provider (needed for currency glyphs that WinAnsi
+        // Helvetica doesn't cover).
 
         val tempFilePath = fileManager.getTempFilePath(tempFileName)
         val finalTempPath = fileManager.getTempFilePath(finalFileName)
@@ -222,13 +291,15 @@ class PdfGeneratorImpl(
         try {
             val pdfDoc = PdfDocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
             val doc = Document(pdfDoc)
+            doc.fontProvider = buildFontProvider()
+            doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
             val numberOfPages = pdfDoc.numberOfPages
 
             if (numberOfPages > 1) {
                 for (i in 1..numberOfPages) {
                     val prefix = if (i == 1) "" else "${getDocumentTypeName(document.documentType, strings)} ${document.documentNumber.text} - "
                     doc.showTextAligned(
-                        Paragraph("$prefix$i/$numberOfPages").setFont(fontRegular),
+                        Paragraph("$prefix$i/$numberOfPages"),
                         570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f
                     )
                 }
@@ -253,13 +324,17 @@ class PdfGeneratorImpl(
         documentNumber: String,
         documentType: DocumentType?,
         documentDate: String,
-        fontBold: PdfFont,
         titleFontSize: Float,
-        dateFontSize: Float
+        dateFontSize: Float,
+        trimDateMargin: Boolean = false,
     ): Table {
+        // When a currency notice will follow immediately below, cut the block's
+        // bottom margin so the notice sits close to the date instead of being
+        // pushed 24pt down into the issuer/client area.
+        val bottomMargin = if (trimDateMargin) 6F else 24F
         val table = Table(UnitValue.createPercentArray(floatArrayOf(70f, 30f)))
             .useAllAvailableWidth()
-            .setMarginBottom(24F)
+            .setMarginBottom(bottomMargin)
 
         // Title and Date cell (left)
         val titleCell = Cell().setBorder(Border.NO_BORDER)
@@ -269,7 +344,7 @@ class PdfGeneratorImpl(
         val title = documentType?.let { getDocumentTypeName(it, strings) } ?: ""
         titleCell.add(
             Paragraph(title + " " + documentNumber)
-                .setFont(fontBold)
+                .pdfBold()
                 .setFontSize(titleFontSize)
                 .setMarginBottom(-2F)
         )
@@ -277,7 +352,7 @@ class PdfGeneratorImpl(
         val dateLabel = strings.documentDate.trimEnd() + " "
         titleCell.add(
             Paragraph("$dateLabel$documentDate")
-                .setFont(fontBold)
+                .pdfBold()
                 .setFontSize(dateFontSize)
         )
 
@@ -307,26 +382,49 @@ class PdfGeneratorImpl(
         return table
     }
 
-    private fun createTitle(documentNumber: String, documentType: DocumentType?, font: PdfFont, fontSize: Float): Paragraph {
+    private fun createTitle(documentNumber: String, documentType: DocumentType?, fontSize: Float): Paragraph {
         val title = documentType?.let { getDocumentTypeName(it, strings) } ?: ""
         return Paragraph(title + " " + documentNumber)
-            .setFont(font)
+            .pdfBold()
             .setFontSize(fontSize)
             .setMarginBottom(-2F)
     }
 
-    private fun createDate(date: String, font: PdfFont, fontSize: Float): Paragraph {
+    private fun createDate(date: String, fontSize: Float, trimMargin: Boolean = false): Paragraph {
         val dateLabel = strings.documentDate.trimEnd() + " "
         return Paragraph("$dateLabel$date")
-            .setFont(font)
+            .pdfBold()
             .setFontSize(fontSize)
-            .setMarginBottom(24F)
+            // Trim the block gap when a currency notice will follow directly
+            // beneath — keeps the two lines visually coupled.
+            .setMarginBottom(if (trimMargin) 6F else 24F)
+    }
+
+    // "Devise : USD" (or the localised equivalent) rendered under the top date
+    // for documents where showCurrencyNotice is set and the currency isn't EUR.
+    // Small bold centered text — matches the visual weight of the due-date line
+    // at the bottom of invoices. The gap between the notice and the issuer/client
+    // table is inherited from setMarginBottom below (matches what createDate
+    // provides when there's no notice).
+    private fun createCurrencyNotice(currencyCode: String): Paragraph {
+        val labelPattern = strings.currencyNoticeLabel
+        val text = if (labelPattern.contains("%1\$s")) {
+            labelPattern.replace("%1\$s", currencyCode)
+        } else {
+            // Defensive fallback for a poorly-populated string resource.
+            "$labelPattern $currencyCode"
+        }
+        return Paragraph(text)
+            .setFontSize(9F)
+            .pdfBold()
+            .setTextAlignment(TextAlignment.CENTER)
+            .setMarginTop(0F)
+            .setMarginBottom(18F)
     }
 
     private fun createIssuerAndClientTable(
         issuer: ClientOrIssuerState?,
         client: ClientOrIssuerState?,
-        font: PdfFont,
         fontSize: Float
     ): Table {
         val table = Table(2).useAllAvailableWidth().setFixedLayout()
@@ -345,14 +443,14 @@ class PdfGeneratorImpl(
         // additional-address cell cascades to the wrong side too.
         val issuerCell = Cell().setBorder(Border.NO_BORDER)
         issuer?.let {
-            createClientOrIssuerParagraph(it, font, fontSize = fontSize).forEach { p -> issuerCell.add(p) }
+            createClientOrIssuerParagraph(it, fontSize = fontSize).forEach { p -> issuerCell.add(p) }
         }
         table.addCell(issuerCell)
 
         // Client
         client?.let {
             table.addCell(
-                createClientRectangleAndContent(createClientOrIssuerParagraph(it, font, fontSize = fontSize))
+                createClientRectangleAndContent(createClientOrIssuerParagraph(it, fontSize = fontSize))
                     .setPaddingBottom(8f)
             )
             table.addCell(Cell().setBorder(Border.NO_BORDER).setPaddingBottom(6f))
@@ -381,7 +479,7 @@ class PdfGeneratorImpl(
                     for (i in 1..<addresses.size) {
                         table.addCell(
                             createClientRectangleAndContent(
-                                createClientOrIssuerParagraph(client, font, displayAllInfo = false, addressIndex = i, fontSize = fontSize)
+                                createClientOrIssuerParagraph(client, displayAllInfo = false, addressIndex = i, fontSize = fontSize)
                             )
                         )
                     }
@@ -428,7 +526,6 @@ class PdfGeneratorImpl(
 
     private fun createClientOrIssuerParagraph(
         clientOrIssuer: ClientOrIssuerState?,
-        font: PdfFont,
         displayAllInfo: Boolean = true,
         addressIndex: Int = 0,
         fontSize: Float
@@ -442,8 +539,8 @@ class PdfGeneratorImpl(
             .setPaddingBottom(5f)
 
         if (displayAllInfo) {
-            clientOrIssuer?.firstName?.text?.let { nameAndAddress.add(Text("$it ").setFont(font)) }
-            clientOrIssuer?.name?.text?.let { nameAndAddress.add(Text("$it\n").setFont(font)) }
+            clientOrIssuer?.firstName?.text?.let { nameAndAddress.add(Text("$it ")) }
+            clientOrIssuer?.name?.text?.let { nameAndAddress.add(Text("$it\n")) }
         }
         result.add(nameAndAddress)
 
@@ -487,38 +584,42 @@ class PdfGeneratorImpl(
         return result
     }
 
-    private fun createReference(text: String, font: PdfFont): Paragraph {
+    private fun createReference(text: String): Paragraph {
         val referenceLabel = strings.documentReference.trimEnd() + " "
-        return Paragraph(Text(referenceLabel).setFont(font)).add(text)
+        return Paragraph(Text(referenceLabel).pdfBold()).add(text)
     }
 
-    private fun createFreeText(text: String, font: PdfFont): Paragraph {
-        return Paragraph(text).setFont(font)
+    private fun createFreeText(text: String): Paragraph {
+        return Paragraph(text)
     }
 
     private fun createProductsTable(
         products: List<DocumentProductState>,
-        fontBold: PdfFont,
-        fontRegular: PdfFont,
         currencyCode: String,
+        formatLocale: String?,
     ): Table? {
         try {
             val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
-            val columnWidth = if (displayUnitColumn) floatArrayOf(43f, 9f, 13f, 8f, 14f, 13f)
-            else floatArrayOf(56f, 9f, 8f, 14f, 13f)
+            // Description | Qty | [Unit] | Tax rate | Unit price HT | Total HT
+            // PU HT and Total HT share the same width so any amount that fits in
+            // the unit price column also fits in the total column (long ISO
+            // codes like "1234,56 EGP" would overflow if Total was narrower).
+            // Description absorbs the extra so the row still sums to 100.
+            val columnWidth = if (displayUnitColumn) floatArrayOf(40f, 9f, 13f, 8f, 15f, 15f)
+            else floatArrayOf(53f, 9f, 8f, 15f, 15f)
 
             val table = Table(UnitValue.createPercentArray(columnWidth)).useAllAvailableWidth().setFixedLayout()
 
             // Header
-            table.addCustomCell(strings.tableDescription, TextAlignment.LEFT, true, fontBold, fontRegular)
-            table.addCustomCell(strings.tableQuantity, TextAlignment.RIGHT, true, fontBold, fontRegular)
+            table.addCustomCell(strings.tableDescription, TextAlignment.LEFT, true)
+            table.addCustomCell(strings.tableQuantity, TextAlignment.RIGHT, true)
             if (displayUnitColumn) {
-                table.addCustomCell(strings.tableUnit, TextAlignment.RIGHT, true, fontBold, fontRegular)
+                table.addCustomCell(strings.tableUnit, TextAlignment.RIGHT, true)
             }
-            table.addCustomCell(strings.tableTaxRate, TextAlignment.RIGHT, true, fontBold, fontRegular)
-            table.addCustomCell(strings.tableUnitPrice, TextAlignment.RIGHT, true, fontBold, fontRegular)
-            table.addCustomCell(strings.tableTotalPrice, TextAlignment.RIGHT, true, fontBold, fontRegular)
+            table.addCustomCell(strings.tableTaxRate, TextAlignment.RIGHT, true)
+            table.addCustomCell(strings.tableUnitPrice, TextAlignment.RIGHT, true)
+            table.addCustomCell(strings.tableTotalPrice, TextAlignment.RIGHT, true)
 
             // Products
             val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
@@ -531,12 +632,12 @@ class PdfGeneratorImpl(
                     }
                     table.addCustomCell(
                         headerText,
-                        TextAlignment.LEFT, true, fontBold, fontRegular, isSpan = true
+                        TextAlignment.LEFT, true, isSpan = true
                     )
-                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, fontBold, fontRegular, displayUnitColumn, currencyCode)
+                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, displayUnitColumn, currencyCode, formatLocale)
                 }
             } else {
-                addProductRows(products, table, fontBold, fontRegular, displayUnitColumn, currencyCode)
+                addProductRows(products, table, displayUnitColumn, currencyCode, formatLocale)
             }
 
             return table
@@ -549,10 +650,9 @@ class PdfGeneratorImpl(
     private fun addProductRows(
         products: List<DocumentProductState>,
         table: Table,
-        fontBold: PdfFont,
-        fontRegular: PdfFont,
         displayUnitColumn: Boolean,
         currencyCode: String,
+        formatLocale: String?,
     ) {
         products.forEach { product ->
             val itemName = Paragraph(Text(product.name.text)).setFixedLeading(10F)
@@ -565,65 +665,116 @@ class PdfGeneratorImpl(
                 null
             }
 
-            table.addCustomCell(paragraphs = listOfNotNull(itemName, spacing, itemDescription), alignment = TextAlignment.LEFT, fontBold = fontBold, fontRegular = fontRegular)
-            table.addCustomCell(product.quantity.stripTrailingZeros().toPlainString().replace(".", ","), fontBold = fontBold, fontRegular = fontRegular)
+            table.addCustomCell(paragraphs = listOfNotNull(itemName, spacing, itemDescription), alignment = TextAlignment.LEFT)
+            table.addCustomCell(product.quantity.stripTrailingZeros().toPlainString().replace(".", ","))
 
             if (displayUnitColumn) {
-                table.addCustomCell(product.unit?.text, fontBold = fontBold, fontRegular = fontRegular)
+                table.addCustomCell(product.unit?.text)
             }
 
             table.addCustomCell(
-                product.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" } ?: " - ",
-                fontBold = fontBold, fontRegular = fontRegular
+                product.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" } ?: " - "
             )
             table.addCustomCell(
-                product.priceWithoutTax?.let { formatAmount(it, currencyCode) } ?: "",
-                fontBold = fontBold, fontRegular = fontRegular
+                product.priceWithoutTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: ""
             )
             table.addCustomCell(
                 product.priceWithoutTax?.let { price ->
-                    formatAmount(price * product.quantity, currencyCode)
-                } ?: "",
-                fontBold = fontBold, fontRegular = fontRegular
+                    formatAmount(price * product.quantity, currencyCode, formatLocale)
+                } ?: ""
             )
         }
     }
 
-    private fun createPrices(font: PdfFont, prices: DocumentTotalPrices, fontSize: Float, currencyCode: String): Table {
-        // Auto-layout + right alignment so each column sizes to its content
-        // (mirrors the in-app preview). Avoids the wide-amount wrap to a new
-        // line that occurred with the previous 90/10 fixed split.
-        val table = Table(2)
-            .setAutoLayout()
+    private fun createPrices(prices: DocumentTotalPrices, fontSize: Float, currencyCode: String, formatLocale: String?): Table {
+        // Single-line-box layout: each row is one Paragraph whose label and
+        // amount sit at their own right-aligned tab stops. One line box per row
+        // means one shared baseline, which matters when iText grabs a fallback
+        // font for a currency glyph the primary Helvetica doesn't cover.
+        data class Line(val label: String, val amount: String, val bold: Boolean)
+        val lines = buildList {
+            add(Line(
+                label = strings.totalWithoutTax,
+                amount = prices.totalPriceWithoutTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: " - ",
+                bold = false,
+            ))
+            prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
+                add(Line(
+                    label = "${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}%${strings.labelSeparator}",
+                    amount = formatAmount(taxAmount, currencyCode, formatLocale),
+                    bold = false,
+                ))
+            }
+            add(Line(
+                label = strings.totalWithTax,
+                amount = prices.totalPriceWithTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: " - ",
+                bold = true,
+            ))
+        }
+
+        // Measure the widest amount so the label's right-align tab lands just
+        // before it. Uses the embedded helvetica.ttf (covers €, £, ₹, ₺, ₩,
+        // ₴, ₸ and everything Latin) rather than StandardFonts.HELVETICA
+        // (Base14, WinAnsi encoded, has none of the currency-symbol block).
+        // For the four glyphs even our embedded font misses (₪ ₼ ₽ ₾),
+        // per-char measurement returns 0 → we substitute a generous 1em
+        // estimate so those rare cases don't collapse the gap.
+        val measurementFont = loadPricesMeasurementFont()
+        val maxAmountWidth = lines.maxOf { measurePriceWidth(it.amount, measurementFont, fontSize) }
+        val labelRight = PRICES_AMOUNT_RIGHT - maxAmountWidth - PRICES_LABEL_AMOUNT_GAP
+
+        val table = Table(1)
+            .setWidth(PRICES_AMOUNT_RIGHT)
             .setHorizontalAlignment(HorizontalAlignment.RIGHT)
-            .setTextAlignment(TextAlignment.RIGHT)
             .setPaddingBottom(8f)
             .setPaddingRight(4f)
 
-        // Total HT
-        table.addCellInPrices(Paragraph(strings.totalWithoutTax))
-        table.addCellInPrices(Paragraph(prices.totalPriceWithoutTax?.let { formatAmount(it, currencyCode) } ?: " - "))
-
-        // TVA par taux
-        prices.totalAmountsOfEachTax?.sortedBy { it.first }?.forEach { (taxRate, taxAmount) ->
-            table.addCellInPrices(Paragraph("${strings.tax} ${taxRate.stripTrailingZeros().toPlainString().replace(".", ",")}%${strings.labelSeparator}"))
-            table.addCellInPrices(Paragraph(formatAmount(taxAmount, currencyCode)))
+        for (line in lines) {
+            table.addPriceLine(line.label, line.amount, fontSize, labelRight, line.bold)
         }
-
-        // Total TTC
-        table.addCellInPrices(Paragraph(strings.totalWithTax).setFont(font).setFontSize(fontSize))
-        table.addCellInPrices(Paragraph(prices.totalPriceWithTax?.let { formatAmount(it, currencyCode) } ?: " - ").setFont(font).setFontSize(fontSize))
-
         return table
     }
 
-    private fun createDueDate(font: PdfFont, date: String, fontSize: Float): Paragraph {
+    // Bold rendering uses Text.simulateBold() (synthetic stroke over the same
+    // font) rather than setProperty(FONT_WEIGHT). FONT_WEIGHT forces iText to
+    // pick a weight-700 face that covers each glyph — the fallback face for
+    // an exotic currency often differs from the label's face and the row ends
+    // up in two families. With simulateBold we stay on the font that already
+    // renders the row.
+    private fun Table.addPriceLine(
+        label: String,
+        amount: String,
+        fontSize: Float,
+        labelRight: Float,
+        bold: Boolean,
+    ): Table {
+        val paragraph = Paragraph()
+            .addTabStops(
+                TabStop(labelRight, TabAlignment.RIGHT),
+                TabStop(PRICES_AMOUNT_RIGHT, TabAlignment.RIGHT),
+            )
+            .setFontSize(fontSize)
+            .setFixedLeading(13f)
+            .setMargin(0f)
+        paragraph.add(Tab())
+        paragraph.add(Text(label).also { if (bold) it.simulateBold() })
+        paragraph.add(Tab())
+        paragraph.add(Text(amount).also { if (bold) it.simulateBold() })
+        return this.addCell(
+            Cell().add(paragraph)
+                .setBorder(Border.NO_BORDER)
+                .setPadding(0f)
+                .setPaddingBottom(2f)
+        )
+    }
+
+    private fun createDueDate(date: String, fontSize: Float): Paragraph {
         val dueDateLabel = strings.dueDate.trimEnd() + " "
         return Paragraph("$dueDateLabel$date")
             .setFixedLeading(16F)
             .setPaddingTop(12f)
             .setTextAlignment(TextAlignment.CENTER)
-            .setFont(font)
+            .pdfBold()
             .setFontSize(fontSize)
     }
 
@@ -638,7 +789,7 @@ class PdfGeneratorImpl(
             .setTextAlignment(TextAlignment.CENTER)
     }
 
-    private fun createWatermark(text: String, font: PdfFont): Paragraph {
+    private fun createWatermark(text: String): Paragraph {
         // Tiny watermark, smaller than the document body. We split on the URL marker
         // to make only that substring a clickable Link in PDF readers, but the entire
         // line is underlined to match the in-app preview (Text with TextDecoration.Underline).
@@ -659,7 +810,6 @@ class PdfGeneratorImpl(
             paragraph.add(Text(text).setUnderline(underlineThickness, underlineYPosition))
         }
         return paragraph
-            .setFont(font)
             .setFontSize(7F)
             .setFixedLeading(9F)
             .setCharacterSpacing(0.4F)
@@ -672,8 +822,6 @@ class PdfGeneratorImpl(
         text: String? = null,
         alignment: TextAlignment = TextAlignment.RIGHT,
         isBold: Boolean = false,
-        fontBold: PdfFont,
-        fontRegular: PdfFont,
         paragraphs: List<Paragraph?>? = null,
         isSpan: Boolean = false
     ): Table {
@@ -684,7 +832,8 @@ class PdfGeneratorImpl(
             .setPaddingTop(if (isBold) 5f else 3f)
             .setPaddingBottom(if (isBold) 5f else 3f)
             .setBorder(SolidBorder(ColorConstants.LIGHT_GRAY, 1f))
-            .setFont(if (isBold) fontBold else fontRegular)
+
+        if (isBold) cell.pdfBold()
 
         if (text != null) {
             cell.add(Paragraph(text).setFixedLeading(10F))
@@ -694,15 +843,53 @@ class PdfGeneratorImpl(
         return this.addCell(cell)
     }
 
-    private fun Table.addCellInPrices(paragraph: Paragraph): Table {
-        return this.addCell(
-            Cell().add(paragraph)
-                .setTextAlignment(TextAlignment.RIGHT)
-                .setBorder(Border.NO_BORDER)
-                .setPaddingTop(-4f)
-                .setPaddingBottom(6f)
-        )
+    // Lazily-loaded PdfFont used only for measuring price-row widths. Kept as
+    // a nullable cache field so we don't re-parse the TTF for every PDF; the
+    // PdfGeneratorImpl instance is per-generation anyway, so no cross-thread
+    // concern. Falls back to the Base14 Helvetica if the asset is missing —
+    // measurement will underestimate exotic glyphs but PRICES_LABEL_AMOUNT_GAP
+    // has enough slack for that to still look correct.
+    private var pricesMeasurementFont: PdfFont? = null
+    private fun loadPricesMeasurementFont(): PdfFont {
+        pricesMeasurementFont?.let { return it }
+        val font = try {
+            fileManager.loadAssetBytes("helvetica.ttf")?.let { bytes ->
+                PdfFontFactory.createFont(FontProgramFactory.createFont(bytes), PdfEncodings.IDENTITY_H)
+            }
+        } catch (_: Throwable) { null } ?: PdfFontFactory.createFont(StandardFonts.HELVETICA)
+        pricesMeasurementFont = font
+        return font
     }
+
+    // Per-char width measurement so we can substitute a fallback estimate for
+    // glyphs the measurement font doesn't cover (getWidth returns 0 for those,
+    // which would otherwise cause the label to overlap the amount when the
+    // currency uses ₪ ₼ ₽ ₾).
+    private fun measurePriceWidth(text: String, font: PdfFont, fontSize: Float): Float {
+        var total = 0f
+        for (c in text) {
+            val glyphWidth = font.getWidth(c.code, fontSize)
+            total += if (glyphWidth > 0f) glyphWidth else fontSize
+        }
+        return total
+    }
+
+}
+
+/**
+ * iText 9.5 doesn't expose a typed setBold()/setFontFamily() on every layout
+ * element (Document, Cell), only on Text. FontProvider selection driven by
+ * Property.FONT_WEIGHT + Property.FONT gives us a uniform path that works on
+ * every element implementing IPropertyContainer.
+ */
+private fun <T : IPropertyContainer> T.pdfFontFamily(family: String): T {
+    setProperty(Property.FONT, arrayOf(family))
+    return this
+}
+
+private fun <T : IPropertyContainer> T.pdfBold(): T {
+    setProperty(Property.FONT_WEIGHT, "bold")
+    return this
 }
 
 /**

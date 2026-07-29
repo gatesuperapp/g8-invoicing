@@ -10,6 +10,8 @@ CREATE TABLE Invoice (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
+  show_currency_notice INTEGER NOT NULL DEFAULT 0,
+  format_locale TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -41,8 +43,8 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_notice, format_locale)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice

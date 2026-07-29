@@ -52,9 +52,11 @@ class LocaleManager(private val settings: Settings = Settings()) {
             settings.putString(KEY_LANGUAGE, language.code!!)
         }
         setAppLocale(language.code)
+        AppLocaleHolder.set(effectiveLanguageCode)
     }
 
     fun initializeLocale() {
         setAppLocale(currentLanguage.code)
+        AppLocaleHolder.set(effectiveLanguageCode)
     }
 }

@@ -12,4 +12,15 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
  *
  * Falls back to "<plainString> <code>" if the currency code is unknown.
  */
-expect fun formatAmount(amount: BigDecimal, currencyCode: String = "EUR"): String
+/**
+ * @param languageCode BCP-47 code (fr/en/es/de) that drives the formatting
+ * locale — separator style, symbol position. Pass a doc's frozen
+ * [DocumentState.formatLocale] to keep the amount identical across app-language
+ * switches. null → fall back to the current app language (AppLocaleHolder),
+ * suitable for renders that aren't tied to a specific frozen doc.
+ */
+expect fun formatAmount(
+    amount: BigDecimal,
+    currencyCode: String = "EUR",
+    languageCode: String? = null,
+): String

@@ -41,6 +41,10 @@ data class PdfStrings(
     val companyId2Label: String,
     val companyId3Label: String,
     val otherLines: String,
+    // Parameterised label rendered under the top date when the document was
+    // created with showCurrencyNotice=true and the currency isn't EUR. The
+    // %1$s placeholder receives the ISO code — never translated.
+    val currencyNoticeLabel: String,
 )
 
 /**
@@ -72,6 +76,21 @@ expect class PdfFileManager() {
      * Open the folder containing the PDF (desktop) or get URI for sharing (Android).
      */
     fun openOrShare(filePath: String)
+
+    /**
+     * Load raw bytes for a bundled asset (e.g. embedded helvetica.ttf). Returns
+     * null when the asset isn't available on the current platform.
+     */
+    fun loadAssetBytes(assetName: String): ByteArray?
+
+    /**
+     * Enumerate absolute paths of system font files usable by iText. The PDF
+     * generator registers these in a FontProvider so any user-typed character
+     * (currency symbols like ৳ ֏ ₽, or exotic chars in a footer/product name)
+     * falls back to whichever system font covers it. Returns an empty list on
+     * platforms without a discoverable system font directory.
+     */
+    fun listSystemFontFiles(): List<String>
 }
 
 /**

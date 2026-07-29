@@ -25,6 +25,7 @@
     <string name="addressed_to">Addressed to</string>
     <string name="invoice_pdf_due_date">Payment due date: </string>
     <string name="invoice_paid">Paid ✔</string>
+    <string name="pdf_currency_notice">Currency: %1$s</string>
 
     <!-- Document table -->
     <string name="document_table_description">Description</string>

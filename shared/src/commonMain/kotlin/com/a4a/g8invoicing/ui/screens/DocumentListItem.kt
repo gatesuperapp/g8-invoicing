@@ -227,7 +227,7 @@ fun DocumentListItem(
             ) {
                 Text(
                     text = document.documentTotalPrices?.totalPriceWithTax?.let {
-                        formatAmount(it, document.currency.text.ifEmpty { "EUR" })
+                        formatAmount(it, document.currency.text.ifEmpty { "EUR" }, document.formatLocale)
                     } ?: "",
                     style = MaterialTheme.typography.textBodyBold.copy(
                         color = if (isCancelled) AppColors.textMuted else statusColor,

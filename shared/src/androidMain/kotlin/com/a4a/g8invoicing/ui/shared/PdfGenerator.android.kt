@@ -93,6 +93,47 @@ actual class PdfFileManager actual constructor() {
         File(filePath).delete()
     }
 
+    actual fun loadAssetBytes(assetName: String): ByteArray? {
+        return try {
+            context.assets.open(assetName).use { it.readBytes() }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    actual fun listSystemFontFiles(): List<String> {
+        // Android bundles all system fonts under /system/fonts. We take every
+        // Noto*/Roboto*/DroidSans* text face and rely on iText's FontSelector
+        // to pick the one whose cmap covers each glyph — this mirrors what
+        // Compose does on-device via the Android font fallback chain, so
+        // preview and PDF end up drawing the same glyphs. Arabic lives under
+        // NotoNaskh/NotoKufi/NotoNastaliq (not NotoSans*), Devanagari lives
+        // under NotoSansDevanagari, Bengali under NotoSansBengali, etc.
+        //
+        // The denylist blocks faces that would either crash iText's parser
+        // (COLR/CBDT colour glyphs) or hijack ordinary code points to draw
+        // icons (Symbol* and vendor emoji faces map e.g. U+20BE Georgian
+        // Lari to ϕ, which is how the wrong glyph reached the PDF earlier).
+        return try {
+            File("/system/fonts").listFiles { f ->
+                if (!f.isFile || !f.canRead()) return@listFiles false
+                val name = f.name
+                val ext = name.substringAfterLast('.', "").lowercase()
+                if (ext !in setOf("ttf", "otf", "ttc")) return@listFiles false
+                val allowed = listOf("Noto", "Roboto", "DroidSans")
+                if (!allowed.any { name.startsWith(it, ignoreCase = true) }) return@listFiles false
+                val denied = listOf(
+                    "NotoColorEmoji", "NotoEmoji",
+                    "NotoSansSymbols", "NotoSansSymbols2",
+                )
+                if (denied.any { name.startsWith(it, ignoreCase = true) }) return@listFiles false
+                true
+            }?.map { it.absolutePath } ?: emptyList()
+        } catch (_: Throwable) {
+            emptyList()
+        }
+    }
+
     actual fun openOrShare(filePath: String) {
         val fileName = File(filePath).name
         val uri = getFileUri(fileName)

@@ -23,9 +23,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -150,6 +160,13 @@ fun CurrencyPicker(
                             isCurrent = entry.code == currentCode,
                             onClick = { onSelect(entry.code) },
                         )
+                        // Solidarity message pinned just under ILS: the Palestinian
+                        // territories don't issue their own currency and Palestinians
+                        // use ILS by force of occupation. Non-clickable, no i18n key
+                        // (statement, not UI copy).
+                        if (entry.code == "ILS") {
+                            FreePalestineRow()
+                        }
                     }
                 }
             }
@@ -170,6 +187,50 @@ private fun SectionHeader(text: String) {
         style = MaterialTheme.typography.labelSmall,
         modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
     )
+}
+
+@Composable
+private fun FreePalestineRow() {
+    // Palestinian flag colours cycled through a repeating linear gradient. The
+    // gradient's origin is animated so the colours appear to glide across the
+    // text. The watermelon is kept in its native colour by rendering it as a
+    // separate Text — applying the brush over the emoji would flatten its
+    // colour glyph to a single-colour silhouette.
+    val flagGreen = Color(0xFF009639)
+    val flagRed = Color(0xFFEE2A35)
+    val flagBlack = Color(0xFF000000)
+    val cycleWidth = 220f
+    val transition = rememberInfiniteTransition(label = "palestine")
+    val shift by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = cycleWidth,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+        ),
+        label = "palestine-shift",
+    )
+    val brush = Brush.linearGradient(
+        colors = listOf(flagGreen, flagRed, flagBlack, flagGreen),
+        start = Offset(shift, 0f),
+        end = Offset(shift + cycleWidth, 0f),
+        tileMode = TileMode.Repeated,
+    )
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(text = "🍉 ", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = "Free Palestine",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                brush = brush,
+                fontWeight = FontWeight.SemiBold,
+            ),
+        )
+    }
 }
 
 @Composable

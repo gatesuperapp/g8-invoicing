@@ -8,6 +8,8 @@ CREATE TABLE Quote (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
+  show_currency_notice INTEGER NOT NULL DEFAULT 0,
+  format_locale TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -38,8 +40,8 @@ SELECT quote_id
 FROM Quote;
 
 save:
-INSERT INTO Quote (quote_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot)
-VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?);
+INSERT INTO Quote (quote_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_notice, format_locale)
+VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Quote

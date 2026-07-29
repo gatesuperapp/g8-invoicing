@@ -23,6 +23,19 @@
 -- taxCategoryCode (BT-151/BT-118) n'est PAS persisté : auto-déduit à la
 -- génération XML depuis (vat_exempt, country_code émetteur, country_code client,
 -- product.type).
+--
+-- 3) show_currency_notice sur Invoice / DeliveryNote / CreditNote. Booléen
+--    (0/1) qui indique si le rendu doit afficher "Devise : XXX" sous la date
+--    (désambiguïse $ £ ¥ partagés entre plusieurs devises). Docs préexistants
+--    restent à 0 — on ne rétro-modifie pas l'aspect des anciennes factures.
+--    Nouveaux docs → 1 dans createNew() / duplicate() / convertX().
+--
+-- 4) format_locale sur Invoice / DeliveryNote / CreditNote. Code langue BCP-47
+--    (fr/en/es/de) gelé à la création. Détermine avec quelle locale les
+--    montants sont formatés (positionnement du symbole, séparateurs, décimales).
+--    Une facture émise en français reste en "1 234,56 $" même si l'utilisateur
+--    passe l'app en anglais. Docs préexistants: NULL → fallback sur langue
+--    courante (comportement pré-feature). Docs neufs: renseigné à createNew().
 
 CREATE TABLE Quote (
   quote_id INTEGER PRIMARY KEY NOT NULL,
@@ -34,6 +47,8 @@ CREATE TABLE Quote (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
+  show_currency_notice INTEGER NOT NULL DEFAULT 0,
+  format_locale TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -80,3 +95,11 @@ ALTER TABLE DocumentClientOrIssuer ADD COLUMN vat_exempt INTEGER DEFAULT 0;
 
 ALTER TABLE ClientOrIssuer ADD COLUMN intra_eu_sales INTEGER DEFAULT 0;
 ALTER TABLE DocumentClientOrIssuer ADD COLUMN intra_eu_sales INTEGER DEFAULT 0;
+
+ALTER TABLE Invoice      ADD COLUMN show_currency_notice INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE DeliveryNote ADD COLUMN show_currency_notice INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE CreditNote   ADD COLUMN show_currency_notice INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE Invoice      ADD COLUMN format_locale TEXT;
+ALTER TABLE DeliveryNote ADD COLUMN format_locale TEXT;
+ALTER TABLE CreditNote   ADD COLUMN format_locale TEXT;

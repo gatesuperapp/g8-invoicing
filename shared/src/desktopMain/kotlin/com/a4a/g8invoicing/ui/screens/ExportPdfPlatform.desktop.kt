@@ -40,6 +40,7 @@ import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
 import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_reference_label
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
@@ -99,6 +100,7 @@ actual fun ExportPdfPlatform(
         companyId2Label = stringResource(Res.string.company_identification2),
         companyId3Label = stringResource(Res.string.company_identification3),
         otherLines = stringResource(Res.string.document_products_other_lines),
+        currencyNoticeLabel = stringResource(Res.string.pdf_currency_notice),
     )
 
     val fileManager = remember { PdfFileManager() }

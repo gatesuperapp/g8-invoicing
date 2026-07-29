@@ -136,6 +136,7 @@ fun DocumentBasicTemplateContent(
                         DocumentBasicTemplateProductsTable(
                             productArray,
                             currencyCode = document.currency.text.ifEmpty { "EUR" },
+                            formatLocale = document.formatLocale,
                             labels = labels,
                         )
                     }
