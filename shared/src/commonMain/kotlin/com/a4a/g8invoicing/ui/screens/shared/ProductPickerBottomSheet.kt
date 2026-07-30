@@ -20,9 +20,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -94,8 +94,11 @@ fun ProductPickerBottomSheet(
     val focusRequester = remember { FocusRequester() }
     val sheetState = rememberModalBottomSheetState()
 
-    // Preemptively expand the sheet BEFORE the IME animates in — see the
-    // matching note in ClientOrIssuerPickerBottomSheet.
+    // Full-expand the sheet on search open, then request focus. Simpler and
+    // more predictable than trying to keep the sheet at its partial state:
+    // when the user opens the search they want maximum viewport for results.
+    // Safe with Material3 ≥ 1.5.0-alpha19 — the fixed sheet no longer races
+    // its internal imePadding against the IME animation, so no wobble.
     LaunchedEffect(searchExpanded) {
         if (searchExpanded) {
             sheetState.expand()
@@ -134,6 +137,11 @@ fun ProductPickerBottomSheet(
         filteredAlphaSorted.groupBy { it.name.text.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
     }
 
+    // Zero out contentWindowInsets on the sheet + apply .imePadding() on the
+    // inner Column. With Material3 ≥ 1.5.0-alpha19 this combo drives the IME
+    // handling cleanly: the sheet is fully expanded (see LaunchedEffect above),
+    // and the .imePadding() below pushes the TextField above the keyboard
+    // without any anchor animation race.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,

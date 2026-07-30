@@ -118,6 +118,15 @@ kotlin {
                 api("io.ktor:ktor-client-okhttp:3.5.1")
                 // Encrypted storage for tokens
                 implementation("androidx.security:security-crypto:1.1.0")
+                // Material3 pinned above what CMP 1.8.2 bundles, to pull in the fix
+                // for ModalBottomSheet + IME anchor wobble (Google b/289824811,
+                // commit Ied801). Without this override the sheet re-runs its
+                // anchor animation every time WindowInsets.ime changes, which
+                // races the OS keyboard animation and produces a visible jump
+                // when a TextField inside the sheet receives focus.
+                // TODO: remove this line once CMP bundles Material3 >= 1.5.0
+                // stable — the multiplatform artifact will then include the fix.
+                implementation("androidx.compose.material3:material3-android:1.5.0-alpha19")
             }
         }
 

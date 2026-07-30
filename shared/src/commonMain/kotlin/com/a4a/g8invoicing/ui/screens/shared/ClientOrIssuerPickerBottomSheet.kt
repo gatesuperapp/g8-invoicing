@@ -20,9 +20,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -107,10 +107,10 @@ fun ClientOrIssuerPickerBottomSheet(
     val focusRequester = remember { FocusRequester() }
     val sheetState = rememberModalBottomSheetState()
 
-    // Preemptively expand the sheet BEFORE the IME animates in. Otherwise the
-    // partial→expanded reconciliation triggered by the keyboard insets makes
-    // the sheet drop down for a frame then snap back up. Someone opening a
-    // search wants max viewport anyway, so expand is the right behaviour.
+    // Full-expand the sheet on search open, then request focus. Simpler and
+    // more predictable than trying to keep the sheet at partial when the user
+    // wants to browse search results. Safe with Material3 ≥ 1.5.0-alpha19 —
+    // no more IME animation race against the sheet's internal imePadding.
     LaunchedEffect(searchExpanded) {
         if (searchExpanded) {
             sheetState.expand()
@@ -155,6 +155,11 @@ fun ClientOrIssuerPickerBottomSheet(
         filteredAlphaSorted.groupBy { it.name.text.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "#" }
     }
 
+    // Zero out contentWindowInsets on the sheet + apply .imePadding() on the
+    // inner Column. With Material3 ≥ 1.5.0-alpha19 this combo drives the IME
+    // handling cleanly: the sheet is fully expanded (see LaunchedEffect above)
+    // and .imePadding() below pushes the TextField above the keyboard without
+    // any anchor animation race.
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
