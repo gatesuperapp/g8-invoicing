@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,8 +36,15 @@ fun DocumentBottomSheetFormSimple(
 ) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { it != SheetValue.Hidden }
     )
+
+    // Drop the earlier `confirmValueChange = { it != SheetValue.Hidden }`
+    // guard — it blocked the sheet from transitioning to Hidden, which had
+    // the side effect of eating the system back press (Material3 relies on
+    // that transition to fire onDismissRequest). We still forbid swipe-down
+    // via `sheetGesturesEnabled = false` on the outer BottomSheetScaffold
+    // in DocumentAddEdit, so the sheet can only be closed via the Cancel
+    // button or the back press now.
 
     ModalBottomSheet(
         onDismissRequest = onClickCancel,
