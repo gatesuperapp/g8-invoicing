@@ -146,6 +146,7 @@ val Typography.textCta: TextStyle
     get() = TextStyle(
         fontFamily = getUiFont(),
         fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
         color = AppColors.textLink,
     )
 
@@ -154,6 +155,7 @@ val Typography.textCtaDisabled: TextStyle
     get() = TextStyle(
         fontFamily = getUiFont(),
         fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
         color = AppColors.textDisabled,
     )
 

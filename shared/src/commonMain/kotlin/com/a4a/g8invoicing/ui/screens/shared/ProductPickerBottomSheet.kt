@@ -67,7 +67,7 @@ import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_recent
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_product
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
@@ -383,7 +383,7 @@ private fun ProductPickerRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = product.name.text,
-                style = MaterialTheme.typography.textBodyBold,
+                style = MaterialTheme.typography.textBody,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -398,7 +398,7 @@ private fun ProductPickerRow(
         }
         Text(
             text = price?.let { formatAmount(it, currencyCode) }.orEmpty(),
-            style = MaterialTheme.typography.textBodyBold,
+            style = MaterialTheme.typography.textBody,
         )
     }
 }

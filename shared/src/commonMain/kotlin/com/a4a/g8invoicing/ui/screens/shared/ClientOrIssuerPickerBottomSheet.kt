@@ -75,6 +75,8 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.textBody
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
@@ -441,9 +443,12 @@ private fun ClientOrIssuerPickerRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
+            // Selected client/issuer highlighted with bold + violet bg;
+            // rest stays regular to keep the list scannable and calm.
             Text(
                 text = displayName,
-                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
+                style = if (isSelected) MaterialTheme.typography.textBodyBold
+                else MaterialTheme.typography.textBody,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
