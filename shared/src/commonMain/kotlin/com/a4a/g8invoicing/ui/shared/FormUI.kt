@@ -369,6 +369,11 @@ class TextInput(
     // rendered when the field actually has content, hidden otherwise so
     // an empty row stays clean.
     val displayClearIcon: Boolean = false,
+    // true → Enter inserts a newline instead of firing the imeAction (Next/Done).
+    // Also reserves at least [minLines] of vertical space so the field doesn't
+    // start visually cramped at one line before the user starts typing.
+    val isMultiline: Boolean = false,
+    val minLines: Int = 1,
 )
 
 class DecimalInput(

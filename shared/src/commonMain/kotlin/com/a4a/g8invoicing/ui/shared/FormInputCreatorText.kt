@@ -115,11 +115,14 @@ fun FormInputCreatorText(
                     textStyle = if (isEditableLabel) MaterialTheme.typography.textBodyBold
                     else LocalTextStyle.current,
                     keyboardOptions = KeyboardOptions(
-                        imeAction = keyboardOption,
-                        keyboardType = input.keyboardType
+                        // Multiline inputs (client notes) opt out of the
+                        // Next/Done imeAction so Enter inserts a newline
+                        // instead of jumping to the next field.
+                        imeAction = if (input.isMultiline) ImeAction.Default else keyboardOption,
+                        keyboardType = input.keyboardType,
                     ),
                     keyboardActions = formActions,
-                    //   singleLine = input.displayFullScreenIcon,
+                    minLines = input.minLines,
 
                 ) { innerTextField ->
                     val interactionSource = remember { MutableInteractionSource() }

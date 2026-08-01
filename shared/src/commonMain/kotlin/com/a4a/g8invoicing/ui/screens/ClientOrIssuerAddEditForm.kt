@@ -730,6 +730,8 @@ fun ClientOrIssuerAddEditForm(
                                 it
                             )
                         },
+                        isMultiline = true,
+                        minLines = 3,
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
                     else ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
