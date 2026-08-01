@@ -118,7 +118,6 @@ fun DocumentBottomSheetProducts(
                 },
                 onClickNew = {
                     typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
-                    isProductListVisible = false
                     onShowDocumentForm(true)
                     onClickNewProduct()
                 },
@@ -138,6 +137,7 @@ fun DocumentBottomSheetProducts(
                 },
                 onClickDone = { syncToMaster ->
                     onClickDoneForm(typeOfCreation, syncToMaster)
+                    isProductListVisible = false
                 },
                 onSelectTaxRate = onSelectTaxRate,
                 showProductType = showProductType,

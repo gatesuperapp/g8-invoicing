@@ -42,6 +42,7 @@ import com.a4a.g8invoicing.shared.resources.document_modal_product_save
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -134,6 +135,21 @@ fun DocumentBottomSheetForm(
         },
         // Note: sheetGesturesEnabled is not available in Compose Multiplatform
     ) {
+        PlatformBackHandler {
+            when {
+                isTaxSelectionVisible -> {
+                    isTaxSelectionVisible = false
+                    scope.launch { sheetState.expand() }
+                }
+                fullScreenElementToShow.value != null -> {
+                    fullScreenEditorText = TextFieldValue("")
+                    fullScreenElementToShow.value = null
+                    scope.launch { sheetState.expand() }
+                }
+                else -> onClickCancel()
+            }
+        }
+
         Column {
             DocumentBottomSheetHeader(
                 typeOfCreation = typeOfCreation,
