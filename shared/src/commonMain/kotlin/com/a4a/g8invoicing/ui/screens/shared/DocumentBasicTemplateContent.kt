@@ -133,10 +133,18 @@ fun DocumentBasicTemplateContent(
                         .fillMaxWidth()
                 ) {
                     if (!productArray.isNullOrEmpty()) {
+                        // For docs created before 1.8 (showCurrencyAndAutoTaxColumn = false),
+                        // keep the historical always-visible tax column so an
+                        // existing invoice re-opened after the update looks
+                        // identical to when it was issued. Post-1.8 docs
+                        // dynamically hide the column when no line has a rate.
+                        val displayTaxColumn = !document.showCurrencyAndAutoTaxColumn ||
+                            productArray.any { it.taxRate != null }
                         DocumentBasicTemplateProductsTable(
                             productArray,
                             currencyCode = document.currency.text.ifEmpty { "EUR" },
                             formatLocale = document.formatLocale,
+                            displayTaxColumn = displayTaxColumn,
                             labels = labels,
                         )
                     }

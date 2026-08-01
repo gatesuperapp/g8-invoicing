@@ -30,6 +30,6 @@ data class InvoiceState(
     override var createdDate: String? = null,
     override var watermarkText: String? = null,
     override var labelsSnapshot: String? = null,
-    override var showCurrencyNotice: Boolean = false,
+    override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
 ) : DocumentState()

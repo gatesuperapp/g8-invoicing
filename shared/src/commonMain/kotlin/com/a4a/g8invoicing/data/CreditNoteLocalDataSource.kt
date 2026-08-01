@@ -75,7 +75,7 @@ class CreditNoteLocalDataSource(
                 footerText = TextFieldValue(getExistingFooter() ?: ""),
                 watermarkText = frozenWatermark,
                 labelsSnapshot = frozenLabels,
-                showCurrencyNotice = true,
+                showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
             )
 
@@ -201,7 +201,7 @@ class CreditNoteLocalDataSource(
                 createdDate = it.created_at,
                 watermarkText = it.watermark_text,
                 labelsSnapshot = it.labels_snapshot,
-                showCurrencyNotice = it.show_currency_notice != 0L,
+                showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
                 formatLocale = it.format_locale,
             )
         }
@@ -243,7 +243,7 @@ class CreditNoteLocalDataSource(
                         footerText = TextFieldValue(getExistingFooter() ?: ""),
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
-                        showCurrencyNotice = true,
+                        showCurrencyAndAutoTaxColumn = true,
                         formatLocale = AppLocaleHolder.languageCode,
                     )
                 )
@@ -291,7 +291,7 @@ class CreditNoteLocalDataSource(
                     creditNote.documentNumber = TextFieldValue(docNumber)
                     creditNote.watermarkText = frozenWatermark
                     creditNote.labelsSnapshot = frozenLabels
-                    creditNote.showCurrencyNotice = true
+                    creditNote.showCurrencyAndAutoTaxColumn = true
                     creditNote.formatLocale = AppLocaleHolder.languageCode
 
                     saveInfoInCreditNoteTable(creditNote)
@@ -486,7 +486,7 @@ class CreditNoteLocalDataSource(
                 footer = document.footerText.text,
                 watermark_text = document.watermarkText,
                 labels_snapshot = document.labelsSnapshot,
-                show_currency_notice = if (document.showCurrencyNotice) 1L else 0L,
+                show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
             )
         } catch (e: Exception) {

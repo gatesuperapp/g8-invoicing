@@ -24,11 +24,13 @@
 -- génération XML depuis (vat_exempt, country_code émetteur, country_code client,
 -- product.type).
 --
--- 3) show_currency_notice sur Invoice / DeliveryNote / CreditNote. Booléen
---    (0/1) qui indique si le rendu doit afficher "Devise : XXX" sous la date
---    (désambiguïse $ £ ¥ partagés entre plusieurs devises). Docs préexistants
---    restent à 0 — on ne rétro-modifie pas l'aspect des anciennes factures.
---    Nouveaux docs → 1 dans createNew() / duplicate() / convertX().
+-- 3) show_currency_and_auto_tax_column sur Invoice / DeliveryNote / CreditNote.
+--    Booléen (0/1) qui gate les comportements de rendu ajoutés en 1.8 :
+--      - afficher "Devise : XXX" sous la date pour désambiguïser $ £ ¥
+--      - masquer la colonne TVA du tableau produits quand aucune ligne
+--        ne porte de taux
+--    Docs préexistants restent à 0 — on ne rétro-modifie pas l'aspect des
+--    anciennes factures. Nouveaux docs → 1 dans createNew()/duplicate()/convertX().
 --
 -- 4) format_locale sur Invoice / DeliveryNote / CreditNote. Code langue BCP-47
 --    (fr/en/es/de) gelé à la création. Détermine avec quelle locale les
@@ -47,7 +49,7 @@ CREATE TABLE Quote (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
-  show_currency_notice INTEGER NOT NULL DEFAULT 0,
+  show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -96,9 +98,9 @@ ALTER TABLE DocumentClientOrIssuer ADD COLUMN vat_exempt INTEGER DEFAULT 0;
 ALTER TABLE ClientOrIssuer ADD COLUMN intra_eu_sales INTEGER DEFAULT 0;
 ALTER TABLE DocumentClientOrIssuer ADD COLUMN intra_eu_sales INTEGER DEFAULT 0;
 
-ALTER TABLE Invoice      ADD COLUMN show_currency_notice INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE DeliveryNote ADD COLUMN show_currency_notice INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE CreditNote   ADD COLUMN show_currency_notice INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE Invoice      ADD COLUMN show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE DeliveryNote ADD COLUMN show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE CreditNote   ADD COLUMN show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0;
 
 ALTER TABLE Invoice      ADD COLUMN format_locale TEXT;
 ALTER TABLE DeliveryNote ADD COLUMN format_locale TEXT;

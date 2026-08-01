@@ -9,7 +9,7 @@ CREATE TABLE CreditNote (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
-  show_currency_notice INTEGER NOT NULL DEFAULT 0,
+  show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -41,7 +41,7 @@ SELECT credit_note_id
 FROM CreditNote;
 
 save:
-INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_notice, format_locale)
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale)
 VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:

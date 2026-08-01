@@ -21,7 +21,7 @@ data class CreditNoteState(
     override var createdDate: String? = null,
     override var watermarkText: String? = null,
     override var labelsSnapshot: String? = null,
-    override var showCurrencyNotice: Boolean = false,
+    override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
     var dueDate: String = "",
     var linkedInvoice: InvoiceState? = null

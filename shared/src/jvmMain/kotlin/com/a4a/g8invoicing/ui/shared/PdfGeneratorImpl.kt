@@ -214,7 +214,7 @@ class PdfGeneratorImpl(
         val dateFontSize = 16F
         val fontSize = 9.5F
         val currencyCodeForHeader = document.currency.text.ifEmpty { "EUR" }
-        val showCurrencyNotice = document.showCurrencyNotice && currencyCodeForHeader != "EUR"
+        val showCurrencyNoticeLine = document.showCurrencyAndAutoTaxColumn && currencyCodeForHeader != "EUR"
 
         // Header with Logo and Title/Date
         val logoPath = document.documentIssuer?.logoPath
@@ -255,9 +255,13 @@ class PdfGeneratorImpl(
         // feature landed).
         val formatLocale = document.formatLocale
 
-        // Products table
+        // Products table — post-1.8 docs (marked by showCurrencyAndAutoTaxColumn) hide
+        // the tax column when no line carries a rate; legacy docs always show
+        // it so a re-export of an old invoice looks identical to the original.
         document.documentProducts?.let { products ->
-            createProductsTable(products, currencyCode, formatLocale)?.let {
+            val displayTaxColumn = !document.showCurrencyAndAutoTaxColumn ||
+                products.any { it.taxRate != null }
+            createProductsTable(products, currencyCode, formatLocale, displayTaxColumn)?.let {
                 val marginTop = if (document.reference?.text.isNullOrEmpty() && document.freeField?.text.isNullOrEmpty()) 20f else 10f
                 doc.add(it.setMarginTop(marginTop).setMarginBottom(12f))
             }
@@ -272,13 +276,13 @@ class PdfGeneratorImpl(
         // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
         // get the extra breathing room applied directly on the footer.
         if (document is InvoiceState) {
-            if (showCurrencyNotice) {
+            if (showCurrencyNoticeLine) {
                 doc.add(createCurrencyNotice(currencyCodeForHeader))
             }
-            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize, trimTopPadding = showCurrencyNotice))
+            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize, trimTopPadding = showCurrencyNoticeLine))
             doc.add(createFooter(document.footerText.text, fontSize))
         } else {
-            if (showCurrencyNotice) {
+            if (showCurrencyNoticeLine) {
                 doc.add(createCurrencyNotice(currencyCodeForHeader))
             }
             doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
@@ -409,7 +413,7 @@ class PdfGeneratorImpl(
 
     // "Devise : USD" (or the localised equivalent) rendered just above the
     // Payment-due-date line at the bottom of invoices for documents where
-    // showCurrencyNotice is set and the currency isn't EUR. Same weight
+    // showCurrencyAndAutoTaxColumn is set on the doc and the currency isn't EUR. Same weight
     // and size as the due date so the two lines read as a coherent pair.
     private fun createCurrencyNotice(currencyCode: String): Paragraph {
         val labelPattern = strings.currencyNoticeLabel
@@ -601,17 +605,31 @@ class PdfGeneratorImpl(
         products: List<DocumentProductState>,
         currencyCode: String,
         formatLocale: String?,
+        displayTaxColumn: Boolean,
     ): Table? {
         try {
             val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
-            // Description | Qty | [Unit] | Tax rate | Unit price HT | Total HT
-            // PU HT and Total HT share the same width so any amount that fits in
-            // the unit price column also fits in the total column (long ISO
-            // codes like "1234,56 EGP" would overflow if Total was narrower).
-            // Description absorbs the extra so the row still sums to 100.
-            val columnWidth = if (displayUnitColumn) floatArrayOf(40f, 9f, 13f, 8f, 15f, 15f)
-            else floatArrayOf(53f, 9f, 8f, 15f, 15f)
+            // Description | Qty | [Unit] | [Tax rate] | Unit price HT | Total HT
+            // The tax column disappears when the issuer is VAT-exempt (nothing
+            // to show in it); the description column absorbs its width. Same
+            // for the unit column. PU HT and Total HT stay equal-width so any
+            // amount that fits one fits the other (long ISO codes like
+            // "1234,56 EGP" would overflow if Total was narrower).
+            val descriptionPct = when {
+                displayUnitColumn && displayTaxColumn -> 40f
+                displayUnitColumn && !displayTaxColumn -> 48f
+                !displayUnitColumn && displayTaxColumn -> 53f
+                else -> 61f
+            }
+            val columnWidth = buildList {
+                add(descriptionPct)
+                add(9f)
+                if (displayUnitColumn) add(13f)
+                if (displayTaxColumn) add(8f)
+                add(15f)
+                add(15f)
+            }.toFloatArray()
 
             val table = Table(UnitValue.createPercentArray(columnWidth)).useAllAvailableWidth().setFixedLayout()
 
@@ -621,12 +639,15 @@ class PdfGeneratorImpl(
             if (displayUnitColumn) {
                 table.addCustomCell(strings.tableUnit, TextAlignment.RIGHT, true)
             }
-            table.addCustomCell(strings.tableTaxRate, TextAlignment.RIGHT, true)
+            if (displayTaxColumn) {
+                table.addCustomCell(strings.tableTaxRate, TextAlignment.RIGHT, true)
+            }
             table.addCustomCell(strings.tableUnitPrice, TextAlignment.RIGHT, true)
             table.addCustomCell(strings.tableTotalPrice, TextAlignment.RIGHT, true)
 
             // Products
             val linkedDeliveryNotes = getLinkedDeliveryNotes(products)
+            val columnCount = columnWidth.size
             if (linkedDeliveryNotes.isNotEmpty()) {
                 linkedDeliveryNotes.forEach { (docNumber, docDate) ->
                     val headerText = if (docNumber.isNullOrEmpty()) {
@@ -636,12 +657,12 @@ class PdfGeneratorImpl(
                     }
                     table.addCustomCell(
                         headerText,
-                        TextAlignment.LEFT, true, isSpan = true
+                        TextAlignment.LEFT, true, isSpan = true, spanColumns = columnCount
                     )
-                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, displayUnitColumn, currencyCode, formatLocale)
+                    addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, displayUnitColumn, displayTaxColumn, currencyCode, formatLocale)
                 }
             } else {
-                addProductRows(products, table, displayUnitColumn, currencyCode, formatLocale)
+                addProductRows(products, table, displayUnitColumn, displayTaxColumn, currencyCode, formatLocale)
             }
 
             return table
@@ -655,6 +676,7 @@ class PdfGeneratorImpl(
         products: List<DocumentProductState>,
         table: Table,
         displayUnitColumn: Boolean,
+        displayTaxColumn: Boolean,
         currencyCode: String,
         formatLocale: String?,
     ) {
@@ -676,9 +698,11 @@ class PdfGeneratorImpl(
                 table.addCustomCell(product.unit?.text)
             }
 
-            table.addCustomCell(
-                product.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" } ?: " - "
-            )
+            if (displayTaxColumn) {
+                table.addCustomCell(
+                    product.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" } ?: " - "
+                )
+            }
             table.addCustomCell(
                 product.priceWithoutTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: ""
             )
@@ -831,9 +855,10 @@ class PdfGeneratorImpl(
         alignment: TextAlignment = TextAlignment.RIGHT,
         isBold: Boolean = false,
         paragraphs: List<Paragraph?>? = null,
-        isSpan: Boolean = false
+        isSpan: Boolean = false,
+        spanColumns: Int = 6,
     ): Table {
-        val cell = Cell(1, if (isSpan) 6 else 1)
+        val cell = Cell(1, if (isSpan) spanColumns else 1)
             .setTextAlignment(alignment)
             .setPaddingLeft(6f)
             .setPaddingRight(6f)

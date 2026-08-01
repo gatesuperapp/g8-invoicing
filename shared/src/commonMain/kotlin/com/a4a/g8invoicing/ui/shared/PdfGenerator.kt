@@ -42,7 +42,7 @@ data class PdfStrings(
     val companyId3Label: String,
     val otherLines: String,
     // Parameterised label rendered under the top date when the document was
-    // created with showCurrencyNotice=true and the currency isn't EUR. The
+    // created with showCurrencyAndAutoTaxColumn=true and the currency isn't EUR. The
     // %1$s placeholder receives the ISO code — never translated.
     val currencyNoticeLabel: String,
 )

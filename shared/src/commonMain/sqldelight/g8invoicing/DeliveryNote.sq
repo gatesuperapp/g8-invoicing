@@ -8,7 +8,7 @@ CREATE TABLE DeliveryNote (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
-  show_currency_notice INTEGER NOT NULL DEFAULT 0,
+  show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -40,7 +40,7 @@ SELECT delivery_note_id
 FROM DeliveryNote;
 
 save:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_notice, format_locale)
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale)
 VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?);
 
 update:

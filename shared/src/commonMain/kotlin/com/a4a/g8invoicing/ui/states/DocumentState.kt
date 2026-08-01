@@ -32,11 +32,15 @@ abstract class DocumentState {
     // current locale ({"invoice_number": "Facture N°", ...}). null = pre-feature legacy
     // doc — at render we fall back to `stringResource` (follows current locale).
     abstract var labelsSnapshot: String?
-    // Frozen at document creation. true → the renderer shows "Devise : XXX" under the
-    // date for non-EUR currencies (disambiguates $ £ ¥ which are shared across many
-    // currencies). false = pre-feature legacy doc — the mention isn't retroactively
-    // added, so a re-export of an old USD invoice keeps the same PDF as before.
-    abstract var showCurrencyNotice: Boolean
+    // Frozen at document creation. Gates the rendering behaviours introduced
+    // in 1.8, all of which must stay off for legacy docs so a re-export
+    // looks identical to the original:
+    //   - show "Devise : XXX" under the payment info for non-EUR currencies
+    //     (disambiguates $ £ ¥ shared across USD/GBP/JPY/…)
+    //   - auto-hide the tax column in the products table when no line has a rate
+    // false = pre-feature legacy doc (default DB value), true = doc created
+    // after the 1.8 migration.
+    abstract var showCurrencyAndAutoTaxColumn: Boolean
     // Frozen at document creation. BCP-47 language code (fr/en/es/de) that
     // drives the amount formatting locale for this doc — separator style,
     // symbol positioning. A French-issued invoice keeps "1 234,56 $" even

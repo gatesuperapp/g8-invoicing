@@ -35,7 +35,7 @@ fun DocumentBasicTemplateFooter(
     val watermark = document.watermarkText?.takeIf { it.isNotBlank() }
 
     val currencyCode = document.currency.text
-    val showCurrencyNotice = document.showCurrencyNotice &&
+    val showCurrencyNoticeLine = document.showCurrencyAndAutoTaxColumn &&
         currencyCode.isNotEmpty() && currencyCode != "EUR"
 
     Column(
@@ -57,7 +57,7 @@ fun DocumentBasicTemplateFooter(
         // Snapshot first, then a locale-specific hardcoded fallback for docs
         // predating the addition of pdf_currency_notice to DocumentLabels.keys,
         // then stringResource as last resort (app-current locale).
-        if (showCurrencyNotice) {
+        if (showCurrencyNoticeLine) {
             val snapshotValue = labels?.get("pdf_currency_notice")
                 ?: DocumentLabels.localeFallback("pdf_currency_notice", document.formatLocale)
             val pattern = snapshotValue ?: stringResource(Res.string.pdf_currency_notice)

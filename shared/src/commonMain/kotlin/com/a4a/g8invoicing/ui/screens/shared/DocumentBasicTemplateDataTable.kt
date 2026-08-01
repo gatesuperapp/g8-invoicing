@@ -52,18 +52,22 @@ fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
     currencyCode: String = "EUR",
     formatLocale: String? = null,
+    displayTaxColumn: Boolean = true,
     labels: Map<String, String>? = null,
 ) {
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
-    // Fixed column weights - same total with or without unit column
+    // Fixed column weights that sum to the same total regardless of which
+    // optional columns (unit, tax) are shown. The description column soaks
+    // up whatever the hidden columns would have taken.
     val quantityColumnWeight = .16f
     val unitColumnWeight = .23f
     val taxColumnWeight = .15f
     val unitPriceColumnWeight = .23f
     val totalPriceColumnWeight = .23f
-    // Description takes remaining space (absorbs unit column when not displayed)
-    val descriptionColumnWeight = if (displayUnitColumn) .69f else .92f
+    val descriptionColumnWeight =
+        (if (displayUnitColumn) .69f else .92f) +
+        (if (displayTaxColumn) 0f else taxColumnWeight)
     val linkedNoteColumnWeight = 1f
 
     TitleRows(
@@ -74,6 +78,7 @@ fun DocumentBasicTemplateProductsTable(
         unitPriceColumnWeight,
         totalPriceColumnWeight,
         displayUnitColumn,
+        displayTaxColumn,
         labels,
     )
 
@@ -91,6 +96,7 @@ fun DocumentBasicTemplateProductsTable(
                 unitPriceColumnWeight,
                 totalPriceColumnWeight,
                 displayUnitColumn,
+                displayTaxColumn,
                 currencyCode,
                 formatLocale,
             )
@@ -105,6 +111,7 @@ fun DocumentBasicTemplateProductsTable(
             unitPriceColumnWeight,
             totalPriceColumnWeight,
             displayUnitColumn,
+            displayTaxColumn,
             currencyCode,
             formatLocale,
         )
@@ -120,6 +127,7 @@ fun TitleRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    displayTaxColumn: Boolean = true,
     labels: Map<String, String>? = null,
 ) {
     Row(
@@ -150,12 +158,14 @@ fun TitleRows(
             )
         }
 
-        TableCell(
-            text = documentLabel(labels, "document_table_tax_rate", Res.string.document_table_tax_rate),
-            weight = taxColumnWeight,
-            alignEnd = true,
-            isBold = true
-        )
+        if (displayTaxColumn) {
+            TableCell(
+                text = documentLabel(labels, "document_table_tax_rate", Res.string.document_table_tax_rate),
+                weight = taxColumnWeight,
+                alignEnd = true,
+                isBold = true
+            )
+        }
         TableCell(
             text = documentLabel(labels, "document_table_unit_price_without_tax", Res.string.document_table_unit_price_without_tax),
             weight = unitPriceColumnWeight,
@@ -223,6 +233,7 @@ fun DocumentProductsRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    displayTaxColumn: Boolean = true,
     currencyCode: String = "EUR",
     formatLocale: String? = null,
 ) {
@@ -254,12 +265,14 @@ fun DocumentProductsRows(
                 )
             }
 
-            TableCell(
-                text = data.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" }
-                    ?: " - ",
-                weight = taxColumnWeight,
-                alignEnd = true
-            )
+            if (displayTaxColumn) {
+                TableCell(
+                    text = data.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" }
+                        ?: " - ",
+                    weight = taxColumnWeight,
+                    alignEnd = true
+                )
+            }
             TableCell(
                 text = data.priceWithoutTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: "",
                 weight = unitPriceColumnWeight,

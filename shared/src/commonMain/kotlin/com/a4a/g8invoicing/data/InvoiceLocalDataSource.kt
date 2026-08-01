@@ -99,7 +99,7 @@ class InvoiceLocalDataSource(
                 ),
                 watermarkText = frozenWatermark,
                 labelsSnapshot = frozenLabels,
-                showCurrencyNotice = true,
+                showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
             )
 
@@ -304,7 +304,7 @@ class InvoiceLocalDataSource(
             createdDate = this.created_at,
             watermarkText = this.watermark_text,
             labelsSnapshot = this.labels_snapshot,
-            showCurrencyNotice = this.show_currency_notice != 0L,
+            showCurrencyAndAutoTaxColumn = this.show_currency_and_auto_tax_column != 0L,
             formatLocale = this.format_locale,
         )
     }
@@ -336,7 +336,7 @@ class InvoiceLocalDataSource(
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)), // DB call
                     watermarkText = frozenWatermark,
                     labelsSnapshot = frozenLabels,
-                    showCurrencyNotice = true,
+                    showCurrencyAndAutoTaxColumn = true,
                     formatLocale = AppLocaleHolder.languageCode,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
@@ -490,7 +490,7 @@ class InvoiceLocalDataSource(
                         paymentStatus = 0,
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
-                        showCurrencyNotice = true,
+                        showCurrencyAndAutoTaxColumn = true,
                         formatLocale = AppLocaleHolder.languageCode,
                     )
 
@@ -815,7 +815,7 @@ class InvoiceLocalDataSource(
                 footer = document.footerText.text,
                 watermark_text = document.watermarkText,
                 labels_snapshot = document.labelsSnapshot,
-                show_currency_notice = if (document.showCurrencyNotice) 1L else 0L,
+                show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
             )
         } catch (e: Exception) {
