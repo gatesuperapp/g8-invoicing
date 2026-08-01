@@ -85,6 +85,10 @@
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Votre facture a bien été créée !</string>
     <string name="invoice_created_button">Voir ma facture</string>
+    <string name="credit_note_created_title">Votre avoir a bien été créé !</string>
+    <string name="credit_note_created_button">Voir mon avoir</string>
+    <string name="corrected_invoice_created_title">Votre facture rectificative a bien été créée !</string>
+    <string name="corrected_invoice_created_button">Voir ma facture rectificative</string>
 
     <!-- Document Form Strings -->
     <string name="document_number_short">N°</string>

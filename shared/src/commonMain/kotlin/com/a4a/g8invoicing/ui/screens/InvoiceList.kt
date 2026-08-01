@@ -60,7 +60,12 @@ import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
+import com.a4a.g8invoicing.shared.resources.corrected_invoice_created_button
+import com.a4a.g8invoicing.shared.resources.corrected_invoice_created_title
+import com.a4a.g8invoicing.shared.resources.credit_note_created_button
+import com.a4a.g8invoicing.shared.resources.credit_note_created_title
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
+import com.a4a.g8invoicing.ui.shared.AlertDialogInvoiceCreated
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.OnboardingDialog
@@ -81,6 +86,10 @@ fun InvoiceList(
     onClickDuplicate: (List<InvoiceState>) -> Unit,
     onClickCreateCreditNote: (List<InvoiceState>) -> Unit,
     onClickCreateCorrectedInvoice: (List<InvoiceState>) -> Unit,
+    onClickViewCreatedCreditNote: (Long) -> Unit = {},
+    onDismissCreditNoteCreatedDialog: () -> Unit = {},
+    onClickViewCreatedCorrectedInvoice: (Long) -> Unit = {},
+    onDismissCorrectedInvoiceCreatedDialog: () -> Unit = {},
     onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
@@ -291,6 +300,31 @@ fun InvoiceList(
                     isDimActive.value = !isDimActive.value
                 },
                 isInvoice = true
+            )
+        }
+
+        // "Just-created" popups after converting to a credit note or a
+        // corrected invoice. Same pattern as BL → invoice on DeliveryNoteList.
+        documentsUiState.createdCreditNoteId?.let { creditNoteId ->
+            AlertDialogInvoiceCreated(
+                onDismissRequest = { onDismissCreditNoteCreatedDialog() },
+                onConfirmation = {
+                    onDismissCreditNoteCreatedDialog()
+                    onClickViewCreatedCreditNote(creditNoteId)
+                },
+                titleText = stringResource(Res.string.credit_note_created_title),
+                buttonText = stringResource(Res.string.credit_note_created_button),
+            )
+        }
+        documentsUiState.createdCorrectedInvoiceId?.let { correctedInvoiceId ->
+            AlertDialogInvoiceCreated(
+                onDismissRequest = { onDismissCorrectedInvoiceCreatedDialog() },
+                onConfirmation = {
+                    onDismissCorrectedInvoiceCreatedDialog()
+                    onClickViewCreatedCorrectedInvoice(correctedInvoiceId)
+                },
+                titleText = stringResource(Res.string.corrected_invoice_created_title),
+                buttonText = stringResource(Res.string.corrected_invoice_created_button),
             )
         }
     }

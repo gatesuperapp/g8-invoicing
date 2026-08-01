@@ -80,6 +80,16 @@ fun NavGraphBuilder.invoiceList(
             onClickDuplicate = viewModel::duplicate,
             onClickCreateCreditNote = viewModel::convertToCreditNote,
             onClickCreateCorrectedInvoice = viewModel::convertToCorrectedInvoice,
+            onClickViewCreatedCreditNote = { creditNoteId ->
+                viewModel.clearCreatedCreditNoteId()
+                navController.navigate(Screen.CreditNoteAddEdit.name + "?itemId=$creditNoteId")
+            },
+            onDismissCreditNoteCreatedDialog = viewModel::clearCreatedCreditNoteId,
+            onClickViewCreatedCorrectedInvoice = { invoiceId ->
+                viewModel.clearCreatedCorrectedInvoiceId()
+                navController.navigate(Screen.InvoiceAddEdit.name + "?itemId=$invoiceId")
+            },
+            onDismissCorrectedInvoiceCreatedDialog = viewModel::clearCreatedCorrectedInvoiceId,
             onClickTag = { selectedDocuments, tag ->
                 viewModel.setTag(selectedDocuments, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
                 viewModel.markAsPaid(selectedDocuments, tag)

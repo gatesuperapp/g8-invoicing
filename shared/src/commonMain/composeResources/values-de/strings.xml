@@ -92,6 +92,10 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Ihre Rechnung wurde erstellt.</string>
     <string name="invoice_created_button">Meine Rechnung ansehen</string>
+    <string name="credit_note_created_title">Ihre Gutschrift wurde erstellt.</string>
+    <string name="credit_note_created_button">Meine Gutschrift ansehen</string>
+    <string name="corrected_invoice_created_title">Ihre Korrekturrechnung wurde erstellt.</string>
+    <string name="corrected_invoice_created_button">Meine Korrekturrechnung ansehen</string>
 
     <!-- Document Form Strings -->
     <string name="document_number_short">Nr.</string>

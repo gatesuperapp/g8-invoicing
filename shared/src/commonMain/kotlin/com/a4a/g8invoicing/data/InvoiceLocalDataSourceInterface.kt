@@ -28,7 +28,7 @@ interface InvoiceLocalDataSourceInterface {
     )
 
     suspend fun deleteDocumentClientOrIssuer(id: Long, type: ClientOrIssuerType)
-    suspend fun duplicate(documents: List<InvoiceState>)
+    suspend fun duplicate(documents: List<InvoiceState>): List<Long>
     suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long?
     suspend fun convertQuotesToInvoice(quotes: List<com.a4a.g8invoicing.ui.states.QuoteState>): Long?
     suspend fun update(document: InvoiceState)

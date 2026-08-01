@@ -207,13 +207,9 @@ class CreditNoteLocalDataSource(
         }
     }
 
-    override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
+    override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
-        // Trace the paper trail back to the source invoices in the credit-note
-        // reference. Uses the singular / plural i18n key depending on how many
-        // invoices are being converted, and drops empty numbers so a malformed
-        // source doesn't leak a bare comma.
         val sourceNumbers = invoices
             .mapNotNull { it.documentNumber.text.takeIf { n -> n.isNotBlank() } }
         val referenceText: String? = when {
@@ -221,7 +217,7 @@ class CreditNoteLocalDataSource(
             sourceNumbers.size == 1 -> getString(Res.string.credit_note_reference_from_invoice, sourceNumbers.single())
             else -> getString(Res.string.credit_note_reference_from_invoices, sourceNumbers.joinToString(", "))
         }
-        withContext(DispatcherProvider.IO) {
+        return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.credit_note_default_number)
@@ -247,13 +243,13 @@ class CreditNoteLocalDataSource(
                         formatLocale = AppLocaleHolder.languageCode,
                     )
                 )
+                val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
                 invoices.forEach {
-                    saveInfoInOtherTables(
-                        it
-                    )
+                    saveInfoInOtherTables(it)
                 }
+                newId
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
             }
         }
     }

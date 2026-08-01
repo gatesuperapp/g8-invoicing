@@ -16,16 +16,22 @@ import com.a4a.g8invoicing.shared.resources.invoice_created_title
 import com.a4a.g8invoicing.ui.theme.textCta
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * "Just-created" confirmation popup with a single CTA that navigates to the
+ * new document. Reused after: BL → invoice conversion (default strings),
+ * invoice → credit note conversion, invoice → corrected invoice.
+ * Pass explicit [titleText] / [buttonText] to override the invoice defaults.
+ */
 @Composable
 fun AlertDialogInvoiceCreated(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
+    titleText: String = stringResource(Res.string.invoice_created_title),
+    buttonText: String = stringResource(Res.string.invoice_created_button),
 ) {
     AlertDialog(
         text = {
-            Text(
-                text = stringResource(Res.string.invoice_created_title),
-            )
+            Text(text = titleText)
         },
         textContentColor = Color.Black,
         onDismissRequest = {
@@ -42,7 +48,7 @@ fun AlertDialogInvoiceCreated(
                     }
                 ) {
                     Text(
-                        text = stringResource(Res.string.invoice_created_button),
+                        text = buttonText,
                         style = MaterialTheme.typography.textCta
                     )
                 }

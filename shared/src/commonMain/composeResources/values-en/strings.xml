@@ -82,6 +82,10 @@
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Your invoice has been created</string>
     <string name="invoice_created_button">View my invoice</string>
+    <string name="credit_note_created_title">Your credit note has been created</string>
+    <string name="credit_note_created_button">View my credit note</string>
+    <string name="corrected_invoice_created_title">Your corrected invoice has been created</string>
+    <string name="corrected_invoice_created_button">View my corrected invoice</string>
 
     <!-- Document Form Strings -->
     <string name="document_number_short">No.</string>

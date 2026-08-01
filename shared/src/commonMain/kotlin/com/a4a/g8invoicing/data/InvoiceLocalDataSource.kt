@@ -470,14 +470,15 @@ class InvoiceLocalDataSource(
 
     // --- duplicate ---
     // Uses withContext(Dispatchers.IO).
-    override suspend fun duplicate(documents: List<InvoiceState>) {
+    override suspend fun duplicate(documents: List<InvoiceState>): List<Long> {
         // Duplicating creates new docs → each gets a fresh watermark decision based on
         // the CURRENT premium/module state, not whatever was frozen on the source doc.
         // Same logic for labelsSnapshot: a duplicated doc is a new doc, snapshotted in
         // the current locale.
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
-        withContext(DispatcherProvider.IO) {
+        return withContext(DispatcherProvider.IO) {
+            val createdIds = mutableListOf<Long>()
             try {
                 documents.forEach { originalDocument ->
                     val docNumber = getLastDocumentNumber()?.let { // DB Call
@@ -499,6 +500,7 @@ class InvoiceLocalDataSource(
                     val newInvoiceId = invoiceQueries.getLastInsertedRowId()
                         .executeAsOneOrNull() // Get ID after main insert
                     newInvoiceId?.let { id ->
+                        createdIds.add(id)
                         saveTag(id, duplicatedDocumentState) // saveTag is suspend
                         saveInfoInOtherTables(
                             id,
@@ -509,6 +511,7 @@ class InvoiceLocalDataSource(
             } catch (e: Exception) {
                 //Log.e("InvoiceDS", "Error duplicate: ${e.message}")
             }
+            createdIds
         }
     }
 
