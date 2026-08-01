@@ -102,6 +102,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_free_field">Freies Feld</string>
     <string name="document_footer">Fußzeile</string>
     <string name="document_default_reference">XFGDTSF</string>
+    <string name="credit_note_reference_from_invoice">Ausgestellt zu Rechnung %1$s</string>
+    <string name="credit_note_reference_from_invoices">Ausgestellt zu Rechnungen %1$s</string>
 
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Neues Produkt</string>

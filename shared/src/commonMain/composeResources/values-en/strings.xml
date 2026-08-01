@@ -92,6 +92,8 @@
     <string name="document_free_field">Free field</string>
     <string name="document_footer">Footer</string>
     <string name="document_default_reference">XFGDTSF</string>
+    <string name="credit_note_reference_from_invoice">Issued from invoice %1$s</string>
+    <string name="credit_note_reference_from_invoices">Issued from invoices %1$s</string>
 
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>

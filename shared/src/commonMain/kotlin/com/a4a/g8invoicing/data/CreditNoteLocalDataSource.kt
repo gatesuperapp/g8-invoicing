@@ -8,6 +8,8 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_default_number
+import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoice
+import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoices
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
@@ -208,6 +210,17 @@ class CreditNoteLocalDataSource(
     override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        // Trace the paper trail back to the source invoices in the credit-note
+        // reference. Uses the singular / plural i18n key depending on how many
+        // invoices are being converted, and drops empty numbers so a malformed
+        // source doesn't leak a bare comma.
+        val sourceNumbers = invoices
+            .mapNotNull { it.documentNumber.text.takeIf { n -> n.isNotBlank() } }
+        val referenceText: String? = when {
+            sourceNumbers.isEmpty() -> null
+            sourceNumbers.size == 1 -> getString(Res.string.credit_note_reference_from_invoice, sourceNumbers.single())
+            else -> getString(Res.string.credit_note_reference_from_invoices, sourceNumbers.joinToString(", "))
+        }
         withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -218,7 +231,8 @@ class CreditNoteLocalDataSource(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
                         documentDate = DateUtils.getCurrentDateFormatted(),
-                        reference = invoices.firstOrNull { it.reference != null }?.reference,
+                        reference = referenceText?.let { TextFieldValue(it) }
+                            ?: invoices.firstOrNull { it.reference != null }?.reference,
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
                         documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
