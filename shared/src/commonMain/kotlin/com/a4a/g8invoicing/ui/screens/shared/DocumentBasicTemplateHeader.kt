@@ -2,7 +2,6 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +31,6 @@ import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
-import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.ui.shared.ImageStorage
 import com.a4a.g8invoicing.ui.shared.InitImageContext
@@ -44,7 +42,6 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.subTitleForDocuments
-import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
 import com.a4a.g8invoicing.ui.theme.titleForDocuments
 import org.jetbrains.compose.resources.stringResource
@@ -137,25 +134,6 @@ fun DocumentBasicTemplateHeader(
                 contentDescription = "Logo",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier.height(40.dp)
-            )
-        }
-    }
-
-    // "Devise : USD" under the date — only shown for documents created with
-    // showCurrencyNotice=true (post-feature) whose currency isn't EUR. Frozen
-    // per-doc so re-editing an old invoice doesn't retroactively add the line.
-    // Bold + centered to match the due-date style used at the bottom of invoices.
-    val currencyCode = document.currency.text
-    if (document.showCurrencyNotice && currencyCode.isNotEmpty() && currencyCode != "EUR") {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 6.dp),
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                style = MaterialTheme.typography.textForDocumentsBold,
-                text = stringResource(Res.string.pdf_currency_notice, currencyCode),
             )
         }
     }

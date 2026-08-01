@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -33,6 +34,10 @@ fun DocumentBasicTemplateFooter(
     // existing docs. null/blank = no watermark on this doc.
     val watermark = document.watermarkText?.takeIf { it.isNotBlank() }
 
+    val currencyCode = document.currency.text
+    val showCurrencyNotice = document.showCurrencyNotice &&
+        currencyCode.isNotEmpty() && currencyCode != "EUR"
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -46,6 +51,25 @@ fun DocumentBasicTemplateFooter(
                 }
             )
     ) {
+        // "Devise : USD" — placed just above the due-date line so it sits with
+        // the payment info, not the header. Bold + centered to match the
+        // due-date visual weight, so the two read as one info block.
+        // Snapshot first, then a locale-specific hardcoded fallback for docs
+        // predating the addition of pdf_currency_notice to DocumentLabels.keys,
+        // then stringResource as last resort (app-current locale).
+        if (showCurrencyNotice) {
+            val snapshotValue = labels?.get("pdf_currency_notice")
+                ?: DocumentLabels.localeFallback("pdf_currency_notice", document.formatLocale)
+            val pattern = snapshotValue ?: stringResource(Res.string.pdf_currency_notice)
+            Row(
+                modifier = Modifier.padding(bottom = 6.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.textForDocumentsBold,
+                    text = pattern.replace("%1\$s", currencyCode),
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .padding(bottom = 6.dp)

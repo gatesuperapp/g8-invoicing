@@ -226,17 +226,12 @@ class PdfGeneratorImpl(
                 documentDate = document.documentDate.substringBefore(" "),
                 titleFontSize = titleFontSize,
                 dateFontSize = dateFontSize,
-                trimDateMargin = showCurrencyNotice,
             ))
         } else {
             // Title (no logo)
             doc.add(createTitle(document.documentNumber.text, document.documentType, titleFontSize))
             // Date
-            doc.add(createDate(document.documentDate.substringBefore(" "), dateFontSize, trimMargin = showCurrencyNotice))
-        }
-
-        if (showCurrencyNotice) {
-            doc.add(createCurrencyNotice(currencyCodeForHeader))
+            doc.add(createDate(document.documentDate.substringBefore(" "), dateFontSize))
         }
 
         // Issuer and Client
@@ -277,9 +272,15 @@ class PdfGeneratorImpl(
         // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
         // get the extra breathing room applied directly on the footer.
         if (document is InvoiceState) {
-            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize))
+            if (showCurrencyNotice) {
+                doc.add(createCurrencyNotice(currencyCodeForHeader))
+            }
+            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize, trimTopPadding = showCurrencyNotice))
             doc.add(createFooter(document.footerText.text, fontSize))
         } else {
+            if (showCurrencyNotice) {
+                doc.add(createCurrencyNotice(currencyCodeForHeader))
+            }
             doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
         }
 
@@ -339,15 +340,10 @@ class PdfGeneratorImpl(
         documentDate: String,
         titleFontSize: Float,
         dateFontSize: Float,
-        trimDateMargin: Boolean = false,
     ): Table {
-        // When a currency notice will follow immediately below, cut the block's
-        // bottom margin so the notice sits close to the date instead of being
-        // pushed 24pt down into the issuer/client area.
-        val bottomMargin = if (trimDateMargin) 6F else 24F
         val table = Table(UnitValue.createPercentArray(floatArrayOf(70f, 30f)))
             .useAllAvailableWidth()
-            .setMarginBottom(bottomMargin)
+            .setMarginBottom(24F)
 
         // Title and Date cell (left)
         val titleCell = Cell().setBorder(Border.NO_BORDER)
@@ -403,36 +399,31 @@ class PdfGeneratorImpl(
             .setMarginBottom(-2F)
     }
 
-    private fun createDate(date: String, fontSize: Float, trimMargin: Boolean = false): Paragraph {
+    private fun createDate(date: String, fontSize: Float): Paragraph {
         val dateLabel = strings.documentDate.trimEnd() + " "
         return Paragraph("$dateLabel$date")
             .pdfBold()
             .setFontSize(fontSize)
-            // Trim the block gap when a currency notice will follow directly
-            // beneath — keeps the two lines visually coupled.
-            .setMarginBottom(if (trimMargin) 6F else 24F)
+            .setMarginBottom(24F)
     }
 
-    // "Devise : USD" (or the localised equivalent) rendered under the top date
-    // for documents where showCurrencyNotice is set and the currency isn't EUR.
-    // Small bold centered text — matches the visual weight of the due-date line
-    // at the bottom of invoices. The gap between the notice and the issuer/client
-    // table is inherited from setMarginBottom below (matches what createDate
-    // provides when there's no notice).
+    // "Devise : USD" (or the localised equivalent) rendered just above the
+    // Payment-due-date line at the bottom of invoices for documents where
+    // showCurrencyNotice is set and the currency isn't EUR. Same weight
+    // and size as the due date so the two lines read as a coherent pair.
     private fun createCurrencyNotice(currencyCode: String): Paragraph {
         val labelPattern = strings.currencyNoticeLabel
         val text = if (labelPattern.contains("%1\$s")) {
             labelPattern.replace("%1\$s", currencyCode)
         } else {
-            // Defensive fallback for a poorly-populated string resource.
             "$labelPattern $currencyCode"
         }
         return Paragraph(text)
-            .setFontSize(9F)
+            .setFontSize(9.5F)
             .pdfBold()
             .setTextAlignment(TextAlignment.CENTER)
-            .setMarginTop(0F)
-            .setMarginBottom(18F)
+            .setFixedLeading(14F)
+            .setPaddingTop(12f)
     }
 
     private fun createIssuerAndClientTable(
@@ -781,11 +772,15 @@ class PdfGeneratorImpl(
         )
     }
 
-    private fun createDueDate(date: String, fontSize: Float): Paragraph {
+    private fun createDueDate(date: String, fontSize: Float, trimTopPadding: Boolean = false): Paragraph {
         val dueDateLabel = strings.dueDate.trimEnd() + " "
         return Paragraph("$dueDateLabel$date")
             .setFixedLeading(16F)
-            .setPaddingTop(12f)
+            // Drop the top gap when the currency notice already sits above:
+            // the notice provides the block spacing to the totals, dueDate
+            // just needs to hug it. Without this, the two lines end up
+            // ~24pt apart instead of ~2.
+            .setPaddingTop(if (trimTopPadding) 2f else 12f)
             .setTextAlignment(TextAlignment.CENTER)
             .pdfBold()
             .setFontSize(fontSize)
@@ -895,9 +890,18 @@ class PdfGeneratorImpl(
     // newer keys still renders sanely.
     private fun effectiveStrings(document: DocumentState, defaults: PdfStrings): PdfStrings {
         val snap = com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
-            .parseSnapshot(document.labelsSnapshot) ?: return defaults
-        fun pick(key: String, default: String): String =
-            snap[key]?.takeIf { it.isNotBlank() } ?: default
+            .parseSnapshot(document.labelsSnapshot)
+        val docLocale = document.formatLocale
+        // Snapshot first, then a hardcoded doc-locale fallback (for keys
+        // added to DocumentLabels after some docs were already created),
+        // then the app-locale defaults passed to the ctor.
+        fun pick(key: String, default: String): String {
+            snap?.get(key)?.takeIf { it.isNotBlank() }?.let { return it }
+            com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
+                .localeFallback(key, docLocale)?.let { return it }
+            return default
+        }
+        if (snap == null && docLocale == null) return defaults
         return defaults.copy(
             invoiceNumber = pick("invoice_number", defaults.invoiceNumber),
             deliveryNoteNumber = pick("delivery_note_number", defaults.deliveryNoteNumber),
@@ -924,6 +928,7 @@ class PdfGeneratorImpl(
             companyId1Label = pick("company_identification1", defaults.companyId1Label),
             companyId2Label = pick("company_identification2", defaults.companyId2Label),
             companyId3Label = pick("company_identification3", defaults.companyId3Label),
+            currencyNoticeLabel = pick("pdf_currency_notice", defaults.currencyNoticeLabel),
         )
     }
 
