@@ -7,9 +7,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 
@@ -72,8 +72,8 @@ fun ClientOrIssuerListContent(
                 keyToResetCheckbox = keyToResetCheckboxes
             )
             HorizontalDivider(
-                thickness = 1.dp,
-                color = Color.LightGray.copy(alpha = 0.6f)
+                thickness = 0.5.dp,
+                color = AppColors.divider,
             )
         }
     }

@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -38,6 +39,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -120,9 +122,11 @@ fun ClientOrIssuerPickerBottomSheet(
         }
     }
 
-    // Only clients get a "Récents" section, and only when the list is long enough
-    // that jumping to a recent entry actually saves scrolling.
-    val showRecentsSection = !isIssuer && list.size > 5
+    // Only clients get a "Récents" section, and only when the list is long
+    // enough to justify one — aligned with the alphabet-header threshold
+    // below (>= 10). Under that count the whole list fits on screen and
+    // the shortcut just adds noise.
+    val showRecentsSection = !isIssuer && list.size >= 10
 
     val dataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
     var recentIds by remember { mutableStateOf<List<Long>>(emptyList()) }
@@ -341,7 +345,13 @@ fun ClientOrIssuerPickerBottomSheet(
                     }
                 }
             } else {
+                val listState = rememberLazyListState()
+                // Recents load asynchronously. Trigger on their arrival so
+                // the sticky header sits at the very top of the viewport
+                // once they've slotted in.
+                LaunchedEffect(recentEntries.size) { listState.scrollToItem(0) }
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -364,8 +374,15 @@ fun ClientOrIssuerPickerBottomSheet(
                                 onClickRefreshFromMaster = {},
                             )
                         }
+                        item(key = "recent-divider") {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(top = 5.dp, bottom = 10.dp),
+                                thickness = 0.5.dp,
+                                color = AppColors.divider,
+                            )
+                        }
                     }
-                    val showAlphabetHeaders = !isIssuer && list.size >= 10
+                    val showAlphabetHeaders = !isIssuer && list.size >= 20
                     grouped.forEach { (letter, entries) ->
                         if (showAlphabetHeaders) {
                             stickyHeader(key = "header-$letter") {

@@ -4,9 +4,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun ProductListContent(
@@ -46,8 +46,8 @@ fun ProductListContent(
             )
 
             HorizontalDivider(
-                thickness = 1.dp,
-                color = Color.LightGray.copy(alpha = 0.6f)
+                thickness = 0.5.dp,
+                color = AppColors.divider,
             )
         }
     }

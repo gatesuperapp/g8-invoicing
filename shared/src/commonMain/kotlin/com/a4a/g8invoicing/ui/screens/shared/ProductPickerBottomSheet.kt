@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -108,9 +110,10 @@ fun ProductPickerBottomSheet(
 
     val nonNullProducts = remember(products) { products.filter { it.id != null } }
 
-    // Only surface "Récents" when the list is long enough that jumping to a recent
-    // entry actually saves scrolling.
-    val showRecentsSection = nonNullProducts.size > 5
+    // Aligned with the alphabet-header threshold below (>= 10). Under that
+    // count the whole list fits on screen — a "Récents" shortcut on top of
+    // it saves no scrolling, just adds noise.
+    val showRecentsSection = nonNullProducts.size >= 10
 
     val productDataSource: ProductLocalDataSourceInterface = koinInject()
     var recentIds by remember { mutableStateOf<List<Long>>(emptyList()) }
@@ -294,7 +297,15 @@ fun ProductPickerBottomSheet(
                     }
                 }
             } else {
+                val listState = rememberLazyListState()
+                // Recents load asynchronously (see LaunchedEffect above that
+                // fills recentIds). If we scrolled at first composition,
+                // recents would slot in on top afterwards and push the view
+                // down. Trigger on their arrival instead so the header lands
+                // at the very top of the viewport.
+                LaunchedEffect(recentEntries.size) { listState.scrollToItem(0) }
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -315,8 +326,15 @@ fun ProductPickerBottomSheet(
                                 onClick = { onSelect(product) },
                             )
                         }
+                        item(key = "recent-divider") {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(top = 5.dp, bottom = 10.dp),
+                                thickness = 0.5.dp,
+                                color = AppColors.divider,
+                            )
+                        }
                     }
-                    val showAlphabetHeaders = nonNullProducts.size >= 10
+                    val showAlphabetHeaders = nonNullProducts.size >= 20
                     grouped.forEach { (letter, entries) ->
                         if (showAlphabetHeaders) {
                             stickyHeader(key = "header-$letter") {
