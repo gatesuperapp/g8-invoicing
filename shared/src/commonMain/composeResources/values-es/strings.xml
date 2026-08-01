@@ -70,6 +70,8 @@
     <string name="document_free_field">Campo libre</string>
     <string name="document_footer">Pie de pagina</string>
     <string name="document_default_reference">XFGDTSF</string>
+    <string name="credit_note_reference_from_invoice">Emitida a partir de la factura %1$s</string>
+    <string name="credit_note_reference_from_invoices">Emitida a partir de las facturas %1$s</string>
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
     <string name="document_products_other_lines">Otras líneas</string>
