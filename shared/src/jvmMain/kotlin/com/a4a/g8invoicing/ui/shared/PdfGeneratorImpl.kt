@@ -52,10 +52,17 @@ import java.io.File
  * This contains all the iText-based PDF generation logic.
  */
 class PdfGeneratorImpl(
-    private val strings: PdfStrings,
+    defaultStrings: PdfStrings,
     private val fileManager: PdfFileManager,
     private val imageStorage: ImageStorage? = null
 ) {
+    // Effective labels for the current PDF. Starts at the app-locale defaults
+    // passed to the ctor and is overridden per doc in generatePdf() so a doc
+    // created in French exports with French labels even after the user
+    // switches the app to English — mirrors the labelsSnapshot mechanism the
+    // in-app preview already uses via documentLabel().
+    private var strings: PdfStrings = defaultStrings
+    private val defaultStrings: PdfStrings = defaultStrings
     private companion object {
         // Primary family name. The FontProvider matches the embedded
         // helvetica.ttf / helveticabold.ttf; unknown-glyph runs fall through
@@ -76,6 +83,12 @@ class PdfGeneratorImpl(
     }
 
     fun generatePdf(document: DocumentState): String {
+        // Freeze the label locale to what the doc had at creation.
+        // labelsSnapshot is a JSON Map<String,String>; when present, its
+        // entries override the default (app-current) PdfStrings values.
+        // Legacy docs without a snapshot keep the current-locale behaviour.
+        strings = effectiveStrings(document, defaultStrings)
+
         // Sanitize the document number for the temp filename: users type
         // things like "F/2026" as their invoice number, and the `/` breaks
         // File(cacheDir, name) since it treats it as a subdirectory.
@@ -872,6 +885,46 @@ class PdfGeneratorImpl(
             total += if (glyphWidth > 0f) glyphWidth else fontSize
         }
         return total
+    }
+
+    // Build the PdfStrings actually used by this PDF: start from the app-locale
+    // defaults, then override each field with the doc's frozen snapshot when
+    // available. Keys must match those in DocumentLabels.keys — the ones the
+    // preview already reads via documentLabel(). A snapshot value that is
+    // null or blank falls through to the default, so an old snapshot missing
+    // newer keys still renders sanely.
+    private fun effectiveStrings(document: DocumentState, defaults: PdfStrings): PdfStrings {
+        val snap = com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
+            .parseSnapshot(document.labelsSnapshot) ?: return defaults
+        fun pick(key: String, default: String): String =
+            snap[key]?.takeIf { it.isNotBlank() } ?: default
+        return defaults.copy(
+            invoiceNumber = pick("invoice_number", defaults.invoiceNumber),
+            deliveryNoteNumber = pick("delivery_note_number", defaults.deliveryNoteNumber),
+            creditNoteNumber = pick("credit_note_number", defaults.creditNoteNumber),
+            documentDate = pick("document_date_label", defaults.documentDate),
+            documentReference = pick("document_reference_label", defaults.documentReference),
+            tableDescription = pick("document_table_description", defaults.tableDescription),
+            tableQuantity = pick("document_table_quantity", defaults.tableQuantity),
+            tableUnit = pick("document_table_unit", defaults.tableUnit),
+            tableTaxRate = pick("document_table_tax_rate", defaults.tableTaxRate),
+            tableUnitPrice = pick("document_table_unit_price_without_tax", defaults.tableUnitPrice),
+            tableTotalPrice = pick("document_table_total_price_without_tax", defaults.tableTotalPrice),
+            totalWithoutTax = pick("document_total_without_tax", defaults.totalWithoutTax),
+            totalWithTax = pick("document_total_with_tax", defaults.totalWithTax),
+            // "tax" isn't a full label — DocumentLabels stores "document_tax_label"
+            // which is the full "TVA %1$s :" pattern. Not portable to the split
+            // structure of PdfStrings.tax + labelSeparator, so we leave defaults
+            // as-is. Consequence: the "TVA / Tax" prefix in the totals block
+            // follows current language for legacy snapshots. Acceptable.
+            dueDate = pick("invoice_pdf_due_date", defaults.dueDate),
+            invoicePaid = pick("invoice_paid", defaults.invoicePaid),
+            labelSeparator = pick("label_separator", defaults.labelSeparator),
+            addressedTo = pick("addressed_to", defaults.addressedTo),
+            companyId1Label = pick("company_identification1", defaults.companyId1Label),
+            companyId2Label = pick("company_identification2", defaults.companyId2Label),
+            companyId3Label = pick("company_identification3", defaults.companyId3Label),
+        )
     }
 
 }

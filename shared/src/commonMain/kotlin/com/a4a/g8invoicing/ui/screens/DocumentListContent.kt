@@ -66,11 +66,14 @@ fun DocumentListContent(
             item(key = "month-$key") {
                 // start = 16dp lines the month up with the pill (which
                 // FlippyCheckBox now positions at 16dp too) and with the
-                // Material-3 TopAppBar title above the list. textPale keeps
-                // the label discreet — a whisper, not a heading.
+                // Material-3 TopAppBar title above the list. textSecondary
+                // (~6.6:1 on surfaceSubtle) passes WCAG AA — textPale
+                // was ~2.5:1, below the 4.5:1 required for 12sp text.
+                // The SemiBold + letter-spacing on textSection keeps the
+                // rendering read as a section label, not a heading.
                 Text(
                     text = monthLabel(key),
-                    style = MaterialTheme.typography.textSection.copy(color = AppColors.textPale),
+                    style = MaterialTheme.typography.textSection.copy(color = AppColors.textSecondary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, top = 20.dp, bottom = 7.dp),
