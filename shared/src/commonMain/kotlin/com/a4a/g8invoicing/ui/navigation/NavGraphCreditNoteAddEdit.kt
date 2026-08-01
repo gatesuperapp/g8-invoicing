@@ -353,6 +353,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                 val documentProductId = creditNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     creditNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                     showDocumentForm = false
                                 }
                             }

@@ -359,6 +359,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 val documentProductId = deliveryNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     deliveryNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                     showDocumentForm = false
                                 }
                             }

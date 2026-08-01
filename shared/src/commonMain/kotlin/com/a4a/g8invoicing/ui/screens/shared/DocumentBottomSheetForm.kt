@@ -495,9 +495,14 @@ private fun DocumentBottomSheetContent(
                     onClickForward = onNavigateToTaxSelection,
                     showFullScreenText = onNavigateToFullScreenText,
                     showProductType = showProductType,
-                    // Sync switch only makes sense when editing an existing document
-                    // product that is still linked to a master Product row.
-                    showSyncToMasterSwitch = typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_PRODUCT &&
+                    // Sync switch: any flow where the user can tweak an existing
+                    // document product still linked to a master Product row.
+                    // EDIT_PRODUCT hits it when editing a doc product; ADD_EXISTING_PRODUCT
+                    // hits it when adding a picked product (user can edit price /
+                    // quantity before confirming). NEW_PRODUCT never shows it —
+                    // the row is being created, sync is implicit.
+                    showSyncToMasterSwitch = (typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_PRODUCT ||
+                        typeOfCreation == DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT) &&
                         documentProduct.productId != null,
                     syncToMasterChecked = syncToMasterChecked,
                     onSyncToMasterChange = onSyncToMasterChange,

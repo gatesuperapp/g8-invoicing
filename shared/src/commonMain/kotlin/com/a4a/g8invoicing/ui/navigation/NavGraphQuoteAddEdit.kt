@@ -359,6 +359,7 @@ fun NavGraphBuilder.quoteAddEdit(
                                 val documentProductId = quoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     quoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                     showDocumentForm = false
                                 }
                             }

@@ -368,6 +368,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 val documentProductId = invoiceViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     invoiceViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                     showDocumentForm = false
                                 }
                             }
