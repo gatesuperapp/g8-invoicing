@@ -61,6 +61,10 @@
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">¡Tu factura se ha creado correctamente!</string>
     <string name="invoice_created_button">Ver mi factura</string>
+    <string name="credit_note_created_title">¡Tu nota de crédito se ha creado correctamente!</string>
+    <string name="credit_note_created_button">Ver mi nota de crédito</string>
+    <string name="corrected_invoice_created_title">¡Tu factura rectificativa se ha creado correctamente!</string>
+    <string name="corrected_invoice_created_button">Ver mi factura rectificativa</string>
     <!-- Document Form Strings -->
     <string name="document_number_short">Nº</string>
     <string name="document_due_date">Fecha límite</string>
