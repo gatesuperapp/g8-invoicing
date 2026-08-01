@@ -172,6 +172,7 @@ fun ProductAddEditForm(
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_NAME, it, null)
                                     },
+                                    displayClearIcon = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_NAME,
                                 isMandatory = true
@@ -184,6 +185,7 @@ fun ProductAddEditForm(
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_DESCRIPTION, it, null)
                                     },
+                                    displayClearIcon = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_DESCRIPTION
                             ),
@@ -195,6 +197,7 @@ fun ProductAddEditForm(
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_UNIT, it, null)
                                     },
+                                    displayClearIcon = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_UNIT
                             ),

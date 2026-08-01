@@ -192,6 +192,7 @@ fun DocumentBottomSheetProductAddEditForm(
                             onValueChange = {
                                 bottomFormOnValueChange(ScreenElement.DOCUMENT_PRODUCT_UNIT, it)
                             },
+                            displayClearIcon = true,
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT
                     ),

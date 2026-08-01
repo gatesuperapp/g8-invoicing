@@ -363,6 +363,12 @@ class TextInput(
     val onValueChange: (TextFieldValue) -> Unit = {},
     val keyboardType: KeyboardType = KeyboardType.Text,
     val displayFullScreenIcon: Boolean = false,
+    // Round grey "×" pinned at the end of the row that clears the field on
+    // tap. Used on the standalone product form (description / unit) so the
+    // user can wipe a value without hand-erasing every character. Only
+    // rendered when the field actually has content, hidden otherwise so
+    // an empty row stays clean.
+    val displayClearIcon: Boolean = false,
 )
 
 class DecimalInput(

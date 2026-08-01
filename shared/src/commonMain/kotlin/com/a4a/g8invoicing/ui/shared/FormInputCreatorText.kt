@@ -3,17 +3,21 @@ package com.a4a.g8invoicing.ui.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material3.Icon
@@ -25,6 +29,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -137,6 +142,32 @@ fun FormInputCreatorText(
                         contentDescription = "Icon for description in full screen",
                         tint = AppColors.iconSecondary
                     )
+                }
+
+                // Clear-field button. Only rendered when opted in AND the
+                // field has content. Same warm-grey hue as the placeholder
+                // (textDisabled) but with alpha dialed down from 54% to 35%
+                // so the chip stays visible without competing with the
+                // field text next to it. White cross on top for legibility.
+                if (input.displayClearIcon && !input.text?.text.isNullOrEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .background(AppColors.textDisabled.copy(alpha = 0.35f))
+                            .clickable {
+                                input.onValueChange(TextFieldValue(""))
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "Clear field",
+                            modifier = Modifier.size(12.dp),
+                            tint = AppColors.textOnAccent,
+                        )
+                    }
                 }
             }
 
