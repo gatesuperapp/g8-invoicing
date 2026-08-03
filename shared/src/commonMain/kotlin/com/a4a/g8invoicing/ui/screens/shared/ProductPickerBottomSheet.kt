@@ -48,7 +48,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -95,6 +97,7 @@ fun ProductPickerBottomSheet(
     var searchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     // Full-expand the sheet on search open, then request focus. Simpler and
     // more predictable than trying to keep the sheet at its partial state:
@@ -252,7 +255,15 @@ fun ProductPickerBottomSheet(
                 Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .clickable { onClickNew() },
+                        .clickable {
+                            // Collapse the picker back to its partial state so the
+                            // new-product form doesn't stack on top of a fully
+                            // expanded picker (search-mode leaves it at Expanded).
+                            // Fire in parallel with onClickNew so the form opens
+                            // immediately and the picker animates down behind it.
+                            scope.launch { sheetState.partialExpand() }
+                            onClickNew()
+                        },
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
