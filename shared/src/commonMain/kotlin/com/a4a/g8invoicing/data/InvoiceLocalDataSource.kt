@@ -832,11 +832,6 @@ class InvoiceLocalDataSource(
     // Calls linkDocumentToDocumentTag which is suspend and handles its own IO.
     private suspend fun saveTag(invoiceId: Long, document: DocumentState) {
         try {
-            if (document is InvoiceState && isPaymentLate(document.dueDate)) {
-                document.documentTag = DocumentTag.CANCELLED
-            }
-
-            // Link tag
             linkDocumentToDocumentTag( // This is suspend
                 invoiceId,
                 newTag = document.documentTag,
