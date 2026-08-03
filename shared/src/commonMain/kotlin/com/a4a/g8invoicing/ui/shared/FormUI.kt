@@ -231,9 +231,7 @@ fun RowWithLabelAndInput(
             .fillMaxWidth()
             .padding(
                 start = 16.dp,
-                end = if (formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_NAME
-                    || formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
-                ) 0.dp else 16.dp,
+                end = if (formInput.pageElement.name.startsWith("DOCUMENT_PRODUCT")) 0.dp else 16.dp,
                 top = 14.dp,
                 bottom = if (formInput.pageElement == ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS) 4.dp else 14.dp
             )
