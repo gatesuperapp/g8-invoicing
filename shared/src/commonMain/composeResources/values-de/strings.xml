@@ -525,7 +525,7 @@ Es ist ein Fehler aufgetreten :
     <!-- Issuer form: VAT exemption + intra-EU sales toggles -->
     <string name="issuer_intra_eu_sales_label">Verkäufe außerhalb meines Landes (EU)</string>
     <string name="issuer_intra_eu_sales_info_modal_title">Innergemeinschaftliche Verkäufe</string>
-    <string name="issuer_intra_eu_sales_info_modal_content">Aktiviere, wenn:\n- dein Unternehmen in der Europäischen Union ist\n\nund\n\n- du eine·n Kund·in in einem anderen EU-Land als deinem eigenen abrechnest.\n\ng8 fragt dich dann bei jedem Produkt, ob es sich um eine Dienstleistung oder eine Ware handelt — die MwSt.-Regeln unterscheiden sich.\n\nRechnungen nur im eigenen Land oder außerhalb der EU? Lasse es deaktiviert.</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Aktiviere, wenn:\n- dein Unternehmen in der Europäischen Union ist\n- Und du mindestens eine·n Kund·in außerhalb deines Landes abrechnest.\n\ng8 fragt dich dann bei jedem Produkt, ob es sich um eine Dienstleistung oder eine Ware handelt — die MwSt.-Regeln unterscheiden sich.\n\nRechnungen nur im eigenen Land oder außerhalb der EU? Lasse es deaktiviert.</string>
     <string name="issuer_intra_eu_sales_info_desc">Info innergemeinschaftliche Verkäufe</string>
     <string name="issuer_vat_exempt_label">Kleinunternehmerregelung</string>
     <string name="issuer_vat_exempt_info_modal_title">Kleinunternehmerregelung</string>

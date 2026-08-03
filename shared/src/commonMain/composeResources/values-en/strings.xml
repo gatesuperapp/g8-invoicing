@@ -520,7 +520,7 @@
     <!-- Issuer form: VAT exemption + intra-EU sales toggles -->
     <string name="issuer_intra_eu_sales_label">Sales outside my country (EU)</string>
     <string name="issuer_intra_eu_sales_info_modal_title">Intra-EU sales</string>
-    <string name="issuer_intra_eu_sales_info_modal_content">Check if:\n- your company is in the European Union\n\nand\n\n- you invoice a client based in another EU country than yours.\n\ng8 will then ask, for each product, whether it is a service or goods — VAT rules differ.\n\nInvoicing only within your country, or outside the EU? Leave unchecked.</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Check if:\n- your company is in the European Union\n- And you invoice at least one client outside your country.\n\ng8 will then ask, for each product, whether it is a service or goods — VAT rules differ.\n\nInvoicing only within your country, or outside the EU? Leave unchecked.</string>
     <string name="issuer_intra_eu_sales_info_desc">Intra-EU sales info</string>
     <string name="issuer_vat_exempt_label">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
@@ -532,7 +532,7 @@
     <string name="quote_number">Quote No.</string>
     <string name="quote_default_number">Q001</string>
     <string name="quote_default_footer">Offer validity: 6 months\nExecution timeframe: 6 months</string>
-    <string name="quote_advice_convert">I learned this move in hip-hop, super classy I know. Still gotta polish it — I\'m not that fast yet, and my patagium slows the wave a bit. Anyway, I wanted to tell you\n\n …   </string>
+    <string name="quote_advice_convert">I learned this move in hip-hop, super classy I know. Still gotta polish it — I'm not that fast yet, and my patagium slows the wave a bit. Anyway, I wanted to tell you\n\n …   </string>
     <string name="quote_advice_convert1">that if you want to convert one or more quotes into an invoice, you can select them from the list with a long tap (or by tapping the ○)\n\n …   </string>
     <string name="quote_advice_convert2">then tap «Invoice». It will appear at the top of the «Invoices» tab with the number incremented from the previous invoice.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
@@ -548,7 +548,7 @@
 
     <!-- Info tooltip -->
     <string name="info_tooltip_ok">OK</string>
-    <string name="info_tooltip_dismiss">Don\'t show again</string>
+    <string name="info_tooltip_dismiss">Don't show again</string>
 
     <!-- Client price picker -->
     <string name="product_clientprice_select_placeholder">Select…</string>
@@ -558,13 +558,13 @@
     <string name="product_type_goods">Goods</string>
     <string name="product_type_service">Service</string>
     <string name="product_type_info_modal_title">Product type</string>
-    <string name="product_type_info_modal_content">Used to automatically determine the applicable VAT category. It\'s a mandatory field for e-invoicing compliance.\n\nDoes not appear on the PDF invoice.</string>
+    <string name="product_type_info_modal_content">Used to automatically determine the applicable VAT category. It's a mandatory field for e-invoicing compliance.\n\nDoes not appear on the PDF invoice.</string>
     <string name="product_type_info_desc">Product type info</string>
 
     <!-- Product unit code (UNECE Rec 20) -->
     <string name="product_unit_code_label">Unit code</string>
     <string name="product_unit_code_info_modal_title">Unit code</string>
-    <string name="product_unit_code_info_modal_content">Deduced automatically from the unit you type. It\'s a mandatory field for e-invoicing compliance.\n\nDoes not appear on the PDF invoice.\n\nIf the unit you use doesn\'t match any code, no worries — that\'s also valid.</string>
+    <string name="product_unit_code_info_modal_content">Deduced automatically from the unit you type. It's a mandatory field for e-invoicing compliance.\n\nDoes not appear on the PDF invoice.\n\nIf the unit you use doesn't match any code, no worries — that's also valid.</string>
     <string name="product_unit_code_info_desc">Unit code info</string>
 
     <!-- Unit picker (UNECE units bottom sheet) -->
