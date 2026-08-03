@@ -568,7 +568,7 @@ Une erreur s'est produite :
     <!-- Issuer form: VAT exemption + intra-EU sales toggles -->
     <string name="issuer_intra_eu_sales_label">Ventas fuera de mi país (UE)</string>
     <string name="issuer_intra_eu_sales_info_modal_title">Ventas intracomunitarias</string>
-    <string name="issuer_intra_eu_sales_info_modal_content">Marca si:\n- tu empresa está en la Unión Europea\n\ny\n\n- facturas a un·a cliente situado·a en otro país de la UE distinto al tuyo.\n\ng8 te preguntará entonces, para cada producto, si se trata de un servicio o de un bien — las reglas de IVA difieren.\n\n¿Facturación solo en tu país, o fuera de la UE? Déjalo desmarcado.</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Marca si:\n- tu empresa está en la Unión Europea\n- Y facturas al menos a un cliente fuera de tu país.\n\ng8 te preguntará entonces, para cada producto, si se trata de un servicio o de un bien — las reglas de IVA difieren.\n\n¿Facturación solo en tu país, o fuera de la UE? Déjalo desmarcado.</string>
     <string name="issuer_intra_eu_sales_info_desc">Info ventas intracomunitarias</string>
     <string name="issuer_vat_exempt_label">Empresa exenta de IVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franquicia de IVA</string>

@@ -185,7 +185,7 @@
     <string name="product_type_info_desc">Info type de produit</string>
     <string name="issuer_intra_eu_sales_label">Ventes hors de mon pays (UE)</string>
     <string name="issuer_intra_eu_sales_info_modal_title">Ventes intra-UE</string>
-    <string name="issuer_intra_eu_sales_info_modal_content">Cochez si :\n- votre entreprise est dans l'Union européenne\n\net\n\n- vous facturez un·e client·e situé·e dans un autre pays de l'UE que le vôtre.\n\ng8 vous demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans votre pays, ou hors UE ? Laissez décoché.</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Cochez si :\n- votre entreprise est dans l'Union européenne\n- Et que vous facturez au moins un client hors de votre pays.\n\ng8 vous demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans votre pays, ou hors UE ? Laissez décoché.</string>
     <string name="issuer_intra_eu_sales_info_desc">Info ventes intra-UE</string>
     <string name="issuer_vat_exempt_label">Entreprise exonérée de TVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
