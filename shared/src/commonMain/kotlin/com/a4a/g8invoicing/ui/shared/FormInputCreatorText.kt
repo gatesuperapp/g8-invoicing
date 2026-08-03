@@ -65,6 +65,13 @@ fun FormInputCreatorText(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Editable-label rows (SIRET / VAT / RCS) share their pageElement's
+    // FocusRequester between label and value, and the shared one lands on the
+    // value field because it wins the last-attached race. So the editable
+    // label owns a dedicated requester the caller can't see, letting a tap
+    // anywhere in the label column focus the label instead of the value.
+    val labelFocusRequester = remember { FocusRequester() }
+
     var customModifier = Modifier
         .onFocusChanged {
             if (it.isFocused) {
@@ -72,17 +79,30 @@ fun FormInputCreatorText(
             }
         }
 
-    focusRequester?.let {
-        customModifier = customModifier.then(Modifier.focusRequester(focusRequester))
+    if (isEditableLabel) {
+        customModifier = customModifier.then(Modifier.focusRequester(labelFocusRequester))
+    } else {
+        focusRequester?.let {
+            customModifier = customModifier.then(Modifier.focusRequester(focusRequester))
+        }
     }
 
     var columnModifier =
         Modifier.background(Color.Transparent) // Just so we can use the custom modifier
     columnModifier = if (isEditableLabel)
-        columnModifier.then(
-            Modifier
-                .fillMaxWidth(0.4f)
-        ) else columnModifier
+        columnModifier
+            .then(Modifier.fillMaxWidth(0.4f))
+            // Absorb taps that fall in the label column but outside the label
+            // BasicTextField (empty space below, the "Modifier" hint row).
+            // Uses the same Main-pass absorb pattern as the FormUI-level
+            // dispatcher, so it beats the outer absorb which would otherwise
+            // route the tap to the value field.
+            .then(
+                Modifier.absorbAndDispatchTap("editable-label") {
+                    labelFocusRequester.requestFocus()
+                }
+            )
+    else columnModifier
 
 
 

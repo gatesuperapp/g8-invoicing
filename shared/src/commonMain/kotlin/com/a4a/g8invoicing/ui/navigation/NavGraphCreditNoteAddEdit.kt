@@ -94,8 +94,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
 
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        var pendingIssuerOpensForm by remember { mutableStateOf(false) }
         var showClientVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingClientToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        var pendingClientOpensForm by remember { mutableStateOf(false) }
 
         // Version mismatch dialog for issuer
         if (showVersionMismatchDialog && pendingIssuerToEdit != null) {
@@ -103,14 +105,18 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 onDismissRequest = {
                     showVersionMismatchDialog = false
                     pendingIssuerToEdit = null
+                    pendingIssuerOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_message)) },
                 confirmButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingIssuerOpensForm
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
                                 val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
@@ -131,8 +137,11 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingIssuerOpensForm
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
@@ -150,14 +159,18 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 onDismissRequest = {
                     showClientVersionMismatchDialog = false
                     pendingClientToEdit = null
+                    pendingClientOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_client_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_client_message)) },
                 confirmButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingClientOpensForm
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
                                 val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
@@ -178,8 +191,11 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingClientOpensForm
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
@@ -237,25 +253,29 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
-            onClickDocumentClientOrIssuer = { clientOrIssuer ->
+            onClickDocumentClientOrIssuer = { clientOrIssuer, openFormOnCompletion ->
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(clientOrIssuer)
-                // Check for version mismatch for issuers
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
                     clientOrIssuer.type == ClientOrIssuerType.ISSUER) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingIssuerToEdit = clientOrIssuer
+                            pendingIssuerOpensForm = openFormOnCompletion
                             showVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }
-                // Check for version mismatch for clients
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT ||
                     clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingClientToEdit = clientOrIssuer
+                            pendingClientOpensForm = openFormOnCompletion
                             showClientVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }

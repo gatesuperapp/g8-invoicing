@@ -26,7 +26,11 @@ fun DocumentBottomSheetElementsAfterSlide(
     taxRates: List<BigDecimal>,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    // `openFormOnCompletion` = true means the caller wants the bottom-sheet edit
+    // form to open once the version check settles (edit-link flow). false means
+    // the caller only wants the check to run so the mismatch dialog fires, but
+    // no form should appear afterwards (refresh-from-master icon flow).
+    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
@@ -70,11 +74,16 @@ fun DocumentBottomSheetElementsAfterSlide(
             hasMasterUpdate = hasMasterUpdate,
             onSelect = { onSelectClientOrIssuer(it) },
             onClickEdit = {
-                onClickEditDocumentClientOrIssuer(it)
+                // Only set the local typeOfCreation. The NavGraph checks for a
+                // master version mismatch first and decides itself whether to
+                // open the form now (no mismatch) or wait until the user has
+                // dismissed the version-mismatch dialog. Opening synchronously
+                // here would race the async check and stack the form on top
+                // of the dialog before the user can react.
                 typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT
                 } else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
-                onShowDocumentForm(true)
+                onClickEditDocumentClientOrIssuer(it, true)
             },
             onClickDeselect = {
                 onClickDeleteDocumentClientOrIssuer(
@@ -85,7 +94,9 @@ fun DocumentBottomSheetElementsAfterSlide(
             onClickRefreshFromMaster = {
                 // Fires the existing version-mismatch dialog (wired at the NavGraph
                 // level via onClickDocumentClientOrIssuer / checkVersionMismatch).
-                onClickEditDocumentClientOrIssuer(it)
+                // No form opens after the dialog is dismissed — refresh is a
+                // dedicated action, not a shortcut into editing.
+                onClickEditDocumentClientOrIssuer(it, false)
             },
             onClickNew = {
                 onClickNewDocumentClientOrIssuer(

@@ -106,7 +106,7 @@ fun DocumentAddEdit(
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickEditDocumentProduct: (DocumentProductState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,

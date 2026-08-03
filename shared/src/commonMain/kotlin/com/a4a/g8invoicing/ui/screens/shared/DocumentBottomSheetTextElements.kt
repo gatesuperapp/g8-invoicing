@@ -52,7 +52,7 @@ fun DocumentBottomSheetTextElements(
     taxRates: List<BigDecimal>,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,

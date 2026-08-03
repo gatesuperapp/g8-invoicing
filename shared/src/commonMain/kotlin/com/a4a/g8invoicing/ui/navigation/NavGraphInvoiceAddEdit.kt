@@ -102,15 +102,24 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        // Whether the pending dialog was triggered by the edit-link flow (open
+        // the form after the user's choice) or by the refresh-from-master icon
+        // (don't open the form — refresh is a standalone action).
+        var pendingIssuerOpensForm by remember { mutableStateOf(false) }
         var showClientVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingClientToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        var pendingClientOpensForm by remember { mutableStateOf(false) }
 
         // Version mismatch dialog for issuer
         if (showVersionMismatchDialog && pendingIssuerToEdit != null) {
             AlertDialog(
                 onDismissRequest = {
+                    // Dismiss by scrim tap / system back = abort the edit intent.
+                    // The form stays closed, matching the "cancel" affordance
+                    // rather than "keep current".
                     showVersionMismatchDialog = false
                     pendingIssuerToEdit = null
+                    pendingIssuerOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_message)) },
@@ -120,8 +129,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                             // Dismiss the dialog synchronously so the bottom-sheet form
                             // takes over immediately; the master fetch keeps running in
                             // the background and updates the state when it lands.
+                            val opensForm = pendingIssuerOpensForm
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
                                 val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
@@ -142,8 +154,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingIssuerOpensForm
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
@@ -161,6 +176,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                 onDismissRequest = {
                     showClientVersionMismatchDialog = false
                     pendingClientToEdit = null
+                    pendingClientOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_client_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_client_message)) },
@@ -170,8 +186,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                             // Dismiss the dialog synchronously so a back tap on the
                             // bottom-sheet form doesn't slip the dialog back on top
                             // while loadLatestMasterVersion is still suspended.
+                            val opensForm = pendingClientOpensForm
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
                                 val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
@@ -192,8 +211,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingClientOpensForm
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
@@ -255,25 +277,34 @@ fun NavGraphBuilder.invoiceAddEdit(
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
-            onClickDocumentClientOrIssuer = { clientOrIssuer ->
+            onClickDocumentClientOrIssuer = { clientOrIssuer, openFormOnCompletion ->
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(clientOrIssuer)
-                // Check for version mismatch for issuers
+                // Version-mismatch check gates the form opening: if a mismatch
+                // fires, defer showDocumentForm to the dialog's confirm/dismiss
+                // buttons; otherwise open the form immediately when the caller
+                // asked for it. Refresh-from-master (openFormOnCompletion=false)
+                // never opens the form here.
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
                     clientOrIssuer.type == ClientOrIssuerType.ISSUER) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingIssuerToEdit = clientOrIssuer
+                            pendingIssuerOpensForm = openFormOnCompletion
                             showVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }
-                // Check for version mismatch for clients
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT ||
                     clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingClientToEdit = clientOrIssuer
+                            pendingClientOpensForm = openFormOnCompletion
                             showClientVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }

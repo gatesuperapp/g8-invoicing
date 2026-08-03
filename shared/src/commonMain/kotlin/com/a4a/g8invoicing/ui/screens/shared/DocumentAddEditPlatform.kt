@@ -34,7 +34,7 @@ expect fun DocumentAddEditPlatform(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
