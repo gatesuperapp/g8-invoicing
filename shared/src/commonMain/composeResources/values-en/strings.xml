@@ -556,6 +556,10 @@
     <string name="onboarding_unitcode_bold3">standardised code</string>
     <string name="onboarding_unitcode_part4"> to go with it.\n\n⚡ You do not need to do anything — I will figure out the unit code on my own!\n\nIf I do not recognise the unit, that is fine too ✅</string>
 
+    <string name="onboarding_improvements_title">Lots of little things</string>
+    <string name="onboarding_improvements_body">🔍 Search bar and alphabetical sort in the client and product pickers.\n\n📄 Exported PDF filenames are more explicit.\n\n📅 Document lists are grouped by month.\n\n✏️ When editing a product from a document, you can apply the change to the product card as well (same option for clients).</string>
+    <string name="onboarding_improvements_cta">Next</string>
+
     <string name="onboarding_thanks_title">Perfect!</string>
     <string name="onboarding_thanks_body">Thanks for your trust. See you soon!</string>
     <string name="onboarding_thanks_cta">Finish</string>
