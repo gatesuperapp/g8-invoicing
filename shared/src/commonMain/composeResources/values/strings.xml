@@ -531,7 +531,7 @@ Une erreur s'est produite :
     <!-- Devis intro -->
     <string name="onboarding_devis_title">Devis</string>
     <string name="onboarding_devis_body_bold">Les devis sont maintenant disponibles</string>
-    <string name="onboarding_devis_body_after_bold"> 🥳\n\nIl est possible de convertir les devis en facture.\n\nTu peux tester la fonctionnalité (5 devis max) puis devenir membre premium pour des devis illimités !</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nEt il est possible de les convertir en facture.\n\nTu peux tester la fonctionnalité (5 devis max) puis devenir membre premium pour des devis illimités !</string>
     <string name="onboarding_devis_cta_activate">Activer les devis</string>
     <string name="onboarding_devis_cta_later_gstore">Plus tard dans le gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, mais pas besoin !</string>

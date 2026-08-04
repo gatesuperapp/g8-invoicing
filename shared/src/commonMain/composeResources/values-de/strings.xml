@@ -534,7 +534,7 @@ Es ist ein Fehler aufgetreten :
 
     <string name="onboarding_devis_title">Kostenvoranschläge</string>
     <string name="onboarding_devis_body_bold">Kostenvoranschläge sind jetzt verfügbar</string>
-    <string name="onboarding_devis_body_after_bold"> 🥳\n\nKostenvoranschläge können in Rechnungen umgewandelt werden.\n\nDu kannst die Funktion ausprobieren (max. 5 Kostenvoranschläge) und danach Premium-Mitglied werden für unbegrenzte Kostenvoranschläge!</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nUnd du kannst sie in Rechnungen umwandeln.\n\nDu kannst die Funktion ausprobieren (max. 5 Kostenvoranschläge) und danach Premium-Mitglied werden für unbegrenzte Kostenvoranschläge!</string>
     <string name="onboarding_devis_cta_activate">Kostenvoranschläge aktivieren</string>
     <string name="onboarding_devis_cta_later_gstore">Später im gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, aber brauche ich nicht!</string>
