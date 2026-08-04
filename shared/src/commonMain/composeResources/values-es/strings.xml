@@ -447,7 +447,7 @@ Une erreur s'est produite :
 
     <string name="onboarding_devis_title">Presupuestos</string>
     <string name="onboarding_devis_body_bold">Los presupuestos ya están disponibles</string>
-    <string name="onboarding_devis_body_after_bold"> 🥳\n\nLos presupuestos se pueden convertir en factura.\n\n¡Puedes probar la función (5 presupuestos máx.) y después hacerte miembro premium para tener presupuestos ilimitados!</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nY puedes convertirlos en factura.\n\n¡Puedes probar la función (5 presupuestos máx.) y después hacerte miembro premium para tener presupuestos ilimitados!</string>
     <string name="onboarding_devis_cta_activate">Activar presupuestos</string>
     <string name="onboarding_devis_cta_later_gstore">Más tarde en la gStore</string>
     <string name="onboarding_devis_cta_no_devis">¡Genial, pero no lo necesito!</string>

@@ -437,7 +437,7 @@
 
     <string name="onboarding_devis_title">Quotes</string>
     <string name="onboarding_devis_body_bold">Quotes are now available</string>
-    <string name="onboarding_devis_body_after_bold"> 🥳\n\nQuotes can be converted to invoices.\n\nYou can try the feature (5 quotes max) then become a premium member for unlimited quotes!</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nAnd you can convert them to invoices.\n\nYou can try the feature (5 quotes max) then become a premium member for unlimited quotes!</string>
     <string name="onboarding_devis_cta_activate">Enable quotes</string>
     <string name="onboarding_devis_cta_later_gstore">Later in the gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, but I do not need it!</string>
