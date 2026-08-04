@@ -313,8 +313,8 @@
     <string name="about_terms_of_service_header">By using the app, you agree to the</string>
     <string name="about_terms_of_service">terms of service</string>
     <string name="about_terms_of_service_header_2">and the</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en/terms-of-use</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en/privacy-policy</string>
     <string name="about_privacy">privacy policy of 𝕘𝟠.</string>
     <!-- Legal links footer on Mon Compte. %1$s = terms label, %2$s = privacy label -->
     <string name="account_legal_line">Read the %1$s and the %2$s</string>
