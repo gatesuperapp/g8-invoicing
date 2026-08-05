@@ -35,6 +35,11 @@ interface ClientOrIssuerLocalDataSourceInterface {
      */
     suspend fun getLastCountryCode(): String?
 
+    /** Up to [limit] distinct country codes previously used on any address,
+     *  ordered by most-recently-used. Powers the "Récents" section in the
+     *  country picker. Empty on fresh install. */
+    suspend fun getRecentCountryCodes(limit: Int): List<String>
+
     /** Bulk-fill country_code on every client (type='client') address that has
      *  no country yet. Used by the 1.8 onboarding wizard to remedy legacy
      *  clients whose addresses predate the country_code field. Issuer addresses

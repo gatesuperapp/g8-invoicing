@@ -218,6 +218,14 @@ class FakeClientOrIssuerDataSource : ClientOrIssuerLocalDataSourceInterface {
             ?.uppercase()
     }
 
+    override suspend fun getRecentCountryCodes(limit: Int): List<String> {
+        return clientsAndIssuers.reversed()
+            .flatMap { it.addresses.orEmpty().reversed() }
+            .mapNotNull { it.countryCode?.trim()?.takeIf { s -> s.isNotEmpty() }?.uppercase() }
+            .distinct()
+            .take(limit)
+    }
+
     override suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long> {
         // Fake returns recent document snapshots' originalClientOrIssuerId, most recent first.
         val docType = when (type) {

@@ -646,6 +646,8 @@ Es ist ein Fehler aufgetreten :
     <string name="client_country">Land</string>
     <string name="country_picker_search">Land suchen</string>
     <string name="country_picker_empty">Kein Land gefunden</string>
+    <string name="country_picker_recent">Zuletzt verwendet</string>
+    <string name="country_picker_all">Alle Länder</string>
 
     <!-- Info tooltip -->
     <string name="info_tooltip_ok">OK</string>

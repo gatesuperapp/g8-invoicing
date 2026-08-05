@@ -165,6 +165,8 @@
     <string name="client_country">Pays</string>
     <string name="country_picker_search">Rechercher un pays</string>
     <string name="country_picker_empty">Aucun pays trouvé</string>
+    <string name="country_picker_recent">Récents</string>
+    <string name="country_picker_all">Tous les pays</string>
     <string name="unit_picker_search">Rechercher une unité</string>
     <string name="unit_picker_empty">Aucune unité trouvée</string>
     <string name="unit_picker_recent">Récentes</string>

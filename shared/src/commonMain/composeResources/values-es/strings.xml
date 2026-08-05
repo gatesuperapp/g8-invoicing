@@ -597,6 +597,8 @@ Une erreur s'est produite :
     <string name="client_country">País</string>
     <string name="country_picker_search">Buscar un país</string>
     <string name="country_picker_empty">Ningún país encontrado</string>
+    <string name="country_picker_recent">Recientes</string>
+    <string name="country_picker_all">Todos los países</string>
 
     <!-- Info tooltip -->
     <string name="info_tooltip_ok">OK</string>

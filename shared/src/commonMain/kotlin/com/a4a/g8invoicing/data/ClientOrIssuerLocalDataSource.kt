@@ -15,6 +15,7 @@ import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuerAddress
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -780,13 +781,45 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    override suspend fun setCountryForClientsWithoutCountry(countryCode: String) {
-        withContext(DispatcherProvider.IO) {
+    override suspend fun getRecentCountryCodes(limit: Int): List<String> {
+        return withContext(DispatcherProvider.IO) {
             try {
-                clientOrIssuerAddressQueries.setCountryForClientsWithoutCountry(
-                    country_code = countryCode.trim().uppercase(),
-                )
-            } catch (_: Exception) {
+                clientOrIssuerAddressQueries.getRecentCountryCodes(limit.toLong())
+                    .executeAsList()
+                    .mapNotNull { it?.trim()?.takeIf { s -> s.isNotEmpty() }?.uppercase() }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    override suspend fun setCountryForClientsWithoutCountry(countryCode: String) {
+        // Reuse the standard updateClientOrIssuer path — its ClientOrIssuer
+        // UPDATE bumps updated_at on the parent row, which is what makes
+        // fetchAll's listener (subscribed to ClientOrIssuer, not …Address)
+        // re-emit. A raw bulk UPDATE on the address table alone would leave
+        // the client-list state stale with country_code=null, and the
+        // address-edit form would then overwrite the just-filled country
+        // with the device-locale fallback.
+        //
+        // Two shapes to handle for pre-1.8 clients:
+        //   1. client has address rows with null country_code → patch them.
+        //   2. client has no address row at all (name/email only)      → create a
+        //      minimal address row carrying just the country, so the country is
+        //      persisted and the edit form can't overwrite it with the fallback.
+        val normalized = countryCode.trim().uppercase()
+        fetchAll(PersonType.CLIENT).first().forEach { client ->
+            val addresses = client.addresses
+            val patchedAddresses = when {
+                addresses.isNullOrEmpty() -> listOf(AddressState(countryCode = normalized))
+                addresses.any { it.countryCode.isNullOrBlank() } -> addresses.map { addr ->
+                    if (addr.countryCode.isNullOrBlank()) addr.copy(countryCode = normalized)
+                    else addr
+                }
+                else -> null
+            }
+            if (patchedAddresses != null) {
+                updateClientOrIssuer(client.copy(addresses = patchedAddresses))
             }
         }
     }

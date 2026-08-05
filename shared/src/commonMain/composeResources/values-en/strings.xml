@@ -592,6 +592,8 @@
     <string name="client_country">Country</string>
     <string name="country_picker_search">Search a country</string>
     <string name="country_picker_empty">No country found</string>
+    <string name="country_picker_recent">Recent</string>
+    <string name="country_picker_all">All countries</string>
 
     <!-- Info tooltip -->
     <string name="info_tooltip_ok">OK</string>

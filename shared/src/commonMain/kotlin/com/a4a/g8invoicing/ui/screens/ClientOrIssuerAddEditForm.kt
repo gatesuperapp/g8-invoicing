@@ -130,17 +130,20 @@ fun ClientOrIssuerAddEditForm(
     LaunchedEffect(clientOrIssuerUiState.id) {
         val fallback = CountryCodes.pickDefaultForNewAddress(dataSource.getLastCountryCode())
         defaultCountryCode = fallback
-        // Populate le state pour les adresses migrées pre-1.8 qui ont country_code NULL :
-        // l'affichage montrait le fallback (cascade) mais le state / la DB restaient null,
-        // ce qui trompait l'user et ferait planter la génération Factur-X. On aligne
-        // state = display en émettant onValueChange pour chaque adresse trouvée vide.
-        clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
-            if (address.countryCode.isNullOrBlank()) {
-                val screenEl = if (isInBottomSheetModal)
-                    ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
-                else
-                    ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
-                onValueChange(screenEl, TextFieldValue(fallback))
+        // Only seed the country on creation (id == null). In edit mode we never
+        // write to state from here: an existing client's country_code=NULL means
+        // the user hasn't set one yet, and silently backfilling with the cascade
+        // fallback would clobber whatever they intended (e.g. an onboarding-set
+        // country the client-list flow hasn't propagated yet).
+        if (clientOrIssuerUiState.id == null) {
+            clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
+                if (address.countryCode.isNullOrBlank()) {
+                    val screenEl = if (isInBottomSheetModal)
+                        ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                    else
+                        ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                    onValueChange(screenEl, TextFieldValue(fallback))
+                }
             }
         }
     }
@@ -402,13 +405,15 @@ fun ClientOrIssuerAddEditForm(
                         else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i")
                     ),
                     // Factur-X requires country with ISO 3166-1 code
-                    // New address will default to last country used in an address, else device locale
+                    // In creation, prefill with cascade default (last-used → device locale → FR).
+                    // In edit, mirror the state exactly (empty when NULL) so the display never
+                    // lies about what's persisted.
                     FormInput(
                         label = clientCountryLabel,
                         inputType = ForwardElement(
                             text = CountryCodes.displayNameOf(
                                 address?.countryCode?.takeIf { it.isNotBlank() }
-                                    ?: defaultCountryCode
+                                    ?: if (clientOrIssuerUiState.id == null) defaultCountryCode else null
                             ),
                             isMultiline = false,
                         ),
@@ -797,14 +802,26 @@ fun ClientOrIssuerAddEditForm(
     if (pickerIndex != null) {
         val currentAddress = clientOrIssuerUiState.addresses?.getOrNull(pickerIndex - 1)
         val currentCode = currentAddress?.countryCode?.takeIf { it.isNotBlank() }
-        val screenEl = if (isInBottomSheetModal)
-            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_$pickerIndex")
-        else
-            ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_$pickerIndex")
+        val screenElFor: (Int) -> ScreenElement = { i ->
+            if (isInBottomSheetModal)
+                ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_$i")
+            else
+                ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_$i")
+        }
         CountryPicker(
             currentCode = currentCode,
             onSelect = { code ->
-                onValueChange(screenEl, TextFieldValue(code))
+                onValueChange(screenElFor(pickerIndex), TextFieldValue(code))
+                // Broadcast the pick to every other address that still has no
+                // country set — the common case (multi-address clients live in
+                // one country). Addresses that already carry a country are left
+                // alone so users can keep distinct countries per address.
+                clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
+                    val position = index + 1
+                    if (position != pickerIndex && address.countryCode.isNullOrBlank()) {
+                        onValueChange(screenElFor(position), TextFieldValue(code))
+                    }
+                }
                 countryPickerAddressIndex = null
             },
             onDismiss = { countryPickerAddressIndex = null },
