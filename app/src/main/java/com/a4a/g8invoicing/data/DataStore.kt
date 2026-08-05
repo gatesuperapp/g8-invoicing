@@ -108,6 +108,11 @@ suspend fun setSeenOnboarding18(context: Context) {
         // in the Factur-X intro step, so silently mark the standalone backup
         // popup as seen — no need to nag the same reminder twice.
         prefs[PrefKeys.HAS_SEEN_POPUP] = true
+        // Same rationale for the What's New modal: the 1.8 onboarding covers
+        // every nouveauté the What's New would announce. Without this write
+        // LAST_SEEN_VERSION stayed at "1.7" and the standard WhatsNew popped
+        // right after the user finished the wizard.
+        prefs[PrefKeys.LAST_SEEN_VERSION] = CURRENT_APP_VERSION
     }
 }
 

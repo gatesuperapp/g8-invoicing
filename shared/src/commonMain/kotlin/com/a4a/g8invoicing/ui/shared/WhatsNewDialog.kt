@@ -73,7 +73,7 @@ fun WhatsNewDialog(
     onDismiss: () -> Unit
 ) {
     // Page de bienvenue + pages de fonctionnalités
-    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Castanea sativa")
+    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Rosa Canina")
 
     val featurePages = listOf(
         WhatsNewPage(

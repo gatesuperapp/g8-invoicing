@@ -74,8 +74,11 @@ fun MainCompose(
     // What's New + Onboarding dialog state. The 1.8 onboarding takes priority
     // over the generic What's New — the onboarding's welcome screen already
     // mentions the Devis feature, so showing both would be redundant.
-    val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = false)
-    val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = false)
+    // `initial = null` so the LaunchedEffect can distinguish "DataStore hasn't
+    // emitted yet" from "flag is legitimately false" — see the LaunchedEffect
+    // below for the race the null guard prevents.
+    val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = null)
+    val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = null)
     var showWhatsNew by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
     // Backup reminder: shown once when the user has >3 rows in any main table.
@@ -85,10 +88,18 @@ fun MainCompose(
     var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
     LaunchedEffect(shouldShow, shouldShowOnboarding) {
-        showOnboarding = shouldShowOnboarding
-        // Only surface What's New when onboarding is NOT going to run.
-        showWhatsNew = shouldShow && !shouldShowOnboarding
-        if (!shouldShow && !shouldShowOnboarding) {
+        // Wait until BOTH DataStore flags have emitted their real value.
+        // Without this guard, the very first composition fires the effect
+        // with initial=null on both, which used to pass the "!shouldShow &&
+        // !shouldShowOnboarding" check and briefly flip showBackupDialog on
+        // — even during a version upgrade where the onboarding was actually
+        // due. The onboarding then displayed a moment later, but the backup
+        // dialog was already open behind it.
+        val whatsNew = shouldShow ?: return@LaunchedEffect
+        val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
+        showOnboarding = onboarding
+        showWhatsNew = whatsNew && !onboarding
+        if (!whatsNew && !onboarding) {
             showBackupDialog = shouldShowBackupPopupNow(
                 context,
                 invoiceQueries,
