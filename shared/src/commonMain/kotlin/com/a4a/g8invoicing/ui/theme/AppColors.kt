@@ -15,7 +15,7 @@ object AppColors {
     // Surfaces / backgrounds
     val screen        = Color(0xFFF9F9F9)   // full-screen background
     val surface       = Color(0xFFFFFFFF)   // cards, form blocks, sheets
-    val surfaceSubtle = Color(0xFFF6F5F2)   // list container behind rows — warm, barely tinted
+    val surfaceSubtle = Color(0xFFF5F5F5)   // list container behind rows — neutral, barely tinted
     val surfaceMuted  = Color(0xFFEEEEEE)   // greyed panels, alt-row backgrounds
     val bottomBar     = Color(0xFFC1C1C1)   // navigation bar background
 

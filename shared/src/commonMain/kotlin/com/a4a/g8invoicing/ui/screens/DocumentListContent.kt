@@ -56,7 +56,7 @@ fun DocumentListContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppColors.surfaceSubtle),
+            .background(AppColors.screen),
         verticalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         grouped.forEach { (key, docsInMonth) ->
