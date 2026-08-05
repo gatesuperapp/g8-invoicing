@@ -611,7 +611,7 @@ Une erreur s'est produite :
 
     <!-- Improvements recap (last-but-one step) -->
     <string name="onboarding_improvements_title">Plein de petites choses</string>
-    <string name="onboarding_improvements_body">🔍 Barre de recherche et tri alphabétique dans les sélecteurs de clients et de produits.\n\n📄 Les noms des PDF exportés sont plus explicites.\n\n📅 Les listes de documents sont groupées par mois.\n\n✏️ En modifiant un produit depuis un document, tu peux répercuter le changement sur la fiche produit (idem pour les clients).</string>
+    <string name="onboarding_improvements_body">🔍 Barre de recherche et tri alphabétique dans les sélecteurs de clients et de produits.\n\n📄 Les noms des PDF exportés sont plus explicites.\n\n📅 Les listes de documents sont groupées par mois, les prix mis en valeur, le nombre de jours avant échéance est calculé.\n\n✏️ En modifiant un produit depuis un document, tu peux répercuter le changement sur la fiche produit (idem pour les clients).</string>
     <string name="onboarding_improvements_cta">Suivant</string>
 
     <!-- Thank you -->

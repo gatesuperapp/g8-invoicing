@@ -524,7 +524,7 @@ Une erreur s'est produite :
     <string name="onboarding_unitcode_part4"> que va con ella.\n\n⚡ No tienes que hacer nada, ¡yo encuentro el código de unidad por mi cuenta!\n\nSi no reconozco la unidad, también vale ✅</string>
 
     <string name="onboarding_improvements_title">Un montón de pequeñas cosas</string>
-    <string name="onboarding_improvements_body">🔍 Barra de búsqueda y orden alfabético en los selectores de clientes y productos.\n\n📄 Los nombres de los PDF exportados son más explícitos.\n\n📅 Las listas de documentos están agrupadas por mes.\n\n✏️ Al modificar un producto desde un documento, puedes aplicar el cambio también a la ficha del producto (misma opción para los clientes).</string>
+    <string name="onboarding_improvements_body">🔍 Barra de búsqueda y orden alfabético en los selectores de clientes y productos.\n\n📄 Los nombres de los PDF exportados son más explícitos.\n\n📅 Las listas de documentos están agrupadas por mes, los precios destacados, y se muestra el número de días hasta el vencimiento.\n\n✏️ Al modificar un producto desde un documento, puedes aplicar el cambio también a la ficha del producto (misma opción para los clientes).</string>
     <string name="onboarding_improvements_cta">Siguiente</string>
 
     <string name="onboarding_thanks_title">¡Perfecto!</string>
