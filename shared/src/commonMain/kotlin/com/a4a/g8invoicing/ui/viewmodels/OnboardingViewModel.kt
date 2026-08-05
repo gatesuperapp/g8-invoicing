@@ -191,8 +191,9 @@ class OnboardingViewModel(
                 else OnboardingStep.ClientCountryDoneSkipped
             }
             OnboardingStep.ClientCountryPicker -> OnboardingStep.ClientCountryDoneApplied
-            OnboardingStep.ClientCountryDoneApplied -> OnboardingStep.ThankYou
-            OnboardingStep.ClientCountryDoneSkipped -> OnboardingStep.ThankYou
+            OnboardingStep.ClientCountryDoneApplied -> OnboardingStep.Improvements
+            OnboardingStep.ClientCountryDoneSkipped -> OnboardingStep.Improvements
+            OnboardingStep.Improvements -> OnboardingStep.ThankYou
             OnboardingStep.ThankYou -> OnboardingStep.ThankYou
         }
     }
@@ -240,10 +241,11 @@ class OnboardingViewModel(
             OnboardingStep.ClientCountryPicker -> OnboardingStep.ClientCountryQuestion
             OnboardingStep.ClientCountryDoneApplied -> OnboardingStep.ClientCountryPicker
             OnboardingStep.ClientCountryDoneSkipped -> OnboardingStep.ClientCountryQuestion
-            OnboardingStep.ThankYou -> {
+            OnboardingStep.Improvements -> {
                 if (_clientCountrySameForAll.value == true) OnboardingStep.ClientCountryDoneApplied
                 else OnboardingStep.ClientCountryDoneSkipped
             }
+            OnboardingStep.ThankYou -> OnboardingStep.Improvements
         }
     }
 

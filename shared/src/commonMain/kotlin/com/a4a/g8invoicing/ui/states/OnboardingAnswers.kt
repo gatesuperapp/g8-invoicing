@@ -44,6 +44,10 @@ sealed class OnboardingStep {
     /** Reassurance after user chose "mixed countries" — nothing to bulk-apply. */
     object ClientCountryDoneSkipped : OnboardingStep()
     object UnitCodeInfo : OnboardingStep()
+    /** Recap of small quality-of-life improvements landing in 1.8 — surfaced
+     *  after the client-country flow and before ThankYou so they land while
+     *  the user is still engaged with the wizard. */
+    object Improvements : OnboardingStep()
     object ThankYou : OnboardingStep()
 }
 

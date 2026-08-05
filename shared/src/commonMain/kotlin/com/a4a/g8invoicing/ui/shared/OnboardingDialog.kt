@@ -105,6 +105,9 @@ import com.a4a.g8invoicing.shared.resources.onboarding_nature_only_goods
 import com.a4a.g8invoicing.shared.resources.onboarding_nature_only_services
 import com.a4a.g8invoicing.shared.resources.onboarding_nature_question
 import com.a4a.g8invoicing.shared.resources.onboarding_nature_title
+import com.a4a.g8invoicing.shared.resources.onboarding_improvements_body
+import com.a4a.g8invoicing.shared.resources.onboarding_improvements_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_improvements_title
 import com.a4a.g8invoicing.shared.resources.onboarding_next
 import com.a4a.g8invoicing.shared.resources.onboarding_no
 import com.a4a.g8invoicing.shared.resources.onboarding_previous
@@ -359,6 +362,7 @@ private fun OnboardingStepContent(
         OnboardingStep.ClientCountryDoneApplied -> ClientCountryDoneAppliedStep()
         OnboardingStep.ClientCountryDoneSkipped -> ClientCountryDoneSkippedStep()
         OnboardingStep.UnitCodeInfo -> UnitCodeInfoStep()
+        OnboardingStep.Improvements -> ImprovementsStep()
         OnboardingStep.ThankYou -> ThankYouStep()
     }
 }
@@ -411,6 +415,7 @@ private fun OnboardingNavRow(
         OnboardingStep.ClientCountryDoneSkipped,
         -> stringResource(Res.string.onboarding_client_country_done_cta)
         OnboardingStep.UnitCodeInfo -> stringResource(Res.string.onboarding_unitcode_cta)
+        OnboardingStep.Improvements -> stringResource(Res.string.onboarding_improvements_cta)
         OnboardingStep.ThankYou -> stringResource(Res.string.onboarding_thanks_cta)
         else -> stringResource(Res.string.onboarding_next)
     }
@@ -1221,6 +1226,25 @@ private fun IssuersDoneStep(issuerCount: Int) {
             text = body,
             style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
+        )
+    }
+}
+
+@Composable
+private fun ImprovementsStep() {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        StepEmoji("✨")
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_improvements_title))
+        Spacer(Modifier.height(32.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_improvements_body),
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            textAlign = TextAlign.Start,
             lineHeight = 22.sp,
         )
     }
