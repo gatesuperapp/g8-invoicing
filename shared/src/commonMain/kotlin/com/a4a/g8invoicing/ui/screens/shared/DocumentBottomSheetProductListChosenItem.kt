@@ -98,7 +98,7 @@ fun DocumentBottomSheetProductListChosenItem(
             modifier = Modifier
                 .padding(
                     start = 20.dp,
-                    end = 30.dp,
+                    end = 13.dp,
                     top = 10.dp,
                     bottom = 10.dp
                 )
