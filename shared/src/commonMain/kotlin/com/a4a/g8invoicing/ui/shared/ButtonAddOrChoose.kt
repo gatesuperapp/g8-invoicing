@@ -18,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun ButtonAddOrChoose(
@@ -49,7 +49,7 @@ fun ButtonAddOrChoose(
     if (isPickerButton) {
         myModifier = myModifier.then(
             Modifier.background(
-                ColorLightGrey
+                AppColors.surfaceSubtle
             )
         )
     }
@@ -73,7 +73,7 @@ fun ButtonAddOrChoose(
                 modifier = Modifier
                     .width(32.dp)
                     .padding(
-                        end = 20.dp,
+                        end = 8.dp,
                         top = 10.dp,
                         bottom = 10.dp
                     ),
@@ -84,7 +84,7 @@ fun ButtonAddOrChoose(
                 modifier = Modifier
                     .width(36.dp)
                     .padding(
-                        end = 20.dp,
+                        end = 8.dp,
                         top = 10.dp,
                         bottom = 10.dp
                     ),
