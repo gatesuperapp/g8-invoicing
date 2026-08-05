@@ -451,6 +451,8 @@ fun NavGraphBuilder.invoiceAddEdit(
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent,
             showProductType = showProductType,
+            hideLinkedSourceHeaders = document.hideLinkedSourceHeaders,
+            onToggleHideLinkedSourceHeaders = invoiceViewModel::toggleHideLinkedSourceHeaders,
         )
     }
 }

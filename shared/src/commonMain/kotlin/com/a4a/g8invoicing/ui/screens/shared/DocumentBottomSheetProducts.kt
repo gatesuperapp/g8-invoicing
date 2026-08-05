@@ -49,6 +49,8 @@ fun DocumentBottomSheetProducts(
     onShowDocumentForm: (Boolean) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
     showProductType: Boolean = false,
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
 ) {
     val density = LocalDensity.current
     val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
@@ -102,7 +104,9 @@ fun DocumentBottomSheetProducts(
                 onShowDocumentForm(true)
             },
             onClickDelete = onClickDeleteDocumentProduct,
-            onOrderChange = onOrderChange
+            onOrderChange = onOrderChange,
+            hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+            onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
         )
         // List of all products to chose from
         if (isProductListVisible) {

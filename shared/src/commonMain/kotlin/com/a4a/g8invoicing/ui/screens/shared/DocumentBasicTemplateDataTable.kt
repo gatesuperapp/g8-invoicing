@@ -54,6 +54,9 @@ fun DocumentBasicTemplateProductsTable(
     formatLocale: String? = null,
     displayTaxColumn: Boolean = true,
     labels: Map<String, String>? = null,
+    // Invoice-level toggle: when true, skip the "BL001 - date" / "Autres lignes"
+    // grouping rows but keep every product row.
+    hideLinkedSourceHeaders: Boolean = false,
 ) {
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
@@ -86,7 +89,9 @@ fun DocumentBasicTemplateProductsTable(
 
     if (linkedDeliveryNotes.isNotEmpty()) {
         linkedDeliveryNotes.forEach { docNumberAndDate ->
-            LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
+            if (!hideLinkedSourceHeaders) {
+                LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
+            }
             DocumentProductsRows(
                 products.filter { it.linkedDocNumber == docNumberAndDate.first },
                 descriptionColumnWeight,

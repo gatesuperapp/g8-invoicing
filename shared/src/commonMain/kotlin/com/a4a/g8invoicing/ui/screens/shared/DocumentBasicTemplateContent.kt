@@ -146,6 +146,8 @@ fun DocumentBasicTemplateContent(
                             formatLocale = document.formatLocale,
                             displayTaxColumn = displayTaxColumn,
                             labels = labels,
+                            hideLinkedSourceHeaders =
+                                (document as? InvoiceState)?.hideLinkedSourceHeaders == true,
                         )
                     }
                 }

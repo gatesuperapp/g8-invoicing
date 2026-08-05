@@ -98,6 +98,19 @@ class InvoiceAddEditViewModel(
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
+    // Flip the "hide linked source headers" bit on the current invoice: mirror
+    // it into the UI state immediately so the eye + preview update in the same
+    // frame, then persist in the background.
+    fun toggleHideLinkedSourceHeaders() {
+        val current = _documentUiState.value
+        val next = !current.hideLinkedSourceHeaders
+        _documentUiState.value = current.copy(hideLinkedSourceHeaders = next)
+        val id = current.documentId?.toLong() ?: return
+        viewModelScope.launch {
+            documentDataSource.updateHideLinkedSourceHeaders(id, next)
+        }
+    }
+
     private fun updateInvoiceInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {

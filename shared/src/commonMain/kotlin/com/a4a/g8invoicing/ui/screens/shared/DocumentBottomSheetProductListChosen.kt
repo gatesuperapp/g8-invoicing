@@ -45,7 +45,9 @@ fun DocumentBottomSheetProductsChosen(
     onClickChooseExisting: () -> Unit, // Opens the product picker bottom sheet
     onClickDocumentProduct: (DocumentProductState) -> Unit, // Edit an existing document product
     onClickDelete: (Int) -> Unit,
-    onOrderChange: (List<DocumentProductState>) -> Unit
+    onOrderChange: (List<DocumentProductState>) -> Unit,
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
     ) {
     Column(
         modifier = Modifier
@@ -67,6 +69,8 @@ fun DocumentBottomSheetProductsChosen(
                 onClickItem = onClickDocumentProduct,
                 onClickDelete = onClickDelete,
                 onOrderChange = onOrderChange,
+                hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+                onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
                 modifier = Modifier.fillMaxSize(),
             )
         }

@@ -125,6 +125,8 @@ fun DocumentAddEdit(
     onShowMessage: (String) -> Unit, // For showing toast/snackbar messages
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit, // Slot for ExportPdf
     showProductType: Boolean = false,
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -250,6 +252,8 @@ fun DocumentAddEdit(
                     onShowDocumentForm = onShowDocumentForm,
                     onOrderChange = onOrderChange,
                     showProductType = showProductType,
+                    hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+                    onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
                 )
             }
         },

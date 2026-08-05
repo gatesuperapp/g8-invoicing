@@ -306,6 +306,7 @@ class InvoiceLocalDataSource(
             labelsSnapshot = this.labels_snapshot,
             showCurrencyAndAutoTaxColumn = this.show_currency_and_auto_tax_column != 0L,
             formatLocale = this.format_locale,
+            hideLinkedSourceHeaders = this.hide_linked_source_headers != 0L,
         )
     }
 
@@ -464,6 +465,22 @@ class InvoiceLocalDataSource(
                 }
             } catch (e: Exception) {
                 //Log.e("InvoiceDS", "Error update: ${e.message}")
+            }
+        }
+    }
+
+    // --- updateHideLinkedSourceHeaders ---
+    // Dedicated write so the eye toggle in the doc form doesn't have to round-trip
+    // through the full update() (which validates every field).
+    override suspend fun updateHideLinkedSourceHeaders(invoiceId: Long, hide: Boolean) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                invoiceQueries.updateHideLinkedSourceHeaders(
+                    invoice_id = invoiceId,
+                    hide_linked_source_headers = if (hide) 1L else 0L,
+                    updated_at = DateUtils.getCurrentTimestamp(),
+                )
+            } catch (_: Exception) {
             }
         }
     }
@@ -820,6 +837,7 @@ class InvoiceLocalDataSource(
                 labels_snapshot = document.labelsSnapshot,
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
+                hide_linked_source_headers = if (document.hideLinkedSourceHeaders) 1L else 0L,
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")

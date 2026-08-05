@@ -52,4 +52,6 @@ expect fun DocumentAddEditPlatform(
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
     showProductType: Boolean = false,
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
 )

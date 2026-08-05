@@ -47,8 +47,12 @@ actual fun DocumentAddEditPlatform(
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
     showProductType: Boolean,
+    hideLinkedSourceHeaders: Boolean,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)?,
 ) {
     // Desktop uses the desktop-specific UI with side panel
+    // hideLinkedSourceHeaders is only wired on Android; desktop's flat product
+    // list has no source-header rows to hide, so the params are ignored here.
     // showProductType n'est pas encore relayé — pas de rendu Product.type côté desktop.
     DocumentAddEditDesktop(
         document = document,

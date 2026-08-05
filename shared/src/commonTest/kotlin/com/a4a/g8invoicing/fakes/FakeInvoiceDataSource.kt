@@ -206,6 +206,14 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
         }
     }
 
+    override suspend fun updateHideLinkedSourceHeaders(invoiceId: Long, hide: Boolean) {
+        val index = invoices.indexOfFirst { it.documentId?.toLong() == invoiceId }
+        if (index >= 0) {
+            invoices[index] = invoices[index].copy(hideLinkedSourceHeaders = hide)
+            invoicesFlow.value = invoices.toList()
+        }
+    }
+
     override suspend fun delete(documents: List<InvoiceState>) {
         val idsToDelete = documents.mapNotNull { it.documentId }
         invoices.removeAll { it.documentId in idsToDelete }

@@ -47,6 +47,8 @@ actual fun DocumentAddEditPlatform(
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
     showProductType: Boolean,
+    hideLinkedSourceHeaders: Boolean,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)?,
 ) {
     // Android uses the mobile DocumentAddEdit with bottom sheets
     DocumentAddEdit(
@@ -85,5 +87,7 @@ actual fun DocumentAddEditPlatform(
         onShowMessage = onShowMessage,
         exportPdfContent = exportPdfContent,
         showProductType = showProductType,
+        hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+        onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
     )
 }

@@ -32,4 +32,9 @@ data class InvoiceState(
     override var labelsSnapshot: String? = null,
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
+    // Single toggle that hides the "BL/D001 - <date>" and "Autres lignes" grouping
+    // rows in the preview + PDF while keeping every product row visible. Rendered as
+    // one eye icon per source-header block in the doc form, all wired to the same
+    // boolean.
+    var hideLinkedSourceHeaders: Boolean = false,
 ) : DocumentState()

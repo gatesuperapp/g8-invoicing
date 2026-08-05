@@ -105,3 +105,9 @@ ALTER TABLE CreditNote   ADD COLUMN show_currency_and_auto_tax_column INTEGER NO
 ALTER TABLE Invoice      ADD COLUMN format_locale TEXT;
 ALTER TABLE DeliveryNote ADD COLUMN format_locale TEXT;
 ALTER TABLE CreditNote   ADD COLUMN format_locale TEXT;
+
+-- 5) hide_linked_source_headers on Invoice. When 1, the preview/PDF omits
+--    the "BL001 - <date>" / "Devis D001 - <date>" / "Autres lignes" grouping
+--    rows above the product table — the products themselves still render.
+--    Bound to a single eye toggle in the doc form's product list.
+ALTER TABLE Invoice ADD COLUMN hide_linked_source_headers INTEGER NOT NULL DEFAULT 0;

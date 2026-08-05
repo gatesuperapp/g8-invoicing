@@ -33,6 +33,11 @@ fun DocumentBottomSheetProductListChosenContent(
     onClickItem: (DocumentProductState) -> Unit,
     onClickDelete: (Int) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
+    // null → no eye rendered (doc type doesn't support the toggle, or state has
+    // no source headers to hide). Non-null → single boolean shared across every
+    // source-header block; every eye click flips all of them.
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -110,6 +115,8 @@ fun DocumentBottomSheetProductListChosenContent(
                     DocumentBottomSheetProductListSourceBlock(
                         docNumber = docNumber,
                         date = productsInGroup.firstOrNull()?.linkedDate,
+                        isHidden = hideLinkedSourceHeaders,
+                        onToggleHidden = onToggleHideLinkedSourceHeaders,
                     )
                 }
             } else if (hasLinkedRow) {
@@ -117,6 +124,8 @@ fun DocumentBottomSheetProductListChosenContent(
                     DocumentBottomSheetProductListSourceBlock(
                         docNumber = otherLinesLabel,
                         date = null,
+                        isHidden = hideLinkedSourceHeaders,
+                        onToggleHidden = onToggleHideLinkedSourceHeaders,
                     )
                 }
             }
