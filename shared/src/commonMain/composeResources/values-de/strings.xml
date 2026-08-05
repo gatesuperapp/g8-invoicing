@@ -611,7 +611,7 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_unitcode_part4"> der dazugehört.\n\n⚡ Du musst nichts tun, ich finde den Einheitscode ganz allein!\n\nWenn ich die Einheit nicht erkenne, ist das auch okay ✅</string>
 
     <string name="onboarding_improvements_title">Viele kleine Dinge</string>
-    <string name="onboarding_improvements_body">🔍 Suchleiste und alphabetische Sortierung in den Kunden- und Produktauswahlen.\n\n📄 Die Namen der exportierten PDFs sind aussagekräftiger.\n\n📅 Die Dokumentlisten sind nach Monat gruppiert.\n\n✏️ Wenn du ein Produkt aus einem Dokument heraus änderst, kannst du die Änderung auch auf die Produktkarte übertragen (dieselbe Option für Kunden).</string>
+    <string name="onboarding_improvements_body">🔍 Suchleiste und alphabetische Sortierung in den Kunden- und Produktauswahlen.\n\n📄 Die Namen der exportierten PDFs sind aussagekräftiger.\n\n📅 Die Dokumentlisten sind nach Monat gruppiert, die Preise hervorgehoben, und die Anzahl der Tage bis zur Fälligkeit wird angezeigt.\n\n✏️ Wenn du ein Produkt aus einem Dokument heraus änderst, kannst du die Änderung auch auf die Produktkarte übertragen (dieselbe Option für Kunden).</string>
     <string name="onboarding_improvements_cta">Weiter</string>
 
     <string name="onboarding_thanks_title">Perfekt!</string>
