@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.shared
 
+import com.a4a.g8invoicing.data.AppLocaleHolder
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.stripTrailingZeros
@@ -261,7 +262,8 @@ class PdfGeneratorImpl(
         document.documentProducts?.let { products ->
             val displayTaxColumn = !document.showCurrencyAndAutoTaxColumn ||
                 products.any { it.taxRate != null }
-            createProductsTable(products, currencyCode, formatLocale, displayTaxColumn)?.let {
+            val hideLinkedHeaders = (document as? InvoiceState)?.hideLinkedSourceHeaders == true
+            createProductsTable(products, currencyCode, formatLocale, displayTaxColumn, hideLinkedHeaders)?.let {
                 val marginTop = if (document.reference?.text.isNullOrEmpty() && document.freeField?.text.isNullOrEmpty()) 20f else 10f
                 doc.add(it.setMarginTop(marginTop).setMarginBottom(12f))
             }
@@ -292,6 +294,13 @@ class PdfGeneratorImpl(
         // null/blank → no watermark for this doc.
         document.watermarkText?.takeIf { it.isNotBlank() }?.let { watermark ->
             doc.add(createWatermark(watermark))
+        }
+
+        // "Paid" stamp — absolute-positioned via setFixedPosition inside
+        // createPaidStamp, so it doesn't push anything down. Added last so it
+        // paints on top of the products / totals / footer content.
+        if (document is InvoiceState && document.paymentStatus == 2) {
+            createPaidStamp(document.formatLocale)?.let { doc.add(it) }
         }
     }
 
@@ -606,6 +615,7 @@ class PdfGeneratorImpl(
         currencyCode: String,
         formatLocale: String?,
         displayTaxColumn: Boolean,
+        hideLinkedSourceHeaders: Boolean = false,
     ): Table? {
         try {
             val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
@@ -650,15 +660,17 @@ class PdfGeneratorImpl(
             val columnCount = columnWidth.size
             if (linkedDeliveryNotes.isNotEmpty()) {
                 linkedDeliveryNotes.forEach { (docNumber, docDate) ->
-                    val headerText = if (docNumber.isNullOrEmpty()) {
-                        strings.otherLines
-                    } else {
-                        "$docNumber - ${docDate?.substringBefore(" ")}"
+                    if (!hideLinkedSourceHeaders) {
+                        val headerText = if (docNumber.isNullOrEmpty()) {
+                            strings.otherLines
+                        } else {
+                            "$docNumber - ${docDate?.substringBefore(" ")}"
+                        }
+                        table.addCustomCell(
+                            headerText,
+                            TextAlignment.LEFT, true, isSpan = true, spanColumns = columnCount
+                        )
                     }
-                    table.addCustomCell(
-                        headerText,
-                        TextAlignment.LEFT, true, isSpan = true, spanColumns = columnCount
-                    )
                     addProductRows(products.filter { it.linkedDocNumber == docNumber }, table, displayUnitColumn, displayTaxColumn, currencyCode, formatLocale)
                 }
             } else {
@@ -808,6 +820,34 @@ class PdfGeneratorImpl(
             .setTextAlignment(TextAlignment.CENTER)
             .pdfBold()
             .setFontSize(fontSize)
+    }
+
+    // Locale-aware "Paid" stamp. Resolve to the invoice's frozen formatLocale
+    // so a FR-created invoice keeps the FR stamp even after the app is
+    // switched to EN. Fallbacks: current UI locale (legacy pre-1.8 invoices
+    // where formatLocale is null), then the language-neutral drawable/
+    // default (FR) as last resort.
+    //
+    // Sized via setWidth and absolute-positioned via setFixedPosition to sit
+    // over the products table area, same pattern as the pre-KMP
+    // CreatePdfWithIText.
+    private fun createPaidStamp(formatLocale: String?): Image? {
+        if (imageStorage == null) return null
+        val paths = buildList {
+            if (!formatLocale.isNullOrBlank()) add("drawable-$formatLocale/img_paid.png")
+            val uiLocale = AppLocaleHolder.languageCode
+            if (uiLocale != formatLocale) add("drawable-$uiLocale/img_paid.png")
+            add("drawable/img_paid.png")
+        }
+        val bytes = paths.firstNotNullOfOrNull { imageStorage.readBundledResource(it) }
+            ?: return null
+        return try {
+            Image(ImageDataFactory.create(bytes))
+                .setWidth(162f)
+                .setFixedPosition(200f, 555f)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private fun createFooter(text: String, fontSize: Float): Paragraph {
