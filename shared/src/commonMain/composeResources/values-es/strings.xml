@@ -1,18 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default document numbers -->
     <string name="invoice_default_number">F001</string>
     <string name="delivery_note_default_number">NE001</string>
     <string name="credit_note_default_number">NC001</string>
-
     <!-- Currency -->
 
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copiar</string>
-
     <!-- Document footer -->
     <string name="document_default_footer">Descuento por pago anticipado: ninguno\nTasa de penalización por retraso en el pago: ninguna\n\n\nIBAN: ES76 1234 1234 1234 1234 1234</string>
-
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
     <string name="delivery_note_number">Nota de entrega Nº</string>
@@ -34,22 +31,18 @@
     <string name="document_table_unit_price_without_tax">PU s/IVA</string>
     <string name="document_table_total_price_without_tax">Total s/IVA</string>
     <string name="document_table_tax_rate">IVA</string>
-
     <!-- Document totals -->
     <string name="document_total_without_tax">Total s/IVA:</string>
     <string name="document_total_with_tax">Total c/IVA:</string>
     <string name="document_tax_label">IVA %1$s: </string>
-
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Total s/IVA:</string>
     <string name="total_with_tax">Total c/IVA:</string>
     <string name="vat">IVA</string>
-
     <!-- UI Labels -->
     <string name="form_label_edit">Editar</string>
     <string name="product_price_without_tax">s/IVA</string>
     <string name="product_price_with_tax">c/IVA</string>
-
     <!-- Alert Dialog Strings -->
     <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nSi ya has enviado la factura, no es legal eliminarla:</string>
     <string name="alert_dialog_delete_invoice_2">Más información\n</string>
@@ -58,7 +51,6 @@
     <string name="alert_dialog_delete_general">¿Estás seguro? Esta acción es irreversible.</string>
     <string name="alert_dialog_delete_confirm">Sí, eliminar</string>
     <string name="alert_dialog_cancel">Cancelar</string>
-
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nuevo cliente</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nuevo emisor</string>
@@ -78,7 +70,6 @@
     <string name="document_modal_product_cancel">Anular</string>
     <string name="document_modal_product_save">Confirmar</string>
     <string name="document_modal_product_back">Volver</string>
-
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">¡Tu factura se ha creado correctamente!</string>
     <string name="invoice_created_button">Ver mi factura</string>
@@ -86,7 +77,6 @@
     <string name="credit_note_created_button">Ver mi nota de crédito</string>
     <string name="corrected_invoice_created_title">¡Tu factura rectificativa se ha creado correctamente!</string>
     <string name="corrected_invoice_created_button">Ver mi factura rectificativa</string>
-
     <!-- Document Form Strings -->
     <string name="document_number_short">Nº</string>
     <string name="document_due_date">Fecha límite</string>
@@ -98,11 +88,12 @@
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Emitida a partir de la factura %1$s</string>
     <string name="credit_note_reference_from_invoices">Emitida a partir de las facturas %1$s</string>
-
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
     <string name="document_products_other_lines">Otras líneas</string>
-    <string name="document_product_advice">Para modificar un producto, toca el rectángulo gris.</string>
+    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
+    <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
+    <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
 
     <!-- Invoice list row — due-date countdown -->
     <string name="document_list_due_in_day">Vence en %1$d día</string>
@@ -180,7 +171,6 @@
     <string name="client_selection_validate">Validar</string>
     <string name="select_placeholder">Seleccionar…</string>
     <string name="clients_selected_count">%1$d clientes seleccionados</string>
-
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Añadir producto</string>
     <string name="document_modal_edit_product">Editar producto</string>
@@ -189,7 +179,6 @@
     <string name="document_modal_edit_issuer">Editar emisor</string>
     <string name="document_modal_new_client">Nuevo cliente</string>
     <string name="document_modal_edit_client">Editar cliente</string>
-
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Cerrar</string>
     <string name="whats_new_done">¡Adelante!</string>
@@ -203,13 +192,10 @@
     <string name="whats_new_currency_description">Ya puedes usar otras monedas además del euro. Cámbiala en "Mi cuenta" &gt; "Moneda e idioma".</string>
     <string name="whats_new_companies_title">Mis empresas</string>
     <string name="whats_new_companies_description">Gestiona más fácilmente los emisores usados en tus documentos desde "Mi cuenta" &gt; "Mis empresas".</string>
-
     <!-- Toast messages -->
     <string name="feature_coming_soon">Próximamente :)</string>
-
     <!-- Corrected Invoice -->
     <string name="corrected_invoice_cancel_and_replace">Anula y reemplaza la factura</string>
-
     <!-- AppBar actions -->
     <string name="appbar_invoices">Facturas</string>
     <string name="appbar_credit_notes">Notas crédito</string>
@@ -257,7 +243,6 @@
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mi cuenta</string>
     <string name="drawer_gstore">𝕘Store</string>
-
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
@@ -278,7 +263,6 @@
     <string name="gstore_module_payments_desc">Registra tarjetas, cheques, efectivo</string>
     <string name="gstore_module_themes_title">Temas premium</string>
     <string name="gstore_module_themes_desc">Colores y diseños adicionales</string>
-
     <!-- Account Screen -->
     <string name="account_share_content">¡Uso la app 𝕘𝟠 para crear mis albaranes y facturas en un instante! Además es un software libre y comprometido. ¿Quieres probarla? Es gratuita y está disponible en Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing o en F-Droid: https://f-droid.org/es/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -310,7 +294,6 @@
     <string name="account_delete_error">No se puede eliminar tu cuenta por el momento. Comprueba tu conexión e inténtalo de nuevo, o escríbenos a </string>
     <string name="account_delete_success_title">Cuenta eliminada</string>
     <string name="account_delete_success_message">Tu cuenta se ha eliminado correctamente. Tus facturas y datos guardados localmente en este dispositivo se conservan.</string>
-
     <!-- About Screen -->
     <string name="about">𝕘𝟠 es una aplicación práctica y comprometida:\n• Funciona sin conexión \n• Sin publicidad ni rastreadores \n• Software libre, open source\n• Diseñada para productores ecológicos\n• Busca financiar proyectos de protección de la fauna salvaje, en particular los quirópteros.</string>
     <string name="about_title_about">Acerca de</string>
@@ -354,7 +337,6 @@
     <string name="about_share_text_2">¡Compártela con tus amigos!</string>
     <string name="about_share_button">Compartir</string>
     <string name="about_title_version">Versión de la aplicación</string>
-
     <!-- Language Selection -->
     <string name="about_title_language">Idioma</string>
     <string name="about_language_system">Idioma del sistema</string>
@@ -362,7 +344,6 @@
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
     <string name="about_language_spanish">Español</string>
-
     <!-- Currency Selection -->
     <string name="account_currency_title">Moneda</string>
     <string name="account_currency_and_language_title">Moneda e idioma</string>
@@ -370,15 +351,12 @@
     <string name="currency_picker_recent">Usadas recientemente</string>
     <string name="currency_picker_all">Todas</string>
     <string name="currency_picker_empty">No se ha encontrado ninguna moneda</string>
-
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
-
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">Aprendí este movimiento en el hip-hop, súper estiloso lo sé. Todavía tengo que practicarlo, no soy muy rápido, creo que mi patagio frena la ola. En fin, quería decirte \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si quieres convertir uno o varios albaranes en una factura, puedes seleccionarlos en la lista haciendo clic largo (o haciendo clic en ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
-
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
     <string name="invoice_advice_legal_1">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡ \n\n …   </string>
@@ -391,7 +369,6 @@
     <string name="invoice_advice_bottom_menu">Hey hey, soy tu batmagotchi. Te tengo que enseñar un truco \n\n …   </string>
     <string name="invoice_advice_bottom_menu1">Para que aparezcan opciones muy útiles, como eliminar un documento \n\n …   </string>
     <string name="invoice_advice_bottom_menu2">haz clic en el círculo ○ delante del número de la factura. Incluso puedes seleccionar varios documentos a la vez.\n\n 𝕨𝕚𝕝𝕕 </string>
-
     <!-- Export PDF -->
     <string name="export_waiting_permission">Permiso requerido…</string>
     <string name="export_ongoing">Exportación en curso…</string>
@@ -418,17 +395,14 @@
 Une erreur s'est produite : 
 </string>
     <string name="alert_dialog_error_confirm">OK</string>
-
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Emisor modificado</string>
     <string name="version_mismatch_message">El emisor se ha modificado desde otro documento. ¿Quieres cargar la última versión?</string>
     <string name="version_mismatch_load_latest">Cargar la última versión</string>
     <string name="version_mismatch_keep_current">Mantener la versión actual</string>
-
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Cliente modificado</string>
     <string name="version_mismatch_client_message">El cliente se ha modificado desde otro documento. ¿Quieres cargar la última versión?</string>
-
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">¿Actualizar el cliente?</string>
     <string name="sync_client_message">¿Quieres aplicar estos cambios al cliente en tu lista de clientes?</string>
@@ -561,7 +535,7 @@ Une erreur s'est produite :
     <string name="onboarding_unitcode_bold3">código normalizado</string>
     <string name="onboarding_unitcode_part4"> que va con ella.\n\n⚡ No tienes que hacer nada, ¡yo encuentro el código de unidad por mi cuenta!\n\nSi no reconozco la unidad, también vale ✅</string>
 
-    <string name="onboarding_improvements_title">Un montón de pequeñas cosas</string>
+    <string name="onboarding_improvements_title">Pequeñas novedades</string>
     <string name="onboarding_improvements_body">🔍 Barra de búsqueda y orden alfabético en los selectores de clientes y productos.\n\n📄 Los nombres de los PDF exportados son más explícitos.\n\n📅 Las listas de documentos están agrupadas por mes, los precios destacados, y se muestra el número de días hasta el vencimiento.\n\n✏️ Al modificar un producto desde un documento, puedes aplicar el cambio también a la ficha del producto (misma opción para los clientes).</string>
     <string name="onboarding_improvements_cta">Siguiente</string>
 
@@ -574,7 +548,7 @@ Une erreur s'est produite :
     <string name="issuer_intra_eu_sales_info_modal_title">Ventas intracomunitarias</string>
     <string name="issuer_intra_eu_sales_info_modal_content">Marca si:\n- tu empresa está en la Unión Europea\n- Y facturas al menos a un cliente fuera de tu país.\n\ng8 te preguntará entonces, para cada producto, si se trata de un servicio o de un bien — las reglas de IVA difieren.\n\n¿Facturación solo en tu país, o fuera de la UE? Déjalo desmarcado.</string>
     <string name="issuer_intra_eu_sales_info_desc">Info ventas intracomunitarias</string>
-    <string name="issuer_vat_exempt_label">Empresa exenta de IVA</string>
+    <string name="issuer_vat_exempt_label">Franquicia de IVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franquicia de IVA</string>
     <string name="issuer_vat_exempt_info_modal_content">Útil para el cumplimiento de la facturación electrónica — permite a g8 añadir automáticamente la mención legal de franquicia de IVA adaptada a tu país en las facturas.</string>
     <string name="issuer_vat_exempt_info_desc">Info franquicia de IVA</string>

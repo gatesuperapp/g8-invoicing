@@ -1,22 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default document numbers -->
     <string name="invoice_default_number">Rg-001</string>
     <string name="delivery_note_default_number">LS001</string>
     <string name="credit_note_default_number">Rg. 001</string>
-
     <!-- Currency -->
 
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Kopie</string>
-
     <!-- Document footer -->
-    <string name="document_default_footer">Skonto bei Vorauszahlung: kein
-Verzugsgebühr bei Zahlungsverzug: keine
-
-
-IBAN: DE71 1234 1234 1234 1234 00</string>
-
+    <string name="document_default_footer">Skonto bei Vorauszahlung: kein \nVerzugsgebühr bei Zahlungsverzug: keine\n\n\n IBAN: DE71 1234 1234 1234 1234 00</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -38,37 +31,26 @@ IBAN: DE71 1234 1234 1234 1234 00</string>
     <string name="document_table_unit_price_without_tax">Einzelpreis ohne MwSt.</string>
     <string name="document_table_total_price_without_tax">Netto-Betrag</string>
     <string name="document_table_tax_rate">MwSt.</string>
-
     <!-- Document totals -->
     <string name="document_total_without_tax">Netto-Betrag:</string>
     <string name="document_total_with_tax">Gesamtbetrag:</string>
     <string name="document_tax_label">MwSt. %1$s: </string>
-
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Netto-Betrag:</string>
     <string name="total_with_tax">Gesamtbetrag:</string>
     <string name="vat">MwSt.</string>
-
     <!-- UI Labels -->
     <string name="form_label_edit">Bearbeiten</string>
     <string name="product_price_without_tax">Netto</string>
     <string name="product_price_with_tax">Brutto</string>
-
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Bist du sicher?
-
-Wenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:
-• Wenn sie noch nicht bezahlt wurde, erstelle eine Korrekturrechnung.
-• Wenn sie bereits bezahlt wurde, erstelle eine Gutschrift und eine neue Rechnung.</string>
-    <string name="alert_dialog_delete_invoice_2">Mehr erfahren
-</string>
-    <string name="alert_dialog_delete_invoice_3">
-In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_invoice_1">Bist du sicher? \n\nWenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:</string>
+    <string name="alert_dialog_delete_invoice_2">Mehr erfahren\n</string>
+    <string name="alert_dialog_delete_invoice_3">\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>
     <string name="alert_dialog_cancel">Abbrechen</string>
-
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Neuer Kunde</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Neuer Ersteller</string>
@@ -88,7 +70,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_modal_product_cancel">Abbrechen</string>
     <string name="document_modal_product_save">Speichern</string>
     <string name="document_modal_product_back">Zurück</string>
-
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Ihre Rechnung wurde erstellt.</string>
     <string name="invoice_created_button">Meine Rechnung ansehen</string>
@@ -96,7 +77,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="credit_note_created_button">Meine Gutschrift ansehen</string>
     <string name="corrected_invoice_created_title">Ihre Korrekturrechnung wurde erstellt.</string>
     <string name="corrected_invoice_created_button">Meine Korrekturrechnung ansehen</string>
-
     <!-- Document Form Strings -->
     <string name="document_number_short">Nr.</string>
     <string name="document_due_date">Fälligkeitsdatum</string>
@@ -108,11 +88,12 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Ausgestellt zu Rechnung %1$s</string>
     <string name="credit_note_reference_from_invoices">Ausgestellt zu Rechnungen %1$s</string>
-
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Neues Produkt</string>
     <string name="document_products_other_lines">Weitere Zeilen</string>
-    <string name="document_product_advice">Um ein Produkt zu ändern, tippe auf das graue Rechteck.</string>
+    <string name="document_product_advice">Um ein Produkt zu ändern, klicke auf das graue Rechteck …</string>
+    <string name="document_product_advice_2">Die Änderung wirkt sich ausschließlich auf dieses Dokument aus …</string>
+    <string name="document_product_advice_3">Sie beeinflusst nicht das gespeicherte Produkt im Reiter "Produkte".</string>
 
     <!-- Invoice list row — due-date countdown. \"T.\" = Tag abbreviated so the
          line stays as compact as the other locales. -->
@@ -135,7 +116,7 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="product_price_input">3</string>
     <string name="product_price_default">Standard-Preis</string>
     <string name="product_price_client">Kund:innen</string>
-    <string name="product_add_price">'+ Einen Preis hinzufügen'</string>
+    <string name="product_add_price">+ Einen Preis hinzufügen</string>
     <string name="product_delete_price">Diesen Preis löschen</string>
     <string name="document_product_quantity">Menge</string>
     <string name="document_product_quantity_input">1</string>
@@ -189,7 +170,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="client_selection_validate">Bestätigen</string>
     <string name="select_placeholder">Auswählen…</string>
     <string name="clients_selected_count">%1$d Kunden ausgewählt</string>
-
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Produkt hinzufügen</string>
     <string name="document_modal_edit_product">Produkt bearbeiten</string>
@@ -198,27 +178,23 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="document_modal_edit_issuer">Ersteller bearbeiten</string>
     <string name="document_modal_new_client">Neuer Kunde</string>
     <string name="document_modal_edit_client">Kunde bearbeiten</string>
-
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Schließen</string>
     <string name="whats_new_done">Los geht's!</string>
     <string name="whats_new_welcome">Willkommen bei Version %1$s!</string>
     <string name="whats_new_discover">Viele neue Funktionen...</string>
     <string name="whats_new_gstore_title">𝕘Store</string>
-    <string name="whats_new_gstore_description">Ein kleiner Shop, um Funktionen freizuschalten.</string>
+    <string name="whats_new_gstore_description">Ein kleiner Shop, um weitere Funktionen freizuschalten.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">𝕘8 spricht jetzt Spanisch!</string>
     <string name="whats_new_currency_title">Money money</string>
-    <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter "Mein Konto" &gt; "Währung und Sprache".</string>
+    <string name="whats_new_currency_description">Sie können jetzt andere Währungen als den Euro verwenden. Ändern Sie sie unter Mein Konto --&gt; Währung und Sprache.</string>
     <string name="whats_new_companies_title">Meine Unternehmen</string>
-    <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter "Mein Konto" &gt; "Meine Unternehmen".</string>
-
+    <string name="whats_new_companies_description">Verwalten Sie die in Ihren Dokumenten verwendeten Ersteller einfacher unter Mein Konto --&gt; Meine Unternehmen.</string>
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bald verfügbar :)</string>
-
     <!-- Corrected Invoice -->
     <string name="corrected_invoice_cancel_and_replace">Rechnung annullieren und ersetzen</string>
-
     <!-- AppBar actions -->
     <string name="appbar_invoices">Rechnungen</string>
     <string name="appbar_credit_notes">Gutschriften</string>
@@ -265,7 +241,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <!-- Drawer / Categories -->
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mein Konto</string>
-
     <!-- Account Screen -->
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich (https://play.google.com/store/apps/details?id=com.a4a.g8invoicing) sowie auf F-Droid: https://f-droid.org/de/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -279,7 +254,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="account_auth_login_failed">Die Anmeldung ist derzeit nicht möglich. Bitte versuchen Sie es etwas später erneut.\n\nBei anhaltenden Problemen schreiben Sie uns an </string>
     <string name="account_auth_invalid_email">Ungültige E-Mail-Adresse.</string>
     <string name="drawer_gstore">𝕘Store</string>
-
     <!-- gStore -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Entdecken Sie die mit einem g8-Premium-Konto verfügbaren Module.</string>
@@ -300,7 +274,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="gstore_module_payments_desc">Erfassen Sie Karten-, Scheck- und Barzahlungen</string>
     <string name="gstore_module_themes_title">Premium-Themes</string>
     <string name="gstore_module_themes_desc">Mehr Farben und Designs</string>
-
     <string name="account_logout">Abmelden</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium-Mitglied</string>
     <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Premium-Mitglied</string>
@@ -320,14 +293,8 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="account_delete_error">Ihr Konto kann derzeit nicht gelöscht werden. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut, oder schreiben Sie uns an </string>
     <string name="account_delete_success_title">Konto gelöscht</string>
     <string name="account_delete_success_message">Ihr Konto wurde gelöscht. Lokal auf diesem Gerät gespeicherte Rechnungen und Daten bleiben erhalten.</string>
-
     <!-- About Screen -->
-    <string name="about">𝕘𝟠 ist eine praktische und engagierte App:
- • Funktioniert offline
- • Keine Werbung, kein Tracking
- • Freie Software, open-source
- • Entworfen für Bio-Landwirte und -Landwirtinnen
- • Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>
+    <string name="about">𝕘𝟠 ist eine praktische und engagierte App: \n• Funktioniert offline \n• Keine Werbung, kein Tracking \n• Freie Software, open-source \n• Entworfen für Bio-Landwirte und -Landwirtinnen \n• Möchte Projekte zum Schutz wildlebender Tiere, insbesondere Fledermäuse, finanzieren.</string>
     <string name="about_title_about">Über</string>
     <string name="about_title_website">Webseite</string>
     <string name="about_website_intro">Besuchen Sie unsere Webseite </string>
@@ -369,7 +336,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_share_text_2">Teilen Sie sie mit Ihren Freund:innen!</string>
     <string name="about_share_button">Teilen</string>
     <string name="about_title_version">Version der App</string>
-
     <!-- Language Selection -->
     <string name="about_title_language">Sprache</string>
     <string name="about_language_system">Systemsprache</string>
@@ -377,7 +343,6 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
     <string name="about_language_spanish">Español</string>
-
     <!-- Currency Selection -->
     <string name="account_currency_title">Währung</string>
     <string name="account_currency_and_language_title">Währung und Sprache</string>
@@ -385,54 +350,24 @@ In jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
     <string name="currency_picker_recent">Zuletzt verwendet</string>
     <string name="currency_picker_all">Alle</string>
     <string name="currency_picker_empty">Keine Währung gefunden</string>
-
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
-
     <!-- Delivery Note List Advice -->
-    <string name="delivery_note_advice_convert">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte
-
- …</string>
-    <string name="delivery_note_advice_convert1">Wenn du aus einem oder mehreren Lieferscheinen eine Rechnung erstellen willst, kannst du sie in der Liste über langes Drücken (oder Klicken auf den ○) auswählen
-
- …</string>
-    <string name="delivery_note_advice_convert2">und dann auf "In Rechnung stellen" klicken. Sie erscheint dann im Reiter "Rechnungen" oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer.
-
- 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
-
+    <string name="delivery_note_advice_convert">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte …\n\n …</string>
+    <string name="delivery_note_advice_convert1">Wenn du aus einem oder mehreren Lieferscheinen eine Rechnung erstellen willst, kannst du sie in der Liste über langes Drücken (oder Klicken auf den ○) auswählen \n\n …</string>
+    <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠,
-genannt: "The Gate"!
-
-Ich bin Kleine Hufnase, deine neue Freundin ♡ 
-
- Du kannst jederzeit auf mich klicken, wenn du mich siehst, ich gebe 
-
- …</string>
-    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie "Rechnungen".
-
-Bevor du eine Rechnung erstellst empfehle ich dir, dich über
-
-…</string>
-    <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: 
-</string>
+    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡ \n\n …</string>
+    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie Rechnungen.\n\n Bevor du eine Rechnung erstellst empfehle ich dir, dich über …</string>
+    <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
-    <string name="invoice_advice_legal_5">Zu einem anderen Thema…</string>
-    <string name="invoice_advice_legal_6">Die Dokumente die du erstellst werden, genauso wie alle deine Änderungen, automatisch im Hintergrund gespeichert.
-
- 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤</string>
+    <string name="invoice_advice_legal_5">Zu einem anderen Thema… \n …</string>
+    <string name="invoice_advice_legal_6">Die Dokumente die du erstellst werden, genauso wie alle deine Änderungen, automatisch im Hintergrund gespeichert.\n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 \n …</string>
     <string name="invoice_advice_legal_url">https://www.the-gate.fr/factures-et-bons-de-livraison-mentions-obligatoires</string>
-    <string name="invoice_advice_bottom_menu">Halli-Hallo, ich bin dein Batmagotchi. Ich muss dir unbedingt einen Tipp geben:
-
- …</string>
-    <string name="invoice_advice_bottom_menu1">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen,
-
- …</string>
-    <string name="invoice_advice_bottom_menu2">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen.
-
- 𝕨𝕚𝕝𝕕</string>
-
+    <string name="invoice_advice_bottom_menu">Halli-Hallo, ich bin dein Batmagotchi. Ich muss dir unbedingt einen Tipp geben: \n\n …</string>
+    <string name="invoice_advice_bottom_menu1">Um sehr nützliche Optionen erscheinen zu lassen, wie z.B. ein Dokument zu löschen, \n\n …</string>
+    <string name="invoice_advice_bottom_menu2">klicke auf den Kreis ○ vor der Rechnungsnummer. Du kannst sogar mehrere Dokumente auf einmal auswählen. \n\n 𝕨𝕚𝕝𝕕</string>
     <!-- Export PDF -->
     <string name="export_waiting_permission">Genehmigung erforderlich…</string>
     <string name="export_ongoing">Export läuft…</string>
@@ -441,22 +376,14 @@ Bevor du eine Rechnung erstellst empfehle ich dir, dich über
     <string name="export_permission_denied">Der Zugriff auf den Speicher ist erforderlich, um PDF-Dateien zu speichern. Sie können den Zugriff in den Einstellungen der Anwendung zulassen.</string>
     <string name="export_done_file_location">Auf dem Gerät gespeichert (Downloads/g8)</string>
     <string name="export_clickable_text">• ֊ •</string>
-    <string name="export_info_popup">• Manchmal kann es etwas dauern, bis die Datei im Download-Ordner erscheint (neu laden kann helfen).
-
-• Denke daran, eine Kopie des PDF in deinen gesendeten E-Mails oder an einem anderen Speicherort aufzubewahren, für den Fall, dass du dein Telefon verlierst.</string>
+    <string name="export_info_popup">• Manchmal kann es etwas dauern, bis die Datei im Download-Ordner erscheint (neu laden kann helfen).\n\n• Wenn die Datei nicht auftaucht, kann es sein, dass sie in einem Unterordner des Download-Ordners gelandet ist (insbesondere, wenn Du einen Dateimanager vom Typ Samsung nutzt)\n\n• Du kannst die Datei auch finden, wenn Du eine Suche nach dem Dateinamen durchführst.</string>
     <string name="export_info_popup_validate">OK</string>
     <string name="export_send_file">Per E-Mail schicken</string>
-    <string name="export_send_file_content">Guten Tag, 
- Sie finden ihre %s im Anhang.
-Herzliche Grüße
-
-</string>
+    <string name="export_send_file_content">Guten Tag,\n\nSie finden ihr Dokument im Anhang. \n\nHerzliche Grüße</string>
     <string name="export_share_file">Teilen</string>
     <string name="export_close">Abschließen</string>
-    <string name="export_error_sharing">Die Datei konnte nicht geteilt werden.
-
-Bitte öffne sie direkt im Ordner Downloads/g8.</string>
-    <string name="export_email_subject">Ihre %s Nr. %s</string>
+    <string name="export_error_sharing">Die Datei konnte nicht geteilt werden.\n\nBitte öffne sie direkt im Ordner Downloads/g8.</string>
+    <string name="export_email_subject">Ihre %1$s Nr. %2$s</string>
     <string name="export_email_subject_invoice">Rechnung</string>
     <string name="export_email_subject_delivery_note">Lieferschein</string>
     <string name="export_email_subject_credit_note">Gutschrift</string>
@@ -466,28 +393,23 @@ Bitte öffne sie direkt im Ordner Downloads/g8.</string>
 
 Es ist ein Fehler aufgetreten : 
 </string>
-    <string name="alert_dialog_error_confirm">Autsch</string>
-
+    <string name="alert_dialog_error_confirm">OK</string>
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Aussteller geändert</string>
     <string name="version_mismatch_message">Der Aussteller wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
     <string name="version_mismatch_load_latest">Neueste Version laden</string>
     <string name="version_mismatch_keep_current">Aktuelle Version behalten</string>
-
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Kunde geändert</string>
     <string name="version_mismatch_client_message">Der Kunde wurde von einem anderen Dokument aus geändert. Möchten Sie die neueste Version laden?</string>
-
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">Kunde aktualisieren?</string>
     <string name="sync_client_message">Möchten Sie diese Änderungen auf den Kunden in Ihrer Kundenliste anwenden?</string>
     <string name="sync_client_yes">Ja, aktualisieren</string>
     <string name="sync_client_no">Nein, nur dieses Dokument</string>
-
     <!-- What's New watermark page -->
     <string name="whats_new_watermark_title">Erstellt mit 𝕘8</string>
     <string name="whats_new_watermark_description">Ein dezenter Hinweis « Erstellt mit 𝕘8 » erscheint jetzt auf Ihren Dokumenten. Sie können ihn entfernen, indem Sie Premium-Mitglied werden, und gleichzeitig die App unterstützen!</string>
-
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Mahnung: Rechnung Nr. %1$s</string>
     <string name="send_reminder_email_content">Hallo, \n\n Ihre Rechnung %1$s über einen Betrag von %2$s %4$s war am %3$s fällig. Wir haben bisher keine Zahlung von Ihnen erhalten.\n\n Wir bitten Sie, die Zahlung so bald wie möglich vorzunehmen.\n\n Mit freundlichen Grüßen\n</string>
@@ -496,17 +418,15 @@ Es ist ein Fehler aufgetreten :
     <string name="database_export_dialog_title">^._.^</string>
     <string name="database_export_dialog_intro">Hey! Ich empfehle dir, deine Datenbank herunterzuladen 💎\n\n</string>
     <string name="database_export_dialog_explanation">Das ist nützlich, falls du dein Telefon verlierst oder es ein Problem bei einem Update gibt.\n\n</string>
-    <string name="database_export_dialog_where">Finde die Option in Menü &gt; 𝕘𝟠.</string>
+    <string name="database_export_dialog_where">Finde die Option in Menü &gt; Über 𝕘𝟠.</string>
     <string name="database_export_dialog_error">Fehler beim Speichern der Datenbank: %1$s</string>
     <string name="database_export_dialog_confirm">Meine Daten herunterladen</string>
     <string name="database_export_dialog_dismiss">Ich mache das später</string>
-
     <!-- Database email dialog -->
     <string name="database_email_dialog_title">✅ Export erfolgreich</string>
     <string name="database_email_dialog_text">Die Datenbank wurde im Downloads-Ordner gespeichert. Möchtest du sie dir per E-Mail schicken?</string>
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
-
     <!-- Database email intent -->
     <string name="database_email_subject">Export meiner g8-Daten</string>
     <string name="database_email_body">Meine SQLite-Datenbank der g8-App. Sie enthält alle meine Daten (Kund·innen, Produkte, Rechnungsdaten..). Falls ich mein Telefon verliere, kann diese Datenbank verwendet werden, um meine Daten wiederherzustellen. Bei Fragen: contact@the-gate.fr.</string>
@@ -514,7 +434,7 @@ Es ist ein Fehler aufgetreten :
 
     <!-- gStore Quote (unlimited + trial) -->
     <string name="gstore_module_quote_title">Unbegrenzte Kostenvoranschläge</string>
-    <string name="gstore_module_quote_desc">Kostenvoranschläge in Rechnungen umwandeln</string>
+    <string name="gstore_module_quote_desc">Kostenvoranschläge erstellen und in Rechnungen umwandeln</string>
     <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
     <string name="gstore_module_quote_trial_title">Kostenvoranschläge entdecken</string>
     <string name="gstore_module_quote_trial_desc">5 kostenlose Kostenvoranschläge</string>
@@ -610,7 +530,7 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_unitcode_bold3">normierten Code</string>
     <string name="onboarding_unitcode_part4"> der dazugehört.\n\n⚡ Du musst nichts tun, ich finde den Einheitscode ganz allein!\n\nWenn ich die Einheit nicht erkenne, ist das auch okay ✅</string>
 
-    <string name="onboarding_improvements_title">Viele kleine Dinge</string>
+    <string name="onboarding_improvements_title">Kleine Neuigkeiten</string>
     <string name="onboarding_improvements_body">🔍 Suchleiste und alphabetische Sortierung in den Kunden- und Produktauswahlen.\n\n📄 Die Namen der exportierten PDFs sind aussagekräftiger.\n\n📅 Die Dokumentlisten sind nach Monat gruppiert, die Preise hervorgehoben, und die Anzahl der Tage bis zur Fälligkeit wird angezeigt.\n\n✏️ Wenn du ein Produkt aus einem Dokument heraus änderst, kannst du die Änderung auch auf die Produktkarte übertragen (dieselbe Option für Kunden).</string>
     <string name="onboarding_improvements_cta">Weiter</string>
 
@@ -623,7 +543,7 @@ Es ist ein Fehler aufgetreten :
     <string name="issuer_intra_eu_sales_info_modal_title">Innergemeinschaftliche Verkäufe</string>
     <string name="issuer_intra_eu_sales_info_modal_content">Aktiviere, wenn:\n- dein Unternehmen in der Europäischen Union ist\n- Und du mindestens eine·n Kund·in außerhalb deines Landes abrechnest.\n\ng8 fragt dich dann bei jedem Produkt, ob es sich um eine Dienstleistung oder eine Ware handelt — die MwSt.-Regeln unterscheiden sich.\n\nRechnungen nur im eigenen Land oder außerhalb der EU? Lasse es deaktiviert.</string>
     <string name="issuer_intra_eu_sales_info_desc">Info innergemeinschaftliche Verkäufe</string>
-    <string name="issuer_vat_exempt_label">Von der Umsatzsteuer befreites Unternehmen</string>
+    <string name="issuer_vat_exempt_label">Kleinunternehmerregelung</string>
     <string name="issuer_vat_exempt_info_modal_title">Kleinunternehmerregelung</string>
     <string name="issuer_vat_exempt_info_modal_content">Nützlich für die E-Rechnungs-Konformität — g8 fügt den passenden gesetzlichen Hinweis zur Kleinunternehmerregelung für dein Land automatisch auf den Rechnungen ein.</string>
     <string name="issuer_vat_exempt_info_desc">Info Kleinunternehmerregelung</string>

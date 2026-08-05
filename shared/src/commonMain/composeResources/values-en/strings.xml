@@ -1,18 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default document numbers -->
     <string name="invoice_default_number">INV001</string>
     <string name="delivery_note_default_number">DN001</string>
     <string name="credit_note_default_number">CN001</string>
-
     <!-- Currency -->
 
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copy</string>
-
     <!-- Document footer -->
     <string name="document_default_footer">Discount for early payment: none\nLate payment penalties: none\n\n\nIBAN: FR76 1234 1234 1234 123456 1234</string>
-
     <!-- Document labels -->
     <string name="invoice_number">Invoice No.</string>
     <string name="delivery_note_number">Delivery note No.</string>
@@ -34,22 +31,18 @@
     <string name="document_table_unit_price_without_tax">Unit price excl. tax</string>
     <string name="document_table_total_price_without_tax">Price \n excl. tax</string>
     <string name="document_table_tax_rate">Tax</string>
-
     <!-- Document totals -->
     <string name="document_total_without_tax">Total excl. tax:</string>
     <string name="document_total_with_tax">Total incl. tax:</string>
     <string name="document_tax_label">Tax %1$s: </string>
-
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Total excl. tax:</string>
     <string name="total_with_tax">Total incl. tax:</string>
     <string name="vat">Tax</string>
-
     <!-- UI Labels -->
     <string name="form_label_edit">Edit</string>
     <string name="product_price_without_tax">Excl. tax</string>
     <string name="product_price_with_tax">Incl. tax</string>
-
     <!-- Alert Dialog Strings -->
     <string name="alert_dialog_delete_invoice_1">Are you sure? \n\nIf you have already sent the invoice, it is not legal to delete it:</string>
     <string name="alert_dialog_delete_invoice_2">Learn more\n</string>
@@ -58,7 +51,6 @@
     <string name="alert_dialog_delete_general">Are you sure? This action is irreversible.</string>
     <string name="alert_dialog_delete_confirm">Yes, delete</string>
     <string name="alert_dialog_cancel">Cancel</string>
-
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">New client</string>
     <string name="document_bottom_sheet_list_add_new_issuer">New issuer</string>
@@ -78,7 +70,6 @@
     <string name="document_modal_product_cancel">Cancel</string>
     <string name="document_modal_product_save">Confirm</string>
     <string name="document_modal_product_back">Back</string>
-
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">Your invoice has been created</string>
     <string name="invoice_created_button">View my invoice</string>
@@ -86,7 +77,6 @@
     <string name="credit_note_created_button">View my credit note</string>
     <string name="corrected_invoice_created_title">Your corrected invoice has been created</string>
     <string name="corrected_invoice_created_button">View my corrected invoice</string>
-
     <!-- Document Form Strings -->
     <string name="document_number_short">No.</string>
     <string name="document_due_date">Due date</string>
@@ -98,11 +88,12 @@
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Issued from invoice %1$s</string>
     <string name="credit_note_reference_from_invoices">Issued from invoices %1$s</string>
-
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>
     <string name="document_products_other_lines">Other lines</string>
-    <string name="document_product_advice">To edit a product, tap the grey box.</string>
+    <string name="document_product_advice">To edit a product, click on the grey box…</string>
+    <string name="document_product_advice_2">The change only applies to this document…</string>
+    <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
 
     <!-- Invoice list row — due-date countdown -->
     <string name="document_list_due_in_day">Due in %1$d day</string>
@@ -178,7 +169,6 @@
     <string name="client_selection_validate">Confirm</string>
     <string name="select_placeholder">Select…</string>
     <string name="clients_selected_count">%1$d clients selected</string>
-
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Add product</string>
     <string name="document_modal_edit_product">Edit product</string>
@@ -187,7 +177,6 @@
     <string name="document_modal_edit_issuer">Edit issuer</string>
     <string name="document_modal_new_client">New client</string>
     <string name="document_modal_edit_client">Edit client</string>
-
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Close</string>
     <string name="whats_new_done">Let's go!</string>
@@ -201,13 +190,10 @@
     <string name="whats_new_currency_description">You can now use currencies other than the euro. Change it in "My Account" &gt; "Currency and language".</string>
     <string name="whats_new_companies_title">My companies</string>
     <string name="whats_new_companies_description">Manage the issuers used in your documents more easily from "My Account" &gt; "My companies".</string>
-
     <!-- Toast messages -->
     <string name="feature_coming_soon">Coming soon :)</string>
-
     <!-- Corrected Invoice -->
     <string name="corrected_invoice_cancel_and_replace">Cancels and replaces invoice</string>
-
     <!-- AppBar actions -->
     <string name="appbar_invoices">Invoices</string>
     <string name="appbar_credit_notes">Credit notes</string>
@@ -254,7 +240,6 @@
     <!-- Drawer / Categories -->
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">My Account</string>
-
     <!-- Account Screen -->
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -268,7 +253,6 @@
     <string name="account_auth_login_failed">Sign-in is currently unavailable. You can try again a bit later.\n\nIf the problem persists, please write to us at </string>
     <string name="account_auth_invalid_email">Invalid email address.</string>
     <string name="drawer_gstore">𝕘Store</string>
-
     <!-- gStore -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Discover the modules available with a g8 premium account.</string>
@@ -289,7 +273,6 @@
     <string name="gstore_module_payments_desc">Record card, check, cash payments</string>
     <string name="gstore_module_themes_title">Premium themes</string>
     <string name="gstore_module_themes_desc">Extra colors and designs</string>
-
     <string name="account_logout">Sign out</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Premium Member</string>
     <string name="account_status_premium_fab">𝕘𝟠 Fab ⭐ — Premium Member</string>
@@ -309,7 +292,6 @@
     <string name="account_delete_error">We couldn't delete your account right now. Check your connection and try again, or contact us at </string>
     <string name="account_delete_success_title">Account deleted</string>
     <string name="account_delete_success_message">Your account has been deleted. Invoices and data stored locally on this device are kept.</string>
-
     <!-- About Screen -->
     <string name="about">𝕘𝟠 is a practical and purpose-driven app:\n • Works offline \n • No ads, no trackers \n • Free and open-source software\n • Designed for organic producers\n • Aims to fund wildlife conservation projects, especially for bats.</string>
     <string name="about_title_about">About</string>
@@ -353,7 +335,6 @@
     <string name="about_share_text_2">Share it with your friends!</string>
     <string name="about_share_button">Share</string>
     <string name="about_title_version">App version</string>
-
     <!-- Language Selection -->
     <string name="about_title_language">Language</string>
     <string name="about_language_system">System language</string>
@@ -361,7 +342,6 @@
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
     <string name="about_language_spanish">Español</string>
-
     <!-- Currency Selection -->
     <string name="account_currency_title">Currency</string>
     <string name="account_currency_and_language_title">Currency and language</string>
@@ -369,15 +349,12 @@
     <string name="currency_picker_recent">Recently used</string>
     <string name="currency_picker_all">All</string>
     <string name="currency_picker_empty">No currency found</string>
-
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
-
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">I learned this move in hip-hop, super cool I know. I still need to practice, I'm not super fast, I think my patagium slows down the wave. Anyway, I wanted to tell you \n\n …</string>
     <string name="delivery_note_advice_convert1">that if you want to convert one or more delivery notes into an invoice, you can select them from the list by long pressing (or by clicking on the ○) \n\n …</string>
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
-
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
     <string name="invoice_advice_legal_1">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡ \n\n …</string>
@@ -390,7 +367,6 @@
     <string name="invoice_advice_bottom_menu">Hey hey, your batmagotchi here. I absolutely need to show you a trick \n\n …</string>
     <string name="invoice_advice_bottom_menu1">To reveal very useful options, like deleting a document \n\n …</string>
     <string name="invoice_advice_bottom_menu2">click on the circle ○ next to the invoice number. You can even select multiple documents at once.\n\n 𝕨𝕚𝕝𝕕</string>
-
     <!-- Export PDF -->
     <string name="export_waiting_permission">Permission required…</string>
     <string name="export_ongoing">Export in progress…</string>
@@ -413,27 +389,22 @@
     <string name="export_email_subject_quote">quote</string>
     <string name="alert_dialog_error">An error occurred: </string>
     <string name="alert_dialog_error_confirm">OK</string>
-
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Issuer modified</string>
     <string name="version_mismatch_message">The issuer has been modified from another document. Would you like to load the latest version?</string>
     <string name="version_mismatch_load_latest">Load latest version</string>
     <string name="version_mismatch_keep_current">Keep current version</string>
-
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Client modified</string>
     <string name="version_mismatch_client_message">The client has been modified from another document. Would you like to load the latest version?</string>
-
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">Update client?</string>
     <string name="sync_client_message">Would you like to apply these changes to the client in your client list?</string>
     <string name="sync_client_yes">Yes, update</string>
     <string name="sync_client_no">No, this document only</string>
-
     <!-- What's New watermark page -->
     <string name="whats_new_watermark_title">Made with 𝕘8</string>
     <string name="whats_new_watermark_description">A discreet « Made with 𝕘8 » mention now appears on your documents. You can remove it by becoming a premium member, and support the app at the same time!</string>
-
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Reminder: invoice #%1$s</string>
     <string name="send_reminder_email_content">Hello, \n\n Your invoice %1$s for the amount of %4$s%2$s was due on %3$s. We have not yet received your payment.\n\n We kindly ask you to proceed with the payment as soon as possible.\n\n Best regards\n</string>
@@ -446,13 +417,11 @@
     <string name="database_export_dialog_error">Error while saving the database: %1$s</string>
     <string name="database_export_dialog_confirm">Download my data</string>
     <string name="database_export_dialog_dismiss">I'll do it later</string>
-
     <!-- Database email dialog -->
     <string name="database_email_dialog_title">✅ Export successful</string>
     <string name="database_email_dialog_text">The database has been saved to the Downloads folder. Would you like to email it to yourself?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-
     <!-- Database email intent -->
     <string name="database_email_subject">Export of my g8 data</string>
     <string name="database_email_body">My SQLite database from the g8 app. It contains all my data (clients, products, invoicing data..). If I lose my phone, this database can be used to restore my data. For any questions: contact@the-gate.fr.</string>
@@ -556,7 +525,7 @@
     <string name="onboarding_unitcode_bold3">standardised code</string>
     <string name="onboarding_unitcode_part4"> to go with it.\n\n⚡ You do not need to do anything — I will figure out the unit code on my own!\n\nIf I do not recognise the unit, that is fine too ✅</string>
 
-    <string name="onboarding_improvements_title">Lots of little things</string>
+    <string name="onboarding_improvements_title">Little updates</string>
     <string name="onboarding_improvements_body">🔍 Search bar and alphabetical sort in the client and product pickers.\n\n📄 Exported PDF filenames are more explicit.\n\n📅 Document lists are grouped by month, prices are highlighted, and the number of days until the due date is shown.\n\n✏️ When editing a product from a document, you can apply the change to the product card as well (same option for clients).</string>
     <string name="onboarding_improvements_cta">Next</string>
 
@@ -569,7 +538,7 @@
     <string name="issuer_intra_eu_sales_info_modal_title">Intra-EU sales</string>
     <string name="issuer_intra_eu_sales_info_modal_content">Check if:\n- your company is in the European Union\n- And you invoice at least one client outside your country.\n\ng8 will then ask, for each product, whether it is a service or goods — VAT rules differ.\n\nInvoicing only within your country, or outside the EU? Leave unchecked.</string>
     <string name="issuer_intra_eu_sales_info_desc">Intra-EU sales info</string>
-    <string name="issuer_vat_exempt_label">Business exempt from VAT</string>
+    <string name="issuer_vat_exempt_label">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
     <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
