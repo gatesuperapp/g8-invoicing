@@ -255,6 +255,9 @@ class QuoteLocalDataSource(
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),
+                        // Reset the issue date to today — a duplicated quote is
+                        // a new quote; users don't want the old date.
+                        documentDate = DateUtils.getCurrentDateFormatted(),
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
                         showCurrencyAndAutoTaxColumn = true,

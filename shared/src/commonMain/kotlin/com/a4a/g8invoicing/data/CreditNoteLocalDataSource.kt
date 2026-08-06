@@ -285,6 +285,10 @@ class CreditNoteLocalDataSource(
                     } ?: getString(Res.string.credit_note_default_number)
                     val creditNote = it
                     creditNote.documentNumber = TextFieldValue(docNumber)
+                    // Reset dates to today (+30 for due date) — a duplicated
+                    // credit note is a new doc, not the original month-old one.
+                    creditNote.documentDate = DateUtils.getCurrentDateFormatted()
+                    creditNote.dueDate = DateUtils.getDatePlusDaysFormatted(30)
                     creditNote.watermarkText = frozenWatermark
                     creditNote.labelsSnapshot = frozenLabels
                     creditNote.showCurrencyAndAutoTaxColumn = true

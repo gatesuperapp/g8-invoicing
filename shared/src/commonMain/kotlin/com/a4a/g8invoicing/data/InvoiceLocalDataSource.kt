@@ -506,6 +506,11 @@ class InvoiceLocalDataSource(
                         documentNumber = TextFieldValue(docNumber),
                         documentTag = DocumentTag.DRAFT,
                         paymentStatus = 0,
+                        // Reset dates to today (+30 for due date) — a duplicated
+                        // invoice is a new invoice, and users don't want the
+                        // months-old issuing/due dates on their fresh doc.
+                        documentDate = DateUtils.getCurrentDateFormatted(),
+                        dueDate = DateUtils.getDatePlusDaysFormatted(30),
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
                         showCurrencyAndAutoTaxColumn = true,

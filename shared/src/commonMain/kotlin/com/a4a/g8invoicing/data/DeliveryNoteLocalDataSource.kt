@@ -254,6 +254,9 @@ class DeliveryNoteLocalDataSource(
 
                     val duplicatedDocumentState = originalDocument.copy(
                         documentNumber = TextFieldValue(docNumber),
+                        // Reset the issue date to today — a duplicated delivery
+                        // note is a new doc; users don't want the old date.
+                        documentDate = DateUtils.getCurrentDateFormatted(),
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
                         showCurrencyAndAutoTaxColumn = true,
