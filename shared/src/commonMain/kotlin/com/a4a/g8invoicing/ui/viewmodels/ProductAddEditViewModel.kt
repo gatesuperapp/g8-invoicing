@@ -96,7 +96,7 @@ class ProductAddEditViewModel(
                         val healed = if (fetched.unitCode == null) {
                             fetched.copy(
                                 unitCode = fetched.unit?.text
-                                    ?.let { unitCodeRepository.matchTextToCode(it).code },
+                                    ?.let { unitCodeRepository.matchTextToCode(it)?.code },
                             )
                         } else fetched
                         _productUiState.value = healed
@@ -182,8 +182,8 @@ class ProductAddEditViewModel(
         )
         if (product.unitCode == null && !product.unit?.text.isNullOrBlank()) {
             viewModelScope.launch {
-                val matched = unitCodeRepository.matchTextToCode(product.unit?.text).code
-                if (_documentProductUiState.value.unitCode == null) {
+                val matched = unitCodeRepository.matchTextToCode(product.unit?.text)?.code
+                if (matched != null && _documentProductUiState.value.unitCode == null) {
                     _documentProductUiState.value =
                         _documentProductUiState.value.copy(unitCode = matched)
                 }
@@ -434,13 +434,15 @@ class ProductAddEditViewModel(
         } else {
             _documentProductUiState.value = _documentProductUiState.value.copy(unit = text, unitCode = null)
         }
-        // Blank field = no code to persist. matchTextToCode's C62 fallback is
-        // reserved for save-time (EN 16931 requires a value in the XML), never
-        // as a live-typed guess — otherwise clearing the field leaves a
-        // phantom "unit" code showing under the empty text.
+        // Blank field = no code to persist. Skip the resolve entirely.
         if (text.text.isBlank()) return
         viewModelScope.launch {
-            val matched = unitCodeRepository.matchTextToCode(text.text).code
+            // Null = the text doesn't map to any known code (e.g. user typed
+            // "toto"). We leave unitCode null in state — the field shows "-"
+            // and the user isn't surprised by an unrelated code appearing
+            // under their text. At save time, whoever persists to the DB can
+            // fall back to C62 (EN 16931 default) for Factur-X compliance.
+            val matched = unitCodeRepository.matchTextToCode(text.text)?.code ?: return@launch
             if (productType == ProductType.PRODUCT) {
                 // Guard against a stale coroutine: only commit if the text
                 // field hasn't changed since we launched.

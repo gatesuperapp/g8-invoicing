@@ -251,32 +251,41 @@ class UnitCodeRepository {
      * the query prefixes the term (typing "kilo" finds "kilogramme") or the
      * term prefixes the query (indexed "u" matches "unite" typed by the user).
      */
+    // Only term.startsWith(q). We do NOT match `q.startsWith(term)` — that
+    // direction was meant to handle plural queries against singular terms
+    // ("unites" against "unite"), but it degenerates on short 1-char terms:
+    // symbol "t" (TNE) would then match ANY query starting with "t", so a
+    // user typing "ty" or "toi" would get TNE tonne suggested underneath.
+    // Plurals are covered instead by including them explicitly in the
+    // Weblate keywords ("unite,unites,u"; "kilogramme,kilogrammes,kilo,kilos"…).
     suspend fun search(query: String): List<UnitCode> {
         val q = normalize(query)
         if (q.isEmpty()) return UnitCode.entries
         val data = load()
         return data.entries
-            .filter { it.term.startsWith(q) || q.startsWith(it.term) }
+            .filter { it.term.startsWith(q) }
             .sortedWith(compareBy({ it.rank }, { it.term.length }))
             .map { it.code }
             .distinct()
     }
 
     /**
-     * Free-text → code resolver, used when saving a product to persist the
-     * Factur-X unit code alongside the human unit string. Best match wins;
-     * if nothing hits, returns [UnitCode.C62] (EN 16931 default for "unit").
+     * Free-text → code resolver. Returns null when nothing in the index
+     * plausibly matches — the caller decides whether to fall back to
+     * [UnitCode.C62] (EN 16931 default) at persistence time or leave the
+     * unit code blank in the UI to avoid surfacing an unrelated code under
+     * whatever the user typed.
      */
-    suspend fun matchTextToCode(text: String?): UnitCode {
+    suspend fun matchTextToCode(text: String?): UnitCode? {
         val q = normalize(text ?: "")
-        if (q.isEmpty()) return UnitCode.C62
+        if (q.isEmpty()) return null
         val data = load()
         val hit = data.entries
             .firstOrNull { it.term == q }
             ?: data.entries
-                .filter { it.term.startsWith(q) || q.startsWith(it.term) }
+                .filter { it.term.startsWith(q) }
                 .minByOrNull { it.rank * 1000 + it.term.length }
-        return hit?.code ?: UnitCode.C62
+        return hit?.code
     }
 
     private fun normalize(s: String): String = stripDiacriticsAndLower(s)
