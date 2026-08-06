@@ -9,7 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.data.models.ProductNature
-import com.a4a.g8invoicing.data.models.UnitCodes
+import com.a4a.g8invoicing.data.models.UnitCode
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
@@ -32,6 +33,7 @@ class ProductAddEditViewModel(
     private val dataSource: ProductLocalDataSourceInterface,
     private val taxDataSource: ProductTaxLocalDataSourceInterface,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
+    private val unitCodeRepository: UnitCodeRepository,
     private val itemId: String?,
     private val type: String?,
 ) : ViewModel() {
@@ -89,12 +91,12 @@ class ProductAddEditViewModel(
                     dataSource.fetchProduct(itemId.toLong())?.let { fetched ->
                         // Auto-heal for legacy products (created before the unitCode field
                         // existed): try to match the free-text unit ("heure", "kg"…) to a
-                        // UNECE code via the alias dictionary. Pure UI convenience — the
-                        // healed value is written to state, so hitting Save persists it.
+                        // UNECE code. Pure UI convenience — the healed value is written to
+                        // state so hitting Save persists it.
                         val healed = if (fetched.unitCode == null) {
                             fetched.copy(
                                 unitCode = fetched.unit?.text
-                                    ?.let { UnitCodes.matchTextToCode(it) },
+                                    ?.let { unitCodeRepository.matchTextToCode(it).code },
                             )
                         } else fetched
                         _productUiState.value = healed
@@ -162,17 +164,9 @@ class ProductAddEditViewModel(
             Pair(product.defaultPriceWithoutTax, product.defaultPriceWithTax)
         }
 
-        // Auto-heal pour anciens produits (créés avant migration 1.8) qui ont unitCode
-        // et type à null. Chaîne de fallback :
-        //  - unitCode = product.unitCode → auto-match texte "kg" → KGM etc. → null (gen fallback H87)
-        //  - type = product.type → type du dernier produit créé (sticky par session) → GOODS
-        // Le fetch du dernier produit rend la fonction async ; on set le state une
-        // première fois avec les valeurs "à plat" (comportement immédiat), puis on
-        // le corrige quand la chaîne complète est résolue. Deux compositions vs UX
-        // qui tombe sur "-" — trade-off accepté.
-        val healedUnitCode = product.unitCode
-            ?: product.unit?.text?.let { UnitCodes.matchTextToCode(it) }
-
+        // Set the state immediately with what's synchronously known. The unit
+        // code auto-heal (only needed for pre-1.8 products with unit text but
+        // no unitCode) runs asynchronously and patches state a moment later.
         _documentProductUiState.value = DocumentProductState(
             id = null,
             name = product.name,
@@ -182,10 +176,19 @@ class ProductAddEditViewModel(
             taxRate = product.taxRate,
             quantity = BigDecimal.ONE,
             unit = product.unit,
-            unitCode = healedUnitCode,
+            unitCode = product.unitCode,
             type = product.type,
             productId = product.id,
         )
+        if (product.unitCode == null && !product.unit?.text.isNullOrBlank()) {
+            viewModelScope.launch {
+                val matched = unitCodeRepository.matchTextToCode(product.unit?.text).code
+                if (_documentProductUiState.value.unitCode == null) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(unitCode = matched)
+                }
+            }
+        }
 
         if (product.type == null && _showProductType.value) {
             // Le produit pické (créé pre-1.8) n'a pas de type. Fallback dernier produit
@@ -396,12 +399,83 @@ class ProductAddEditViewModel(
         productType: ProductType,
         idStr: String? = null,
     ) {
+        // Unit-related edits go through the async path so we can hit the
+        // suspend UnitCodeRepository (index-load is suspend). The rest stays
+        // synchronous.
+        when (pageElement) {
+            ScreenElement.PRODUCT_UNIT, ScreenElement.DOCUMENT_PRODUCT_UNIT ->
+                onUnitFreeTextChange(pageElement, value as TextFieldValue, productType)
+            ScreenElement.PRODUCT_UNIT_CODE, ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE ->
+                onUnitCodePicked(pageElement, value as String, productType)
+            else -> {
+                if (productType == ProductType.PRODUCT) {
+                    _productUiState.value =
+                        updateProductUiState(_productUiState.value, pageElement, value, idStr)
+                } else {
+                    _documentProductUiState.value =
+                        updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
+                }
+            }
+        }
+    }
+
+    // Free-text unit sync: set the text field immediately, then resolve the
+    // Factur-X code in the background. Clearing the code up-front avoids a
+    // "ghost code" from a previous keystroke sticking after the user retyped
+    // something that no longer matches — the async resolve will fill in C62
+    // (EN 16931 default) if nothing else matches.
+    private fun onUnitFreeTextChange(
+        pageElement: ScreenElement,
+        text: TextFieldValue,
+        productType: ProductType,
+    ) {
         if (productType == ProductType.PRODUCT) {
-            _productUiState.value =
-                updateProductUiState(_productUiState.value, pageElement, value, idStr)
+            _productUiState.value = _productUiState.value.copy(unit = text, unitCode = null)
         } else {
-            _documentProductUiState.value =
-                updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
+            _documentProductUiState.value = _documentProductUiState.value.copy(unit = text, unitCode = null)
+        }
+        viewModelScope.launch {
+            val matched = unitCodeRepository.matchTextToCode(text.text).code
+            if (productType == ProductType.PRODUCT) {
+                // Guard against a stale coroutine: only commit if the text
+                // field hasn't changed since we launched.
+                if (_productUiState.value.unit?.text == text.text) {
+                    _productUiState.value = _productUiState.value.copy(unitCode = matched)
+                }
+            } else {
+                if (_documentProductUiState.value.unit?.text == text.text) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(unitCode = matched)
+                }
+            }
+        }
+    }
+
+    // Pick from the bottom-sheet: code arrives ready. Sync the text field to
+    // the localized short form / symbol so what the user sees matches what
+    // they picked.
+    private fun onUnitCodePicked(
+        pageElement: ScreenElement,
+        code: String,
+        productType: ProductType,
+    ) {
+        if (productType == ProductType.PRODUCT) {
+            _productUiState.value = _productUiState.value.copy(unitCode = code)
+        } else {
+            _documentProductUiState.value = _documentProductUiState.value.copy(unitCode = code)
+        }
+        viewModelScope.launch {
+            val label = unitCodeRepository.resolveShort(code) ?: code
+            if (productType == ProductType.PRODUCT) {
+                if (_productUiState.value.unitCode == code) {
+                    _productUiState.value = _productUiState.value.copy(unit = TextFieldValue(label))
+                }
+            } else {
+                if (_documentProductUiState.value.unitCode == code) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(unit = TextFieldValue(label))
+                }
+            }
         }
     }
 
@@ -621,28 +695,9 @@ private fun updateProductUiState(
             }
         }
 
-        ScreenElement.PRODUCT_UNIT -> {
-            val text = value as TextFieldValue
-            // Sync auto-match : quand l'user tape "heure", "kg", "botte"… on remplit
-            // silencieusement unitCode via le dictionnaire d'alias UNECE. Aucune trace
-            // visible côté UI, le champ texte affiche toujours ce que l'user a tapé.
-            // Aucun match trouvé → on VIDE unitCode (pas de "code fantôme" resté depuis
-            // une saisie précédente qui matchait) : le PDF affiche le texte user tel quel
-            // et Factur-X tombera sur H87 (piece) au moment de générer le XML.
-            updatedProductState = updatedProductState.copy(
-                unit = text,
-                unitCode = UnitCodes.matchTextToCode(text.text),
-            )
-        }
-
-        ScreenElement.PRODUCT_UNIT_CODE -> {
-            // Pick depuis le bottom-sheet : code + libellé FR prérempli côté champ unit.
-            val code = value as String
-            updatedProductState = updatedProductState.copy(
-                unitCode = code,
-                unit = TextFieldValue(UnitCodes.codeToDefaultLabel(code) ?: code),
-            )
-        }
+        // PRODUCT_UNIT and PRODUCT_UNIT_CODE are handled asynchronously via
+        // onUnitFreeTextChange / onUnitCodePicked in the ViewModel, so this
+        // synchronous path never sees them.
 
         ScreenElement.PRODUCT_TYPE -> {
             updatedProductState = updatedProductState.copy(type = value as ProductNature)
@@ -705,21 +760,8 @@ private fun updateDocumentProductUiState(
             } else updated.copy(priceWithTax = null)
         }
 
-        ScreenElement.DOCUMENT_PRODUCT_UNIT -> {
-            val text = value as TextFieldValue
-            updated = updated.copy(
-                unit = text,
-                unitCode = UnitCodes.matchTextToCode(text.text),
-            )
-        }
-
-        ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE -> {
-            val code = value as String
-            updated = updated.copy(
-                unitCode = code,
-                unit = TextFieldValue(UnitCodes.codeToDefaultLabel(code) ?: code),
-            )
-        }
+        // DOCUMENT_PRODUCT_UNIT and DOCUMENT_PRODUCT_UNIT_CODE run through the
+        // async path in the ViewModel — see onUnitFreeTextChange / onUnitCodePicked.
 
         ScreenElement.DOCUMENT_PRODUCT_TYPE -> {
             updated = updated.copy(type = value as ProductNature)

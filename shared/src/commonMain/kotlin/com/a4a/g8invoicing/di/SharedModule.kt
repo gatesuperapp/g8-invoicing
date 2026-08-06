@@ -9,6 +9,7 @@ import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSource
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.DatabaseDriverFactory
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.QuoteLocalDataSource
@@ -63,6 +64,9 @@ val sharedModule = module {
     // Currency Manager (singleton)
     single { CurrencyManager() }
 
+    // Unit code repository (localised names / short forms / search index)
+    single { UnitCodeRepository() }
+
     // Database
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
     single { Database(get()) }
@@ -115,7 +119,7 @@ val sharedModule = module {
     viewModel { params ->
         val itemId = params.values.getOrNull(0) as? String
         val type = params.values.getOrNull(1) as? String
-        ProductAddEditViewModel(get(), get(), get(), itemId, type)
+        ProductAddEditViewModel(get(), get(), get(), get(), itemId, type)
     }
     viewModel { DeliveryNoteListViewModel(get(), get()) }
     viewModel { params ->

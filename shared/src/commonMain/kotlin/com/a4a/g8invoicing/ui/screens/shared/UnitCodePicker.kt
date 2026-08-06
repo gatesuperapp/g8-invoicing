@@ -30,9 +30,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.data.AppLocaleHolder
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
-import com.a4a.g8invoicing.data.models.UnitCodes
-import org.koin.compose.koinInject
+import com.a4a.g8invoicing.data.models.UnitCode
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.unit_picker_category_area
 import com.a4a.g8invoicing.shared.resources.unit_picker_category_count
@@ -47,17 +48,18 @@ import com.a4a.g8invoicing.shared.resources.unit_picker_empty
 import com.a4a.g8invoicing.shared.resources.unit_picker_recent
 import com.a4a.g8invoicing.shared.resources.unit_picker_search
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 /**
- * Modal bottom sheet listing UNECE unit codes accepted by Factur-X. Search field at top
- * filters both code and French label. Last-5 codes used in Product creation surface at
- * the top as a "Récentes" section (auto-fetched via Koin from
- * `ProductLocalDataSourceInterface.fetchLast5UnitCodes()` — no plumbing needed by
- * callers). Below, entries are grouped by category (comptage, longueur, surface,
- * volume, poids, temps, énergie, service, emballage).
+ * Modal bottom sheet listing UNECE unit codes accepted by Factur-X. Search
+ * queries go through [UnitCodeRepository.search] so localised keywords (from
+ * strings.xml) and diacritic-insensitive matching are honoured.
  *
- * When the user types a query, categories collapse into a single flat filtered list.
- * Selecting an entry calls [onSelect] with the UNECE code; the caller handles closing.
+ * Last-5 unit codes used at product creation surface at the top as "Récentes"
+ * (fetched via Koin from ProductLocalDataSourceInterface). Below, entries are
+ * grouped by category (comptage, longueur, surface, volume, poids, temps,
+ * énergie, service, emballage) when the search is empty; a non-empty query
+ * collapses everything into a single ranked list.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,36 +68,39 @@ fun UnitCodePicker(
     onSelect: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val dataSource: ProductLocalDataSourceInterface = koinInject()
+    val productDataSource: ProductLocalDataSourceInterface = koinInject()
+    val unitCodeRepository: UnitCodeRepository = koinInject()
+
     // Nullable while the fetch is in flight so the list waits for the Récentes
     // section before rendering. Otherwise the LazyColumn paints the "Comptage"
     // category at index 0, then the Récentes header inserts at index 0 later
-    // and the sheet stays scrolled past it — user has to drag up to reach it.
+    // and the sheet stays scrolled past it.
     var recentCodes by remember { mutableStateOf<List<String>?>(null) }
     LaunchedEffect(Unit) {
-        recentCodes = dataSource.fetchLast5UnitCodes()
+        recentCodes = productDataSource.fetchLast5UnitCodes()
     }
 
     var query by remember { mutableStateOf(TextFieldValue("")) }
-
     val trimmedQuery = query.text.trim()
     val hasQuery = trimmedQuery.isNotEmpty()
 
-    val filtered: List<UnitCodes.UnitCode> = remember(trimmedQuery) {
-        if (!hasQuery) UnitCodes.ALL
-        else UnitCodes.ALL.filter {
-            it.code.contains(trimmedQuery, ignoreCase = true) ||
-                it.labelFr.contains(trimmedQuery, ignoreCase = true) ||
-                it.labelEn.contains(trimmedQuery, ignoreCase = true)
-        }
+    // Rebuild both the display-name map and search results whenever the query
+    // OR the locale change. The locale key covers the (rare) case where the
+    // user switches app language while the sheet is open.
+    val locale = AppLocaleHolder.languageCode
+    var namesByCode by remember { mutableStateOf<Map<UnitCode, String>>(emptyMap()) }
+    LaunchedEffect(locale) {
+        namesByCode = UnitCode.entries.associateWith { unitCodeRepository.resolveName(it) }
+    }
+    var results by remember { mutableStateOf<List<UnitCode>>(emptyList()) }
+    LaunchedEffect(trimmedQuery, locale) {
+        results = unitCodeRepository.search(trimmedQuery)
     }
 
-    val recent: List<UnitCodes.UnitCode> = remember(recentCodes) {
-        recentCodes?.mapNotNull { UnitCodes.findByCode(it) } ?: emptyList()
+    val recent: List<UnitCode> = remember(recentCodes) {
+        recentCodes?.mapNotNull { UnitCode.findByCode(it) } ?: emptyList()
     }
 
-    // Open fully expanded so the top of the list ("Récentes" header + recent codes)
-    // is visible without the user having to drag the sheet up first.
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -125,9 +130,8 @@ fun UnitCodePicker(
 
             if (recentCodes == null) {
                 // Fetch still in flight — render nothing so the LazyColumn's
-                // initial scroll position matches the final structure (Récentes
-                // header at index 0 when we have recents).
-            } else if (filtered.isEmpty()) {
+                // initial scroll position matches the final structure.
+            } else if (results.isEmpty()) {
                 Text(
                     text = stringResource(Res.string.unit_picker_empty),
                     style = MaterialTheme.typography.bodyMedium,
@@ -143,20 +147,35 @@ fun UnitCodePicker(
                             SectionHeader(stringResource(Res.string.unit_picker_recent))
                         }
                         items(recent, key = { "recent-${it.code}" }) { entry ->
-                            UnitRow(entry = entry, isCurrent = entry.code == currentCode, onClick = { onSelect(entry.code) })
+                            UnitRow(
+                                entry = entry,
+                                label = namesByCode[entry] ?: entry.code,
+                                isCurrent = entry.code == currentCode,
+                                onClick = { onSelect(entry.code) },
+                            )
                         }
                     }
                     if (hasQuery) {
-                        items(filtered, key = { "flat-${it.code}" }) { entry ->
-                            UnitRow(entry = entry, isCurrent = entry.code == currentCode, onClick = { onSelect(entry.code) })
+                        items(results, key = { "flat-${it.code}" }) { entry ->
+                            UnitRow(
+                                entry = entry,
+                                label = namesByCode[entry] ?: entry.code,
+                                isCurrent = entry.code == currentCode,
+                                onClick = { onSelect(entry.code) },
+                            )
                         }
                     } else {
-                        UnitCodes.Category.entries.forEach { category ->
-                            val codes = filtered.filter { it.category == category }
+                        UnitCode.Category.entries.forEach { category ->
+                            val codes = results.filter { it.category == category }
                             if (codes.isEmpty()) return@forEach
-                            item("header-$category") { SectionHeader(category.labelFr()) }
+                            item("header-$category") { SectionHeader(category.label()) }
                             items(codes, key = { "cat-${it.code}" }) { entry ->
-                                UnitRow(entry = entry, isCurrent = entry.code == currentCode, onClick = { onSelect(entry.code) })
+                                UnitRow(
+                                    entry = entry,
+                                    label = namesByCode[entry] ?: entry.code,
+                                    isCurrent = entry.code == currentCode,
+                                    onClick = { onSelect(entry.code) },
+                                )
                             }
                         }
                     }
@@ -180,7 +199,8 @@ private fun SectionHeader(label: String) {
 
 @Composable
 private fun UnitRow(
-    entry: UnitCodes.UnitCode,
+    entry: UnitCode,
+    label: String,
     isCurrent: Boolean,
     onClick: () -> Unit,
 ) {
@@ -193,7 +213,7 @@ private fun UnitRow(
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
-            text = "${entry.labelFr} — ${entry.code}",
+            text = "$label — ${entry.code}",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (isCurrent) FontWeight.SemiBold else FontWeight.Normal,
         )
@@ -201,14 +221,14 @@ private fun UnitRow(
 }
 
 @Composable
-private fun UnitCodes.Category.labelFr(): String = when (this) {
-    UnitCodes.Category.COUNT -> stringResource(Res.string.unit_picker_category_count)
-    UnitCodes.Category.LENGTH -> stringResource(Res.string.unit_picker_category_length)
-    UnitCodes.Category.AREA -> stringResource(Res.string.unit_picker_category_area)
-    UnitCodes.Category.VOLUME -> stringResource(Res.string.unit_picker_category_volume)
-    UnitCodes.Category.WEIGHT -> stringResource(Res.string.unit_picker_category_weight)
-    UnitCodes.Category.TIME -> stringResource(Res.string.unit_picker_category_time)
-    UnitCodes.Category.ENERGY -> stringResource(Res.string.unit_picker_category_energy)
-    UnitCodes.Category.SERVICE -> stringResource(Res.string.unit_picker_category_service)
-    UnitCodes.Category.PACKAGING -> stringResource(Res.string.unit_picker_category_packaging)
+private fun UnitCode.Category.label(): String = when (this) {
+    UnitCode.Category.COUNT -> stringResource(Res.string.unit_picker_category_count)
+    UnitCode.Category.LENGTH -> stringResource(Res.string.unit_picker_category_length)
+    UnitCode.Category.AREA -> stringResource(Res.string.unit_picker_category_area)
+    UnitCode.Category.VOLUME -> stringResource(Res.string.unit_picker_category_volume)
+    UnitCode.Category.WEIGHT -> stringResource(Res.string.unit_picker_category_weight)
+    UnitCode.Category.TIME -> stringResource(Res.string.unit_picker_category_time)
+    UnitCode.Category.ENERGY -> stringResource(Res.string.unit_picker_category_energy)
+    UnitCode.Category.SERVICE -> stringResource(Res.string.unit_picker_category_service)
+    UnitCode.Category.PACKAGING -> stringResource(Res.string.unit_picker_category_packaging)
 }

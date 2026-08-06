@@ -31,7 +31,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ProductNature
-import com.a4a.g8invoicing.data.models.UnitCodes
+import com.a4a.g8invoicing.data.models.UnitCode
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
+import com.a4a.g8invoicing.data.AppLocaleHolder
+import androidx.compose.runtime.LaunchedEffect
+import org.koin.compose.koinInject
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_product_quantity
@@ -111,6 +115,19 @@ fun DocumentBottomSheetProductAddEditForm(
 
     var unitPickerOpen by remember { mutableStateOf(false) }
     var typePickerOpen by remember { mutableStateOf(false) }
+
+    // See ProductAddEditForm for the same pattern — resolve the localised name
+    // of the currently-selected unit code asynchronously.
+    val unitCodeRepository: UnitCodeRepository = koinInject()
+    var unitCodeDisplay by remember { mutableStateOf<String?>(null) }
+    val currentUnitCode = documentProduct.unitCode
+    LaunchedEffect(currentUnitCode, AppLocaleHolder.languageCode) {
+        unitCodeDisplay = currentUnitCode?.let { code ->
+            val unit = UnitCode.findByCode(code)
+            if (unit == null) code
+            else "$code — ${unitCodeRepository.resolveName(unit)}"
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -199,9 +216,7 @@ fun DocumentBottomSheetProductAddEditForm(
                     FormInput(
                         label = productUnitCodeLabel,
                         inputType = ForwardElement(
-                            text = documentProduct.unitCode
-                                ?.let { code -> UnitCodes.findByCode(code)?.let { "$code — ${it.labelFr}" } ?: code }
-                                ?: "-",
+                            text = unitCodeDisplay ?: "-",
                             isMultiline = false,
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE,

@@ -16,6 +16,7 @@ import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -67,6 +68,9 @@ val appModule = module {
 
     // Currency Manager (singleton)
     single { CurrencyManager() }
+
+    // Unit code repository (localised names / short forms / search index)
+    single { UnitCodeRepository() }
 
     single { DatabaseDriverFactory(androidContext()) }
 
@@ -141,7 +145,7 @@ val appModule = module {
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
         val type: String? = if (params.size() > 1) params[1] else null
-        ProductAddEditViewModel(get(), get(), get(), itemId, type)
+        ProductAddEditViewModel(get(), get(), get(), get(), itemId, type)
     }
     viewModel { DeliveryNoteListViewModel(get(), get()) }
     viewModel { params ->
