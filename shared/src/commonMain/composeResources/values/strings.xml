@@ -181,6 +181,145 @@
     <string name="unit_picker_category_energy">Énergie</string>
     <string name="unit_picker_category_service">Service</string>
     <string name="unit_picker_category_packaging">Emballage</string>
+
+    <!-- Unit codes (UNECE Rec 20/21). `_name` = long-form label shown in the
+         picker. `_short` = compact form used inline (only for codes without an
+         invariant international symbol like kg/m²/h — those pull the symbol
+         from Kotlin directly). `_keywords` = comma-separated search synonyms,
+         never displayed. -->
+
+    <!-- Comptage -->
+    <string name="unit_c62_name">unité</string>
+    <string name="unit_c62_short">u</string>
+    <string name="unit_c62_keywords">unite,unites,u</string>
+    <string name="unit_h87_name">pièce</string>
+    <string name="unit_h87_short">pc</string>
+    <string name="unit_h87_keywords">piece,pieces,pc</string>
+    <string name="unit_set_name">ensemble</string>
+    <string name="unit_set_short">ens</string>
+    <string name="unit_set_keywords">ensemble,ensembles,set,kit</string>
+    <string name="unit_pr_name">paire</string>
+    <string name="unit_pr_short">pr</string>
+    <string name="unit_pr_keywords">paire,paires,pr</string>
+    <string name="unit_dzn_name">douzaine</string>
+    <string name="unit_dzn_short">dz</string>
+    <string name="unit_dzn_keywords">douzaine,douzaines,dz</string>
+    <string name="unit_lo_name">lot</string>
+    <string name="unit_lo_short">lot</string>
+    <string name="unit_lo_keywords">lot,lots</string>
+
+    <!-- Longueur -->
+    <string name="unit_mtr_name">mètre</string>
+    <string name="unit_mtr_keywords">metre,metres</string>
+    <string name="unit_lm_name">mètre linéaire</string>
+    <string name="unit_lm_short">ml</string>
+    <string name="unit_lm_keywords">metre lineaire,metres lineaires,ml,lineaire</string>
+    <string name="unit_cmt_name">centimètre</string>
+    <string name="unit_cmt_keywords">centimetre,centimetres</string>
+    <string name="unit_mmt_name">millimètre</string>
+    <string name="unit_mmt_keywords">millimetre,millimetres</string>
+    <string name="unit_kmt_name">kilomètre</string>
+    <string name="unit_kmt_keywords">kilometre,kilometres</string>
+
+    <!-- Surface -->
+    <string name="unit_mtk_name">mètre carré</string>
+    <string name="unit_mtk_keywords">metre carre,metres carres,m carre</string>
+    <string name="unit_cmk_name">centimètre carré</string>
+    <string name="unit_cmk_keywords">centimetre carre</string>
+    <string name="unit_kmk_name">kilomètre carré</string>
+    <string name="unit_kmk_keywords">kilometre carre</string>
+
+    <!-- Volume -->
+    <string name="unit_ltr_name">litre</string>
+    <string name="unit_ltr_keywords">litre,litres</string>
+    <string name="unit_mlt_name">millilitre</string>
+    <string name="unit_mlt_keywords">millilitre,millilitres</string>
+    <string name="unit_clt_name">centilitre</string>
+    <string name="unit_clt_keywords">centilitre,centilitres</string>
+    <string name="unit_hlt_name">hectolitre</string>
+    <string name="unit_hlt_keywords">hectolitre,hectolitres</string>
+    <string name="unit_mtq_name">mètre cube</string>
+    <string name="unit_mtq_keywords">metre cube,metres cubes,m cube</string>
+
+    <!-- Poids -->
+    <string name="unit_kgm_name">kilogramme</string>
+    <string name="unit_kgm_keywords">kilogramme,kilogrammes,kilo,kilos</string>
+    <string name="unit_grm_name">gramme</string>
+    <string name="unit_grm_keywords">gramme,grammes,gr</string>
+    <string name="unit_tne_name">tonne</string>
+    <string name="unit_tne_keywords">tonne,tonnes</string>
+    <string name="unit_dtn_name">quintal</string>
+    <string name="unit_dtn_short">q</string>
+    <string name="unit_dtn_keywords">quintal,quintaux,decitonne,100 kg,dt,q</string>
+
+    <!-- Temps -->
+    <string name="unit_hur_name">heure</string>
+    <string name="unit_hur_keywords">heure,heures,hr</string>
+    <string name="unit_min_name">minute</string>
+    <string name="unit_min_keywords">minute,minutes</string>
+    <string name="unit_day_name">jour</string>
+    <string name="unit_day_short">j</string>
+    <string name="unit_day_keywords">jour,jours,j,jr</string>
+    <string name="unit_wee_name">semaine</string>
+    <string name="unit_wee_short">sem</string>
+    <string name="unit_wee_keywords">semaine,semaines,sem</string>
+    <string name="unit_mon_name">mois</string>
+    <string name="unit_mon_short">mois</string>
+    <string name="unit_mon_keywords">mois</string>
+    <string name="unit_ann_name">année</string>
+    <string name="unit_ann_short">an</string>
+    <string name="unit_ann_keywords">annee,annees,ans,an</string>
+
+    <!-- Énergie -->
+    <string name="unit_kwh_name">kilowatt-heure</string>
+    <string name="unit_kwh_short">kWh</string>
+    <string name="unit_kwh_keywords">kilowatt-heure,kilowatt heure,kwh</string>
+    <string name="unit_mwh_name">mégawatt-heure</string>
+    <string name="unit_mwh_short">MWh</string>
+    <string name="unit_mwh_keywords">megawatt-heure,megawatt heure,mwh</string>
+
+    <!-- Service -->
+    <string name="unit_act_name">activité</string>
+    <string name="unit_act_short">act</string>
+    <string name="unit_act_keywords">activite,activites</string>
+    <string name="unit_e48_name">unité de service</string>
+    <string name="unit_e48_short">us</string>
+    <string name="unit_e48_keywords">unite de service,service,services</string>
+    <string name="unit_e51_name">prestation</string>
+    <string name="unit_e51_short">prest</string>
+    <string name="unit_e51_keywords">prestation,prestations</string>
+
+    <!-- Emballage / vrac -->
+    <string name="unit_xbh_name">botte</string>
+    <string name="unit_xbh_short">botte</string>
+    <string name="unit_xbh_keywords">botte,bottes,bouquet</string>
+    <string name="unit_xbe_name">fagot</string>
+    <string name="unit_xbe_short">fagot</string>
+    <string name="unit_xbe_keywords">fagot,fagots</string>
+    <string name="unit_xbl_name">balle compressée</string>
+    <string name="unit_xbl_short">balle</string>
+    <string name="unit_xbl_keywords">balle,balles,ballot,balle compressee</string>
+    <string name="unit_xsa_name">sac</string>
+    <string name="unit_xsa_short">sac</string>
+    <string name="unit_xsa_keywords">sac,sacs</string>
+    <string name="unit_xbg_name">sachet</string>
+    <string name="unit_xbg_short">sachet</string>
+    <string name="unit_xbg_keywords">sachet,sachets</string>
+    <string name="unit_xbk_name">panier</string>
+    <string name="unit_xbk_short">panier</string>
+    <string name="unit_xbk_keywords">panier,paniers</string>
+    <string name="unit_xcr_name">cageot</string>
+    <string name="unit_xcr_short">cageot</string>
+    <string name="unit_xcr_keywords">cageot,cageots</string>
+    <string name="unit_xro_name">rouleau</string>
+    <string name="unit_xro_short">rlx</string>
+    <string name="unit_xro_keywords">rouleau,rouleaux,rlx</string>
+    <string name="unit_xpx_name">palette</string>
+    <string name="unit_xpx_short">pal</string>
+    <string name="unit_xpx_keywords">palette,palettes,pal</string>
+    <string name="unit_hea_name">tête</string>
+    <string name="unit_hea_short">tête</string>
+    <string name="unit_hea_keywords">tete,tetes,betail,animaux,tete de betail</string>
     <string name="product_type_label">Type</string>
     <string name="product_type_service">Service</string>
     <string name="product_type_goods">Bien</string>

@@ -605,4 +605,139 @@ Une erreur s'est produite :
     <string name="unit_picker_category_energy">Energía</string>
     <string name="unit_picker_category_service">Servicio</string>
     <string name="unit_picker_category_packaging">Embalaje</string>
+
+    <!-- Unit codes (UNECE Rec 20/21) — véase el archivo FR para el esquema. -->
+
+    <!-- Recuento -->
+    <string name="unit_c62_name">unidad</string>
+    <string name="unit_c62_short">u</string>
+    <string name="unit_c62_keywords">unidad,unidades,u</string>
+    <string name="unit_h87_name">pieza</string>
+    <string name="unit_h87_short">pza</string>
+    <string name="unit_h87_keywords">pieza,piezas,pza</string>
+    <string name="unit_set_name">conjunto</string>
+    <string name="unit_set_short">conj</string>
+    <string name="unit_set_keywords">conjunto,conjuntos,set,kit</string>
+    <string name="unit_pr_name">par</string>
+    <string name="unit_pr_short">par</string>
+    <string name="unit_pr_keywords">par,pares</string>
+    <string name="unit_dzn_name">docena</string>
+    <string name="unit_dzn_short">doc</string>
+    <string name="unit_dzn_keywords">docena,docenas,doc</string>
+    <string name="unit_lo_name">lote</string>
+    <string name="unit_lo_short">lote</string>
+    <string name="unit_lo_keywords">lote,lotes</string>
+
+    <!-- Longitud -->
+    <string name="unit_mtr_name">metro</string>
+    <string name="unit_mtr_keywords">metro,metros</string>
+    <string name="unit_lm_name">metro lineal</string>
+    <string name="unit_lm_short">ml</string>
+    <string name="unit_lm_keywords">metro lineal,metros lineales,ml,lineal</string>
+    <string name="unit_cmt_name">centímetro</string>
+    <string name="unit_cmt_keywords">centimetro,centimetros</string>
+    <string name="unit_mmt_name">milímetro</string>
+    <string name="unit_mmt_keywords">milimetro,milimetros</string>
+    <string name="unit_kmt_name">kilómetro</string>
+    <string name="unit_kmt_keywords">kilometro,kilometros</string>
+
+    <!-- Superficie -->
+    <string name="unit_mtk_name">metro cuadrado</string>
+    <string name="unit_mtk_keywords">metro cuadrado,metros cuadrados</string>
+    <string name="unit_cmk_name">centímetro cuadrado</string>
+    <string name="unit_cmk_keywords">centimetro cuadrado</string>
+    <string name="unit_kmk_name">kilómetro cuadrado</string>
+    <string name="unit_kmk_keywords">kilometro cuadrado</string>
+
+    <!-- Volumen -->
+    <string name="unit_ltr_name">litro</string>
+    <string name="unit_ltr_keywords">litro,litros</string>
+    <string name="unit_mlt_name">mililitro</string>
+    <string name="unit_mlt_keywords">mililitro,mililitros</string>
+    <string name="unit_clt_name">centilitro</string>
+    <string name="unit_clt_keywords">centilitro,centilitros</string>
+    <string name="unit_hlt_name">hectolitro</string>
+    <string name="unit_hlt_keywords">hectolitro,hectolitros</string>
+    <string name="unit_mtq_name">metro cúbico</string>
+    <string name="unit_mtq_keywords">metro cubico,metros cubicos</string>
+
+    <!-- Peso -->
+    <string name="unit_kgm_name">kilogramo</string>
+    <string name="unit_kgm_keywords">kilogramo,kilogramos,kilo,kilos</string>
+    <string name="unit_grm_name">gramo</string>
+    <string name="unit_grm_keywords">gramo,gramos,gr</string>
+    <string name="unit_tne_name">tonelada</string>
+    <string name="unit_tne_keywords">tonelada,toneladas</string>
+    <string name="unit_dtn_name">quintal</string>
+    <string name="unit_dtn_short">q</string>
+    <string name="unit_dtn_keywords">quintal,quintales,decitonelada,100 kg,q</string>
+
+    <!-- Tiempo -->
+    <string name="unit_hur_name">hora</string>
+    <string name="unit_hur_keywords">hora,horas,hr</string>
+    <string name="unit_min_name">minuto</string>
+    <string name="unit_min_keywords">minuto,minutos</string>
+    <string name="unit_day_name">día</string>
+    <string name="unit_day_short">d</string>
+    <string name="unit_day_keywords">dia,dias,d</string>
+    <string name="unit_wee_name">semana</string>
+    <string name="unit_wee_short">sem</string>
+    <string name="unit_wee_keywords">semana,semanas,sem</string>
+    <string name="unit_mon_name">mes</string>
+    <string name="unit_mon_short">mes</string>
+    <string name="unit_mon_keywords">mes,meses</string>
+    <string name="unit_ann_name">año</string>
+    <string name="unit_ann_short">a</string>
+    <string name="unit_ann_keywords">ano,anos,anio,anios,año,años</string>
+
+    <!-- Energía -->
+    <string name="unit_kwh_name">kilovatio-hora</string>
+    <string name="unit_kwh_short">kWh</string>
+    <string name="unit_kwh_keywords">kilovatio hora,kilovatio-hora,kwh</string>
+    <string name="unit_mwh_name">megavatio-hora</string>
+    <string name="unit_mwh_short">MWh</string>
+    <string name="unit_mwh_keywords">megavatio hora,megavatio-hora,mwh</string>
+
+    <!-- Servicio -->
+    <string name="unit_act_name">actividad</string>
+    <string name="unit_act_short">act</string>
+    <string name="unit_act_keywords">actividad,actividades</string>
+    <string name="unit_e48_name">unidad de servicio</string>
+    <string name="unit_e48_short">us</string>
+    <string name="unit_e48_keywords">unidad de servicio,servicio,servicios</string>
+    <string name="unit_e51_name">prestación</string>
+    <string name="unit_e51_short">prest</string>
+    <string name="unit_e51_keywords">prestacion,prestaciones</string>
+
+    <!-- Embalaje / a granel -->
+    <string name="unit_xbh_name">manojo</string>
+    <string name="unit_xbh_short">manojo</string>
+    <string name="unit_xbh_keywords">manojo,manojos,ramo</string>
+    <string name="unit_xbe_name">haz</string>
+    <string name="unit_xbe_short">haz</string>
+    <string name="unit_xbe_keywords">haz,haces,fajo</string>
+    <string name="unit_xbl_name">bala comprimida</string>
+    <string name="unit_xbl_short">bala</string>
+    <string name="unit_xbl_keywords">bala,balas,bala comprimida</string>
+    <string name="unit_xsa_name">saco</string>
+    <string name="unit_xsa_short">saco</string>
+    <string name="unit_xsa_keywords">saco,sacos</string>
+    <string name="unit_xbg_name">bolsa</string>
+    <string name="unit_xbg_short">bolsa</string>
+    <string name="unit_xbg_keywords">bolsa,bolsas,sachet</string>
+    <string name="unit_xbk_name">cesta</string>
+    <string name="unit_xbk_short">cesta</string>
+    <string name="unit_xbk_keywords">cesta,cestas,canasta</string>
+    <string name="unit_xcr_name">caja</string>
+    <string name="unit_xcr_short">caja</string>
+    <string name="unit_xcr_keywords">caja,cajas,cajon</string>
+    <string name="unit_xro_name">rollo</string>
+    <string name="unit_xro_short">rollo</string>
+    <string name="unit_xro_keywords">rollo,rollos</string>
+    <string name="unit_xpx_name">palé</string>
+    <string name="unit_xpx_short">palé</string>
+    <string name="unit_xpx_keywords">pale,pales,palet,palets</string>
+    <string name="unit_hea_name">cabeza</string>
+    <string name="unit_hea_short">cabeza</string>
+    <string name="unit_hea_keywords">cabeza,cabezas,ganado,animales</string>
 </resources>
