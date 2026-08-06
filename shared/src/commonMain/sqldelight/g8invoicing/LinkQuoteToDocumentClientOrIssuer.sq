@@ -1,0 +1,28 @@
+CREATE TABLE LinkQuoteToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  quote_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(id)
+          ON DELETE CASCADE
+);
+
+getDocumentClientOrIssuerLinkedToQuote:
+SELECT *
+FROM LinkQuoteToDocumentClientOrIssuer
+WHERE quote_id = :quote_id;
+
+saveDocumentClientOrIssuerLinkedToQuote:
+INSERT
+INTO LinkQuoteToDocumentClientOrIssuer (id, quote_id, document_client_or_issuer_id)
+VALUES (?, ?, ?);
+
+deleteDocumentClientOrIssuerLinkedToQuote:
+DELETE FROM LinkQuoteToDocumentClientOrIssuer
+WHERE  quote_id = :quote_id
+AND document_client_or_issuer_id = :document_client_or_issuer_id;
+
+deleteAllDocumentClientOrIssuerLinkedToAQuote:
+DELETE FROM LinkQuoteToDocumentClientOrIssuer
+WHERE  quote_id = :quote_id;

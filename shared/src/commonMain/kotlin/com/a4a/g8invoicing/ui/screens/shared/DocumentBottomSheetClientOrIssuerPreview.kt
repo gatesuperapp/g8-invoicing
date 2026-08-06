@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -23,6 +23,7 @@ import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 
 // User can either select an item (client or product) in the list, or add a new item
@@ -39,8 +40,8 @@ fun DocumentBottomSheetClientOrIssuerPreview(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.5f)
-            .background(Color.White)
+            .fillMaxSize()
+            .background(AppColors.surface)
     ) {
         // Header: display "back" button
         Row(

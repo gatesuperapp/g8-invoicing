@@ -8,6 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.models.PersonType
+import com.a4a.g8invoicing.data.models.ProductNature
+import com.a4a.g8invoicing.data.models.UnitCode
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
@@ -30,6 +33,7 @@ class ProductAddEditViewModel(
     private val dataSource: ProductLocalDataSourceInterface,
     private val taxDataSource: ProductTaxLocalDataSourceInterface,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
+    private val unitCodeRepository: UnitCodeRepository,
     private val itemId: String?,
     private val type: String?,
 ) : ViewModel() {
@@ -59,26 +63,63 @@ class ProductAddEditViewModel(
     val clientSelectionDialogState: StateFlow<ClientSelectionDialogState?> =
         _clientSelectionDialogState.asStateFlow()
 
+    // Type visibility flag: driven by the CURRENT document's issuer, not by any
+    // global "last issuer" state. Multi-company users have some issuers with
+    // intra-EU sales enabled and some without — the doc bottom-sheet form must
+    // reflect the actual issuer selected for THIS document. NavGraphs push the
+    // value via setShowProductType() based on documentIssuerUiState.intraEuSales.
+    // Type is not shown on the master Product form at all (see comment on the
+    // "Type is a transaction attribute" removal in ProductAddEditForm).
+    private val _showProductType = MutableStateFlow(false)
+    val showProductType: StateFlow<Boolean> = _showProductType.asStateFlow()
+
+    fun setShowProductType(value: Boolean) {
+        _showProductType.value = value
+    }
+
     init {
-        if (type == ProductType.PRODUCT.name.lowercase()) {
-            itemId?.let { productId ->
-                viewModelScope.launch {
-                    _isLoading.value = true
-                    try {
-                        dataSource.fetchProduct(productId.toLong())?.let {
-                            _productUiState.value = it
-                        }
-                    } finally {
-                        _isLoading.value = false
+        // type peut arriver null lors d'un "nouveau produit" depuis l'onglet Produits.
+        // On considère qu'un type absent = Product master (le seul flow qui n'est PAS
+        // DocumentProduct est Product master).
+        val isDocumentProduct = type == ProductType.DOCUMENT_PRODUCT.name.lowercase()
+        if (isDocumentProduct) {
+            _isLoading.value = false
+        } else if (itemId != null) {
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    dataSource.fetchProduct(itemId.toLong())?.let { fetched ->
+                        // Auto-heal for legacy products (created before the unitCode field
+                        // existed): try to match the free-text unit ("heure", "kg"…) to a
+                        // UNECE code. Pure UI convenience — the healed value is written to
+                        // state so hitting Save persists it.
+                        val healed = if (fetched.unitCode == null) {
+                            fetched.copy(
+                                unitCode = fetched.unit?.text
+                                    ?.let { unitCodeRepository.matchTextToCode(it)?.code },
+                            )
+                        } else fetched
+                        _productUiState.value = healed
                     }
+                } finally {
+                    _isLoading.value = false
                 }
-            } ?: run {
-                _isLoading.value = false
-                primeStateWithLastProductSticky()
             }
         } else {
             _isLoading.value = false
-            primeStateWithLastProductSticky()
+            // Sticky on new master product: inherit unit, unitCode, taxRate from
+            // the last created product. Type is NOT inherited here — the Type row
+            // is not shown on the master form in 1.8 (it can't be gated on a
+            // specific issuer's intraEuSales flag without per-product company
+            // scoping, which comes in 1.9).
+            viewModelScope.launch {
+                val last = dataSource.fetchLastCreatedProduct()
+                _productUiState.value = _productUiState.value.copy(
+                    unit = last?.unit ?: _productUiState.value.unit,
+                    unitCode = last?.unitCode ?: _productUiState.value.unitCode,
+                    taxRate = last?.taxRate ?: _productUiState.value.taxRate,
+                )
+            }
         }
 
         viewModelScope.launch {
@@ -88,28 +129,12 @@ class ProductAddEditViewModel(
         }
     }
 
-    // Pre-fill unit + taxRate from the most recently created product so a fresh
-    // form (master product creation OR first document-product after app restart)
-    // starts with the same values the user last used. In-session stickiness is
-    // handled separately by clearProductNameAndDescription() preserving those
-    // fields between successive creations without hitting the DB.
-    private fun primeStateWithLastProductSticky() {
+    private val _last5UnitCodes = MutableStateFlow<List<String>>(emptyList())
+    val last5UnitCodes: StateFlow<List<String>> = _last5UnitCodes.asStateFlow()
+
+    fun refreshLast5UnitCodes() {
         viewModelScope.launch {
-            val last = dataSource.fetchLastCreatedProduct() ?: return@launch
-            if (_productUiState.value.unit?.text.isNullOrEmpty() && _productUiState.value.taxRate == null) {
-                _productUiState.value = _productUiState.value.copy(
-                    unit = last.unit ?: TextFieldValue(""),
-                    taxRate = last.taxRate,
-                )
-            }
-            if ((_documentProductUiState.value.unit?.text.isNullOrEmpty()) &&
-                _documentProductUiState.value.taxRate == null
-            ) {
-                _documentProductUiState.value = _documentProductUiState.value.copy(
-                    unit = last.unit,
-                    taxRate = last.taxRate,
-                )
-            }
+            _last5UnitCodes.value = dataSource.fetchLast5UnitCodes()
         }
     }
 
@@ -139,6 +164,9 @@ class ProductAddEditViewModel(
             Pair(product.defaultPriceWithoutTax, product.defaultPriceWithTax)
         }
 
+        // Set the state immediately with what's synchronously known. The unit
+        // code auto-heal (only needed for pre-1.8 products with unit text but
+        // no unitCode) runs asynchronously and patches state a moment later.
         _documentProductUiState.value = DocumentProductState(
             id = null,
             name = product.name,
@@ -148,8 +176,33 @@ class ProductAddEditViewModel(
             taxRate = product.taxRate,
             quantity = BigDecimal.ONE,
             unit = product.unit,
+            unitCode = product.unitCode,
+            type = product.type,
             productId = product.id,
         )
+        if (product.unitCode == null && !product.unit?.text.isNullOrBlank()) {
+            viewModelScope.launch {
+                val matched = unitCodeRepository.matchTextToCode(product.unit?.text)?.code
+                if (matched != null && _documentProductUiState.value.unitCode == null) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(unitCode = matched)
+                }
+            }
+        }
+
+        if (product.type == null && _showProductType.value) {
+            // Le produit pické (créé pre-1.8) n'a pas de type. Fallback dernier produit
+            // → GOODS + warning one-shot. Skip entièrement si l'émetteur n'a pas coché
+            // "Ventes intra-UE" (le champ Type n'est pas affiché de toute façon).
+            viewModelScope.launch {
+                val stickyType = dataSource.fetchLastCreatedProduct()?.type
+                    ?: ProductNature.GOODS
+                if (_documentProductUiState.value.type == null) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(type = stickyType)
+                }
+            }
+        }
     }
 
     fun setProductUiState() {
@@ -160,13 +213,30 @@ class ProductAddEditViewModel(
             defaultPriceWithoutTax = _documentProductUiState.value.priceWithoutTax,
             defaultPriceWithTax = _documentProductUiState.value.priceWithTax,
             taxRate = _documentProductUiState.value.taxRate,
-            unit = _documentProductUiState.value.unit
+            unit = _documentProductUiState.value.unit,
+            unitCode = _documentProductUiState.value.unitCode,
+            type = _documentProductUiState.value.type,
         )
     }
 
     fun clearProductUiState() {
         _productUiState.value = ProductState()
         _documentProductUiState.value = DocumentProductState()
+        // Sticky sur inline DocumentProduct : au reset complet, on ré-hydrate depuis
+        // le dernier produit créé (unit + unitCode + taxRate + type). Sinon type reste
+        // null et l'user tombe sur "-" sur chaque nouvelle ligne de facture inline.
+        viewModelScope.launch {
+            val last = dataSource.fetchLastCreatedProduct()
+            _documentProductUiState.value = _documentProductUiState.value.copy(
+                unit = last?.unit,
+                unitCode = last?.unitCode,
+                taxRate = last?.taxRate,
+                // Type seulement si l'émetteur a coché "Ventes intra-UE" — sinon inutile.
+                type = if (_showProductType.value)
+                    last?.type ?: ProductNature.GOODS
+                else null,
+            )
+        }
     }
 
     fun clearProductNameAndDescription() {
@@ -177,13 +247,23 @@ class ProductAddEditViewModel(
             defaultPriceWithTax = null
         )
 
+        // On first "+ Nouveau produit" for an intra-EU issuer, previous state is
+        // empty (nothing to preserve as sticky) → type would land as null and
+        // display as "-". Default to GOODS so the user has a sensible starting
+        // point that they can override to SERVICE via the picker.
+        val currentType = _documentProductUiState.value.type
+        val defaultedType = if (_showProductType.value && currentType == null)
+            ProductNature.GOODS
+        else currentType
+
         _documentProductUiState.value = _documentProductUiState.value.copy(
             name = TextFieldValue(),
             description = TextFieldValue(),
             priceWithoutTax = null,
             priceWithTax = null,
-            quantity = BigDecimal.ONE
-            // unit is intentionally NOT reset - it's preserved between product creations
+            quantity = BigDecimal.ONE,
+            type = defaultedType,
+            // unit / unitCode intentionally NOT reset — sticky entre créations
         )
     }
 
@@ -275,6 +355,18 @@ class ProductAddEditViewModel(
         }
     }
 
+    /** Same as [saveProductInLocalDb] but awaits the insert and returns the new
+     * master Product id. Used by the "create product from a document" flow so
+     * the caller can backfill DocumentProduct.product_id in the same
+     * transaction batch and keep the master ↔ document link intact from row 1. */
+    suspend fun saveProductInLocalDbAndGetId(): Long? {
+        return try {
+            dataSource.saveProduct(productUiState.value)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     fun updateInLocalDb(type: ProductType) {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
@@ -290,18 +382,107 @@ class ProductAddEditViewModel(
         }
     }
 
+    /** Called after saving a DocumentProduct edit when the user ticked the
+     *  "Also apply to the product card" switch. Pushes the edited fields back
+     *  to the master Product row. Runs on the same scope as updateInLocalDb
+     *  so callers can just await both in order. */
+    suspend fun syncDocumentProductToMaster() {
+        try {
+            dataSource.syncMasterFromDocumentProduct(documentProductUiState.value)
+        } catch (_: Exception) {
+        }
+    }
+
     fun updateProductState(
         pageElement: ScreenElement,
         value: Any,
         productType: ProductType,
         idStr: String? = null,
     ) {
+        // Unit-related edits go through the async path so we can hit the
+        // suspend UnitCodeRepository (index-load is suspend). The rest stays
+        // synchronous.
+        when (pageElement) {
+            ScreenElement.PRODUCT_UNIT, ScreenElement.DOCUMENT_PRODUCT_UNIT ->
+                onUnitFreeTextChange(pageElement, value as TextFieldValue, productType)
+            ScreenElement.PRODUCT_UNIT_CODE, ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE ->
+                onUnitCodePicked(pageElement, value as String, productType)
+            else -> {
+                if (productType == ProductType.PRODUCT) {
+                    _productUiState.value =
+                        updateProductUiState(_productUiState.value, pageElement, value, idStr)
+                } else {
+                    _documentProductUiState.value =
+                        updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
+                }
+            }
+        }
+    }
+
+    // Free-text unit sync: set the text field immediately, then resolve the
+    // Factur-X code in the background. Clearing the code up-front avoids a
+    // "ghost code" from a previous keystroke sticking after the user retyped
+    // something that no longer matches — the async resolve will fill in C62
+    // (EN 16931 default) if nothing else matches.
+    private fun onUnitFreeTextChange(
+        pageElement: ScreenElement,
+        text: TextFieldValue,
+        productType: ProductType,
+    ) {
         if (productType == ProductType.PRODUCT) {
-            _productUiState.value =
-                updateProductUiState(_productUiState.value, pageElement, value, idStr)
+            _productUiState.value = _productUiState.value.copy(unit = text, unitCode = null)
         } else {
-            _documentProductUiState.value =
-                updateDocumentProductUiState(_documentProductUiState.value, pageElement, value)
+            _documentProductUiState.value = _documentProductUiState.value.copy(unit = text, unitCode = null)
+        }
+        // Blank field = no code to persist. Skip the resolve entirely.
+        if (text.text.isBlank()) return
+        viewModelScope.launch {
+            // Null = the text doesn't map to any known code (e.g. user typed
+            // "toto"). We leave unitCode null in state — the field shows "-"
+            // and the user isn't surprised by an unrelated code appearing
+            // under their text. At save time, whoever persists to the DB can
+            // fall back to C62 (EN 16931 default) for Factur-X compliance.
+            val matched = unitCodeRepository.matchTextToCode(text.text)?.code ?: return@launch
+            if (productType == ProductType.PRODUCT) {
+                // Guard against a stale coroutine: only commit if the text
+                // field hasn't changed since we launched.
+                if (_productUiState.value.unit?.text == text.text) {
+                    _productUiState.value = _productUiState.value.copy(unitCode = matched)
+                }
+            } else {
+                if (_documentProductUiState.value.unit?.text == text.text) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(unitCode = matched)
+                }
+            }
+        }
+    }
+
+    // Pick from the bottom-sheet: code arrives ready. Sync the text field to
+    // the localized short form / symbol so what the user sees matches what
+    // they picked.
+    private fun onUnitCodePicked(
+        pageElement: ScreenElement,
+        code: String,
+        productType: ProductType,
+    ) {
+        if (productType == ProductType.PRODUCT) {
+            _productUiState.value = _productUiState.value.copy(unitCode = code)
+        } else {
+            _documentProductUiState.value = _documentProductUiState.value.copy(unitCode = code)
+        }
+        viewModelScope.launch {
+            val label = unitCodeRepository.resolveShort(code) ?: code
+            if (productType == ProductType.PRODUCT) {
+                if (_productUiState.value.unitCode == code) {
+                    _productUiState.value = _productUiState.value.copy(unit = TextFieldValue(label))
+                }
+            } else {
+                if (_documentProductUiState.value.unitCode == code) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(unit = TextFieldValue(label))
+                }
+            }
         }
     }
 
@@ -439,6 +620,7 @@ class ProductAddEditViewModel(
 
         _productUiState.value = _productUiState.value.copy(additionalPrices = updatedPrices)
     }
+
 }
 
 private fun updateProductUiState(
@@ -520,8 +702,12 @@ private fun updateProductUiState(
             }
         }
 
-        ScreenElement.PRODUCT_UNIT -> {
-            updatedProductState = updatedProductState.copy(unit = value as TextFieldValue)
+        // PRODUCT_UNIT and PRODUCT_UNIT_CODE are handled asynchronously via
+        // onUnitFreeTextChange / onUnitCodePicked in the ViewModel, so this
+        // synchronous path never sees them.
+
+        ScreenElement.PRODUCT_TYPE -> {
+            updatedProductState = updatedProductState.copy(type = value as ProductNature)
         }
 
         ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS -> {
@@ -581,8 +767,11 @@ private fun updateDocumentProductUiState(
             } else updated.copy(priceWithTax = null)
         }
 
-        ScreenElement.DOCUMENT_PRODUCT_UNIT -> {
-            updated = updated.copy(unit = value as TextFieldValue)
+        // DOCUMENT_PRODUCT_UNIT and DOCUMENT_PRODUCT_UNIT_CODE run through the
+        // async path in the ViewModel — see onUnitFreeTextChange / onUnitCodePicked.
+
+        ScreenElement.DOCUMENT_PRODUCT_TYPE -> {
+            updated = updated.copy(type = value as ProductNature)
         }
 
         else -> {}

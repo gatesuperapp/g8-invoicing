@@ -22,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,7 +51,13 @@ import com.a4a.g8invoicing.shared.resources.whats_new_gstore_description
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_title
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textDisplay
+import com.a4a.g8invoicing.ui.theme.textHeadline
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
@@ -66,7 +73,7 @@ fun WhatsNewDialog(
     onDismiss: () -> Unit
 ) {
     // Page de bienvenue + pages de fonctionnalités
-    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Castanea sativa")
+    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Rosa Canina")
 
     val featurePages = listOf(
         WhatsNewPage(
@@ -108,7 +115,7 @@ fun WhatsNewDialog(
                 .height(420.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = AppColors.surface)
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
                 // Croix en haut à droite
@@ -121,7 +128,7 @@ fun WhatsNewDialog(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(Res.string.whats_new_close),
-                        tint = Color.Gray
+                        tint = AppColors.iconSecondary
                     )
                 }
 
@@ -153,26 +160,24 @@ fun WhatsNewDialog(
                                 ) {
                                     Text(
                                         text = "((„• ֊ •„)♡",
-                                        fontSize = 24.sp,
-                                        textAlign = TextAlign.Center
+                                        style = MaterialTheme.typography.textHeadline,
+                                        textAlign = TextAlign.Center,
                                     )
 
                                     Spacer(modifier = Modifier.height(16.dp))
 
                                     Text(
                                         text = welcomeTitle,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        textAlign = TextAlign.Center
+                                        style = MaterialTheme.typography.textBodyBold,
+                                        textAlign = TextAlign.Center,
                                     )
 
                                     Spacer(modifier = Modifier.height(12.dp))
 
                                     Text(
                                         text = stringResource(Res.string.whats_new_discover),
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                                         textAlign = TextAlign.Center,
-                                        color = Color.DarkGray
                                     )
                                 }
                             } else {
@@ -187,27 +192,25 @@ fun WhatsNewDialog(
                                 ) {
                                     Text(
                                         text = page.emoji,
-                                        fontSize = 48.sp,
-                                        textAlign = TextAlign.Center
+                                        style = MaterialTheme.typography.textDisplay,
+                                        textAlign = TextAlign.Center,
                                     )
 
                                     Spacer(modifier = Modifier.height(16.dp))
 
                                     Text(
                                         text = page.title,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        textAlign = TextAlign.Center
+                                        style = MaterialTheme.typography.textScreenTitle,
+                                        textAlign = TextAlign.Center,
                                     )
 
                                     Spacer(modifier = Modifier.height(12.dp))
 
                                     Text(
                                         text = page.description,
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                                         textAlign = TextAlign.Center,
                                         lineHeight = 20.sp,
-                                        color = Color.DarkGray
                                     )
                                 }
                             }
@@ -227,7 +230,7 @@ fun WhatsNewDialog(
                                     .size(if (isSelected) 10.dp else 8.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSelected) ColorVioletLight else Color.LightGray
+                                        if (isSelected) ColorVioletLight else AppColors.surfaceMuted
                                     )
                                     .clickable {
                                         coroutineScope.launch {

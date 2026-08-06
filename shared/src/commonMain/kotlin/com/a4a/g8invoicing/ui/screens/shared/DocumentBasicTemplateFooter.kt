@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -35,7 +33,10 @@ fun DocumentBasicTemplateFooter(
     // column). Display whatever is stored — toggling the module later doesn't change
     // existing docs. null/blank = no watermark on this doc.
     val watermark = document.watermarkText?.takeIf { it.isNotBlank() }
-    val uriHandler = LocalUriHandler.current
+
+    val currencyCode = document.currency.text
+    val showCurrencyNoticeLine = document.showCurrencyAndAutoTaxColumn &&
+        currencyCode.isNotEmpty() && currencyCode != "EUR"
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -50,6 +51,25 @@ fun DocumentBasicTemplateFooter(
                 }
             )
     ) {
+        // "Devise : USD" — placed just above the due-date line so it sits with
+        // the payment info, not the header. Bold + centered to match the
+        // due-date visual weight, so the two read as one info block.
+        // Snapshot first, then a locale-specific hardcoded fallback for docs
+        // predating the addition of pdf_currency_notice to DocumentLabels.keys,
+        // then stringResource as last resort (app-current locale).
+        if (showCurrencyNoticeLine) {
+            val snapshotValue = labels?.get("pdf_currency_notice")
+                ?: DocumentLabels.localeFallback("pdf_currency_notice", document.formatLocale)
+            val pattern = snapshotValue ?: stringResource(Res.string.pdf_currency_notice)
+            Row(
+                modifier = Modifier.padding(bottom = 6.dp)
+            ) {
+                Text(
+                    style = MaterialTheme.typography.textForDocumentsBold,
+                    text = pattern.replace("%1\$s", currencyCode),
+                )
+            }
+        }
         Row(
             modifier = Modifier
                 .padding(bottom = 6.dp)
@@ -68,22 +88,25 @@ fun DocumentBasicTemplateFooter(
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.textForDocuments,
                 text = document.footerText.text,
-                lineHeight = 10.sp
+                // 7sp on a 6sp font ≈ 1.15 line-height — the previous 10sp
+                // rendered a user-typed blank line as ~2 blank lines. Halving
+                // would clip; 7 gets the same visual "one blank line" effect
+                // without eating into the glyph metrics.
+                lineHeight = 7.sp
             )
         }
         if (watermark != null) {
-            // Tiny watermark, smaller than the address text. Whole line is clickable →
-            // opens the website. Underlined to signal interactivity.
+            // Tiny watermark, smaller than the address text. Non-interactive in the
+            // in-app preview to avoid accidental taps launching the browser; the PDF
+            // renders the same watermark with a live hyperlink (PdfGeneratorImpl).
             Text(
                 modifier = Modifier
-                    .clickable { uriHandler.openUri("https://the-gate.fr") }
                     .padding(top = 4.dp, bottom = 6.dp),
                 textAlign = TextAlign.Center,
                 text = watermark,
                 color = Color(0xFF888888),
                 fontSize = 5.sp,
                 lineHeight = 7.sp,
-                textDecoration = TextDecoration.Underline,
             )
         }
     }

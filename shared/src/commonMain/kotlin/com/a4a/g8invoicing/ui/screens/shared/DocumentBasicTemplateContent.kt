@@ -23,6 +23,7 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -49,7 +50,7 @@ fun DocumentBasicTemplateContent(
             modifier = Modifier
                 .width(screenWidth)
                 .padding(pagePadding)
-                .background(Color.White)
+                .background(AppColors.surface)
                 .heightIn(min = screenWidth * 1.28f)
         )
         return
@@ -64,7 +65,7 @@ fun DocumentBasicTemplateContent(
                 bottom = pagePadding,
                 end = pagePadding
             )
-            .background(Color.White)
+            .background(AppColors.surface)
             .heightIn(min = screenWidth * 1.28f)
             .customCombinedClickable(
                 onClick = {
@@ -82,7 +83,7 @@ fun DocumentBasicTemplateContent(
                     bottom = 20.dp,
                     end = 20.dp
                 )
-                .background(Color.White)
+                .background(AppColors.surface)
         ) {
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem, labels)
@@ -132,10 +133,21 @@ fun DocumentBasicTemplateContent(
                         .fillMaxWidth()
                 ) {
                     if (!productArray.isNullOrEmpty()) {
+                        // For docs created before 1.8 (showCurrencyAndAutoTaxColumn = false),
+                        // keep the historical always-visible tax column so an
+                        // existing invoice re-opened after the update looks
+                        // identical to when it was issued. Post-1.8 docs
+                        // dynamically hide the column when no line has a rate.
+                        val displayTaxColumn = !document.showCurrencyAndAutoTaxColumn ||
+                            productArray.any { it.taxRate != null }
                         DocumentBasicTemplateProductsTable(
                             productArray,
                             currencyCode = document.currency.text.ifEmpty { "EUR" },
+                            formatLocale = document.formatLocale,
+                            displayTaxColumn = displayTaxColumn,
                             labels = labels,
+                            hideLinkedSourceHeaders =
+                                (document as? InvoiceState)?.hideLinkedSourceHeaders == true,
                         )
                     }
                 }

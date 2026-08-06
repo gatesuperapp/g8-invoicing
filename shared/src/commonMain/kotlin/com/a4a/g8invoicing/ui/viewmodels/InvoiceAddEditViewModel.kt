@@ -98,6 +98,19 @@ class InvoiceAddEditViewModel(
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
     }
 
+    // Flip the "hide linked source headers" bit on the current invoice: mirror
+    // it into the UI state immediately so the eye + preview update in the same
+    // frame, then persist in the background.
+    fun toggleHideLinkedSourceHeaders() {
+        val current = _documentUiState.value
+        val next = !current.hideLinkedSourceHeaders
+        _documentUiState.value = current.copy(hideLinkedSourceHeaders = next)
+        val id = current.documentId?.toLong() ?: return
+        viewModelScope.launch {
+            documentDataSource.updateHideLinkedSourceHeaders(id, next)
+        }
+    }
+
     private fun updateInvoiceInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {
@@ -217,6 +230,22 @@ class InvoiceAddEditViewModel(
         saveJob?.cancel()
         saveJob = viewModelScope.launch {
             try {
+                // Drop the previous document snapshot of the same role first so the
+                // fetch below can't hand back the stale row (firstOrNull on the join
+                // would otherwise return the older insert, causing the picker to
+                // flicker back to the old selection).
+                val documentType = when (documentClientOrIssuer.type) {
+                    ClientOrIssuerType.CLIENT, ClientOrIssuerType.DOCUMENT_CLIENT ->
+                        ClientOrIssuerType.DOCUMENT_CLIENT
+                    ClientOrIssuerType.ISSUER, ClientOrIssuerType.DOCUMENT_ISSUER ->
+                        ClientOrIssuerType.DOCUMENT_ISSUER
+                    else -> null
+                }
+                _documentUiState.value.documentId?.let { docId ->
+                    documentType?.let {
+                        documentDataSource.deleteDocumentClientOrIssuer(docId.toLong(), it)
+                    }
+                }
                 documentDataSource.saveDocumentClientOrIssuerInDbAndLinkToDocument(
                     documentClientOrIssuer = documentClientOrIssuer,
                     id = _documentUiState.value.documentId?.toLong()

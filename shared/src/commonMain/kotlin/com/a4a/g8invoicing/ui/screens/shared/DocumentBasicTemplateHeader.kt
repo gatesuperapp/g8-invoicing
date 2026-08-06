@@ -31,6 +31,7 @@ import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
+import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.ui.shared.ImageStorage
 import com.a4a.g8invoicing.ui.shared.InitImageContext
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -38,6 +39,7 @@ import com.a4a.g8invoicing.ui.shared.loadLogoBitmap
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
+import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.subTitleForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
@@ -98,6 +100,7 @@ fun DocumentBasicTemplateHeader(
                 text = when (document) {
                     is DeliveryNoteState -> documentLabel(labels, "delivery_note_number", Res.string.delivery_note_number)
                     is CreditNoteState -> documentLabel(labels, "credit_note_number", Res.string.credit_note_number)
+                    is QuoteState -> documentLabel(labels, "quote_number", Res.string.quote_number)
                     else -> documentLabel(labels, "invoice_number", Res.string.invoice_number)
                 } + " " + document.documentNumber.text
             )
@@ -134,6 +137,7 @@ fun DocumentBasicTemplateHeader(
             )
         }
     }
+
     val client = document.documentClient
 
     // ROW 1: NOTHING ------- CLIENT ADDRESS TITLE 1
@@ -215,7 +219,7 @@ fun DocumentBasicTemplateHeader(
             // primary client rectangle. The PDF renderer already spaces this via
             // dedicated iText spacer cells.
             Row(
-                modifier = Modifier.padding(top = 14.dp)
+                modifier = Modifier.padding(top = 7.dp)
             ) {
                 // When there are only 2 addresses, put address 2 on the right (below address 1)
                 if (addresses.size == 2) {
@@ -297,8 +301,8 @@ fun DocumentClientRectangleAndContent(
                 SolidColor(Color.LightGray),
                 shape = RoundedCornerShape(15.dp)
             )
-            .padding(top = 8.dp)
             .fillMaxWidth()
+            .padding(top = 8.dp, start = 10.dp, end = 10.dp)
         customModifier2 = if (addressIndex == 0)
             customModifier2.then(
                 Modifier

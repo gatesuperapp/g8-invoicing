@@ -13,10 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun DocumentBottomSheetLargeText(
@@ -28,16 +29,18 @@ fun DocumentBottomSheetLargeText(
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         Column(
             Modifier
-                .background(ColorLightGreyo)
+                .background(AppColors.surfaceMuted)
                 .padding(start = 30.dp, end = 30.dp, top = 20.dp, bottom = 30.dp)
                 .fillMaxHeight(0.5f)
         ) {
             BasicTextField(
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(AppColors.surface)
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(30.dp),
+                    .padding(30.dp)
+                    // Free-form footer / description — opt out of autofill.
+                    .clearAndSetSemantics {},
                 value = text,
                 onValueChange = onValueChange
             )

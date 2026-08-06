@@ -6,7 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.auth.AuthRepository
-import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.data.auth.AuthState
 import com.a4a.g8invoicing.data.auth.DeleteAccountResult
 import com.a4a.g8invoicing.data.auth.MagicLinkResult
@@ -62,27 +61,6 @@ class AccountViewModel(
                     uiState = uiState.copy(
                         isLoading = false,
                         errorMessage = "magic_link_error"
-                    )
-                }
-            }
-        }
-    }
-
-    fun consumeMagicLink(token: String) {
-        viewModelScope.launch {
-            uiState = uiState.copy(isLoading = true, consumeErrorMessage = null)
-            when (val result = authRepository.consumeMagicLink(token)) {
-                is AuthResult.Success -> {
-                    uiState = uiState.copy(
-                        isLoading = false,
-                        isLoggedIn = true,
-                        userEmail = result.email
-                    )
-                }
-                is AuthResult.Error -> {
-                    uiState = uiState.copy(
-                        isLoading = false,
-                        consumeErrorMessage = result.message
                     )
                 }
             }
@@ -158,10 +136,6 @@ class AccountViewModel(
         uiState = uiState.copy(successMessage = null)
     }
 
-    fun clearConsumeError() {
-        uiState = uiState.copy(consumeErrorMessage = null)
-    }
-
     fun clearDeleteError() {
         uiState = uiState.copy(deleteErrorMessage = null)
     }
@@ -177,7 +151,6 @@ data class AccountUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val consumeErrorMessage: String? = null,
     val isDeleting: Boolean = false,
     val deleteErrorMessage: String? = null,
     val accountDeleted: Boolean = false,

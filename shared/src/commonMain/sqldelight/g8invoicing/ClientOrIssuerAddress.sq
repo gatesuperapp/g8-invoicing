@@ -4,7 +4,8 @@ CREATE TABLE ClientOrIssuerAddress (
   address_line_1 TEXT,
   address_line_2 TEXT,
   zip_code TEXT,
-  city TEXT
+  city TEXT,
+  country_code TEXT
 );
 
 get:
@@ -13,8 +14,8 @@ FROM ClientOrIssuerAddress
 WHERE id = :id;
 
 save:
-INSERT INTO ClientOrIssuerAddress (id, address_title, address_line_1, address_line_2, zip_code, city)
-VALUES (?, ?, ?,?, ?,  ?);
+INSERT INTO ClientOrIssuerAddress (id, address_title, address_line_1, address_line_2, zip_code, city, country_code)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuerAddress
@@ -22,9 +23,28 @@ SET address_title = :address_title,
     address_line_1 = :address_line_1,
     address_line_2 = :address_line_2,
     zip_code = :zip_code,
-    city = :city
+    city = :city,
+    country_code = :country_code
 WHERE
     id = :id;
+
+getLastCountryCode:
+SELECT country_code
+FROM ClientOrIssuerAddress
+WHERE country_code IS NOT NULL AND country_code != ''
+ORDER BY id DESC
+LIMIT 1;
+
+-- Distinct country codes ordered by most-recently-used (MAX(id) per code).
+-- GROUP BY collapses duplicates; MAX(id) drives the sort so the most recent
+-- occurrence of each code wins.
+getRecentCountryCodes:
+SELECT country_code
+FROM ClientOrIssuerAddress
+WHERE country_code IS NOT NULL AND country_code != ''
+GROUP BY country_code
+ORDER BY MAX(id) DESC
+LIMIT :limit;
 
 delete:
 DELETE FROM ClientOrIssuerAddress

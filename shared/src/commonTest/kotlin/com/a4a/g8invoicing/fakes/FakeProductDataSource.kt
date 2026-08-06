@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.fakes
 
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.ProductPrice
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -28,18 +29,15 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
         return products.find { it.id == id.toInt() }
     }
 
-    override suspend fun fetchLastCreatedProduct(): ProductState? {
-        return products.maxByOrNull { it.id ?: 0 }
-    }
-
     override fun fetchAllProducts(): Flow<List<ProductState>> {
         return productsFlow
     }
 
-    override suspend fun saveProduct(product: ProductState) {
+    override suspend fun saveProduct(product: ProductState): Long? {
         val newProduct = product.copy(id = nextId++)
         products.add(newProduct)
         productsFlow.value = products.toList()
+        return newProduct.id?.toLong()
     }
 
     override suspend fun duplicateProducts(products: List<ProductState>, duplicateNameSuffix: String) {
@@ -102,6 +100,47 @@ class FakeProductDataSource : ProductLocalDataSourceInterface {
         // In the real implementation, this clears product_tax_id from products
         // For the fake, we don't track tax IDs separately, so this is a no-op
         // The real DB uses product_tax_id FK to ProductTax table
+    }
+
+    override suspend fun fetchLast5UnitCodes(): List<String> =
+        products.mapNotNull { it.unitCode }
+            .asReversed()
+            .distinct()
+            .take(5)
+
+    override suspend fun fetchLast3RecentProductIds(): List<Long> =
+        products.asReversed()
+            .mapNotNull { it.id?.toLong() }
+            .distinct()
+            .take(3)
+
+    override suspend fun syncMasterFromDocumentProduct(documentProduct: com.a4a.g8invoicing.ui.states.DocumentProductState) {
+        val masterId = documentProduct.productId ?: return
+        val index = products.indexOfFirst { it.id == masterId }
+        if (index < 0) return
+        val existing = products[index]
+        products[index] = existing.copy(
+            name = documentProduct.name,
+            description = documentProduct.description,
+            unit = documentProduct.unit,
+            unitCode = documentProduct.unitCode,
+            type = documentProduct.type,
+            defaultPriceWithoutTax = documentProduct.priceWithoutTax ?: existing.defaultPriceWithoutTax,
+        )
+        productsFlow.value = products.toList()
+    }
+
+    override suspend fun fetchLastUsedProductType(): ProductNature? =
+        products.mapNotNull { it.type }.lastOrNull()
+
+    override suspend fun fetchLastCreatedProduct(): ProductState? =
+        products.lastOrNull()
+
+    override suspend fun updateAllProductTypes(newType: ProductNature) {
+        val updated = products.map { it.copy(type = newType) }
+        products.clear()
+        products.addAll(updated)
+        productsFlow.value = products.toList()
     }
 
     // Helper to add additional price to a product

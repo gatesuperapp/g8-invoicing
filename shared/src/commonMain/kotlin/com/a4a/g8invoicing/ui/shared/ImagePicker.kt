@@ -51,6 +51,16 @@ expect class ImageStorage() {
      * Check if a logo file exists.
      */
     fun logoExists(logoPath: String): Boolean
+
+    /**
+     * Read raw bytes for a bundled Compose Resources file (e.g.
+     * "drawable-fr/img_paid.png"). The path is relative to the resource root
+     * — the package prefix is prepended internally. Returns null if the file
+     * doesn't exist in the current build. Used by the PDF generator to load
+     * locale-specific assets synchronously; Compose Resources' own reader is
+     * suspend and can't be called from the iText render path.
+     */
+    fun readBundledResource(relativePath: String): ByteArray?
 }
 
 /**

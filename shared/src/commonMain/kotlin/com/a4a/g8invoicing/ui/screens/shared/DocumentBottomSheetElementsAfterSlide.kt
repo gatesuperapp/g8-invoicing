@@ -26,13 +26,17 @@ fun DocumentBottomSheetElementsAfterSlide(
     taxRates: List<BigDecimal>,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    // `openFormOnCompletion` = true means the caller wants the bottom-sheet edit
+    // form to open once the version check settles (edit-link flow). false means
+    // the caller only wants the check to run so the mismatch dialog fires, but
+    // no form should appear afterwards (refresh-from-master icon flow).
+    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean = false,
@@ -42,8 +46,8 @@ fun DocumentBottomSheetElementsAfterSlide(
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
+    showProductType: Boolean = false,
     ) {
-    var isClientOrIssuerListVisible by remember { mutableStateOf(false) }
     var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
         mutableStateOf(
             DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
@@ -56,10 +60,44 @@ fun DocumentBottomSheetElementsAfterSlide(
     val documentFooterString = stringResource(Res.string.document_footer)
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
-        DocumentBottomSheetClientOrIssuerPreview(
+        val pair = parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>
+        val snapshot = pair.first
+        val master = pair.second.firstOrNull { it.id == snapshot?.originalClientOrIssuerId }
+        val snapshotVersion = snapshot?.originalVersion
+        val masterVersion = master?.version
+        val hasMasterUpdate = snapshotVersion != null && masterVersion != null &&
+            masterVersion > snapshotVersion
+        ClientOrIssuerPickerBottomSheet(
             pageElement = pageElement,
-            clientOrIssuer = (parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>).first,
-            onClickBack = onClickBack,
+            list = pair.second,
+            currentSelected = snapshot,
+            hasMasterUpdate = hasMasterUpdate,
+            onSelect = { onSelectClientOrIssuer(it) },
+            onClickEdit = {
+                // Only set the local typeOfCreation. The NavGraph checks for a
+                // master version mismatch first and decides itself whether to
+                // open the form now (no mismatch) or wait until the user has
+                // dismissed the version-mismatch dialog. Opening synchronously
+                // here would race the async check and stack the form on top
+                // of the dialog before the user can react.
+                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
+                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT
+                } else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
+                onClickEditDocumentClientOrIssuer(it, true)
+            },
+            onClickDeselect = {
+                onClickDeleteDocumentClientOrIssuer(
+                    if (pageElement == ScreenElement.DOCUMENT_CLIENT) ClientOrIssuerType.DOCUMENT_CLIENT
+                    else ClientOrIssuerType.DOCUMENT_ISSUER
+                )
+            },
+            onClickRefreshFromMaster = {
+                // Fires the existing version-mismatch dialog (wired at the NavGraph
+                // level via onClickDocumentClientOrIssuer / checkVersionMismatch).
+                // No form opens after the dialog is dismissed — refresh is a
+                // dedicated action, not a shortcut into editing.
+                onClickEditDocumentClientOrIssuer(it, false)
+            },
             onClickNew = {
                 onClickNewDocumentClientOrIssuer(
                     if (pageElement == ScreenElement.DOCUMENT_CLIENT) ClientOrIssuerType.DOCUMENT_CLIENT
@@ -70,40 +108,8 @@ fun DocumentBottomSheetElementsAfterSlide(
                 } else DocumentBottomSheetTypeOfForm.NEW_ISSUER
                 onShowDocumentForm(true)
             },
-            onClickSelect = { isClientOrIssuerListVisible = true },
-            onClickEdit = {
-                onClickEditDocumentClientOrIssuer(it)
-                typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT)
-                    DocumentBottomSheetTypeOfForm.EDIT_CLIENT else DocumentBottomSheetTypeOfForm.EDIT_ISSUER
-                onShowDocumentForm(true)
-            },
-            onClickDelete = onClickDeleteDocumentClientOrIssuer,
-            isClientOrIssuerListEmpty = parameters.second.isEmpty()
+            onDismiss = onClickBack,
         )
-
-        if (isClientOrIssuerListVisible) {
-            DocumentBottomSheetClientOrIssuerList(
-                list = parameters.second,
-                pageElement = pageElement,
-                onClickBack = { isClientOrIssuerListVisible = false },
-                onClientOrIssuerSelect = {
-                    onSelectClientOrIssuer(it)
-                    isClientOrIssuerListVisible = false
-                    /*typeOfCreation = if (pageElement == ScreenElement.DOCUMENT_CLIENT) {
-                        DocumentBottomSheetTypeOfForm.ADD_EXISTING_CLIENT
-                    } else DocumentBottomSheetTypeOfForm.ADD_EXISTING_ISSUER
-                    onShowDocumentForm(true)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        delay(TimeUnit.MILLISECONDS.toMillis(500))
-                        // Waits for the bottom form to be opened,
-                        // so previous screen change is in background
-                        isClientOrIssuerListVisible = false
-                    }*/
-                },
-                currentClientId = currentClientId,
-                currentIssuerId = currentIssuerId
-            )
-        }
     }
 
     if (pageElement == ScreenElement.DOCUMENT_DATE) {
@@ -182,14 +188,15 @@ fun DocumentBottomSheetElementsAfterSlide(
                 onClickCancelForm()
                 onShowDocumentForm(false)
             },
-            onClickDone = {
-                onClickDoneForm(typeOfCreation)
+            onClickDone = { syncToMaster ->
+                onClickDoneForm(typeOfCreation, syncToMaster)
             },
             onSelectTaxRate = onSelectTaxRate,
             onClickDeleteAddress = onClickDeleteAddress,
             onClickDeleteEmail = onClickDeleteEmail,
             onAddEmail = onAddEmail,
-            onPendingEmailValidationResult = onPendingEmailValidationResult
+            onPendingEmailValidationResult = onPendingEmailValidationResult,
+            showProductType = showProductType,
         )
     }
 }

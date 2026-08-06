@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,11 +42,12 @@ import com.a4a.g8invoicing.shared.resources.document_modal_product_save
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.callForActionsDisabled
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
+import com.a4a.g8invoicing.ui.theme.textCtaDisabled
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
@@ -59,7 +61,8 @@ fun DocumentBottomSheetForm(
     documentProduct: DocumentProductState = DocumentProductState(),
     taxRates: List<BigDecimal>? = null,
     onClickCancel: () -> Unit, // Called when the bottom sheet is fully dismissed by cancel/back
-    onClickDone: () -> Unit,   // Called when the main form is submitted
+    onClickDone: (syncToMaster: Boolean) -> Unit,   // Called when the main form is submitted
+
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
@@ -67,6 +70,7 @@ fun DocumentBottomSheetForm(
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
+    showProductType: Boolean = false,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -84,6 +88,14 @@ fun DocumentBottomSheetForm(
 
     // State to manage visibility of the tax selection screen
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
+    // Sync-to-master checkbox lives here so it persists across in-sheet navigations
+    // (tax selection, full-screen text) but resets when the sheet mounts a different
+    // client / issuer / product snapshot.
+    var syncToMasterChecked by remember(
+        documentClientUiState.id,
+        documentIssuerUiState.id,
+        documentProduct.id,
+    ) { mutableStateOf(false) }
     // State to determine if a text field (name or description) should be shown in full screen
     val fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
     // State to hold the text being edited in the full-screen text editor
@@ -123,6 +135,21 @@ fun DocumentBottomSheetForm(
         },
         // Note: sheetGesturesEnabled is not available in Compose Multiplatform
     ) {
+        PlatformBackHandler {
+            when {
+                isTaxSelectionVisible -> {
+                    isTaxSelectionVisible = false
+                    scope.launch { sheetState.expand() }
+                }
+                fullScreenElementToShow.value != null -> {
+                    fullScreenEditorText = TextFieldValue("")
+                    fullScreenElementToShow.value = null
+                    scope.launch { sheetState.expand() }
+                }
+                else -> onClickCancel()
+            }
+        }
+
         Column {
             DocumentBottomSheetHeader(
                 typeOfCreation = typeOfCreation,
@@ -173,7 +200,7 @@ fun DocumentBottomSheetForm(
                         pendingEmailState.value = ""
                     }
                     // Proceed with saving
-                    onClickDone()
+                    onClickDone(syncToMasterChecked)
                 }, // Main "Done" action for the form
                 onClickDoneFullScreen = { // "Done" action for the full-screen text editor
                     fullScreenElementToShow.value?.let { screenElement ->
@@ -211,7 +238,10 @@ fun DocumentBottomSheetForm(
                     fullScreenElementToShow.value = screenElement
                     // fullScreenEditorText is initialized by the LaunchedEffect
                 },
-                onNavigateToTaxSelection = { isTaxSelectionVisible = true } // Callback to show tax selection
+                onNavigateToTaxSelection = { isTaxSelectionVisible = true }, // Callback to show tax selection
+                showProductType = showProductType,
+                syncToMasterChecked = syncToMasterChecked,
+                onSyncToMasterChange = { syncToMasterChecked = it },
             )
         }
     }
@@ -301,7 +331,7 @@ private fun DocumentBottomSheetHeader(
         Box(modifier = Modifier.fillMaxWidth()) {
             // Cancel or Back button
             Text(
-                style = MaterialTheme.typography.callForActionsViolet,
+                style = MaterialTheme.typography.textCta,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(top = 20.dp) // Consistent padding
@@ -333,8 +363,8 @@ private fun DocumentBottomSheetHeader(
 
             // Done or Save button
             Text(
-                style = if (isDoneButtonEnabled) MaterialTheme.typography.callForActionsViolet
-                else MaterialTheme.typography.callForActionsDisabled,
+                style = if (isDoneButtonEnabled) MaterialTheme.typography.textCta
+                else MaterialTheme.typography.textCtaDisabled,
                 modifier = Modifier
                     .padding(top = 20.dp, bottom = 20.dp) // Consistent padding
                     .align(Alignment.TopEnd)
@@ -380,46 +410,60 @@ private fun DocumentBottomSheetContent(
     pendingEmailStateHolder: MutableState<String>,
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit,
     onNavigateToFullScreenText: (ScreenElement) -> Unit, // Callback to request full screen view
-    onNavigateToTaxSelection: (ScreenElement) -> Unit // Callback to request tax selection view
+    onNavigateToTaxSelection: (ScreenElement) -> Unit, // Callback to request tax selection view
+    showProductType: Boolean = false,
+    syncToMasterChecked: Boolean,
+    onSyncToMasterChange: (Boolean) -> Unit,
 ) {
     // Determine which form or view to show based on the current state
     when {
         typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> {
-            ClientOrIssuerAddEditForm(
-                clientOrIssuerUiState = documentClientUiState,
-                typeOfCreation = typeOfCreation,
-                onValueChange = { screenElement, value ->
-                    bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
-                },
-                placeCursorAtTheEndOfText = { screenElement ->
-                    bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_CLIENT)
-                },
-                isInBottomSheetModal = true,
-                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) },
-                onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
-                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) },
-                pendingEmailStateHolder = pendingEmailStateHolder,
-                onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) }
-            )
+            // Key on originalVersion + emails identity so loadLatestMasterVersion,
+            // which flips originalVersion when the user picks "load latest", forces
+            // the form to re-run its composition and pick up the freshly-fetched
+            // emails / addresses / labels from the master row instead of the stale
+            // snapshot that the bottom sheet mounted with.
+            key(documentClientUiState.originalVersion, documentClientUiState.emails) {
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuerUiState = documentClientUiState,
+                    typeOfCreation = typeOfCreation,
+                    onValueChange = { screenElement, value ->
+                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_CLIENT)
+                    },
+                    placeCursorAtTheEndOfText = { screenElement ->
+                        bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_CLIENT)
+                    },
+                    isInBottomSheetModal = true,
+                    onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_CLIENT) },
+                    onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_CLIENT, index) },
+                    onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_CLIENT, email) },
+                    pendingEmailStateHolder = pendingEmailStateHolder,
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_CLIENT, isValid) },
+                    syncToMasterChecked = syncToMasterChecked,
+                    onSyncToMasterChange = onSyncToMasterChange,
+                )
+            }
         }
 
         typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> {
-            ClientOrIssuerAddEditForm(
-                clientOrIssuerUiState = documentIssuerUiState,
-                typeOfCreation = typeOfCreation,
-                onValueChange = { screenElement, value ->
-                    bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
-                },
-                placeCursorAtTheEndOfText = { screenElement ->
-                    bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_ISSUER)
-                },
-                isInBottomSheetModal = true,
-                onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) },
-                onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
-                onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
-                pendingEmailStateHolder = pendingEmailStateHolder,
-                onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
-            )
+            key(documentIssuerUiState.originalVersion, documentIssuerUiState.emails) {
+                ClientOrIssuerAddEditForm(
+                    clientOrIssuerUiState = documentIssuerUiState,
+                    typeOfCreation = typeOfCreation,
+                    onValueChange = { screenElement, value ->
+                        bottomFormOnValueChange(screenElement, value, ClientOrIssuerType.DOCUMENT_ISSUER)
+                    },
+                    placeCursorAtTheEndOfText = { screenElement ->
+                        bottomFormPlaceCursor(screenElement, ClientOrIssuerType.DOCUMENT_ISSUER)
+                    },
+                    isInBottomSheetModal = true,
+                    onClickDeleteAddress = { onClickDeleteAddress(ClientOrIssuerType.DOCUMENT_ISSUER) },
+                    onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
+                    onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
+                    pendingEmailStateHolder = pendingEmailStateHolder,
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
+                )
+            }
         }
 
         else -> { // Product related content
@@ -449,7 +493,19 @@ private fun DocumentBottomSheetContent(
                         bottomFormPlaceCursor(screenElement, null)
                     },
                     onClickForward = onNavigateToTaxSelection,
-                    showFullScreenText = onNavigateToFullScreenText
+                    showFullScreenText = onNavigateToFullScreenText,
+                    showProductType = showProductType,
+                    // Sync switch: any flow where the user can tweak an existing
+                    // document product still linked to a master Product row.
+                    // EDIT_PRODUCT hits it when editing a doc product; ADD_EXISTING_PRODUCT
+                    // hits it when adding a picked product (user can edit price /
+                    // quantity before confirming). NEW_PRODUCT never shows it —
+                    // the row is being created, sync is implicit.
+                    showSyncToMasterSwitch = (typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_PRODUCT ||
+                        typeOfCreation == DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT) &&
+                        documentProduct.productId != null,
+                    syncToMasterChecked = syncToMasterChecked,
+                    onSyncToMasterChange = onSyncToMasterChange,
                 )
             }
         }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -28,7 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientRef
-import com.a4a.g8invoicing.ui.theme.inputLabel
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 @Composable
@@ -230,22 +231,46 @@ fun RowWithLabelAndInput(
             .fillMaxWidth()
             .padding(
                 start = 16.dp,
-                end = if (formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_NAME
-                    || formInput.pageElement == ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
-                ) 0.dp else 16.dp,
+                end = if (formInput.pageElement.name.startsWith("DOCUMENT_PRODUCT")) 0.dp else 16.dp,
                 top = 14.dp,
                 bottom = if (formInput.pageElement == ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS) 4.dp else 14.dp
             )
     ) {
         // Label
         when (formInput.label) {
-            is String -> Text(
-                modifier = Modifier
-                    .fillMaxWidth(0.4f)
-                    .padding(end = 12.dp),
-                text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
-                style = MaterialTheme.typography.inputLabel
-            )
+            is String -> {
+                if (formInput.labelInfoTooltip != null) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                            .padding(end = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
+                            style = MaterialTheme.typography.textBodyBold,
+                        )
+                        Spacer(Modifier.weight(1f))
+                        // Pastille "?" alignée au bord droit de la colonne label — les
+                        // lignes Code unité / Type ont ainsi leur pastille en colonne.
+                        // Se supprime après lecture (persist via Settings au close du modal).
+                        InfoTooltipButton(
+                            title = formInput.labelInfoTooltip.title,
+                            content = formInput.labelInfoTooltip.content,
+                            contentDescription = formInput.labelInfoTooltip.contentDescription,
+                            persistenceKey = formInput.labelInfoTooltip.persistenceKey,
+                        )
+                    }
+                } else {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth(0.4f)
+                            .padding(end = 12.dp),
+                        text = if (formInput.isMandatory) "${formInput.label} *" else formInput.label,
+                        style = MaterialTheme.typography.textBodyBold
+                    )
+                }
+            }
 
             is TextInput -> FormInputCreatorText(
                 input = formInput.label,
@@ -314,7 +339,20 @@ class FormInput(
     val inputType2: Any? = null, // Used for DoubleInputCreator
     val pageElement: ScreenElement,
     val extraId: String? = null,
-    val isMandatory: Boolean = false
+    val isMandatory: Boolean = false,
+    // Optional info tooltip (small ⓘ icon) rendered right after the label. Meant for
+    // fields the user might not intuit — e.g. Factur-X metadata that never appears on
+    // the PDF. Kept opt-in so most FormInputs stay clean.
+    val labelInfoTooltip: LabelInfoTooltip? = null,
+)
+
+data class LabelInfoTooltip(
+    val title: String,
+    val content: String,
+    val contentDescription: String,
+    // When non-null, the ⓘ disappears permanently after the user has read + dismissed
+    // the modal (persisted via Settings). Same key = same one-time discoverability aid.
+    val persistenceKey: String? = null,
 )
 
 class TextInput(
@@ -323,6 +361,17 @@ class TextInput(
     val onValueChange: (TextFieldValue) -> Unit = {},
     val keyboardType: KeyboardType = KeyboardType.Text,
     val displayFullScreenIcon: Boolean = false,
+    // Round grey "×" pinned at the end of the row that clears the field on
+    // tap. Used on the standalone product form (description / unit) so the
+    // user can wipe a value without hand-erasing every character. Only
+    // rendered when the field actually has content, hidden otherwise so
+    // an empty row stays clean.
+    val displayClearIcon: Boolean = false,
+    // true → Enter inserts a newline instead of firing the imeAction (Next/Done).
+    // Also reserves at least [minLines] of vertical space so the field doesn't
+    // start visually cramped at one line before the user starts typing.
+    val isMultiline: Boolean = false,
+    val minLines: Int = 1,
 )
 
 class DecimalInput(

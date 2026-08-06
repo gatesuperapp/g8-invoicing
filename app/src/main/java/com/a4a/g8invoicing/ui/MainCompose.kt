@@ -16,25 +16,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import g8invoicing.ClientOrIssuerQueries
+import g8invoicing.DeliveryNoteQueries
+import g8invoicing.InvoiceQueries
+import g8invoicing.ProductQueries
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.initializeVersionTracking
+import com.a4a.g8invoicing.data.setSeenOnboarding18
 import com.a4a.g8invoicing.data.setSeenWhatsNew
+import com.a4a.g8invoicing.data.shouldShowBackupPopupNow
+import com.a4a.g8invoicing.data.shouldShowOnboarding18
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.data.auth.AuthState
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.about_contact_email
+import com.a4a.g8invoicing.shared.resources.account_auth_link_expired
+import com.a4a.g8invoicing.shared.resources.account_auth_login_failed
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.navigation.Screen
+import com.a4a.g8invoicing.ui.screens.AuthMessageDialog
+import com.a4a.g8invoicing.ui.screens.DatabaseEmailDialog
+import com.a4a.g8invoicing.ui.screens.DatabaseExportDialog
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
 import com.a4a.g8invoicing.ui.screens.sendDatabaseByEmail
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import androidx.compose.ui.platform.LocalUriHandler
 import android.content.Intent
 import android.net.Uri
 import java.io.File
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -49,6 +66,10 @@ fun MainCompose(
     val authRepository: AuthRepository = koinInject()
     val subscriptionRepository: SubscriptionRepository = koinInject()
     val authState by authRepository.authState.collectAsState()
+    val invoiceQueries: InvoiceQueries = koinInject()
+    val deliveryNoteQueries: DeliveryNoteQueries = koinInject()
+    val productQueries: ProductQueries = koinInject()
+    val clientOrIssuerQueries: ClientOrIssuerQueries = koinInject()
 
     // Initialize locale and version tracking on first composition
     LaunchedEffect(Unit) {
@@ -58,29 +79,115 @@ fun MainCompose(
         initializeVersionTracking(context)
     }
 
-    // What's New dialog state
-    val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = false)
+    // What's New + Onboarding dialog state. The 1.8 onboarding takes priority
+    // over the generic What's New — the onboarding's welcome screen already
+    // mentions the Devis feature, so showing both would be redundant.
+    // `initial = null` so the LaunchedEffect can distinguish "DataStore hasn't
+    // emitted yet" from "flag is legitimately false" — see the LaunchedEffect
+    // below for the race the null guard prevents.
+    val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = null)
+    val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = null)
     var showWhatsNew by remember { mutableStateOf(false) }
+    var showOnboarding by remember { mutableStateOf(false) }
+    // Backup reminder: shown once when the user has >3 rows in any main table.
+    // Suppressed while onboarding / what's new are pending to avoid stacking
+    // modals at cold start.
+    var showBackupDialog by remember { mutableStateOf(false) }
+    var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
-    // Update showWhatsNew when shouldShow changes
-    LaunchedEffect(shouldShow) {
-        if (shouldShow) {
-            showWhatsNew = true
+    LaunchedEffect(shouldShow, shouldShowOnboarding) {
+        // Wait until BOTH DataStore flags have emitted their real value.
+        // Without this guard, the very first composition fires the effect
+        // with initial=null on both, which used to pass the "!shouldShow &&
+        // !shouldShowOnboarding" check and briefly flip showBackupDialog on
+        // — even during a version upgrade where the onboarding was actually
+        // due. The onboarding then displayed a moment later, but the backup
+        // dialog was already open behind it.
+        val whatsNew = shouldShow ?: return@LaunchedEffect
+        val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
+        showOnboarding = onboarding
+        showWhatsNew = whatsNew && !onboarding
+        if (!whatsNew && !onboarding) {
+            showBackupDialog = shouldShowBackupPopupNow(
+                context,
+                invoiceQueries,
+                deliveryNoteQueries,
+                productQueries,
+                clientOrIssuerQueries,
+            )
         }
+    }
+
+    if (showBackupDialog) {
+        DatabaseExportDialog(
+            context = context,
+            onDismiss = { showBackupDialog = false },
+            onResult = { file ->
+                showBackupDialog = false
+                backupExportedFile = file
+            },
+        )
+    }
+
+    backupExportedFile?.let { file ->
+        DatabaseEmailDialog(
+            context = context,
+            onDismiss = { backupExportedFile = null },
+            file = file,
+        )
     }
 
     // Track navController for deep link navigation
     var navControllerRef by remember { mutableStateOf<NavHostController?>(null) }
 
-    // Handle magic link token coming from a deep link: navigate to Account so its own
-    // NavBackStackEntry-scoped ViewModel can consume the token (and own the consume
-    // success/error state). navControllerRef is part of the key so we wait until the
-    // NavHost has wired it up — otherwise on cold start the navigate() no-ops.
+    // Error surfaced by the magic-link consume call — kept here (not in the Account
+    // VM) so the dialog outlives Account's composition. Account can be destroyed
+    // for reasons unrelated to auth (locale switch, NavGraph rebuild after DataStore
+    // emits a new value, a stacked nav.navigate) and any state carried on its VM
+    // would disappear with it — which used to make the dialog flash for ~2s and
+    // then vanish.
+    var consumeErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Navigate to Account when a deep-link token arrives, so a successful consume
+    // lands the user directly on the logged-in Account view. navControllerRef is
+    // part of the key so we wait until the NavHost has wired it up.
     LaunchedEffect(pendingMagicLinkToken, navControllerRef) {
         val nav = navControllerRef
         if (pendingMagicLinkToken != null && nav != null) {
             nav.navigate(Screen.Account.name)
         }
+    }
+
+    // Consume the deep-link token at the app root. Clearing pendingMagicLinkToken
+    // is deferred until AFTER consumeMagicLink returns — clearing it earlier would
+    // change the LaunchedEffect key mid-call and cancel the in-flight network
+    // request.
+    LaunchedEffect(pendingMagicLinkToken) {
+        val token = pendingMagicLinkToken ?: return@LaunchedEffect
+        val result = authRepository.consumeMagicLink(token)
+        onMagicLinkTokenConsumed()
+        if (result is AuthResult.Error) {
+            consumeErrorMessage = result.message
+        }
+    }
+
+    // Backend distinguishes "Lien invalide ou expiré" (401, link itself dead) from
+    // generic 500s (other failures, e.g. user-creation conflicts) — pick the right
+    // copy based on the message so a 500 doesn't get mislabelled as "link expired".
+    consumeErrorMessage?.let { msg ->
+        val isLinkExpired = msg.contains("expir", ignoreCase = true)
+            || msg.contains("invalide", ignoreCase = true)
+            || msg.contains("invalid", ignoreCase = true)
+            || msg.contains("abgelaufen", ignoreCase = true)
+        AuthMessageDialog(
+            messagePrefix = stringResource(
+                if (isLinkExpired) Res.string.account_auth_link_expired
+                else Res.string.account_auth_login_failed
+            ),
+            contactEmail = stringResource(Res.string.about_contact_email),
+            uriHandler = LocalUriHandler.current,
+            onDismiss = { consumeErrorMessage = null },
+        )
     }
 
     // Sync subscription status when auth state changes:
@@ -124,6 +231,17 @@ fun MainCompose(
                             setSeenWhatsNew(context)
                         }
                     },
+                    showOnboarding = showOnboarding,
+                    onOnboardingDismissed = {
+                        showOnboarding = false
+                        coroutineScope.launch {
+                            setSeenOnboarding18(context)
+                            // Also mark What's New as seen — the onboarding
+                            // already covered the same ground and we don't
+                            // want it to fire on the next launch.
+                            setSeenWhatsNew(context)
+                        }
+                    },
                     onShareContent = { content ->
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -155,8 +273,6 @@ fun MainCompose(
                             context.startActivity(intent)
                         }
                     },
-                    pendingMagicLinkToken = pendingMagicLinkToken,
-                    onMagicLinkTokenConsumed = onMagicLinkTokenConsumed,
                 )
             }
         }

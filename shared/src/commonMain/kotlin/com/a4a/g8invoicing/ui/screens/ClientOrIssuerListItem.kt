@@ -24,16 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.theme.ColorLightGreenTransp
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
-import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textSecondary
 
 @Composable
 fun ClientOrIssuerListItem(
@@ -79,7 +77,7 @@ fun ClientOrIssuerListItem(
                     }
                 )
             }
-            .background(if (checkedState.value) ColorLightGreyo else Color.White)
+            .background(if (checkedState.value) AppColors.surfaceMuted else AppColors.surface)
     ) {
         // Adding padding in the inside row, to keep the click & the ripple in all row
         // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
@@ -96,8 +94,8 @@ fun ClientOrIssuerListItem(
             if (isCheckboxDisplayed) {
                 Column {
                     FlippyCheckBox(
-                        fillColorWhenSelectionOff = Color.White, // Was actionTagUndefined().iconColor
-                        backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
+                        fillColorWhenSelectionOff = AppColors.surface, // Was actionTagUndefined().iconColor
+                        backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                         onItemCheckboxClick = {
                             checkedState.value = !checkedState.value
                             onItemCheckboxClick(checkedState.value)
@@ -125,11 +123,9 @@ fun ClientOrIssuerListItem(
                         (clientOrIssuer.firstName?.let { " " + it.text } ?: "")
                     Text(
                         text = clientName,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        //style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.textBodyBold,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
                 Row(
@@ -138,10 +134,9 @@ fun ClientOrIssuerListItem(
                 ) {
                     Text(
                         text = clientOrIssuer.emails?.firstOrNull()?.email?.text?.ifEmpty { " - " } ?: " - ",
-                        fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSmall
+                        style = MaterialTheme.typography.textSecondary,
                     )
                 }
             }

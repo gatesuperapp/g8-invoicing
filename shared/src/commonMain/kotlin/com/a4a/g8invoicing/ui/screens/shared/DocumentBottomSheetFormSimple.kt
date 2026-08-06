@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -21,7 +20,7 @@ import com.a4a.g8invoicing.shared.resources.document_modal_product_back
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import org.jetbrains.compose.resources.stringResource
 
 
@@ -37,8 +36,15 @@ fun DocumentBottomSheetFormSimple(
 ) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
-        confirmValueChange = { it != SheetValue.Hidden }
     )
+
+    // Drop the earlier `confirmValueChange = { it != SheetValue.Hidden }`
+    // guard — it blocked the sheet from transitioning to Hidden, which had
+    // the side effect of eating the system back press (Material3 relies on
+    // that transition to fire onDismissRequest). We still forbid swipe-down
+    // via `sheetGesturesEnabled = false` on the outer BottomSheetScaffold
+    // in DocumentAddEdit, so the sheet can only be closed via the Cancel
+    // button or the back press now.
 
     ModalBottomSheet(
         onDismissRequest = onClickCancel,
@@ -58,7 +64,7 @@ fun DocumentBottomSheetFormSimple(
                         .fillMaxWidth()
                 ) {
                     Text(
-                        style = MaterialTheme.typography.callForActionsViolet,
+                        style = MaterialTheme.typography.textCta,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(top = 20.dp)
@@ -81,7 +87,7 @@ fun DocumentBottomSheetFormSimple(
 
                     if (!isDatePicker)
                         Text(
-                            style = MaterialTheme.typography.callForActionsViolet,
+                            style = MaterialTheme.typography.textCta,
                             modifier = Modifier
                                 .padding(top = 20.dp)
                                 .clickable {

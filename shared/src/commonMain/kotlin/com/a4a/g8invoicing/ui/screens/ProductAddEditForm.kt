@@ -23,8 +23,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,21 +48,40 @@ import com.a4a.g8invoicing.shared.resources.product_price
 import com.a4a.g8invoicing.shared.resources.product_price_client
 import com.a4a.g8invoicing.shared.resources.product_price_default
 import com.a4a.g8invoicing.shared.resources.product_price_input
+import com.a4a.g8invoicing.data.models.ProductNature
+import com.a4a.g8invoicing.data.models.UnitCode
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
+import com.a4a.g8invoicing.data.AppLocaleHolder
+import androidx.compose.runtime.LaunchedEffect
+import org.koin.compose.koinInject
+import com.a4a.g8invoicing.ui.screens.shared.ProductNaturePicker
+import com.a4a.g8invoicing.ui.screens.shared.UnitCodePicker
 import com.a4a.g8invoicing.shared.resources.product_tax
+import com.a4a.g8invoicing.shared.resources.product_type_goods
+import com.a4a.g8invoicing.shared.resources.product_type_info_desc
+import com.a4a.g8invoicing.shared.resources.product_type_info_modal_content
+import com.a4a.g8invoicing.shared.resources.product_type_info_modal_title
+import com.a4a.g8invoicing.shared.resources.product_type_label
+import com.a4a.g8invoicing.shared.resources.product_type_service
 import com.a4a.g8invoicing.shared.resources.product_unit
+import com.a4a.g8invoicing.shared.resources.product_unit_code_info_desc
+import com.a4a.g8invoicing.shared.resources.product_unit_code_info_modal_content
+import com.a4a.g8invoicing.shared.resources.product_unit_code_info_modal_title
+import com.a4a.g8invoicing.shared.resources.product_unit_code_label
 import com.a4a.g8invoicing.shared.resources.product_unit_input
 import com.a4a.g8invoicing.ui.shared.DecimalInput
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
+import com.a4a.g8invoicing.ui.shared.LabelInfoTooltip
 import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.shared.ListPicker
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -74,8 +96,30 @@ fun ProductAddEditForm(
     onClickSelectClients: (priceId: String) -> Unit,
     onRemoveClient: (priceId: String, clientId: Int) -> Unit,
     isLoading: Boolean,
+    // 1.8: no per-product company scoping yet, so the Type row can't be gated on
+    // a specific issuer's intraEuSales flag. Default false = row stays hidden on
+    // the master form. Wired end-to-end (VM → NavGraph → form) so 1.9 only needs
+    // to push a real value here once the active-company concept exists.
+    showProductType: Boolean = false,
 ) {
     val localFocusManager = LocalFocusManager.current
+    var unitPickerOpen by remember { mutableStateOf(false) }
+    var typePickerOpen by remember { mutableStateOf(false) }
+
+    // Resolve the localised name for the currently-selected unit code. Recomputes
+    // on locale change (AppLocaleHolder.languageCode as a key) and on code
+    // change. Compose Resources' getString is suspend so we live-update state
+    // rather than passing the whole string down.
+    val unitCodeRepository: UnitCodeRepository = koinInject()
+    var unitCodeDisplay by remember { mutableStateOf<String?>(null) }
+    val currentUnitCode = product.unitCode
+    LaunchedEffect(currentUnitCode, AppLocaleHolder.languageCode) {
+        unitCodeDisplay = currentUnitCode?.let { code ->
+            val unit = UnitCode.findByCode(code)
+            if (unit == null) code
+            else "$code — ${unitCodeRepository.resolveName(unit)}"
+        }
+    }
 
     // Hoist stringResource calls
     val productNameLabel = stringResource(Res.string.product_name)
@@ -84,6 +128,16 @@ fun ProductAddEditForm(
     val productDescriptionPlaceholder = stringResource(Res.string.product_description_input)
     val productUnitLabel = stringResource(Res.string.product_unit)
     val productUnitPlaceholder = stringResource(Res.string.product_unit_input)
+    val productTypeLabel = stringResource(Res.string.product_type_label)
+    val productTypeServiceLabel = stringResource(Res.string.product_type_service)
+    val productTypeGoodsLabel = stringResource(Res.string.product_type_goods)
+    val productTypeInfoTitle = stringResource(Res.string.product_type_info_modal_title)
+    val productTypeInfoContent = stringResource(Res.string.product_type_info_modal_content)
+    val productTypeInfoDesc = stringResource(Res.string.product_type_info_desc)
+    val productUnitCodeLabel = stringResource(Res.string.product_unit_code_label)
+    val unitCodeInfoTitle = stringResource(Res.string.product_unit_code_info_modal_title)
+    val unitCodeInfoContent = stringResource(Res.string.product_unit_code_info_modal_content)
+    val unitCodeInfoDesc = stringResource(Res.string.product_unit_code_info_desc)
     val productTaxLabel = stringResource(Res.string.product_tax)
     val productPriceLabel = stringResource(Res.string.product_price)
     val productPriceDefaultLabel = stringResource(Res.string.product_price_default)
@@ -93,7 +147,7 @@ fun ProductAddEditForm(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray)
+            .background(AppColors.surfaceMuted)
             .verticalScroll(rememberScrollState())
             .dismissKeyboardOnUnconsumedTap()
             .padding(12.dp)
@@ -107,7 +161,7 @@ fun ProductAddEditForm(
             Column {
                 Column(
                     modifier = Modifier
-                        .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                        .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                         .fillMaxWidth()
                         .padding(
                             top = 6.dp,
@@ -121,10 +175,16 @@ fun ProductAddEditForm(
                         product.name,
                         product.description,
                         product.unit,
+                        product.unitCode,
+                        product.type,
                         product.taxRate,
                         product.defaultPriceWithoutTax,
                         product.defaultPriceWithTax,
-                        hasAdditionalPrices
+                        hasAdditionalPrices,
+                        // Include the async unit-code display so the FormInput
+                        // rebuilds once resolveName finishes — otherwise the row
+                        // caches a stale "-" until an unrelated field changes.
+                        unitCodeDisplay,
                     ) {
                         listOfNotNull(
                             FormInput(
@@ -134,7 +194,8 @@ fun ProductAddEditForm(
                                     placeholder = productNamePlaceholder,
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_NAME, it, null)
-                                    }
+                                    },
+                                    displayClearIcon = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_NAME,
                                 isMandatory = true
@@ -146,7 +207,8 @@ fun ProductAddEditForm(
                                     placeholder = productDescriptionPlaceholder,
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_DESCRIPTION, it, null)
-                                    }
+                                    },
+                                    displayClearIcon = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_DESCRIPTION
                             ),
@@ -157,10 +219,51 @@ fun ProductAddEditForm(
                                     placeholder = productUnitPlaceholder,
                                     onValueChange = {
                                         onValueChange(ScreenElement.PRODUCT_UNIT, it, null)
-                                    }
+                                    },
+                                    displayClearIcon = true,
                                 ),
                                 pageElement = ScreenElement.PRODUCT_UNIT
                             ),
+                            // Code unité UNECE (BT-130) — ouverture bottom-sheet catégorisée.
+                            // Sync bi-directionnelle text↔code géré côté ViewModel : taper "heure"
+                            // en unit auto-match HUR ; picker → prérempli "heure" côté unit.
+                            FormInput(
+                                label = productUnitCodeLabel,
+                                inputType = ForwardElement(
+                                    text = unitCodeDisplay ?: "-",
+                                    isMultiline = false,
+                                ),
+                                pageElement = ScreenElement.PRODUCT_UNIT_CODE,
+                                labelInfoTooltip = LabelInfoTooltip(
+                                    title = unitCodeInfoTitle,
+                                    content = unitCodeInfoContent,
+                                    contentDescription = unitCodeInfoDesc,
+                                    persistenceKey = "product_unit_code",
+                                ),
+                            ),
+                            // Product.type (BT-151 SERVICE/GOODS). Row hidden in 1.8
+                            // (showProductType defaults to false — see param comment):
+                            // no per-product company scoping means we can't decide
+                            // which issuer's intraEuSales gates visibility here. Wired
+                            // end-to-end so 1.9 only flips the source of the flag.
+                            if (showProductType) FormInput(
+                                label = productTypeLabel,
+                                inputType = ForwardElement(
+                                    text = when (product.type) {
+                                        ProductNature.GOODS -> productTypeGoodsLabel
+                                        ProductNature.SERVICE -> productTypeServiceLabel
+                                        null -> "-"
+                                    },
+                                    isMultiline = false,
+                                ),
+                                pageElement = ScreenElement.PRODUCT_TYPE,
+                                labelInfoTooltip = LabelInfoTooltip(
+                                    title = productTypeInfoTitle,
+                                    content = productTypeInfoContent,
+                                    contentDescription = productTypeInfoDesc,
+                                    persistenceKey = "product_type",
+                                ),
+                            ) else null,
                             FormInput(
                                 label = productTaxLabel,
                                 inputType = ForwardElement(
@@ -210,7 +313,13 @@ fun ProductAddEditForm(
                     FormUI(
                         inputList = inputList,
                         localFocusManager = localFocusManager,
-                        onClickForward = onClickForward,
+                        onClickForward = { element ->
+                            when (element) {
+                                ScreenElement.PRODUCT_UNIT_CODE -> unitPickerOpen = true
+                                ScreenElement.PRODUCT_TYPE -> typePickerOpen = true
+                                else -> onClickForward(element)
+                            }
+                        },
                         placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                         errors = product.errors
                     )
@@ -244,7 +353,7 @@ fun ProductAddEditForm(
                 key(currentPrice.idStr) {
                     Column(
                         modifier = Modifier
-                            .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                            .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     ) {
 
                         // 🗑️ Suppression du prix - padding réduit
@@ -335,6 +444,27 @@ fun ProductAddEditForm(
             )
         }
     }
+
+    if (unitPickerOpen) {
+        UnitCodePicker(
+            currentCode = product.unitCode,
+            onSelect = { code ->
+                onValueChange(ScreenElement.PRODUCT_UNIT_CODE, code, null)
+                unitPickerOpen = false
+            },
+            onDismiss = { unitPickerOpen = false },
+        )
+    }
+    if (typePickerOpen) {
+        ProductNaturePicker(
+            current = product.type,
+            onSelect = { nature ->
+                onValueChange(ScreenElement.PRODUCT_TYPE, nature, null)
+                typePickerOpen = false
+            },
+            onDismiss = { typePickerOpen = false },
+        )
+    }
 }
 
 @Composable
@@ -344,7 +474,7 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
         modifier = Modifier
             .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
             .background(
-                color = Color.White,
+                color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
             )
             .clickable(enabled = true) {
@@ -353,7 +483,7 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
-            style = MaterialTheme.typography.callForActions,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             color = ColorVioletLink,
             text = AnnotatedString(addPriceText),
         )
@@ -374,7 +504,7 @@ fun DeletePriceButton(onClick: () -> Unit) {
         Icon(
             modifier = Modifier.size(18.dp),
             imageVector = Icons.Outlined.Delete,
-            tint = ColorDarkGray,
+            tint = AppColors.iconPrimary,
             contentDescription = deletePriceText
         )
     }

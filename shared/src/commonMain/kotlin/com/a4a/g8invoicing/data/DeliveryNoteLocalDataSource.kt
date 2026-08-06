@@ -71,6 +71,8 @@ class DeliveryNoteLocalDataSource(
                 footerText = TextFieldValue(getExistingFooter() ?: ""),
                 watermarkText = frozenWatermark,
                 labelsSnapshot = frozenLabels,
+                showCurrencyAndAutoTaxColumn = true,
+                formatLocale = AppLocaleHolder.languageCode,
             )
 
             saveInfoInDocumentTable(newDeliveryNoteState)
@@ -202,8 +204,8 @@ class DeliveryNoteLocalDataSource(
                 documentDate = it.delivery_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
                 freeField = TextFieldValue(text = it.free_field ?: ""),
-                documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
-                documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
+                documentIssuer = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_ISSUER }?.maxByOrNull { it.id ?: 0 },
+                documentClient = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_CLIENT }?.maxByOrNull { it.id ?: 0 },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
@@ -211,6 +213,8 @@ class DeliveryNoteLocalDataSource(
                 createdDate = it.created_at,
                 watermarkText = it.watermark_text,
                 labelsSnapshot = it.labels_snapshot,
+                showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
+                formatLocale = it.format_locale,
             )
         }
     }
@@ -252,6 +256,8 @@ class DeliveryNoteLocalDataSource(
                         documentNumber = TextFieldValue(docNumber),
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
+                        showCurrencyAndAutoTaxColumn = true,
+                        formatLocale = AppLocaleHolder.languageCode,
                     )
 
                     saveInfoInDocumentTable(duplicatedDocumentState)
@@ -459,6 +465,8 @@ class DeliveryNoteLocalDataSource(
                 footer = document.footerText.text,
                 watermark_text = document.watermarkText,
                 labels_snapshot = document.labelsSnapshot,
+                show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
+                format_locale = document.formatLocale,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

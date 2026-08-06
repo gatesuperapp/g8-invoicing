@@ -22,10 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
@@ -39,13 +38,11 @@ import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.a4a.g8invoicing.ui.theme.ColorGreen
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
-import com.a4a.g8invoicing.ui.theme.ColorPinkOrange
-import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBody
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.data.formatAmount
-import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.invoice_due_date
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -100,7 +97,7 @@ fun DocumentListItem(
                     }
                 )
             }
-            .background(if (checkedState.value) ColorLightGreyo else Color.White)
+            .background(if (checkedState.value) AppColors.divider else AppColors.surface)
     ) {
 
         // Adding padding in the inside row, to keep the click & the ripple in all row
@@ -112,13 +109,40 @@ fun DocumentListItem(
                     end = 20.dp,
                     top = 14.dp,
                     bottom = 14.dp
-                )
+                ),
+            verticalAlignment = CenterVertically,
         ) {
+
+            // Cancelled invoices are visually greyed out: white pill (not the
+            // yellow "cancelled" fill), primary text in a light muted grey,
+            // price struck-through. The tag lookup still returns
+            // actionTagCancelled() so the tag dropdown / bottom bar keep their
+            // pale-yellow chip semantics elsewhere.
+            val isCancelled = document is InvoiceState &&
+                document.documentTag == DocumentTag.CANCELLED
+
+            val statusColor: Color = when (document.documentTag) {
+                DocumentTag.PAID -> AppColors.statusPaid
+                DocumentTag.LATE -> AppColors.statusLate
+                else -> AppColors.textPrimary
+            }
+            // Body text greys out when the invoice is cancelled so the whole
+            // row reads as "no longer relevant". textMuted (light grey) rather
+            // than textSecondary (dark grey) because cancelled shouldn't
+            // compete with active rows for attention.
+            val bodyColor: Color = if (isCancelled) AppColors.textMuted else AppColors.textPrimary
+
+            // Hoisted here so both the left column (countdown text) and the
+            // right column (LATE status label wants the same day count) can
+            // share it — otherwise the right column has no way to see the
+            // value computed inside the left column's scope.
+            val invoice = document as? InvoiceState
+            val daysUntilDue = invoice?.let { daysUntilDueDate(it.dueDate) }
 
             Column {
                 FlippyCheckBox(
-                    fillColorWhenSelectionOff = action.iconColor,
-                    backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
+                    fillColorWhenSelectionOff = if (isCancelled) AppColors.surface else action.iconColor,
+                    backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.divider else AppColors.surface,
                     onItemCheckboxClick = {
                         checkedState.value = !checkedState.value
                         onItemCheckboxClick(checkedState.value)
@@ -126,7 +150,7 @@ fun DocumentListItem(
                     checkboxFace = if (checkedState.value) CheckboxFace.Front
                     else CheckboxFace.Back,
                     checkedState = checkedState.value,
-                    displayBorder = document.documentType != DocumentType.INVOICE
+                    displayBorder = document.documentType != DocumentType.INVOICE || isCancelled,
                 )
             }
 
@@ -138,35 +162,60 @@ fun DocumentListItem(
             ) {
                 Text(
                     text = document.documentNumber.text,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.textBodyBold.copy(color = bodyColor),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 document.documentClient?.let {
                     Text(
                         text = it.name.text + (it.firstName?.let { " " + it.text } ?: ""),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSmall,
+                        style = MaterialTheme.typography.textBody.copy(
+                            color = bodyColor,
+                            textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
+                        ),
                     )
                 } ?: Text(" - ")
 
-                if (document is InvoiceState) {
-                    if (document.documentTag == DocumentTag.PAID || document.documentTag == DocumentTag.CANCELLED) {
-                        action.label?.let {
-                            Text(
-                                text = it,
-                            )
-                        }
-                    } else {
+                // Creation date, optionally followed by " · Éch. dans X
+                // jour(s)" for invoices whose deadline is still ahead. Late
+                // invoices skip the left-hand countdown because their overdue
+                // signal already sits on the right, under the price. Draft
+                // is included — customers still like the deadline reminder
+                // even before the invoice is sent. Colour is textSecondary
+                // (dark grey) — cancelled falls back to textMuted so the
+                // whole row still greys out.
+                val leftCountdownDays = when {
+                    invoice == null -> null
+                    invoice.documentTag == DocumentTag.PAID -> null
+                    invoice.documentTag == DocumentTag.CANCELLED -> null
+                    invoice.documentTag == DocumentTag.LATE -> null
+                    daysUntilDue == null || daysUntilDue < 0 -> null
+                    else -> daysUntilDue
+                }
+                val dateColor: Color = if (isCancelled) AppColors.textMuted else AppColors.textSecondary
+
+                Row(verticalAlignment = CenterVertically) {
+                    Text(
+                        text = dateWithoutYear(document.documentDate),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.textSecondary.copy(color = dateColor),
+                    )
+                    if (leftCountdownDays != null) {
                         Text(
-                            text = stringResource(Res.string.invoice_due_date) + " " + document.dueDate.substringBefore(
-                                " "
+                            text = " · ",
+                            style = MaterialTheme.typography.textSecondary.copy(color = dateColor),
+                        )
+                        Text(
+                            text = stringResource(
+                                countdownStringFor(leftCountdownDays),
+                                leftCountdownDays,
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            style = MaterialTheme.typography.textSmall,
+                            style = MaterialTheme.typography.textSecondary.copy(color = dateColor),
                         )
                     }
                 }
@@ -177,21 +226,40 @@ fun DocumentListItem(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = document.documentDate.substringBefore(" "),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
                     text = document.documentTotalPrices?.totalPriceWithTax?.let {
-                        formatAmount(it, document.currency.text.ifEmpty { "EUR" })
+                        formatAmount(it, document.currency.text.ifEmpty { "EUR" }, document.formatLocale)
                     } ?: "",
-                    color = when (document.documentTag) {
-                        DocumentTag.PAID -> ColorGreen
-                        DocumentTag.LATE -> ColorPinkOrange
-                        else -> Color.Black
-                    },
-                    style = MaterialTheme.typography.textSmall
+                    style = MaterialTheme.typography.textBodyBold.copy(
+                        color = if (isCancelled) AppColors.textMuted else statusColor,
+                        textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
+                    ),
                 )
+                if (document is InvoiceState) {
+                    // Status label under the price. For late invoices the
+                    // flat 'En retard' label swells to 'En retard de X jour(s)'
+                    // so the row surfaces exactly how overdue it is; the
+                    // colour still matches the price so paid/late read as one
+                    // green / one red signal.
+                    val overdueDays = if (document.documentTag == DocumentTag.LATE &&
+                        daysUntilDue != null && daysUntilDue < 0) -daysUntilDue else null
+                    val labelText = when {
+                        overdueDays != null -> stringResource(
+                            countdownStringFor(-overdueDays),
+                            overdueDays,
+                        )
+                        else -> action.label
+                    }
+                    labelText?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.textSecondary.copy(
+                                color = if (isCancelled) AppColors.textMuted else statusColor,
+                            ),
+                        )
+                    }
+                }
+                // Non-invoice types: no second line on the right — the price
+                // sits alone and centres vertically with the left column.
             }
         }
     }

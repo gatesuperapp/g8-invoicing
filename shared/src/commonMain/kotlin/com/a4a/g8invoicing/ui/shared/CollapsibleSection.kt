@@ -23,7 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.textTitle
+import com.a4a.g8invoicing.ui.theme.textSection
 
 @Composable
 fun CollapsibleSection(
@@ -54,11 +54,11 @@ fun CollapsibleSection(
                     .padding(end = 8.dp)
                     .rotate(chevronRotation),
                 text = ">",
-                style = MaterialTheme.typography.textTitle,
+                style = MaterialTheme.typography.textSection,
             )
             Text(
                 text = title.uppercase(),
-                style = MaterialTheme.typography.textTitle,
+                style = MaterialTheme.typography.textSection,
             )
         }
         AnimatedVisibility(visible = expanded) {

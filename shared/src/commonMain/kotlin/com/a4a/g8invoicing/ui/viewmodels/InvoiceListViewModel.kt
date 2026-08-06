@@ -95,7 +95,8 @@ class InvoiceListViewModel(
         createCreditNoteJob?.cancel()
         createCreditNoteJob = viewModelScope.launch {
             try {
-                creditNoteDataSource.convertInvoiceToCreditNote(selectedDocuments)
+                val creditNoteId = creditNoteDataSource.convertInvoiceToCreditNote(selectedDocuments)
+                _documentsUiState.update { state -> state.copy(createdCreditNoteId = creditNoteId) }
             } catch (e: Exception) {
                 // Error handling
             }
@@ -110,12 +111,28 @@ class InvoiceListViewModel(
                 selectedDocuments.forEach {
                     it.freeField = TextFieldValue(cancelAndReplaceText + " " + it.documentNumber.text)
                 }
-                invoiceDataSource.duplicate(selectedDocuments)
+                val createdIds = invoiceDataSource.duplicate(selectedDocuments)
                 setTag(selectedDocuments, DocumentTag.CANCELLED, TagUpdateOrCreationCase.AUTOMATICALLY_CANCELLED)
+                // Only surface the "view my corrected invoice" popup when a
+                // single source was picked — with several, the dialog would
+                // arbitrarily pick one to open.
+                if (createdIds.size == 1) {
+                    _documentsUiState.update { state ->
+                        state.copy(createdCorrectedInvoiceId = createdIds.single())
+                    }
+                }
             } catch (e: Exception) {
                 // Error handling
             }
         }
+    }
+
+    fun clearCreatedCreditNoteId() {
+        _documentsUiState.update { state -> state.copy(createdCreditNoteId = null) }
+    }
+
+    fun clearCreatedCorrectedInvoiceId() {
+        _documentsUiState.update { state -> state.copy(createdCorrectedInvoiceId = null) }
     }
 
     fun setTag(selectedDocuments: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase) {

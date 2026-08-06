@@ -24,4 +24,29 @@ interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun getLastCreatedIssuerId(): Long?
     suspend fun getLastIssuer(): ClientOrIssuerState?
     suspend fun getMasterVersion(masterId: Long): Int?
+
+    /**
+     * Country code (ISO 3166-1 alpha-2, uppercase) of the most recently created address
+     * that has one saved. Used by the address form as the primary cascade default for a
+     * newly-created address slot — someone who mostly bills the same country doesn't
+     * re-pick it every time. null when no prior address carries a country (fresh install
+     * or entirely legacy data), in which case the caller falls back to the device locale
+     * and then to "FR" via [com.a4a.g8invoicing.data.models.CountryCodes.pickDefaultForNewAddress].
+     */
+    suspend fun getLastCountryCode(): String?
+
+    /** Up to [limit] distinct country codes previously used on any address,
+     *  ordered by most-recently-used. Powers the "Récents" section in the
+     *  country picker. Empty on fresh install. */
+    suspend fun getRecentCountryCodes(limit: Int): List<String>
+
+    /** Bulk-fill country_code on every client (type='client') address that has
+     *  no country yet. Used by the 1.8 onboarding wizard to remedy legacy
+     *  clients whose addresses predate the country_code field. Issuer addresses
+     *  are untouched. */
+    suspend fun setCountryForClientsWithoutCountry(countryCode: String)
+
+    /** Master ids of the 3 most recently used clients or issuers in documents,
+     *  most recent first. Powers the "Recents" section in the picker sheets. */
+    suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long>
 }

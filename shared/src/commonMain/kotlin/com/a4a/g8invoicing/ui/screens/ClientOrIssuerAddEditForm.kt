@@ -20,6 +20,8 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -28,15 +30,23 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.models.CountryCodes
+import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
+import androidx.compose.runtime.LaunchedEffect
+import org.koin.compose.koinInject
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.client_add_address
 import com.a4a.g8invoicing.shared.resources.client_address1
@@ -48,6 +58,7 @@ import com.a4a.g8invoicing.shared.resources.client_address_title_head_office_pla
 import com.a4a.g8invoicing.shared.resources.client_address_title_invoicing_placeholder
 import com.a4a.g8invoicing.shared.resources.client_city
 import com.a4a.g8invoicing.shared.resources.client_city_input
+import com.a4a.g8invoicing.shared.resources.client_country
 import com.a4a.g8invoicing.shared.resources.client_company_identification1_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification2_input
 import com.a4a.g8invoicing.shared.resources.client_company_identification3_input
@@ -65,26 +76,35 @@ import com.a4a.g8invoicing.shared.resources.client_notes
 import com.a4a.g8invoicing.shared.resources.client_notes_input
 import com.a4a.g8invoicing.shared.resources.client_phone
 import com.a4a.g8invoicing.shared.resources.client_phone_input
+import com.a4a.g8invoicing.shared.resources.document_form_sync_client_to_master
+import com.a4a.g8invoicing.shared.resources.document_form_sync_issuer_to_master
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_dismiss
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
 import com.a4a.g8invoicing.shared.resources.issuer_logo_label
 import com.a4a.g8invoicing.shared.resources.issuer_logo_remove
 import com.a4a.g8invoicing.shared.resources.issuer_logo_select
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_desc
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_content
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_title
+import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_label
+import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_label
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
 import com.a4a.g8invoicing.ui.shared.EmailListInput
+import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
+import com.a4a.g8invoicing.ui.shared.InfoTooltipButton
 import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
-import com.a4a.g8invoicing.ui.theme.ColorDarkGray
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -100,7 +120,33 @@ fun ClientOrIssuerAddEditForm(
     scrollState: ScrollState = rememberScrollState(),
     pendingEmailStateHolder: MutableState<String>? = null,
     onPendingEmailValidationResult: (Boolean) -> Unit = {},
+    syncToMasterChecked: Boolean = false,
+    onSyncToMasterChange: (Boolean) -> Unit = {},
 ) {
+    val dataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
+    var defaultCountryCode by remember {
+        mutableStateOf(CountryCodes.pickDefaultForNewAddress(null))
+    }
+    LaunchedEffect(clientOrIssuerUiState.id) {
+        val fallback = CountryCodes.pickDefaultForNewAddress(dataSource.getLastCountryCode())
+        defaultCountryCode = fallback
+        // Only seed the country on creation (id == null). In edit mode we never
+        // write to state from here: an existing client's country_code=NULL means
+        // the user hasn't set one yet, and silently backfilling with the cascade
+        // fallback would clobber whatever they intended (e.g. an onboarding-set
+        // country the client-list flow hasn't propagated yet).
+        if (clientOrIssuerUiState.id == null) {
+            clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
+                if (address.countryCode.isNullOrBlank()) {
+                    val screenEl = if (isInBottomSheetModal)
+                        ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                    else
+                        ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                    onValueChange(screenEl, TextFieldValue(fallback))
+                }
+            }
+        }
+    }
     val localFocusManager = LocalFocusManager.current
     // Use client ID as key to re-calculate when editing a different client
     // Use client ID AND addresses size as key to re-calculate when addresses change
@@ -131,6 +177,11 @@ fun ClientOrIssuerAddEditForm(
     val clientCityPlaceholder = stringResource(Res.string.client_city_input)
     val clientZipCodeLabel = stringResource(Res.string.client_zip_code)
     val clientZipCodePlaceholder = stringResource(Res.string.client_zip_code_input)
+    val clientCountryLabel = stringResource(Res.string.client_country)
+    // Which address-index (1..3) currently has its country picker sheet open. null = none.
+    // Tracked at the outer scope so the sheet renders once, after the address loop, and
+    // the same rendering path is shared by all three possible addresses.
+    var countryPickerAddressIndex: Int? by remember { mutableStateOf(null) }
     val companyId1Label = stringResource(Res.string.company_identification1)
     val companyId2Label = stringResource(Res.string.company_identification2)
     val companyId3Label = stringResource(Res.string.company_identification3)
@@ -146,6 +197,11 @@ fun ClientOrIssuerAddEditForm(
     val issuerLogoRemove = stringResource(Res.string.issuer_logo_remove)
     val issuerLogoErrorTitle = stringResource(Res.string.issuer_logo_error_title)
     val issuerLogoErrorDismiss = stringResource(Res.string.issuer_logo_error_dismiss)
+    val issuerVatExemptLabel = stringResource(Res.string.issuer_vat_exempt_label)
+    val issuerIntraEuSalesLabel = stringResource(Res.string.issuer_intra_eu_sales_label)
+    val issuerIntraEuSalesInfoTitle = stringResource(Res.string.issuer_intra_eu_sales_info_modal_title)
+    val issuerIntraEuSalesInfoContent = stringResource(Res.string.issuer_intra_eu_sales_info_modal_content)
+    val issuerIntraEuSalesInfoDesc = stringResource(Res.string.issuer_intra_eu_sales_info_desc)
 
     // Check if this is an issuer (to show logo field)
     // Also check typeOfCreation for new issuer creation where type might be null
@@ -157,7 +213,7 @@ fun ClientOrIssuerAddEditForm(
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
-            .background(ColorBackgroundGrey)
+            .background(AppColors.divider)
             .fillMaxSize()
             .dismissKeyboardOnUnconsumedTap()
             .padding(12.dp)
@@ -166,7 +222,7 @@ fun ClientOrIssuerAddEditForm(
     ) {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(
                     //start = 20.dp,
                     top = 8.dp,
@@ -186,7 +242,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_NAME,
                                 it
                             )
-                        }
+                        },
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME
                     else ScreenElement.CLIENT_OR_ISSUER_NAME,
@@ -203,7 +259,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME,
                                 it
                             )
-                        }
+                        },
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
                     else ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME
@@ -220,7 +276,7 @@ fun ClientOrIssuerAddEditForm(
                                 it
                             )
                         },
-                        keyboardType = KeyboardType.Phone
+                        keyboardType = KeyboardType.Phone,
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
                     else ScreenElement.CLIENT_OR_ISSUER_PHONE
@@ -240,7 +296,7 @@ fun ClientOrIssuerAddEditForm(
         // Email section with chips
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(top = 8.dp)
         ) {
             val emailInputList = listOf(
@@ -276,7 +332,7 @@ fun ClientOrIssuerAddEditForm(
 
             Column(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .padding(top = 8.dp)
             ) {
                 val inputList = mutableListOf(
@@ -291,7 +347,7 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i"),
                                     it
                                 )
-                            }
+                            },
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_1_$i")
@@ -308,7 +364,7 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i"),
                                     it
                                 )
-                            }
+                            },
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_LINE_2_$i")
@@ -325,7 +381,7 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ZIP_$i"),
                                     it
                                 )
-                            }
+                            },
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ZIP_$i")
@@ -342,11 +398,28 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i"),
                                     it
                                 )
-                            }
+                            },
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_CITY_$i")
                         else ScreenElement.valueOf("CLIENT_OR_ISSUER_CITY_$i")
+                    ),
+                    // Factur-X requires country with ISO 3166-1 code
+                    // In creation, prefill with cascade default (last-used → device locale → FR).
+                    // In edit, mirror the state exactly (empty when NULL) so the display never
+                    // lies about what's persisted.
+                    FormInput(
+                        label = clientCountryLabel,
+                        inputType = ForwardElement(
+                            text = CountryCodes.displayNameOf(
+                                address?.countryCode?.takeIf { it.isNotBlank() }
+                                    ?: if (clientOrIssuerUiState.id == null) defaultCountryCode else null
+                            ),
+                            isMultiline = false,
+                        ),
+                        pageElement = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_$i")
+                        else ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_$i")
                     )
                 )
 
@@ -369,7 +442,7 @@ fun ClientOrIssuerAddEditForm(
                                     else ScreenElement.valueOf("CLIENT_OR_ISSUER_ADDRESS_TITLE_$i"),
                                     it
                                 )
-                            }
+                            },
                         ),
                         pageElement = if (isInBottomSheetModal)
                             ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_ADDRESS_TITLE_$i")
@@ -382,6 +455,15 @@ fun ClientOrIssuerAddEditForm(
                 FormUI(
                     inputList = inputList,
                     localFocusManager = localFocusManager,
+                    onClickForward = { element ->
+                        // The only ForwardElement in this form is the country row; every
+                        // ScreenElement whose name contains "COUNTRY_" opens the picker for
+                        // the address slot pointed to by its trailing digit.
+                        val name = element.name
+                        if ("COUNTRY_" in name) {
+                            countryPickerAddressIndex = name.last().digitToIntOrNull()
+                        }
+                    },
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                     errors = clientOrIssuerUiState.errors
                 )
@@ -421,12 +503,15 @@ fun ClientOrIssuerAddEditForm(
 
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(
                     top = 8.dp
                 )
 
         ) {
+            // Company-ID (SIRET / VAT / RCS) have no matching ContentType — opt out of
+            // autofill entirely so the system doesn't offer credit-card or password
+            // suggestions in a business-identifier field.
             val inputList = listOf(
                 FormInput(
                     label = TextInput(
@@ -448,7 +533,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
                                 it
                             )
-                        }
+                        },
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1
@@ -462,7 +547,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
                                 it
                             )
-                        }
+                        },
                     ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId2Number,
@@ -473,7 +558,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
                                 it
                             )
-                        }
+                        },
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2
@@ -487,7 +572,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
                                 it
                             )
-                        }
+                        },
                     ),
                     inputType = TextInput(
                         text = clientOrIssuerUiState.companyId3Number,
@@ -498,7 +583,7 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
                                 it
                             )
-                        }
+                        },
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3
                     else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3
@@ -520,7 +605,7 @@ fun ClientOrIssuerAddEditForm(
         if (isIssuer) {
             Column(
                 modifier = Modifier
-                    .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .padding(top = 8.dp, bottom = 8.dp)
             ) {
                 LogoPickerComponent(
@@ -542,11 +627,97 @@ fun ClientOrIssuerAddEditForm(
             }
 
             Spacer(Modifier.padding(bottom = 16.dp))
+
+            // VAT exemption toggle (BT-118=E in Factur-X). Switch panel styled like the
+            // logo panel above. The matching legal mention is appended by the XML
+            // serializer at generation time, not here.
+            Row(
+                modifier = Modifier
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = issuerVatExemptLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(Modifier.weight(1f))
+                Switch(
+                    checked = clientOrIssuerUiState.vatExempt,
+                    onCheckedChange = { checked ->
+                        onValueChange(
+                            if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_VAT_EXEMPT
+                            else ScreenElement.ISSUER_VAT_EXEMPT,
+                            checked
+                        )
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorVioletLink,
+                        checkedBorderColor = Color.Transparent,
+                        uncheckedBorderColor = Color.Transparent,
+                    ),
+                )
+            }
+
+            // Ventes intra-UE : n'a de sens que pour un émetteur établi dans un pays UE
+            // (post-Brexit → UK exclu, cf. CountryCodes.EU_COUNTRIES). Pour tous les
+            // autres (Ghana, Mexique, US, UK, CH…), on cache complètement l'option pour
+            // dégonfler l'UI. On applique le même fallback que l'affichage du champ
+            // Pays (line ~410) sinon un issuer pre-1.8 avec country_code NULL en DB
+            // affiche "France" via defaultCountryCode mais le switch resterait caché.
+            val issuerCountry = clientOrIssuerUiState.addresses?.firstOrNull()?.countryCode
+                ?.takeIf { it.isNotBlank() }
+                ?: defaultCountryCode
+            if (CountryCodes.isInEU(issuerCountry)) {
+                Spacer(Modifier.padding(bottom = 16.dp))
+                Row(
+                    modifier = Modifier
+                        .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = issuerIntraEuSalesLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    InfoTooltipButton(
+                        title = issuerIntraEuSalesInfoTitle,
+                        content = issuerIntraEuSalesInfoContent,
+                        contentDescription = issuerIntraEuSalesInfoDesc,
+                        persistenceKey = "issuer_intra_eu_sales",
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Switch(
+                        checked = clientOrIssuerUiState.intraEuSales,
+                        onCheckedChange = { checked ->
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_INTRA_EU_SALES
+                                else ScreenElement.ISSUER_INTRA_EU_SALES,
+                                checked
+                            )
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = ColorVioletLink,
+                            checkedBorderColor = Color.Transparent,
+                            uncheckedBorderColor = Color.Transparent,
+                        ),
+                    )
+                }
+            }
+
+            Spacer(Modifier.padding(bottom = 16.dp))
         }
 
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .padding(
                     top = 8.dp
                 )
@@ -563,7 +734,9 @@ fun ClientOrIssuerAddEditForm(
                                 else ScreenElement.CLIENT_OR_ISSUER_NOTES,
                                 it
                             )
-                        }
+                        },
+                        isMultiline = true,
+                        minLines = 3,
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
                     else ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES
@@ -577,6 +750,82 @@ fun ClientOrIssuerAddEditForm(
                 errors = clientOrIssuerUiState.errors
             )
         }
+
+        // Sync-to-master switch — only when editing a document snapshot of an
+        // existing master client / issuer. Sits in its own white block, detached
+        // from the notes block above so the toggle reads as a separate decision.
+        // Style matches the VAT-exempt / intra-EU switches above.
+        val showSyncSwitch = isInBottomSheetModal && (
+            typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_CLIENT ||
+                typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER
+            )
+        if (showSyncSwitch) {
+            Spacer(modifier = Modifier.padding(top = 12.dp))
+            Row(
+                modifier = Modifier
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = stringResource(
+                        if (typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER)
+                            Res.string.document_form_sync_issuer_to_master
+                        else Res.string.document_form_sync_client_to_master
+                    ),
+                    style = MaterialTheme.typography.textBodyBold,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 15.dp),
+                )
+                Switch(
+                    checked = syncToMasterChecked,
+                    onCheckedChange = { onSyncToMasterChange(it) },
+                    modifier = Modifier.scale(0.8f),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = ColorVioletLink,
+                        checkedBorderColor = Color.Transparent,
+                        uncheckedBorderColor = Color.Transparent,
+                    ),
+                )
+            }
+        }
+    }
+
+    // Country picker sheet — one instance shared by the three possible address rows.
+    // Runs outside the form Columns so the ModalBottomSheet floats over the whole
+    // screen. The cascade default (last-used → device locale → "FR") kicks in when
+    // countryCode is null on the selected address.
+    val pickerIndex = countryPickerAddressIndex
+    if (pickerIndex != null) {
+        val currentAddress = clientOrIssuerUiState.addresses?.getOrNull(pickerIndex - 1)
+        val currentCode = currentAddress?.countryCode?.takeIf { it.isNotBlank() }
+        val screenElFor: (Int) -> ScreenElement = { i ->
+            if (isInBottomSheetModal)
+                ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_$i")
+            else
+                ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_$i")
+        }
+        CountryPicker(
+            currentCode = currentCode,
+            onSelect = { code ->
+                onValueChange(screenElFor(pickerIndex), TextFieldValue(code))
+                // Broadcast the pick to every other address that still has no
+                // country set — the common case (multi-address clients live in
+                // one country). Addresses that already carry a country are left
+                // alone so users can keep distinct countries per address.
+                clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
+                    val position = index + 1
+                    if (position != pickerIndex && address.countryCode.isNullOrBlank()) {
+                        onValueChange(screenElFor(position), TextFieldValue(code))
+                    }
+                }
+                countryPickerAddressIndex = null
+            },
+            onDismiss = { countryPickerAddressIndex = null },
+        )
     }
 }
 
@@ -605,7 +854,7 @@ fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
             modifier = Modifier
                 .size(22.dp),
             imageVector = Icons.Outlined.DeleteOutline,
-            tint = ColorDarkGray,
+            tint = AppColors.iconPrimary,
             contentDescription = contentDescription
         )
     }
@@ -617,7 +866,7 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String
         modifier = Modifier
             .padding(start = 4.dp, top = 10.dp, bottom = bottomPadding)
             .background(
-                color = Color.White,
+                color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
             )
             .clickable(enabled = true) {
@@ -626,7 +875,7 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
-            style = MaterialTheme.typography.callForActions,
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             color = ColorVioletLink,
             text = AnnotatedString(text),
         )

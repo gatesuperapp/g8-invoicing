@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.RequestQuote
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.ShoppingBasket
@@ -35,8 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.runtime.collectAsState
+import org.koin.compose.koinInject
 
 /**
  * Permanent sidebar for desktop showing all categories.
@@ -48,16 +52,21 @@ fun CategorySidebar(
     onClickCategory: (Category) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val categories = listOf(
-        Category.G8,
-        Category.MyAccount,
-        Category.GStore,
-        Category.Clients,
-        Category.Products,
-        Category.CreditNotes,
-        Category.DeliveryNotes,
-        Category.Invoices,
-    )
+    val activatedModules by koinInject<ActivatedModulesRepository>().state.collectAsState()
+    val categories = buildList {
+        add(Category.G8)
+        add(Category.MyAccount)
+        add(Category.GStore)
+        add(Category.Clients)
+        add(Category.Products)
+        add(Category.CreditNotes)
+        if (
+            ActivatedModulesRepository.MODULE_QUOTE in activatedModules ||
+            ActivatedModulesRepository.MODULE_QUOTE_TRIAL in activatedModules
+        ) add(Category.Quotes)
+        if (ActivatedModulesRepository.MODULE_DELIVERY_NOTE in activatedModules) add(Category.DeliveryNotes)
+        add(Category.Invoices)
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -156,5 +165,6 @@ private fun getCategoryIcon(category: Category): ImageVector? {
         Category.Invoices -> Icons.Filled.Receipt
         Category.CreditNotes -> Icons.Filled.Description
         Category.DeliveryNotes -> Icons.Filled.LocalShipping
+        Category.Quotes -> Icons.Filled.RequestQuote
     }
 }

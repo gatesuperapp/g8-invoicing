@@ -24,17 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.FlippyCheckBox
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
-import com.a4a.g8invoicing.ui.theme.textSmall
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textSecondary
 import org.koin.compose.koinInject
 
 @Composable
@@ -93,7 +92,7 @@ fun ProductListItem(
                     }
                 )
             }
-            .background(if (checkedState.value) ColorLightGreyo else Color.White)
+            .background(if (checkedState.value) AppColors.surfaceMuted else AppColors.surface)
     ) {
         // Adding padding in the inside row, to keep the click & the ripple in all row
         // (NB: putting padding on the checkbox works, but then when name is on 2 lines it's
@@ -110,8 +109,8 @@ fun ProductListItem(
             if (isCheckboxDisplayed) {
                 Column {
                     FlippyCheckBox(
-                        fillColorWhenSelectionOff = Color.White, // was actionTagUndefined().iconColor
-                        backgroundColorWhenSelectionOn = if (checkedState.value) ColorLightGreyo else Color.White,
+                        fillColorWhenSelectionOff = AppColors.surface, // was actionTagUndefined().iconColor
+                        backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                         onItemCheckboxClick = {
                             checkedState.value = !checkedState.value
                             onItemCheckboxClick(checkedState.value)
@@ -138,8 +137,7 @@ fun ProductListItem(
                     Text(
                         modifier = Modifier.weight(1F),
                         text = product.name.text,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.textBodyBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -155,10 +153,9 @@ fun ProductListItem(
                     Text(
                         text = if (!product.description?.text.isNullOrEmpty())
                             product.description!!.text else " - ",
-                        fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSmall
+                        style = MaterialTheme.typography.textSecondary,
                     )
                 }
             }

@@ -32,6 +32,11 @@ actual class ImageStorage actual constructor() {
         // TODO: Implement for iOS
         return false
     }
+
+    actual fun readBundledResource(relativePath: String): ByteArray? {
+        // TODO: Implement for iOS
+        return null
+    }
 }
 
 /**

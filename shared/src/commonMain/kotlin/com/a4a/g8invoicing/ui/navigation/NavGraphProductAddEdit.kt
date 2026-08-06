@@ -42,6 +42,10 @@ fun NavGraphBuilder.productAddEdit(
         val productUiState by viewModel.productUiState
         val isLoading by viewModel.isLoading.collectAsState()
         val clientSelectionDialogState by viewModel.clientSelectionDialogState.collectAsState()
+        // Master Product form: VM.showProductType stays false in 1.8 (no per-product
+        // company scoping to drive it). Collected here anyway so 1.9 just wires the
+        // active-company push to VM.setShowProductType() and everything else works.
+        val showProductType by viewModel.showProductType.collectAsState()
         val isNew = backStackEntry.arguments?.getString("itemId") == null
 
         val mappedDialogState = clientSelectionDialogState?.let {
@@ -56,6 +60,7 @@ fun NavGraphBuilder.productAddEdit(
             navController = navController,
             product = productUiState,
             isLoading = isLoading,
+            showProductType = showProductType,
             clientSelectionDialogState = mappedDialogState,
             onValueChange = { pageElement, value, idStr ->
                 viewModel.updateProductState(pageElement, value, ProductType.PRODUCT, idStr)

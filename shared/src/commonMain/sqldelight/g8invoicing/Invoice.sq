@@ -10,6 +10,9 @@ CREATE TABLE Invoice (
   footer TEXT,
   watermark_text TEXT,
   labels_snapshot TEXT,
+  show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
+  format_locale TEXT,
+  hide_linked_source_headers INTEGER NOT NULL DEFAULT 0,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -41,8 +44,8 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
@@ -54,6 +57,13 @@ SET number = :number,
     due_date =: due_date,
     payment_status =: payment_status,
     footer  =: footer,
+    updated_at =: updated_at
+WHERE
+    invoice_id = :invoice_id;
+
+updateHideLinkedSourceHeaders:
+UPDATE Invoice
+SET hide_linked_source_headers = :hide_linked_source_headers,
     updated_at =: updated_at
 WHERE
     invoice_id = :invoice_id;

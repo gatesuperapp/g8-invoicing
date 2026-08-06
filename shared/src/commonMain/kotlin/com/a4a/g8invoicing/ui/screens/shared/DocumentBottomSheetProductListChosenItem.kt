@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -29,10 +30,10 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.ui.states.DocumentProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 @Composable
@@ -56,12 +57,7 @@ fun DocumentBottomSheetProductListChosenItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(5.dp))
-            .background(
-                when {
-                    isDragging -> Color(0xFFD1D1D1)
-                    else -> ColorLightGrey
-                }
-            )
+            .background(if (isDragging) AppColors.surfaceMuted else AppColors.surfaceSubtle)
             .clickable(
                 interactionSource = rowInteractionSource,
                 indication = ripple(color = Color.Black, bounded = false)
@@ -93,7 +89,7 @@ fun DocumentBottomSheetProductListChosenItem(
         ) {
             Icon(
                 imageVector = Icons.Outlined.DragHandle,
-                contentDescription = "Reorder"
+                contentDescription = "Reorder",
             )
         }
 
@@ -102,7 +98,7 @@ fun DocumentBottomSheetProductListChosenItem(
             modifier = Modifier
                 .padding(
                     start = 20.dp,
-                    end = 30.dp,
+                    end = 13.dp,
                     top = 10.dp,
                     bottom = 10.dp
                 )
@@ -113,15 +109,14 @@ fun DocumentBottomSheetProductListChosenItem(
             Text(
                 text = documentProduct.quantity.stripTrailingZeros().toPlainString()
                     .replace(".", ","),
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
             Text(
                 modifier = Modifier.weight(1F),
                 text = documentProduct.name.text,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
             Icon(
                 modifier = Modifier
@@ -130,7 +125,7 @@ fun DocumentBottomSheetProductListChosenItem(
                         onClick = onClickDeleteDocumentProduct
                     ),
                 imageVector = Icons.Outlined.DeleteOutline,
-                contentDescription = "Delete line item"
+                contentDescription = "Delete line item",
             )
         }
     }

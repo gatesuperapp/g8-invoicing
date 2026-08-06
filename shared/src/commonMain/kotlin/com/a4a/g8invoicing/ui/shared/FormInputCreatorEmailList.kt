@@ -34,12 +34,14 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.states.EmailState
-import com.a4a.g8invoicing.ui.theme.inputField
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textInputPlaceholder
 
 data class EmailListInput(
     val emails: List<EmailState>,
@@ -71,12 +73,15 @@ fun FormInputCreatorEmailList(
     }
     var emailError by remember { mutableStateOf<String?>(null) }
 
-    // Function to try adding an email with validation
+    // Read the pending value fresh on every call: onDone and onFocusChanged both fire
+    // when the user taps the keyboard "Done" button, and reading through a captured
+    // local would let the second call re-add the value the first call just consumed.
     fun tryAddEmail() {
-        if (pendingEmail.isNotBlank()) {
-            val validationError = FormInputsValidator.validateEmail(pendingEmail.trim())
+        val current = input.pendingEmailStateHolder?.value ?: localPendingEmail
+        if (current.isNotBlank()) {
+            val validationError = FormInputsValidator.validateEmail(current.trim())
             if (validationError == null) {
-                input.onAddEmail(pendingEmail.trim())
+                input.onAddEmail(current.trim())
                 setPendingEmail("")
                 emailError = null
                 input.onPendingEmailValidationResult(true)
@@ -122,6 +127,8 @@ fun FormInputCreatorEmailList(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = if (nonEmptyEmails.isNotEmpty()) 4.dp else 0.dp)
+                        // Autofill disabled — see FormInputCreatorText for context.
+                        .clearAndSetSemantics {}
                         .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
                         .onFocusChanged { focusState ->
                             // When focus is lost, try to add the email
@@ -144,7 +151,7 @@ fun FormInputCreatorEmailList(
                         if (pendingEmail.isEmpty()) {
                             Text(
                                 text = input.placeholder,
-                                style = MaterialTheme.typography.inputField
+                                style = MaterialTheme.typography.textInputPlaceholder
                             )
                         }
                         innerTextField()
@@ -189,7 +196,7 @@ fun EmailChip(
                 .padding(start = 4.dp)
                 .size(18.dp)
                 .clickable { onRemoveClick() },
-            tint = Color.Gray
+            tint = AppColors.iconSecondary
         )
     }
 }

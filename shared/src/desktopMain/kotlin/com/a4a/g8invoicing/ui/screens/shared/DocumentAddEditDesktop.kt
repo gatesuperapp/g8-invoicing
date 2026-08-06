@@ -102,13 +102,13 @@ fun DocumentAddEditDesktop(
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickEditDocumentProduct: (DocumentProductState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -433,12 +433,12 @@ private fun DocumentDesktopTextTab(
     taxRates: List<BigDecimal>,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -585,7 +585,7 @@ private fun DocumentDesktopTextTab(
                 showIssuerPicker = false
             },
             onClickEdit = { issuer ->
-                onClickDocumentClientOrIssuer(issuer)
+                onClickDocumentClientOrIssuer(issuer, true)
                 showIssuerPicker = false
             }
         )
@@ -607,7 +607,7 @@ private fun DocumentDesktopTextTab(
                 showClientPicker = false
             },
             onClickEdit = { client ->
-                onClickDocumentClientOrIssuer(client)
+                onClickDocumentClientOrIssuer(client, true)
                 showClientPicker = false
             }
         )
@@ -638,7 +638,7 @@ private fun DocumentDesktopProductsTab(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -736,8 +736,8 @@ private fun DocumentDesktopProductsTab(
                 onClickCancelForm()
                 onShowDocumentForm(false)
             },
-            onClickDone = {
-                onClickDoneForm(typeOfCreation)
+            onClickDone = { syncToMaster ->
+                onClickDoneForm(typeOfCreation, syncToMaster)
                 onShowDocumentForm(false)
             }
         )

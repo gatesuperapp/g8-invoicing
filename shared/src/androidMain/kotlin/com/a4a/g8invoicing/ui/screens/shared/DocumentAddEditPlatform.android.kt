@@ -29,12 +29,12 @@ actual fun DocumentAddEditPlatform(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -46,6 +46,9 @@ actual fun DocumentAddEditPlatform(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
+    showProductType: Boolean,
+    hideLinkedSourceHeaders: Boolean,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)?,
 ) {
     // Android uses the mobile DocumentAddEdit with bottom sheets
     DocumentAddEdit(
@@ -83,5 +86,8 @@ actual fun DocumentAddEditPlatform(
         onOrderChange = onOrderChange,
         onShowMessage = onShowMessage,
         exportPdfContent = exportPdfContent,
+        showProductType = showProductType,
+        hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+        onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
     )
 }

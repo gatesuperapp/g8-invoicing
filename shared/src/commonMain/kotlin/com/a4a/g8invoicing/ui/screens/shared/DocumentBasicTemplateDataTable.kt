@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_table_description
 import com.a4a.g8invoicing.shared.resources.document_table_quantity
 import com.a4a.g8invoicing.shared.resources.document_table_tax_rate
@@ -50,18 +51,26 @@ val borderWidth = 0.7.dp
 fun DocumentBasicTemplateProductsTable(
     products: List<DocumentProductState>,
     currencyCode: String = "EUR",
+    formatLocale: String? = null,
+    displayTaxColumn: Boolean = true,
     labels: Map<String, String>? = null,
+    // Invoice-level toggle: when true, skip the "BL001 - date" / "Autres lignes"
+    // grouping rows but keep every product row.
+    hideLinkedSourceHeaders: Boolean = false,
 ) {
     val displayUnitColumn = products.any { !it.unit?.text.isNullOrEmpty() }
 
-    // Fixed column weights - same total with or without unit column
+    // Fixed column weights that sum to the same total regardless of which
+    // optional columns (unit, tax) are shown. The description column soaks
+    // up whatever the hidden columns would have taken.
     val quantityColumnWeight = .16f
     val unitColumnWeight = .23f
     val taxColumnWeight = .15f
     val unitPriceColumnWeight = .23f
     val totalPriceColumnWeight = .23f
-    // Description takes remaining space (absorbs unit column when not displayed)
-    val descriptionColumnWeight = if (displayUnitColumn) .69f else .92f
+    val descriptionColumnWeight =
+        (if (displayUnitColumn) .69f else .92f) +
+        (if (displayTaxColumn) 0f else taxColumnWeight)
     val linkedNoteColumnWeight = 1f
 
     TitleRows(
@@ -72,6 +81,7 @@ fun DocumentBasicTemplateProductsTable(
         unitPriceColumnWeight,
         totalPriceColumnWeight,
         displayUnitColumn,
+        displayTaxColumn,
         labels,
     )
 
@@ -79,7 +89,9 @@ fun DocumentBasicTemplateProductsTable(
 
     if (linkedDeliveryNotes.isNotEmpty()) {
         linkedDeliveryNotes.forEach { docNumberAndDate ->
-            LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
+            if (!hideLinkedSourceHeaders) {
+                LinkedDeliveryNoteRow(linkedNoteColumnWeight, docNumberAndDate)
+            }
             DocumentProductsRows(
                 products.filter { it.linkedDocNumber == docNumberAndDate.first },
                 descriptionColumnWeight,
@@ -89,7 +101,9 @@ fun DocumentBasicTemplateProductsTable(
                 unitPriceColumnWeight,
                 totalPriceColumnWeight,
                 displayUnitColumn,
+                displayTaxColumn,
                 currencyCode,
+                formatLocale,
             )
         }
     } else {
@@ -102,7 +116,9 @@ fun DocumentBasicTemplateProductsTable(
             unitPriceColumnWeight,
             totalPriceColumnWeight,
             displayUnitColumn,
+            displayTaxColumn,
             currencyCode,
+            formatLocale,
         )
     }
 }
@@ -116,6 +132,7 @@ fun TitleRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    displayTaxColumn: Boolean = true,
     labels: Map<String, String>? = null,
 ) {
     Row(
@@ -146,12 +163,14 @@ fun TitleRows(
             )
         }
 
-        TableCell(
-            text = documentLabel(labels, "document_table_tax_rate", Res.string.document_table_tax_rate),
-            weight = taxColumnWeight,
-            alignEnd = true,
-            isBold = true
-        )
+        if (displayTaxColumn) {
+            TableCell(
+                text = documentLabel(labels, "document_table_tax_rate", Res.string.document_table_tax_rate),
+                weight = taxColumnWeight,
+                alignEnd = true,
+                isBold = true
+            )
+        }
         TableCell(
             text = documentLabel(labels, "document_table_unit_price_without_tax", Res.string.document_table_unit_price_without_tax),
             weight = unitPriceColumnWeight,
@@ -188,13 +207,19 @@ fun LinkedDeliveryNoteRow(
     linkedNoteColumnWeight: Float,
     docNumberAndDate: Pair<String?, String?>,
 ) {
+    val docNumber = docNumberAndDate.first
+    val text = if (docNumber.isNullOrEmpty()) {
+        stringResource(Res.string.document_products_other_lines)
+    } else {
+        docNumber + " - " + docNumberAndDate.second?.substringBefore(" ")
+    }
     Row(
         Modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.End
     ) {
         TableCell(
-            text = docNumberAndDate.first + " - " + docNumberAndDate.second?.substringBefore(" "),
+            text = text,
             weight = linkedNoteColumnWeight,
             alignEnd = false,
             isBold = true
@@ -213,7 +238,9 @@ fun DocumentProductsRows(
     unitPriceColumnWeight: Float,
     totalPriceColumnWeight: Float,
     displayUnitColumn: Boolean,
+    displayTaxColumn: Boolean = true,
     currencyCode: String = "EUR",
+    formatLocale: String? = null,
 ) {
     tableData.forEach { data ->
 
@@ -243,19 +270,21 @@ fun DocumentProductsRows(
                 )
             }
 
+            if (displayTaxColumn) {
+                TableCell(
+                    text = data.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" }
+                        ?: " - ",
+                    weight = taxColumnWeight,
+                    alignEnd = true
+                )
+            }
             TableCell(
-                text = data.taxRate?.let { "${it.stripTrailingZeros().toPlainString().replace(".", ",")}%" }
-                    ?: " - ",
-                weight = taxColumnWeight,
-                alignEnd = true
-            )
-            TableCell(
-                text = data.priceWithoutTax?.let { formatAmount(it, currencyCode) } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: "",
                 weight = unitPriceColumnWeight,
                 alignEnd = true
             )
             TableCell(
-                text = data.priceWithoutTax?.let { formatAmount(it * data.quantity, currencyCode) } ?: "",
+                text = data.priceWithoutTax?.let { formatAmount(it * data.quantity, currencyCode, formatLocale) } ?: "",
                 weight = totalPriceColumnWeight,
                 alignEnd = true
             )

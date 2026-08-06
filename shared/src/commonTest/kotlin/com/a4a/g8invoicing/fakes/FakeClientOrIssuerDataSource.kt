@@ -206,4 +206,54 @@ class FakeClientOrIssuerDataSource : ClientOrIssuerLocalDataSourceInterface {
     override suspend fun getMasterVersion(masterId: Long): Int? {
         return clientsAndIssuers.find { it.id == masterId.toInt() }?.version
     }
+
+    override suspend fun getLastCountryCode(): String? {
+        // Walk backwards through the fake clients/issuers list, first non-empty countryCode
+        // on any of their addresses. Matches the semantics of the SQLDelight query which
+        // returns the country of the most recently created address that has one.
+        return clientsAndIssuers.reversed()
+            .flatMap { it.addresses.orEmpty().reversed() }
+            .firstOrNull { !it.countryCode.isNullOrBlank() }
+            ?.countryCode
+            ?.uppercase()
+    }
+
+    override suspend fun getRecentCountryCodes(limit: Int): List<String> {
+        return clientsAndIssuers.reversed()
+            .flatMap { it.addresses.orEmpty().reversed() }
+            .mapNotNull { it.countryCode?.trim()?.takeIf { s -> s.isNotEmpty() }?.uppercase() }
+            .distinct()
+            .take(limit)
+    }
+
+    override suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long> {
+        // Fake returns recent document snapshots' originalClientOrIssuerId, most recent first.
+        val docType = when (type) {
+            PersonType.CLIENT -> ClientOrIssuerType.DOCUMENT_CLIENT
+            PersonType.ISSUER -> ClientOrIssuerType.DOCUMENT_ISSUER
+        }
+        return documentClientsAndIssuers
+            .asReversed()
+            .asSequence()
+            .filter { it.type == docType && it.originalClientOrIssuerId != null }
+            .mapNotNull { it.originalClientOrIssuerId?.toLong() }
+            .distinct()
+            .take(3)
+            .toList()
+    }
+
+    override suspend fun setCountryForClientsWithoutCountry(countryCode: String) {
+        val normalised = countryCode.trim().uppercase()
+        val updated = clientsAndIssuers.map { entry ->
+            if (entry.type != ClientOrIssuerType.CLIENT) entry
+            else {
+                val newAddresses = entry.addresses?.map { addr ->
+                    if (addr.countryCode.isNullOrBlank()) addr.copy(countryCode = normalised) else addr
+                }
+                entry.copy(addresses = newAddresses)
+            }
+        }
+        clientsAndIssuers.clear()
+        clientsAndIssuers.addAll(updated)
+    }
 }

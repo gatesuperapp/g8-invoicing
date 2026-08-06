@@ -20,9 +20,12 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.RequestQuote
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -52,6 +55,15 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
 import com.a4a.g8invoicing.shared.resources.gstore_footer_free
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_trial_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_trial_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_trial_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_watermark_title
@@ -61,7 +73,13 @@ import com.a4a.g8invoicing.shared.resources.gstore_title
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.WebsiteFooter
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textCaption
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
+import com.a4a.g8invoicing.ui.theme.textTiny
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -72,9 +90,12 @@ private data class GStoreModule(
     val descRes: StringResource,
     val detailRes: StringResource,
     val icon: ImageVector,
+    // A module marked isFree = true is togglable by every user (no premium check) and
+    // its card/dialog hide the PREMIUM pill. Kept per-module (not a global list) so a
+    // future free-tier module needs only a flag flip, no cross-file wiring.
+    val isFree: Boolean = false,
 )
 
-// Only watermark-removal is shipping at launch — other modules will be added when ready.
 private val MODULES = listOf(
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
@@ -82,6 +103,33 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_watermark_desc,
         detailRes = Res.string.gstore_module_watermark_detail,
         icon = Icons.Outlined.WaterDrop,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE,
+        titleRes = Res.string.gstore_module_delivery_note_title,
+        descRes = Res.string.gstore_module_delivery_note_desc,
+        detailRes = Res.string.gstore_module_delivery_note_detail,
+        icon = Icons.Outlined.LocalShipping,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_QUOTE,
+        titleRes = Res.string.gstore_module_quote_title,
+        descRes = Res.string.gstore_module_quote_desc,
+        detailRes = Res.string.gstore_module_quote_detail,
+        icon = Icons.Outlined.RequestQuote,
+    ),
+    // Free discovery variant of MODULE_QUOTE. Only surfaced to non-premium
+    // users (see `visibleModules` in GStore composable). Premium users already
+    // have unlimited via MODULE_QUOTE, so seeing a "5 free quotes" card would
+    // be confusing.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_QUOTE_TRIAL,
+        titleRes = Res.string.gstore_module_quote_trial_title,
+        descRes = Res.string.gstore_module_quote_trial_desc,
+        detailRes = Res.string.gstore_module_quote_trial_detail,
+        icon = Icons.Outlined.RequestQuote,
+        isFree = true,
     ),
 )
 
@@ -92,6 +140,8 @@ fun GStore(
     navController: NavController,
     onClickCategory: (Category) -> Unit,
     onClickBack: () -> Unit,
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     viewModel: GStoreViewModel = koinViewModel(),
 ) {
     val activated by viewModel.activatedState.collectAsState()
@@ -106,7 +156,7 @@ fun GStore(
     val isPremium = remember(subscriptionState) {
         (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->
             s.status == "active" &&
-                (s.currentPeriodEndMs ?: 0L) > kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+                (s.currentPeriodEndMs ?: 0L) > kotlin.time.Clock.System.now().toEpochMilliseconds()
         } ?: false
     }
     val isDimActive = remember { mutableStateOf(false) }
@@ -138,10 +188,19 @@ fun GStore(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = { isDimActive.value = !isDimActive.value },
-                isButtonNewDisplayed = false
+                isButtonNewDisplayed = false,
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
             )
         }
     ) { padding ->
+        // The trial "Devis découverte" card is hidden for premium users — they
+        // already have unlimited quotes via MODULE_QUOTE, so surfacing a "5 free"
+        // tile alongside the paid one would be confusing.
+        val visibleModules = remember(isPremium) {
+            if (isPremium) MODULES.filter { it.id != ActivatedModulesRepository.MODULE_QUOTE_TRIAL }
+            else MODULES
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -153,16 +212,22 @@ fun GStore(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
+                // weight(1f) with default fill=true so the grid takes ALL remaining
+                // Column height (minus the footer, which sits below with no weight).
+                // The previous fill=false + Spacer(weight=1f) split the leftover space
+                // 50/50 and clipped the grid at mid-column when more than one row
+                // fit, hiding the bottom of the second row.
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false),
+                    .weight(1f),
             ) {
-                items(MODULES) { module ->
+                items(visibleModules) { module ->
                     GStoreModuleCard(
                         title = stringResource(module.titleRes),
                         description = stringResource(module.descRes),
                         icon = module.icon,
                         isPremium = isPremium,
+                        isFree = module.isFree,
                         isActivated = module.id in activated,
                         onToggle = { viewModel.toggleModule(module.id) },
                         onPremiumHint = onPremiumHint,
@@ -170,8 +235,6 @@ fun GStore(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
 
             // Footer: info pointer to the-gate.fr root — only for non-premium users.
             // Premium users don't see a "manage your account on …" line here because
@@ -193,6 +256,7 @@ fun GStore(
             detail = stringResource(module.detailRes),
             icon = module.icon,
             isPremium = isPremium,
+            isFree = module.isFree,
             isActivated = module.id in activated,
             onToggle = { viewModel.toggleModule(module.id) },
             onPremiumHint = onPremiumHint,
@@ -219,14 +283,13 @@ private fun PremiumHintDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .clickable(onClick = onDismiss)
-                .background(Color.White, shape = RoundedCornerShape(14.dp))
+                .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
                 .padding(horizontal = 20.dp, vertical = 20.dp),
         ) {
             Text(
                 text = message,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                 lineHeight = 20.sp,
-                color = Color.DarkGray,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -240,11 +303,13 @@ private fun GStoreModuleCard(
     description: String,
     icon: ImageVector,
     isPremium: Boolean,
+    isFree: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
     onPremiumHint: () -> Unit,
     onClick: () -> Unit,
 ) {
+    val isUnlocked = isFree || isPremium
     // Tall rectangular card. Vertical stack: icon top → big gap → title + desc → Switch bottom.
     // PREMIUM pill sits top-right and stays visible even for premium users — the GStore
     // will mix premium and free modules, so the pill labels the *module*, not the *user*.
@@ -255,7 +320,7 @@ private fun GStoreModuleCard(
             .fillMaxWidth()
             .height(230.dp)
             .clickable(onClick = onClick)
-            .background(Color.White, shape = RoundedCornerShape(14.dp))
+            .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
             .padding(14.dp),
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -273,27 +338,24 @@ private fun GStoreModuleCard(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = ColorVioletLight,
+                        tint = AppColors.accent,
                         modifier = Modifier.size(22.dp),
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                PremiumPill()
+                if (!isFree) PremiumPill()
             }
 
             Spacer(modifier = Modifier.height(28.dp))
 
             Text(
                 text = title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 15.sp,
-                color = Color.Black,
+                style = MaterialTheme.typography.textBodyBold,
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = description,
-                fontSize = 12.sp,
-                color = Color.DarkGray,
+                style = MaterialTheme.typography.textCaption,
                 lineHeight = 16.sp,
             )
 
@@ -305,12 +367,12 @@ private fun GStoreModuleCard(
             // "off / not-yours" affordance without hiding the tap target.
             Switch(
                 checked = isActivated,
-                onCheckedChange = { if (isPremium) onToggle() else onPremiumHint() },
+                onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = ColorVioletLight,
                     uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = if (isPremium) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
+                    uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                     uncheckedBorderColor = Color.Transparent,
                 ),
             )
@@ -324,11 +386,13 @@ private fun ModuleDetailDialog(
     detail: String,
     icon: ImageVector,
     isPremium: Boolean,
+    isFree: Boolean,
     isActivated: Boolean,
     onToggle: () -> Unit,
     onPremiumHint: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val isUnlocked = isFree || isPremium
     // Centered modal taking ~2/3 of the screen height, so the GStore TopBar and
     // BottomBar stay visible around it — the user keeps the context that they're still
     // on the GStore screen. usePlatformDefaultWidth=false lets us widen beyond the
@@ -342,7 +406,7 @@ private fun ModuleDetailDialog(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .fillMaxHeight(2f / 3f)
-                .background(Color.White, shape = RoundedCornerShape(16.dp)),
+                .background(AppColors.surface, shape = RoundedCornerShape(16.dp)),
         ) {
             // Close (X) in the top-right — mirrors the WhatsNewDialog pattern so the
             // dismissal affordance stays consistent across the app.
@@ -355,7 +419,7 @@ private fun ModuleDetailDialog(
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = null,
-                    tint = Color.Gray,
+                    tint = AppColors.iconSecondary,
                 )
             }
 
@@ -379,30 +443,27 @@ private fun ModuleDetailDialog(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = ColorVioletLight,
+                            tint = AppColors.accent,
                             modifier = Modifier.size(22.dp),
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    PremiumPill()
+                    if (!isFree) PremiumPill()
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
                     text = title,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.Black,
+                    style = MaterialTheme.typography.textScreenTitle,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = detail,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
                     lineHeight = 20.sp,
-                    color = Color.DarkGray,
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -412,12 +473,12 @@ private fun ModuleDetailDialog(
                 // card so non-premium taps consistently trigger the hint snackbar.
                 Switch(
                     checked = isActivated,
-                    onCheckedChange = { if (isPremium) onToggle() else onPremiumHint() },
+                    onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = ColorVioletLight,
                         uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = if (isPremium) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
+                        uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                         uncheckedBorderColor = Color.Transparent,
                     ),
                 )
@@ -435,9 +496,10 @@ private fun PremiumPill() {
     ) {
         Text(
             text = stringResource(Res.string.gstore_premium_badge),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = ColorVioletLight,
+            style = MaterialTheme.typography.textTiny.copy(
+                fontWeight = FontWeight.SemiBold,
+                color = ColorVioletLight,
+            ),
         )
     }
 }

@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.ColorGreyo
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun FormInputCreatorGoForward(
@@ -36,7 +36,7 @@ fun FormInputCreatorGoForward(
             modifier = Modifier
                 .width(15.dp)
                 .padding(bottom = 3.dp),
-            tint = ColorGreyo,
+            tint = AppColors.iconSecondary,
             imageVector = Icons.Filled.KeyboardArrowRight,
             contentDescription = "Right arrow"
         )

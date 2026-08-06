@@ -8,8 +8,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,10 +23,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.sync_client_message
-import com.a4a.g8invoicing.shared.resources.sync_client_no
-import com.a4a.g8invoicing.shared.resources.sync_client_title
-import com.a4a.g8invoicing.shared.resources.sync_client_yes
 import com.a4a.g8invoicing.shared.resources.version_mismatch_client_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_client_title
 import com.a4a.g8invoicing.shared.resources.version_mismatch_keep_current
@@ -84,6 +81,16 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         val productAddEditViewModel: ProductAddEditViewModel = koinViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
+        // Product.type visibility follows the CURRENT document's issuer. Read from
+        // document.documentIssuer (the picked issuer for this invoice) — NOT from
+        // clientOrIssuerAddEditViewModel.documentIssuerUiState, which is only
+        // populated when the user opens the issuer-edit sub-form. The pick flow
+        // (onSelectClientOrIssuer above) writes to invoiceViewModel via
+        // saveDocumentClientOrIssuerInUiState, so that's the authoritative source.
+        val showProductType = document.documentIssuer?.intraEuSales == true
+        LaunchedEffect(showProductType) {
+            productAddEditViewModel.setShowProductType(showProductType)
+        }
 
         var showDocumentForm by remember { mutableStateOf(false) }
 
@@ -95,48 +102,68 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        // Whether the pending dialog was triggered by the edit-link flow (open
+        // the form after the user's choice) or by the refresh-from-master icon
+        // (don't open the form — refresh is a standalone action).
+        var pendingIssuerOpensForm by remember { mutableStateOf(false) }
         var showClientVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingClientToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
-        var showSyncClientDialog by remember { mutableStateOf(false) }
-        var pendingClientToSave by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        var pendingClientOpensForm by remember { mutableStateOf(false) }
 
         // Version mismatch dialog for issuer
         if (showVersionMismatchDialog && pendingIssuerToEdit != null) {
             AlertDialog(
                 onDismissRequest = {
+                    // Dismiss by scrim tap / system back = abort the edit intent.
+                    // The form stays closed, matching the "cancel" affordance
+                    // rather than "keep current".
                     showVersionMismatchDialog = false
                     pendingIssuerToEdit = null
+                    pendingIssuerOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_message)) },
                 confirmButton = {
                     Button(
                         onClick = {
+                            // Dismiss the dialog synchronously so the bottom-sheet form
+                            // takes over immediately; the master fetch keeps running in
+                            // the background and updates the state when it lands.
+                            val opensForm = pendingIssuerOpensForm
+                            showVersionMismatchDialog = false
+                            pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
-                                showVersionMismatchDialog = false
-                                pendingIssuerToEdit = null
+                                if (updated != null) {
+                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 },
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingIssuerOpensForm
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 }
@@ -149,98 +176,51 @@ fun NavGraphBuilder.invoiceAddEdit(
                 onDismissRequest = {
                     showClientVersionMismatchDialog = false
                     pendingClientToEdit = null
+                    pendingClientOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_client_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_client_message)) },
                 confirmButton = {
                     Button(
                         onClick = {
+                            // Dismiss the dialog synchronously so a back tap on the
+                            // bottom-sheet form doesn't slip the dialog back on top
+                            // while loadLatestMasterVersion is still suspended.
+                            val opensForm = pendingClientOpensForm
+                            showClientVersionMismatchDialog = false
+                            pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
-                                showClientVersionMismatchDialog = false
-                                pendingClientToEdit = null
+                                if (updated != null) {
+                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 },
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingClientOpensForm
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
-                        )
-                    }
-                }
-            )
-        }
-
-        // Sync client to master dialog
-        if (showSyncClientDialog && pendingClientToSave != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    // On dismiss, save without syncing to master
-                    scope.launch {
-                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                            ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = false
-                        )
-                        invoiceViewModel.reloadDocument()
-                        showSyncClientDialog = false
-                        pendingClientToSave = null
-                        showDocumentForm = false
-                    }
-                },
-                title = { Text(stringResource(Res.string.sync_client_title)) },
-                text = { Text(stringResource(Res.string.sync_client_message)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = true
-                                )
-                                // Reload document to get updated originalVersion after sync
-                                invoiceViewModel.reloadDocument()
-                                showSyncClientDialog = false
-                                pendingClientToSave = null
-                                showDocumentForm = false
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.sync_client_yes),
-                            style = MaterialTheme.typography.callForActionsViolet
-                        )
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = false
-                                )
-                                invoiceViewModel.reloadDocument()
-                                showSyncClientDialog = false
-                                pendingClientToSave = null
-                                showDocumentForm = false
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.sync_client_no),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 }
@@ -297,25 +277,34 @@ fun NavGraphBuilder.invoiceAddEdit(
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
-            onClickDocumentClientOrIssuer = { clientOrIssuer ->
+            onClickDocumentClientOrIssuer = { clientOrIssuer, openFormOnCompletion ->
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(clientOrIssuer)
-                // Check for version mismatch for issuers
+                // Version-mismatch check gates the form opening: if a mismatch
+                // fires, defer showDocumentForm to the dialog's confirm/dismiss
+                // buttons; otherwise open the form immediately when the caller
+                // asked for it. Refresh-from-master (openFormOnCompletion=false)
+                // never opens the form here.
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
                     clientOrIssuer.type == ClientOrIssuerType.ISSUER) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingIssuerToEdit = clientOrIssuer
+                            pendingIssuerOpensForm = openFormOnCompletion
                             showVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }
-                // Check for version mismatch for clients
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT ||
                     clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingClientToEdit = clientOrIssuer
+                            pendingClientOpensForm = openFormOnCompletion
                             showClientVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }
@@ -357,7 +346,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                     )
                 }
             },
-            onClickDoneForm = { typeOfCreation ->
+            onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
@@ -376,20 +365,11 @@ fun NavGraphBuilder.invoiceAddEdit(
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                                // Check if there are actual changes from master
-                                val hasChanges = clientOrIssuerAddEditViewModel.hasChangesFromMaster(documentClientUiState)
-                                if (hasChanges) {
-                                    // Show sync dialog to ask user if they want to update master client
-                                    pendingClientToSave = documentClientUiState.copy()
-                                    showSyncClientDialog = true
-                                } else {
-                                    // No changes from master, just save document without sync dialog
-                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                        ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = false
-                                    )
-                                    invoiceViewModel.reloadDocument()
-                                    showDocumentForm = false
-                                }
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                )
+                                invoiceViewModel.reloadDocument()
+                                showDocumentForm = false
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -408,9 +388,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState
+                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
-                                // Reload document to get updated originalVersion after sync
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false
                             }
@@ -420,6 +399,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 val documentProductId = invoiceViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     invoiceViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                     showDocumentForm = false
                                 }
                             }
@@ -427,13 +407,12 @@ fun NavGraphBuilder.invoiceAddEdit(
                         DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
                             if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                                 productAddEditViewModel.setProductUiState()
-                                productAddEditViewModel.saveProductInLocalDb()
-                                val documentProductId = invoiceViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
+                                val masterProductId = productAddEditViewModel.saveProductInLocalDbAndGetId()
+                                val docProductWithLink = documentProduct.copy(productId = masterProductId?.toInt())
+                                val documentProductId = invoiceViewModel.saveDocumentProductInLocalDbAndGetId(docProductWithLink)
                                 if (documentProductId != null) {
-                                    invoiceViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
-                                    // Deliberately no clearProductUiState() here: keep unit + taxRate
-                                    // in state so the next creation (onClickNewDocumentProduct →
-                                    // clearProductNameAndDescription) can carry them over.
+                                    invoiceViewModel.saveDocumentProductInUiState(docProductWithLink.copy(id = documentProductId))
+                                    productAddEditViewModel.clearProductUiState()
                                     showDocumentForm = false
                                 }
                             }
@@ -442,6 +421,7 @@ fun NavGraphBuilder.invoiceAddEdit(
                             if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                                 invoiceViewModel.updateUiState(ScreenElement.DOCUMENT_PRODUCT, documentProduct)
                                 productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                                if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                 productAddEditViewModel.clearProductUiState()
                                 showDocumentForm = false
                             }
@@ -469,7 +449,10 @@ fun NavGraphBuilder.invoiceAddEdit(
             },
             onOrderChange = invoiceViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
-            exportPdfContent = exportPdfContent
+            exportPdfContent = exportPdfContent,
+            showProductType = showProductType,
+            hideLinkedSourceHeaders = document.hideLinkedSourceHeaders,
+            onToggleHideLinkedSourceHeaders = invoiceViewModel::toggleHideLinkedSourceHeaders,
         )
     }
 }

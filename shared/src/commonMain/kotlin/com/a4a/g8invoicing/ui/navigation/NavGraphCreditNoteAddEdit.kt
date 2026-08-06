@@ -4,8 +4,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,10 +19,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.sync_client_message
-import com.a4a.g8invoicing.shared.resources.sync_client_no
-import com.a4a.g8invoicing.shared.resources.sync_client_title
-import com.a4a.g8invoicing.shared.resources.sync_client_yes
 import com.a4a.g8invoicing.shared.resources.version_mismatch_client_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_client_title
 import com.a4a.g8invoicing.shared.resources.version_mismatch_keep_current
@@ -78,6 +75,14 @@ fun NavGraphBuilder.creditNoteAddEdit(
 
         val productAddEditViewModel: ProductAddEditViewModel = koinViewModel()
         val documentProduct by productAddEditViewModel.documentProductUiState.collectAsState()
+        // Product.type visibility: read from uiState.documentIssuer (authoritative
+        // source, set by onSelectClientOrIssuer via saveDocumentClientOrIssuerInUiState).
+        // NOT clientOrIssuerAddEditViewModel.documentIssuerUiState — that's only for
+        // the issuer-edit sub-form.
+        val showProductType = uiState.documentIssuer?.intraEuSales == true
+        LaunchedEffect(showProductType) {
+            productAddEditViewModel.setShowProductType(showProductType)
+        }
 
         var showDocumentForm by remember { mutableStateOf(false) }
 
@@ -89,10 +94,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
 
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        var pendingIssuerOpensForm by remember { mutableStateOf(false) }
         var showClientVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingClientToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
-        var showSyncClientDialog by remember { mutableStateOf(false) }
-        var pendingClientToSave by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        var pendingClientOpensForm by remember { mutableStateOf(false) }
 
         // Version mismatch dialog for issuer
         if (showVersionMismatchDialog && pendingIssuerToEdit != null) {
@@ -100,37 +105,48 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 onDismissRequest = {
                     showVersionMismatchDialog = false
                     pendingIssuerToEdit = null
+                    pendingIssuerOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_message)) },
                 confirmButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingIssuerOpensForm
+                            showVersionMismatchDialog = false
+                            pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
-                                showVersionMismatchDialog = false
-                                pendingIssuerToEdit = null
+                                if (updated != null) {
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 },
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingIssuerOpensForm
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
+                            pendingIssuerOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 }
@@ -143,98 +159,48 @@ fun NavGraphBuilder.creditNoteAddEdit(
                 onDismissRequest = {
                     showClientVersionMismatchDialog = false
                     pendingClientToEdit = null
+                    pendingClientOpensForm = false
                 },
                 title = { Text(stringResource(Res.string.version_mismatch_client_title)) },
                 text = { Text(stringResource(Res.string.version_mismatch_client_message)) },
                 confirmButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingClientOpensForm
+                            showClientVersionMismatchDialog = false
+                            pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                             scope.launch {
-                                clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
                                     ClientOrIssuerType.DOCUMENT_CLIENT
                                 )
-                                showClientVersionMismatchDialog = false
-                                pendingClientToEdit = null
+                                if (updated != null) {
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                                    creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                }
                             }
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 },
                 dismissButton = {
                     Button(
                         onClick = {
+                            val opensForm = pendingClientOpensForm
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
+                            pendingClientOpensForm = false
+                            if (opensForm) showDocumentForm = true
                         }
                     ) {
                         Text(
                             text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.callForActionsViolet
-                        )
-                    }
-                }
-            )
-        }
-
-        // Sync client to master dialog
-        if (showSyncClientDialog && pendingClientToSave != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    // On dismiss, save without syncing to master
-                    scope.launch {
-                        clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                            ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = false
-                        )
-                        creditNoteViewModel.reloadDocument()
-                        showSyncClientDialog = false
-                        pendingClientToSave = null
-                        showDocumentForm = false
-                    }
-                },
-                title = { Text(stringResource(Res.string.sync_client_title)) },
-                text = { Text(stringResource(Res.string.sync_client_message)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = true
-                                )
-                                // Reload document to get updated originalVersion after sync
-                                creditNoteViewModel.reloadDocument()
-                                showSyncClientDialog = false
-                                pendingClientToSave = null
-                                showDocumentForm = false
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.sync_client_yes),
-                            style = MaterialTheme.typography.callForActionsViolet
-                        )
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, pendingClientToSave!!, syncToMaster = false
-                                )
-                                creditNoteViewModel.reloadDocument()
-                                showSyncClientDialog = false
-                                pendingClientToSave = null
-                                showDocumentForm = false
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.sync_client_no),
-                            style = MaterialTheme.typography.callForActionsViolet
+                            style = MaterialTheme.typography.textCta
                         )
                     }
                 }
@@ -287,25 +253,29 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onClickNewDocumentClientOrIssuer = {
                 clientOrIssuerAddEditViewModel.clearClientOrIssuerUiState(it)
             },
-            onClickDocumentClientOrIssuer = { clientOrIssuer ->
+            onClickDocumentClientOrIssuer = { clientOrIssuer, openFormOnCompletion ->
                 clientOrIssuerAddEditViewModel.setDocumentClientOrIssuerUiState(clientOrIssuer)
-                // Check for version mismatch for issuers
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
                     clientOrIssuer.type == ClientOrIssuerType.ISSUER) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingIssuerToEdit = clientOrIssuer
+                            pendingIssuerOpensForm = openFormOnCompletion
                             showVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }
-                // Check for version mismatch for clients
                 if (clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT ||
                     clientOrIssuer.type == ClientOrIssuerType.CLIENT) {
                     scope.launch {
                         if (clientOrIssuerAddEditViewModel.checkVersionMismatch(clientOrIssuer)) {
                             pendingClientToEdit = clientOrIssuer
+                            pendingClientOpensForm = openFormOnCompletion
                             showClientVersionMismatchDialog = true
+                        } else if (openFormOnCompletion) {
+                            showDocumentForm = true
                         }
                     }
                 }
@@ -351,7 +321,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                     )
                 }
             },
-            onClickDoneForm = { typeOfCreation ->
+            onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
@@ -369,20 +339,11 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
-                                // Check if there are actual changes from master
-                                val hasChanges = clientOrIssuerAddEditViewModel.hasChangesFromMaster(documentClientUiState)
-                                if (hasChanges) {
-                                    // Show sync dialog to ask user if they want to update master client
-                                    pendingClientToSave = documentClientUiState.copy()
-                                    showSyncClientDialog = true
-                                } else {
-                                    // No changes from master, just save document without sync dialog
-                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                        ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = false
-                                    )
-                                    creditNoteViewModel.reloadDocument()
-                                    showDocumentForm = false
-                                }
+                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                )
+                                creditNoteViewModel.reloadDocument()
+                                showDocumentForm = false
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -401,9 +362,8 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState
+                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
-                                // Reload document to get updated originalVersion after sync
                                 creditNoteViewModel.reloadDocument()
                                 showDocumentForm = false
                             }
@@ -413,6 +373,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                 val documentProductId = creditNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
                                 if (documentProductId != null) {
                                     creditNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
+                                    if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                     showDocumentForm = false
                                 }
                             }
@@ -420,13 +381,12 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> {
                             if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                                 productAddEditViewModel.setProductUiState()
-                                productAddEditViewModel.saveProductInLocalDb()
-                                val documentProductId = creditNoteViewModel.saveDocumentProductInLocalDbAndGetId(documentProduct)
+                                val masterProductId = productAddEditViewModel.saveProductInLocalDbAndGetId()
+                                val docProductWithLink = documentProduct.copy(productId = masterProductId?.toInt())
+                                val documentProductId = creditNoteViewModel.saveDocumentProductInLocalDbAndGetId(docProductWithLink)
                                 if (documentProductId != null) {
-                                    creditNoteViewModel.saveDocumentProductInUiState(documentProduct.copy(id = documentProductId))
-                                    // Deliberately no clearProductUiState() here: keep unit + taxRate
-                                    // in state so the next creation (onClickNewDocumentProduct →
-                                    // clearProductNameAndDescription) can carry them over.
+                                    creditNoteViewModel.saveDocumentProductInUiState(docProductWithLink.copy(id = documentProductId))
+                                    productAddEditViewModel.clearProductUiState()
                                     showDocumentForm = false
                                 }
                             }
@@ -435,6 +395,7 @@ fun NavGraphBuilder.creditNoteAddEdit(
                             if (productAddEditViewModel.validateInputs(ProductType.DOCUMENT_PRODUCT)) {
                                 creditNoteViewModel.updateUiState(ScreenElement.DOCUMENT_PRODUCT, documentProduct)
                                 productAddEditViewModel.updateInLocalDb(ProductType.DOCUMENT_PRODUCT)
+                                if (syncToMaster) productAddEditViewModel.syncDocumentProductToMaster()
                                 productAddEditViewModel.clearProductUiState()
                                 showDocumentForm = false
                             }
@@ -463,7 +424,8 @@ fun NavGraphBuilder.creditNoteAddEdit(
             },
             onOrderChange = creditNoteViewModel::updateDocumentProductsOrderInUiStateAndDb,
             onShowMessage = onShowMessage,
-            exportPdfContent = exportPdfContent
+            exportPdfContent = exportPdfContent,
+            showProductType = showProductType,
         )
     }
 }

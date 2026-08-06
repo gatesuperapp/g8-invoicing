@@ -32,6 +32,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -67,7 +68,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -75,7 +75,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -147,14 +146,15 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
-import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.callForActions
-import com.a4a.g8invoicing.ui.theme.textNormalBold
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -172,8 +172,8 @@ fun Account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
-    pendingMagicLinkToken: String? = null,
-    onMagicLinkTokenConsumed: () -> Unit = {},
+    isCategoriesMenuOpen: Boolean = false,
+    onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     viewModel: AccountViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
@@ -220,19 +220,8 @@ fun Account(
         }
     }
 
-    // Consume the magic link token from the deep link on this screen's own VM so the
-    // success (logged-in UI) or error (expired-link dialog) lands on the same instance
-    // that renders here — calling consume from MainCompose would target the Activity-
-    // scoped VM, leaving this NavBackStackEntry-scoped one with stale null state.
-    LaunchedEffect(pendingMagicLinkToken) {
-        if (pendingMagicLinkToken != null) {
-            viewModel.consumeMagicLink(pendingMagicLinkToken)
-            onMagicLinkTokenConsumed()
-        }
-    }
-
     Scaffold(
-        containerColor = Color.White,
+        containerColor = AppColors.surface,
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = stringResource(Res.string.drawer_my_account),
@@ -246,7 +235,9 @@ fun Account(
                 navController = navController,
                 onClickCategory = onClickCategory,
                 onChangeBackground = { isDimActive.value = !isDimActive.value },
-                isButtonNewDisplayed = false
+                isButtonNewDisplayed = false,
+                isCategoriesMenuOpen = isCategoriesMenuOpen,
+                onCategoriesMenuOpenChange = onCategoriesMenuOpenChange,
             )
         },
     ) { _ ->
@@ -287,29 +278,6 @@ fun Account(
                         onClearError = { viewModel.clearError() },
                         onClearSuccess = { viewModel.clearSuccess() },
                         uriHandler = uriHandler,
-                    )
-                }
-
-                // Shown regardless of login state — a stale magic link clicked while
-                // already logged in still gets explained, instead of silently doing nothing.
-                // Backend distinguishes "Lien invalide ou expiré" (401, link itself dead)
-                // from generic 500s (other failures, e.g. user-creation conflicts) — we
-                // pick the right copy based on the message so a 500 doesn't get mislabelled
-                // as "link expired".
-                if (uiState.consumeErrorMessage != null) {
-                    val msg = uiState.consumeErrorMessage!!
-                    val isLinkExpired = msg.contains("expir", ignoreCase = true)
-                        || msg.contains("invalide", ignoreCase = true)
-                        || msg.contains("invalid", ignoreCase = true)
-                        || msg.contains("abgelaufen", ignoreCase = true)
-                    AuthMessageDialog(
-                        messagePrefix = stringResource(
-                            if (isLinkExpired) Res.string.account_auth_link_expired
-                            else Res.string.account_auth_login_failed
-                        ),
-                        contactEmail = stringResource(Res.string.about_contact_email),
-                        uriHandler = uriHandler,
-                        onDismiss = { viewModel.clearConsumeError() },
                     )
                 }
 
@@ -373,9 +341,10 @@ fun Account(
                                     showDeleteAccountDialog = true
                                 },
                             text = stringResource(Res.string.account_delete_cta),
-                            fontSize = 13.sp,
-                            color = ColorRedLate,
-                            textDecoration = TextDecoration.Underline,
+                            style = MaterialTheme.typography.textSecondary.copy(
+                                color = ColorRedLate,
+                                textDecoration = TextDecoration.Underline,
+                            ),
                         )
                     }
                 }
@@ -493,6 +462,13 @@ fun Account(
         if (showSendDatabaseByEmailDialog && exportedFilePath != null) {
             AlertDialog(
                 onDismissRequest = { showSendDatabaseByEmailDialog = false },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = Color(0xFF4CAF50),
+                    )
+                },
                 title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
                 text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
                 confirmButton = {
@@ -526,7 +502,7 @@ fun Account(
 }
 
 @Composable
-private fun AuthMessageDialog(
+fun AuthMessageDialog(
     messagePrefix: String,
     contactEmail: String,
     uriHandler: androidx.compose.ui.platform.UriHandler,
@@ -576,7 +552,7 @@ private fun ColumnScope.LoggedOutContent(
 
     Text(
         text = stringResource(Res.string.account_auth_title),
-        fontWeight = FontWeight.Bold,
+        style = MaterialTheme.typography.textBodyBold,
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -705,8 +681,8 @@ private fun LoggedInContent(
                 stringResource(Res.string.account_renewal_date, dateLabel)
             }
             Text(
-                fontSize = 13.sp,
                 text = text,
+                style = MaterialTheme.typography.textSecondary,
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -716,9 +692,10 @@ private fun LoggedInContent(
         Text(
             modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
             text = manageLabel,
-            fontSize = 13.sp,
-            color = ColorVioletLight,
-            textDecoration = TextDecoration.Underline,
+            style = MaterialTheme.typography.textSecondary.copy(
+                color = ColorVioletLight,
+                textDecoration = TextDecoration.Underline,
+            ),
         )
         Spacer(modifier = Modifier.height(12.dp))
     }
@@ -727,9 +704,10 @@ private fun LoggedInContent(
     Text(
         modifier = Modifier.clickable { onLogout() },
         text = stringResource(Res.string.account_logout),
-        fontSize = 13.sp,
-        color = ColorVioletLight,
-        textDecoration = TextDecoration.Underline,
+        style = MaterialTheme.typography.textSecondary.copy(
+            color = ColorVioletLight,
+            textDecoration = TextDecoration.Underline,
+        ),
     )
 }
 
@@ -792,7 +770,7 @@ private fun CurrencySelector(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.Gray
+            tint = AppColors.iconSecondary
         )
     }
 
@@ -851,7 +829,7 @@ private fun LanguageSelector(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.Gray
+            tint = AppColors.iconSecondary
         )
     }
 
@@ -912,7 +890,7 @@ private fun MyCompaniesSection(
 
     // "+ Ajouter une entreprise" — violet plain CTA, no fill, tight to the list.
     Text(
-        style = MaterialTheme.typography.callForActions,
+        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
         color = ColorVioletLink,
         modifier = Modifier
             .padding(start = 4.dp, top = 4.dp)
@@ -934,7 +912,7 @@ private fun IssuerListRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(5.dp))
-            .background(ColorLightGrey)
+            .background(AppColors.surfaceMuted)
             .clickable(onClick = onClick)
             .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -942,8 +920,7 @@ private fun IssuerListRow(
         Text(
             modifier = Modifier.weight(1F),
             text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
         )
         Icon(
             modifier = Modifier
@@ -1007,7 +984,7 @@ private fun LegalLinksFooter(uriHandler: androidx.compose.ui.platform.UriHandler
     ) {
         ClickableText(
             text = annotated,
-            style = TextStyle(fontSize = 13.sp, textAlign = TextAlign.Center),
+            style = MaterialTheme.typography.textSecondary.copy(textAlign = TextAlign.Center),
             onClick = { offset ->
                 annotated.getStringAnnotations(tag = "terms", start = offset, end = offset)
                     .firstOrNull()?.let { uriHandler.openUri(it.item) }

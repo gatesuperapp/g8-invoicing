@@ -1,5 +1,6 @@
 package com.a4a.g8invoicing.ui.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,8 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.a4a.g8invoicing.ui.theme.textTiny
 
 @Composable
 fun BottomBarActionView(
@@ -141,25 +143,31 @@ fun BottomBarActionView(
 
 @Composable
 fun AddIconAndLabelInColumn(action: AppBarAction, iconSize: Dp? = null) {
+    // Fixed-height icon slot so every label lands on the same baseline no matter
+    // how big or small the individual icon is (e.g. the tag icon on selection is
+    // 16dp while categories/more/duplicate are 24dp — without the slot the small
+    // ones float up and the labels stagger).
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        action.icon?.let {
-            Icon(
-                it,
-                modifier = if (iconSize != null) {
-                    Modifier
-                        .size(iconSize)
-                } else Modifier,
-                tint = action.iconColor ?: LocalContentColor.current,
-                contentDescription = action.description
-            )
+        Box(
+            modifier = Modifier.size(24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            action.icon?.let {
+                Icon(
+                    it,
+                    modifier = if (iconSize != null) Modifier.size(iconSize) else Modifier,
+                    tint = action.iconColor ?: LocalContentColor.current,
+                    contentDescription = action.description
+                )
+            }
         }
 
         action.label?.let {
             Text(
                 text = it,
-                fontSize = 10.sp,
+                style = MaterialTheme.typography.textTiny,
             )
         }
     }

@@ -108,6 +108,17 @@ actual class ImageStorage actual constructor() {
         return File(logoDir, logoPath).exists()
     }
 
+    actual fun readBundledResource(relativePath: String): ByteArray? {
+        // Compose Resources on Desktop bundles drawables into the classpath
+        // under composeResources/<module.package>/<relativePath>.
+        val resourcePath = "composeResources/com.a4a.g8invoicing.shared.resources/$relativePath"
+        return try {
+            javaClass.classLoader.getResourceAsStream(resourcePath)?.use { it.readBytes() }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun resizeIfNeeded(image: BufferedImage, maxWidth: Int, maxHeight: Int): BufferedImage {
         val width = image.width
         val height = image.height

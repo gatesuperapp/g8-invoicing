@@ -1,19 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Default document numbers -->
     <string name="invoice_default_number">F001</string>
     <string name="delivery_note_default_number">NE001</string>
     <string name="credit_note_default_number">NC001</string>
-
     <!-- Currency -->
-    <string name="currency">€</string>
 
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copiar</string>
-
     <!-- Document footer -->
     <string name="document_default_footer">Descuento por pago anticipado: ninguno\nTasa de penalización por retraso en el pago: ninguna\n\n\nIBAN: ES76 1234 1234 1234 1234 1234</string>
-
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
     <string name="delivery_note_number">Nota de entrega Nº</string>
@@ -26,6 +22,7 @@
     <string name="addressed_to">Dirigido a</string>
     <string name="invoice_pdf_due_date">Fecha límite de pago: </string>
     <string name="invoice_paid">Pagado ✔</string>
+    <string name="pdf_currency_notice">Moneda: %1$s</string>
 
     <!-- Document table -->
     <string name="document_table_description">Descripción</string>
@@ -34,23 +31,18 @@
     <string name="document_table_unit_price_without_tax">PU s/IVA</string>
     <string name="document_table_total_price_without_tax">Total s/IVA</string>
     <string name="document_table_tax_rate">IVA</string>
-
     <!-- Document totals -->
     <string name="document_total_without_tax">Total s/IVA:</string>
     <string name="document_total_with_tax">Total c/IVA:</string>
-    <string name="document_tax">IVA</string>
     <string name="document_tax_label">IVA %1$s: </string>
-
     <!-- Document totals aliases for PDF -->
     <string name="total_without_tax">Total s/IVA:</string>
     <string name="total_with_tax">Total c/IVA:</string>
     <string name="vat">IVA</string>
-
     <!-- UI Labels -->
     <string name="form_label_edit">Editar</string>
     <string name="product_price_without_tax">s/IVA</string>
     <string name="product_price_with_tax">c/IVA</string>
-
     <!-- Alert Dialog Strings -->
     <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nSi ya has enviado la factura, no es legal eliminarla:</string>
     <string name="alert_dialog_delete_invoice_2">Más información\n</string>
@@ -59,19 +51,32 @@
     <string name="alert_dialog_delete_general">¿Estás seguro? Esta acción es irreversible.</string>
     <string name="alert_dialog_delete_confirm">Sí, eliminar</string>
     <string name="alert_dialog_cancel">Cancelar</string>
-
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nuevo cliente</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nuevo emisor</string>
+    <string name="document_bottom_sheet_picker_empty_client">Ningún cliente encontrado.\nToca + para añadir uno.</string>
+    <string name="document_bottom_sheet_picker_empty_issuer">Ningún emisor encontrado.\nToca + para añadir tu empresa.</string>
+    <string name="document_bottom_sheet_picker_empty_product">Ningún producto encontrado.\nToca + para añadir uno.</string>
+    <string name="document_bottom_sheet_picker_recent">Recientes</string>
+    <string name="document_bottom_sheet_picker_edit_link">Editar</string>
+    <string name="document_form_sync_client_to_master">Aplicar también los cambios a la ficha del cliente</string>
+    <string name="document_form_sync_issuer_to_master">Aplicar también los cambios a la ficha del emisor</string>
+    <string name="document_form_sync_product_to_master">Aplicar también los cambios a la ficha del producto</string>
+    <string name="document_bottom_sheet_picker_title_client">Clientes</string>
+    <string name="document_bottom_sheet_picker_title_issuer">Emisores</string>
+    <string name="document_bottom_sheet_picker_title_product">Productos</string>
+    <string name="document_bottom_sheet_add_product">Añadir un producto</string>
     <string name="document_bottom_sheet_document_product_add">Escoge desde mi lista</string>
     <string name="document_modal_product_cancel">Anular</string>
     <string name="document_modal_product_save">Confirmar</string>
     <string name="document_modal_product_back">Volver</string>
-
     <!-- Invoice Created Dialog -->
     <string name="invoice_created_title">¡Tu factura se ha creado correctamente!</string>
     <string name="invoice_created_button">Ver mi factura</string>
-
+    <string name="credit_note_created_title">¡Tu nota de crédito se ha creado correctamente!</string>
+    <string name="credit_note_created_button">Ver mi nota de crédito</string>
+    <string name="corrected_invoice_created_title">¡Tu factura rectificativa se ha creado correctamente!</string>
+    <string name="corrected_invoice_created_button">Ver mi factura rectificativa</string>
     <!-- Document Form Strings -->
     <string name="document_number_short">Nº</string>
     <string name="document_due_date">Fecha límite</string>
@@ -81,12 +86,20 @@
     <string name="document_free_field">Campo libre</string>
     <string name="document_footer">Pie de pagina</string>
     <string name="document_default_reference">XFGDTSF</string>
-
+    <string name="credit_note_reference_from_invoice">Emitida a partir de la factura %1$s</string>
+    <string name="credit_note_reference_from_invoices">Emitida a partir de las facturas %1$s</string>
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
+    <string name="document_products_other_lines">Otras líneas</string>
     <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
     <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
     <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
+
+    <!-- Invoice list row — due-date countdown -->
+    <string name="document_list_due_in_day">Vence en %1$d día</string>
+    <string name="document_list_due_in_days">Vence en %1$d días</string>
+    <string name="document_list_overdue_day">%1$d d de retraso</string>
+    <string name="document_list_overdue_days">%1$d d de retraso</string>
 
     <!-- Product Form Strings -->
     <string name="product_name">Nombre</string>
@@ -97,8 +110,6 @@
     <string name="product_unit_input">kg</string>
     <string name="product_tax">Impuesto</string>
     <string name="tax_rate_screen_title">Tasa de IVA</string>
-    <string name="tax_rate_edit_title">Modificar IVA</string>
-    <string name="tax_rate_edit_rates">Modificar las tasas</string>
     <string name="tax_rate_add_rate">+ Añadir una tasa</string>
     <string name="product_price">Precio</string>
     <string name="product_price_input">3</string>
@@ -109,7 +120,6 @@
     <string name="document_product_quantity">Cantidad</string>
     <string name="document_product_quantity_input">1</string>
     <string name="product_clientprice_select_placeholder">Seleccionar…</string>
-    <string name="product_select_placeholder">Seleccionar…</string>
 
 
     <!-- Client/Issuer Form Strings -->
@@ -161,7 +171,6 @@
     <string name="client_selection_validate">Validar</string>
     <string name="select_placeholder">Seleccionar…</string>
     <string name="clients_selected_count">%1$d clientes seleccionados</string>
-
     <!-- Document Modal Strings -->
     <string name="document_modal_add_product">Añadir producto</string>
     <string name="document_modal_edit_product">Editar producto</string>
@@ -170,7 +179,6 @@
     <string name="document_modal_edit_issuer">Editar emisor</string>
     <string name="document_modal_new_client">Nuevo cliente</string>
     <string name="document_modal_edit_client">Editar cliente</string>
-
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Cerrar</string>
     <string name="whats_new_done">¡Adelante!</string>
@@ -184,13 +192,10 @@
     <string name="whats_new_currency_description">Ya puedes usar otras monedas además del euro. Cámbiala en "Mi cuenta" &gt; "Moneda e idioma".</string>
     <string name="whats_new_companies_title">Mis empresas</string>
     <string name="whats_new_companies_description">Gestiona más fácilmente los emisores usados en tus documentos desde "Mi cuenta" &gt; "Mis empresas".</string>
-
     <!-- Toast messages -->
     <string name="feature_coming_soon">Próximamente :)</string>
-
     <!-- Corrected Invoice -->
     <string name="corrected_invoice_cancel_and_replace">Anula y reemplaza la factura</string>
-
     <!-- AppBar actions -->
     <string name="appbar_invoices">Facturas</string>
     <string name="appbar_credit_notes">Notas crédito</string>
@@ -205,11 +210,10 @@
     <string name="appbar_tag">Marcador</string>
     <string name="appbar_send_reminder">Enviar recordatorio</string>
     <string name="appbar_text">Editar texto</string>
-    <string name="appbar_list">Añadir productos</string>
-    <string name="appbar_list_label">Productos</string>
+    <string name="appbar_list">Añadir una línea</string>
+    <string name="appbar_list_label">Líneas</string>
     <string name="appbar_components">Editar elementos</string>
     <string name="appbar_text_label">Texto</string>
-    <string name="appbar_style">Modificar el estilo</string>
     <string name="appbar_style_label">Estilo</string>
     <string name="appbar_more">Otras opciones</string>
     <string name="appbar_more_label">Más</string>
@@ -225,8 +229,6 @@
     <string name="appbar_duplicate_label">Duplicar</string>
     <string name="appbar_save_payment">Registrar pago</string>
     <string name="appbar_save_payment_label">Pago</string>
-    <string name="appbar_send">Enviar</string>
-    <string name="appbar_save">Guardar</string>
     <string name="appbar_export">Exportar</string>
     <string name="appbar_tag_draft">Borrador</string>
     <string name="appbar_tag_paid">Pagado</string>
@@ -236,13 +238,11 @@
     <string name="appbar_tag_reminded">Recordado</string>
     <string name="appbar_product_add">Añadir producto</string>
     <string name="appbar_product_edit">Modificar producto</string>
-    <string name="appbar_g8">𝕘𝟠</string>
 
     <!-- Drawer / Categories -->
-    <string name="drawer_g8">𝕘𝟠</string>
+    <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mi cuenta</string>
     <string name="drawer_gstore">𝕘Store</string>
-
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
@@ -263,11 +263,7 @@
     <string name="gstore_module_payments_desc">Registra tarjetas, cheques, efectivo</string>
     <string name="gstore_module_themes_title">Temas premium</string>
     <string name="gstore_module_themes_desc">Colores y diseños adicionales</string>
-
     <!-- Account Screen -->
-    <string name="account_subscribe">Apoya el proyecto y disfruta de ventajas exclusivas: acceso anticipado a las próximas funcionalidades (app de escritorio, facturación electrónica..), insignia en el foro, pegatina "Petit Rhino".. ¡y mucho más!</string>
-    <string name="account_donate">Más información</string>
-    <string name="account_donate_link">https://www.the-gate.fr/es</string>
     <string name="account_share_content">¡Uso la app 𝕘𝟠 para crear mis albaranes y facturas en un instante! Además es un software libre y comprometido. ¿Quieres probarla? Es gratuita y está disponible en Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing o en F-Droid: https://f-droid.org/es/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
     <string name="account_auth_title">¿Eres miembro premium? Inicia sesión a continuación:</string>
@@ -287,7 +283,6 @@
     <string name="account_manage_subscription">Gestionar mi suscripción</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
-    <string name="account_section_auth">Autenticación</string>
     <string name="account_my_companies">Mis empresas</string>
     <string name="account_add_company">+ Añadir una empresa</string>
     <string name="account_section_advanced">Avanzado</string>
@@ -299,11 +294,9 @@
     <string name="account_delete_error">No se puede eliminar tu cuenta por el momento. Comprueba tu conexión e inténtalo de nuevo, o escríbenos a </string>
     <string name="account_delete_success_title">Cuenta eliminada</string>
     <string name="account_delete_success_message">Tu cuenta se ha eliminado correctamente. Tus facturas y datos guardados localmente en este dispositivo se conservan.</string>
-
     <!-- About Screen -->
     <string name="about">𝕘𝟠 es una aplicación práctica y comprometida:\n• Funciona sin conexión \n• Sin publicidad ni rastreadores \n• Software libre, open source\n• Diseñada para productores ecológicos\n• Busca financiar proyectos de protección de la fauna salvaje, en particular los quirópteros.</string>
     <string name="about_title_about">Acerca de</string>
-    <string name="about_title_early_access">Programa "Early bat"</string>
     <string name="about_title_website">Sitio web</string>
     <string name="about_website_intro">Visita nuestro sitio web </string>
     <string name="about_website_cta">www.the-gate.fr</string>
@@ -325,7 +318,7 @@
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Copia de seguridad</string>
     <string name="about_backup_text">Acuérdate de descargar tu base de datos regularmente, para restaurarla en caso de pérdida del teléfono.</string>
-    <string name="about_download_database">Descargar</string>
+    <string name="about_download_database">💎 Guardar 💎</string>
     <string name="account_backup_dialog_title">Copia de seguridad descargada</string>
     <string name="account_backup_dialog_message">Tu base de datos se ha guardado en la carpeta Descargas. ¿También quieres enviarla por correo?</string>
     <string name="account_backup_dialog_yes">Sí, enviar por correo</string>
@@ -334,8 +327,8 @@
     <string name="about_terms_of_service_header">Al usar la aplicación, aceptas las</string>
     <string name="about_terms_of_service">condiciones de uso</string>
     <string name="about_terms_of_service_header_2">y la</string>
-    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en</string>
-    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en</string>
+    <string name="about_terms_of_service_url_1">https://www.the-gate.fr/en/terms-of-use</string>
+    <string name="about_terms_of_service_url_2">https://www.the-gate.fr/en/privacy-policy</string>
     <string name="about_privacy">política de privacidad de 𝕘𝟠.</string>
     <!-- Legal links footer on Mon Compte. %1$s = terms label, %2$s = privacy label -->
     <string name="account_legal_line">Leer las %1$s y la %2$s</string>
@@ -344,7 +337,6 @@
     <string name="about_share_text_2">¡Compártela con tus amigos!</string>
     <string name="about_share_button">Compartir</string>
     <string name="about_title_version">Versión de la aplicación</string>
-
     <!-- Language Selection -->
     <string name="about_title_language">Idioma</string>
     <string name="about_language_system">Idioma del sistema</string>
@@ -352,7 +344,6 @@
     <string name="about_language_english">English</string>
     <string name="about_language_german">Deutsch</string>
     <string name="about_language_spanish">Español</string>
-
     <!-- Currency Selection -->
     <string name="account_currency_title">Moneda</string>
     <string name="account_currency_and_language_title">Moneda e idioma</string>
@@ -360,15 +351,12 @@
     <string name="currency_picker_recent">Usadas recientemente</string>
     <string name="currency_picker_all">Todas</string>
     <string name="currency_picker_empty">No se ha encontrado ninguna moneda</string>
-
     <string name="label_separator">: </string>
     <string name="ok">OK</string>
-
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">Aprendí este movimiento en el hip-hop, súper estiloso lo sé. Todavía tengo que practicarlo, no soy muy rápido, creo que mi patagio frena la ola. En fin, quería decirte \n\n …   </string>
     <string name="delivery_note_advice_convert1">que si quieres convertir uno o varios albaranes en una factura, puedes seleccionarlos en la lista haciendo clic largo (o haciendo clic en ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
-
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
     <string name="invoice_advice_legal_1">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡ \n\n …   </string>
@@ -381,7 +369,6 @@
     <string name="invoice_advice_bottom_menu">Hey hey, soy tu batmagotchi. Te tengo que enseñar un truco \n\n …   </string>
     <string name="invoice_advice_bottom_menu1">Para que aparezcan opciones muy útiles, como eliminar un documento \n\n …   </string>
     <string name="invoice_advice_bottom_menu2">haz clic en el círculo ○ delante del número de la factura. Incluso puedes seleccionar varios documentos a la vez.\n\n 𝕨𝕚𝕝𝕕 </string>
-
     <!-- Export PDF -->
     <string name="export_waiting_permission">Permiso requerido…</string>
     <string name="export_ongoing">Exportación en curso…</string>
@@ -401,23 +388,21 @@
     <string name="export_email_subject_invoice">factura</string>
     <string name="export_email_subject_delivery_note">albarán</string>
     <string name="export_email_subject_credit_note">nota de crédito</string>
+    <string name="export_email_subject_quote">presupuesto</string>
     <string name="alert_dialog_error">𝕠𝕙 𝕟𝕠
  ((˃ᯅ˂)ノ) 
 
 Une erreur s'est produite : 
 </string>
     <string name="alert_dialog_error_confirm">OK</string>
-
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Emisor modificado</string>
     <string name="version_mismatch_message">El emisor se ha modificado desde otro documento. ¿Quieres cargar la última versión?</string>
     <string name="version_mismatch_load_latest">Cargar la última versión</string>
     <string name="version_mismatch_keep_current">Mantener la versión actual</string>
-
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Cliente modificado</string>
     <string name="version_mismatch_client_message">El cliente se ha modificado desde otro documento. ¿Quieres cargar la última versión?</string>
-
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">¿Actualizar el cliente?</string>
     <string name="sync_client_message">¿Quieres aplicar estos cambios al cliente en tu lista de clientes?</string>
@@ -430,7 +415,7 @@ Une erreur s'est produite :
 
     <!-- Reminder email (invoice past due) -->
     <string name="send_reminder_email_subject">Recordatorio: factura N°%1$s</string>
-    <string name="send_reminder_email_content">Hola, \n\n Tu factura %1$s por un importe de %2$s€ venció el %3$s. Aún no hemos recibido tu pago.\n\n Te rogamos que procedas con el pago lo antes posible.\n\n Un saludo\n</string>
+    <string name="send_reminder_email_content">Hola, \n\n Tu factura %1$s por un importe de %2$s %4$s venció el %3$s. Aún no hemos recibido tu pago.\n\n Te rogamos que procedas con el pago lo antes posible.\n\n Un saludo\n</string>
 
     <!-- Database export dialog -->
     <string name="database_export_dialog_title">^._.^</string>
@@ -451,4 +436,308 @@ Une erreur s'est produite :
     <string name="database_email_subject">Exportación de mis datos g8</string>
     <string name="database_email_body">Mi base de datos SQLite de la aplicación g8. Contiene todos mis datos (clientes, productos, datos de facturación..). Si pierdo mi teléfono, esta base de datos podrá utilizarse para restaurar mis datos. Para cualquier pregunta: contact@the-gate.fr.</string>
     <string name="database_email_chooser">Enviar la base de datos por correo</string>
+
+    <!-- gStore Quote (unlimited + trial) -->
+    <string name="gstore_module_quote_title">Presupuestos ilimitados</string>
+    <string name="gstore_module_quote_desc">Crear presupuestos y convertirlos en facturas</string>
+    <string name="gstore_module_quote_detail">Activa este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados. El número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
+    <string name="gstore_module_quote_trial_title">Descubre los presupuestos</string>
+    <string name="gstore_module_quote_trial_desc">5 presupuestos gratis para probar la función</string>
+    <string name="gstore_module_quote_trial_detail">Activar este módulo permite obtener 5 presupuestos gratis para probar la función y ver si te conviene. Después habrá que hacerse miembro premium para tener presupuestos ilimitados.</string>
+    <string name="gstore_quote_trial_exhausted_title">Presupuestos gratis agotados</string>
+    <string name="gstore_quote_trial_exhausted_body">Tus 5 presupuestos gratis se han agotado. Si deseas seguir usando los presupuestos, puedes hacerte miembro premium.</string>
+    <string name="gstore_quote_trial_exhausted_cta">De acuerdo</string>
+
+    <!-- Onboarding 1.8 -->
+    <string name="onboarding_previous">Anterior</string>
+    <string name="onboarding_next">Siguiente</string>
+    <string name="onboarding_yes">Sí</string>
+    <string name="onboarding_no">No</string>
+
+    <string name="onboarding_welcome_body">Bienvenida a la versión\n1.8 - Rosa Canina</string>
+    <string name="onboarding_welcome_cta">Descubrir</string>
+
+    <string name="onboarding_devis_title">Presupuestos</string>
+    <string name="onboarding_devis_body_bold">Los presupuestos ya están disponibles</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nY puedes convertirlos en factura.\n\n¡Puedes probar la función (5 presupuestos máx.) y después hacerte miembro premium para tener presupuestos ilimitados!</string>
+    <string name="onboarding_devis_cta_activate">Activar presupuestos</string>
+    <string name="onboarding_devis_cta_later_gstore">Más tarde en la gStore</string>
+    <string name="onboarding_devis_cta_no_devis">¡Genial, pero no lo necesito!</string>
+
+    <string name="onboarding_facturx_title">Nuevos campos</string>
+    <string name="onboarding_facturx_body_before_bold">He empezado a añadir campos para tener facturas normalizadas, más legibles y listas para la facturación electrónica.\n\n</string>
+    <string name="onboarding_facturx_body_bold">Necesito tu ayuda para algunos ajustes.</string>
+    <string name="onboarding_facturx_cta">De acuerdo</string>
+
+    <string name="onboarding_privacy_title">Confidencialidad</string>
+    <string name="onboarding_privacy_body_p1">Que sepas que no tengo acceso a las respuestas que me vas a dar: tus datos solo se guardan en tu teléfono.</string>
+    <string name="onboarding_privacy_body_p2">Por cierto, ¿te gustaría hacer una copia de seguridad rápida?</string>
+    <string name="onboarding_privacy_cta_backup">Guardar mi base de datos</string>
+
+    <string name="onboarding_cleanup_title">Tus empresas</string>
+    <string name="onboarding_cleanup_body_part1">Veo que gestionas varias empresas.\n\nSi hay alguna que ya no usas, </string>
+    <string name="onboarding_cleanup_body_bold_delete_here">puedes eliminarlas aquí</string>
+    <string name="onboarding_cleanup_body_part3">. No te preocupes, los documentos vinculados no se moverán.</string>
+    <string name="onboarding_cleanup_cta">Siguiente</string>
+    <string name="onboarding_cleanup_delete_confirm_title">¿Eliminar esta empresa?</string>
+    <string name="onboarding_cleanup_delete_confirm_yes">Eliminar</string>
+    <string name="onboarding_cleanup_delete_confirm_no">Cancelar</string>
+
+    <string name="onboarding_issuer_country_subtitle">¿En qué país está domiciliada %1$s?</string>
+    <string name="onboarding_issuer_country_pick">Elegir un país</string>
+
+    <string name="onboarding_vat_subtitle">¿Estás en régimen de franquicia de IVA?</string>
+    <string name="onboarding_vat_option_franchise">Estoy en franquicia de IVA</string>
+    <string name="onboarding_vat_option_tva">Facturo IVA</string>
+    <string name="onboarding_vat_option_dontknow">No lo sé</string>
+
+    <string name="onboarding_vat_dontknow_title">Sin problema</string>
+    <string name="onboarding_vat_dontknow_body">Para saber si te afecta, mira tu último aviso fiscal o pregunta a tu contable.\n\nMientras tanto, asumo que facturas IVA. Podrás modificarlo más tarde en los ajustes de tu empresa.</string>
+    <string name="onboarding_vat_dontknow_cta">De acuerdo</string>
+
+    <string name="onboarding_intraeu_subtitle">¿A veces vendes a clientes en otro país de la UE?</string>
+
+    <string name="onboarding_nature_title">Tipo de producto</string>
+    <string name="onboarding_nature_intro">Para las empresas con exención intracomunitaria, el código de impuestos depende de si vendes bienes o servicios.</string>
+    <string name="onboarding_nature_question">¿Tus productos son…</string>
+    <string name="onboarding_nature_only_services">Solo servicios</string>
+    <string name="onboarding_nature_only_goods">Solo bienes</string>
+    <string name="onboarding_nature_mixed">Un poco de ambos</string>
+
+    <string name="onboarding_issuers_done_title">Listo</string>
+    <string name="onboarding_issuers_done_body_singular">Los ajustes de tu empresa están guardados. Siempre podrás modificarlos en Mi cuenta &gt; Mis empresas.</string>
+    <string name="onboarding_issuers_done_body_plural">Los ajustes de tus empresas están guardados. Siempre podrás modificarlos en Mi cuenta &gt; Mis empresas.</string>
+
+    <string name="onboarding_mixed_hint_title">Un poco de ambos</string>
+    <string name="onboarding_mixed_hint_body">En ese caso, tendrás que indicar el tipo de producto sobre la marcha, cuando los añadas a tus documentos.</string>
+
+    <string name="onboarding_client_country_intro_title">País de los clientes</string>
+    <string name="onboarding_client_country_intro_body">¿Tus clientes están, en su mayoría, en el mismo país?\n\nSi es así, podré rellenarlo automáticamente.</string>
+    <string name="onboarding_client_country_intro_yes">Sí</string>
+    <string name="onboarding_client_country_intro_no">No, están mezclados</string>
+
+    <string name="onboarding_client_country_picker_subtitle">¿En qué país?</string>
+    <string name="onboarding_client_country_picker_pick">Elegir un país</string>
+
+    <string name="onboarding_client_country_done_applied_title">Hecho</string>
+    <string name="onboarding_client_country_done_applied_body">He guardado este país para tus clientes que aún no tenían uno.</string>
+    <string name="onboarding_client_country_done_skipped_title">Sin problema</string>
+    <string name="onboarding_client_country_done_skipped_body">Podrás configurar el país de tus clientes sobre la marcha, cuando los añadas a un documento.</string>
+    <string name="onboarding_client_country_done_cta">Siguiente</string>
+
+    <string name="onboarding_unitcode_cta">De acuerdo</string>
+    <string name="onboarding_unitcode_title">Código de unidad</string>
+    <string name="onboarding_unitcode_part1">Otro campo que he cambiado en esta versión es el </string>
+    <string name="onboarding_unitcode_bold1">código de unidad</string>
+    <string name="onboarding_unitcode_part2">.\n\nCada uno de tus productos ya tenía una </string>
+    <string name="onboarding_unitcode_bold2">unidad</string>
+    <string name="onboarding_unitcode_part3"> (hora, kilo, pieza). Ahora habrá un </string>
+    <string name="onboarding_unitcode_bold3">código normalizado</string>
+    <string name="onboarding_unitcode_part4"> que va con ella.\n\n⚡ No tienes que hacer nada, ¡yo encuentro el código de unidad por mi cuenta!\n\nSi no reconozco la unidad, también vale ✅</string>
+
+    <string name="onboarding_improvements_title">Pequeñas novedades</string>
+    <string name="onboarding_improvements_body">🔍 Barra de búsqueda y orden alfabético en los selectores de clientes y productos.\n\n📄 Los nombres de los PDF exportados son más explícitos.\n\n📅 Las listas de documentos están agrupadas por mes, los precios destacados, y se muestra el número de días hasta el vencimiento.\n\n✏️ Al modificar un producto desde un documento, puedes aplicar el cambio también a la ficha del producto (misma opción para los clientes).</string>
+    <string name="onboarding_improvements_cta">Siguiente</string>
+
+    <string name="onboarding_thanks_title">¡Perfecto!</string>
+    <string name="onboarding_thanks_body">Gracias por tu confianza. ¡Hasta pronto!</string>
+    <string name="onboarding_thanks_cta">Terminar</string>
+
+    <!-- Issuer form: VAT exemption + intra-EU sales toggles -->
+    <string name="issuer_intra_eu_sales_label">Ventas fuera de mi país (UE)</string>
+    <string name="issuer_intra_eu_sales_info_modal_title">Ventas intracomunitarias</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Marca si:\n- tu empresa está en la Unión Europea\n- Y facturas al menos a un cliente fuera de tu país.\n\ng8 te preguntará entonces, para cada producto, si se trata de un servicio o de un bien — las reglas de IVA difieren.\n\n¿Facturación solo en tu país, o fuera de la UE? Déjalo desmarcado.</string>
+    <string name="issuer_intra_eu_sales_info_desc">Info ventas intracomunitarias</string>
+    <string name="issuer_vat_exempt_label">Franquicia de IVA</string>
+    <string name="issuer_vat_exempt_info_modal_title">Franquicia de IVA</string>
+    <string name="issuer_vat_exempt_info_modal_content">Útil para el cumplimiento de la facturación electrónica — permite a g8 añadir automáticamente la mención legal de franquicia de IVA adaptada a tu país en las facturas.</string>
+    <string name="issuer_vat_exempt_info_desc">Info franquicia de IVA</string>
+
+    <!-- Quote (Devis) -->
+    <string name="appbar_quotes">Presupuestos</string>
+    <string name="quote_number">Presupuesto Nº</string>
+    <string name="quote_default_number">PR001</string>
+    <string name="quote_default_footer">Duración de validez de la oferta: 6 meses\nPlazo de ejecución: 6 meses</string>
+    <string name="quote_advice_convert">Este paso lo aprendí en hip-hop, súper estiloso lo sé. Aún tengo que trabajarlo, no soy súper rápida, creo que mi patagio frena la ola. En fin, quería decirte\n\n …   </string>
+    <string name="quote_advice_convert1">que si quieres convertir uno o varios presupuestos en una factura, puedes seleccionarlos en la lista con una pulsación larga (o pulsando el ○)\n\n …   </string>
+    <string name="quote_advice_convert2">y pulsar «Facturar». Aparecerá en la parte superior de la pestaña «Facturas» con el número incrementado respecto a la factura anterior.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
+
+    <!-- gStore delivery-note module -->
+    <string name="gstore_module_delivery_note_title">Albaranes</string>
+    <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
+    <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados. El número de albarán se indicará en la factura correspondiente para la trazabilidad contable. Puedes agrupar varios albaranes en una sola factura.</string>
+
+    <!-- Country picker (address form) -->
+    <string name="client_country">País</string>
+    <string name="country_picker_search">Buscar un país</string>
+    <string name="country_picker_empty">Ningún país encontrado</string>
+    <string name="country_picker_recent">Recientes</string>
+    <string name="country_picker_all">Todos los países</string>
+
+    <!-- Info tooltip -->
+    <string name="info_tooltip_ok">OK</string>
+    <string name="info_tooltip_dismiss">No mostrar más</string>
+
+    <!-- Product type (goods / service) -->
+    <string name="product_type_label">Tipo</string>
+    <string name="product_type_goods">Bien</string>
+    <string name="product_type_service">Servicio</string>
+    <string name="product_type_info_modal_title">Tipo de producto</string>
+    <string name="product_type_info_modal_content">Se utiliza para determinar automáticamente la categoría de IVA aplicable. Es un campo obligatorio para el cumplimiento de la facturación electrónica.\n\nNo aparece en la factura PDF.</string>
+    <string name="product_type_info_desc">Info tipo de producto</string>
+
+    <!-- Product unit code (UNECE Rec 20) -->
+    <string name="product_unit_code_label">Código de unidad</string>
+    <string name="product_unit_code_info_modal_title">Código de unidad</string>
+    <string name="product_unit_code_info_modal_content">Se deduce automáticamente de la unidad que introduces. Es un campo obligatorio para el cumplimiento de la facturación electrónica.\n\nNo aparece en la factura PDF.\n\nSi la unidad que usas no corresponde a ningún código, no te preocupes — también es válido.</string>
+    <string name="product_unit_code_info_desc">Info código de unidad</string>
+
+    <!-- Unit picker (UNECE units bottom sheet) -->
+    <string name="unit_picker_search">Buscar una unidad</string>
+    <string name="unit_picker_empty">Ninguna unidad encontrada</string>
+    <string name="unit_picker_recent">Recientes</string>
+    <string name="unit_picker_category_count">Recuento</string>
+    <string name="unit_picker_category_length">Longitud</string>
+    <string name="unit_picker_category_area">Superficie</string>
+    <string name="unit_picker_category_volume">Volumen</string>
+    <string name="unit_picker_category_weight">Peso</string>
+    <string name="unit_picker_category_time">Tiempo</string>
+    <string name="unit_picker_category_energy">Energía</string>
+    <string name="unit_picker_category_service">Servicio</string>
+    <string name="unit_picker_category_packaging">Embalaje</string>
+
+    <!-- Unit codes (UNECE Rec 20/21) — véase el archivo FR para el esquema. -->
+
+    <!-- Recuento -->
+    <string name="unit_c62_name">unidad</string>
+    <string name="unit_c62_short">u</string>
+    <string name="unit_c62_keywords">unidad,unidades,u</string>
+    <string name="unit_h87_name">pieza</string>
+    <string name="unit_h87_short">pza</string>
+    <string name="unit_h87_keywords">pieza,piezas,pza</string>
+    <string name="unit_set_name">conjunto</string>
+    <string name="unit_set_short">conj</string>
+    <string name="unit_set_keywords">conjunto,conjuntos,set,kit</string>
+    <string name="unit_pr_name">par</string>
+    <string name="unit_pr_short">par</string>
+    <string name="unit_pr_keywords">par,pares</string>
+    <string name="unit_dzn_name">docena</string>
+    <string name="unit_dzn_short">doc</string>
+    <string name="unit_dzn_keywords">docena,docenas,doc</string>
+    <string name="unit_lo_name">lote</string>
+    <string name="unit_lo_short">lote</string>
+    <string name="unit_lo_keywords">lote,lotes</string>
+
+    <!-- Longitud -->
+    <string name="unit_mtr_name">metro</string>
+    <string name="unit_mtr_keywords">metro,metros</string>
+    <string name="unit_lm_name">metro lineal</string>
+    <string name="unit_lm_short">ml</string>
+    <string name="unit_lm_keywords">metro lineal,metros lineales,ml,lineal</string>
+    <string name="unit_cmt_name">centímetro</string>
+    <string name="unit_cmt_keywords">centimetro,centimetros</string>
+    <string name="unit_mmt_name">milímetro</string>
+    <string name="unit_mmt_keywords">milimetro,milimetros</string>
+    <string name="unit_kmt_name">kilómetro</string>
+    <string name="unit_kmt_keywords">kilometro,kilometros</string>
+
+    <!-- Superficie -->
+    <string name="unit_mtk_name">metro cuadrado</string>
+    <string name="unit_mtk_keywords">metro cuadrado,metros cuadrados</string>
+    <string name="unit_cmk_name">centímetro cuadrado</string>
+    <string name="unit_cmk_keywords">centimetro cuadrado</string>
+    <string name="unit_kmk_name">kilómetro cuadrado</string>
+    <string name="unit_kmk_keywords">kilometro cuadrado</string>
+
+    <!-- Volumen -->
+    <string name="unit_ltr_name">litro</string>
+    <string name="unit_ltr_keywords">litro,litros</string>
+    <string name="unit_mlt_name">mililitro</string>
+    <string name="unit_mlt_keywords">mililitro,mililitros</string>
+    <string name="unit_clt_name">centilitro</string>
+    <string name="unit_clt_keywords">centilitro,centilitros</string>
+    <string name="unit_hlt_name">hectolitro</string>
+    <string name="unit_hlt_keywords">hectolitro,hectolitros</string>
+    <string name="unit_mtq_name">metro cúbico</string>
+    <string name="unit_mtq_keywords">metro cubico,metros cubicos</string>
+
+    <!-- Peso -->
+    <string name="unit_kgm_name">kilogramo</string>
+    <string name="unit_kgm_keywords">kilogramo,kilogramos,kilo,kilos</string>
+    <string name="unit_grm_name">gramo</string>
+    <string name="unit_grm_keywords">gramo,gramos,gr</string>
+    <string name="unit_tne_name">tonelada</string>
+    <string name="unit_tne_keywords">tonelada,toneladas</string>
+    <string name="unit_dtn_name">quintal</string>
+    <string name="unit_dtn_short">q</string>
+    <string name="unit_dtn_keywords">quintal,quintales,decitonelada,100 kg,q</string>
+
+    <!-- Tiempo -->
+    <string name="unit_hur_name">hora</string>
+    <string name="unit_hur_keywords">hora,horas,hr</string>
+    <string name="unit_min_name">minuto</string>
+    <string name="unit_min_keywords">minuto,minutos</string>
+    <string name="unit_day_name">día</string>
+    <string name="unit_day_short">d</string>
+    <string name="unit_day_keywords">dia,dias,d</string>
+    <string name="unit_wee_name">semana</string>
+    <string name="unit_wee_short">sem</string>
+    <string name="unit_wee_keywords">semana,semanas,sem</string>
+    <string name="unit_mon_name">mes</string>
+    <string name="unit_mon_short">mes</string>
+    <string name="unit_mon_keywords">mes,meses</string>
+    <string name="unit_ann_name">año</string>
+    <string name="unit_ann_short">a</string>
+    <string name="unit_ann_keywords">ano,anos,anio,anios,año,años</string>
+
+    <!-- Energía -->
+    <string name="unit_kwh_name">kilovatio-hora</string>
+    <string name="unit_kwh_short">kWh</string>
+    <string name="unit_kwh_keywords">kilovatio hora,kilovatio-hora,kwh</string>
+    <string name="unit_mwh_name">megavatio-hora</string>
+    <string name="unit_mwh_short">MWh</string>
+    <string name="unit_mwh_keywords">megavatio hora,megavatio-hora,mwh</string>
+
+    <!-- Servicio -->
+    <string name="unit_act_name">actividad</string>
+    <string name="unit_act_short">act</string>
+    <string name="unit_act_keywords">actividad,actividades</string>
+    <string name="unit_e48_name">unidad de servicio</string>
+    <string name="unit_e48_short">us</string>
+    <string name="unit_e48_keywords">unidad de servicio,servicio,servicios</string>
+    <string name="unit_e51_name">prestación</string>
+    <string name="unit_e51_short">prest</string>
+    <string name="unit_e51_keywords">prestacion,prestaciones</string>
+
+    <!-- Embalaje / a granel -->
+    <string name="unit_xbh_name">manojo</string>
+    <string name="unit_xbh_short">manojo</string>
+    <string name="unit_xbh_keywords">manojo,manojos,ramo</string>
+    <string name="unit_xbe_name">haz</string>
+    <string name="unit_xbe_short">haz</string>
+    <string name="unit_xbe_keywords">haz,haces,fajo</string>
+    <string name="unit_xbl_name">bala comprimida</string>
+    <string name="unit_xbl_short">bala</string>
+    <string name="unit_xbl_keywords">bala,balas,bala comprimida</string>
+    <string name="unit_xsa_name">saco</string>
+    <string name="unit_xsa_short">saco</string>
+    <string name="unit_xsa_keywords">saco,sacos</string>
+    <string name="unit_xbg_name">bolsa</string>
+    <string name="unit_xbg_short">bolsa</string>
+    <string name="unit_xbg_keywords">bolsa,bolsas,sachet</string>
+    <string name="unit_xbk_name">cesta</string>
+    <string name="unit_xbk_short">cesta</string>
+    <string name="unit_xbk_keywords">cesta,cestas,canasta</string>
+    <string name="unit_xcr_name">caja</string>
+    <string name="unit_xcr_short">caja</string>
+    <string name="unit_xcr_keywords">caja,cajas,cajon</string>
+    <string name="unit_xro_name">rollo</string>
+    <string name="unit_xro_short">rollo</string>
+    <string name="unit_xro_keywords">rollo,rollos</string>
+    <string name="unit_xpx_name">palé</string>
+    <string name="unit_xpx_short">palé</string>
+    <string name="unit_xpx_keywords">pale,pales,palet,palets</string>
+    <string name="unit_hea_name">cabeza</string>
+    <string name="unit_hea_short">cabeza</string>
+    <string name="unit_hea_keywords">cabeza,cabezas,ganado,animales</string>
 </resources>

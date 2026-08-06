@@ -3,17 +3,21 @@ package com.a4a.g8invoicing.ui.shared
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Fullscreen
 import androidx.compose.material3.Icon
@@ -25,22 +29,26 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.form_label_edit
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.inputLabel
-import com.a4a.g8invoicing.ui.theme.textVerySmall
+import com.a4a.g8invoicing.ui.theme.textBodyBold
+import com.a4a.g8invoicing.ui.theme.textCaption
 
 @Composable
 fun FormInputCreatorText(
@@ -57,6 +65,13 @@ fun FormInputCreatorText(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Editable-label rows (SIRET / VAT / RCS) share their pageElement's
+    // FocusRequester between label and value, and the shared one lands on the
+    // value field because it wins the last-attached race. So the editable
+    // label owns a dedicated requester the caller can't see, letting a tap
+    // anywhere in the label column focus the label instead of the value.
+    val labelFocusRequester = remember { FocusRequester() }
+
     var customModifier = Modifier
         .onFocusChanged {
             if (it.isFocused) {
@@ -64,17 +79,30 @@ fun FormInputCreatorText(
             }
         }
 
-    focusRequester?.let {
-        customModifier = customModifier.then(Modifier.focusRequester(focusRequester))
+    if (isEditableLabel) {
+        customModifier = customModifier.then(Modifier.focusRequester(labelFocusRequester))
+    } else {
+        focusRequester?.let {
+            customModifier = customModifier.then(Modifier.focusRequester(focusRequester))
+        }
     }
 
     var columnModifier =
         Modifier.background(Color.Transparent) // Just so we can use the custom modifier
     columnModifier = if (isEditableLabel)
-        columnModifier.then(
-            Modifier
-                .fillMaxWidth(0.4f)
-        ) else columnModifier
+        columnModifier
+            .then(Modifier.fillMaxWidth(0.4f))
+            // Absorb taps that fall in the label column but outside the label
+            // BasicTextField (empty space below, the "Modifier" hint row).
+            // Uses the same Main-pass absorb pattern as the FormUI-level
+            // dispatcher, so it beats the outer absorb which would otherwise
+            // route the tap to the value field.
+            .then(
+                Modifier.absorbAndDispatchTap("editable-label") {
+                    labelFocusRequester.requestFocus()
+                }
+            )
+    else columnModifier
 
 
 
@@ -90,20 +118,31 @@ fun FormInputCreatorText(
                 BasicTextField(
                     modifier = customModifier // focusing on textfield when clinking on label
                         .weight(1F)
-                        .padding(end = if (input.displayFullScreenIcon) 4.dp else 0.dp),
+                        .padding(end = if (input.displayFullScreenIcon) 4.dp else 0.dp)
+                        // Autofill disabled on every FormInput text field.
+                        // Compose MP 1.8 registered every BasicTextField with the
+                        // Android autofill framework by default; the multi-address
+                        // form was catching cross-field fills (picking a postal
+                        // code overwrote the street, etc.) and the per-field
+                        // ContentType tagging couldn't stop it cleanly. Strip
+                        // all semantics on the input so autofill leaves it alone.
+                        .clearAndSetSemantics {},
                     //  .horizontalScroll(rememberScrollState()),
                     value = input.text ?: TextFieldValue(""),
                     onValueChange = {
                         input.onValueChange(it)
                     },
-                    textStyle = if (isEditableLabel) MaterialTheme.typography.inputLabel
+                    textStyle = if (isEditableLabel) MaterialTheme.typography.textBodyBold
                     else LocalTextStyle.current,
                     keyboardOptions = KeyboardOptions(
-                        imeAction = keyboardOption,
-                        keyboardType = input.keyboardType
+                        // Multiline inputs (client notes) opt out of the
+                        // Next/Done imeAction so Enter inserts a newline
+                        // instead of jumping to the next field.
+                        imeAction = if (input.isMultiline) ImeAction.Default else keyboardOption,
+                        keyboardType = input.keyboardType,
                     ),
                     keyboardActions = formActions,
-                    //   singleLine = input.displayFullScreenIcon,
+                    minLines = input.minLines,
 
                 ) { innerTextField ->
                     val interactionSource = remember { MutableInteractionSource() }
@@ -124,8 +163,34 @@ fun FormInputCreatorText(
                             ),
                         imageVector = Icons.Outlined.Fullscreen,
                         contentDescription = "Icon for description in full screen",
-                        tint = ColorGreyo
+                        tint = AppColors.iconSecondary
                     )
+                }
+
+                // Clear-field button. Only rendered when opted in AND the
+                // field has content. Same warm-grey hue as the placeholder
+                // (textDisabled) but with alpha dialed down from 54% to 35%
+                // so the chip stays visible without competing with the
+                // field text next to it. White cross on top for legibility.
+                if (input.displayClearIcon && !input.text?.text.isNullOrEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(20.dp)
+                            .clip(CircleShape)
+                            .background(AppColors.textDisabled.copy(alpha = 0.35f))
+                            .clickable {
+                                input.onValueChange(TextFieldValue(""))
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "Clear field",
+                            modifier = Modifier.size(12.dp),
+                            tint = AppColors.textOnAccent,
+                        )
+                    }
                 }
             }
 
@@ -143,11 +208,11 @@ fun FormInputCreatorText(
                             .width(10.dp),
                         imageVector = Icons.Outlined.Edit,
                         contentDescription = "Edit label",
-                        tint = ColorGreyo
+                        tint = AppColors.iconSecondary
                     )
                     Text(
                         color = ColorGreyo,
-                        style = MaterialTheme.typography.textVerySmall,
+                        style = MaterialTheme.typography.textCaption.copy(fontSize = 9.sp),
                         text = stringResource(Res.string.form_label_edit)
                     )
                 }

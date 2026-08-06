@@ -11,6 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.getAppVersion
 import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.InvoiceList
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.currentTimeMillis
@@ -31,6 +32,13 @@ fun NavGraphBuilder.invoiceList(
     // What's New dialog
     initialShowWhatsNew: Boolean = false,
     onWhatsNewDismissed: () -> Unit = {},
+    // 1.8 Onboarding wizard (fullscreen, non-dismissable)
+    initialShowOnboarding: Boolean = false,
+    onOnboardingDismissed: () -> Unit = {},
+    // Database backup CTA inside the wizard's Factur-X intro step — same
+    // underlying handlers as Account → Sauvegarde. Forwarded from MainCompose.
+    onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
+    onSendDatabaseByEmail: (String) -> Unit = {},
 ) {
     composable(route = Screen.InvoiceList.name) {
         val viewModel: InvoiceListViewModel = koinViewModel()
@@ -51,11 +59,17 @@ fun NavGraphBuilder.invoiceList(
 
         // What's New dialog state
         var showWhatsNewDialog by remember { mutableStateOf(initialShowWhatsNew) }
+        var showOnboardingDialog by remember { mutableStateOf(initialShowOnboarding) }
 
         // Update dialog state when initialShowWhatsNew changes (async loading from DataStore)
         LaunchedEffect(initialShowWhatsNew) {
             if (initialShowWhatsNew) {
                 showWhatsNewDialog = true
+            }
+        }
+        LaunchedEffect(initialShowOnboarding) {
+            if (initialShowOnboarding) {
+                showOnboardingDialog = true
             }
         }
 
@@ -66,6 +80,16 @@ fun NavGraphBuilder.invoiceList(
             onClickDuplicate = viewModel::duplicate,
             onClickCreateCreditNote = viewModel::convertToCreditNote,
             onClickCreateCorrectedInvoice = viewModel::convertToCorrectedInvoice,
+            onClickViewCreatedCreditNote = { creditNoteId ->
+                viewModel.clearCreatedCreditNoteId()
+                navController.navigate(Screen.CreditNoteAddEdit.name + "?itemId=$creditNoteId")
+            },
+            onDismissCreditNoteCreatedDialog = viewModel::clearCreatedCreditNoteId,
+            onClickViewCreatedCorrectedInvoice = { invoiceId ->
+                viewModel.clearCreatedCorrectedInvoiceId()
+                navController.navigate(Screen.InvoiceAddEdit.name + "?itemId=$invoiceId")
+            },
+            onDismissCorrectedInvoiceCreatedDialog = viewModel::clearCreatedCorrectedInvoiceId,
             onClickTag = { selectedDocuments, tag ->
                 viewModel.setTag(selectedDocuments, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
                 viewModel.markAsPaid(selectedDocuments, tag)
@@ -84,7 +108,14 @@ fun NavGraphBuilder.invoiceList(
             onDismissWhatsNew = {
                 showWhatsNewDialog = false
                 onWhatsNewDismissed()
-            }
+            },
+            showOnboardingDialog = showOnboardingDialog,
+            onDismissOnboarding = {
+                showOnboardingDialog = false
+                onOnboardingDismissed()
+            },
+            onExportDatabase = onExportDatabase,
+            onSendDatabaseByEmail = onSendDatabaseByEmail,
         )
     }
 }

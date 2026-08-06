@@ -8,6 +8,8 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.credit_note_default_number
+import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoice
+import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoices
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.jetbrains.compose.resources.getString
@@ -73,6 +75,8 @@ class CreditNoteLocalDataSource(
                 footerText = TextFieldValue(getExistingFooter() ?: ""),
                 watermarkText = frozenWatermark,
                 labelsSnapshot = frozenLabels,
+                showCurrencyAndAutoTaxColumn = true,
+                formatLocale = AppLocaleHolder.languageCode,
             )
 
             saveInfoInCreditNoteTable(creditNote)
@@ -187,8 +191,8 @@ class CreditNoteLocalDataSource(
                 documentDate = it.issuing_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
                 freeField = it.free_field?.let { TextFieldValue(text = it) },
-                documentIssuer = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_ISSUER },
-                documentClient = documentClientAndIssuer?.firstOrNull { it.type == ClientOrIssuerType.DOCUMENT_CLIENT },
+                documentIssuer = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_ISSUER }?.maxByOrNull { it.id ?: 0 },
+                documentClient = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_CLIENT }?.maxByOrNull { it.id ?: 0 },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
                 documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
                 currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
@@ -197,14 +201,23 @@ class CreditNoteLocalDataSource(
                 createdDate = it.created_at,
                 watermarkText = it.watermark_text,
                 labelsSnapshot = it.labels_snapshot,
+                showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
+                formatLocale = it.format_locale,
             )
         }
     }
 
-    override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>) {
+    override suspend fun convertInvoiceToCreditNote(invoices: List<InvoiceState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
-        withContext(DispatcherProvider.IO) {
+        val sourceNumbers = invoices
+            .mapNotNull { it.documentNumber.text.takeIf { n -> n.isNotBlank() } }
+        val referenceText: String? = when {
+            sourceNumbers.isEmpty() -> null
+            sourceNumbers.size == 1 -> getString(Res.string.credit_note_reference_from_invoice, sourceNumbers.single())
+            else -> getString(Res.string.credit_note_reference_from_invoices, sourceNumbers.joinToString(", "))
+        }
+        return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.credit_note_default_number)
@@ -213,7 +226,9 @@ class CreditNoteLocalDataSource(
                 saveInfoInCreditNoteTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
-                        reference = invoices.firstOrNull { it.reference != null }?.reference,
+                        documentDate = DateUtils.getCurrentDateFormatted(),
+                        reference = referenceText?.let { TextFieldValue(it) }
+                            ?: invoices.firstOrNull { it.reference != null }?.reference,
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
                         documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
@@ -224,15 +239,17 @@ class CreditNoteLocalDataSource(
                         footerText = TextFieldValue(getExistingFooter() ?: ""),
                         watermarkText = frozenWatermark,
                         labelsSnapshot = frozenLabels,
+                        showCurrencyAndAutoTaxColumn = true,
+                        formatLocale = AppLocaleHolder.languageCode,
                     )
                 )
+                val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
                 invoices.forEach {
-                    saveInfoInOtherTables(
-                        it
-                    )
+                    saveInfoInOtherTables(it)
                 }
+                newId
             } catch (e: Exception) {
-                //Log.e(ContentValues.TAG, "Error: ${e.message}")
+                null
             }
         }
     }
@@ -270,6 +287,8 @@ class CreditNoteLocalDataSource(
                     creditNote.documentNumber = TextFieldValue(docNumber)
                     creditNote.watermarkText = frozenWatermark
                     creditNote.labelsSnapshot = frozenLabels
+                    creditNote.showCurrencyAndAutoTaxColumn = true
+                    creditNote.formatLocale = AppLocaleHolder.languageCode
 
                     saveInfoInCreditNoteTable(creditNote)
                     saveInfoInOtherTables(creditNote)
@@ -463,6 +482,8 @@ class CreditNoteLocalDataSource(
                 footer = document.footerText.text,
                 watermark_text = document.watermarkText,
                 labels_snapshot = document.labelsSnapshot,
+                show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
+                format_locale = document.formatLocale,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

@@ -1,37 +1,23 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
-import com.a4a.g8invoicing.ui.shared.Keyboard
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
@@ -43,6 +29,10 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 fun DocumentBottomSheetProducts(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
+    sheetMaxHeight: Dp,
+    isSheetFullScreen: Boolean,
+    onSheetDragUp: () -> Unit,
+    onSheetStepDown: () -> Unit,
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
@@ -52,22 +42,36 @@ fun DocumentBottomSheetProducts(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
-    onOrderChange: (List<DocumentProductState>) -> Unit
+    onOrderChange: (List<DocumentProductState>) -> Unit,
+    showProductType: Boolean = false,
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val keyboard by keyboardAsState()
-
-    Box(
-        // We add this column to be able to apply "fillMaxHeight" to the components that slide in
-        // If we don't constrain the parent (=this column) width, components that slide in
-        // fill the screen full height
-    ) {
-        val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
+    val density = LocalDensity.current
+    val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
+    // The sheet Surface is held at the max-visible height (fullscreen state minus
+    // the top inset) at all states, so its white background always fills whatever
+    // area the sheet occupies on screen and no preview leaks through during the
+    // Partial→Expanded animation. The visible-content Column inside then animates
+    // between peekHeight and the max to drive the LazyColumn viewport dynamically.
+    val sheetMaxContentHeight = sheetMaxHeight - topInsetDp
+    val visibleContentHeight by animateDpAsState(
+        targetValue = if (isSheetFullScreen) sheetMaxContentHeight else sheetMaxHeight / 2,
+        label = "sheet-content-height",
+    )
+    Box(modifier = Modifier.height(sheetMaxContentHeight)) {
+    Column(modifier = Modifier.fillMaxWidth().height(visibleContentHeight)) {
+    SheetDragHandle(
+        onDragUp = onSheetDragUp,
+        onDragDown = onSheetStepDown,
+        onTap = onSheetStepDown,
+    )
+    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
         var isProductListVisible by remember { mutableStateOf(false) }
         var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
             mutableStateOf(
@@ -88,55 +92,9 @@ fun DocumentBottomSheetProducts(
 
         val params = parameters as Pair<List<DocumentProductState>?, List<ProductState>?>
 
-        Column(
-            modifier = Modifier
-                .fillMaxHeight(0.5f)
-        ) {
-            Row(
-                Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Box(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .width(70.dp)
-                        .clickable {
-                            // Hides keyboard if it was opened
-                            if (keyboard == Keyboard.Opened) {
-                                keyboardController?.hide()
-                            } else { // Hides bottom sheet
-                                onDismissBottomSheet()
-                            }
-                        }) {
-                    Icon(
-                        modifier = Modifier
-                            .padding(end = 10.dp)
-                            .size(30.dp)
-                            .align(alignment = Alignment.CenterEnd),
-                        imageVector = Icons.Outlined.ArrowDropDown,
-                        contentDescription = "Close bottom sheet"
-                    )
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                //    keyboardController?.hide()
-                slideOtherComponent.value = ScreenElement.DOCUMENT_PRODUCT
-            }
-        }
-
         // List of selected products
         DocumentBottomSheetProductsChosen(
             list = params.first ?: emptyList(),
-            onClickNew = {
-                typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
-                onShowDocumentForm(true)
-                onClickNewProduct()
-            },
             onClickChooseExisting = {
                 isProductListVisible = true
             },
@@ -146,21 +104,27 @@ fun DocumentBottomSheetProducts(
                 onShowDocumentForm(true)
             },
             onClickDelete = onClickDeleteDocumentProduct,
-            isClientOrIssuerListEmpty = parameters.second.isEmpty(),
-            onOrderChange = onOrderChange
+            onOrderChange = onOrderChange,
+            hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+            onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
         )
         // List of all products to chose from
         if (isProductListVisible) {
-            DocumentBottomSheetProductsAvailable(
-                list = params.second ?: emptyList(),
-                onClickBack = { isProductListVisible = false },
-                onProductClick = {
+            ProductPickerBottomSheet(
+                products = params.second ?: emptyList(),
+                clientId = document.documentClient?.originalClientOrIssuerId,
+                onDismiss = { isProductListVisible = false },
+                onSelect = {
                     onClickProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
                     isProductListVisible = false
                     onShowDocumentForm(true)
                 },
-                clientId = document.documentClient?.originalClientOrIssuerId
+                onClickNew = {
+                    typeOfCreation = DocumentBottomSheetTypeOfForm.NEW_PRODUCT
+                    onShowDocumentForm(true)
+                    onClickNewProduct()
+                },
             )
         }
         // Add new product or edit chosen product
@@ -171,16 +135,21 @@ fun DocumentBottomSheetProducts(
                 taxRates = taxRates,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
-                onClickCancel = { // Re-initialize
+                onClickCancel = {
                     onClickCancelForm()
                     onShowDocumentForm(false)
                 },
-                onClickDone = {
-                    onClickDoneForm(typeOfCreation)
+                onClickDone = { syncToMaster ->
+                    onClickDoneForm(typeOfCreation, syncToMaster)
+                    isProductListVisible = false
                 },
-                onSelectTaxRate = onSelectTaxRate
+                onSelectTaxRate = onSelectTaxRate,
+                showProductType = showProductType,
             )
         }
     }
+    }
+    }
 
 }
+

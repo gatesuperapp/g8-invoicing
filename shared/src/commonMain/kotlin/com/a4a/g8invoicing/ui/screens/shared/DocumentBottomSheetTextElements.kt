@@ -1,40 +1,34 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
-import com.a4a.g8invoicing.ui.shared.keyboardAsState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -46,6 +40,10 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 fun DocumentBottomSheetTextElements(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
+    sheetMaxHeight: Dp,
+    isSheetFullScreen: Boolean,
+    onSheetDragUp: () -> Unit,
+    onSheetStepDown: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
     issuers: MutableList<ClientOrIssuerState>,
@@ -54,14 +52,14 @@ fun DocumentBottomSheetTextElements(
     taxRates: List<BigDecimal>,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickEditDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     currentClientId: Int? = null,
     currentIssuerId: Int? = null,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     localFocusManager: FocusManager,
@@ -71,15 +69,25 @@ fun DocumentBottomSheetTextElements(
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
+    showProductType: Boolean = false,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val keyboard by keyboardAsState()
+    val density = LocalDensity.current
+    val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
+    val sheetMaxContentHeight = sheetMaxHeight - topInsetDp
+    val visibleContentHeight by animateDpAsState(
+        targetValue = if (isSheetFullScreen) sheetMaxContentHeight else sheetMaxHeight / 2,
+        label = "text-sheet-content-height",
+    )
 
+    Box(
+        modifier = Modifier
+            .height(sheetMaxContentHeight)
+            .imePadding()
+    ) {
     Column(
-        modifier = Modifier.imePadding()
-        // We add this column to be able to apply "fillMaxHeight" to the components that slide in
-        // If we don't constrain the parent (=this column) width, components that slide in
-        // fill the screen full height
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(visibleContentHeight)
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
 
@@ -89,11 +97,16 @@ fun DocumentBottomSheetTextElements(
             slideOtherComponent.value = null
         }
 
+        SheetDragHandle(
+            onDragUp = onSheetDragUp,
+            onDragDown = onSheetStepDown,
+            onTap = onSheetStepDown,
+        )
+
         Box(
             modifier = Modifier
                 .background(Color.Transparent)
                 .fillMaxWidth() // Prend toute la largeur
-                // .background(Color.Yellow) // Pour débugger la zone cliquable
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -103,61 +116,26 @@ fun DocumentBottomSheetTextElements(
                 )
                 .focusable(false)
         ) {
-            // Show the main elements list only when no slide-in is open.
-            // Otherwise the elements (close icon, clickable rows) sit underneath
-            // the slide-in and catch taps that fall on its empty areas, which
-            // makes the sheet feel like it has a transparent background.
-            if (slideOtherComponent.value == null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight(0.5f)
-                ) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Box( // CONTAINS "VALIDATE" ICON / "CLOSE SHEET" ICON
-                            modifier = Modifier
-                                .height(50.dp)
-                                .width(70.dp)
-                                .clickable {
-                                    // Hides keyboard if it was opened
-                                    if (keyboard.name == "Opened") {
-                                        keyboardController?.hide()
-                                    } else { // Hides bottom sheet
-                                        onDismissBottomSheet()
-                                    }
-                                }) {
-                            Icon(
-                                modifier = Modifier
-                                    .padding(end = 10.dp)
-                                    .size(30.dp)
-                                    .align(alignment = Alignment.CenterEnd),
-                                imageVector = Icons.Filled.ArrowDropDown,
-                                contentDescription = "Close bottom sheet"
-                            )
-                        }
-                    }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(bottom = 50.dp)
-                    ) {
-                        // MAIN ELEMENTS
-                        DocumentBottomSheetElementsContent(
-                            document = document,
-                            onValueChange = onValueChange,
-                            onClickForward = {
-                                //  localFocusManager.clearFocus(force = true)
-                                slideOtherComponent.value = it
-                            },
-                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                            localFocusManager = localFocusManager
-                        )
-                    }
-                }
+            // Keep the main elements list rendered even when a slide-in is open, so
+            // ModalBottomSheet sub-sheets (date, footer…) show it greyed under their
+            // scrim. Non-modal sub-sheets below must fillMaxSize so they cover it.
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 50.dp)
+            ) {
+                // MAIN ELEMENTS
+                DocumentBottomSheetElementsContent(
+                    document = document,
+                    onValueChange = onValueChange,
+                    onClickForward = {
+                        //  localFocusManager.clearFocus(force = true)
+                        slideOtherComponent.value = it
+                    },
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    localFocusManager = localFocusManager
+                )
             }
 
             // SLIDING ELEMENTS (ISSUER, SENDER, DATE..)
@@ -199,9 +177,9 @@ fun DocumentBottomSheetTextElements(
                 currentIssuerId = currentIssuerId,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
-                onClickDoneForm = {
+                onClickDoneForm = { type, syncToMaster ->
                     slideOtherComponent.value = null
-                    onClickDoneForm(it)
+                    onClickDoneForm(type, syncToMaster)
                 },
                 onClickCancelForm = onClickCancelForm,
                 onSelectTaxRate = onSelectTaxRate,
@@ -211,9 +189,11 @@ fun DocumentBottomSheetTextElements(
                 onClickDeleteAddress = onClickDeleteAddress,
                 onClickDeleteEmail = onClickDeleteEmail,
                 onAddEmail = onAddEmail,
-                onPendingEmailValidationResult = onPendingEmailValidationResult
+                onPendingEmailValidationResult = onPendingEmailValidationResult,
+                showProductType = showProductType,
             )
         }
+    }
     }
 }
 

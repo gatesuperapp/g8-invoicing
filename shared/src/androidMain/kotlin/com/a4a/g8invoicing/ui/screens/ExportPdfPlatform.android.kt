@@ -54,7 +54,9 @@ import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
+import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_reference_label
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.shared.resources.export_clickable_text
 import com.a4a.g8invoicing.shared.resources.export_close
 import com.a4a.g8invoicing.shared.resources.export_done
@@ -63,6 +65,7 @@ import com.a4a.g8invoicing.shared.resources.export_email_subject
 import com.a4a.g8invoicing.shared.resources.export_email_subject_credit_note
 import com.a4a.g8invoicing.shared.resources.export_email_subject_delivery_note
 import com.a4a.g8invoicing.shared.resources.export_email_subject_invoice
+import com.a4a.g8invoicing.shared.resources.export_email_subject_quote
 import com.a4a.g8invoicing.shared.resources.export_error
 import com.a4a.g8invoicing.shared.resources.export_error_sharing
 import com.a4a.g8invoicing.shared.resources.export_info_popup
@@ -74,6 +77,7 @@ import com.a4a.g8invoicing.shared.resources.export_send_file_content
 import com.a4a.g8invoicing.shared.resources.export_share_file
 import com.a4a.g8invoicing.shared.resources.export_waiting_permission
 import com.a4a.g8invoicing.shared.resources.invoice_number
+import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
 import com.a4a.g8invoicing.shared.resources.label_separator
@@ -129,6 +133,7 @@ actual fun ExportPdfPlatform(
         invoiceNumber = stringResource(Res.string.invoice_number),
         deliveryNoteNumber = stringResource(Res.string.delivery_note_number),
         creditNoteNumber = stringResource(Res.string.credit_note_number),
+        quoteNumber = stringResource(Res.string.quote_number),
         documentDate = stringResource(Res.string.document_date_label),
         documentReference = stringResource(Res.string.document_reference_label),
         tableDescription = stringResource(Res.string.document_table_description),
@@ -147,6 +152,8 @@ actual fun ExportPdfPlatform(
         companyId1Label = stringResource(Res.string.company_identification1),
         companyId2Label = stringResource(Res.string.company_identification2),
         companyId3Label = stringResource(Res.string.company_identification3),
+        otherLines = stringResource(Res.string.document_products_other_lines),
+        currencyNoticeLabel = stringResource(Res.string.pdf_currency_notice),
     )
 
     // Strings for UI
@@ -168,6 +175,7 @@ actual fun ExportPdfPlatform(
     val strEmailSubjectInvoice = stringResource(Res.string.export_email_subject_invoice)
     val strEmailSubjectDeliveryNote = stringResource(Res.string.export_email_subject_delivery_note)
     val strEmailSubjectCreditNote = stringResource(Res.string.export_email_subject_credit_note)
+    val strEmailSubjectQuote = stringResource(Res.string.export_email_subject_quote)
     val strEmailSubject = stringResource(Res.string.export_email_subject, "%1\$s", "%2\$s")
     val strEmailContent = stringResource(Res.string.export_send_file_content)
     val strOk = stringResource(Res.string.ok)
@@ -343,6 +351,7 @@ actual fun ExportPdfPlatform(
                 strEmailSubjectInvoice = strEmailSubjectInvoice,
                 strEmailSubjectDeliveryNote = strEmailSubjectDeliveryNote,
                 strEmailSubjectCreditNote = strEmailSubjectCreditNote,
+                strEmailSubjectQuote = strEmailSubjectQuote,
                 strEmailSubject = strEmailSubject,
                 strEmailContent = strEmailContent,
                 onError = { showShareError = true }
@@ -368,6 +377,7 @@ private fun SendEmailButton(
     strEmailSubjectInvoice: String,
     strEmailSubjectDeliveryNote: String,
     strEmailSubjectCreditNote: String,
+    strEmailSubjectQuote: String,
     strEmailSubject: String,
     strEmailContent: String,
     onError: () -> Unit
@@ -380,6 +390,7 @@ private fun SendEmailButton(
                 DocumentType.INVOICE -> strEmailSubjectInvoice
                 DocumentType.DELIVERY_NOTE -> strEmailSubjectDeliveryNote
                 DocumentType.CREDIT_NOTE -> strEmailSubjectCreditNote
+                DocumentType.QUOTE -> strEmailSubjectQuote
                 else -> ""
             }
 

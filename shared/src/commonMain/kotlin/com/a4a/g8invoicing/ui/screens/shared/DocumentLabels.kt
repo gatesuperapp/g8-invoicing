@@ -24,6 +24,7 @@ import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
 import com.a4a.g8invoicing.shared.resources.label_separator
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -70,6 +71,7 @@ internal object DocumentLabels {
         "invoice_paid" to Res.string.invoice_paid,
         "invoice_pdf_due_date" to Res.string.invoice_pdf_due_date,
         "label_separator" to Res.string.label_separator,
+        "pdf_currency_notice" to Res.string.pdf_currency_notice,
     )
 
     /**
@@ -90,6 +92,27 @@ internal object DocumentLabels {
         if (json.isNullOrBlank()) return null
         return runCatching { Json.decodeFromString(LABELS_SERIALIZER, json) }.getOrNull()
     }
+
+    /**
+     * Doc-locale fallbacks for labels that were added to [keys] AFTER their
+     * users' documents were created — the snapshot won't carry the key, but
+     * we can still render in the doc's frozen [formatLocale] instead of the
+     * app-current locale. New labels should be added here at the same time
+     * they land in [keys]. Once no legacy doc predates the key any more, the
+     * entry can be dropped.
+     */
+    private val LOCALE_FALLBACKS: Map<String, Map<String, String>> = mapOf(
+        "pdf_currency_notice" to mapOf(
+            "fr" to "Devise : %1\$s",
+            "en" to "Currency: %1\$s",
+            "de" to "Währung: %1\$s",
+            "es" to "Moneda: %1\$s",
+        ),
+    )
+
+    /** Look up a hardcoded locale fallback; null when the key/lang combo isn't known. */
+    fun localeFallback(key: String, languageCode: String?): String? =
+        LOCALE_FALLBACKS[key]?.get(languageCode)
 }
 
 /**

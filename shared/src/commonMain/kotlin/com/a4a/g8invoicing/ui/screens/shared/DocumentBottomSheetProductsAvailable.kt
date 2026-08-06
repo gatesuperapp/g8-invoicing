@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.screens.ProductListContent
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun DocumentBottomSheetProductsAvailable(
@@ -27,8 +28,8 @@ fun DocumentBottomSheetProductsAvailable(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxHeight(0.5f)
-            .background(Color.White)
+            .fillMaxSize()
+            .background(AppColors.surface)
     ) {
         // Header: display "back" button
         Row(

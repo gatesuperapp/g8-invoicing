@@ -11,9 +11,12 @@ import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.DatabaseDriverFactory
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.QuoteLocalDataSource
+import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -48,8 +51,11 @@ import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.OnboardingViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.QuoteAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -62,6 +68,9 @@ val appModule = module {
 
     // Currency Manager (singleton)
     single { CurrencyManager() }
+
+    // Unit code repository (localised names / short forms / search index)
+    single { UnitCodeRepository() }
 
     single { DatabaseDriverFactory(androidContext()) }
 
@@ -114,6 +123,7 @@ val appModule = module {
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
     single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get()) }
+    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get()) }
     single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get()) }
     single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
@@ -135,12 +145,17 @@ val appModule = module {
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
         val type: String? = if (params.size() > 1) params[1] else null
-        ProductAddEditViewModel(get(), get(), get(), itemId, type)
+        ProductAddEditViewModel(get(), get(), get(), get(), itemId, type)
     }
     viewModel { DeliveryNoteListViewModel(get(), get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
         DeliveryNoteAddEditViewModel(get(), get(), itemId)
+    }
+    viewModel { QuoteListViewModel(get(), get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        QuoteAddEditViewModel(get(), get(), itemId)
     }
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
@@ -154,4 +169,5 @@ val appModule = module {
     }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { GStoreViewModel(get(), get()) }
+    viewModel { OnboardingViewModel(get(), get(), get(), get()) }
 }

@@ -26,7 +26,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.callForActionsViolet
+import com.a4a.g8invoicing.ui.theme.textCta
 import org.jetbrains.compose.resources.stringResource
 
 //Provides back arrow navigation and eventually screen titles.
@@ -129,7 +129,7 @@ fun TopBar(
         navigationIcon = {
             if (isCancelCtaDisplayed) {
                 Text(
-                    style = MaterialTheme.typography.callForActionsViolet,
+                    style = MaterialTheme.typography.textCta,
                     modifier = Modifier
                         .padding(start = 20.dp)
                         .clickable { onClickBackArrow() },

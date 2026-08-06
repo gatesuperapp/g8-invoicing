@@ -35,7 +35,16 @@ class MainActivity : AppCompatActivity() {
         // Compulsory for the bottom sheet modal to not overlap native navbar
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        handleDeepLink(intent)
+        // Only process the launching intent on a fresh start. On config-change
+        // recreations (locale switch on cold start, rotation, dark mode…), the
+        // ActivityManager re-delivers the original intent — re-firing the token
+        // would trigger a second consumeMagicLink, which briefly clears the
+        // consumeErrorMessage (dialog vanishes) and then re-sets it once the
+        // 401 lands (dialog re-appears). Fresh clicks while the app is running
+        // still land in onNewIntent below.
+        if (savedInstanceState == null) {
+            handleDeepLink(intent)
+        }
 
         setContent {
             MainCompose(
@@ -74,9 +83,15 @@ class MainActivity : AppCompatActivity() {
                 val totalAmount = invoice.documentTotalPrices?.totalPriceWithTax
                     ?.toStringExpanded() ?: "0"
                 val dueDate = invoice.dueDate
+                // Reuse the invoice's own currency so multi-currency users don't
+                // read out "100 €" for a USD-denominated bill. Falls back to
+                // EUR when the invoice was created before currency was tracked.
+                val currency = com.a4a.g8invoicing.data.currencySymbol(
+                    invoice.currency.text.ifEmpty { "EUR" }
+                )
 
                 val subject = getString(Res.string.send_reminder_email_subject, documentNumber)
-                val body = getString(Res.string.send_reminder_email_content, documentNumber, totalAmount, dueDate)
+                val body = getString(Res.string.send_reminder_email_content, documentNumber, totalAmount, dueDate, currency)
 
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
                     data = Uri.parse("mailto:")

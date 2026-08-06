@@ -45,6 +45,41 @@ actual class PdfFileManager actual constructor() {
             e.printStackTrace()
         }
     }
+
+    actual fun loadAssetBytes(assetName: String): ByteArray? {
+        // Desktop reads embedded assets from the jvmMain classpath.
+        return try {
+            this::class.java.classLoader?.getResourceAsStream(assetName)?.use { it.readBytes() }
+        } catch (_: Throwable) {
+            null
+        }
+    }
+
+    actual fun listSystemFontFiles(): List<String> {
+        // Iterate the OS-specific system font dirs; iText's FontProvider will
+        // skip anything it can't parse. Kept coarse: users on desktop rarely
+        // hit exotic scripts, and the Android side is where this matters most.
+        val roots = when {
+            System.getProperty("os.name").lowercase().contains("mac") ->
+                listOf("/System/Library/Fonts", "/Library/Fonts", "${System.getProperty("user.home")}/Library/Fonts")
+            System.getProperty("os.name").lowercase().contains("win") ->
+                listOf("${System.getenv("WINDIR") ?: "C:\\Windows"}\\Fonts")
+            else -> listOf("/usr/share/fonts", "/usr/local/share/fonts", "${System.getProperty("user.home")}/.fonts")
+        }
+        return roots.flatMap { root ->
+            try {
+                File(root).walkTopDown().filter {
+                    it.isFile && it.canRead() && (
+                        it.name.endsWith(".ttf", true) ||
+                        it.name.endsWith(".otf", true) ||
+                        it.name.endsWith(".ttc", true)
+                    )
+                }.map { it.absolutePath }.toList()
+            } catch (_: Throwable) {
+                emptyList()
+            }
+        }
+    }
 }
 
 /**

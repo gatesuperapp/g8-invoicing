@@ -18,6 +18,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
 
 @Composable
@@ -45,7 +46,9 @@ fun FormInputCreatorDecimal(
 
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
         BasicTextField(
-            modifier = customModifier,
+            // No autofill dataset makes sense for quantities / prices — opt out so
+            // the system doesn't offer irrelevant suggestions.
+            modifier = customModifier.clearAndSetSemantics {},
             value = text?.replace(".", ",") ?: "",
             onValueChange = {
                 text = decimalFormatter.cleanup(it)

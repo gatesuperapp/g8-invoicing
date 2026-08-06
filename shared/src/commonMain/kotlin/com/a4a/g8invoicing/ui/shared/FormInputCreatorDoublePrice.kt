@@ -21,6 +21,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -125,7 +126,8 @@ fun FormInputCreatorDoublePrice(
 
             BasicTextField(
                 maxLines = 1,
-                modifier = customModifier,
+                // Price fields — nothing to autofill, opt out.
+                modifier = customModifier.clearAndSetSemantics {},
                 value = textPriceWithoutTax?.replace(".", ",") ?: "",
                 onValueChange = { newValue ->
                     val cleanedValue = decimalFormatter.cleanup(newValue)
@@ -171,7 +173,8 @@ fun FormInputCreatorDoublePrice(
                 BasicTextField(
                     maxLines = 1,
                     modifier = Modifier
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .clearAndSetSemantics {},
                     value = textPriceWithTax?.replace(".", ",") ?: "",
                     onValueChange = { newValue ->
                         val cleanedValue = decimalFormatter.cleanup(newValue)

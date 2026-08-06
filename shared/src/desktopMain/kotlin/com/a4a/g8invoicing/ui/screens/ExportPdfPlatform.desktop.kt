@@ -38,8 +38,11 @@ import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_reference_label
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.shared.resources.invoice_number
+import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.document_table_description
@@ -77,6 +80,7 @@ actual fun ExportPdfPlatform(
         invoiceNumber = stringResource(Res.string.invoice_number),
         deliveryNoteNumber = stringResource(Res.string.delivery_note_number),
         creditNoteNumber = stringResource(Res.string.credit_note_number),
+        quoteNumber = stringResource(Res.string.quote_number),
         documentDate = stringResource(Res.string.document_date_label),
         documentReference = stringResource(Res.string.document_reference_label),
         tableDescription = stringResource(Res.string.document_table_description),
@@ -95,6 +99,8 @@ actual fun ExportPdfPlatform(
         companyId1Label = stringResource(Res.string.company_identification1),
         companyId2Label = stringResource(Res.string.company_identification2),
         companyId3Label = stringResource(Res.string.company_identification3),
+        otherLines = stringResource(Res.string.document_products_other_lines),
+        currencyNoticeLabel = stringResource(Res.string.pdf_currency_notice),
     )
 
     val fileManager = remember { PdfFileManager() }

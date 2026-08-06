@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import platform.Foundation.NSBundle
 import platform.Foundation.NSLocale
 import platform.Foundation.NSUserDefaults
+import platform.Foundation.countryCode
 import platform.Foundation.currentLocale
 import platform.Foundation.languageCode
 
@@ -23,3 +24,6 @@ actual fun setAppLocale(languageCode: String?) {
 
 actual fun getSystemLocaleCode(): String =
     NSLocale.currentLocale.languageCode.takeIf { it.isNotEmpty() } ?: "en"
+
+actual fun getSystemCountryCode(): String =
+    NSLocale.currentLocale.countryCode?.uppercase() ?: ""

@@ -102,10 +102,11 @@ import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.animations.BatKiss
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
-import com.a4a.g8invoicing.ui.theme.textNormalBold
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -184,7 +185,7 @@ fun About(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(AppColors.surface)
         ) {
             Column(
                 modifier = Modifier
@@ -262,7 +263,7 @@ fun About(
                 CollapsibleSection(title = stringResource(Res.string.about_title_version)) {
                     Text(
                         text = versionName,
-                        style = MaterialTheme.typography.textNormalBold,
+                        style = MaterialTheme.typography.textBodyBold,
                     )
                 }
 

@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,7 +48,8 @@ import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.tax_rate_add_rate
 import com.a4a.g8invoicing.ui.shared.Separator
-import com.a4a.g8invoicing.ui.theme.callForActions
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -67,7 +69,7 @@ fun ProductTaxRatesContent(
     modifier = if (isDisplayedInBottomSheet)
         modifier.then(Modifier
             .fillMaxHeight(0.5f)
-            .background(Color.LightGray.copy(alpha = 0.4f))
+            .background(AppColors.surfaceMuted.copy(alpha = 0.4f))
             .verticalScroll(scrollState)
             .padding(top = 30.dp, end = 60.dp, start = 60.dp, bottom = 30.dp))
     else
@@ -82,7 +84,7 @@ fun ProductTaxRatesContent(
     {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
         ) {
             // Adds the no tax ("-") choice to the list
@@ -171,7 +173,7 @@ fun ProductTaxRatesContent(
                             imageVector = Icons.Outlined.Settings,
                             contentDescription = "Modifier les taux",
                             modifier = Modifier.size(20.dp),
-                            tint = Color.Gray
+                            tint = AppColors.iconSecondary
                         )
                     }
                 }
@@ -195,7 +197,7 @@ fun ProductTaxRatesEditContent(
     ) {
         Column(
             modifier = Modifier
-                .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                 .fillMaxWidth()
                 .padding(
                     top = 8.dp,
@@ -230,7 +232,7 @@ fun ProductTaxRatesEditContent(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
-                style = MaterialTheme.typography.callForActions,
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                 text = AnnotatedString(stringResource(Res.string.tax_rate_add_rate)),
             )
         }
@@ -337,7 +339,10 @@ private fun TaxRateEditRow(
                 modifier = Modifier
                     .weight(1F)
                     .padding(start = 20.dp, end = 8.dp)
-                    .focusRequester(focusRequester),
+                    .focusRequester(focusRequester)
+                    // No autofill dataset makes sense for a VAT rate — opt out so the
+                    // system doesn't offer credit-card or password suggestions.
+                    .clearAndSetSemantics {},
                 textStyle = LocalTextStyle.current,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
@@ -374,7 +379,7 @@ private fun TaxRateEditRow(
                     imageVector = Icons.Outlined.Edit,
                     contentDescription = "Modifier",
                     modifier = Modifier.size(20.dp),
-                    tint = Color.Gray
+                    tint = AppColors.iconSecondary
                 )
             }
         }
@@ -389,7 +394,7 @@ private fun TaxRateEditRow(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Supprimer",
                     modifier = Modifier.size(20.dp),
-                    tint = Color.Gray
+                    tint = AppColors.iconSecondary
                 )
             }
         }

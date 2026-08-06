@@ -1,6 +1,6 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import kotlinx.datetime.Clock
+
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -132,7 +132,7 @@ fun parseDate(dateString: String, pattern: String = "dd/MM/yyyy HH:mm:ss"): Long
     }
 }
 
-fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
+fun currentTimeMillis(): Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
 /**
  * Get midnight UTC of today's date (for DatePicker initialization).
@@ -140,7 +140,7 @@ fun currentTimeMillis(): Long = Clock.System.now().toEpochMilliseconds()
  * is correctly displayed.
  */
 fun todayForPicker(): Long {
-    val now = Clock.System.now()
+    val now = kotlin.time.Clock.System.now()
     val localDate = now.toLocalDateTime(TimeZone.currentSystemDefault()).date
     return localDate.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
 }

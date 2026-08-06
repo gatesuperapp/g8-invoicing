@@ -29,6 +29,10 @@ actual class PdfFileManager actual constructor() {
     actual fun openOrShare(filePath: String) {
         // TODO: Use UIActivityViewController for sharing
     }
+
+    actual fun loadAssetBytes(assetName: String): ByteArray? = null
+
+    actual fun listSystemFontFiles(): List<String> = emptyList()
 }
 
 /**

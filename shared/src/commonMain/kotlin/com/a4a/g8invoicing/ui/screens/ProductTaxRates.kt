@@ -22,7 +22,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
 import com.a4a.g8invoicing.shared.resources.tax_rate_screen_title
 import com.a4a.g8invoicing.ui.navigation.TopBar
-import com.a4a.g8invoicing.ui.theme.ColorBackgroundGrey
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
 
@@ -73,7 +73,7 @@ fun ProductTaxRates(
         it
         Column(
             modifier = Modifier
-                .background(ColorBackgroundGrey)
+                .background(AppColors.divider)
                 .fillMaxSize()
                 .verticalScroll(scrollState)
                 .imePadding()

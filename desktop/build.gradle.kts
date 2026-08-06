@@ -16,10 +16,10 @@ dependencies {
     implementation(compose.materialIconsExtended)
 
     // Koin for DI
-    implementation("io.insert-koin:koin-core:4.0.2")
+    implementation("io.insert-koin:koin-core:4.2.2")
 
     // Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.11.0")
 }
 
 compose.desktop {

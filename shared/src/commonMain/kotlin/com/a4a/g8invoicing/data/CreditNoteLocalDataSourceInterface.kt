@@ -19,7 +19,7 @@ interface CreditNoteLocalDataSourceInterface {
     suspend fun saveDocumentClientOrIssuerInDbAndLinkToDocument(documentClientOrIssuer: ClientOrIssuerState, id: Long?)
     suspend fun deleteDocumentClientOrIssuer(id:Long, type: ClientOrIssuerType,)
     suspend fun duplicate(documents: List<CreditNoteState>)
-    suspend fun convertInvoiceToCreditNote(documents: List<InvoiceState>)
+    suspend fun convertInvoiceToCreditNote(documents: List<InvoiceState>): Long?
     suspend fun update(document: CreditNoteState)
     suspend fun delete(documents: List<CreditNoteState>)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)

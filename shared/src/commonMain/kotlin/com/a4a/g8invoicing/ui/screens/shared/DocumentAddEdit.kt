@@ -4,7 +4,10 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.calculateCentroid
 import androidx.compose.foundation.gestures.calculateCentroidSize
@@ -15,7 +18,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +46,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -67,7 +75,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.ProductState
-import com.a4a.g8invoicing.ui.theme.ColorLightGreyo
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.feature_coming_soon
@@ -98,13 +106,13 @@ fun DocumentAddEdit(
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickEditDocumentProduct: (DocumentProductState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -116,6 +124,9 @@ fun DocumentAddEdit(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit, // For showing toast/snackbar messages
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit, // Slot for ExportPdf
+    showProductType: Boolean = false,
+    hideLinkedSourceHeaders: Boolean = false,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -135,14 +146,16 @@ fun DocumentAddEdit(
     // Store string for callback (can't use stringResource in lambda)
     val comingSoonMessage = stringResource(Res.string.feature_coming_soon)
 
-    // When the bottom sheet is expanded (slide-in elements, products picker,
-    // nested form…) intercept system back to close it instead of popping
-    // back to the document list. Mirrors the visibility check used elsewhere
-    // in this file (== SheetValue.Expanded) so it stays in sync.
-    val isSheetVisible = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
+    // When the bottom sheet is open (either partially expanded or fully expanded)
+    // intercept system back to close it instead of popping back to the document list.
+    val isSheetVisible = scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden
     PlatformBackHandler(enabled = isSheetVisible) {
         hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
     }
+
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    val sheetLayoutHeight = maxHeight
+    val partialPeekHeight = sheetLayoutHeight / 2
 
     BottomSheetScaffold(
         sheetSwipeEnabled = false,
@@ -152,13 +165,27 @@ fun DocumentAddEdit(
             topEnd = 0.dp
         ),// Remove rounded corners (must be a better way..)
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 0.dp,
+        sheetPeekHeight = partialPeekHeight,
         sheetContent = {
             if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
                 DocumentBottomSheetTextElements(
                     document = document,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+                    },
+                    sheetMaxHeight = sheetLayoutHeight,
+                    isSheetFullScreen = scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded,
+                    onSheetDragUp = {
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                    },
+                    onSheetStepDown = {
+                        scope.launch {
+                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            } else {
+                                hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+                            }
+                        }
                     },
                     clients = clientList,
                     issuers = issuerList,
@@ -184,13 +211,28 @@ fun DocumentAddEdit(
                     onClickDeleteAddress = onClickDeleteAddress,
                     onClickDeleteEmail = onClickDeleteEmail,
                     onAddEmail = onAddEmail,
-                    onPendingEmailValidationResult = onPendingEmailValidationResult
+                    onPendingEmailValidationResult = onPendingEmailValidationResult,
+                    showProductType = showProductType,
                 )
             } else {
                 DocumentBottomSheetProducts(
                     document = document,
                     onDismissBottomSheet = {
                         hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+                    },
+                    sheetMaxHeight = sheetLayoutHeight,
+                    isSheetFullScreen = scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded,
+                    onSheetDragUp = {
+                        scope.launch { scaffoldState.bottomSheetState.expand() }
+                    },
+                    onSheetStepDown = {
+                        scope.launch {
+                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            } else {
+                                hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+                            }
+                        }
                     },
                     documentProductUiState = documentProductUiState,
                     products = products,
@@ -208,7 +250,10 @@ fun DocumentAddEdit(
                     onSelectTaxRate = onSelectTaxRate,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
-                    onOrderChange = onOrderChange
+                    onOrderChange = onOrderChange,
+                    showProductType = showProductType,
+                    hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+                    onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
                 )
             }
         },
@@ -267,7 +312,7 @@ fun DocumentAddEdit(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(ColorLightGreyo)
+                    .background(AppColors.divider)
             ) {
                 // A4 aspect ratio: 210mm / 297mm ≈ 0.707
                 val a4AspectRatio = 210f / 297f
@@ -389,7 +434,7 @@ fun DocumentAddEdit(
                     DocumentBasicTemplate(
                         uiState = document,
                         onClickElement = {
-                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                            if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
                                 hideBottomSheet(
                                     scope,
                                     scaffoldState,
@@ -422,7 +467,7 @@ fun DocumentAddEdit(
                             }
                         },
                         onClickRestOfThePage = {
-                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
+                            if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
                                 hideBottomSheet(
                                     scope,
                                     scaffoldState,
@@ -436,12 +481,13 @@ fun DocumentAddEdit(
             }
         }
     }
+    }
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetScaffoldState) {
-    scope.launch { scaffoldState.bottomSheetState.expand() }
+    scope.launch { scaffoldState.bottomSheetState.partialExpand() }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)

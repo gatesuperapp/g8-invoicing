@@ -398,7 +398,7 @@ class ClientOrIssuerDataSourceTest {
             ClientOrIssuerState(
                 name = TextFieldValue("Ma Société"),
                 type = ClientOrIssuerType.DOCUMENT_ISSUER,
-                originalClientId = masterIssuer.id,
+                originalClientOrIssuerId = masterIssuer.id,
                 emails = listOf(EmailState(email = TextFieldValue("original@email.fr")))
             )
         )
@@ -434,7 +434,7 @@ class ClientOrIssuerDataSourceTest {
             ClientOrIssuerState(
                 name = TextFieldValue("Ancienne Société"),
                 type = ClientOrIssuerType.DOCUMENT_ISSUER,
-                originalClientId = masterIssuer.id,
+                originalClientOrIssuerId = masterIssuer.id,
                 phone = TextFieldValue("0100000000")
             )
         )
@@ -464,12 +464,12 @@ class ClientOrIssuerDataSourceTest {
         dataSource.createNew(issuer)
         val masterIssuer = dataSource.getIssuers().first()
 
-        // Create document issuer WITHOUT originalClientId
+        // Create document issuer WITHOUT originalClientOrIssuerId
         val docIssuerId = dataSource.addDocumentClientOrIssuer(
             ClientOrIssuerState(
                 name = TextFieldValue("Autre Société"),
                 type = ClientOrIssuerType.DOCUMENT_ISSUER,
-                originalClientId = null // No link to master
+                originalClientOrIssuerId = null // No link to master
             )
         )
 
@@ -501,8 +501,8 @@ class ClientOrIssuerDataSourceTest {
         assertEquals("Deuxième Émetteur", lastIssuer.name.text)
         // getLastIssuer returns as DOCUMENT_ISSUER type for use in documents
         assertEquals(ClientOrIssuerType.DOCUMENT_ISSUER, lastIssuer.type)
-        // originalClientId should be set to link back to master
-        assertNotNull(lastIssuer.originalClientId)
+        // originalClientOrIssuerId should be set to link back to master
+        assertNotNull(lastIssuer.originalClientOrIssuerId)
     }
 
     @Test
@@ -580,7 +580,7 @@ class ClientOrIssuerDataSourceTest {
             ClientOrIssuerState(
                 name = TextFieldValue("Société"),
                 type = ClientOrIssuerType.DOCUMENT_ISSUER,
-                originalClientId = masterIssuer.id,
+                originalClientOrIssuerId = masterIssuer.id,
                 addresses = listOf(address)
             )
         )

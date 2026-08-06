@@ -15,6 +15,7 @@ import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuerAddress
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -158,6 +159,8 @@ class ClientOrIssuerLocalDataSource(
             clientOrIssuer.companyId3Label?.text?.trim(),
             clientOrIssuer.companyId3Number?.text?.trim(),
             clientOrIssuer.logoPath,
+            if (clientOrIssuer.vatExempt) 1L else 0L,
+            if (clientOrIssuer.intraEuSales) 1L else 0L,
         )
     }
 
@@ -174,6 +177,7 @@ class ClientOrIssuerLocalDataSource(
                 address_line_2 = address.addressLine2?.text?.trim(),
                 zip_code = address.zipCode?.text?.trim(),
                 city = address.city?.text?.trim(),
+                country_code = address.countryCode?.trim(),
             )
             val newAddressId = clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
                 ?: return false
@@ -223,6 +227,8 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.companyId3Label?.text?.trim(),
                     clientOrIssuer.companyId3Number?.text?.trim(),
                     clientOrIssuer.logoPath,
+                    if (clientOrIssuer.vatExempt) 1L else 0L,
+                    if (clientOrIssuer.intraEuSales) 1L else 0L,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -248,6 +254,7 @@ class ClientOrIssuerLocalDataSource(
                         address_line_2 = address.addressLine2?.text?.trim(),
                         zip_code = address.zipCode?.text?.trim(),
                         city = address.city?.text?.trim(),
+                        country_code = address.countryCode?.trim(),
                     )
 
                     val newAddressId = clientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -329,6 +336,7 @@ class ClientOrIssuerLocalDataSource(
                         address_line_2 = address.addressLine2?.text?.trim(),
                         zip_code = address.zipCode?.text?.trim(),
                         city = address.city?.text?.trim(),
+                        country_code = address.countryCode?.trim(),
                     )
 
                     documentClientOrIssuerAddressQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -396,6 +404,8 @@ class ClientOrIssuerLocalDataSource(
                         company_id3_label = clientOrIssuer.companyId3Label?.text?.trim(),
                         company_id3_number = clientOrIssuer.companyId3Number?.text?.trim(),
                         logo_path = clientOrIssuer.logoPath,
+                        vat_exempt = if (clientOrIssuer.vatExempt) 1L else 0L,
+                        intra_eu_sales = if (clientOrIssuer.intraEuSales) 1L else 0L,
                     )
                 }
 
@@ -424,6 +434,7 @@ class ClientOrIssuerLocalDataSource(
                                 address_line_2 = address.addressLine2?.text?.trim(),
                                 zip_code = address.zipCode?.text?.trim(),
                                 city = address.city?.text?.trim(),
+                                country_code = address.countryCode?.trim(),
                             )
                         }
                     }
@@ -470,6 +481,8 @@ class ClientOrIssuerLocalDataSource(
                         company_id3_label = documentClientOrIssuer.companyId3Label?.text?.trim(),
                         company_id3_number = documentClientOrIssuer.companyId3Number?.text?.trim(),
                         logo_path = documentClientOrIssuer.logoPath,
+                        vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
+                        intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
                     )
                 }
                 // Addresses to delete
@@ -498,6 +511,7 @@ class ClientOrIssuerLocalDataSource(
                                 address_line_2 = address.addressLine2?.text?.trim(),
                                 zip_code = address.zipCode?.text?.trim(),
                                 city = address.city?.text?.trim(),
+                                country_code = address.countryCode?.trim(),
                             )
                         }
                     }
@@ -513,6 +527,7 @@ class ClientOrIssuerLocalDataSource(
                                 address_line_2 = address.addressLine2?.text?.trim(),
                                 zip_code = address.zipCode?.text?.trim(),
                                 city = address.city?.text?.trim(),
+                                country_code = address.countryCode?.trim(),
                             )
                             // Link document address to document client/issuer
                             documentClientOrIssuerAddressQueries.getLastInsertedRowId()
@@ -560,6 +575,8 @@ class ClientOrIssuerLocalDataSource(
                         company_id3_label = documentClientOrIssuer.companyId3Label?.text?.trim(),
                         company_id3_number = documentClientOrIssuer.companyId3Number?.text?.trim(),
                         logo_path = documentClientOrIssuer.logoPath,
+                        vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
+                        intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
                     )
 
                     // Emails: supprimer et recréer dans table maître
@@ -597,6 +614,7 @@ class ClientOrIssuerLocalDataSource(
                                 address_line_2 = docAddress.address_line_2,
                                 zip_code = docAddress.zip_code,
                                 city = docAddress.city,
+                                country_code = docAddress.country_code,
                             )
                         } else {
                             // Document address has no master address - create it now
@@ -607,6 +625,7 @@ class ClientOrIssuerLocalDataSource(
                                 address_line_2 = docAddress.address_line_2,
                                 zip_code = docAddress.zip_code,
                                 city = docAddress.city,
+                                country_code = docAddress.country_code,
                             )
                             val newMasterAddressId = clientOrIssuerAddressQueries.getLastInsertedRowId()
                                 .executeAsOneOrNull()
@@ -747,6 +766,75 @@ class ClientOrIssuerLocalDataSource(
             }
         }
     }
+
+    override suspend fun getLastCountryCode(): String? {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                // Single-column SELECT — SQLDelight returns String? directly (the column is
+                // nullable in schema even though the WHERE filters out empty rows), so the
+                // executeAsOneOrNull result is String??; unwrap and normalise.
+                clientOrIssuerAddressQueries.getLastCountryCode()
+                    .executeAsOneOrNull()?.trim()?.takeIf { it.isNotEmpty() }?.uppercase()
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    override suspend fun getRecentCountryCodes(limit: Int): List<String> {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerAddressQueries.getRecentCountryCodes(limit.toLong())
+                    .executeAsList()
+                    .mapNotNull { it?.trim()?.takeIf { s -> s.isNotEmpty() }?.uppercase() }
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    override suspend fun setCountryForClientsWithoutCountry(countryCode: String) {
+        // Reuse the standard updateClientOrIssuer path — its ClientOrIssuer
+        // UPDATE bumps updated_at on the parent row, which is what makes
+        // fetchAll's listener (subscribed to ClientOrIssuer, not …Address)
+        // re-emit. A raw bulk UPDATE on the address table alone would leave
+        // the client-list state stale with country_code=null, and the
+        // address-edit form would then overwrite the just-filled country
+        // with the device-locale fallback.
+        //
+        // Two shapes to handle for pre-1.8 clients:
+        //   1. client has address rows with null country_code → patch them.
+        //   2. client has no address row at all (name/email only)      → create a
+        //      minimal address row carrying just the country, so the country is
+        //      persisted and the edit form can't overwrite it with the fallback.
+        val normalized = countryCode.trim().uppercase()
+        fetchAll(PersonType.CLIENT).first().forEach { client ->
+            val addresses = client.addresses
+            val patchedAddresses = when {
+                addresses.isNullOrEmpty() -> listOf(AddressState(countryCode = normalized))
+                addresses.any { it.countryCode.isNullOrBlank() } -> addresses.map { addr ->
+                    if (addr.countryCode.isNullOrBlank()) addr.copy(countryCode = normalized)
+                    else addr
+                }
+                else -> null
+            }
+            if (patchedAddresses != null) {
+                updateClientOrIssuer(client.copy(addresses = patchedAddresses))
+            }
+        }
+    }
+
+    override suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long> =
+        withContext(DispatcherProvider.IO) {
+            val typeStr = when (type) {
+                PersonType.CLIENT -> ClientOrIssuerType.CLIENT.name.lowercase()
+                PersonType.ISSUER -> ClientOrIssuerType.ISSUER.name.lowercase()
+            }
+            documentClientOrIssuerQueries
+                .getLast3RecentOriginalIdsByType(typeStr)
+                .executeAsList()
+                .mapNotNull { it }
+        }
 }
 
 fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {
@@ -762,6 +850,7 @@ fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {
         addressLine2 = clientOrIssuer.address_line_2?.let { TextFieldValue(text = it) },
         zipCode = clientOrIssuer.zip_code?.let { TextFieldValue(text = it) },
         city = clientOrIssuer.city?.let { TextFieldValue(text = it) },
+        countryCode = clientOrIssuer.country_code,
     )
 }
 
@@ -802,6 +891,8 @@ fun ClientOrIssuer.transformIntoEditable(
         },
         companyId3Number = clientOrIssuer.company_id3_number?.let { TextFieldValue(text = it) },
         logoPath = clientOrIssuer.logo_path,
+        vatExempt = (clientOrIssuer.vat_exempt ?: 0L) != 0L,
+        intraEuSales = (clientOrIssuer.intra_eu_sales ?: 0L) != 0L,
     )
 }
 
@@ -830,5 +921,6 @@ fun DocumentClientOrIssuerAddress.transformIntoEditable(): AddressState {
         addressLine2 = address.address_line_2?.let { TextFieldValue(text = it) },
         zipCode = address.zip_code?.let { TextFieldValue(text = it) },
         city = address.city?.let { TextFieldValue(text = it) },
+        countryCode = address.country_code,
     )
 }

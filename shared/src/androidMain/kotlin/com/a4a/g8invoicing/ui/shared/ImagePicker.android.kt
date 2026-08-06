@@ -164,6 +164,19 @@ actual class ImageStorage actual constructor() {
         return File(logoDir, logoPath).exists()
     }
 
+    actual fun readBundledResource(relativePath: String): ByteArray? {
+        // Compose Resources on Android copies drawables into the APK assets
+        // under composeResources/<module.package>/<relativePath>. Reading
+        // through AssetManager is synchronous, which is what the PDF pipeline
+        // needs (its render path is not a coroutine).
+        val assetPath = "composeResources/com.a4a.g8invoicing.shared.resources/$relativePath"
+        return try {
+            context.assets.open(assetPath).use { it.readBytes() }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun resizeIfNeeded(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
         val width = bitmap.width
         val height = bitmap.height

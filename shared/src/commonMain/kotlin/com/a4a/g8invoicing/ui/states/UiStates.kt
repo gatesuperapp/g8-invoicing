@@ -3,13 +3,22 @@ package com.a4a.g8invoicing.ui.states
 data class InvoicesUiState(
     val documentStates: List<InvoiceState> = listOf(),
     val userMessages: List<Message> = listOf(),
-    val isFetchingDeliveryNotes: Boolean = false
+    val isFetchingDeliveryNotes: Boolean = false,
+    val createdCreditNoteId: Long? = null,
+    val createdCorrectedInvoiceId: Long? = null,
 )
 
 data class DeliveryNotesUiState(
     val deliveryNoteStates: List<DeliveryNoteState> = listOf(),
     val userMessages: List<Message> = listOf(),
     val isFetchingDeliveryNotes: Boolean = false,
+    val createdInvoiceId: Long? = null
+)
+
+data class QuotesUiState(
+    val quoteStates: List<QuoteState> = listOf(),
+    val userMessages: List<Message> = listOf(),
+    val isFetchingQuotes: Boolean = false,
     val createdInvoiceId: Long? = null
 )
 

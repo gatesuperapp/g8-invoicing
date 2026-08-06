@@ -29,12 +29,12 @@ actual fun DocumentAddEditPlatform(
     onClickDeleteDocumentProduct: (Int) -> Unit,
     onSelectClientOrIssuer: (ClientOrIssuerState) -> Unit,
     onClickNewDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
-    onClickDocumentClientOrIssuer: (ClientOrIssuerState) -> Unit,
+    onClickDocumentClientOrIssuer: (ClientOrIssuerState, openFormOnCompletion: Boolean) -> Unit,
     onClickDeleteDocumentClientOrIssuer: (ClientOrIssuerType) -> Unit,
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
-    onClickDoneForm: (DocumentBottomSheetTypeOfForm) -> Unit,
+    onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
     showDocumentForm: Boolean,
@@ -46,8 +46,14 @@ actual fun DocumentAddEditPlatform(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     onShowMessage: (String) -> Unit,
     exportPdfContent: @Composable (DocumentState, () -> Unit) -> Unit,
+    showProductType: Boolean,
+    hideLinkedSourceHeaders: Boolean,
+    onToggleHideLinkedSourceHeaders: (() -> Unit)?,
 ) {
     // Desktop uses the desktop-specific UI with side panel
+    // hideLinkedSourceHeaders is only wired on Android; desktop's flat product
+    // list has no source-header rows to hide, so the params are ignored here.
+    // showProductType n'est pas encore relayé — pas de rendu Product.type côté desktop.
     DocumentAddEditDesktop(
         document = document,
         clientList = clientList,

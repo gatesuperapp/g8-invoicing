@@ -4,7 +4,6 @@ import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -32,7 +31,7 @@ class SubscriptionRepository(
     private val authRepository: AuthRepository,
     private val authApi: AuthApiClient,
     private val settings: Settings,
-    private val clock: Clock = Clock.System,
+    private val clock: kotlin.time.Clock = kotlin.time.Clock.System,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 
