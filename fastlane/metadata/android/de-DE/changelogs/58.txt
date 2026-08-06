@@ -1,0 +1,11 @@
+🌹 v1.8 - Rosa canina
+
+- 📝 Angebote (Premium-𝕘Store-Modul, 5 gratis), in Rechnungen umwandelbar
+- 🔎 Kunden-/Produktauswahl: Suche + Zuletzt verwendet + alphabetisch
+- 📆 Dokumente nach Monat gruppiert, Tage bis Fälligkeit
+- 💶 ISO-Währungscode auf PDFs
+- 🌍 Neue Felder: Land, MwSt.-Befreiung, EU-Binnenmarkt, Produkttyp
+- ✏️ In einer Rechnung Änderungen an die Produkt-/Kundenkarte übernehmen
+- 🪄 Design überarbeitet
+- 📎 Aussagekräftigere PDF-Dateinamen
+- 🔧 Aktualisierung der Abhängigkeiten

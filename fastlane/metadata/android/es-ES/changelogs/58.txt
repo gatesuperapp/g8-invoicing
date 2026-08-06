@@ -1,0 +1,11 @@
+🌹 v1.8 - Rosa canina
+
+- 📝 Presupuestos (módulo Premium 𝕘Store, 5 gratis), convertibles en factura
+- 🔎 Selectores clientes/productos: búsqueda + recientes + orden alfabético
+- 📆 Documentos agrupados por mes, días hasta el vencimiento
+- 💶 Código ISO de la moneda en los PDF
+- 🌍 Nuevos campos: país, IVA exento, ventas intra-UE, tipo de producto
+- ✏️ Desde una factura, aplica cambios a la ficha producto/cliente
+- 🪄 Diseño renovado
+- 📎 Nombres de PDF más detallados
+- 🔧 Actualización de dependencias

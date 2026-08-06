@@ -1,0 +1,11 @@
+🌹 v1.8 - Rosa canina
+
+- 📝 Quotes (Premium 𝕘Store module, 5 free to try), convertible into invoices
+- 🔎 Client/product pickers: search + recents + alphabetical sort
+- 📆 Documents grouped by month, days until due date
+- 💶 Currency ISO code on PDFs
+- 🌍 New fields: country, VAT-exempt, intra-EU sales, product type
+- ✏️ From an invoice, push edits back to the product/client card
+- 🪄 Design: polished
+- 📎 More explicit PDF filenames
+- 🔧 Dependency upgrades
