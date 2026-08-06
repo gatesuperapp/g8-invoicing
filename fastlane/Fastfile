@@ -32,8 +32,15 @@ platform :android do
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
-    gradle(task: "clean bundleRelease")
-    upload_to_play_store
+    # Build ONLY the stable flavor. bundleRelease alone builds both stable +
+    # beta AABs and upload_to_play_store then picks the beta one, which the
+    # Play Store rejects with 'APK has the wrong package name' because the
+    # store listing is for com.a4a.g8invoicing (stable), not
+    # com.a4a.g8invoicing.beta.
+    gradle(task: "clean bundleStableRelease")
+    upload_to_play_store(
+      aab: "app/build/outputs/bundle/stableRelease/app-stable-release.aab"
+    )
   end
 
   desc "Push store listing only (texts + screenshots + changelogs), no build"
