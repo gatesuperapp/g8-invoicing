@@ -8,4 +8,3 @@
 - ✏️ From an invoice, push edits back to the product/client card
 - 🪄 Design: polished
 - 📎 More explicit PDF filenames
-- 🔧 Dependency upgrades

@@ -8,4 +8,3 @@
 - ✏️ Depuis une facture, applique tes modifs à la fiche produit/client
 - 🪄 Design : remise en beauté
 - 📎 Nom de fichier PDF + détaillé
-- 🔧 Mise à jour des dépendances

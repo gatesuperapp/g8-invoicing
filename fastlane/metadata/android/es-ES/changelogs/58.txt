@@ -8,4 +8,3 @@
 - ✏️ Desde una factura, aplica cambios a la ficha producto/cliente
 - 🪄 Diseño renovado
 - 📎 Nombres de PDF más detallados
-- 🔧 Actualización de dependencias
