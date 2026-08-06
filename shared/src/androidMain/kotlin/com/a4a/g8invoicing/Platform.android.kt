@@ -24,6 +24,15 @@ actual fun setAppLocale(languageCode: String?) {
         LocaleListCompat.getEmptyLocaleList()
     }
     AppCompatDelegate.setApplicationLocales(localeList)
+    // Also align the JVM-global Locale.getDefault(). Compose Resources' suspend
+    // getString() reads Locale.getDefault() via getSystemResourceEnvironment(),
+    // which AppCompatDelegate.setApplicationLocales does NOT reliably update on
+    // Android — so the picker's stringResource (composition-scoped) would show
+    // EN while a coroutine-side getString() would still return FR. Setting the
+    // JVM default explicitly closes that gap.
+    if (languageCode != null) {
+        java.util.Locale.setDefault(java.util.Locale.forLanguageTag(languageCode))
+    }
 }
 
 actual fun getSystemLocaleCode(): String = java.util.Locale.getDefault().language.ifEmpty { "en" }

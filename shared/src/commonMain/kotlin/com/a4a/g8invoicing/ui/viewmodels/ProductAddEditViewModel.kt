@@ -434,6 +434,11 @@ class ProductAddEditViewModel(
         } else {
             _documentProductUiState.value = _documentProductUiState.value.copy(unit = text, unitCode = null)
         }
+        // Blank field = no code to persist. matchTextToCode's C62 fallback is
+        // reserved for save-time (EN 16931 requires a value in the XML), never
+        // as a live-typed guess — otherwise clearing the field leaves a
+        // phantom "unit" code showing under the empty text.
+        if (text.text.isBlank()) return
         viewModelScope.launch {
             val matched = unitCodeRepository.matchTextToCode(text.text).code
             if (productType == ProductType.PRODUCT) {
