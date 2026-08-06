@@ -28,10 +28,16 @@ import com.a4a.g8invoicing.data.shouldShowBackupPopupNow
 import com.a4a.g8invoicing.data.shouldShowOnboarding18
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.data.auth.AuthState
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.about_contact_email
+import com.a4a.g8invoicing.shared.resources.account_auth_link_expired
+import com.a4a.g8invoicing.shared.resources.account_auth_login_failed
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.navigation.Screen
+import com.a4a.g8invoicing.ui.screens.AuthMessageDialog
 import com.a4a.g8invoicing.ui.screens.DatabaseEmailDialog
 import com.a4a.g8invoicing.ui.screens.DatabaseExportDialog
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
@@ -39,11 +45,13 @@ import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
 import com.a4a.g8invoicing.ui.screens.sendDatabaseByEmail
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import androidx.compose.ui.platform.LocalUriHandler
 import android.content.Intent
 import android.net.Uri
 import java.io.File
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -132,15 +140,54 @@ fun MainCompose(
     // Track navController for deep link navigation
     var navControllerRef by remember { mutableStateOf<NavHostController?>(null) }
 
-    // Handle magic link token coming from a deep link: navigate to Account so its own
-    // NavBackStackEntry-scoped ViewModel can consume the token (and own the consume
-    // success/error state). navControllerRef is part of the key so we wait until the
-    // NavHost has wired it up — otherwise on cold start the navigate() no-ops.
+    // Error surfaced by the magic-link consume call — kept here (not in the Account
+    // VM) so the dialog outlives Account's composition. Account can be destroyed
+    // for reasons unrelated to auth (locale switch, NavGraph rebuild after DataStore
+    // emits a new value, a stacked nav.navigate) and any state carried on its VM
+    // would disappear with it — which used to make the dialog flash for ~2s and
+    // then vanish.
+    var consumeErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Navigate to Account when a deep-link token arrives, so a successful consume
+    // lands the user directly on the logged-in Account view. navControllerRef is
+    // part of the key so we wait until the NavHost has wired it up.
     LaunchedEffect(pendingMagicLinkToken, navControllerRef) {
         val nav = navControllerRef
         if (pendingMagicLinkToken != null && nav != null) {
             nav.navigate(Screen.Account.name)
         }
+    }
+
+    // Consume the deep-link token at the app root. Clearing pendingMagicLinkToken
+    // is deferred until AFTER consumeMagicLink returns — clearing it earlier would
+    // change the LaunchedEffect key mid-call and cancel the in-flight network
+    // request.
+    LaunchedEffect(pendingMagicLinkToken) {
+        val token = pendingMagicLinkToken ?: return@LaunchedEffect
+        val result = authRepository.consumeMagicLink(token)
+        onMagicLinkTokenConsumed()
+        if (result is AuthResult.Error) {
+            consumeErrorMessage = result.message
+        }
+    }
+
+    // Backend distinguishes "Lien invalide ou expiré" (401, link itself dead) from
+    // generic 500s (other failures, e.g. user-creation conflicts) — pick the right
+    // copy based on the message so a 500 doesn't get mislabelled as "link expired".
+    consumeErrorMessage?.let { msg ->
+        val isLinkExpired = msg.contains("expir", ignoreCase = true)
+            || msg.contains("invalide", ignoreCase = true)
+            || msg.contains("invalid", ignoreCase = true)
+            || msg.contains("abgelaufen", ignoreCase = true)
+        AuthMessageDialog(
+            messagePrefix = stringResource(
+                if (isLinkExpired) Res.string.account_auth_link_expired
+                else Res.string.account_auth_login_failed
+            ),
+            contactEmail = stringResource(Res.string.about_contact_email),
+            uriHandler = LocalUriHandler.current,
+            onDismiss = { consumeErrorMessage = null },
+        )
     }
 
     // Sync subscription status when auth state changes:
@@ -226,8 +273,6 @@ fun MainCompose(
                             context.startActivity(intent)
                         }
                     },
-                    pendingMagicLinkToken = pendingMagicLinkToken,
-                    onMagicLinkTokenConsumed = onMagicLinkTokenConsumed,
                 )
             }
         }

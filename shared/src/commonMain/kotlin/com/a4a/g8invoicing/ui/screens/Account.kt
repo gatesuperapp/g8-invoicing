@@ -172,8 +172,6 @@ fun Account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
-    pendingMagicLinkToken: String? = null,
-    onMagicLinkTokenConsumed: () -> Unit = {},
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     viewModel: AccountViewModel = koinViewModel(),
@@ -219,17 +217,6 @@ fun Account(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         if (uiState.isLoggedIn) {
             viewModel.refreshSubscription()
-        }
-    }
-
-    // Consume the magic link token from the deep link on this screen's own VM so the
-    // success (logged-in UI) or error (expired-link dialog) lands on the same instance
-    // that renders here — calling consume from MainCompose would target the Activity-
-    // scoped VM, leaving this NavBackStackEntry-scoped one with stale null state.
-    LaunchedEffect(pendingMagicLinkToken) {
-        if (pendingMagicLinkToken != null) {
-            viewModel.consumeMagicLink(pendingMagicLinkToken)
-            onMagicLinkTokenConsumed()
         }
     }
 
@@ -291,29 +278,6 @@ fun Account(
                         onClearError = { viewModel.clearError() },
                         onClearSuccess = { viewModel.clearSuccess() },
                         uriHandler = uriHandler,
-                    )
-                }
-
-                // Shown regardless of login state — a stale magic link clicked while
-                // already logged in still gets explained, instead of silently doing nothing.
-                // Backend distinguishes "Lien invalide ou expiré" (401, link itself dead)
-                // from generic 500s (other failures, e.g. user-creation conflicts) — we
-                // pick the right copy based on the message so a 500 doesn't get mislabelled
-                // as "link expired".
-                if (uiState.consumeErrorMessage != null) {
-                    val msg = uiState.consumeErrorMessage!!
-                    val isLinkExpired = msg.contains("expir", ignoreCase = true)
-                        || msg.contains("invalide", ignoreCase = true)
-                        || msg.contains("invalid", ignoreCase = true)
-                        || msg.contains("abgelaufen", ignoreCase = true)
-                    AuthMessageDialog(
-                        messagePrefix = stringResource(
-                            if (isLinkExpired) Res.string.account_auth_link_expired
-                            else Res.string.account_auth_login_failed
-                        ),
-                        contactEmail = stringResource(Res.string.about_contact_email),
-                        uriHandler = uriHandler,
-                        onDismiss = { viewModel.clearConsumeError() },
                     )
                 }
 
@@ -538,7 +502,7 @@ fun Account(
 }
 
 @Composable
-private fun AuthMessageDialog(
+fun AuthMessageDialog(
     messagePrefix: String,
     contactEmail: String,
     uriHandler: androidx.compose.ui.platform.UriHandler,
