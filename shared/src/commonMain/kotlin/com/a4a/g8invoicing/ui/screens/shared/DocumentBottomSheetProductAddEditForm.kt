@@ -160,7 +160,12 @@ fun DocumentBottomSheetProductAddEditForm(
                 documentProduct.type,
                 documentProduct.taxRate,
                 documentProduct.priceWithoutTax,
-                documentProduct.priceWithTax
+                documentProduct.priceWithTax,
+                // Include the resolved unit-code display so the picker's async
+                // resolveName finishing (after the state.unitCode change already
+                // rebuilt the list) triggers another rebuild with the new label
+                // — otherwise the cached FormInput keeps the stale "-".
+                unitCodeDisplay,
             ) {
                 listOfNotNull(
                     FormInput(

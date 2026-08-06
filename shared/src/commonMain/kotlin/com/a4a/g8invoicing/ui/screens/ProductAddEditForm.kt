@@ -180,7 +180,11 @@ fun ProductAddEditForm(
                         product.taxRate,
                         product.defaultPriceWithoutTax,
                         product.defaultPriceWithTax,
-                        hasAdditionalPrices
+                        hasAdditionalPrices,
+                        // Include the async unit-code display so the FormInput
+                        // rebuilds once resolveName finishes — otherwise the row
+                        // caches a stale "-" until an unrelated field changes.
+                        unitCodeDisplay,
                     ) {
                         listOfNotNull(
                             FormInput(
