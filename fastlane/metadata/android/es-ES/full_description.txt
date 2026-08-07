@@ -1,8 +1,9 @@
-𝕘𝟠 es una aplicación de facturación gratuita y eficaz.
+𝕘𝟠 es una aplicación de facturación eficaz y de código abierto.
 
 Funcionalidades:
 - Crear y gestionar facturas
 - Crear albaranes y convertirlos en facturas
+- Crear presupuestos y convertirlos en facturas (opción premium)
 - Crear notas de crédito
 - Gestionar tus clientes y productos
 - Precios personalizados por cliente

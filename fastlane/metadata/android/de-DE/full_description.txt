@@ -1,8 +1,9 @@
-𝕘𝟠 ist eine kostenlose, effiziente und quelloffene Rechnungsstellungs-App.
+𝕘𝟠 ist eine effiziente und quelloffene Rechnungsstellungs-App.
 
 Funktionen:
 - Rechnungen erstellen und verwalten
 - Lieferscheine erstellen und in Rechnungen umwandeln
+- Angebote erstellen und in Rechnungen umwandeln (Premium-Option)
 - Gutschriften erstellen
 - Kunden und Produkte verwalten
 - Individuelle Preise pro Kunde

@@ -1,8 +1,9 @@
-𝕘𝟠 est une application de facturation gratuite, efficace et open source.
+𝕘𝟠 est une application de facturation efficace et open source.
 
 Fonctionnalités :
 - Créer et gérer des factures
 - Créer des bons de livraison et les convertir en factures
+- Créer des devis et les convertir en factures (option premium)
 - Créer des avoirs
 - Gérer vos clients et produits
 - Prix personnalisés par client

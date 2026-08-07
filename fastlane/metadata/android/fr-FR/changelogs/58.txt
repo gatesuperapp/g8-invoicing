@@ -1,10 +1,10 @@
-🌹 v1.8 - Rosa canina
+v1.8 - Rosa canina
 
-- 📝 Devis (module Premium 𝕘Store, 5 gratuits), convertibles en facture
-- 🔎 Sélecteurs clients/produits : recherche + récents + tri alphabétique
-- 📆 Documents groupés par mois, jours avant échéance
-- 💶 Code ISO de la devise sur les PDF
-- 🌍 Nouveaux champs : pays, TVA exonérée, ventes intra-UE, type de produit
-- ✏️ Depuis une facture, applique tes modifs à la fiche produit/client
-- 🪄 Design : remise en beauté
-- 📎 Nom de fichier PDF + détaillé
+- Devis (module Premium 𝕘Store, 5 gratuits), convertibles en facture
+- Sélecteurs clients/produits : recherche + récents + tri alphabétique
+- Documents groupés par mois, jours avant échéance
+- Code ISO de la devise sur les PDF
+- Nouveaux champs : pays, TVA exonérée, ventes intra-UE, type de produit
+- Depuis une facture, applique tes modifs à la fiche produit/client
+- Design : remise en beauté
+- Nom de fichier PDF + détaillé

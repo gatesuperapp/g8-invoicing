@@ -1,8 +1,9 @@
-𝕘𝟠 is a free, efficient, and open-source invoicing app.
+𝕘𝟠 is an efficient, open-source invoicing app.
 
 Features:
 - Create and manage invoices
 - Create delivery slips and convert them into invoices
+- Create quotes and convert them into invoices (premium option)
 - Create credit memos
 - Manage your customers and products
 - Custom prices per customer
