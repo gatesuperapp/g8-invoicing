@@ -83,6 +83,7 @@ import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSection
+import com.a4a.g8invoicing.util.normalizeForSearch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -147,10 +148,13 @@ fun ClientOrIssuerPickerBottomSheet(
     val filteredAlphaSorted = remember(query.text, list, selectedMasterId) {
         val q = query.text.trim()
         val filtered = if (q.isEmpty()) list
-        else list.filter {
-            it.name.text.contains(q, ignoreCase = true) ||
-                (it.firstName?.text?.contains(q, ignoreCase = true) == true) ||
-                (it.emails?.any { e -> e.email.text.contains(q, ignoreCase = true) } == true)
+        else {
+            val nq = q.normalizeForSearch()
+            list.filter {
+                it.name.text.normalizeForSearch().contains(nq) ||
+                    (it.firstName?.text?.normalizeForSearch()?.contains(nq) == true) ||
+                    (it.emails?.any { e -> e.email.text.normalizeForSearch().contains(nq) } == true)
+            }
         }
         val withoutSelected = if (selectedMasterId == null) filtered
         else filtered.filter { it.id != selectedMasterId }

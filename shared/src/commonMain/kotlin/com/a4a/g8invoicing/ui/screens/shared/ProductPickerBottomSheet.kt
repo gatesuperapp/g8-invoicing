@@ -76,6 +76,7 @@ import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSection
+import com.a4a.g8invoicing.util.normalizeForSearch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -132,9 +133,12 @@ fun ProductPickerBottomSheet(
     val filteredAlphaSorted = remember(query.text, nonNullProducts) {
         val q = query.text.trim()
         val filtered = if (q.isEmpty()) nonNullProducts
-        else nonNullProducts.filter {
-            it.name.text.contains(q, ignoreCase = true) ||
-                (it.description?.text?.contains(q, ignoreCase = true) == true)
+        else {
+            val nq = q.normalizeForSearch()
+            nonNullProducts.filter {
+                it.name.text.normalizeForSearch().contains(nq) ||
+                    (it.description?.text?.normalizeForSearch()?.contains(nq) == true)
+            }
         }
         filtered.sortedBy { it.name.text.trim().lowercase() }
     }
