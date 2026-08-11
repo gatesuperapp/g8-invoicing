@@ -129,7 +129,8 @@ class FakeCreditNoteDataSource : CreditNoteLocalDataSourceInterface {
         creditNotesFlow.value = creditNotes.toList()
     }
 
-    override suspend fun convertInvoiceToCreditNote(documents: List<InvoiceState>) {
+    override suspend fun convertInvoiceToCreditNote(documents: List<InvoiceState>): Long? {
+        var lastId: Long? = null
         documents.forEach { invoice ->
             val newId = nextCreditNoteId++
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -150,8 +151,10 @@ class FakeCreditNoteDataSource : CreditNoteLocalDataSourceInterface {
                 createdDate = DateUtils.getCurrentTimestamp()
             )
             creditNotes.add(newCreditNote)
+            lastId = newId.toLong()
         }
         creditNotesFlow.value = creditNotes.toList()
+        return lastId
     }
 
     override suspend fun update(document: CreditNoteState) {

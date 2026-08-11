@@ -124,7 +124,8 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
         }
     }
 
-    override suspend fun duplicate(documents: List<InvoiceState>) {
+    override suspend fun duplicate(documents: List<InvoiceState>): List<Long> {
+        val newIds = mutableListOf<Long>()
         documents.forEach { doc ->
             val newId = nextInvoiceId++
             val duplicate = doc.copy(
@@ -133,8 +134,10 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
                 documentTag = DocumentTag.DRAFT
             )
             invoices.add(duplicate)
+            newIds.add(newId.toLong())
         }
         invoicesFlow.value = invoices.toList()
+        return newIds
     }
 
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {

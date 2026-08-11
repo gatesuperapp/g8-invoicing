@@ -151,6 +151,13 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
+            // MockEngine — lets AuthRepositorySessionExpiredTest construct an HttpClient
+            // for AuthApiClient without actually reaching the network.
+            implementation("io.ktor:ktor-client-mock:3.5.1")
+            // MapSettings — in-memory Settings for repository tests. Lives in the
+            // dedicated -test artifact (core keeps to the platform-specific
+            // implementations only).
+            implementation("com.russhwolf:multiplatform-settings-test:1.3.0")
         }
     }
 }
