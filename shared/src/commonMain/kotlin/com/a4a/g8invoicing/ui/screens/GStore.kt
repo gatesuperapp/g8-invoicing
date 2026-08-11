@@ -365,8 +365,11 @@ private fun GStoreModuleCard(
             // premium-only hint snackbar instead of being silently swallowed by a
             // disabled Switch. The grayed uncheckedTrack color for non-premium keeps the
             // "off / not-yours" affordance without hiding the tap target.
+            // The visible checked state combines the preference (isActivated) with the
+            // entitlement (isUnlocked) — a locked module retombes visually to OFF at
+            // logout / subscription loss without erasing the preference.
             Switch(
-                checked = isActivated,
+                checked = isActivated && isUnlocked,
                 onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
@@ -472,7 +475,7 @@ private fun ModuleDetailDialog(
                 // modal, per design. Same colors + always-enabled behaviour as on the
                 // card so non-premium taps consistently trigger the hint snackbar.
                 Switch(
-                    checked = isActivated,
+                    checked = isActivated && isUnlocked,
                     onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,

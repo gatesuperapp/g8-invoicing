@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoice
 import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoices
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -30,6 +31,7 @@ class CreditNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
@@ -47,11 +49,10 @@ class CreditNoteLocalDataSource(
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
-        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
-            null
-        } else {
-            getString(Res.string.invoice_watermark_default)
-        }
+        val removalActive =
+            activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL) &&
+                subscriptionRepository.isPremium()
+        return if (removalActive) null else getString(Res.string.invoice_watermark_default)
     }
 
     override suspend fun createNew(): Long? {

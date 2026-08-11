@@ -85,6 +85,7 @@ import com.a4a.g8invoicing.data.currencyDisplayName
 import com.a4a.g8invoicing.data.currencySymbol
 import com.a4a.g8invoicing.ui.screens.shared.CurrencyPicker
 import com.a4a.g8invoicing.data.auth.SubscriptionState
+import com.a4a.g8invoicing.data.auth.isPremium
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about_language_english
 import com.a4a.g8invoicing.shared.resources.about_terms_of_service_url_1
@@ -700,15 +701,51 @@ private fun LoggedInContent(
         Spacer(modifier = Modifier.height(12.dp))
     }
 
+    // Confirm logout for premium users. Losing premium at logout is a real functional
+    // change (creation buttons block, watermark comes back on new documents), so we
+    // ask before pulling the rug. Non-premium logout stays a single-click action —
+    // asking there would be noise since nothing changes for them.
+    val isPremiumEntitlement = subscriptionState.isPremium()
+    var showLogoutConfirm by remember { mutableStateOf(false) }
+
     // No separator between manage subscription and logout — design choice.
     Text(
-        modifier = Modifier.clickable { onLogout() },
+        modifier = Modifier.clickable {
+            if (isPremiumEntitlement) showLogoutConfirm = true else onLogout()
+        },
         text = stringResource(Res.string.account_logout),
         style = MaterialTheme.typography.textSecondary.copy(
             color = ColorVioletLight,
             textDecoration = TextDecoration.Underline,
         ),
     )
+
+    if (showLogoutConfirm) {
+        // TODO(strings): move the FR literals below to composeResources/values/strings.xml
+        // on the `translations` branch. Suggested keys:
+        //   account_logout_premium_confirm_title  = "Se déconnecter ?"
+        //   account_logout_premium_confirm_body   = "Vos fonctions premium seront indisponibles jusqu'à reconnexion. Vos documents restent sur cet appareil."
+        //   account_logout_premium_confirm_ok     = "Se déconnecter"
+        //   account_logout_premium_confirm_cancel = "Annuler"
+        AlertDialog(
+            onDismissRequest = { showLogoutConfirm = false },
+            title = { Text("Se déconnecter ?") },
+            text = {
+                Text(
+                    "Vos fonctions premium seront indisponibles jusqu'à reconnexion. Vos documents restent sur cet appareil.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLogoutConfirm = false
+                    onLogout()
+                }) { Text("Se déconnecter") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutConfirm = false }) { Text("Annuler") }
+            },
+        )
+    }
 }
 
 @Composable

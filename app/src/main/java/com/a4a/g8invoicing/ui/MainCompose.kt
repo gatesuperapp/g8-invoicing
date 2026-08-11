@@ -202,6 +202,35 @@ fun MainCompose(
         }
     }
 
+    // Session-expired modal — fired only when AuthRepository.forceLogout runs
+    // (refresh-token dead, server revoke, replay detection). Voluntary logout goes
+    // through the Account button and never emits here.
+    var showSessionExpired by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        authRepository.sessionExpired.collect { showSessionExpired = true }
+    }
+    if (showSessionExpired) {
+        // TODO(strings): move the FR literals below to composeResources/values/strings.xml
+        // on the `translations` branch. Suggested keys:
+        //   account_session_expired_title = "Session expirée"
+        //   account_session_expired_body  = "Reconnectez-vous pour retrouver vos fonctions premium."
+        //   account_session_expired_cta   = "D'accord"
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showSessionExpired = false },
+            title = { androidx.compose.material3.Text("Session expirée") },
+            text = {
+                androidx.compose.material3.Text(
+                    "Reconnectez-vous pour retrouver vos fonctions premium.",
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { showSessionExpired = false }) {
+                    androidx.compose.material3.Text("D'accord")
+                }
+            },
+        )
+    }
+
     G8InvoicingTheme {
         // Use Crossfade for smooth transition when language changes
         Crossfade(

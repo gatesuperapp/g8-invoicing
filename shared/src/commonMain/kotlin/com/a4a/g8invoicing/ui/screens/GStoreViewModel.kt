@@ -22,8 +22,9 @@ class GStoreViewModel(
         // Free modules bypass the premium check. Defense-in-depth: UI should already
         // prevent premium-only toggles for non-premium users via the pill + hint dialog,
         // but never trust UI alone.
-        if (moduleId !in ActivatedModulesRepository.FREE_MODULES && !isPremium()) return
-        activatedModules.toggle(moduleId)
+        val premium = isPremium()
+        if (moduleId !in ActivatedModulesRepository.FREE_MODULES && !premium) return
+        activatedModules.toggle(moduleId, isPremium = premium)
     }
 
     /**

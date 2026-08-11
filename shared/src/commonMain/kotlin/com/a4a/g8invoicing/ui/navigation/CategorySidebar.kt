@@ -52,7 +52,16 @@ fun CategorySidebar(
     onClickCategory: (Category) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val activatedModules by koinInject<ActivatedModulesRepository>().state.collectAsState()
+    val modulesRepo = koinInject<ActivatedModulesRepository>()
+    val activatedModules by modulesRepo.state.collectAsState()
+    val everActivated by modulesRepo.everActivated.collectAsState()
+    // Premium categories stay listable after subscription loss so the user can access
+    // the documents they created while premium. Read-only surfacing — the "+ new"
+    // buttons are gated separately.
+    val hasQuoteAccess =
+        ActivatedModulesRepository.MODULE_QUOTE in activatedModules ||
+            ActivatedModulesRepository.MODULE_QUOTE in everActivated ||
+            ActivatedModulesRepository.MODULE_QUOTE_TRIAL in activatedModules
     val categories = buildList {
         add(Category.G8)
         add(Category.MyAccount)
@@ -60,10 +69,7 @@ fun CategorySidebar(
         add(Category.Clients)
         add(Category.Products)
         add(Category.CreditNotes)
-        if (
-            ActivatedModulesRepository.MODULE_QUOTE in activatedModules ||
-            ActivatedModulesRepository.MODULE_QUOTE_TRIAL in activatedModules
-        ) add(Category.Quotes)
+        if (hasQuoteAccess) add(Category.Quotes)
         if (ActivatedModulesRepository.MODULE_DELIVERY_NOTE in activatedModules) add(Category.DeliveryNotes)
         add(Category.Invoices)
     }

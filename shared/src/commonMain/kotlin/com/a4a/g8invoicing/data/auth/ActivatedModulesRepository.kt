@@ -22,18 +22,54 @@ class ActivatedModulesRepository(
     private val _state = MutableStateFlow(loadFromCache())
     val state: StateFlow<Set<String>> = _state.asStateFlow()
 
+    // Non-free modules that have been activated at least once while the user was premium.
+    // Never cleared on logout — the navigation menu keeps surfacing those categories so
+    // an ex-premium can still access the documents they created (quotes, orders, ...).
+    // Only wiped on explicit account delete (see [wipeAll]).
+    private val _everActivated = MutableStateFlow(loadEverActivatedFromCache())
+    val everActivated: StateFlow<Set<String>> = _everActivated.asStateFlow()
+
     fun isActive(moduleId: String): Boolean = moduleId in _state.value
 
-    fun toggle(moduleId: String) {
+    fun wasEverActivated(moduleId: String): Boolean = moduleId in _everActivated.value
+
+    /**
+     * Toggle a module ON/OFF. When turning a non-free module ON, mark it in the
+     * ever-activated set — this drives the menu-visibility fallback for ex-premium
+     * users. The premium check itself lives in the ViewModel; this method assumes
+     * the caller has already gated the call.
+     */
+    fun toggle(moduleId: String, isPremium: Boolean) {
         val current = _state.value
-        val updated = if (moduleId in current) current - moduleId else current + moduleId
+        val turningOn = moduleId !in current
+        val updated = if (turningOn) current + moduleId else current - moduleId
         _state.value = updated
         settings.putString(KEY_ACTIVATED, updated.joinToString(","))
+
+        if (turningOn && isPremium && moduleId !in FREE_MODULES) {
+            val updatedEver = _everActivated.value + moduleId
+            if (updatedEver != _everActivated.value) {
+                _everActivated.value = updatedEver
+                settings.putString(KEY_EVER_ACTIVATED, updatedEver.joinToString(","))
+            }
+        }
     }
 
     fun clear() {
         _state.value = emptySet()
         settings.remove(KEY_ACTIVATED)
+    }
+
+    /**
+     * Nuke both the current activation and the ever-activated history. Only for
+     * account-delete flows — logout must NOT call this, otherwise ex-premium users
+     * lose menu access to their existing documents.
+     */
+    fun wipeAll() {
+        _state.value = emptySet()
+        _everActivated.value = emptySet()
+        settings.remove(KEY_ACTIVATED)
+        settings.remove(KEY_EVER_ACTIVATED)
     }
 
     // ---- Quote trial counter -----------------------------------------------
@@ -81,6 +117,26 @@ class ActivatedModulesRepository(
         return cached
     }
 
+    private fun loadEverActivatedFromCache(): Set<String> {
+        val raw = settings.getStringOrNull(KEY_EVER_ACTIVATED)
+        val stored = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+        // Migration: existing installs that had non-free modules currently ON when this
+        // shipped are grandfathered into the ever-activated set on first read. Without
+        // this, a premium user updating the app would see their category disappear at
+        // next logout because we'd have no history of the ON toggle.
+        if (settings.getStringOrNull(KEY_EVER_ACTIVATED_SEEDED) == null) {
+            val currentRaw = settings.getStringOrNull(KEY_ACTIVATED)
+            val currentActive = currentRaw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+            val seeded = stored + currentActive.filter { it !in FREE_MODULES }
+            if (seeded.isNotEmpty()) {
+                settings.putString(KEY_EVER_ACTIVATED, seeded.joinToString(","))
+            }
+            settings.putString(KEY_EVER_ACTIVATED_SEEDED, "1")
+            return seeded
+        }
+        return stored
+    }
+
     companion object {
         const val MODULE_ORDERS = "orders"
         const val MODULE_FACTURX = "facturx"
@@ -118,6 +174,8 @@ class ActivatedModulesRepository(
         private const val KEY_ACTIVATED = "gstore_activated_modules_v1"
         private const val KEY_DEFAULTS_SEEDED = "gstore_defaults_seeded_v1"
         private const val KEY_QUOTE_TRIAL_COUNT = "gstore_quote_trial_count_v1"
+        private const val KEY_EVER_ACTIVATED = "gstore_ever_activated_modules_v1"
+        private const val KEY_EVER_ACTIVATED_SEEDED = "gstore_ever_activated_seeded_v1"
 
         /** Maximum number of "+ new quote" clicks a trial user can make before
          *  the exhausted modal takes over. Not user-configurable. */

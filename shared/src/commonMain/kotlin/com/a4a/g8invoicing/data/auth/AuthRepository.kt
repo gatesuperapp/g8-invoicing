@@ -1,8 +1,12 @@
 package com.a4a.g8invoicing.data.auth
 
 import com.a4a.g8invoicing.data.LocaleManager
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
@@ -19,6 +23,19 @@ class AuthRepository(
         else AuthState.LoggedOut
     )
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    // One-shot signal fired when the session dies involuntarily (refresh token expired,
+    // server-side revoke, replay detection). Voluntary logout does NOT emit here.
+    // Consumed by MainCompose to surface a "reconnect" modal that a plain LoggedOut
+    // transition wouldn't distinguish from the user tapping the Logout button.
+    // BufferOverflow.DROP_OLDEST + replay=0: subscribers that miss the emit while
+    // backgrounded won't get a stale reconnect prompt on next foreground.
+    private val _sessionExpired = MutableSharedFlow<Unit>(
+        replay = 0,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val sessionExpired: SharedFlow<Unit> = _sessionExpired.asSharedFlow()
 
     fun isLoggedIn(): Boolean = tokenStorage.isLoggedIn()
     fun getUserEmail(): String? = tokenStorage.userEmail
@@ -99,10 +116,13 @@ class AuthRepository(
 
     /**
      * Force logout without server call (when refresh fails).
+     * Emits on [sessionExpired] so MainCompose can distinguish this from a voluntary
+     * logout and show a "reconnect" modal.
      */
     fun forceLogout() {
         tokenStorage.clear()
         _authState.value = AuthState.LoggedOut
+        _sessionExpired.tryEmit(Unit)
     }
 
     /**

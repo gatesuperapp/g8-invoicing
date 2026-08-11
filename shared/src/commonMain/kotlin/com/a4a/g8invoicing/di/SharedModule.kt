@@ -25,6 +25,7 @@ import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.AuthApiClient
 import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
 import com.a4a.g8invoicing.ui.screens.GStoreViewModel
@@ -88,6 +89,7 @@ val sharedModule = module {
     single { TokenStorage() }
     single { AuthApiClient(get()) }
     single { AuthRepository(get(), get(), get()) }
+    single { SubscriptionRepository(get(), get(), get()) }
 
     // Queries
     single { get<Database>().invoiceQueries }
@@ -101,10 +103,10 @@ val sharedModule = module {
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
-    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get()) }
-    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get()) }
-    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get()) }
-    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get()) }
+    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get()) }
+    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get()) }
+    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get(), get()) }
+    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
 
     // ViewModels

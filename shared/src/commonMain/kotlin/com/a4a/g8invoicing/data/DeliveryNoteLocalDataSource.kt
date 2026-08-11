@@ -11,6 +11,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.delivery_note_default_number
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
@@ -26,6 +27,7 @@ class DeliveryNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
@@ -42,11 +44,10 @@ class DeliveryNoteLocalDataSource(
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
-        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
-            null
-        } else {
-            getString(Res.string.invoice_watermark_default)
-        }
+        val removalActive =
+            activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL) &&
+                subscriptionRepository.isPremium()
+        return if (removalActive) null else getString(Res.string.invoice_watermark_default)
     }
 
     // --- createNew ---

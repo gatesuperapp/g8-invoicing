@@ -11,6 +11,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_default_footer
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.shared.resources.invoice_default_number
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
@@ -52,6 +53,7 @@ class InvoiceLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
 ) : InvoiceLocalDataSourceInterface {
     private val invoiceQueries = db.invoiceQueries
@@ -117,17 +119,18 @@ class InvoiceLocalDataSource(
     }
 
     // Compute the watermark to freeze on a newly-created invoice. Returns null when the
-    // user is currently premium with the watermark-removal module active — that invoice
-    // will then render without watermark forever, even if the user later un-activates
-    // the module. Conversely, an invoice created now without removal keeps its watermark
-    // forever, even if the user activates removal later. The "freeze at creation"
-    // behavior is the whole point of persisting the string in the DB.
+    // user is currently premium AND has the watermark-removal module active — that
+    // invoice will then render without watermark forever, even if the user later loses
+    // premium or un-activates the module. Conversely, an invoice created without
+    // removal keeps its watermark forever, even if the user activates removal later.
+    // The "freeze at creation" behavior is the whole point of persisting the string
+    // in the DB. Requiring premium here prevents ex-premium users from continuing to
+    // produce watermark-free documents via a stale preference flag.
     private suspend fun computeWatermark(): String? {
-        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
-            null
-        } else {
-            getString(Res.string.invoice_watermark_default)
-        }
+        val removalActive =
+            activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL) &&
+                subscriptionRepository.isPremium()
+        return if (removalActive) null else getString(Res.string.invoice_watermark_default)
     }
 
     // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---

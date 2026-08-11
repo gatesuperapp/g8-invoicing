@@ -24,8 +24,12 @@ import kotlinx.serialization.json.Json
  * shared-prefs instance). Subscription status itself isn't sensitive, but reusing
  * the same store keeps the auth-related state colocated.
  *
- * Premium = subscription.status == "active" AND currentPeriodEnd > now.
- * (Trialing/past_due are intentionally NOT premium — strict per plan.)
+ * Premium = subscription.status in {active, trialing, past_due} AND currentPeriodEnd > now.
+ * past_due is intentionally kept as premium: Stripe retries a failed payment for
+ * ~3 weeks (Smart Retries) before flipping to unpaid/canceled. Cutting premium on the
+ * first failed charge would burn users whose card expired while on holiday.
+ * currentPeriodEnd remains the hard cutoff — once the paid period ends and Stripe
+ * hasn't renewed, isPremium goes false regardless of status.
  */
 class SubscriptionRepository(
     private val authRepository: AuthRepository,
@@ -92,7 +96,7 @@ class SubscriptionRepository(
 
     fun isPremium(): Boolean {
         val s = _state.value as? SubscriptionState.Known ?: return false
-        if (s.status != "active") return false
+        if (s.status !in PREMIUM_STATUSES) return false
         val end = s.currentPeriodEndMs ?: return false
         return end > clock.now().toEpochMilliseconds()
     }
@@ -128,7 +132,21 @@ class SubscriptionRepository(
         private const val KEY_CACHE = "subscription_cache_v1"
         private const val FRESH_WINDOW_MS = 6L * 60L * 60L * 1000L          // 6 hours
         private const val STALE_WINDOW_MS = 7L * 24L * 60L * 60L * 1000L    // 7 days
+        internal val PREMIUM_STATUSES = setOf("active", "trialing", "past_due")
     }
+}
+
+/**
+ * Same semantics as [SubscriptionRepository.isPremium] but derivable from a state
+ * snapshot — handy for Composables that only observe [SubscriptionRepository.state].
+ * Requires a clock so callers can inject a test clock; production callers pass
+ * [kotlin.time.Clock.System].
+ */
+fun SubscriptionState.isPremium(clock: kotlin.time.Clock = kotlin.time.Clock.System): Boolean {
+    val s = this as? SubscriptionState.Known ?: return false
+    if (s.status !in SubscriptionRepository.PREMIUM_STATUSES) return false
+    val end = s.currentPeriodEndMs ?: return false
+    return end > clock.now().toEpochMilliseconds()
 }
 
 sealed class SubscriptionState {
