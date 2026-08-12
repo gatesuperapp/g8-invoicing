@@ -10,8 +10,10 @@
     <string name="product_duplicate_suffix"> - Copiar</string>
     <!-- Document footer -->
     <string name="document_default_footer"></string>
-    <string name="document_default_payment_terms">Descuento por pago anticipado: ninguno\nTasa de penalización por retraso en el pago: ninguna\nPago neto en 30 días</string>
+    <string name="document_default_payment_terms">Descuento por pago anticipado: ninguno\nTasa de penalización por retraso en el pago: ninguna\n\nPago en 30 días</string>
     <string name="document_payment_terms">Términos de pago</string>
+    <string name="document_payment_means_default_label">Medios de pago aceptados</string>
+    <string name="document_payment_means_picker_selection_title">Selecciona los medios de pago aceptados</string>
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
     <string name="delivery_note_number">Nota de entrega Nº</string>

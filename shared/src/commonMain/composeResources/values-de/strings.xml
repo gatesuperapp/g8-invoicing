@@ -10,8 +10,10 @@
     <string name="product_duplicate_suffix"> - Kopie</string>
     <!-- Document footer -->
     <string name="document_default_footer"></string>
-    <string name="document_default_payment_terms">Skonto bei Vorauszahlung: kein\nVerzugsgebühr bei Zahlungsverzug: keine\nZahlung innerhalb von 30 Tagen netto</string>
+    <string name="document_default_payment_terms">Skonto bei Vorauszahlung: kein\nVerzugsgebühr bei Zahlungsverzug: keine\n\nZahlung innerhalb von 30 Tagen</string>
     <string name="document_payment_terms">Zahlungsbedingungen</string>
+    <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel</string>
+    <string name="document_payment_means_picker_selection_title">Wähle die akzeptierten Zahlungsmittel</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
