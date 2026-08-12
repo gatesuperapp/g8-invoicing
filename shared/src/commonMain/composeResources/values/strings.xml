@@ -11,8 +11,17 @@
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copie</string>
 
-    <!-- Document footer -->
-    <string name="document_default_footer">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\n\nIBAN : FR76 1234 1234 1234 123456 1234</string>
+    <!-- Document footer.
+         Vidé en 1.9 : IBAN a maintenant son champ dédié, les mentions LME
+         (escompte + pénalités + 30j net) sont portées par document_default_payment_terms.
+         Le footer reste un vrai texte libre pour les remerciements / mentions autres. -->
+    <string name="document_default_footer"></string>
+    <!-- Payment terms (Factur-X BT-20). Défaut porté par cette clé — les mentions LME
+         (art. L441-10 C.com) sont légalement obligatoires en France B2B, donc on
+         les pré-remplit pour que l'user ne les perde jamais par oubli. Récupéré
+         tel quel de l'ancien document_default_footer moins l'IBAN. -->
+    <string name="document_default_payment_terms">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\nPaiement sous 30 jours net</string>
+    <string name="document_payment_terms">Termes de paiement</string>
     <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
