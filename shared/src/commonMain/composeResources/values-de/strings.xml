@@ -9,7 +9,9 @@
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Kopie</string>
     <!-- Document footer -->
-    <string name="document_default_footer">Skonto bei Vorauszahlung: kein \nVerzugsgebühr bei Zahlungsverzug: keine\n\n\n IBAN: DE71 1234 1234 1234 1234 00</string>
+    <string name="document_default_footer"></string>
+    <string name="document_default_payment_terms">Skonto bei Vorauszahlung: kein\nVerzugsgebühr bei Zahlungsverzug: keine\nZahlung innerhalb von 30 Tagen netto</string>
+    <string name="document_payment_terms">Zahlungsbedingungen</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>

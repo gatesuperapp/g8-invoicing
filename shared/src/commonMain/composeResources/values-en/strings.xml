@@ -9,7 +9,9 @@
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copy</string>
     <!-- Document footer -->
-    <string name="document_default_footer">Discount for early payment: none\nLate payment penalties: none\n\n\nIBAN: FR76 1234 1234 1234 123456 1234</string>
+    <string name="document_default_footer"></string>
+    <string name="document_default_payment_terms">Discount for early payment: none\nLate payment penalties: none\nNet payment within 30 days</string>
+    <string name="document_payment_terms">Payment terms</string>
     <!-- Document labels -->
     <string name="invoice_number">Invoice No.</string>
     <string name="delivery_note_number">Delivery note No.</string>
