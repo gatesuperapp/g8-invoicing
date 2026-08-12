@@ -97,6 +97,17 @@
     <string name="document_issuer">Émetteur·ice</string>
     <string name="document_client">Client·e</string>
     <string name="document_free_field">Champ libre</string>
+    <!-- Payment means (Factur-X BT-81). Row label in the invoice text-edit menu. -->
+    <string name="document_payment_means">Moyens de paiement</string>
+    <!-- Long form used as the picker modal title + the PDF prefix ("<label> : Virement, Chèque"). -->
+    <string name="document_payment_means_picker_title">Moyens de paiement acceptés</string>
+    <string name="pdf_payment_means_prefix">Moyens de paiement acceptés :</string>
+    <!-- Individual payment method labels (UN/CEFACT 4461 codes). -->
+    <string name="payment_means_30">Virement</string>
+    <string name="payment_means_42">Chèque</string>
+    <string name="payment_means_48">CB</string>
+    <string name="payment_means_58">SEPA</string>
+    <string name="payment_means_10">Espèces</string>
     <string name="document_footer">Pied de page</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Issu de la facture %1$s</string>

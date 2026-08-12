@@ -84,6 +84,14 @@
     <string name="document_issuer">Emisor</string>
     <string name="document_client">Cliente</string>
     <string name="document_free_field">Campo libre</string>
+    <string name="document_payment_means">Medios de pago</string>
+    <string name="document_payment_means_picker_title">Medios de pago aceptados</string>
+    <string name="pdf_payment_means_prefix">Medios de pago aceptados:</string>
+    <string name="payment_means_30">Transferencia</string>
+    <string name="payment_means_42">Cheque</string>
+    <string name="payment_means_48">Tarjeta</string>
+    <string name="payment_means_58">SEPA</string>
+    <string name="payment_means_10">Efectivo</string>
     <string name="document_footer">Pie de pagina</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Emitida a partir de la factura %1$s</string>
