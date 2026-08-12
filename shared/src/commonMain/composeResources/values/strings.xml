@@ -20,8 +20,15 @@
          (art. L441-10 C.com) sont légalement obligatoires en France B2B, donc on
          les pré-remplit pour que l'user ne les perde jamais par oubli. Récupéré
          tel quel de l'ancien document_default_footer moins l'IBAN. -->
-    <string name="document_default_payment_terms">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\nPaiement sous 30 jours net</string>
+    <string name="document_default_payment_terms">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\nPaiement sous 30 jours</string>
     <string name="document_payment_terms">Termes de paiement</string>
+    <!-- Default value of the (editable) payment-means label on new invoices. Shown
+         both as the row label in the text-edit menu and above the switches in the
+         picker. The user can rename it — e.g. "Payer par". If left empty, the whole
+         payment-means block is skipped when rendering the PDF/preview. -->
+    <string name="document_payment_means_default_label">Moyens de paiement acceptés</string>
+    <!-- Section title inside the picker, above the 5 switch rows. -->
+    <string name="document_payment_means_picker_selection_title">Sélectionnez les moyens de paiement autorisés</string>
     <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
