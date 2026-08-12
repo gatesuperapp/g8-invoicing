@@ -22,13 +22,18 @@
          tel quel de l'ancien document_default_footer moins l'IBAN. -->
     <string name="document_default_payment_terms">Escompte pour paiement anticipé : néant\nTaux de pénalités en cas de retard de paiement : néant\n\nPaiement sous 30 jours</string>
     <string name="document_payment_terms">Termes de paiement</string>
-    <!-- Default value of the (editable) payment-means label on new invoices. Shown
-         both as the row label in the text-edit menu and above the switches in the
-         picker. The user can rename it — e.g. "Payer par". If left empty, the whole
-         payment-means block is skipped when rendering the PDF/preview. -->
-    <string name="document_payment_means_default_label">Moyens de paiement acceptés</string>
-    <!-- Section title inside the picker, above the 5 switch rows. -->
-    <string name="document_payment_means_picker_selection_title">Sélectionnez les moyens de paiement autorisés</string>
+    <!-- Default value of the (editable) payment-means label rendered on the PDF/preview.
+         Shown as the placeholder inside the label field in the picker. The user can
+         rename it — e.g. "Payer par". If left empty, the whole payment-means block is
+         skipped when rendering the PDF/preview. Trailing " :" is intentional: when a
+         joined mode list follows, the display becomes "<label> Virement, chèque" (label
+         already carries the colon). When the list is hidden via the eye toggle, the
+         renderer strips the trailing " :" so a lonely colon doesn't leak onto the doc. -->
+    <string name="document_payment_means_default_label">Moyens de paiement acceptés :</string>
+    <!-- Accessibility labels for the eye icon inside the payment-means picker encart —
+         toggles whether the joined mode list is rendered on preview + PDF. -->
+    <string name="document_payment_means_hide_list_a11y">Masquer la liste des moyens de paiement</string>
+    <string name="document_payment_means_show_list_a11y">Afficher la liste des moyens de paiement</string>
     <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
@@ -104,7 +109,7 @@
     <!-- Payment means (Factur-X BT-81). Row label in the invoice text-edit menu. -->
     <string name="document_payment_means">Moyens de paiement</string>
     <!-- Long form used as the picker modal title + the PDF prefix ("<label> : Virement, Chèque"). -->
-    <string name="document_payment_means_picker_title">Moyens de paiement acceptés</string>
+    <string name="document_payment_means_picker_title">Moyens de paiement</string>
     <string name="pdf_payment_means_prefix">Moyens de paiement acceptés :</string>
     <!-- Individual payment method labels (UN/CEFACT 4461 codes). -->
     <string name="payment_means_30">Virement</string>

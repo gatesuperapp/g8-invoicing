@@ -12,8 +12,9 @@
     <string name="document_default_footer"></string>
     <string name="document_default_payment_terms">Discount for early payment: none\nLate payment penalties: none\n\nPayment within 30 days</string>
     <string name="document_payment_terms">Payment terms</string>
-    <string name="document_payment_means_default_label">Accepted payment means</string>
-    <string name="document_payment_means_picker_selection_title">Select the accepted payment means</string>
+    <string name="document_payment_means_default_label">Accepted payment means:</string>
+    <string name="document_payment_means_hide_list_a11y">Hide the payment means list</string>
+    <string name="document_payment_means_show_list_a11y">Show the payment means list</string>
     <!-- Document labels -->
     <string name="invoice_number">Invoice No.</string>
     <string name="delivery_note_number">Delivery note No.</string>
@@ -77,7 +78,7 @@
     <string name="document_client">Client</string>
     <string name="document_free_field">Free field</string>
     <string name="document_payment_means">Payment means</string>
-    <string name="document_payment_means_picker_title">Accepted payment means</string>
+    <string name="document_payment_means_picker_title">Payment means</string>
     <string name="pdf_payment_means_prefix">Accepted payment means:</string>
     <string name="payment_means_30">Bank transfer</string>
     <string name="payment_means_42">Cheque</string>
