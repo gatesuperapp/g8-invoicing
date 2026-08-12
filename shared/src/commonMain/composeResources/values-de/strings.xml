@@ -72,6 +72,14 @@
     <string name="document_issuer">Ersteller</string>
     <string name="document_client">Kunde</string>
     <string name="document_free_field">Freies Feld</string>
+    <string name="document_payment_means">Zahlungsmittel</string>
+    <string name="document_payment_means_picker_title">Akzeptierte Zahlungsmittel</string>
+    <string name="pdf_payment_means_prefix">Akzeptierte Zahlungsmittel:</string>
+    <string name="payment_means_30">Überweisung</string>
+    <string name="payment_means_42">Scheck</string>
+    <string name="payment_means_48">Karte</string>
+    <string name="payment_means_58">SEPA</string>
+    <string name="payment_means_10">Bargeld</string>
     <string name="document_footer">Fußzeile</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Ausgestellt zu Rechnung %1$s</string>
