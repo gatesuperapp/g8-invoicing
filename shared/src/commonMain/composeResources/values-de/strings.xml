@@ -12,8 +12,9 @@
     <string name="document_default_footer"></string>
     <string name="document_default_payment_terms">Skonto bei Vorauszahlung: kein\nVerzugsgebühr bei Zahlungsverzug: keine\n\nZahlung innerhalb von 30 Tagen</string>
     <string name="document_payment_terms">Zahlungsbedingungen</string>
-    <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel</string>
-    <string name="document_payment_means_picker_selection_title">Wähle die akzeptierten Zahlungsmittel</string>
+    <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel:</string>
+    <string name="document_payment_means_hide_list_a11y">Zahlungsmittel-Liste ausblenden</string>
+    <string name="document_payment_means_show_list_a11y">Zahlungsmittel-Liste anzeigen</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -89,7 +90,7 @@
     <string name="document_client">Kunde</string>
     <string name="document_free_field">Freies Feld</string>
     <string name="document_payment_means">Zahlungsmittel</string>
-    <string name="document_payment_means_picker_title">Akzeptierte Zahlungsmittel</string>
+    <string name="document_payment_means_picker_title">Zahlungsmittel</string>
     <string name="pdf_payment_means_prefix">Akzeptierte Zahlungsmittel:</string>
     <string name="payment_means_30">Überweisung</string>
     <string name="payment_means_42">Scheck</string>
