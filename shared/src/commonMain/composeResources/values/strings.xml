@@ -34,6 +34,14 @@
          toggles whether the joined mode list is rendered on preview + PDF. -->
     <string name="document_payment_means_hide_list_a11y">Masquer la liste des moyens de paiement</string>
     <string name="document_payment_means_show_list_a11y">Afficher la liste des moyens de paiement</string>
+    <!-- Row label paired with the show/hide switch below the chips inside the
+         payment-means picker. When the switch is on, the payment-means block is
+         rendered on the invoice/credit-note preview + PDF. -->
+    <string name="document_payment_means_show_switch">Afficher les modes de paiement acceptés sur la facture</string>
+    <!-- Underlined link below the show/hide switch — opens a text modal where
+         the user can rewrite the label prefix. The joined mode list keeps auto-
+         appending after whatever the user types. -->
+    <string name="document_payment_means_edit_prefix">Modifier le texte</string>
     <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->

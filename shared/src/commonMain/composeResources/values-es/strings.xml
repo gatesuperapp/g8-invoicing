@@ -15,6 +15,8 @@
     <string name="document_payment_means_default_label">Medios de pago aceptados:</string>
     <string name="document_payment_means_hide_list_a11y">Ocultar la lista de medios de pago</string>
     <string name="document_payment_means_show_list_a11y">Mostrar la lista de medios de pago</string>
+    <string name="document_payment_means_show_switch">Mostrar los medios de pago aceptados en la factura</string>
+    <string name="document_payment_means_edit_prefix">Editar el texto</string>
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
     <string name="delivery_note_number">Nota de entrega Nº</string>

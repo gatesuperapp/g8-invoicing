@@ -15,6 +15,8 @@
     <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel:</string>
     <string name="document_payment_means_hide_list_a11y">Zahlungsmittel-Liste ausblenden</string>
     <string name="document_payment_means_show_list_a11y">Zahlungsmittel-Liste anzeigen</string>
+    <string name="document_payment_means_show_switch">Akzeptierte Zahlungsmittel auf der Rechnung anzeigen</string>
+    <string name="document_payment_means_edit_prefix">Text bearbeiten</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
