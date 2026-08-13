@@ -156,6 +156,12 @@ fun ProductPickerBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         contentWindowInsets = { WindowInsets(0) },
+        // Grey pill handle, matches the outer BottomSheetScaffold (SheetDragHandle).
+        dragHandle = {
+            androidx.compose.material3.BottomSheetDefaults.DragHandle(
+                color = androidx.compose.ui.graphics.Color(0xFFE0E0E0),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
@@ -235,7 +241,7 @@ fun ProductPickerBottomSheet(
                         ) {
                             Text(
                                 text = stringResource(Res.string.document_bottom_sheet_picker_title_product),
-                                style = MaterialTheme.typography.textScreenTitle,
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(start = 12.dp),
                             )
                             Spacer(Modifier.weight(1f))

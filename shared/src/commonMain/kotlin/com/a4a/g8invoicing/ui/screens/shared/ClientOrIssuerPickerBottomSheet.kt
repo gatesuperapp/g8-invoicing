@@ -174,6 +174,13 @@ fun ClientOrIssuerPickerBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         contentWindowInsets = { WindowInsets(0) },
+        // Grey pill handle, matching the outer BottomSheetScaffold (SheetDragHandle).
+        // Overrides Material's default onSurfaceVariant which reads too dark on our surface.
+        dragHandle = {
+            androidx.compose.material3.BottomSheetDefaults.DragHandle(
+                color = Color(0xFFE0E0E0),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
@@ -274,7 +281,7 @@ fun ClientOrIssuerPickerBottomSheet(
                                     if (isIssuer) Res.string.document_bottom_sheet_picker_title_issuer
                                     else Res.string.document_bottom_sheet_picker_title_client
                                 ),
-                                style = MaterialTheme.typography.textScreenTitle,
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(start = 12.dp),
                             )
                             Spacer(Modifier.weight(1f))
