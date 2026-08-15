@@ -410,6 +410,9 @@
     <string name="issuer_bank_label">Libellé</string>
     <string name="issuer_bank_label_input">Compte pro</string>
     <string name="issuer_bank_delete_a11y">Supprimer ce compte bancaire</string>
+    <string name="issuer_bank_country">Pays</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">N° de compte</string>
     <!-- Row label for the "afficher les coordonnées bancaires" switch inside
          the payment-means picker, mirrored on the "afficher les modes de
          paiement acceptés" switch above it. Off = the IBAN/BIC line is
