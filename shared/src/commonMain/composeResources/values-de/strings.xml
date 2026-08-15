@@ -61,6 +61,7 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Neuer Kunde</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Neuer Ersteller</string>
+    <string name="document_form_sync_to_master">Änderungen auf die Firmenkarte anwenden</string>
     <string name="document_bottom_sheet_document_product_add">Aus meiner Liste wählen</string>
     <string name="document_modal_product_cancel">Abbrechen</string>
     <string name="document_modal_product_save">Speichern</string>

@@ -61,6 +61,7 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">Nuevo cliente</string>
     <string name="document_bottom_sheet_list_add_new_issuer">Nuevo emisor</string>
+    <string name="document_form_sync_to_master">Aplicar los cambios a la ficha de la empresa</string>
     <string name="document_bottom_sheet_document_product_add">Escoge desde mi lista</string>
     <string name="document_modal_product_cancel">Anular</string>
     <string name="document_modal_product_save">Confirmar</string>

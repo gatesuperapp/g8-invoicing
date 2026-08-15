@@ -61,6 +61,7 @@
     <!-- Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_client">New client</string>
     <string name="document_bottom_sheet_list_add_new_issuer">New issuer</string>
+    <string name="document_form_sync_to_master">Apply changes to the company card</string>
     <string name="document_bottom_sheet_document_product_add">Choose from my list</string>
     <string name="document_modal_product_cancel">Cancel</string>
     <string name="document_modal_product_save">Confirm</string>
