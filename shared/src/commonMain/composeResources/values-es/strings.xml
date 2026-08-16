@@ -15,6 +15,8 @@
     <string name="document_payment_means_default_label">Medios de pago aceptados:</string>
     <string name="document_payment_means_hide_list_a11y">Ocultar la lista de medios de pago</string>
     <string name="document_payment_means_show_list_a11y">Mostrar la lista de medios de pago</string>
+    <string name="document_payment_means_show_switch">Mostrar los medios de pago aceptados en la factura</string>
+    <string name="document_payment_means_edit_prefix">Editar el texto</string>
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
     <string name="delivery_note_number">Nota de entrega Nº</string>
@@ -64,8 +66,7 @@
     <string name="document_bottom_sheet_picker_empty_product">Ningún producto encontrado.\nToca + para añadir uno.</string>
     <string name="document_bottom_sheet_picker_recent">Recientes</string>
     <string name="document_bottom_sheet_picker_edit_link">Editar</string>
-    <string name="document_form_sync_client_to_master">Aplicar también los cambios a la ficha del cliente</string>
-    <string name="document_form_sync_issuer_to_master">Aplicar también los cambios a la ficha del emisor</string>
+    <string name="document_form_sync_to_master">Aplicar los cambios a la ficha de la empresa</string>
     <string name="document_form_sync_product_to_master">Aplicar también los cambios a la ficha del producto</string>
     <string name="document_bottom_sheet_picker_title_client">Clientes</string>
     <string name="document_bottom_sheet_picker_title_issuer">Emisores</string>

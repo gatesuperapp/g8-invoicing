@@ -15,6 +15,8 @@
     <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel:</string>
     <string name="document_payment_means_hide_list_a11y">Zahlungsmittel-Liste ausblenden</string>
     <string name="document_payment_means_show_list_a11y">Zahlungsmittel-Liste anzeigen</string>
+    <string name="document_payment_means_show_switch">Akzeptierte Zahlungsmittel auf der Rechnung anzeigen</string>
+    <string name="document_payment_means_edit_prefix">Text bearbeiten</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -64,8 +66,7 @@
     <string name="document_bottom_sheet_picker_empty_product">Keine Produkte gefunden.\nTippe auf +, um eines hinzuzufügen.</string>
     <string name="document_bottom_sheet_picker_recent">Zuletzt verwendet</string>
     <string name="document_bottom_sheet_picker_edit_link">Bearbeiten</string>
-    <string name="document_form_sync_client_to_master">Änderungen auch auf die Kundenkarte anwenden</string>
-    <string name="document_form_sync_issuer_to_master">Änderungen auch auf die Erstellerkarte anwenden</string>
+    <string name="document_form_sync_to_master">Änderungen auf die Firmenkarte anwenden</string>
     <string name="document_form_sync_product_to_master">Änderungen auch auf die Produktkarte anwenden</string>
     <string name="document_bottom_sheet_picker_title_client">Kunden</string>
     <string name="document_bottom_sheet_picker_title_issuer">Ersteller</string>

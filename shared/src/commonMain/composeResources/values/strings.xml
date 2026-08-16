@@ -29,11 +29,19 @@
          joined mode list follows, the display becomes "<label> Virement, chèque" (label
          already carries the colon). When the list is hidden via the eye toggle, the
          renderer strips the trailing " :" so a lonely colon doesn't leak onto the doc. -->
-    <string name="document_payment_means_default_label">Moyens de paiement acceptés :</string>
+    <string name="document_payment_means_default_label">Modes de paiement acceptés :</string>
     <!-- Accessibility labels for the eye icon inside the payment-means picker encart —
          toggles whether the joined mode list is rendered on preview + PDF. -->
     <string name="document_payment_means_hide_list_a11y">Masquer la liste des moyens de paiement</string>
     <string name="document_payment_means_show_list_a11y">Afficher la liste des moyens de paiement</string>
+    <!-- Row label paired with the show/hide switch below the chips inside the
+         payment-means picker. When the switch is on, the payment-means block is
+         rendered on the invoice/credit-note preview + PDF. -->
+    <string name="document_payment_means_show_switch">Afficher les modes de paiement acceptés sur la facture</string>
+    <!-- Underlined link below the show/hide switch — opens a text modal where
+         the user can rewrite the label prefix. The joined mode list keeps auto-
+         appending after whatever the user types. -->
+    <string name="document_payment_means_edit_prefix">Modifier le texte</string>
     <string name="quote_default_footer">Durée de validité de l'offre : 6 mois \nDélai d'exécution : 6 mois</string>
 
     <!-- Document labels -->
@@ -91,8 +99,7 @@
     <string name="document_bottom_sheet_picker_empty_product">Aucun produit trouvé.\nClique sur + pour en ajouter un.</string>
     <string name="document_bottom_sheet_picker_recent">Récents</string>
     <string name="document_bottom_sheet_picker_edit_link">Éditer</string>
-    <string name="document_form_sync_client_to_master">Appliquer les modifications à la fiche client</string>
-    <string name="document_form_sync_issuer_to_master">Appliquer les modifications à la fiche émetteur</string>
+    <string name="document_form_sync_to_master">Appliquer les modifications à la fiche entreprise</string>
     <string name="document_form_sync_product_to_master">Appliquer les modifications à la fiche produit</string>
     <string name="document_bottom_sheet_picker_title_client">Client·es</string>
     <string name="document_bottom_sheet_picker_title_issuer">Émetteur·ices</string>
@@ -119,16 +126,24 @@
     <string name="document_client">Client·e</string>
     <string name="document_free_field">Champ libre</string>
     <!-- Payment means (Factur-X BT-81). Row label in the invoice text-edit menu. -->
-    <string name="document_payment_means">Moyens de paiement</string>
+    <string name="document_payment_means">Modes de paiement</string>
     <!-- Long form used as the picker modal title + the PDF prefix ("<label> : Virement, Chèque"). -->
-    <string name="document_payment_means_picker_title">Moyens de paiement</string>
+    <string name="document_payment_means_picker_title">Modes de paiement</string>
     <string name="pdf_payment_means_prefix">Moyens de paiement acceptés :</string>
     <!-- Individual payment method labels (UN/CEFACT 4461 codes). -->
     <string name="payment_means_30">Virement</string>
     <string name="payment_means_42">Chèque</string>
     <string name="payment_means_48">CB</string>
-    <string name="payment_means_58">SEPA</string>
+    <string name="payment_means_58">Prélèvement SEPA</string>
     <string name="payment_means_10">Espèces</string>
+    <string name="payment_means_paypal">PayPal</string>
+    <string name="payment_means_stripe">Stripe</string>
+    <string name="payment_means_other">Autre</string>
+    <string name="client_or_issuer_section_addresses">Adresse</string>
+    <string name="client_or_issuer_section_identification">Identification</string>
+    <string name="client_or_issuer_section_bank">Compte bancaire</string>
+    <string name="client_or_issuer_section_notes">Notes</string>
+    <string name="client_or_issuer_section_backup">Sauvegarde</string>
     <string name="document_footer">Pied de page</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Issu de la facture %1$s</string>
@@ -387,6 +402,31 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Ajouter une adresse</string>
     <string name="client_delete_address">Effacer l'adresse</string>
+    <!-- Issuer form — banks section (multi-IBAN support). -->
+    <string name="issuer_bank_add">+ Ajouter un compte</string>
+    <!-- Label to distinguish accounts when 2+ IBANs are configured. Only
+         surfaced once the user opens a 2nd bank slot — with a single account
+         there is no ambiguity to resolve. -->
+    <string name="issuer_bank_label">Libellé</string>
+    <string name="issuer_bank_label_input">Compte pro</string>
+    <string name="issuer_bank_delete_a11y">Supprimer ce compte bancaire</string>
+    <string name="issuer_bank_country">Pays</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">N° de compte</string>
+    <!-- Row label for the "afficher les coordonnées bancaires" switch inside
+         the payment-means picker, mirrored on the "afficher les modes de
+         paiement acceptés" switch above it. Off = the IBAN/BIC line is
+         skipped on the invoice preview + PDF. -->
+    <string name="document_payment_bank_show_switch">Afficher les coordonnées bancaires de l'entreprise</string>
+    <string name="document_payment_bank_edit_prefix">Modifier le texte</string>
+    <string name="document_payment_bank_picker_title">Coordonnées bancaires</string>
+    <!-- Empty-state placeholder in the payment-means IBAN dropdown when the
+         issuer has no bank configured yet. -->
+    <string name="document_payment_bank_iban_empty">Ajoutez un compte bancaire à votre entreprise</string>
+    <!-- Empty-state variant when the invoice doesn't have an issuer set at
+         all yet — the user needs to pick one before we can talk about their
+         bank accounts. -->
+    <string name="document_payment_bank_iban_empty_no_issuer">Ajoutez un émetteur à votre facture</string>
     <string name="client_selection_title">Sélectionner les clients</string>
     <string name="client_selection_empty">Vous n'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie "Client·es".</string>
     <string name="client_selection_all_used">Tous les clients sont déjà assignés à d'autres prix.</string>
