@@ -17,6 +17,11 @@ CREATE TABLE DocumentClientOrIssuer (
   logo_path TEXT,
   vat_exempt INTEGER DEFAULT 0,
   intra_eu_sales INTEGER DEFAULT 0,
+  payment_iban TEXT,
+  payment_bic TEXT,
+  -- Country of the frozen bank (ISO 3166-1 alpha-2). Drives the rendered
+  -- label on preview + PDF ("IBAN :" vs "N° de compte :").
+  payment_country TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -43,8 +48,8 @@ FROM DocumentClientOrIssuer
 WHERE name = :name AND first_name =: first_name;
 
 save:
-INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales)
-VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path, :vat_exempt, :intra_eu_sales);
+INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, payment_iban, payment_bic, payment_country)
+VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path, :vat_exempt, :intra_eu_sales, :payment_iban, :payment_bic, :payment_country);
 
 update:
 UPDATE DocumentClientOrIssuer
@@ -64,7 +69,10 @@ SET type = :type,
     company_id3_number = :company_id3_number,
     logo_path = :logo_path,
     vat_exempt = :vat_exempt,
-    intra_eu_sales = :intra_eu_sales
+    intra_eu_sales = :intra_eu_sales,
+    payment_iban = :payment_iban,
+    payment_bic = :payment_bic,
+    payment_country = :payment_country
 WHERE
     id = :id;
 
@@ -94,6 +102,15 @@ LIMIT 1;
 updateOriginalVersion:
 UPDATE DocumentClientOrIssuer
 SET original_version = :original_version
+WHERE id = :id;
+
+-- Dedicated write for the payment-means picker on invoices — the user swaps
+-- the frozen bank without touching any other issuer field.
+updatePaymentBank:
+UPDATE DocumentClientOrIssuer
+SET payment_iban = :payment_iban,
+    payment_bic = :payment_bic,
+    payment_country = :payment_country
 WHERE id = :id;
 
 getLast3RecentOriginalIdsByType:

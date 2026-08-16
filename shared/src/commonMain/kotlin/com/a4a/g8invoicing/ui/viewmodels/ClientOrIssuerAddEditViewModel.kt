@@ -154,7 +154,14 @@ class ClientOrIssuerAddEditViewModel(
                 companyId3Number = _documentIssuerUiState.value.companyId3Number,
                 logoPath = _documentIssuerUiState.value.logoPath,
                 vatExempt = _documentIssuerUiState.value.vatExempt,
-                intraEuSales = _documentIssuerUiState.value.intraEuSales
+                intraEuSales = _documentIssuerUiState.value.intraEuSales,
+                // Carry over the banks the user typed in the doc-embedded issuer
+                // form — createNewAndReturnId reads them from this state to seed
+                // the IssuerBank table for the new master. Without this the doc
+                // gets a frozen payment_iban seeded from the first bank but the
+                // master has zero linked accounts, so the payment-means picker
+                // dropdown shows the empty-state hint on the next open.
+                banks = _documentIssuerUiState.value.banks,
             )
         }
     }
@@ -764,6 +771,13 @@ class ClientOrIssuerAddEditViewModel(
                 person = person.copy(logoPath = logoPath)
             }
 
+            ScreenElement.ISSUER_BANKS -> {
+                @Suppress("UNCHECKED_CAST")
+                person = person.copy(
+                    banks = value as List<com.a4a.g8invoicing.ui.states.IssuerBankState>
+                )
+            }
+
             ScreenElement.ISSUER_VAT_EXEMPT -> {
                 person = person.copy(vatExempt = value as Boolean)
             }
@@ -939,6 +953,21 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.DOCUMENT_ISSUER_LOGO -> {
                 val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
                 person = person.copy(logoPath = logoPath)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_PAYMENT_IBAN -> {
+                person = person.copy(paymentIban = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_PAYMENT_BIC -> {
+                person = person.copy(paymentBic = value as TextFieldValue)
+            }
+
+            ScreenElement.ISSUER_BANKS -> {
+                @Suppress("UNCHECKED_CAST")
+                person = person.copy(
+                    banks = value as List<com.a4a.g8invoicing.ui.states.IssuerBankState>
+                )
             }
 
             ScreenElement.DOCUMENT_ISSUER_VAT_EXEMPT -> {

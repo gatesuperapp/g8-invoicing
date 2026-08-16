@@ -25,6 +25,18 @@ interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun getLastIssuer(): ClientOrIssuerState?
     suspend fun getMasterVersion(masterId: Long): Int?
 
+    // Bank accounts of a master issuer, ordered by sort_order asc.
+    suspend fun getIssuerBanks(issuerId: Long): List<com.a4a.g8invoicing.ui.states.IssuerBankState>
+
+    // Freeze a specific bank on a doc's DocumentClientOrIssuer — invoked
+    // when the user picks a different IBAN inside the payment-means modal.
+    suspend fun updateDocumentClientOrIssuerPaymentBank(
+        documentClientOrIssuerId: Long,
+        iban: String?,
+        bic: String?,
+        country: String?,
+    )
+
     /**
      * Country code (ISO 3166-1 alpha-2, uppercase) of the most recently created address
      * that has one saved. Used by the address form as the primary cascade default for a

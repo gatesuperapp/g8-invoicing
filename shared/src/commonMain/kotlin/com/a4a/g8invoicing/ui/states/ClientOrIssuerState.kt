@@ -31,6 +31,24 @@ data class ClientOrIssuerState(
     var companyId3Label: TextFieldValue? = null,
     var companyId3Number: TextFieldValue? = null,
     var logoPath: String? = null,
+    // Bank accounts attached to the issuer (empty for clients). Persisted in
+    // the [IssuerBank] table — many-to-one. The payment-means picker on an
+    // invoice lets the user pick one of these; the picked account's IBAN + BIC
+    // freeze onto [DocumentClientOrIssuer.payment_iban/payment_bic] so an
+    // already-emitted invoice keeps its bank details even if the master list
+    // changes later.
+    var banks: List<IssuerBankState> = emptyList(),
+    // Frozen IBAN (BT-84) on this doc-side snapshot only (i.e. when this state
+    // represents a DocumentClientOrIssuer, not a master issuer). Master issuers
+    // carry their accounts under [banks] instead. Never populated on clients.
+    var paymentIban: TextFieldValue? = null,
+    // Frozen BIC (BT-86), same conditions as [paymentIban]. Optional — SEPA
+    // "IBAN only" (2016) makes it redundant intra-SEPA; still useful for
+    // international payments (UK post-Brexit, Switzerland, US…).
+    var paymentBic: TextFieldValue? = null,
+    // Frozen country (ISO 3166-1 alpha-2) of the picked bank. Drives the
+    // rendered label on preview + PDF ("IBAN :" vs "N° de compte :").
+    var paymentCountry: String? = null,
     // Franchise en base de TVA (micro-entrepreneur FR / Kleinunternehmer DE / etc.).
     // Significatif seulement quand type=ISSUER. Utilisé par le générateur Factur-X pour
     // forcer BT-118=E + mention légale correspondante au pays.

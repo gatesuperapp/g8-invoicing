@@ -1,0 +1,83 @@
+-- Migration de la version 6 vers la version 7
+-- Regroupe les changements de schéma de la branche 1.9 (non-released à ce stade).
+-- On amende ce fichier en place jusqu'à la release 1.9 (même convention que
+-- 5.sqm pendant la phase 1.8) — une fois taggé, tout futur changement passe
+-- par 7.sqm.
+--
+-- 1) IBAN (BT-84) et BIC (BT-86) sur l'émetteur, dans le cadre du chantier
+--    Factur-X (cf. wip_facturx_gap_analysis + facturx-extended-fields.html).
+--    Stockés dans une table dédiée `IssuerBank` (many-to-one vers l'émetteur)
+--    pour supporter plusieurs comptes bancaires par émetteur — pattern miroir
+--    de ClientOrIssuerAddress. Le doc fige un seul compte (celui sélectionné
+--    dans le picker paiement) via les colonnes payment_iban/payment_bic sur
+--    DocumentClientOrIssuer, pour ne pas casser les factures déjà émises si
+--    l'user change de banque plus tard.
+
+CREATE TABLE IssuerBank (
+  issuer_bank_id INTEGER PRIMARY KEY NOT NULL,
+  issuer_id INTEGER NOT NULL,
+  label TEXT,
+  -- ISO 3166-1 alpha-2. Drives the identifier field label / hint / validation
+  -- (IBAN countries → "IBAN" + mod-97 check ; others → generic "Numéro de
+  -- compte" with country-specific hint).
+  country_code TEXT,
+  -- Account identifier — IBAN for IBAN countries, domestic BBAN otherwise.
+  -- Single string like BT-84 expects.
+  identifier TEXT,
+  bic TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+-- Doc-side freeze: one bank per doc (the one the user picked in the paiement
+-- modal). payment_iban + payment_bic mirror the picked IssuerBank at doc
+-- creation and only change when the user re-picks a different bank on that doc.
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_iban TEXT;
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_bic TEXT;
+-- Country of the picked bank at freeze time. Drives the rendered label
+-- ("IBAN :" for IBAN countries, "N° de compte :" for domestic-only).
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_country TEXT;
+
+-- 2) Payment Means selections — set multi-valeurs stocké en TEXT comma-separated
+--    des chip identities ("TRANSFER,CHEQUE" ou "PAYPAL,STRIPE"). SQLDelight n'a
+--    pas d'array natif. On stocke l'identité du chip et non le code UN/CEFACT
+--    4461 parce que PayPal et Stripe partagent le code 68 — sans l'identité on
+--    ne peut plus distinguer les deux au reload. Les codes 4461 sont dérivés
+--    à l'export Factur-X (unCefactCodesForExport()), avec fallback sur [1]
+--    "Instrument not defined" quand rien n'est coché.
+--    Sur facture et avoir uniquement (BL et devis ne sont pas des docs de
+--    règlement Factur-X).
+ALTER TABLE Invoice ADD COLUMN payment_means_selections TEXT;
+ALTER TABLE CreditNote ADD COLUMN payment_means_selections TEXT;
+-- Editable prefix rendered before the joined payment-means list. Empty = opt-out.
+ALTER TABLE Invoice ADD COLUMN payment_means_label TEXT;
+ALTER TABLE CreditNote ADD COLUMN payment_means_label TEXT;
+-- Eye toggle. 1 = whole payment-means block hidden on preview + PDF. Codes stay
+-- persisted so BT-81 Factur-X data is preserved regardless.
+ALTER TABLE Invoice ADD COLUMN payment_means_hidden INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE CreditNote ADD COLUMN payment_means_hidden INTEGER NOT NULL DEFAULT 0;
+-- "Autre" chip state — separate flag rather than a sentinel code. Keeps the
+-- selections column 100% UN/CEFACT-clean and enforces that OTHER is a UI-only
+-- marker that never renders on the invoice or in Factur-X exports.
+ALTER TABLE Invoice ADD COLUMN payment_means_other_checked INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE CreditNote ADD COLUMN payment_means_other_checked INTEGER NOT NULL DEFAULT 0;
+
+-- 3) Payment Terms Description (BT-20) — texte libre par facture. Porte les
+--    mentions LME (escompte, taux de pénalité) et le délai de paiement.
+--    Uniquement sur Invoice — un avoir crédite, il n'a pas de "conditions de
+--    paiement" à respecter par le client.
+ALTER TABLE Invoice ADD COLUMN payment_terms_description TEXT;
+
+-- 4) Bank details block visibility on the invoice preview + PDF. Paired with
+--    the "Afficher les coordonnées bancaires" switch inside the payment-means
+--    picker. 1 = block skipped on preview + PDF; the frozen IBAN/BIC stay in
+--    DocumentClientOrIssuer regardless (Factur-X BT-84/86 preserved).
+ALTER TABLE Invoice ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE CreditNote ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0;
+-- Editable bank-details label: same segments+tokens model as
+-- payment_means_label. Free segments carry user text; IbanToken / BicToken
+-- render "IBAN : <value>" / "BIC : <value>" at flatten time. Null = fall back
+-- to defaultPaymentBankSegments() (both tokens, newline between).
+ALTER TABLE Invoice ADD COLUMN payment_bank_label TEXT;
+ALTER TABLE CreditNote ADD COLUMN payment_bank_label TEXT;

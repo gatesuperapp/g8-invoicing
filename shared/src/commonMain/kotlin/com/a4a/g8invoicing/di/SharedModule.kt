@@ -136,12 +136,12 @@ val sharedModule = module {
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = params.getOrNull()
-        InvoiceAddEditViewModel(get(), get(), itemId)
+        InvoiceAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { CreditNoteListViewModel(get()) }
     viewModel { params ->
         val itemId: String? = params.getOrNull()
-        CreditNoteAddEditViewModel(get(), get(), itemId)
+        CreditNoteAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { GStoreViewModel(get(), get()) }

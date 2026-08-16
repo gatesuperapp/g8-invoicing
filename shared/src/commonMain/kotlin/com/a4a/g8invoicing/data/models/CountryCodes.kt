@@ -138,4 +138,24 @@ object CountryCodes {
 
     fun isInEU(code: String?): Boolean =
         code?.uppercase()?.let { it in EU_COUNTRIES } == true
+
+    /**
+     * ISO 3166-1 alpha-2 codes for countries that use IBAN as their standard
+     * bank account identifier. Source: SWIFT/ECBS IBAN registry (~80 countries).
+     * Used to switch the bank account form's identifier field between "IBAN"
+     * (+ mod-97 validation) and a generic "Numéro de compte" fallback.
+     */
+    private val IBAN_COUNTRIES: Set<String> = setOf(
+        "AD", "AE", "AL", "AT", "AZ", "BA", "BE", "BG", "BH", "BR",
+        "BY", "CH", "CR", "CY", "CZ", "DE", "DK", "DO", "EE", "EG",
+        "ES", "FI", "FO", "FR", "GB", "GE", "GI", "GL", "GR", "GT",
+        "HR", "HU", "IE", "IL", "IQ", "IS", "IT", "JO", "KW", "KZ",
+        "LB", "LC", "LI", "LT", "LU", "LV", "LY", "MC", "MD", "ME",
+        "MK", "MR", "MT", "MU", "NL", "NO", "PK", "PL", "PS", "PT",
+        "QA", "RO", "RS", "SA", "SC", "SE", "SI", "SK", "SM", "ST",
+        "SV", "TL", "TN", "TR", "UA", "VA", "VG", "XK",
+    )
+
+    fun isIbanCountry(code: String?): Boolean =
+        code?.uppercase()?.let { it in IBAN_COUNTRIES } == true
 }

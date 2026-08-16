@@ -160,12 +160,12 @@ val appModule = module {
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
-        InvoiceAddEditViewModel(get(), get(), itemId)
+        InvoiceAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { CreditNoteListViewModel(get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
-        CreditNoteAddEditViewModel(get(), get(), itemId)
+        CreditNoteAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { GStoreViewModel(get(), get()) }

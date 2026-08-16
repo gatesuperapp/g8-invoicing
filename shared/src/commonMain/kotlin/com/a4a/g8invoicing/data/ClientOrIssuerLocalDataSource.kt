@@ -7,6 +7,7 @@ import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.EmailState
+import com.a4a.g8invoicing.ui.states.IssuerBankState
 import g8invoicing.ClientOrIssuerEmail
 import g8invoicing.DocumentClientOrIssuerEmail
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
@@ -32,6 +33,7 @@ class ClientOrIssuerLocalDataSource(
         db.linkDocumentClientOrIssuerToAddressQueries
     private val clientOrIssuerEmailQueries = db.clientOrIssuerEmailQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
+    private val issuerBankQueries = db.issuerBankQueries
 
     override suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
         return withContext(DispatcherProvider.IO) {
@@ -40,12 +42,60 @@ class ClientOrIssuerLocalDataSource(
                     ?.let {
                         it.transformIntoEditable(
                             addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
-                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList()
-                        )
+                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                        ).copy(banks = fetchIssuerBanks(it.id))
                     }
             } catch (e: Exception) {
                 null
             }
+        }
+    }
+
+    // Read all bank accounts attached to an issuer, ordered stably by sort_order
+    // then id (append-order tie-breaker).
+    internal fun fetchIssuerBanks(issuerId: Long): List<IssuerBankState> {
+        return try {
+            issuerBankQueries.getForIssuer(issuerId).executeAsList().map { row ->
+                IssuerBankState(
+                    id = row.issuer_bank_id.toInt(),
+                    label = row.label?.let { TextFieldValue(text = it) },
+                    countryCode = row.country_code,
+                    identifier = TextFieldValue(text = row.identifier ?: ""),
+                    bic = TextFieldValue(text = row.bic ?: ""),
+                    sortOrder = row.sort_order.toInt(),
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    // Sync the whole bank list for an issuer: wipe + reinsert. Simple, safe on
+    // small lists (users hold 1-3 accounts in practice), and avoids the delta
+    // dance for insert/update/delete/reorder in one shot.
+    internal fun saveIssuerBanks(issuerId: Long, banks: List<IssuerBankState>) {
+        try {
+            issuerBankQueries.deleteForIssuer(issuerId)
+            banks.forEachIndexed { index, bank ->
+                val label = bank.label?.text?.trim().orEmpty().ifEmpty { null }
+                val identifier = bank.identifier.text.trim().ifEmpty { null }
+                val bic = bank.bic.text.trim().ifEmpty { null }
+                val country = bank.countryCode?.trim()?.ifEmpty { null }
+                // Skip fully-empty rows: an unfilled "+ Ajouter un compte"
+                // placeholder should not persist as an empty account.
+                if (label == null && identifier == null && bic == null) return@forEachIndexed
+                issuerBankQueries.save(
+                    issuer_bank_id = null,
+                    issuer_id = issuerId,
+                    label = label,
+                    country_code = country,
+                    identifier = identifier,
+                    bic = bic,
+                    sort_order = index.toLong(),
+                )
+            }
+        } catch (e: Exception) {
+            // Log if needed
         }
     }
 
@@ -57,8 +107,8 @@ class ClientOrIssuerLocalDataSource(
                     .map {
                         it.transformIntoEditable(
                             addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
-                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList()
-                        )
+                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                        ).copy(banks = fetchIssuerBanks(it.id))
                     }
             }
             .flowOn(DispatcherProvider.IO)
@@ -131,6 +181,7 @@ class ClientOrIssuerLocalDataSource(
                     }
 
                     saveClientOrIssuerEmailRows(newEntityId, clientOrIssuer.emails)
+                    saveIssuerBanks(newEntityId, clientOrIssuer.banks)
 
                     newEntityId
                 }
@@ -170,6 +221,7 @@ class ClientOrIssuerLocalDataSource(
     ): Boolean {
         if (addresses.isNullOrEmpty()) return true
         for (address in addresses) {
+            if (isAddressEmpty(address)) continue
             clientOrIssuerAddressQueries.save(
                 id = null,
                 address_title = address.addressTitle?.text?.trim(),
@@ -188,6 +240,16 @@ class ClientOrIssuerLocalDataSource(
             )
         }
         return true
+    }
+
+    /** Country excluded — it's pre-filled by default, so a row with only
+     *  country would otherwise "look filled" and get persisted as noise. */
+    private fun isAddressEmpty(address: AddressState): Boolean {
+        return address.addressTitle?.text.isNullOrBlank() &&
+            address.addressLine1?.text.isNullOrBlank() &&
+            address.addressLine2?.text.isNullOrBlank() &&
+            address.zipCode?.text.isNullOrBlank() &&
+            address.city?.text.isNullOrBlank()
     }
 
     private fun saveClientOrIssuerEmailRows(
@@ -247,6 +309,7 @@ class ClientOrIssuerLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             try {
                 for (address in addresses) {
+                    if (isAddressEmpty(address)) continue
                     clientOrIssuerAddressQueries.save(
                         id = null,
                         address_title = address.addressTitle?.text?.trim(),
@@ -328,6 +391,7 @@ class ClientOrIssuerLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             try {
                 addresses?.forEach { address ->
+                    if (isAddressEmpty(address)) return@forEach
                     documentClientOrIssuerAddressQueries.save(
                         id = null,
                         original_address_id = address.originalAddressId?.toLong(),
@@ -407,6 +471,9 @@ class ClientOrIssuerLocalDataSource(
                         vat_exempt = if (clientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (clientOrIssuer.intraEuSales) 1L else 0L,
                     )
+                    // Bank accounts live in their own table; simplest robust sync
+                    // is delete-all-then-reinsert (small lists, rare edits).
+                    saveIssuerBanks(it.toLong(), clientOrIssuer.banks)
                 }
 
                 // Addresses to delete
@@ -459,6 +526,23 @@ class ClientOrIssuerLocalDataSource(
     ) {
         return withContext(DispatcherProvider.IO) {
             try {
+                // Re-derive the frozen payment_iban/payment_bic from the current
+                // bank list. Users edit banks through the section (add a BIC to
+                // an existing account, add a 2nd account) without touching the
+                // top-level paymentIban/paymentBic fields — those would drift
+                // to stale values on save without this sync. Matching rule:
+                // keep the same bank if its IBAN is still present; otherwise
+                // fall back to the first bank of the (edited) list.
+                val syncedBank = documentClientOrIssuer.banks.firstOrNull { bank ->
+                    val current = documentClientOrIssuer.paymentIban?.text?.trim().orEmpty()
+                    current.isNotEmpty() && bank.identifier.text.trim() == current
+                } ?: documentClientOrIssuer.banks.firstOrNull()
+                val syncedIban = syncedBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: documentClientOrIssuer.paymentIban?.text?.trim()
+                val syncedBic = syncedBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: documentClientOrIssuer.paymentBic?.text?.trim()
+                val syncedCountry = syncedBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: documentClientOrIssuer.paymentCountry?.trim()?.takeIf { it.isNotEmpty() }
                 documentClientOrIssuer.id?.let {
                     documentClientOrIssuerQueries.update(
                         id = it.toLong(),
@@ -483,6 +567,9 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = documentClientOrIssuer.logoPath,
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+                        payment_iban = syncedIban,
+                        payment_bic = syncedBic,
+                        payment_country = syncedCountry,
                     )
                 }
                 // Addresses to delete
@@ -518,6 +605,7 @@ class ClientOrIssuerLocalDataSource(
                     // For new addresses: create document address only (master will be created in syncToMaster block)
                     documentClientOrIssuer.id?.let { docClientId ->
                         addressesToCreate.forEach { address ->
+                            if (isAddressEmpty(address)) return@forEach
                             // Create document address without master link (will be set during sync)
                             documentClientOrIssuerAddressQueries.save(
                                 id = null,
@@ -546,6 +634,22 @@ class ClientOrIssuerLocalDataSource(
                 documentClientOrIssuer.id?.toLong()?.let { docClientId ->
                     documentClientOrIssuerEmailQueries.deleteByDocumentClientOrIssuerId(docClientId)
                     saveInfoInDocumentClientOrIssuerEmailTable(docClientId, documentClientOrIssuer.emails)
+                }
+
+                // Banks are always master-owned resources (they live in the
+                // IssuerBank table, keyed to the master issuer). When the user
+                // edits banks from the doc-embedded issuer form (add/remove a
+                // bank, add a BIC), those edits must persist to the master
+                // regardless of the sync-to-master switch — which only controls
+                // propagation of name/phone/company-id/address fields. Empty
+                // list = state wasn't hydrated (older code paths, race
+                // conditions) → keep master intact rather than wipe.
+                val isIssuerEdit = documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
+                    documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
+                if (isIssuerEdit && documentClientOrIssuer.banks.isNotEmpty()) {
+                    documentClientOrIssuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                        saveIssuerBanks(masterId, documentClientOrIssuer.banks)
+                    }
                 }
 
                 // Sync to master table if syncToMaster is true and there's an originalClientOrIssuerId
@@ -578,6 +682,8 @@ class ClientOrIssuerLocalDataSource(
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
                     )
+                    // Banks handled unconditionally above — master-owned resource,
+                    // not gated by syncToMaster.
 
                     // Emails: supprimer et recréer dans table maître
                     clientOrIssuerEmailQueries.deleteByClientOrIssuerId(masterId)
@@ -748,11 +854,44 @@ class ClientOrIssuerLocalDataSource(
                             companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
                             companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
                             logoPath = issuer.logo_path,
+                            // Freeze the first bank (sort_order = 0) on the new doc.
+                            // The payment-means picker on the invoice lets the user
+                            // swap in a different bank later — this seeds the pick
+                            // so the block renders correctly on a brand-new doc.
+                            paymentIban = fetchIssuerBanks(issuer.id).firstOrNull()
+                                ?.identifier?.text?.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentBic = fetchIssuerBanks(issuer.id).firstOrNull()
+                                ?.bic?.text?.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
                         )
                     }
                 }
             } catch (e: Exception) {
                 null
+            }
+        }
+    }
+
+    override suspend fun getIssuerBanks(issuerId: Long): List<IssuerBankState> {
+        return withContext(DispatcherProvider.IO) { fetchIssuerBanks(issuerId) }
+    }
+
+    override suspend fun updateDocumentClientOrIssuerPaymentBank(
+        documentClientOrIssuerId: Long,
+        iban: String?,
+        bic: String?,
+        country: String?,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                documentClientOrIssuerQueries.updatePaymentBank(
+                    id = documentClientOrIssuerId,
+                    payment_iban = iban?.takeIf { it.isNotEmpty() },
+                    payment_bic = bic?.takeIf { it.isNotEmpty() },
+                    payment_country = country?.takeIf { it.isNotEmpty() },
+                )
+            } catch (_: Exception) {
             }
         }
     }
