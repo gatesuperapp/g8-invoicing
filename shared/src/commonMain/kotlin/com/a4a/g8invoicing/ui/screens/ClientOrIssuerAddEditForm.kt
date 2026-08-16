@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.ui.screens
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -49,6 +50,10 @@ import androidx.compose.runtime.LaunchedEffect
 import org.koin.compose.koinInject
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.client_add_address
+import com.a4a.g8invoicing.shared.resources.issuer_bank_add
+import com.a4a.g8invoicing.shared.resources.issuer_bank_delete_a11y
+import com.a4a.g8invoicing.shared.resources.issuer_bank_label
+import com.a4a.g8invoicing.shared.resources.issuer_bank_label_input
 import com.a4a.g8invoicing.shared.resources.client_address1
 import com.a4a.g8invoicing.shared.resources.client_address1_input
 import com.a4a.g8invoicing.shared.resources.client_address2_input
@@ -76,8 +81,7 @@ import com.a4a.g8invoicing.shared.resources.client_notes
 import com.a4a.g8invoicing.shared.resources.client_notes_input
 import com.a4a.g8invoicing.shared.resources.client_phone
 import com.a4a.g8invoicing.shared.resources.client_phone_input
-import com.a4a.g8invoicing.shared.resources.document_form_sync_client_to_master
-import com.a4a.g8invoicing.shared.resources.document_form_sync_issuer_to_master
+import com.a4a.g8invoicing.shared.resources.document_form_sync_to_master
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_dismiss
 import com.a4a.g8invoicing.shared.resources.issuer_logo_error_title
 import com.a4a.g8invoicing.shared.resources.issuer_logo_label
@@ -95,7 +99,12 @@ import com.a4a.g8invoicing.ui.shared.EmailListInput
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
+import com.a4a.g8invoicing.ui.shared.INFO_GLYPH_I
 import com.a4a.g8invoicing.ui.shared.InfoTooltipButton
+import com.a4a.g8invoicing.ui.shared.LabelInfoTooltip
+import com.a4a.g8invoicing.shared.resources.issuer_bank_country
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
 import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.shared.LogoPickerComponent
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -105,6 +114,12 @@ import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textSection
+import com.a4a.g8invoicing.shared.resources.client_or_issuer_section_addresses
+import com.a4a.g8invoicing.shared.resources.client_or_issuer_section_backup
+import com.a4a.g8invoicing.shared.resources.client_or_issuer_section_bank
+import com.a4a.g8invoicing.shared.resources.client_or_issuer_section_identification
+import com.a4a.g8invoicing.shared.resources.client_or_issuer_section_notes
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -280,26 +295,7 @@ fun ClientOrIssuerAddEditForm(
                     ),
                     pageElement = if (isInBottomSheetModal) ScreenElement.CLIENT_OR_ISSUER_PHONE
                     else ScreenElement.CLIENT_OR_ISSUER_PHONE
-                )
-            )
-            // Create the UI with list items
-            FormUI(
-                inputList = inputList,
-                localFocusManager = localFocusManager,
-                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                errors = clientOrIssuerUiState.errors
-            )
-        }
-
-        Spacer(Modifier.padding(bottom = 16.dp))
-
-        // Email section with chips
-        Column(
-            modifier = Modifier
-                .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
-                .padding(top = 8.dp)
-        ) {
-            val emailInputList = listOf(
+                ),
                 FormInput(
                     label = clientEmailLabel,
                     inputType = EmailListInput(
@@ -316,16 +312,43 @@ fun ClientOrIssuerAddEditForm(
                     else ScreenElement.CLIENT_OR_ISSUER_EMAIL_1
                 )
             )
-
+            // Create the UI with list items
             FormUI(
-                inputList = emailInputList,
+                inputList = inputList,
                 localFocusManager = localFocusManager,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 errors = clientOrIssuerUiState.errors
             )
         }
 
+        if (isIssuer) {
+            Spacer(Modifier.padding(bottom = 16.dp))
+            Column(
+                modifier = Modifier
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+                    .padding(top = 8.dp, bottom = 8.dp)
+            ) {
+                LogoPickerComponent(
+                    label = issuerLogoLabel,
+                    selectButtonText = issuerLogoSelect,
+                    removeButtonText = issuerLogoRemove,
+                    issuerId = clientOrIssuerUiState.id?.toInt(),
+                    currentLogoPath = clientOrIssuerUiState.logoPath,
+                    onLogoPathChanged = { newPath ->
+                        onValueChange(
+                            if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_LOGO
+                            else ScreenElement.ISSUER_LOGO,
+                            newPath ?: ""
+                        )
+                    },
+                    errorTitle = issuerLogoErrorTitle,
+                    errorDismissText = issuerLogoErrorDismiss
+                )
+            }
+        }
+
         Spacer(Modifier.padding(bottom = 16.dp))
+        SectionTitle(stringResource(Res.string.client_or_issuer_section_addresses))
 
         for (i in 1..numberOfClientAddresses) {
             val address = clientOrIssuerUiState.addresses?.getOrNull(i - 1)
@@ -469,24 +492,9 @@ fun ClientOrIssuerAddEditForm(
                 )
             }
 
-            // Add buttons to add or delete address
             if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)) {
-                if (i == 1 && !previousAddressIsFilled(clientOrIssuerUiState, 1)) {
-                    Spacer(Modifier.padding(bottom = 16.dp))
-                }
-                Row(Modifier.padding(bottom = 6.dp)) {
-                    if (i != 3 &&
-                        numberOfClientAddresses == i
-                        && previousAddressIsFilled(clientOrIssuerUiState, i)
-                    ) {
-                        AddAddressButton(
-                            onClick = { numberOfClientAddresses += 1 },
-                            bottomPadding = 16.dp,
-                            text = clientAddAddressText
-                        )
-                    }
+                Row(Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
                     if (i > 1 && i == numberOfClientAddresses) {
-                        Spacer(Modifier.weight(1F))
                         DeleteAddressButton(
                             onClick = {
                                 numberOfClientAddresses -= 1
@@ -497,9 +505,20 @@ fun ClientOrIssuerAddEditForm(
                             contentDescription = clientDeleteAddressText
                         )
                     }
+                    Spacer(Modifier.weight(1F))
+                    if (i != 3 && numberOfClientAddresses == i) {
+                        AddAddressButton(
+                            onClick = { numberOfClientAddresses += 1 },
+                            topPadding = 3.dp,
+                            bottomPadding = 16.dp,
+                            text = clientAddAddressText
+                        )
+                    }
                 }
             } else Spacer(Modifier.padding(bottom = 20.dp))
         }
+
+        SectionTitle(stringResource(Res.string.client_or_issuer_section_identification))
 
         Column(
             modifier = Modifier
@@ -599,43 +618,15 @@ fun ClientOrIssuerAddEditForm(
             )
         }
 
-        Spacer(Modifier.padding(bottom = 16.dp))
-
-        // Logo section (only for issuers)
         if (isIssuer) {
-            Column(
-                modifier = Modifier
-                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
-                    .padding(top = 8.dp, bottom = 8.dp)
-            ) {
-                LogoPickerComponent(
-                    label = issuerLogoLabel,
-                    selectButtonText = issuerLogoSelect,
-                    removeButtonText = issuerLogoRemove,
-                    issuerId = clientOrIssuerUiState.id?.toInt(),
-                    currentLogoPath = clientOrIssuerUiState.logoPath,
-                    onLogoPathChanged = { newPath ->
-                        onValueChange(
-                            if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_LOGO
-                            else ScreenElement.ISSUER_LOGO,
-                            newPath ?: ""
-                        )
-                    },
-                    errorTitle = issuerLogoErrorTitle,
-                    errorDismissText = issuerLogoErrorDismiss
-                )
-            }
-
             Spacer(Modifier.padding(bottom = 16.dp))
 
-            // VAT exemption toggle (BT-118=E in Factur-X). Switch panel styled like the
-            // logo panel above. The matching legal mention is appended by the XML
-            // serializer at generation time, not here.
+            // BT-118=E. Matching legal mention is appended by the XML serializer.
             Row(
                 modifier = Modifier
                     .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    .padding(start = 26.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             ) {
                 Text(
@@ -662,12 +653,9 @@ fun ClientOrIssuerAddEditForm(
                 )
             }
 
-            // Ventes intra-UE : n'a de sens que pour un émetteur établi dans un pays UE
-            // (post-Brexit → UK exclu, cf. CountryCodes.EU_COUNTRIES). Pour tous les
-            // autres (Ghana, Mexique, US, UK, CH…), on cache complètement l'option pour
-            // dégonfler l'UI. On applique le même fallback que l'affichage du champ
-            // Pays (line ~410) sinon un issuer pre-1.8 avec country_code NULL en DB
-            // affiche "France" via defaultCountryCode mais le switch resterait caché.
+            // Same defaultCountryCode fallback as the country field: without it,
+            // a pre-1.8 issuer with country_code NULL would render "France" but
+            // hide this switch.
             val issuerCountry = clientOrIssuerUiState.addresses?.firstOrNull()?.countryCode
                 ?.takeIf { it.isNotBlank() }
                 ?: defaultCountryCode
@@ -713,7 +701,16 @@ fun ClientOrIssuerAddEditForm(
             }
 
             Spacer(Modifier.padding(bottom = 16.dp))
+            SectionTitle(stringResource(Res.string.client_or_issuer_section_bank))
+            IssuerBanksSection(
+                banks = clientOrIssuerUiState.banks,
+                onBanksChange = { onValueChange(ScreenElement.ISSUER_BANKS, it) },
+                defaultCountryCode = issuerCountry,
+            )
         }
+
+        Spacer(Modifier.padding(bottom = 16.dp))
+        SectionTitle(stringResource(Res.string.client_or_issuer_section_notes))
 
         Column(
             modifier = Modifier
@@ -761,19 +758,16 @@ fun ClientOrIssuerAddEditForm(
             )
         if (showSyncSwitch) {
             Spacer(modifier = Modifier.padding(top = 12.dp))
+            SectionTitle(stringResource(Res.string.client_or_issuer_section_backup))
             Row(
                 modifier = Modifier
                     .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
-                    .padding(start = 10.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    .padding(start = 26.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(
-                        if (typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_ISSUER)
-                            Res.string.document_form_sync_issuer_to_master
-                        else Res.string.document_form_sync_client_to_master
-                    ),
+                    text = stringResource(Res.string.document_form_sync_to_master),
                     style = MaterialTheme.typography.textBodyBold,
                     modifier = Modifier
                         .weight(1f)
@@ -829,19 +823,6 @@ fun ClientOrIssuerAddEditForm(
     }
 }
 
-private fun previousAddressIsFilled(clientOrIssuerUiState: ClientOrIssuerState, i: Int): Boolean {
-    val lastAddressesElement = clientOrIssuerUiState.addresses?.getOrNull(i - 1)
-    val fieldsOfLastAddress = listOf(
-        lastAddressesElement?.addressTitle?.text,
-        lastAddressesElement?.addressLine1?.text,
-        lastAddressesElement?.addressLine2?.text,
-        lastAddressesElement?.zipCode?.text,
-        lastAddressesElement?.city?.text,
-    )
-    return lastAddressesElement != null
-            && fieldsOfLastAddress.any { !it.isNullOrEmpty() }
-}
-
 @Composable
 fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
     IconButton(
@@ -861,10 +842,19 @@ fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
 }
 
 @Composable
-fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String) {
+private fun SectionTitle(text: String) {
+    Text(
+        text = text.uppercase(),
+        style = MaterialTheme.typography.textSection,
+        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 6.dp),
+    )
+}
+
+@Composable
+fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, topPadding: Dp = 10.dp, text: String) {
     Box(
         modifier = Modifier
-            .padding(start = 4.dp, top = 10.dp, bottom = bottomPadding)
+            .padding(start = 4.dp, top = topPadding, bottom = bottomPadding)
             .background(
                 color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
@@ -878,6 +868,212 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, text: String
             style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
             color = ColorVioletLink,
             text = AnnotatedString(text),
+        )
+    }
+}
+
+/**
+ * Dynamic bank-accounts section for the issuer form. One [IssuerBankRow] per
+ * account in [banks], plus a "+ Ajouter un IBAN" button at the bottom. The
+ * [IssuerBankState.label] field only shows when the issuer holds 2+ accounts —
+ * with a single account there is no ambiguity, so hiding the label keeps the
+ * form uncluttered for the 90% case.
+ *
+ * The section fires [onBanksChange] on every mutation (typed field, add, remove)
+ * with the whole updated list. Empty rows persist as-is here and get dropped
+ * only at save time (see ClientOrIssuerLocalDataSource.saveIssuerBanks) so the
+ * user can leave a placeholder open while editing.
+ *
+ * Cap at 2 for the moment (user's rule); the model supports N.
+ */
+@Composable
+private fun IssuerBanksSection(
+    banks: List<com.a4a.g8invoicing.ui.states.IssuerBankState>,
+    onBanksChange: (List<com.a4a.g8invoicing.ui.states.IssuerBankState>) -> Unit,
+    defaultCountryCode: String?,
+) {
+    val addLabel = stringResource(Res.string.issuer_bank_add)
+    val deleteA11y = stringResource(Res.string.issuer_bank_delete_a11y)
+    // Show at least one row so the user has something to type into on a fresh
+    // issuer — treat "no banks stored" as "one empty placeholder".
+    val display = if (banks.isEmpty()) listOf(com.a4a.g8invoicing.ui.states.IssuerBankState()) else banks
+    val showLabelField = display.size > 1
+
+    // Country picker index (1-based to match address pattern), null = closed.
+    var bankCountryPickerIndex: Int? by remember { mutableStateOf(null) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        display.forEachIndexed { index, bank ->
+            if (index > 0) {
+                Spacer(Modifier.padding(bottom = 13.dp))
+            }
+            IssuerBankRow(
+                bank = bank,
+                showLabelField = showLabelField,
+                defaultCountryCode = defaultCountryCode,
+                onBankChange = { updated ->
+                    val base = if (banks.isEmpty()) listOf(com.a4a.g8invoicing.ui.states.IssuerBankState()) else banks
+                    val newList = base.toMutableList().apply { set(index, updated) }
+                    onBanksChange(newList)
+                },
+                onCountryClick = { bankCountryPickerIndex = index + 1 },
+            )
+            // Delete button on the gray outer background, only on rows after the
+            // first (the primary account has no delete affordance). Left-aligned
+            // to match the "delete address" convention on the client form.
+            if (index > 0) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    DeleteAddressButton(
+                        onClick = {
+                            onBanksChange(banks.toMutableList().apply { removeAt(index) })
+                        },
+                        contentDescription = deleteA11y,
+                    )
+                }
+            }
+        }
+
+        // Capped at 2 per the current spec.
+        if (display.size < 2) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                AddAddressButton(
+                    onClick = {
+                        val base = if (banks.isEmpty()) listOf(com.a4a.g8invoicing.ui.states.IssuerBankState()) else banks
+                        onBanksChange(base + com.a4a.g8invoicing.ui.states.IssuerBankState())
+                    },
+                    topPadding = 3.dp,
+                    text = addLabel,
+                )
+            }
+        }
+    }
+
+    val pickerIndex = bankCountryPickerIndex
+    if (pickerIndex != null) {
+        val currentBank = display.getOrNull(pickerIndex - 1)
+        val currentCode = currentBank?.countryCode?.takeIf { it.isNotBlank() }
+            ?: defaultCountryCode
+        CountryPicker(
+            currentCode = currentCode,
+            onSelect = { code ->
+                currentBank?.let {
+                    val base = if (banks.isEmpty()) listOf(com.a4a.g8invoicing.ui.states.IssuerBankState()) else banks
+                    val newList = base.toMutableList().apply {
+                        set(pickerIndex - 1, it.copy(countryCode = code))
+                    }
+                    onBanksChange(newList)
+                }
+                bankCountryPickerIndex = null
+            },
+            onDismiss = { bankCountryPickerIndex = null },
+        )
+    }
+}
+
+@Composable
+private fun IssuerBankRow(
+    bank: com.a4a.g8invoicing.ui.states.IssuerBankState,
+    showLabelField: Boolean,
+    defaultCountryCode: String?,
+    onBankChange: (com.a4a.g8invoicing.ui.states.IssuerBankState) -> Unit,
+    onCountryClick: () -> Unit,
+) {
+    val labelInputHint = stringResource(Res.string.issuer_bank_label_input)
+    val labelFieldLabel = stringResource(Res.string.issuer_bank_label)
+    val countryLabel = stringResource(Res.string.issuer_bank_country)
+    val identifierIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban)
+    val identifierGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic)
+
+    // Effective country = user pick > company default. Drives the identifier
+    // field label + placeholder (IBAN vs domestic account number).
+    val effectiveCountry = bank.countryCode?.takeIf { it.isNotBlank() }
+        ?: defaultCountryCode
+    val isIban = CountryCodes.isIbanCountry(effectiveCountry)
+    val identifierLabel = if (isIban) identifierIbanLabel else identifierGenericLabel
+    val identifierPlaceholder = if (isIban) "FR76 1234 1234 1234 123456 1234" else ""
+
+    // Single FormUI with all rows in one list so the built-in Separator() draws
+    // between them consistently. "Libellé" is prepended only when the issuer
+    // holds 2+ banks (no ambiguity to resolve with a single account).
+    val inputs = buildList {
+        if (showLabelField) {
+            add(
+                FormInput(
+                    label = labelFieldLabel,
+                    inputType = TextInput(
+                        text = bank.label,
+                        placeholder = labelInputHint,
+                        onValueChange = {
+                            onBankChange(bank.copy(label = it as TextFieldValue))
+                        },
+                    ),
+                    pageElement = ScreenElement.ISSUER_BANKS,
+                )
+            )
+        }
+        add(
+            FormInput(
+                label = countryLabel,
+                inputType = ForwardElement(
+                    text = CountryCodes.displayNameOf(effectiveCountry),
+                    isMultiline = false,
+                ),
+                pageElement = ScreenElement.ISSUER_BANK_COUNTRY,
+            )
+        )
+        add(
+            FormInput(
+                label = identifierLabel,
+                inputType = TextInput(
+                    text = bank.identifier,
+                    placeholder = identifierPlaceholder,
+                    onValueChange = {
+                        onBankChange(bank.copy(identifier = it as TextFieldValue))
+                    },
+                    // The FR76… placeholder wraps to 2 lines on narrow phones;
+                    // reserve 2 lines when IBAN so the field height stays
+                    // stable. Generic identifier has a shorter/no placeholder,
+                    // single-line is fine.
+                    minLines = if (isIban) 2 else 1,
+                ),
+                pageElement = ScreenElement.ISSUER_BANKS,
+            )
+        )
+        // BIC is a SWIFT/ISO 9362 code used for international routing. Non-IBAN
+        // countries typically use their domestic clearing (ACH, BSB, etc.), so
+        // the BIC field isn't meaningful there — hide it.
+        if (isIban) {
+            add(
+                FormInput(
+                    label = "BIC",
+                    inputType = TextInput(
+                        text = bank.bic,
+                        placeholder = "XXXXFRPPXXX",
+                        onValueChange = {
+                            onBankChange(bank.copy(bic = it as TextFieldValue))
+                        },
+                    ),
+                    pageElement = ScreenElement.ISSUER_BANKS,
+                )
+            )
+        }
+    }
+    Column(
+        modifier = Modifier
+            .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+            .padding(top = 8.dp)
+    ) {
+        FormUI(
+            inputList = inputs,
+            localFocusManager = LocalFocusManager.current,
+            onClickForward = { element ->
+                if (element == ScreenElement.ISSUER_BANK_COUNTRY) onCountryClick()
+            },
+            placeCursorAtTheEndOfText = {},
+            errors = mutableListOf(),
         )
     }
 }

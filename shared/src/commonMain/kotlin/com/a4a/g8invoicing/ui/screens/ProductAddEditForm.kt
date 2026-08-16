@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -327,11 +328,16 @@ fun ProductAddEditForm(
 
                 // Afficher "Ajouter un prix" seulement s'il n'y a pas de prix additionnels
                 if (product.additionalPrices.isNullOrEmpty()) {
-                    Spacer(Modifier.padding(bottom = 6.dp))
-                    AddPriceButton(
-                        onClick = onClickAddPrice,
-                        bottomPadding = 16.dp
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        AddPriceButton(
+                            onClick = onClickAddPrice,
+                            topPadding = 3.dp,
+                            bottomPadding = 16.dp,
+                        )
+                    }
                 }
             }
 
@@ -351,20 +357,11 @@ fun ProductAddEditForm(
                 }
 
                 key(currentPrice.idStr) {
+                    Box {
                     Column(
                         modifier = Modifier
                             .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     ) {
-
-                        // 🗑️ Suppression du prix - padding réduit
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            DeletePriceButton {
-                                onClickDeletePrice(currentPrice.idStr)
-                            }
-                        }
 
                         val priceInputList = remember(
                             currentPrice.clients,
@@ -420,28 +417,36 @@ fun ProductAddEditForm(
                             )
                         }
 
-                        Column(
-                            modifier = Modifier
-                                .offset(y = (-4).dp)
-                        ) {
-                            FormUI(
-                                inputList = priceInputList,
-                                localFocusManager = localFocusManager,
-                                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                                onClickOpenClientSelection = onClickSelectClients,
-                                errors = product.errors
-                            )
-                        }
+                        FormUI(
+                            inputList = priceInputList,
+                            localFocusManager = localFocusManager,
+                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                            onClickOpenClientSelection = onClickSelectClients,
+                            errors = product.errors
+                        )
+                    }
+                    // Overlaid delete affordance — quarter-circle grey pill in
+                    // the top-right corner, so removing a price doesn't push
+                    // the block down by a dedicated row.
+                    QuarterCircleDeleteButton(
+                        modifier = Modifier.align(Alignment.TopEnd),
+                        onClick = { onClickDeletePrice(currentPrice.idStr) },
+                    )
                     }
                 }
             }
 
             // Afficher "Ajouter un prix" après tous les prix additionnels
-            Spacer(Modifier.padding(bottom = 6.dp))
-            AddPriceButton(
-                onClick = onClickAddPrice,
-                bottomPadding = 16.dp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                AddPriceButton(
+                    onClick = onClickAddPrice,
+                    topPadding = 3.dp,
+                    bottomPadding = 16.dp,
+                )
+            }
         }
     }
 
@@ -468,11 +473,11 @@ fun ProductAddEditForm(
 }
 
 @Composable
-fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
+fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, topPadding: Dp = 4.dp) {
     val addPriceText = stringResource(Res.string.product_add_price)
     Box(
         modifier = Modifier
-            .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
+            .padding(start = 4.dp, top = topPadding, bottom = bottomPadding)
             .background(
                 color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
@@ -506,6 +511,37 @@ fun DeletePriceButton(onClick: () -> Unit) {
             imageVector = Icons.Outlined.Delete,
             tint = AppColors.iconPrimary,
             contentDescription = deletePriceText
+        )
+    }
+}
+
+/**
+ * Delete affordance overlaid on the top-right corner of a card. Grey background
+ * shaped as a quarter-circle "pie slice" — the top and right edges hug the
+ * card corner (topEnd rounded like the card, 6.dp), the bottom-left is fully
+ * rounded so the fill reads as one quarter of a big circle inside the corner.
+ */
+@Composable
+fun QuarterCircleDeleteButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    contentDescription: String? = null,
+) {
+    Box(
+        modifier = modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(topEnd = 6.dp, bottomStart = 100.dp, topStart = 0.dp, bottomEnd = 0.dp))
+            .background(AppColors.divider)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.TopEnd,
+    ) {
+        Icon(
+            modifier = Modifier
+                .padding(top = 6.dp, end = 6.dp)
+                .size(16.dp),
+            imageVector = Icons.Outlined.Delete,
+            tint = AppColors.iconPrimary,
+            contentDescription = contentDescription,
         )
     }
 }

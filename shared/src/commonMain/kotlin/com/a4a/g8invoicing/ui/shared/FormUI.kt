@@ -259,6 +259,7 @@ fun RowWithLabelAndInput(
                             content = formInput.labelInfoTooltip.content,
                             contentDescription = formInput.labelInfoTooltip.contentDescription,
                             persistenceKey = formInput.labelInfoTooltip.persistenceKey,
+                            glyph = formInput.labelInfoTooltip.glyph,
                         )
                     }
                 } else {
@@ -353,6 +354,9 @@ data class LabelInfoTooltip(
     // When non-null, the ⓘ disappears permanently after the user has read + dismissed
     // the modal (persisted via Settings). Same key = same one-time discoverability aid.
     val persistenceKey: String? = null,
+    // Icon inside the pastille. "?" (default) for one-off hints, "i" for reference
+    // info kept visible in permanence.
+    val glyph: String = "?",
 )
 
 class TextInput(

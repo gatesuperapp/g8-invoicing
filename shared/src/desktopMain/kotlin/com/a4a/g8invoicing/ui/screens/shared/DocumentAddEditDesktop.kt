@@ -736,8 +736,11 @@ private fun DocumentDesktopProductsTab(
                 onClickCancelForm()
                 onShowDocumentForm(false)
             },
-            onClickDone = { syncToMaster ->
-                onClickDoneForm(typeOfCreation, syncToMaster)
+            onClickDone = {
+                // Desktop product dialog has no sync-to-master switch (only the
+                // mobile bottom sheet exposes it). Default to false so master
+                // rows aren't touched when the user edits a doc product here.
+                onClickDoneForm(typeOfCreation, false)
                 onShowDocumentForm(false)
             }
         )
