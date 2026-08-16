@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 class CreditNoteAddEditViewModel(
     private val documentDataSource: CreditNoteLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
+    private val clientOrIssuerDataSource: com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface,
     private val itemId: String?,
 ) : ViewModel() {
     private var fetchJob: Job? = null
@@ -273,6 +274,19 @@ class CreditNoteAddEditViewModel(
     fun updateUiState(screenElement: ScreenElement, value: Any) {
         _documentUiState.value =
             updateCreditNoteUiState(_documentUiState.value, screenElement, value)
+        // See InvoiceAddEditViewModel.updateUiState for rationale.
+        if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
+            val bank = value as? com.a4a.g8invoicing.ui.states.IssuerBankState ?: return
+            val docIssuerId = _documentUiState.value.documentIssuer?.id?.toLong() ?: return
+            viewModelScope.launch {
+                clientOrIssuerDataSource.updateDocumentClientOrIssuerPaymentBank(
+                    documentClientOrIssuerId = docIssuerId,
+                    iban = bank.identifier.text.takeIf { it.isNotEmpty() },
+                    bic = bank.bic.text.takeIf { it.isNotEmpty() },
+                    country = bank.countryCode?.takeIf { it.isNotEmpty() },
+                )
+            }
+        }
     }
 
     fun updateTextFieldCursorOfCreditNoteState(pageElement: ScreenElement) {
@@ -342,6 +356,51 @@ fun updateCreditNoteUiState(
 
         ScreenElement.DOCUMENT_FOOTER -> {
             doc = doc.copy(footerText = value as TextFieldValue)
+        }
+
+        ScreenElement.DOCUMENT_PAYMENT_MEANS_LABEL -> {
+            @Suppress("UNCHECKED_CAST")
+            val newSegments = value as List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>
+            doc = doc.copy(
+                paymentMeansSegments = newSegments,
+                paymentMeansSelections = com.a4a.g8invoicing.data.models
+                    .chipIdsFromSegments(newSegments)
+                    .takeIf { it.isNotEmpty() },
+            )
+        }
+
+        ScreenElement.DOCUMENT_PAYMENT_MEANS_HIDDEN -> {
+            doc = doc.copy(paymentMeansHidden = value as Boolean)
+        }
+
+        ScreenElement.DOCUMENT_PAYMENT_MEANS_OTHER -> {
+            doc = doc.copy(paymentMeansOtherChecked = value as Boolean)
+        }
+
+        ScreenElement.DOCUMENT_PAYMENT_BANK_HIDDEN -> {
+            doc = doc.copy(paymentBankHidden = value as Boolean)
+        }
+
+        ScreenElement.DOCUMENT_PAYMENT_BANK_LABEL -> {
+            @Suppress("UNCHECKED_CAST")
+            doc = doc.copy(
+                paymentBankSegments = value as List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
+            )
+        }
+
+        ScreenElement.DOCUMENT_ISSUER_BANK_PICKED -> {
+            val bank = value as com.a4a.g8invoicing.ui.states.IssuerBankState
+            doc.documentIssuer?.let { currentIssuer ->
+                doc = doc.copy(
+                    documentIssuer = currentIssuer.copy(
+                        paymentIban = bank.identifier.text.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentBic = bank.bic.text.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentCountry = bank.countryCode?.takeIf { it.isNotEmpty() },
+                    )
+                )
+            }
         }
 
         else -> {}

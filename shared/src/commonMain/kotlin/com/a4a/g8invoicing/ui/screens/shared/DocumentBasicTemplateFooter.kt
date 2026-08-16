@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
 import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -81,6 +82,98 @@ fun DocumentBasicTemplateFooter(
                 )
             }
         }
+        // Payment terms block (BT-20) — invoice only, free text. Rendered just
+        // above the payment-means line. Sits at whatever the user typed on the
+        // doc; if the field is empty (user cleared it), we skip the row entirely
+        // so we don't leave a phantom vertical gap.
+        val paymentTerms = (document as? InvoiceState)?.paymentTermsDescription?.text
+            ?.takeIf { it.isNotBlank() }
+        if (paymentTerms != null) {
+            Row {
+                Text(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.textForDocuments,
+                    text = paymentTerms,
+                    lineHeight = 7.sp,
+                )
+            }
+        }
+        // Payment means block (BT-81) — invoice + credit note only. Segments
+        // (Free text + locked Token codes) flatten to a plain string, using
+        // the doc's frozen labels snapshot so mode names stay in the doc's
+        // original locale after the app switches language. Hidden flag opts
+        // the whole block out; empty flatten (no chips + no free text) gives
+        // the same effect.
+        val paymentMeansSegments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment> =
+            when (document) {
+                is InvoiceState -> document.paymentMeansSegments
+                is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansSegments
+                else -> emptyList()
+            }
+        val paymentMeansHidden: Boolean = when (document) {
+            is InvoiceState -> document.paymentMeansHidden
+            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansHidden
+            else -> false
+        }
+        if (!paymentMeansHidden && paymentMeansSegments.isNotEmpty()) {
+            val labelsByChip = com.a4a.g8invoicing.data.models.PaymentMeans.entries.associate {
+                it.chipId to (labels?.get(it.labelKey) ?: "")
+            }
+            val display = com.a4a.g8invoicing.data.models
+                .flattenPaymentLabel(paymentMeansSegments, labelsByChip)
+            if (display.isNotEmpty()) {
+                Row {
+                    Text(
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.textForDocuments,
+                        text = display,
+                        lineHeight = 7.sp,
+                    )
+                }
+            }
+        }
+        // IBAN + BIC block, sourced from the frozen documentIssuer snapshot.
+        // Skipped when the "Afficher les coordonnées bancaires" switch is off
+        // (paymentBankHidden). The frozen bank fields on DocumentClientOrIssuer
+        // stay populated regardless — BT-84/86 preserved for Factur-X export
+        // even when the human-readable block is hidden.
+        val paymentBankHidden: Boolean = when (document) {
+            is InvoiceState -> document.paymentBankHidden
+            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankHidden
+            else -> false
+        }
+        val iban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty()
+        val bic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty()
+        val paymentCountry = document.documentIssuer?.paymentCountry
+        val identifierLabel = if (com.a4a.g8invoicing.data.models.CountryCodes.isIbanCountry(paymentCountry)
+            || paymentCountry == null
+        ) "IBAN" else stringResource(Res.string.issuer_bank_identifier_generic)
+        val bankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = when (document) {
+            is InvoiceState -> document.paymentBankSegments
+            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankSegments
+            else -> emptyList()
+        }
+        val effectiveBankSegments = bankSegments.ifEmpty {
+            com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
+        }
+        if (!paymentBankHidden && (iban.isNotEmpty() || bic.isNotEmpty())) {
+            val bankRendered = com.a4a.g8invoicing.data.models.flattenPaymentBank(
+                effectiveBankSegments, identifierLabel, iban, bic,
+            )
+            if (bankRendered.isNotEmpty()) {
+                Row {
+                    Text(
+                        modifier = Modifier.padding(bottom = 6.dp),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.textForDocuments,
+                        text = bankRendered,
+                        lineHeight = 7.sp,
+                    )
+                }
+            }
+        }
         Row {
             Text(
                 modifier = Modifier
@@ -111,3 +204,4 @@ fun DocumentBasicTemplateFooter(
         }
     }
 }
+

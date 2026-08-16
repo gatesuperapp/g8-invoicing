@@ -38,6 +38,16 @@ enum class ScreenElement {
     CLIENT_OR_ISSUER_PHONE,
     CLIENT_OR_ISSUER_NOTES,
     ISSUER_LOGO,
+    ISSUER_PAYMENT_IBAN,
+    ISSUER_PAYMENT_BIC,
+    // Whole bank list on the master issuer. Fires with List<IssuerBankState>
+    // (edits, adds, removes go through the same event). Codes-derived fields
+    // like the payment picker on documents pick from this list.
+    ISSUER_BANKS,
+    // Country picker anchor per bank row. Not persisted as a distinct state —
+    // the picked country lives on the corresponding IssuerBankState.countryCode
+    // and is written back via the ISSUER_BANKS event.
+    ISSUER_BANK_COUNTRY,
     ISSUER_VAT_EXEMPT,
     ISSUER_INTRA_EU_SALES,
     CLIENT_OR_ISSUER_IDENTIFICATION1,
@@ -76,6 +86,13 @@ enum class ScreenElement {
     DOCUMENT_CLIENT_OR_ISSUER_PHONE,
     DOCUMENT_CLIENT_OR_ISSUER_NOTES,
     DOCUMENT_ISSUER_LOGO,
+    DOCUMENT_ISSUER_PAYMENT_IBAN,
+    DOCUMENT_ISSUER_PAYMENT_BIC,
+    // Fired by the payment-means picker when the user swaps the doc's frozen
+    // bank via the IBAN dropdown. Value = IssuerBankState. Handler updates
+    // documentIssuer.paymentIban/paymentBic + persists via a dedicated write
+    // (autoSave only touches the invoice row, not DocumentClientOrIssuer).
+    DOCUMENT_ISSUER_BANK_PICKED,
     DOCUMENT_ISSUER_VAT_EXEMPT,
     DOCUMENT_ISSUER_INTRA_EU_SALES,
     DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1,
@@ -109,6 +126,31 @@ enum class ScreenElement {
     DOCUMENT_PRODUCT_QUANTITY,
     DOCUMENT_PRODUCT_DISCOUNT,
     DOCUMENT_FOOTER,
+    // Row identifier for the payment-means picker (used as navigation trigger
+    // in the doc-edit form list). Not fired as a value-change event any more —
+    // the label refactor unified codes + free text under DOCUMENT_PAYMENT_MEANS_LABEL.
+    DOCUMENT_PAYMENT_MEANS,
+    // Structured payment-means label: fires with List<PaymentLabelSegment>.
+    // Chip toggles append/remove Token segments; the "Modifier le texte" modal
+    // edits the surrounding Free segments. Codes (BT-81) are derived from
+    // the tokens present so both fields stay in sync via a single event.
+    DOCUMENT_PAYMENT_MEANS_LABEL,
+    // Eye toggle in the payment-means picker. true = the whole block is hidden
+    // on preview + PDF (codes stay persisted regardless).
+    DOCUMENT_PAYMENT_MEANS_HIDDEN,
+    // "Autre" chip toggle. Fires with Boolean. OTHER is UI-only — never renders
+    // on the invoice, never contributes a Token to segments, never exports to
+    // Factur-X. Stored in a dedicated flag on the doc state.
+    DOCUMENT_PAYMENT_MEANS_OTHER,
+    // "Afficher les coordonnées bancaires" switch inside the payment-means
+    // picker. true = IBAN/BIC line skipped on preview + PDF (frozen bank on
+    // DocumentClientOrIssuer stays populated regardless).
+    DOCUMENT_PAYMENT_BANK_HIDDEN,
+    // Structured bank-details label. Fires with List<PaymentBankSegment>.
+    DOCUMENT_PAYMENT_BANK_LABEL,
+    // BT-20 — free-text payment terms description (LME mentions + "30j net"…).
+    // Per-invoice ; not on BL / avoir / devis.
+    DOCUMENT_PAYMENT_TERMS,
     SETTINGS_ACCOUNT,
     ELSE
 }

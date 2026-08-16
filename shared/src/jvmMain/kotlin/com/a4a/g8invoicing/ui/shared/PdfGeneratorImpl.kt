@@ -282,12 +282,61 @@ class PdfGeneratorImpl(
                 doc.add(createCurrencyNotice(currencyCodeForHeader))
             }
             doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize, trimTopPadding = showCurrencyNoticeLine))
+            // BT-20 payment terms (free text) — invoice only. Rendered right
+            // above the payment means line so the payment block reads as one
+            // coherent group. Skipped when the user cleared the field.
+            createPaymentTermsBlock(document.paymentTermsDescription.text, fontSize)?.let { doc.add(it) }
+            // BT-81 payment means — invoice + credit note only. Segments are
+            // flattened at render time using [PdfStrings.paymentMeansLabels]
+            // (already locale-frozen), so mode names stay in the doc's original
+            // language even if the app locale changes later.
+            if (!document.paymentMeansHidden) {
+                createPaymentMeansBlock(document.paymentMeansSegments, fontSize)
+                    ?.let { doc.add(it) }
+            }
+            // BT-84 IBAN / BT-86 BIC — inserted between payment means and footer.
+            // Skipped when the picker's "Afficher les coordonnées bancaires"
+            // switch is off — frozen fields on DocumentClientOrIssuer stay
+            // populated regardless (BT-84/86 preserved for Factur-X export).
+            if (!document.paymentBankHidden) {
+                createIbanBicBlock(
+                    document.documentIssuer,
+                    (document as? com.a4a.g8invoicing.ui.states.InvoiceState)?.paymentBankSegments
+                        ?: emptyList(),
+                    fontSize,
+                )?.let { doc.add(it) }
+            }
             doc.add(createFooter(document.footerText.text, fontSize))
         } else {
             if (showCurrencyNoticeLine) {
                 doc.add(createCurrencyNotice(currencyCodeForHeader))
             }
-            doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
+            val creditNote = document as? com.a4a.g8invoicing.ui.states.CreditNoteState
+            val paymentMeansBlock = if (creditNote?.paymentMeansHidden == true) null
+            else createPaymentMeansBlock(
+                creditNote?.paymentMeansSegments ?: emptyList(),
+                fontSize,
+            )
+            val ibanBlock = if (creditNote?.paymentBankHidden == true) null
+            else createIbanBicBlock(
+                document.documentIssuer,
+                creditNote?.paymentBankSegments ?: emptyList(),
+                fontSize,
+            )
+            // First block after the currency notice gets the 24pt top margin —
+            // subsequent blocks hug each other. Doubling would leave gaping holes.
+            when {
+                paymentMeansBlock != null -> {
+                    doc.add(paymentMeansBlock.setMarginTop(24F))
+                    ibanBlock?.let { doc.add(it) }
+                    doc.add(createFooter(document.footerText.text, fontSize))
+                }
+                ibanBlock != null -> {
+                    doc.add(ibanBlock.setMarginTop(24F))
+                    doc.add(createFooter(document.footerText.text, fontSize))
+                }
+                else -> doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
+            }
         }
 
         // g8 watermark — text is frozen on the document at creation (watermark_text column).
@@ -861,6 +910,71 @@ class PdfGeneratorImpl(
             .setTextAlignment(TextAlignment.CENTER)
     }
 
+    /**
+     * BT-20 payment terms description — free text. Returns null when the field
+     * is empty so the caller can skip the block. No prefix / label — the text
+     * itself carries the mentions (LME + "30j net"), the user owns the wording.
+     */
+    private fun createPaymentTermsBlock(text: String, fontSize: Float): Paragraph? {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return null
+        return Paragraph(trimmed)
+            .setFontSize(fontSize)
+            .setFixedLeading(10F)
+            .setTextAlignment(TextAlignment.CENTER)
+    }
+
+    /**
+     * BT-81 payment means block. Flatten [segments] using the frozen locale
+     * snapshot ([PdfStrings.paymentMeansLabels]) so a FR invoice keeps FR
+     * mode names after the app switches locale. Returns null when the flatten
+     * yields an empty string.
+     */
+    private fun createPaymentMeansBlock(
+        segments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>,
+        fontSize: Float,
+    ): Paragraph? {
+        val display = com.a4a.g8invoicing.data.models
+            .flattenPaymentLabel(segments, strings.paymentMeansLabels)
+        if (display.isEmpty()) return null
+        return Paragraph(display)
+            .setFontSize(fontSize)
+            .setFixedLeading(10F)
+            .setTextAlignment(TextAlignment.CENTER)
+    }
+
+    /**
+     * IBAN (BT-84) + BIC (BT-86) block. Sourced from the frozen documentIssuer
+     * snapshot (payment_iban / payment_bic on DocumentClientOrIssuer). Returns null
+     * when neither is set so the caller can skip the block entirely — same shape
+     * as the watermark handling above. Font/leading match [createFooter] so IBAN
+     * and BIC read visually as one block with the free-text footer that follows.
+     */
+    private fun createIbanBicBlock(
+        issuer: com.a4a.g8invoicing.ui.states.ClientOrIssuerState?,
+        segments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
+        fontSize: Float,
+    ): Paragraph? {
+        val iban = issuer?.paymentIban?.text?.trim().orEmpty()
+        val bic = issuer?.paymentBic?.text?.trim().orEmpty()
+        if (iban.isEmpty() && bic.isEmpty()) return null
+        val country = issuer?.paymentCountry
+        val identifierLabel = if (com.a4a.g8invoicing.data.models.CountryCodes.isIbanCountry(country)
+            || country == null
+        ) strings.bankAccountIbanLabel else strings.bankAccountGenericLabel
+        val effectiveSegments = segments.ifEmpty {
+            com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
+        }
+        val rendered = com.a4a.g8invoicing.data.models.flattenPaymentBank(
+            effectiveSegments, identifierLabel, iban, bic,
+        )
+        if (rendered.isEmpty()) return null
+        return Paragraph(rendered)
+            .setFontSize(fontSize)
+            .setFixedLeading(10F)
+            .setTextAlignment(TextAlignment.CENTER)
+    }
+
     private fun createWatermark(text: String): Paragraph {
         // Tiny watermark, smaller than the document body. We split on the URL marker
         // to make only that substring a clickable Link in PDF readers, but the entire
@@ -994,6 +1108,18 @@ class PdfGeneratorImpl(
             companyId2Label = pick("company_identification2", defaults.companyId2Label),
             companyId3Label = pick("company_identification3", defaults.companyId3Label),
             currencyNoticeLabel = pick("pdf_currency_notice", defaults.currencyNoticeLabel),
+            // Freeze the mode labels (BT-81) per-chip so a FR invoice keeps
+            // "Virement, chèque" after the user switches app to EN. Same
+            // snapshot → localeFallback → app-default cascade as every other
+            // field above. Chip identity (not UN/CEFACT code) because PayPal
+            // + Stripe share code 68. The prefix isn't handled here — it's
+            // the user's paymentMeansLabel on the doc state, not a static
+            // PdfStrings key.
+            paymentMeansLabels = defaults.paymentMeansLabels.mapValues { (chipId, default) ->
+                val labelKey = com.a4a.g8invoicing.data.models.PaymentMeans
+                    .fromChipId(chipId)?.labelKey ?: "payment_means_$chipId"
+                pick(labelKey, default)
+            },
         )
     }
 

@@ -323,8 +323,34 @@ class QuoteLocalDataSource(
             val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
             clientOrIssuerDataSource.createNew(masterIssuer)
             val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
-            // Lier au master
-            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+            // Seed doc-frozen payment_iban/payment_bic from the first bank
+            // (see InvoiceLocalDataSource for rationale).
+            val firstBank = documentClientOrIssuer.banks.firstOrNull()
+            val seededIban = firstBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededBic = firstBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededCountry = firstBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+            documentClientOrIssuer.copy(
+                originalClientOrIssuerId = masterId?.toInt(),
+                paymentIban = seededIban ?: documentClientOrIssuer.paymentIban,
+                paymentBic = seededBic ?: documentClientOrIssuer.paymentBic,
+                paymentCountry = seededCountry ?: documentClientOrIssuer.paymentCountry,
+            )
+        } else if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.paymentIban?.text.isNullOrEmpty() &&
+            documentClientOrIssuer.banks.isNotEmpty()
+        ) {
+            val firstBank = documentClientOrIssuer.banks.first()
+            documentClientOrIssuer.copy(
+                paymentIban = firstBank.identifier.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentBic = firstBank.bic.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentCountry = firstBank.countryCode?.trim()?.takeIf { it.isNotEmpty() },
+            )
         } else {
             documentClientOrIssuer
         }

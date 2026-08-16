@@ -9,6 +9,8 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_default_footer
+import com.a4a.g8invoicing.shared.resources.document_default_payment_terms
+import com.a4a.g8invoicing.shared.resources.document_payment_means_default_label
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
@@ -83,9 +85,33 @@ class InvoiceLocalDataSource(
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
+        // Per-issuer reuse: pull payment_terms / payment_means / payment_bank
+        // from the most recent invoice for the same master issuer, so the new
+        // invoice inherits whatever the user last set on THIS company (not the
+        // last global invoice, which might belong to a different émetteur).
+        // Null when no prior invoice matches → fall back to defaults.
+        val reuse = existingIssuer?.id?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
+
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
+
+            val reusedSelections = reuse?.payment_means_selections
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                ?.takeIf { it.isNotEmpty() }
+            val reusedSegments = reuse?.payment_means_label?.let {
+                com.a4a.g8invoicing.data.models.parsePaymentLabel(it)
+            }?.takeIf { it.isNotEmpty() }
+            val reusedBankSegments = reuse?.payment_bank_label?.let {
+                com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
+            }?.takeIf { it.isNotEmpty() }
+            val reusedTerms = reuse?.payment_terms_description?.takeIf { it.isNotEmpty() }
 
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
@@ -103,6 +129,21 @@ class InvoiceLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
+                paymentMeansSelections = reusedSelections ?: setOf(
+                    com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                    com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                    com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                ),
+                paymentMeansOtherChecked = (reuse?.payment_means_other_checked ?: 0L) != 0L,
+                paymentMeansSegments = reusedSegments
+                    ?: com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                paymentBankSegments = reusedBankSegments ?: emptyList(),
+                paymentTermsDescription = TextFieldValue(
+                    reusedTerms ?: getExistingPaymentTermsDescription()
+                        ?: getString(Res.string.document_default_payment_terms)
+                ),
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -153,6 +194,18 @@ class InvoiceLocalDataSource(
         return footer
     }
 
+    // Last non-empty payment_terms_description used across invoices. Mirrors
+    // getExistingFooter() so a user who tailors their terms once has them
+    // pre-filled on every new invoice going forward. Fallback (when null) is
+    // resolved by callers to document_default_payment_terms (LME mentions).
+    private fun getExistingPaymentTermsDescription(): String? {
+        return try {
+            invoiceQueries.getLastInsertedInvoicePaymentTerms().executeAsOneOrNull()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     // --- fetch ---
     // Correctly uses withContext(Dispatchers.IO).
     // Internal fetch* helpers are synchronous and will run on this IO context.
@@ -163,13 +216,15 @@ class InvoiceLocalDataSource(
                     ?.let {
                         it.transformIntoEditableInvoice(
                             fetchDocumentProducts(it.invoice_id),// Synchronous, runs on this IO context
-                            fetchClientAndIssuer( // Synchronous, runs on this IO context
-                                it.invoice_id,
-                                linkInvoiceToDocumentClientOrIssuerQueries,
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries,
-                                documentClientOrIssuerEmailQueries
+                            hydrateBanksOnDocIssuer(
+                                fetchClientAndIssuer(
+                                    it.invoice_id,
+                                    linkInvoiceToDocumentClientOrIssuerQueries,
+                                    linkDocumentClientOrIssuerToAddressQueries,
+                                    documentClientOrIssuerQueries,
+                                    documentClientOrIssuerAddressQueries,
+                                    documentClientOrIssuerEmailQueries
+                                )
                             ),
                             fetchTag(it.invoice_id)  // Synchronous, runs on this IO context
                         )
@@ -179,6 +234,24 @@ class InvoiceLocalDataSource(
                 null
             }
         }
+    }
+
+    // Populate DOCUMENT_ISSUER states with their master's bank accounts. Needed
+    // by the doc-embedded issuer form + the payment picker: the doc-frozen
+    // snapshot only stores the *picked* IBAN/BIC, not the whole list. Fetching
+    // banks here surfaces every account so the picker can offer them and the
+    // form can edit them (edits then sync back to master on save).
+    private suspend fun hydrateBanksOnDocIssuer(
+        states: List<ClientOrIssuerState>?,
+    ): List<ClientOrIssuerState>? = states?.map { state ->
+        if (state.type == ClientOrIssuerType.DOCUMENT_ISSUER &&
+            state.originalClientOrIssuerId != null
+        ) {
+            state.copy(
+                banks = clientOrIssuerDataSource
+                    .getIssuerBanks(state.originalClientOrIssuerId!!.toLong())
+            )
+        } else state
     }
 
 
@@ -310,6 +383,18 @@ class InvoiceLocalDataSource(
             showCurrencyAndAutoTaxColumn = this.show_currency_and_auto_tax_column != 0L,
             formatLocale = this.format_locale,
             hideLinkedSourceHeaders = this.hide_linked_source_headers != 0L,
+            paymentMeansSelections = this.payment_means_selections
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                ?.takeIf { it.isNotEmpty() },
+            paymentMeansOtherChecked = this.payment_means_other_checked != 0L,
+            paymentMeansSegments = com.a4a.g8invoicing.data.models.parsePaymentLabel(this.payment_means_label),
+            paymentMeansHidden = this.payment_means_hidden != 0L,
+            paymentBankHidden = this.payment_bank_hidden != 0L,
+            paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(this.payment_bank_label),
+            paymentTermsDescription = TextFieldValue(text = this.payment_terms_description ?: ""),
         )
     }
 
@@ -342,6 +427,18 @@ class InvoiceLocalDataSource(
                     labelsSnapshot = frozenLabels,
                     showCurrencyAndAutoTaxColumn = true,
                     formatLocale = AppLocaleHolder.languageCode,
+                    paymentMeansSelections = setOf(
+                        com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                    ),
+                    paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                    paymentTermsDescription = TextFieldValue(
+                        getExistingPaymentTermsDescription()
+                            ?: getString(Res.string.document_default_payment_terms)
+                    ),
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -395,6 +492,18 @@ class InvoiceLocalDataSource(
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)),
                     watermarkText = frozenWatermark,
                     labelsSnapshot = frozenLabels,
+                    paymentMeansSelections = setOf(
+                        com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                    ),
+                    paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                    paymentTermsDescription = TextFieldValue(
+                        getExistingPaymentTermsDescription()
+                            ?: getString(Res.string.document_default_payment_terms)
+                    ),
                 )
                 saveInfoInInvoiceTable(newInvoiceState)
 
@@ -455,6 +564,13 @@ class InvoiceLocalDataSource(
                     due_date = document.dueDate,
                     payment_status = document.paymentStatus.toLong(),
                     footer = document.footerText.text,
+                    payment_means_selections = document.paymentMeansSelections?.joinToString(","),
+                    payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
+                    payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
+                    payment_terms_description = document.paymentTermsDescription.text.takeIf { it.isNotEmpty() },
+                    payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
+                    payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
+                    payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 // Update tag if payment is late (due date expired)
@@ -633,8 +749,41 @@ class InvoiceLocalDataSource(
             val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
             clientOrIssuerDataSource.createNew(masterIssuer)
             val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
-            // Lier au master
-            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+            // Seed the doc's frozen payment_iban / payment_bic from the first
+            // bank the user typed in. Without this the master row saves the
+            // bank correctly but the doc's snapshot stays null, so the invoice
+            // renders nothing under the "IBAN :" / "BIC :" slot until the user
+            // manually picks a bank in the payment-means modal.
+            val firstBank = documentClientOrIssuer.banks.firstOrNull()
+            val seededIban = firstBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededBic = firstBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededCountry = firstBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+            documentClientOrIssuer.copy(
+                originalClientOrIssuerId = masterId?.toInt(),
+                paymentIban = seededIban ?: documentClientOrIssuer.paymentIban,
+                paymentBic = seededBic ?: documentClientOrIssuer.paymentBic,
+                paymentCountry = seededCountry ?: documentClientOrIssuer.paymentCountry,
+            )
+        } else if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.paymentIban?.text.isNullOrEmpty() &&
+            documentClientOrIssuer.banks.isNotEmpty()
+        ) {
+            // Existing issuer picked for the doc: banks are hydrated on the
+            // state but payment_iban/payment_bic haven't been picked yet →
+            // default to the first bank so the invoice's "IBAN :" line
+            // renders straight away.
+            val firstBank = documentClientOrIssuer.banks.first()
+            documentClientOrIssuer.copy(
+                paymentIban = firstBank.identifier.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentBic = firstBank.bic.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentCountry = firstBank.countryCode?.trim()?.takeIf { it.isNotEmpty() },
+            )
         } else {
             documentClientOrIssuer
         }
@@ -846,6 +995,13 @@ class InvoiceLocalDataSource(
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
                 hide_linked_source_headers = if (document.hideLinkedSourceHeaders) 1L else 0L,
+                payment_means_selections = document.paymentMeansSelections?.joinToString(","),
+                payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
+                payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
+                payment_terms_description = document.paymentTermsDescription.text.takeIf { it.isNotEmpty() },
+                payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
+                payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
+                payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")
@@ -1261,6 +1417,9 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         logo_path = documentClientOrIssuer.logoPath,
         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+        payment_iban = documentClientOrIssuer.paymentIban?.text?.trim(),
+        payment_bic = documentClientOrIssuer.paymentBic?.text?.trim(),
+        payment_country = documentClientOrIssuer.paymentCountry?.trim()?.ifEmpty { null },
     )
 }
 
@@ -1349,6 +1508,9 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         logoPath = documentClientOrIssuer.logo_path,
         vatExempt = (documentClientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (documentClientOrIssuer.intra_eu_sales ?: 0L) != 0L,
+        paymentIban = documentClientOrIssuer.payment_iban?.let { TextFieldValue(text = it) },
+        paymentBic = documentClientOrIssuer.payment_bic?.let { TextFieldValue(text = it) },
+        paymentCountry = documentClientOrIssuer.payment_country,
     )
 }
 

@@ -24,5 +24,19 @@ data class CreditNoteState(
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
     var dueDate: String = "",
-    var linkedInvoice: InvoiceState? = null
+    var linkedInvoice: InvoiceState? = null,
+    // See InvoiceState.paymentMeansSelections — same semantics on credit notes since
+    // they are Factur-X payment documents too (type-code 381 for regular avoir, 384
+    // for corrective).
+    var paymentMeansSelections: Set<String>? = null,
+    // See InvoiceState.paymentMeansOtherChecked.
+    var paymentMeansOtherChecked: Boolean = false,
+    // See InvoiceState.paymentMeansSegments.
+    var paymentMeansSegments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment> = emptyList(),
+    // See InvoiceState.paymentMeansHidden.
+    var paymentMeansHidden: Boolean = false,
+    // See InvoiceState.paymentBankHidden.
+    var paymentBankHidden: Boolean = false,
+    // See InvoiceState.paymentBankSegments.
+    var paymentBankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = emptyList(),
 ) : DocumentState()

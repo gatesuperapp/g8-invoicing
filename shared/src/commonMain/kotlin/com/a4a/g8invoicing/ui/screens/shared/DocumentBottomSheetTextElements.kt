@@ -157,6 +157,50 @@ fun DocumentBottomSheetTextElements(
                     ScreenElement.DOCUMENT_FOOTER -> {
                         document.footerText
                     }
+                    ScreenElement.DOCUMENT_PAYMENT_MEANS -> when (document) {
+                        // PaymentPickerParams — see the data class definition below.
+                        // Bundles segments + hidden flag + issuer info (for the IBAN
+                        // dropdown) so the picker branch can fetch banks + show the
+                        // right pre-selection without extra plumbing.
+                        is InvoiceState -> PaymentPickerParams(
+                            segments = document.paymentMeansSegments,
+                            hidden = document.paymentMeansHidden,
+                            masterIssuerId = document.documentIssuer?.originalClientOrIssuerId?.toLong(),
+                            selectedIban = document.documentIssuer?.paymentIban?.text,
+                            bankHidden = document.paymentBankHidden,
+                            hasIssuer = document.documentIssuer != null,
+                            otherChecked = document.paymentMeansOtherChecked,
+                            bankSegments = document.paymentBankSegments,
+                            bankIban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty(),
+                            bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
+                            bankCountry = document.documentIssuer?.paymentCountry,
+                        )
+                        is com.a4a.g8invoicing.ui.states.CreditNoteState -> PaymentPickerParams(
+                            segments = document.paymentMeansSegments,
+                            hidden = document.paymentMeansHidden,
+                            masterIssuerId = document.documentIssuer?.originalClientOrIssuerId?.toLong(),
+                            selectedIban = document.documentIssuer?.paymentIban?.text,
+                            bankHidden = document.paymentBankHidden,
+                            hasIssuer = document.documentIssuer != null,
+                            otherChecked = document.paymentMeansOtherChecked,
+                            bankSegments = document.paymentBankSegments,
+                            bankIban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty(),
+                            bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
+                            bankCountry = document.documentIssuer?.paymentCountry,
+                        )
+                        else -> PaymentPickerParams(
+                            segments = emptyList(),
+                            hidden = false,
+                            masterIssuerId = null,
+                            selectedIban = null,
+                            bankHidden = false,
+                            hasIssuer = false,
+                        )
+                    }
+                    ScreenElement.DOCUMENT_PAYMENT_TERMS -> when (document) {
+                        is InvoiceState -> document.paymentTermsDescription
+                        else -> androidx.compose.ui.text.input.TextFieldValue()
+                    }
 
                     else -> {}
                 },

@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
 import com.a4a.g8invoicing.shared.resources.addressed_to
 import com.a4a.g8invoicing.shared.resources.alert_dialog_error
 import com.a4a.g8invoicing.shared.resources.alert_dialog_error_confirm
@@ -154,6 +156,11 @@ actual fun ExportPdfPlatform(
         companyId3Label = stringResource(Res.string.company_identification3),
         otherLines = stringResource(Res.string.document_products_other_lines),
         currencyNoticeLabel = stringResource(Res.string.pdf_currency_notice),
+        paymentMeansLabels = com.a4a.g8invoicing.data.models.PaymentMeans.entries.associate {
+            it.chipId to stringResource(it.labelRes)
+        },
+        bankAccountIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban),
+        bankAccountGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic),
     )
 
     // Strings for UI

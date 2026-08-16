@@ -13,6 +13,35 @@ CREATE TABLE Invoice (
   show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
   hide_linked_source_headers INTEGER NOT NULL DEFAULT 0,
+  -- Payment-means chip selections, stored as comma-separated chip identities
+  -- ("TRANSFER,CHEQUE" ou "PAYPAL,STRIPE"). Chip identity (not UN/CEFACT code)
+  -- because PayPal + Stripe share code 68 — code alone can't tell them apart
+  -- at reload. UN/CEFACT 4461 codes are derived at Factur-X export time via
+  -- unCefactCodesForExport(), with fallback [1] "Instrument not defined" when
+  -- nothing is checked. Nullable ; vide = pas de mention rendue sur le PDF.
+  payment_means_selections TEXT,
+  -- Editable prefix rendered before the joined payment-means list on the
+  -- PDF/preview. Empty string = opt-out (whole block skipped).
+  payment_means_label TEXT,
+  -- Eye toggle in the payment-means picker. 1 = the whole block (label + list)
+  -- is hidden on preview + PDF. Codes stay persisted so Factur-X BT-81 data is
+  -- preserved regardless.
+  payment_means_hidden INTEGER NOT NULL DEFAULT 0,
+  -- BT-20 Payment Terms Description — texte libre (mentions LME, "30j net"…).
+  -- Frozen per doc à la création via getExistingPaymentTermsDescription() +
+  -- fallback document_default_payment_terms.
+  payment_terms_description TEXT,
+  -- Eye toggle on the "Afficher les coordonnées bancaires" switch inside the
+  -- payment-means picker. 1 = IBAN/BIC line hidden on preview + PDF. Frozen
+  -- fields on DocumentClientOrIssuer stay populated (BT-84/86 preserved).
+  payment_bank_hidden INTEGER NOT NULL DEFAULT 0,
+  -- "Autre" chip state — separate flag rather than a sentinel in
+  -- payment_means_selections. Keeps selections column 100% UN/CEFACT-clean and
+  -- enforces that OTHER is UI-only (never rendered on the invoice or exported).
+  payment_means_other_checked INTEGER NOT NULL DEFAULT 0,
+  -- Editable bank-details label: JSON-serialised PaymentBankSegment list.
+  -- Null / empty = fall back to defaultPaymentBankSegments().
+  payment_bank_label TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -44,8 +73,8 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers, payment_means_selections, payment_means_label, payment_means_hidden, payment_terms_description, payment_bank_hidden, payment_means_other_checked, payment_bank_label)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
@@ -57,9 +86,36 @@ SET number = :number,
     due_date =: due_date,
     payment_status =: payment_status,
     footer  =: footer,
+    payment_means_selections = :payment_means_selections,
+    payment_means_label = :payment_means_label,
+    payment_means_hidden = :payment_means_hidden,
+    payment_terms_description = :payment_terms_description,
+    payment_bank_hidden = :payment_bank_hidden,
+    payment_means_other_checked = :payment_means_other_checked,
+    payment_bank_label = :payment_bank_label,
     updated_at =: updated_at
 WHERE
     invoice_id = :invoice_id;
+
+getLastInsertedInvoicePaymentTerms:
+SELECT payment_terms_description
+FROM Invoice
+WHERE payment_terms_description IS NOT NULL AND payment_terms_description != ''
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+-- Most recent invoice attached to a specific master issuer, so a new invoice
+-- for the same company seeds its payment terms/means/bank labels + chip
+-- selections from the last one — reused text is per-issuer, not global.
+getLastInvoicePaymentReuseForIssuer:
+SELECT i.payment_terms_description, i.payment_means_selections,
+       i.payment_means_label, i.payment_means_other_checked, i.payment_bank_label
+FROM Invoice i
+JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
+JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+ORDER BY i.invoice_id DESC
+LIMIT 1;
 
 updateHideLinkedSourceHeaders:
 UPDATE Invoice

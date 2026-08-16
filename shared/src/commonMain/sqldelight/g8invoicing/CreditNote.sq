@@ -11,6 +11,18 @@ CREATE TABLE CreditNote (
   labels_snapshot TEXT,
   show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
+  -- See Invoice.payment_means_selections.
+  payment_means_selections TEXT,
+  -- See Invoice.payment_means_label.
+  payment_means_label TEXT,
+  -- See Invoice.payment_means_hidden.
+  payment_means_hidden INTEGER NOT NULL DEFAULT 0,
+  -- See Invoice.payment_bank_hidden.
+  payment_bank_hidden INTEGER NOT NULL DEFAULT 0,
+  -- See Invoice.payment_means_other_checked.
+  payment_means_other_checked INTEGER NOT NULL DEFAULT 0,
+  -- See Invoice.payment_bank_label.
+  payment_bank_label TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -41,8 +53,8 @@ SELECT credit_note_id
 FROM CreditNote;
 
 save:
-INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, payment_means_selections, payment_means_label, payment_means_hidden, payment_bank_hidden, payment_means_other_checked, payment_bank_label)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE CreditNote
@@ -53,6 +65,12 @@ SET number = :number,
     currency =: currency,
     due_date =: due_date,
     footer  =: footer,
+    payment_means_selections = :payment_means_selections,
+    payment_means_label = :payment_means_label,
+    payment_means_hidden = :payment_means_hidden,
+    payment_bank_hidden = :payment_bank_hidden,
+    payment_means_other_checked = :payment_means_other_checked,
+    payment_bank_label = :payment_bank_label,
     updated_at =: updated_at
 
 WHERE

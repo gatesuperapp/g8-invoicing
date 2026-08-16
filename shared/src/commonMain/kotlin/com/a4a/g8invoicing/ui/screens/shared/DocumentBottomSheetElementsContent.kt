@@ -13,6 +13,9 @@ import com.a4a.g8invoicing.shared.resources.document_default_reference
 import com.a4a.g8invoicing.shared.resources.document_free_field
 import com.a4a.g8invoicing.shared.resources.document_due_date
 import com.a4a.g8invoicing.shared.resources.document_footer
+import com.a4a.g8invoicing.shared.resources.document_payment_means
+import com.a4a.g8invoicing.shared.resources.document_payment_terms
+import com.a4a.g8invoicing.data.models.joinPaymentMeansLabels
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
@@ -105,6 +108,46 @@ fun DocumentBottomSheetElementsContent(
                     pageElement = ScreenElement.DOCUMENT_DUE_DATE
                 )
             )
+        // Payment terms (BT-20) — free-text row for invoice only. Between
+        // Échéance and Moyens de paiement (ordre final : Échéance → Termes →
+        // Moyens → Pied de page).
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_payment_terms),
+                inputType = ForwardElement(
+                    text = document.paymentTermsDescription.text.ifEmpty { " - " },
+                    isMultiline = false,
+                    displayArrow = false,
+                ),
+                pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS,
+            )
+        )
+    }
+    // Payment means (BT-81) — invoice + credit note only. Row label is fixed
+    // ("Moyens de paiement"), matching Termes de paiement above it. The user's
+    // editable per-doc label (rendered on the preview/PDF) lives inside the
+    // picker modal itself — keeping the menu row stable so users can find the
+    // entry no matter what they typed in the label field.
+    val paymentMeansSelections: Set<String>? = when (document) {
+        is InvoiceState -> document.paymentMeansSelections
+        is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansSelections
+        else -> null
+    }
+    if (document is InvoiceState ||
+        document is com.a4a.g8invoicing.ui.states.CreditNoteState
+    ) {
+        val joined = joinPaymentMeansLabels(paymentMeansSelections)
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_payment_means),
+                inputType = ForwardElement(
+                    text = joined.ifEmpty { " - " },
+                    isMultiline = false,
+                    displayArrow = false,
+                ),
+                pageElement = ScreenElement.DOCUMENT_PAYMENT_MEANS,
+            )
+        )
     }
     inputList.add(
         FormInput(

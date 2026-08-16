@@ -37,4 +37,45 @@ data class InvoiceState(
     // one eye icon per source-header block in the doc form, all wired to the same
     // boolean.
     var hideLinkedSourceHeaders: Boolean = false,
+    // Payment-means chip selections — chip identities (enum names like
+    // "TRANSFER", "PAYPAL"), NOT UN/CEFACT 4461 codes. PayPal + Stripe share
+    // code 68; chip identity is what round-trips through the DB so both stay
+    // distinguishable at reload. UN/CEFACT codes derive at Factur-X export
+    // time via [unCefactCodesForExport] with the "empty → [1] Instrument not
+    // defined" fallback. Empty/null = no info displayed on the PDF.
+    // Default seeded on createNew() to {TRANSFER, CHEQUE, CASH} — the classic
+    // FR B2B combo. Does NOT contain OTHER (see [paymentMeansOtherChecked]).
+    var paymentMeansSelections: Set<String>? = null,
+    // "Autre" chip state. Separate flag rather than a sentinel in selections
+    // so the selections column stays 100% UN/CEFACT-clean. OTHER is UI-only:
+    // never contributes a Token to segments, never renders on the invoice,
+    // never exports to Factur-X — it's purely a marker for the user's picker.
+    var paymentMeansOtherChecked: Boolean = false,
+    // Structured payment-means label: a mixed list of Free text segments and
+    // locked Token(code) segments (see PaymentLabelSegment). Chip toggles
+    // append or remove tokens; the "Modifier le texte" modal edits the Free
+    // portions around them, rejecting any edit that would delete a token.
+    // Tokens render as their locale-appropriate mode label at flatten time,
+    // so the persisted payload stays language-agnostic. Empty list = no block
+    // rendered on preview + PDF.
+    var paymentMeansSegments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment> = emptyList(),
+    // Eye toggle inside the payment-means picker. true = the whole payment-means
+    // block (label + list) is hidden on preview + PDF. Codes stay persisted so
+    // Factur-X BT-81 data is preserved.
+    var paymentMeansHidden: Boolean = false,
+    // "Afficher les coordonnées bancaires" switch below the IBAN dropdown in
+    // the payment-means picker. true = IBAN/BIC line skipped on preview + PDF.
+    // Frozen fields on DocumentClientOrIssuer stay populated regardless.
+    var paymentBankHidden: Boolean = false,
+    // Structured bank-details label (same segments+tokens pattern as
+    // paymentMeansSegments). Empty list = fall back to
+    // defaultPaymentBankSegments() at render time.
+    var paymentBankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = emptyList(),
+    // BT-20 Payment Terms Description — free-text conditions, e.g. "Escompte pour
+    // paiement anticipé : néant\nTaux de pénalités : néant\nPaiement sous 30 jours net".
+    // Per-invoice (not on the issuer) since different clients can have different terms.
+    // Default seeded on createNew() from getExistingPaymentTermsDescription() → last
+    // used text → fallback to document_default_payment_terms (which carries the LME
+    // legal mentions in FR).
+    var paymentTermsDescription: TextFieldValue = TextFieldValue(),
 ) : DocumentState()

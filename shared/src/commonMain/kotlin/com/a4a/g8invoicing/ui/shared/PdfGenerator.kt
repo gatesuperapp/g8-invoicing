@@ -45,6 +45,18 @@ data class PdfStrings(
     // created with showCurrencyAndAutoTaxColumn=true and the currency isn't EUR. The
     // %1$s placeholder receives the ISO code — never translated.
     val currencyNoticeLabel: String,
+    // Payment means block (BT-81) mode labels keyed by chip identity (enum
+    // name like "TRANSFER", "PAYPAL"). Chip identity, not UN/CEFACT code,
+    // because PayPal + Stripe share code 68. Resolved at construction time
+    // from Compose Resources so PDF generation stays synchronous. The block's
+    // prefix is not stored here — it's a per-document user label on
+    // Invoice/CreditNote state (paymentMeansLabel), rendered as
+    // "<userLabel> : <joined modes>".
+    val paymentMeansLabels: Map<String, String>,
+    // Label prefix for the bank identifier line — "IBAN :" for IBAN countries,
+    // localised "N° de compte :" for non-IBAN countries (US, AU, NZ, ZA…).
+    val bankAccountIbanLabel: String,
+    val bankAccountGenericLabel: String,
 )
 
 /**

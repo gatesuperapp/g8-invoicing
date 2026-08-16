@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 class InvoiceAddEditViewModel(
     private val documentDataSource: InvoiceLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
+    private val clientOrIssuerDataSource: com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface,
     private val itemId: String?,
 ) : ViewModel() {
     private var fetchJob: Job? = null
@@ -96,6 +97,21 @@ class InvoiceAddEditViewModel(
     fun updateUiState(screenElement: ScreenElement, value: Any) {
         _documentUiState.value =
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
+        // Side effect: freezing a new bank on the doc doesn't go through the
+        // Invoice-row autoSave (which only writes the invoice table) — hit the
+        // dedicated DocumentClientOrIssuer.payment_iban/bic write path here.
+        if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
+            val bank = value as? com.a4a.g8invoicing.ui.states.IssuerBankState ?: return
+            val docIssuerId = _documentUiState.value.documentIssuer?.id?.toLong() ?: return
+            viewModelScope.launch {
+                clientOrIssuerDataSource.updateDocumentClientOrIssuerPaymentBank(
+                    documentClientOrIssuerId = docIssuerId,
+                    iban = bank.identifier.text.takeIf { it.isNotEmpty() },
+                    bic = bank.bic.text.takeIf { it.isNotEmpty() },
+                    country = bank.countryCode?.takeIf { it.isNotEmpty() },
+                )
+            }
+        }
     }
 
     // Flip the "hide linked source headers" bit on the current invoice: mirror
@@ -367,6 +383,59 @@ class InvoiceAddEditViewModel(
 
             ScreenElement.DOCUMENT_FOOTER -> {
                 doc = doc.copy(footerText = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_MEANS_LABEL -> {
+                // Now carries List<PaymentLabelSegment>. Selections are derived
+                // from the tokens present (chip identities), so both fields stay
+                // in sync without a separate DOCUMENT_PAYMENT_MEANS event. OTHER
+                // never appears here — it lives on paymentMeansOtherChecked.
+                @Suppress("UNCHECKED_CAST")
+                val newSegments = value as List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>
+                doc = doc.copy(
+                    paymentMeansSegments = newSegments,
+                    paymentMeansSelections = com.a4a.g8invoicing.data.models
+                        .chipIdsFromSegments(newSegments)
+                        .takeIf { it.isNotEmpty() },
+                )
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_MEANS_HIDDEN -> {
+                doc = doc.copy(paymentMeansHidden = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_MEANS_OTHER -> {
+                doc = doc.copy(paymentMeansOtherChecked = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_BANK_HIDDEN -> {
+                doc = doc.copy(paymentBankHidden = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_BANK_LABEL -> {
+                @Suppress("UNCHECKED_CAST")
+                doc = doc.copy(
+                    paymentBankSegments = value as List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
+                )
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_BANK_PICKED -> {
+                val bank = value as com.a4a.g8invoicing.ui.states.IssuerBankState
+                doc.documentIssuer?.let { currentIssuer ->
+                    doc = doc.copy(
+                        documentIssuer = currentIssuer.copy(
+                            paymentIban = bank.identifier.text.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentBic = bank.bic.text.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentCountry = bank.countryCode?.takeIf { it.isNotEmpty() },
+                        )
+                    )
+                }
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_TERMS -> {
+                doc = doc.copy(paymentTermsDescription = value as TextFieldValue)
             }
 
             else -> {}
