@@ -62,9 +62,31 @@ class CreditNoteLocalDataSource(
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
+        // Per-issuer reuse: mirror the Invoice createNew logic — pull payment
+        // means / bank segments from the most recent credit note for the same
+        // master issuer, so a new credit note inherits whatever the user last
+        // set on THIS company.
+        val reuse = existingIssuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            creditNoteQueries.getLastCreditNotePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
+
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
+
+            val reusedSelections = reuse?.payment_means_selections
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                ?.takeIf { it.isNotEmpty() }
+            val reusedSegments = reuse?.payment_means_label?.let {
+                com.a4a.g8invoicing.data.models.parsePaymentLabel(it)
+            }?.takeIf { it.isNotEmpty() }
+            val reusedBankSegments = reuse?.payment_bank_label?.let {
+                com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
+            }?.takeIf { it.isNotEmpty() }
 
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
@@ -79,14 +101,17 @@ class CreditNoteLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
-                paymentMeansSelections = setOf(
+                paymentMeansSelections = reusedSelections ?: setOf(
                     com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
                     com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
                     com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
                 ),
-                paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
-                    getString(Res.string.document_payment_means_default_label)
-                ),
+                paymentMeansOtherChecked = (reuse?.payment_means_other_checked ?: 0L) != 0L,
+                paymentMeansSegments = reusedSegments
+                    ?: com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                paymentBankSegments = reusedBankSegments ?: emptyList(),
             )
 
             saveInfoInCreditNoteTable(creditNote)

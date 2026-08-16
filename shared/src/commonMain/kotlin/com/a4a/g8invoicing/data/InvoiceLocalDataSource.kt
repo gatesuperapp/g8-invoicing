@@ -89,8 +89,11 @@ class InvoiceLocalDataSource(
         // from the most recent invoice for the same master issuer, so the new
         // invoice inherits whatever the user last set on THIS company (not the
         // last global invoice, which might belong to a different émetteur).
+        // getLastIssuer() returns a DOCUMENT_ISSUER shell with id=null and the
+        // master pointer on originalClientOrIssuerId — that's the id our SQL
+        // filters on.
         // Null when no prior invoice matches → fall back to defaults.
-        val reuse = existingIssuer?.id?.toLong()?.let { masterId ->
+        val reuse = existingIssuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
             invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
                 .executeAsOneOrNull()
         }

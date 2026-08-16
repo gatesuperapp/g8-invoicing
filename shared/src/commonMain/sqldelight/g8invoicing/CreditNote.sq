@@ -92,3 +92,31 @@ FROM CreditNote
 ORDER BY credit_note_id DESC
 LIMIT 1;
 
+-- Per-issuer payment reuse for a fresh credit note: pick the most recently
+-- created document (credit note OR invoice) attached to the same master
+-- issuer and read its payment means/bank labels + chip selections. Falls back
+-- to invoices because credit notes are rare — if the user just created a
+-- normal invoice for this company, that's what they want to inherit from.
+getLastCreditNotePaymentReuseForIssuer:
+SELECT payment_means_selections, payment_means_label,
+       payment_means_other_checked, payment_bank_label
+FROM (
+    SELECT c.payment_means_selections, c.payment_means_label,
+           c.payment_means_other_checked, c.payment_bank_label,
+           c.created_at AS ts
+    FROM CreditNote c
+    JOIN LinkCreditNoteToDocumentClientOrIssuer l ON l.credit_note_id = c.credit_note_id
+    JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+    WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+    UNION ALL
+    SELECT i.payment_means_selections, i.payment_means_label,
+           i.payment_means_other_checked, i.payment_bank_label,
+           i.created_at AS ts
+    FROM Invoice i
+    JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
+    JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+    WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+)
+ORDER BY ts DESC
+LIMIT 1;
+
