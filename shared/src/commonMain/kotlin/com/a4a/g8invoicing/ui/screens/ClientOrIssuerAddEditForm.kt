@@ -16,10 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -51,7 +47,6 @@ import org.koin.compose.koinInject
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.client_add_address
 import com.a4a.g8invoicing.shared.resources.issuer_bank_add
-import com.a4a.g8invoicing.shared.resources.issuer_bank_delete_a11y
 import com.a4a.g8invoicing.shared.resources.issuer_bank_label
 import com.a4a.g8invoicing.shared.resources.issuer_bank_label_input
 import com.a4a.g8invoicing.shared.resources.client_address1
@@ -70,7 +65,6 @@ import com.a4a.g8invoicing.shared.resources.client_company_identification3_input
 import com.a4a.g8invoicing.shared.resources.company_identification1
 import com.a4a.g8invoicing.shared.resources.company_identification2
 import com.a4a.g8invoicing.shared.resources.company_identification3
-import com.a4a.g8invoicing.shared.resources.client_delete_address
 import com.a4a.g8invoicing.shared.resources.client_email
 import com.a4a.g8invoicing.shared.resources.client_email_input
 import com.a4a.g8invoicing.shared.resources.client_first_name
@@ -95,6 +89,7 @@ import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_label
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.DeleteBlockRow
 import com.a4a.g8invoicing.ui.shared.EmailListInput
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.FormInput
@@ -206,7 +201,6 @@ fun ClientOrIssuerAddEditForm(
     val clientNotesLabel = stringResource(Res.string.client_notes)
     val clientNotesPlaceholder = stringResource(Res.string.client_notes_input)
     val clientAddAddressText = stringResource(Res.string.client_add_address)
-    val clientDeleteAddressText = stringResource(Res.string.client_delete_address)
     val issuerLogoLabel = stringResource(Res.string.issuer_logo_label)
     val issuerLogoSelect = stringResource(Res.string.issuer_logo_select)
     val issuerLogoRemove = stringResource(Res.string.issuer_logo_remove)
@@ -474,7 +468,9 @@ fun ClientOrIssuerAddEditForm(
                 }
 
 
-                // Create the UI with list items
+                val showDelete = typeOfCreation?.name.toString()
+                    .contains(ClientOrIssuerType.CLIENT.name)
+                    && i > 1 && i == numberOfClientAddresses
                 FormUI(
                     inputList = inputList,
                     localFocusManager = localFocusManager,
@@ -488,23 +484,24 @@ fun ClientOrIssuerAddEditForm(
                         }
                     },
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    errors = clientOrIssuerUiState.errors
+                    errors = clientOrIssuerUiState.errors,
+                    trailingContent = if (showDelete) {
+                        {
+                            DeleteBlockRow(
+                                onClick = {
+                                    numberOfClientAddresses -= 1
+                                    if (clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
+                                        onClickDeleteAddress()
+                                    }
+                                },
+                            )
+                        }
+                    } else null,
                 )
             }
 
             if (typeOfCreation?.name.toString().contains(ClientOrIssuerType.CLIENT.name)) {
                 Row(Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
-                    if (i > 1 && i == numberOfClientAddresses) {
-                        DeleteAddressButton(
-                            onClick = {
-                                numberOfClientAddresses -= 1
-                                if (clientOrIssuerUiState.addresses?.getOrNull(i - 1) != null) {
-                                    onClickDeleteAddress()
-                                }
-                            },
-                            contentDescription = clientDeleteAddressText
-                        )
-                    }
                     Spacer(Modifier.weight(1F))
                     if (i != 3 && numberOfClientAddresses == i) {
                         AddAddressButton(
@@ -824,24 +821,6 @@ fun ClientOrIssuerAddEditForm(
 }
 
 @Composable
-fun DeleteAddressButton(onClick: () -> Unit, contentDescription: String) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .padding(end = 4.dp, top = 4.dp, bottom = 16.dp)
-            .size(14.dp)
-    ) {
-        Icon(
-            modifier = Modifier
-                .size(22.dp),
-            imageVector = Icons.Outlined.DeleteOutline,
-            tint = AppColors.iconPrimary,
-            contentDescription = contentDescription
-        )
-    }
-}
-
-@Composable
 private fun SectionTitle(text: String) {
     Text(
         text = text.uppercase(),
@@ -893,7 +872,6 @@ private fun IssuerBanksSection(
     defaultCountryCode: String?,
 ) {
     val addLabel = stringResource(Res.string.issuer_bank_add)
-    val deleteA11y = stringResource(Res.string.issuer_bank_delete_a11y)
     // Show at least one row so the user has something to type into on a fresh
     // issuer — treat "no banks stored" as "one empty placeholder".
     val display = if (banks.isEmpty()) listOf(com.a4a.g8invoicing.ui.states.IssuerBankState()) else banks
@@ -917,20 +895,10 @@ private fun IssuerBanksSection(
                     onBanksChange(newList)
                 },
                 onCountryClick = { bankCountryPickerIndex = index + 1 },
+                onDelete = if (index > 0) {
+                    { onBanksChange(banks.toMutableList().apply { removeAt(index) }) }
+                } else null,
             )
-            // Delete button on the gray outer background, only on rows after the
-            // first (the primary account has no delete affordance). Left-aligned
-            // to match the "delete address" convention on the client form.
-            if (index > 0) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    DeleteAddressButton(
-                        onClick = {
-                            onBanksChange(banks.toMutableList().apply { removeAt(index) })
-                        },
-                        contentDescription = deleteA11y,
-                    )
-                }
-            }
         }
 
         // Capped at 2 per the current spec.
@@ -980,6 +948,7 @@ private fun IssuerBankRow(
     defaultCountryCode: String?,
     onBankChange: (com.a4a.g8invoicing.ui.states.IssuerBankState) -> Unit,
     onCountryClick: () -> Unit,
+    onDelete: (() -> Unit)? = null,
 ) {
     val labelInputHint = stringResource(Res.string.issuer_bank_label_input)
     val labelFieldLabel = stringResource(Res.string.issuer_bank_label)
@@ -1074,6 +1043,9 @@ private fun IssuerBankRow(
             },
             placeCursorAtTheEndOfText = {},
             errors = mutableListOf(),
+            trailingContent = if (onDelete != null) {
+                { DeleteBlockRow(onClick = onDelete) }
+            } else null,
         )
     }
 }

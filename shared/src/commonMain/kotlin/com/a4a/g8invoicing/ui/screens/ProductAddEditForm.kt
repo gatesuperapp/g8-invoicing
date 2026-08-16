@@ -2,7 +2,6 @@ package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,16 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.product_add_price
-import com.a4a.g8invoicing.shared.resources.product_delete_price
 import com.a4a.g8invoicing.shared.resources.product_description
 import com.a4a.g8invoicing.shared.resources.product_description_input
 import com.a4a.g8invoicing.shared.resources.product_name
@@ -71,6 +64,7 @@ import com.a4a.g8invoicing.shared.resources.product_unit_code_info_modal_title
 import com.a4a.g8invoicing.shared.resources.product_unit_code_label
 import com.a4a.g8invoicing.shared.resources.product_unit_input
 import com.a4a.g8invoicing.ui.shared.DecimalInput
+import com.a4a.g8invoicing.ui.shared.DeleteBlockRow
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
@@ -357,7 +351,6 @@ fun ProductAddEditForm(
                 }
 
                 key(currentPrice.idStr) {
-                    Box {
                     Column(
                         modifier = Modifier
                             .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
@@ -422,16 +415,11 @@ fun ProductAddEditForm(
                             localFocusManager = localFocusManager,
                             placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                             onClickOpenClientSelection = onClickSelectClients,
-                            errors = product.errors
+                            errors = product.errors,
+                            trailingContent = {
+                                DeleteBlockRow(onClick = { onClickDeletePrice(currentPrice.idStr) })
+                            },
                         )
-                    }
-                    // Overlaid delete affordance — quarter-circle grey pill in
-                    // the top-right corner, so removing a price doesn't push
-                    // the block down by a dedicated row.
-                    QuarterCircleDeleteButton(
-                        modifier = Modifier.align(Alignment.TopEnd),
-                        onClick = { onClickDeletePrice(currentPrice.idStr) },
-                    )
                     }
                 }
             }
@@ -496,52 +484,3 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, topPadding: Dp
 }
 
 
-@Composable
-fun DeletePriceButton(onClick: () -> Unit) {
-    val deletePriceText = stringResource(Res.string.product_delete_price)
-    Box(
-        modifier = Modifier
-            .offset(x = 8.dp, y = (-8).dp)
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            modifier = Modifier.size(18.dp),
-            imageVector = Icons.Outlined.Delete,
-            tint = AppColors.iconPrimary,
-            contentDescription = deletePriceText
-        )
-    }
-}
-
-/**
- * Delete affordance overlaid on the top-right corner of a card. Grey background
- * shaped as a quarter-circle "pie slice" — the top and right edges hug the
- * card corner (topEnd rounded like the card, 6.dp), the bottom-left is fully
- * rounded so the fill reads as one quarter of a big circle inside the corner.
- */
-@Composable
-fun QuarterCircleDeleteButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    contentDescription: String? = null,
-) {
-    Box(
-        modifier = modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(topEnd = 6.dp, bottomStart = 100.dp, topStart = 0.dp, bottomEnd = 0.dp))
-            .background(AppColors.divider)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.TopEnd,
-    ) {
-        Icon(
-            modifier = Modifier
-                .padding(top = 6.dp, end = 6.dp)
-                .size(16.dp),
-            imageVector = Icons.Outlined.Delete,
-            tint = AppColors.iconPrimary,
-            contentDescription = contentDescription,
-        )
-    }
-}

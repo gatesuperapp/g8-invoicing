@@ -42,6 +42,10 @@ fun FormUI(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
     errors: MutableList<Pair<ScreenElement, String?>>? = null,
     onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
+    // Extra content rendered inside the same Column as the inputs, right after
+    // the last one — with a Separator drawn between them so it visually reads
+    // as another row of the block. Used for the "Supprimer" affordance.
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     // handle focus
     val focusManager = LocalFocusManager.current
@@ -129,9 +133,13 @@ fun FormUI(
                     rowYRanges.add(Triple(input.pageElement, top, bottom))
                 }
             }) {
+                // Last input still needs a separator below it when trailingContent
+                // will render right after, so the delete row reads as a real row.
+                val drawBottomSeparator = input != inputList.last() || trailingContent != null
                 PageElementCreator(
                     input = input,
                     isLastInput = input == inputList.last(),
+                    drawBottomSeparator = drawBottomSeparator,
                     imeAction = imeAction,
                     onClickForward = onClickForward,
                     onClickOpenClientSelection = onClickOpenClientSelection,
@@ -154,6 +162,7 @@ fun FormUI(
                 )
             }
         }
+        trailingContent?.invoke()
     }
 }
 
@@ -170,6 +179,7 @@ fun PageElementCreator(
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
     clearFocusForAllRows: () -> Unit,
+    drawBottomSeparator: Boolean = !isLastInput,
 ) {
     Column {
         RowWithLabelAndInput(
@@ -185,7 +195,7 @@ fun PageElementCreator(
             clearFocusForAllRows = clearFocusForAllRows
         )
 
-        if (!isLastInput) {
+        if (drawBottomSeparator) {
             Separator()
         }
     }
@@ -233,7 +243,7 @@ fun RowWithLabelAndInput(
                 start = 16.dp,
                 end = if (formInput.pageElement.name.startsWith("DOCUMENT_PRODUCT")) 0.dp else 16.dp,
                 top = 14.dp,
-                bottom = if (formInput.pageElement == ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS) 4.dp else 14.dp
+                bottom = 14.dp,
             )
     ) {
         // Label
