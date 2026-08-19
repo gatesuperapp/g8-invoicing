@@ -54,4 +54,6 @@ expect fun DocumentAddEditPlatform(
     showProductType: Boolean = false,
     hideLinkedSourceHeaders: Boolean = false,
     onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
+    onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit = { _, _ -> },
+    onToggleRetentionHidden: (Int) -> Unit = {},
 )

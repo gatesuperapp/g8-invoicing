@@ -178,6 +178,7 @@
     <string name="document_modal_edit_issuer">Ersteller bearbeiten</string>
     <string name="document_modal_new_client">Neuer Kunde</string>
     <string name="document_modal_edit_client">Kunde bearbeiten</string>
+    <string name="document_modal_edit_retention">Quellensteuer bearbeiten</string>
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Schließen</string>
     <string name="whats_new_done">Los geht's!</string>
@@ -547,6 +548,16 @@ Es ist ein Fehler aufgetreten :
     <string name="issuer_vat_exempt_info_modal_title">Kleinunternehmerregelung</string>
     <string name="issuer_vat_exempt_info_modal_content">Nützlich für die E-Rechnungs-Konformität — g8 fügt den passenden gesetzlichen Hinweis zur Kleinunternehmerregelung für dein Land automatisch auf den Rechnungen ein.</string>
     <string name="issuer_vat_exempt_info_desc">Info Kleinunternehmerregelung</string>
+    <string name="issuer_tax_withholding_label">Quellensteuer</string>
+    <string name="issuer_tax_withholding_info_modal_content">Wenn aktiviert, wird automatisch eine Quellensteuer-Zeile zu neuen Rechnungen und Gutschriften dieses Ausstellers hinzugefügt. Du kannst Bezeichnung und Satz in der Zeile bearbeiten oder sie mit dem Augensymbol auf einzelnen Rechnungen ausblenden.</string>
+    <string name="issuer_tax_withholding_info_desc">Info Quellensteuer</string>
+    <string name="retention_default_label">Quellensteuer</string>
+    <string name="retention_default_mx_isr">Retención ISR</string>
+    <string name="retention_default_mx_iva">Retención IVA</string>
+    <string name="retention_edit_field_label">Bezeichnung</string>
+    <string name="retention_edit_field_rate">Satz (%)</string>
+    <string name="retention_hide_a11y">Auf PDF ausblenden</string>
+    <string name="retention_show_a11y">Auf PDF anzeigen</string>
 
     <!-- Quote (Devis) -->
     <string name="appbar_quotes">Kostenvoranschläge</string>

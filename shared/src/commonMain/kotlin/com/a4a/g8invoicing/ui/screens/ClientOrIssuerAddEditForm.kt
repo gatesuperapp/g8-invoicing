@@ -87,6 +87,9 @@ import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_desc
 import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_content
 import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_info_modal_title
 import com.a4a.g8invoicing.shared.resources.issuer_intra_eu_sales_label
+import com.a4a.g8invoicing.shared.resources.issuer_tax_withholding_info_desc
+import com.a4a.g8invoicing.shared.resources.issuer_tax_withholding_info_modal_content
+import com.a4a.g8invoicing.shared.resources.issuer_tax_withholding_label
 import com.a4a.g8invoicing.shared.resources.issuer_vat_exempt_label
 import com.a4a.g8invoicing.shared.resources.client_zip_code
 import com.a4a.g8invoicing.shared.resources.client_zip_code_input
@@ -202,6 +205,9 @@ fun ClientOrIssuerAddEditForm(
     val issuerIntraEuSalesInfoTitle = stringResource(Res.string.issuer_intra_eu_sales_info_modal_title)
     val issuerIntraEuSalesInfoContent = stringResource(Res.string.issuer_intra_eu_sales_info_modal_content)
     val issuerIntraEuSalesInfoDesc = stringResource(Res.string.issuer_intra_eu_sales_info_desc)
+    val issuerTaxWithholdingLabel = stringResource(Res.string.issuer_tax_withholding_label)
+    val issuerTaxWithholdingDesc = stringResource(Res.string.issuer_tax_withholding_info_modal_content)
+    val issuerTaxWithholdingInfoDesc = stringResource(Res.string.issuer_tax_withholding_info_desc)
 
     // Check if this is an issuer (to show logo field)
     // Also check typeOfCreation for new issuer creation where type might be null
@@ -653,6 +659,7 @@ fun ClientOrIssuerAddEditForm(
                             checked
                         )
                     },
+                    modifier = Modifier.scale(0.8f),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = ColorVioletLink,
@@ -702,6 +709,52 @@ fun ClientOrIssuerAddEditForm(
                                 checked
                             )
                         },
+                        modifier = Modifier.scale(0.8f),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = ColorVioletLink,
+                            checkedBorderColor = Color.Transparent,
+                            uncheckedBorderColor = Color.Transparent,
+                        ),
+                    )
+                }
+            }
+
+            // Withholding tax toggle. Hidden outside the RETENTION_COUNTRIES set
+            // (Spain, Portugal, Italy, Japan, Chile, Peru, Mexico, Brazil,
+            // Colombia) — the row would be noise for users in other markets.
+            if (CountryCodes.isRetentionCountry(issuerCountry)) {
+                Spacer(Modifier.padding(bottom = 16.dp))
+                Row(
+                    modifier = Modifier
+                        .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = issuerTaxWithholdingLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    InfoTooltipButton(
+                        title = issuerTaxWithholdingLabel,
+                        content = issuerTaxWithholdingDesc,
+                        contentDescription = issuerTaxWithholdingInfoDesc,
+                        persistenceKey = "issuer_tax_withholding",
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Switch(
+                        checked = clientOrIssuerUiState.taxWithholdingEnabled,
+                        onCheckedChange = { checked ->
+                            onValueChange(
+                                if (isInBottomSheetModal) ScreenElement.DOCUMENT_ISSUER_TAX_WITHHOLDING
+                                else ScreenElement.ISSUER_TAX_WITHHOLDING,
+                                checked
+                            )
+                        },
+                        modifier = Modifier.scale(0.8f),
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = ColorVioletLink,

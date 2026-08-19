@@ -387,9 +387,17 @@ fun NavGraphBuilder.invoiceAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
+                                val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
+                                val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
+                                if (turnedOffRetention) {
+                                    invoiceViewModel.clearRetentionsInDb()
+                                } else if (turnedOnRetention) {
+                                    invoiceViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false
                             }
@@ -426,6 +434,9 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 showDocumentForm = false
                             }
                         }
+                        // Retention save routes through the form's onRetentionSave
+                        // callback below, not through this when. Kept exhaustive.
+                        DocumentBottomSheetTypeOfForm.EDIT_RETENTION -> {}
                     }
                 }
             },
@@ -453,6 +464,12 @@ fun NavGraphBuilder.invoiceAddEdit(
             showProductType = showProductType,
             hideLinkedSourceHeaders = document.hideLinkedSourceHeaders,
             onToggleHideLinkedSourceHeaders = invoiceViewModel::toggleHideLinkedSourceHeaders,
+            onSaveRetention = { idx, updated ->
+                invoiceViewModel.updateRetentionAt(idx, updated)
+            },
+            onToggleRetentionHidden = { idx ->
+                invoiceViewModel.toggleRetentionHiddenAt(idx)
+            },
         )
     }
 }

@@ -138,4 +138,48 @@ object CountryCodes {
 
     fun isInEU(code: String?): Boolean =
         code?.uppercase()?.let { it in EU_COUNTRIES } == true
+
+    /**
+     * Countries where B2B invoices commonly carry a mandatory withholding tax
+     * that the seller subtracts from the invoice total (IRPF in Spain, IRS
+     * retenção in Portugal, ritenuta d'acconto in Italy, ISR/IVA retention in
+     * Mexico, etc.). Gates the "Tax withholding" toggle on the issuer form —
+     * hidden entirely outside this set so French / German / etc. users don't
+     * see an option that doesn't apply to them.
+     */
+    private val RETENTION_COUNTRIES: Set<String> = setOf(
+        "ES", "PT", "IT", "JP", "CL", "PE", "MX", "BR", "CO",
+    )
+
+    fun isRetentionCountry(code: String?): Boolean =
+        code?.uppercase()?.let { it in RETENTION_COUNTRIES } == true
+
+    /**
+     * Default retention rate (as a percentage) proposed when the user first
+     * adds a withholding line, per the issuer's country. Editable afterwards.
+     * Falls back to 15 (the most common rate across the set) for unknown codes.
+     *
+     * Sources — commonly-cited standard rates:
+     *   ES = 15 (IRPF, 7 for new autoentrepreneurs' 3 first years)
+     *   PT = 25 (IRS retenção na fonte)
+     *   IT = 20 (ritenuta d'acconto)
+     *   JP = 10.21 (源泉徴収税額)
+     *   CL = 14.5 (retención boleta de honorarios)
+     *   PE =  8 (renta de 4ta categoría)
+     *   MX = 10 (ISR — IVA retention separate, user adds a second line)
+     *   BR = 15 (IRRF, variable — 15 is a common indicative rate)
+     *   CO = 11 (retención en la fuente, variable — 11 common for services)
+     */
+    fun defaultRetentionRate(code: String?): Double = when (code?.uppercase()) {
+        "ES" -> 15.0
+        "PT" -> 25.0
+        "IT" -> 20.0
+        "JP" -> 10.21
+        "CL" -> 14.5
+        "PE" -> 8.0
+        "MX" -> 10.0
+        "BR" -> 15.0
+        "CO" -> 11.0
+        else -> 15.0
+    }
 }

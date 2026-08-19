@@ -161,6 +161,7 @@ class ClientOrIssuerLocalDataSource(
             clientOrIssuer.logoPath,
             if (clientOrIssuer.vatExempt) 1L else 0L,
             if (clientOrIssuer.intraEuSales) 1L else 0L,
+            if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
         )
     }
 
@@ -229,6 +230,7 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.logoPath,
                     if (clientOrIssuer.vatExempt) 1L else 0L,
                     if (clientOrIssuer.intraEuSales) 1L else 0L,
+                    if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -406,6 +408,7 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = clientOrIssuer.logoPath,
                         vat_exempt = if (clientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (clientOrIssuer.intraEuSales) 1L else 0L,
+                        tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
                 }
 
@@ -483,6 +486,7 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = documentClientOrIssuer.logoPath,
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+                        tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
                 }
                 // Addresses to delete
@@ -577,6 +581,7 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = documentClientOrIssuer.logoPath,
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+                        tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
 
                     // Emails: supprimer et recréer dans table maître
@@ -748,6 +753,9 @@ class ClientOrIssuerLocalDataSource(
                             companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
                             companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
                             logoPath = issuer.logo_path,
+                            vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
+                            intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
+                            taxWithholdingEnabled = issuer.tax_withholding_enabled != 0L,
                         )
                     }
                 }
@@ -893,6 +901,7 @@ fun ClientOrIssuer.transformIntoEditable(
         logoPath = clientOrIssuer.logo_path,
         vatExempt = (clientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (clientOrIssuer.intra_eu_sales ?: 0L) != 0L,
+        taxWithholdingEnabled = clientOrIssuer.tax_withholding_enabled != 0L,
     )
 }
 

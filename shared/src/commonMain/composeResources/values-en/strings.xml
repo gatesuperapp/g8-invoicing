@@ -177,6 +177,7 @@
     <string name="document_modal_edit_issuer">Edit issuer</string>
     <string name="document_modal_new_client">New client</string>
     <string name="document_modal_edit_client">Edit client</string>
+    <string name="document_modal_edit_retention">Edit withholding</string>
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Close</string>
     <string name="whats_new_done">Let's go!</string>
@@ -542,6 +543,16 @@
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
     <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
+    <string name="issuer_tax_withholding_label">Tax withholding</string>
+    <string name="issuer_tax_withholding_info_modal_content">When enabled, a withholding line is added automatically to new invoices and credit notes for this issuer. You can edit the label and rate on the line, or hide it on individual invoices via the eye icon.</string>
+    <string name="issuer_tax_withholding_info_desc">Tax withholding info</string>
+    <string name="retention_default_label">Withholding</string>
+    <string name="retention_default_mx_isr">Retención ISR</string>
+    <string name="retention_default_mx_iva">Retención IVA</string>
+    <string name="retention_edit_field_label">Label</string>
+    <string name="retention_edit_field_rate">Rate (%)</string>
+    <string name="retention_hide_a11y">Hide on PDF</string>
+    <string name="retention_show_a11y">Show on PDF</string>
 
     <!-- Quote (Devis) -->
     <string name="appbar_quotes">Quotes</string>

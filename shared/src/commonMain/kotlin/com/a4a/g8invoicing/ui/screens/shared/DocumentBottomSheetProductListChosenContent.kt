@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.RetentionState
 import kotlinx.coroutines.CancellationException
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
@@ -38,6 +40,9 @@ fun DocumentBottomSheetProductListChosenContent(
     // source-header block; every eye click flips all of them.
     hideLinkedSourceHeaders: Boolean = false,
     onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
+    retentions: List<RetentionState> = emptyList(),
+    onClickRetention: (Int) -> Unit = {},
+    onToggleRetentionHidden: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val hapticFeedback = LocalHapticFeedback.current
@@ -146,6 +151,13 @@ fun DocumentBottomSheetProductListChosenContent(
                     }
                 }
             }
+        }
+        itemsIndexed(retentions) { idx, retention ->
+            RetentionLineRow(
+                retention = retention,
+                onClick = { onClickRetention(idx) },
+                onToggleHidden = { onToggleRetentionHidden(idx) },
+            )
         }
     }
 }

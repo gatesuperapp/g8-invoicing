@@ -361,9 +361,17 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                val hadRetentions = creditNoteViewModel.documentUiState.value.retentions.isNotEmpty()
+                                val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
+                                val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
+                                if (turnedOffRetention) {
+                                    creditNoteViewModel.clearRetentionsInDb()
+                                } else if (turnedOnRetention) {
+                                    creditNoteViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
                                 creditNoteViewModel.reloadDocument()
                                 showDocumentForm = false
                             }
@@ -426,6 +434,12 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent,
             showProductType = showProductType,
+            onSaveRetention = { idx, updated ->
+                creditNoteViewModel.updateRetentionAt(idx, updated)
+            },
+            onToggleRetentionHidden = { idx ->
+                creditNoteViewModel.toggleRetentionHiddenAt(idx)
+            },
         )
     }
 }

@@ -1,0 +1,51 @@
+CREATE TABLE CreditNoteRetention (
+  id INTEGER PRIMARY KEY NOT NULL,
+  credit_note_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  rate REAL NOT NULL,
+  sort_order INTEGER,
+  hidden INTEGER NOT NULL DEFAULT 0,
+
+  FOREIGN KEY(credit_note_id)
+        REFERENCES CreditNote(credit_note_id)
+        ON DELETE CASCADE
+);
+
+getForCreditNote:
+SELECT *
+FROM CreditNoteRetention
+WHERE credit_note_id = :credit_note_id
+ORDER BY sort_order ASC, id ASC;
+
+save:
+INSERT INTO CreditNoteRetention (id, credit_note_id, label, rate, sort_order, hidden)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateOne:
+UPDATE CreditNoteRetention
+SET label = :label,
+    rate = :rate,
+    sort_order = :sort_order,
+    hidden = :hidden
+WHERE id = :id;
+
+deleteOne:
+DELETE FROM CreditNoteRetention
+WHERE id = :id;
+
+deleteAllForCreditNote:
+DELETE FROM CreditNoteRetention
+WHERE credit_note_id = :credit_note_id;
+
+-- Same shape as InvoiceRetention.getLastInvoiceIdWithRetentionsForIssuer.
+-- CreditNote createNew calls both this + the invoice-side helper, compares
+-- created_at, and clones from whichever doc type won.
+getLastCreditNoteIdWithRetentionsForIssuer:
+SELECT c.credit_note_id, c.created_at
+FROM CreditNote c
+JOIN LinkCreditNoteToDocumentClientOrIssuer l ON l.credit_note_id = c.credit_note_id
+JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+JOIN CreditNoteRetention cnr ON cnr.credit_note_id = c.credit_note_id
+WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+ORDER BY c.credit_note_id DESC
+LIMIT 1;
