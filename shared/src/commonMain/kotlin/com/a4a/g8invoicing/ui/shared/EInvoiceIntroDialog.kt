@@ -255,7 +255,7 @@ private fun IntroStep(onGo: (EInvoiceStep) -> Unit, onDismiss: () -> Unit) {
         StepTitle("Coucou")
         Spacer(Modifier.height(24.dp))
         StepAnnotatedBody {
-            append("Pardon de t\'interrompre ! Je voulais te parler de la ")
+            append("Je voulais te parler de la ")
             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                 append("facturation électronique…")
             }
@@ -343,15 +343,6 @@ private fun SolutionStep(onGo: (EInvoiceStep) -> Unit) {
         PrimaryButton("C'est qui c'est qui") { onGo(EInvoiceStep.SuperPDP) }
         Spacer(Modifier.height(8.dp))
         SecondaryButton("Trop de suspense") { onGo(EInvoiceStep.SuperPDP) }
-        StepAnnotatedBody {
-            append("Il existe de nombreuses PAs et c'est dur de savoir qui choisir. \n\n En l'absence de plateforme libre sur le marché, je t'en recommande une qui est française, a ses serveurs en région parisienne, et dont le support est rapide et humain. Elle est")
-            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(" gratuite") }
-            append(" (sauf 2€ pour la création du compte) et ")
-            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("sans engagement.* ") }
-            append("\n\n La réception et l'émission sont comprises.")
-            append("\n\n Le modèle économique repose sur le volume : le service devient payant à partir de 1000 factures/mois (et les appels API - utilisés par d'autres outils pour se \"brancher\" - le sont aussi).")
-
-        }
     }
 }
 

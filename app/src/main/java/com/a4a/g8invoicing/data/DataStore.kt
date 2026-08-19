@@ -79,6 +79,11 @@ suspend fun initializeVersionTracking(context: Context) {
     // Seulement pour les vraies nouvelles installations
     if (lastSeenVersion == null && !hasSeenPopup) {
         setSeenWhatsNew(context)
+        // Le popup e-invoice cible les mises à jour depuis 1.8/antérieur :
+        // pour les fresh installs on flip SEEN=true directement pour qu'il
+        // n'apparaisse jamais (l'utilisateur découvre l'appli avec la
+        // facturation électronique déjà intégrée aux features).
+        setSeenEInvoiceIntro(context)
         // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
         // The onboarding must run for fresh installs too (with the empty-issuer
         // path skipping the per-issuer loop) so a user quitting via the Home
