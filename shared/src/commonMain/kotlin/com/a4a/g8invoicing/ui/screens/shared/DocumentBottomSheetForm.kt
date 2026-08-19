@@ -461,7 +461,9 @@ private fun DocumentBottomSheetContent(
                     onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
                     onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
                     pendingEmailStateHolder = pendingEmailStateHolder,
-                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) },
+                    syncToMasterChecked = syncToMasterChecked,
+                    onSyncToMasterChange = onSyncToMasterChange,
                 )
             }
         }
