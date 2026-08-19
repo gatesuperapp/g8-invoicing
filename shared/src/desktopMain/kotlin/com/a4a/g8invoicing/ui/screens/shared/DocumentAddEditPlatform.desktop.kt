@@ -49,6 +49,8 @@ actual fun DocumentAddEditPlatform(
     showProductType: Boolean,
     hideLinkedSourceHeaders: Boolean,
     onToggleHideLinkedSourceHeaders: (() -> Unit)?,
+    onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit,
+    onToggleRetentionHidden: (Int) -> Unit,
 ) {
     // Desktop uses the desktop-specific UI with side panel
     // hideLinkedSourceHeaders is only wired on Android; desktop's flat product

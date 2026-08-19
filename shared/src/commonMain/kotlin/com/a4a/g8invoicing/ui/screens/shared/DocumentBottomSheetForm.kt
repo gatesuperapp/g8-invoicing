@@ -33,6 +33,7 @@ import com.a4a.g8invoicing.shared.resources.document_modal_add_product
 import com.a4a.g8invoicing.shared.resources.document_modal_edit_client
 import com.a4a.g8invoicing.shared.resources.document_modal_edit_issuer
 import com.a4a.g8invoicing.shared.resources.document_modal_edit_product
+import com.a4a.g8invoicing.shared.resources.document_modal_edit_retention
 import com.a4a.g8invoicing.shared.resources.document_modal_new_client
 import com.a4a.g8invoicing.shared.resources.document_modal_new_issuer
 import com.a4a.g8invoicing.shared.resources.document_modal_new_product
@@ -44,8 +45,10 @@ import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.RetentionState
 import com.a4a.g8invoicing.ui.theme.textCta
 import com.a4a.g8invoicing.ui.theme.textCtaDisabled
 import com.a4a.g8invoicing.ui.viewmodels.ProductType
@@ -71,6 +74,9 @@ fun DocumentBottomSheetForm(
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
     showProductType: Boolean = false,
+    // Set when typeOfCreation == EDIT_RETENTION; buffered locally, saved on submit.
+    retention: RetentionState? = null,
+    onRetentionSave: (RetentionState) -> Unit = {},
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -100,6 +106,16 @@ fun DocumentBottomSheetForm(
     val fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
     // State to hold the text being edited in the full-screen text editor
     var fullScreenEditorText by remember { mutableStateOf(TextFieldValue("")) }
+    // Keyed on retention.id so mounting a different row resets the buffer.
+    var retentionLabel by remember(retention?.id) {
+        mutableStateOf(retention?.label ?: TextFieldValue(""))
+    }
+    var retentionRateText by remember(retention?.id) {
+        mutableStateOf(retention?.let { r ->
+            if (r.rate == com.ionspin.kotlin.bignum.decimal.BigDecimal.ZERO) ""
+            else r.rate.stripTrailingZeros().toPlainString().replace(".", ",")
+        } ?: "")
+    }
 
     // Effect to initialize/update `fullScreenEditorText` when `fullScreenElementToShow` changes
     LaunchedEffect(fullScreenElementToShow.value) {
@@ -179,6 +195,15 @@ fun DocumentBottomSheetForm(
                     // Hide keyboard
                     keyboardController?.hide()
 
+                    if (typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_RETENTION && retention != null) {
+                        val cleaned = retentionRateText.replace(",", ".").ifBlank { "0" }
+                        val rate = runCatching {
+                            com.ionspin.kotlin.bignum.decimal.BigDecimal.parseString(cleaned)
+                        }.getOrDefault(com.ionspin.kotlin.bignum.decimal.BigDecimal.ZERO)
+                        onRetentionSave(retention.copy(label = retentionLabel, rate = rate))
+                        return@DocumentBottomSheetHeader
+                    }
+
                     // Check if there's a pending email to validate
                     val pendingEmail = pendingEmailState.value.trim()
                     if (pendingEmail.isNotEmpty()) {
@@ -242,6 +267,10 @@ fun DocumentBottomSheetForm(
                 showProductType = showProductType,
                 syncToMasterChecked = syncToMasterChecked,
                 onSyncToMasterChange = { syncToMasterChecked = it },
+                retentionLabel = retentionLabel,
+                onRetentionLabelChange = { retentionLabel = it },
+                retentionRateText = retentionRateText,
+                onRetentionRateTextChange = { retentionRateText = it },
             )
         }
     }
@@ -271,6 +300,8 @@ private fun calculateIsDoneButtonEnabled(
         typeOfCreation.toString().contains(ProductType.PRODUCT.name) &&
                 documentProduct.name.text.isNotEmpty() &&
                 documentProduct.quantity != BigDecimal.ZERO -> true // Use BigDecimal.ZERO for comparison
+
+        typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_RETENTION -> true
 
         else -> false
     }
@@ -318,6 +349,7 @@ private fun DocumentBottomSheetHeader(
     val editClientText = stringResource(Res.string.document_modal_edit_client)
     val editIssuerText = stringResource(Res.string.document_modal_edit_issuer)
     val editProductText = stringResource(Res.string.document_modal_edit_product)
+    val editRetentionText = stringResource(Res.string.document_modal_edit_retention)
 
     Row(
         modifier = Modifier
@@ -357,6 +389,7 @@ private fun DocumentBottomSheetHeader(
                     DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> editClientText
                     DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> editIssuerText
                     DocumentBottomSheetTypeOfForm.EDIT_PRODUCT -> editProductText
+                    DocumentBottomSheetTypeOfForm.EDIT_RETENTION -> editRetentionText
                     else -> "" // Default empty title
                 }
             )
@@ -414,9 +447,21 @@ private fun DocumentBottomSheetContent(
     showProductType: Boolean = false,
     syncToMasterChecked: Boolean,
     onSyncToMasterChange: (Boolean) -> Unit,
+    retentionLabel: TextFieldValue,
+    onRetentionLabelChange: (TextFieldValue) -> Unit,
+    retentionRateText: String,
+    onRetentionRateTextChange: (String) -> Unit,
 ) {
     // Determine which form or view to show based on the current state
     when {
+        typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_RETENTION -> {
+            DocumentBottomSheetRetentionAddEditForm(
+                label = retentionLabel,
+                onLabelChange = onRetentionLabelChange,
+                rateText = retentionRateText,
+                onRateTextChange = onRetentionRateTextChange,
+            )
+        }
         typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> {
             // Key on originalVersion + emails identity so loadLatestMasterVersion,
             // which flips originalVersion when the user picks "load latest", forces
@@ -461,7 +506,9 @@ private fun DocumentBottomSheetContent(
                     onClickDeleteEmail = { index -> onClickDeleteEmail(ClientOrIssuerType.DOCUMENT_ISSUER, index) },
                     onAddEmail = { email -> onAddEmail(ClientOrIssuerType.DOCUMENT_ISSUER, email) },
                     pendingEmailStateHolder = pendingEmailStateHolder,
-                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) }
+                    onPendingEmailValidationResult = { isValid -> onPendingEmailValidationResult(ClientOrIssuerType.DOCUMENT_ISSUER, isValid) },
+                    syncToMasterChecked = syncToMasterChecked,
+                    onSyncToMasterChange = onSyncToMasterChange,
                 )
             }
         }

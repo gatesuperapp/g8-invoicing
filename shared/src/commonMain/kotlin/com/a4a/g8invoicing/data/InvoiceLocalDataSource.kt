@@ -10,6 +10,9 @@ import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_default_footer
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
+import com.a4a.g8invoicing.shared.resources.retention_default_label
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.shared.resources.invoice_default_number
 import org.jetbrains.compose.resources.getString
@@ -32,6 +35,7 @@ import g8invoicing.DocumentClientOrIssuerEmailQueries
 import g8invoicing.DocumentClientOrIssuerQueries
 import g8invoicing.DocumentProductQueries
 import g8invoicing.Invoice
+import g8invoicing.InvoiceRetention
 import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkCreditNoteToDocumentClientOrIssuerQueries
 import g8invoicing.LinkCreditNoteToDocumentProductQueries
@@ -70,6 +74,7 @@ class InvoiceLocalDataSource(
         db.linkInvoiceDocumentProductToQuoteQueries
     private val linkInvoiceToDocumentClientOrIssuerQueries =
         db.linkInvoiceToDocumentClientOrIssuerQueries
+    private val invoiceRetentionQueries = db.invoiceRetentionQueries
 
 
     // --- createNew ---
@@ -80,6 +85,26 @@ class InvoiceLocalDataSource(
         val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+
+        // Reuse the last invoice's retentions for this master issuer; fall
+        // back to country defaults. Keyed on originalClientOrIssuerId since
+        // the fresh DOCUMENT_ISSUER shell has no id yet.
+        val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
+            if (existingIssuer?.taxWithholdingEnabled == true) {
+                existingIssuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                    invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
+                        .executeAsOneOrNull()?.let { row ->
+                            invoiceRetentionQueries.getForInvoice(row.invoice_id)
+                                .executeAsList()
+                                .map { it.transformIntoRetentionState() }
+                        }
+                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                    existingIssuer,
+                    getString(Res.string.retention_default_label),
+                    getString(Res.string.retention_default_mx_isr),
+                    getString(Res.string.retention_default_mx_iva),
+                )
+            } else emptyList()
 
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -101,6 +126,7 @@ class InvoiceLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
+                retentions = reusedRetentions,
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -111,8 +137,50 @@ class InvoiceLocalDataSource(
                 // Pass the obtained ID explicitly to helper functions
                 saveTag(id, newInvoiceState) // saveTag is suspend
                 saveInfoInOtherTables(id, newInvoiceState) // saveInfoInOtherTables is suspend
+                saveRetentionsForInvoice(id, reusedRetentions)
             }
             newInvoiceId // Return the ID
+        }
+    }
+
+    private fun InvoiceRetention.transformIntoRetentionState(): com.a4a.g8invoicing.ui.states.RetentionState =
+        com.a4a.g8invoicing.ui.states.RetentionState(
+            id = this.id.toInt(),
+            label = TextFieldValue(this.label),
+            rate = BigDecimal.parseString(this.rate.toString()),
+            sortOrder = this.sort_order?.toInt() ?: 0,
+            hidden = this.hidden != 0L,
+        )
+
+    // Wipe + re-insert on save; N is tiny (1-3 rows) so per-row diffing isn't
+    // worth the bookkeeping.
+    private fun saveRetentionsForInvoice(
+        invoiceId: Long,
+        retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>,
+    ) {
+        try {
+            invoiceRetentionQueries.deleteAllForInvoice(invoiceId)
+            retentions.forEachIndexed { index, r ->
+                invoiceRetentionQueries.save(
+                    id = null,
+                    invoice_id = invoiceId,
+                    label = r.label.text,
+                    rate = r.rate.doubleValue(false),
+                    sort_order = index.toLong(),
+                    hidden = if (r.hidden) 1L else 0L,
+                )
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun fetchRetentions(invoiceId: Long): List<com.a4a.g8invoicing.ui.states.RetentionState> {
+        return try {
+            invoiceRetentionQueries.getForInvoice(invoiceId)
+                .executeAsList()
+                .map { it.transformIntoRetentionState() }
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
@@ -286,6 +354,7 @@ class InvoiceLocalDataSource(
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
     ): InvoiceState {
+        val retentions = fetchRetentions(this.invoice_id)
         return InvoiceState(
             documentId = this.invoice_id.toInt(),
             documentTag = documentTag ?: DocumentTag.DRAFT,
@@ -296,7 +365,7 @@ class InvoiceLocalDataSource(
             documentIssuer = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_ISSUER }?.maxByOrNull { it.id ?: 0 },
             documentClient = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_CLIENT }?.maxByOrNull { it.id ?: 0 },
             documentProducts = documentProducts?.sortedBy { it.sortOrder },
-            documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
+            documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it, retentions) },
             currency = TextFieldValue(this.currency ?: CurrencyManager.DEFAULT_FALLBACK),
             dueDate = this.due_date ?: "",
             paymentStatus = this.payment_status.toInt(),
@@ -307,6 +376,7 @@ class InvoiceLocalDataSource(
             showCurrencyAndAutoTaxColumn = this.show_currency_and_auto_tax_column != 0L,
             formatLocale = this.format_locale,
             hideLinkedSourceHeaders = this.hide_linked_source_headers != 0L,
+            retentions = retentions,
         )
     }
 
@@ -316,6 +386,24 @@ class InvoiceLocalDataSource(
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val issuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Same seed rule as createNew (reuse → country defaults).
+        val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
+            if (issuer?.taxWithholdingEnabled == true) {
+                issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                    invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
+                        .executeAsOneOrNull()?.let { row ->
+                            invoiceRetentionQueries.getForInvoice(row.invoice_id)
+                                .executeAsList()
+                                .map { it.transformIntoRetentionState() }
+                        }
+                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                    issuer,
+                    getString(Res.string.retention_default_label),
+                    getString(Res.string.retention_default_mx_isr),
+                    getString(Res.string.retention_default_mx_iva),
+                )
+            } else emptyList()
         return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -328,7 +416,7 @@ class InvoiceLocalDataSource(
                     dueDate = DateUtils.getDatePlusDaysFormatted(30),
                     reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
-                    documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentIssuer = issuer,
                     documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
                     currency = TextFieldValue(
                         deliveryNotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
@@ -339,6 +427,7 @@ class InvoiceLocalDataSource(
                     labelsSnapshot = frozenLabels,
                     showCurrencyAndAutoTaxColumn = true,
                     formatLocale = AppLocaleHolder.languageCode,
+                    retentions = reusedRetentions,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -354,6 +443,7 @@ class InvoiceLocalDataSource(
                     deliveryNotes.forEach { deliveryNote ->
                         saveInfoInOtherTables(id, deliveryNote)
                     }
+                    saveRetentionsForInvoice(id, reusedRetentions)
                 }
                 newInvoiceId
             } catch (e: Exception) {
@@ -371,6 +461,23 @@ class InvoiceLocalDataSource(
     override suspend fun convertQuotesToInvoice(quotes: List<QuoteState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val issuer = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
+            if (issuer?.taxWithholdingEnabled == true) {
+                issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                    invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
+                        .executeAsOneOrNull()?.let { row ->
+                            invoiceRetentionQueries.getForInvoice(row.invoice_id)
+                                .executeAsList()
+                                .map { it.transformIntoRetentionState() }
+                        }
+                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                    issuer,
+                    getString(Res.string.retention_default_label),
+                    getString(Res.string.retention_default_mx_isr),
+                    getString(Res.string.retention_default_mx_iva),
+                )
+            } else emptyList()
         return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber()?.let {
                 incrementDocumentNumber(it)
@@ -383,7 +490,7 @@ class InvoiceLocalDataSource(
                     dueDate = DateUtils.getDatePlusDaysFormatted(30),
                     reference = quotes.firstOrNull { it.reference != null }?.reference,
                     freeField = quotes.firstOrNull { it.freeField != null }?.freeField,
-                    documentIssuer = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentIssuer = issuer,
                     documentClient = quotes.firstOrNull { it.documentClient != null }?.documentClient,
                     currency = TextFieldValue(
                         quotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
@@ -392,11 +499,13 @@ class InvoiceLocalDataSource(
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)),
                     watermarkText = frozenWatermark,
                     labelsSnapshot = frozenLabels,
+                    retentions = reusedRetentions,
                 )
                 saveInfoInInvoiceTable(newInvoiceState)
 
                 val newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
                 newInvoiceId?.let { id ->
+                    saveRetentionsForInvoice(id, reusedRetentions)
                     val firstQuoteForTag = quotes.first().copy(documentTag = DocumentTag.DRAFT)
                     saveTag(id, firstQuoteForTag)
 
@@ -454,6 +563,9 @@ class InvoiceLocalDataSource(
                     footer = document.footerText.text,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
+                document.documentId?.toLong()?.let { id ->
+                    saveRetentionsForInvoice(id, document.retentions)
+                }
                 // Update tag if payment is late (due date expired)
                 if (isPaymentLate(document.dueDate)) { // isPaymentLate is pure
                     linkDocumentToDocumentTag( // linkDocumentToDocumentTag is suspend
@@ -482,6 +594,24 @@ class InvoiceLocalDataSource(
                 )
             } catch (_: Exception) {
             }
+        }
+    }
+
+    override suspend fun deleteAllRetentions(invoiceId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                invoiceRetentionQueries.deleteAllForInvoice(invoiceId)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    override suspend fun saveRetentions(
+        invoiceId: Long,
+        retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            saveRetentionsForInvoice(invoiceId, retentions)
         }
     }
 
@@ -1258,6 +1388,7 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         logo_path = documentClientOrIssuer.logoPath,
         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+        tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
     )
 }
 
@@ -1346,6 +1477,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         logoPath = documentClientOrIssuer.logo_path,
         vatExempt = (documentClientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (documentClientOrIssuer.intra_eu_sales ?: 0L) != 0L,
+        taxWithholdingEnabled = documentClientOrIssuer.tax_withholding_enabled != 0L,
     )
 }
 
@@ -1509,7 +1641,10 @@ fun updateDocumentProductsOrderInDb(
     }
 }
 
-fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotalPrices {
+fun calculateDocumentPrices(
+    products: List<DocumentProductState>,
+    retentions: List<com.a4a.g8invoicing.ui.states.RetentionState> = emptyList(),
+): DocumentTotalPrices {
     val totalPriceWithoutTax = products
         .filter { it.priceWithoutTax != null }
         .fold(BigDecimal.ZERO) { acc, item ->
@@ -1533,9 +1668,28 @@ fun calculateDocumentPrices(products: List<DocumentProductState>): DocumentTotal
         amountsPerTaxRate.add(Pair(taxRate, sumOfAmounts))
     } // ex: amountsPerTaxRate = [(20.0, 7.2), (10.0, 2.4)]
 
+    // Retention amounts: rate% × untaxed base. Deducted from (base+VAT) at
+    // the end — VAT is computed on the untouched base (Spanish convention).
+    val visibleRetentions = retentions.filter { !it.hidden }
+    val retentionAmounts = visibleRetentions.map { r ->
+        val amt = (totalPriceWithoutTax * r.rate / BigDecimal.fromInt(100))
+            .roundToDigitPositionAfterDecimalPoint(2, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO)
+        com.a4a.g8invoicing.ui.states.RetentionLine(
+            label = r.label.text.ifBlank { "Retención" },
+            rate = r.rate,
+            amount = amt,
+        )
+    }
+    val totalRetentions = retentionAmounts.fold(BigDecimal.ZERO) { acc, line -> acc + line.amount }
+
+    val grossWithTax = totalPriceWithoutTax +
+        amountsPerTaxRate.fold(BigDecimal.ZERO) { acc, pair -> acc + pair.second }
+
     return DocumentTotalPrices(
         totalPriceWithoutTax = totalPriceWithoutTax,
         totalAmountsOfEachTax = amountsPerTaxRate,
-        totalPriceWithTax = totalPriceWithoutTax + amountsPerTaxRate.fold(BigDecimal.ZERO) { acc, pair -> acc + pair.second }
+        totalPriceWithTax = grossWithTax - totalRetentions,
+        retentionAmounts = retentionAmounts,
+        totalRetentions = totalRetentions,
     )
 }

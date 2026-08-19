@@ -34,6 +34,7 @@ import com.a4a.g8invoicing.shared.resources.document_product_advice
 import com.a4a.g8invoicing.ui.shared.ButtonAddOrChoose
 import com.a4a.g8invoicing.ui.shared.animations.BatWavyArms
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.RetentionState
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import org.jetbrains.compose.resources.stringResource
 
@@ -48,6 +49,11 @@ fun DocumentBottomSheetProductsChosen(
     onOrderChange: (List<DocumentProductState>) -> Unit,
     hideLinkedSourceHeaders: Boolean = false,
     onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
+    // Retention lines are pinned at the bottom of the doc, no drag handle,
+    // no delete. Tapping a row opens the retention edit sheet.
+    retentions: List<RetentionState> = emptyList(),
+    onClickRetention: (Int) -> Unit = {},
+    onToggleRetentionHidden: (Int) -> Unit = {},
     ) {
     Column(
         modifier = Modifier
@@ -62,7 +68,9 @@ fun DocumentBottomSheetProductsChosen(
             isPickerButton = true,
             stringResource(Res.string.document_bottom_sheet_add_product)
         )
-        // Display the list of chosen products
+        // Display the list of chosen products + retentions inline. Retentions
+        // are appended as trailing items in the same LazyColumn so they share
+        // the products' contentPadding + vertical spacing.
         Box(modifier = Modifier.weight(1f).fillMaxSize()) {
             DocumentBottomSheetProductListChosenContent(
                 documentProducts = list,
@@ -71,6 +79,9 @@ fun DocumentBottomSheetProductsChosen(
                 onOrderChange = onOrderChange,
                 hideLinkedSourceHeaders = hideLinkedSourceHeaders,
                 onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
+                retentions = retentions,
+                onClickRetention = onClickRetention,
+                onToggleRetentionHidden = onToggleRetentionHidden,
                 modifier = Modifier.fillMaxSize(),
             )
         }

@@ -1,0 +1,5 @@
+v1.8.1
+
+- Infos sur la facturation électronique (obligation PA au 1er septembre 2026)
+- Retenue à la source (IRPF, Ritenuta, ISR/IVA…) pour les émetteurs en Espagne, Portugal, Italie, Japon, Chili, Pérou, Mexique, Brésil, Colombie
+- Ligne retenue ajoutée automatiquement sur les factures et avoirs, éditable + masquable par facture

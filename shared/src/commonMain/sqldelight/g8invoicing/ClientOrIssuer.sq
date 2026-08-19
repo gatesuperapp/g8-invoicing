@@ -16,6 +16,7 @@ CREATE TABLE ClientOrIssuer (
   version INTEGER DEFAULT 1,
   vat_exempt INTEGER DEFAULT 0,
   intra_eu_sales INTEGER DEFAULT 0,
+  tax_withholding_enabled INTEGER NOT NULL DEFAULT 0,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -52,8 +53,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, tax_withholding_enabled)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -72,6 +73,7 @@ SET type = :type,
     logo_path = :logo_path,
     vat_exempt = :vat_exempt,
     intra_eu_sales = :intra_eu_sales,
+    tax_withholding_enabled = :tax_withholding_enabled,
     version = COALESCE(version, 0) + 1,
     updated_at = datetime('now', 'localtime')
 WHERE

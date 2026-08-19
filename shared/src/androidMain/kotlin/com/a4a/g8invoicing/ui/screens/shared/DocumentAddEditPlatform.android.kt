@@ -49,6 +49,8 @@ actual fun DocumentAddEditPlatform(
     showProductType: Boolean,
     hideLinkedSourceHeaders: Boolean,
     onToggleHideLinkedSourceHeaders: (() -> Unit)?,
+    onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit,
+    onToggleRetentionHidden: (Int) -> Unit,
 ) {
     // Android uses the mobile DocumentAddEdit with bottom sheets
     DocumentAddEdit(
@@ -89,5 +91,7 @@ actual fun DocumentAddEditPlatform(
         showProductType = showProductType,
         hideLinkedSourceHeaders = hideLinkedSourceHeaders,
         onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
+        onSaveRetention = onSaveRetention,
+        onToggleRetentionHidden = onToggleRetentionHidden,
     )
 }

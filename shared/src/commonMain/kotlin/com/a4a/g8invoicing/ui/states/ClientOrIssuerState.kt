@@ -40,5 +40,10 @@ data class ClientOrIssuerState(
     // Débloque l'affichage du champ Product.type (SERVICE/GOODS) — inutile pour un
     // utilisateur non-UE ou qui ne facture que dans son propre pays.
     var intraEuSales: Boolean = false,
+    // Withholding tax (Spanish IRPF, Portuguese IRS retenção, etc.). Only shown
+    // on the form when the issuer's country is in CountryCodes.RETENTION_COUNTRIES.
+    // When true, new invoices/credit notes for this issuer auto-add a retention
+    // line seeded from the previous doc's rate.
+    var taxWithholdingEnabled: Boolean = false,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

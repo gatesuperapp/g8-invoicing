@@ -45,7 +45,13 @@ platform :android do
 
   desc "Push store listing only (texts + screenshots + changelogs), no build"
   lane :metadata do
+    # supply needs an explicit version_code to know which release the
+    # changelog files belong to when we're not uploading a new AAB.
+    # Read it from build.gradle.kts so it stays in sync with each release.
+    version_code = File.read("../app/build.gradle.kts")
+      .match(/versionCode\s*=\s*(\d+)/)[1].to_i
     upload_to_play_store(
+      version_code: version_code,
       skip_upload_apk: true,
       skip_upload_aab: true,
       skip_upload_changelogs: false,

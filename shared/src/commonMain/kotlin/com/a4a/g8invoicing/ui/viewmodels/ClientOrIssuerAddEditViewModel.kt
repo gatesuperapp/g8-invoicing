@@ -114,6 +114,7 @@ class ClientOrIssuerAddEditViewModel(
             logoPath = clientOrIssuer.logoPath,
             vatExempt = clientOrIssuer.vatExempt,
             intraEuSales = clientOrIssuer.intraEuSales,
+            taxWithholdingEnabled = clientOrIssuer.taxWithholdingEnabled,
             errors = mutableListOf()
         )
     }
@@ -154,7 +155,8 @@ class ClientOrIssuerAddEditViewModel(
                 companyId3Number = _documentIssuerUiState.value.companyId3Number,
                 logoPath = _documentIssuerUiState.value.logoPath,
                 vatExempt = _documentIssuerUiState.value.vatExempt,
-                intraEuSales = _documentIssuerUiState.value.intraEuSales
+                intraEuSales = _documentIssuerUiState.value.intraEuSales,
+                taxWithholdingEnabled = _documentIssuerUiState.value.taxWithholdingEnabled,
             )
         }
     }
@@ -772,6 +774,10 @@ class ClientOrIssuerAddEditViewModel(
                 person = person.copy(intraEuSales = value as Boolean)
             }
 
+            ScreenElement.ISSUER_TAX_WITHHOLDING -> {
+                person = person.copy(taxWithholdingEnabled = value as Boolean)
+            }
+
             else -> {}
         }
         return person
@@ -947,6 +953,10 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.DOCUMENT_ISSUER_INTRA_EU_SALES -> {
                 person = person.copy(intraEuSales = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_TAX_WITHHOLDING -> {
+                person = person.copy(taxWithholdingEnabled = value as Boolean)
             }
 
             else -> {}
@@ -1143,6 +1153,7 @@ class ClientOrIssuerAddEditViewModel(
             logoPath = masterData.logoPath,
             vatExempt = masterData.vatExempt,
             intraEuSales = masterData.intraEuSales,
+            taxWithholdingEnabled = masterData.taxWithholdingEnabled,
             originalVersion = masterData.version // Update to current master version
         )
 

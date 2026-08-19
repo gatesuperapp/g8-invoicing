@@ -7,6 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
+import com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.retention_default_label
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
+import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -80,6 +86,32 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    // Called by the NavGraph when EDIT_ISSUER turns off the tax-withholding
+    // switch: the direct-to-DB update path doesn't go through
+    // saveDocumentClientOrIssuerInUiState, so the retention wipe must be
+    // done explicitly before reloadDocument reads DB back into state.
+    suspend fun clearRetentionsInDb() {
+        _documentUiState.value.documentId?.toLong()?.let { id ->
+            documentDataSource.deleteAllRetentions(id)
+        }
+    }
+
+    // ON transition on EDIT_ISSUER: seed the country default(s) directly to DB
+    // (same rule as createNew / the picker), so the retention row shows up
+    // immediately after reloadDocument.
+    suspend fun seedDefaultRetentionsInDb(issuer: ClientOrIssuerState) {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        val defaults = defaultRetentionsForIssuer(
+            issuer,
+            getString(Res.string.retention_default_label),
+            getString(Res.string.retention_default_mx_isr),
+            getString(Res.string.retention_default_mx_iva),
+        )
+        if (defaults.isNotEmpty()) {
+            documentDataSource.saveRetentions(id, defaults)
+        }
+    }
+
     private suspend fun createNewInvoiceInVM(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
@@ -96,6 +128,36 @@ class InvoiceAddEditViewModel(
     fun updateUiState(screenElement: ScreenElement, value: Any) {
         _documentUiState.value =
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
+    }
+
+    // Retention CRUD. Every mutation also refreshes documentTotalPrices so
+    // the totals block updates in the same frame; autoSave persists on debounce.
+    fun updateRetentionAt(index: Int, retention: com.a4a.g8invoicing.ui.states.RetentionState) {
+        val current = _documentUiState.value.retentions.toMutableList()
+        if (index in current.indices) {
+            current[index] = retention.copy(sortOrder = index)
+            _documentUiState.value = _documentUiState.value.copy(
+                retentions = current,
+                documentTotalPrices = calculateDocumentPrices(
+                    _documentUiState.value.documentProducts ?: emptyList(),
+                    current,
+                ),
+            )
+        }
+    }
+
+    fun toggleRetentionHiddenAt(index: Int) {
+        val current = _documentUiState.value.retentions.toMutableList()
+        if (index in current.indices) {
+            current[index] = current[index].copy(hidden = !current[index].hidden)
+            _documentUiState.value = _documentUiState.value.copy(
+                retentions = current,
+                documentTotalPrices = calculateDocumentPrices(
+                    _documentUiState.value.documentProducts ?: emptyList(),
+                    current,
+                ),
+            )
+        }
     }
 
     // Flip the "hide linked source headers" bit on the current invoice: mirror
@@ -173,7 +235,9 @@ class InvoiceAddEditViewModel(
             // Recalculate the prices
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
-                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
+                    _documentUiState.value.copy(
+                        documentTotalPrices = calculateDocumentPrices(it, _documentUiState.value.retentions)
+                    )
             }
         } catch (e: Exception) {
             // Error handling
@@ -194,7 +258,7 @@ class InvoiceAddEditViewModel(
         _documentUiState.update { currentState ->
             currentState.copy(
                 documentProducts = newList.toList(),
-                documentTotalPrices = calculateDocumentPrices(newList.toList())
+                documentTotalPrices = calculateDocumentPrices(newList.toList(), currentState.retentions)
             )
         }
     }
@@ -296,9 +360,43 @@ class InvoiceAddEditViewModel(
             _documentUiState.value = _documentUiState.value.copy(
                 documentClient = documentClientOrIssuer
             )
-        else _documentUiState.value = _documentUiState.value.copy(
-            documentIssuer = documentClientOrIssuer
-        )
+        else {
+            _documentUiState.value = _documentUiState.value.copy(
+                documentIssuer = documentClientOrIssuer
+            )
+            // Toggle-driven: ON seeds country defaults, OFF wipes. The switch
+            // is the only way to remove lines (no per-line delete in the UI).
+            val hasRetentions = _documentUiState.value.retentions.isNotEmpty()
+            if (documentClientOrIssuer.taxWithholdingEnabled && !hasRetentions) {
+                viewModelScope.launch {
+                    val defaults = defaultRetentionsForIssuer(
+                        documentClientOrIssuer,
+                        getString(Res.string.retention_default_label),
+                        getString(Res.string.retention_default_mx_isr),
+                        getString(Res.string.retention_default_mx_iva),
+                    )
+                    if (_documentUiState.value.retentions.isEmpty() &&
+                        _documentUiState.value.documentIssuer?.taxWithholdingEnabled == true
+                    ) {
+                        _documentUiState.value = _documentUiState.value.copy(
+                            retentions = defaults,
+                            documentTotalPrices = calculateDocumentPrices(
+                                _documentUiState.value.documentProducts ?: emptyList(),
+                                defaults,
+                            ),
+                        )
+                    }
+                }
+            } else if (!documentClientOrIssuer.taxWithholdingEnabled && hasRetentions) {
+                _documentUiState.value = _documentUiState.value.copy(
+                    retentions = emptyList(),
+                    documentTotalPrices = calculateDocumentPrices(
+                        _documentUiState.value.documentProducts ?: emptyList(),
+                        emptyList(),
+                    ),
+                )
+            }
+        }
     }
 
     fun updateTextFieldCursorOfInvoiceState(pageElement: ScreenElement) {
@@ -353,7 +451,7 @@ class InvoiceAddEditViewModel(
                     doc
                 )?.let {
                     doc = doc.copy(documentProducts = it)
-                    doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it))
+                    doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it, doc.retentions))
                 }
             }
 

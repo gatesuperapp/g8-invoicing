@@ -24,5 +24,7 @@ data class CreditNoteState(
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
     var dueDate: String = "",
-    var linkedInvoice: InvoiceState? = null
+    var linkedInvoice: InvoiceState? = null,
+    // See InvoiceState.retentions.
+    var retentions: List<RetentionState> = emptyList(),
 ) : DocumentState()

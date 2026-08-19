@@ -1,0 +1,4 @@
+v1.8.1
+
+- Retención de impuestos (IRPF, Retenção IRS, Ritenuta, ISR/IVA...) para emisores en España, Portugal, Italia, Japón, Chile, Perú, México, Brasil, Colombia
+- Línea de retención añadida automáticamente en facturas y notas de crédito, editable + ocultable por factura

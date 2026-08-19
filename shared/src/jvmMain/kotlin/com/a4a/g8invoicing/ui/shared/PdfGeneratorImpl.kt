@@ -745,6 +745,14 @@ class PdfGeneratorImpl(
                     bold = false,
                 ))
             }
+            prices.retentionAmounts.forEach { line ->
+                val rateStr = "${line.rate.stripTrailingZeros().toPlainString().replace(".", ",")} %"
+                add(Line(
+                    label = "${line.label} $rateStr${strings.labelSeparator}",
+                    amount = "− " + formatAmount(line.amount, currencyCode, formatLocale),
+                    bold = false,
+                ))
+            }
             add(Line(
                 label = strings.totalWithTax,
                 amount = prices.totalPriceWithTax?.let { formatAmount(it, currencyCode, formatLocale) } ?: " - ",

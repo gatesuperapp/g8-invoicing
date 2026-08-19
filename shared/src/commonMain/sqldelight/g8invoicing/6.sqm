@@ -1,0 +1,36 @@
+-- Migration 6 → 7 (release 1.8.1) — tax withholding support.
+-- Adds retention line tables (Invoice + CreditNote) and the master switch on
+-- the issuer that gates auto-seed on new documents. Mirrored on
+-- DocumentClientOrIssuer so the doc snapshot survives a reopen (same pattern
+-- as vat_exempt / intra_eu_sales).
+
+ALTER TABLE ClientOrIssuer ADD COLUMN tax_withholding_enabled INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN tax_withholding_enabled INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE InvoiceRetention (
+  id INTEGER PRIMARY KEY NOT NULL,
+  invoice_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  rate REAL NOT NULL,
+  sort_order INTEGER,
+  -- Per-invoice eye toggle: line stays in DB + carries over on reuse, just
+  -- skipped by the renderer. Used for B2B/B2C mixed billers.
+  hidden INTEGER NOT NULL DEFAULT 0,
+
+  FOREIGN KEY(invoice_id)
+        REFERENCES Invoice(invoice_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE CreditNoteRetention (
+  id INTEGER PRIMARY KEY NOT NULL,
+  credit_note_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  rate REAL NOT NULL,
+  sort_order INTEGER,
+  hidden INTEGER NOT NULL DEFAULT 0,
+
+  FOREIGN KEY(credit_note_id)
+        REFERENCES CreditNote(credit_note_id)
+        ON DELETE CASCADE
+);

@@ -37,4 +37,8 @@ data class InvoiceState(
     // one eye icon per source-header block in the doc form, all wired to the same
     // boolean.
     var hideLinkedSourceHeaders: Boolean = false,
+    // Withholding lines pinned at the bottom of the totals block. Independent
+    // from documentProducts (never mixed / reordered together). Sorted by
+    // sortOrder when > 1 line — Mexican CFDI needs ISR before IVA retention.
+    var retentions: List<RetentionState> = emptyList(),
 ) : DocumentState()

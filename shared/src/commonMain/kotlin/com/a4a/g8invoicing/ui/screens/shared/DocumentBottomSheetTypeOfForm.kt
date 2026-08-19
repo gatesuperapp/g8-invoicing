@@ -8,4 +8,5 @@ enum class DocumentBottomSheetTypeOfForm {
     EDIT_CLIENT,
     EDIT_PRODUCT,
     EDIT_ISSUER,
+    EDIT_RETENTION,
 }

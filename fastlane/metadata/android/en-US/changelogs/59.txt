@@ -1,0 +1,4 @@
+v1.8.1
+
+- Withholding tax (IRPF, Ritenuta, ISR/IVA...) for issuers in Spain, Portugal, Italy, Japan, Chile, Peru, Mexico, Brazil, Colombia
+- Withholding line added automatically on invoices and credit notes, editable + hideable per invoice
