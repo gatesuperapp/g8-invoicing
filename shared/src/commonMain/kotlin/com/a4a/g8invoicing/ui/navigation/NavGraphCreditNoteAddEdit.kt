@@ -122,6 +122,14 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
                                 if (updated != null) {
+                                    // See NavGraphInvoiceAddEdit — same retention
+                                    // toggle transition fix on the refresh path.
+                                    val hadRetentions = creditNoteViewModel.documentUiState.value.retentions.isNotEmpty()
+                                    if (updated.taxWithholdingEnabled && !hadRetentions) {
+                                        creditNoteViewModel.seedDefaultRetentionsInDb(updated)
+                                    } else if (!updated.taxWithholdingEnabled && hadRetentions) {
+                                        creditNoteViewModel.clearRetentionsInDb()
+                                    }
                                     creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
                                     creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
                                 }

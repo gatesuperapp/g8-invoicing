@@ -139,6 +139,18 @@ fun NavGraphBuilder.invoiceAddEdit(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
                                 if (updated != null) {
+                                    // Retention toggle transition: write DB rows synchronously
+                                    // before saveDocumentClientOrIssuerInLocalDb reloads state.
+                                    // saveDocumentClientOrIssuerInUiState only seeds in state
+                                    // (async), which the subsequent reload wipes out — the
+                                    // refresh flow would then look silent until the user runs
+                                    // through EDIT_ISSUER.
+                                    val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
+                                    if (updated.taxWithholdingEnabled && !hadRetentions) {
+                                        invoiceViewModel.seedDefaultRetentionsInDb(updated)
+                                    } else if (!updated.taxWithholdingEnabled && hadRetentions) {
+                                        invoiceViewModel.clearRetentionsInDb()
+                                    }
                                     invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
                                     invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
                                 }
