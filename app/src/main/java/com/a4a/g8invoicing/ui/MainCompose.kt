@@ -73,12 +73,16 @@ fun MainCompose(
     val productQueries: ProductQueries = koinInject()
     val clientOrIssuerQueries: ClientOrIssuerQueries = koinInject()
 
-    // Initialize locale and version tracking on first composition
+    // Initialize locale and version tracking on first composition. The done
+    // flag gates the popup-firing LaunchedEffect below — without it, a fresh
+    // install races: shouldShowEInvoiceIntro emits `true` (HAS_SEEN=false) a
+    // fraction of a second before initializeVersionTracking has had time to
+    // flip HAS_SEEN=true, and the popup fires anyway.
+    var versionTrackingDone by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
-        // Pour les nouvelles installations, enregistre la version actuelle
-        // Ainsi lors de la prochaine mise à jour, la modale WhatsNew s'affichera
         initializeVersionTracking(context)
+        versionTrackingDone = true
     }
 
     // What's New + Onboarding dialog state. The 1.8 onboarding takes priority
@@ -99,11 +103,14 @@ fun MainCompose(
     var showBackupDialog by remember { mutableStateOf(false) }
     var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
-    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice) {
+    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, versionTrackingDone) {
         // Wait until every DataStore flag has emitted its real value —
         // guarding against the initial=null race that used to flip
         // showBackupDialog on a version upgrade before the onboarding flag
-        // resolved.
+        // resolved. versionTrackingDone gates the fresh-install path so
+        // shouldShowEInvoice is read after HAS_SEEN_EINVOICE_INTRO has been
+        // flipped for fresh installs.
+        if (!versionTrackingDone) return@LaunchedEffect
         val whatsNew = shouldShow ?: return@LaunchedEffect
         val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
         val eInvoice = shouldShowEInvoice ?: return@LaunchedEffect
