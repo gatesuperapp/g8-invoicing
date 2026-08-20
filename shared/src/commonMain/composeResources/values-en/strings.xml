@@ -12,7 +12,7 @@
     <string name="document_default_footer"></string>
     <string name="document_default_payment_terms">In the event of late payment, a penalty at the legal rate in force will be applied, plus a fixed indemnity of €40. No discount for early payment.</string>
     <string name="document_payment_terms">Payment terms</string>
-    <string name="document_payment_means_default_label">Payment means:</string>
+    <string name="document_payment_means_default_label">Accepted payment means:</string>
     <string name="document_payment_means_hide_list_a11y">Hide the payment means list</string>
     <string name="document_payment_means_show_list_a11y">Show the payment means list</string>
     <string name="document_payment_means_show_switch">Show accepted payment means on the invoice</string>
@@ -27,7 +27,7 @@
     <string name="document_reference">Reference</string>
     <string name="document_reference_label">Reference: </string>
     <string name="addressed_to">Addressed to</string>
-    <string name="invoice_pdf_due_date">Payment due by </string>
+    <string name="invoice_pdf_due_date">Due date: </string>
     <string name="document_payment_section_title">Payment</string>
     <string name="invoice_paid">Paid ✔</string>
     <string name="pdf_currency_notice">Currency: %1$s</string>
