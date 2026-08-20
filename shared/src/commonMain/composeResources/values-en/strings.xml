@@ -10,7 +10,7 @@
     <string name="product_duplicate_suffix"> - Copy</string>
     <!-- Document footer -->
     <string name="document_default_footer"></string>
-    <string name="document_default_payment_terms">Discount for early payment: none\nLate payment penalties: none\n\nPayment within 30 days</string>
+    <string name="document_default_payment_terms">In the event of late payment, a penalty at the legal rate in force will be applied, plus a fixed indemnity of €40. No discount for early payment.</string>
     <string name="document_payment_terms">Payment terms</string>
     <string name="document_payment_means_default_label">Accepted payment means:</string>
     <string name="document_payment_means_hide_list_a11y">Hide the payment means list</string>
@@ -177,6 +177,19 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Add an address</string>
     <string name="client_delete_address">Delete address</string>
+    <string name="client_or_issuer_section_bank">Bank details</string>
+    <string name="issuer_bank_add">+ Add an account</string>
+    <string name="issuer_bank_label">Label</string>
+    <string name="issuer_bank_label_input">Business account</string>
+    <string name="issuer_bank_delete_a11y">Delete this bank account</string>
+    <string name="issuer_bank_country">Country</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">Account No.</string>
+    <string name="document_payment_bank_show_switch">Show the business bank details</string>
+    <string name="document_payment_bank_edit_prefix">Edit text</string>
+    <string name="document_payment_bank_picker_title">Bank details</string>
+    <string name="document_payment_bank_iban_empty">Add a bank account to your business</string>
+    <string name="document_payment_bank_iban_empty_no_issuer">Add an issuer to your invoice</string>
     <string name="client_selection_title">Select clients</string>
     <string name="client_selection_empty">You haven't created any clients yet. You can do so from the "Clients" category.</string>
     <string name="client_selection_all_used">All clients are already assigned to other prices.</string>
@@ -191,6 +204,7 @@
     <string name="document_modal_edit_issuer">Edit issuer</string>
     <string name="document_modal_new_client">New client</string>
     <string name="document_modal_edit_client">Edit client</string>
+    <string name="document_modal_edit_retention">Edit withholding</string>
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Close</string>
     <string name="whats_new_done">Let's go!</string>
@@ -371,8 +385,10 @@
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
-    <string name="invoice_advice_legal_1">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡ \n\n …</string>
-    <string name="invoice_advice_legal_2">You are currently in the "Invoices" category.\n\n Before creating an invoice, I recommend you check the …</string>
+    <string name="invoice_advice_legal_1">You\'re currently in the "Invoices" category.\n\n Tap the Create button at the bottom of the page to create your first invoice …</string>
+    <string name="invoice_advice_legal_2">All the documents you create, as well as all your changes, are saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I\'m Little Horseshoe, your new amigo ♡</string>
+
     <string name="invoice_advice_legal_3">mandatory information for a compliant invoice. To make your life easier, I've summarised everything here: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n On another note… \n …</string>
@@ -556,6 +572,16 @@
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
     <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
+    <string name="issuer_tax_withholding_label">Tax withholding</string>
+    <string name="issuer_tax_withholding_info_modal_content">When enabled, a withholding line is added automatically to new invoices and credit notes for this issuer. You can edit the label and rate on the line, or hide it on individual invoices via the eye icon.</string>
+    <string name="issuer_tax_withholding_info_desc">Tax withholding info</string>
+    <string name="retention_default_label">Withholding</string>
+    <string name="retention_default_mx_isr">Retención ISR</string>
+    <string name="retention_default_mx_iva">Retención IVA</string>
+    <string name="retention_edit_field_label">Label</string>
+    <string name="retention_edit_field_rate">Rate (%)</string>
+    <string name="retention_hide_a11y">Hide on PDF</string>
+    <string name="retention_show_a11y">Show on PDF</string>
 
     <!-- Quote (Devis) -->
     <string name="appbar_quotes">Quotes</string>
