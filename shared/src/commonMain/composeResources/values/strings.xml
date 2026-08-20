@@ -387,6 +387,16 @@
     <string name="info_tooltip_ok">OK</string>
     <string name="product_unit_code_info_desc">Info code unité</string>
     <string name="issuer_vat_exempt_info_desc">Info franchise TVA</string>
+    <string name="issuer_tax_withholding_label">Retenue à la source</string>
+    <string name="issuer_tax_withholding_info_modal_content">Quand ce paramètre est activé, une ligne de retenue est ajoutée automatiquement aux nouvelles factures et avoirs de cet émetteur. Tu peux modifier le libellé et le taux sur la ligne, ou la masquer sur des factures précises via l'icône œil.</string>
+    <string name="issuer_tax_withholding_info_desc">Info retenue à la source</string>
+    <string name="retention_default_label">Retenue</string>
+    <string name="retention_default_mx_isr">Retención ISR</string>
+    <string name="retention_default_mx_iva">Retención IVA</string>
+    <string name="retention_edit_field_label">Libellé</string>
+    <string name="retention_edit_field_rate">Taux (%)</string>
+    <string name="retention_hide_a11y">Masquer sur le PDF</string>
+    <string name="retention_show_a11y">Afficher sur le PDF</string>
     <string name="company_identification1">N° SIRET</string>
     <string name="company_identification2">N° TVA</string>
     <string name="company_identification3">N° RCS</string>
@@ -442,6 +452,7 @@
     <string name="document_modal_edit_issuer">Édition émetteur·ice</string>
     <string name="document_modal_new_client">Nouveau client·e</string>
     <string name="document_modal_edit_client">Édition client·e</string>
+    <string name="document_modal_edit_retention">Édition retenue</string>
 
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Fermer</string>

@@ -169,6 +169,19 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Añadir una dirección</string>
     <string name="client_delete_address">Eliminar dirección</string>
+    <string name="client_or_issuer_section_bank">Datos bancarios</string>
+    <string name="issuer_bank_add">+ Añadir una cuenta</string>
+    <string name="issuer_bank_label">Etiqueta</string>
+    <string name="issuer_bank_label_input">Cuenta profesional</string>
+    <string name="issuer_bank_delete_a11y">Eliminar esta cuenta bancaria</string>
+    <string name="issuer_bank_country">País</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">Nº de cuenta</string>
+    <string name="document_payment_bank_show_switch">Mostrar los datos bancarios de la empresa</string>
+    <string name="document_payment_bank_edit_prefix">Editar el texto</string>
+    <string name="document_payment_bank_picker_title">Datos bancarios</string>
+    <string name="document_payment_bank_iban_empty">Añade una cuenta bancaria a tu empresa</string>
+    <string name="document_payment_bank_iban_empty_no_issuer">Añade un emisor a tu factura</string>
     <string name="client_selection_title">Seleccionar los clientes</string>
     <string name="client_selection_empty">Todavía no has creado ningún cliente. Puedes hacerlo desde la categoría "Clientes".</string>
     <string name="client_selection_all_used">Todos los clientes ya están asignados a otros precios.</string>
@@ -183,6 +196,7 @@
     <string name="document_modal_edit_issuer">Editar emisor</string>
     <string name="document_modal_new_client">Nuevo cliente</string>
     <string name="document_modal_edit_client">Editar cliente</string>
+    <string name="document_modal_edit_retention">Editar retención</string>
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Cerrar</string>
     <string name="whats_new_done">¡Adelante!</string>
@@ -556,6 +570,16 @@ Une erreur s'est produite :
     <string name="issuer_vat_exempt_info_modal_title">Franquicia de IVA</string>
     <string name="issuer_vat_exempt_info_modal_content">Útil para el cumplimiento de la facturación electrónica — permite a g8 añadir automáticamente la mención legal de franquicia de IVA adaptada a tu país en las facturas.</string>
     <string name="issuer_vat_exempt_info_desc">Info franquicia de IVA</string>
+    <string name="issuer_tax_withholding_label">Retención de impuestos</string>
+    <string name="issuer_tax_withholding_info_modal_content">Cuando está activada, se añade automáticamente una línea de retención a las nuevas facturas y notas de crédito de este emisor. Puedes editar la etiqueta y el porcentaje en la línea, u ocultarla en facturas concretas con el icono de ojo.</string>
+    <string name="issuer_tax_withholding_info_desc">Info retención de impuestos</string>
+    <string name="retention_default_label">Retención</string>
+    <string name="retention_default_mx_isr">Retención ISR</string>
+    <string name="retention_default_mx_iva">Retención IVA</string>
+    <string name="retention_edit_field_label">Etiqueta</string>
+    <string name="retention_edit_field_rate">Porcentaje (%)</string>
+    <string name="retention_hide_a11y">Ocultar en el PDF</string>
+    <string name="retention_show_a11y">Mostrar en el PDF</string>
 
     <!-- Quote (Devis) -->
     <string name="appbar_quotes">Presupuestos</string>

@@ -167,6 +167,19 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Add an address</string>
     <string name="client_delete_address">Delete address</string>
+    <string name="client_or_issuer_section_bank">Bank details</string>
+    <string name="issuer_bank_add">+ Add an account</string>
+    <string name="issuer_bank_label">Label</string>
+    <string name="issuer_bank_label_input">Business account</string>
+    <string name="issuer_bank_delete_a11y">Delete this bank account</string>
+    <string name="issuer_bank_country">Country</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">Account No.</string>
+    <string name="document_payment_bank_show_switch">Show the business bank details</string>
+    <string name="document_payment_bank_edit_prefix">Edit text</string>
+    <string name="document_payment_bank_picker_title">Bank details</string>
+    <string name="document_payment_bank_iban_empty">Add a bank account to your business</string>
+    <string name="document_payment_bank_iban_empty_no_issuer">Add an issuer to your invoice</string>
     <string name="client_selection_title">Select clients</string>
     <string name="client_selection_empty">You haven't created any clients yet. You can do so from the "Clients" category.</string>
     <string name="client_selection_all_used">All clients are already assigned to other prices.</string>
@@ -181,6 +194,7 @@
     <string name="document_modal_edit_issuer">Edit issuer</string>
     <string name="document_modal_new_client">New client</string>
     <string name="document_modal_edit_client">Edit client</string>
+    <string name="document_modal_edit_retention">Edit withholding</string>
     <!-- WhatsNew Dialog -->
     <string name="whats_new_close">Close</string>
     <string name="whats_new_done">Let's go!</string>
@@ -546,6 +560,16 @@
     <string name="issuer_vat_exempt_info_modal_title">VAT exemption</string>
     <string name="issuer_vat_exempt_info_modal_content">Useful for e-invoicing compliance — lets g8 automatically add the VAT exemption legal notice appropriate for your country onto your invoices.</string>
     <string name="issuer_vat_exempt_info_desc">VAT exemption info</string>
+    <string name="issuer_tax_withholding_label">Tax withholding</string>
+    <string name="issuer_tax_withholding_info_modal_content">When enabled, a withholding line is added automatically to new invoices and credit notes for this issuer. You can edit the label and rate on the line, or hide it on individual invoices via the eye icon.</string>
+    <string name="issuer_tax_withholding_info_desc">Tax withholding info</string>
+    <string name="retention_default_label">Withholding</string>
+    <string name="retention_default_mx_isr">Retención ISR</string>
+    <string name="retention_default_mx_iva">Retención IVA</string>
+    <string name="retention_edit_field_label">Label</string>
+    <string name="retention_edit_field_rate">Rate (%)</string>
+    <string name="retention_hide_a11y">Hide on PDF</string>
+    <string name="retention_show_a11y">Show on PDF</string>
 
     <!-- Quote (Devis) -->
     <string name="appbar_quotes">Quotes</string>
