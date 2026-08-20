@@ -19,7 +19,7 @@
     <!-- Payment terms (Factur-X BT-20). Défaut porté par cette clé — les mentions LME
          (art. L441-10 C.com) sont légalement obligatoires en France B2B, donc on
          les pré-remplit pour que l'user ne les perde jamais par oubli. -->
-    <string name="document_default_payment_terms">En cas de retard de paiement, une pénalité au taux légal en vigueur sera appliquée, à laquelle s'ajoutera une indemnité forfaitaire de 40 €. Pas d'escompte pour paiement anticipé.</string>
+    <string name="document_default_payment_terms">En cas de retard de paiement, une pénalité au taux d'intérêt appliqué par la BCE à son opération de refinancement la plus récente, majoré de 10 points, sera appliquée, à laquelle s'ajoutera une indemnité forfaitaire de 40 €. Pas d'escompte pour paiement anticipé.</string>
     <string name="document_payment_terms">Termes de paiement</string>
     <!-- Default value of the (editable) payment-means label rendered on the PDF/preview.
          Shown as the placeholder inside the label field in the picker. The user can
