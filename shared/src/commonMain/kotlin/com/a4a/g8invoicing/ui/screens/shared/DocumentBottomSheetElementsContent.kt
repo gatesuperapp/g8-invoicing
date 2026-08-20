@@ -108,26 +108,10 @@ fun DocumentBottomSheetElementsContent(
                     pageElement = ScreenElement.DOCUMENT_DUE_DATE
                 )
             )
-        // Payment terms (BT-20) — free-text row for invoice only. Between
-        // Échéance and Moyens de paiement (ordre final : Échéance → Termes →
-        // Moyens → Pied de page).
-        inputList.add(
-            FormInput(
-                label = stringResource(Res.string.document_payment_terms),
-                inputType = ForwardElement(
-                    text = document.paymentTermsDescription.text.ifEmpty { " - " },
-                    isMultiline = false,
-                    displayArrow = false,
-                ),
-                pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS,
-            )
-        )
     }
-    // Payment means (BT-81) — invoice + credit note only. Row label is fixed
-    // ("Moyens de paiement"), matching Termes de paiement above it. The user's
-    // editable per-doc label (rendered on the preview/PDF) lives inside the
-    // picker modal itself — keeping the menu row stable so users can find the
-    // entry no matter what they typed in the label field.
+    // Payment means (BT-81) — invoice + credit note only. Row label is fixed;
+    // the user's editable per-doc label (rendered on the preview/PDF) lives
+    // inside the picker modal so the menu row stays findable regardless.
     val paymentMeansSelections: Set<String>? = when (document) {
         is InvoiceState -> document.paymentMeansSelections
         is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansSelections
@@ -146,6 +130,19 @@ fun DocumentBottomSheetElementsContent(
                     displayArrow = false,
                 ),
                 pageElement = ScreenElement.DOCUMENT_PAYMENT_MEANS,
+            )
+        )
+    }
+    if (document is InvoiceState) {
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_payment_terms),
+                inputType = ForwardElement(
+                    text = document.paymentTermsDescription.text.ifEmpty { " - " },
+                    isMultiline = false,
+                    displayArrow = false,
+                ),
+                pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS,
             )
         )
     }
