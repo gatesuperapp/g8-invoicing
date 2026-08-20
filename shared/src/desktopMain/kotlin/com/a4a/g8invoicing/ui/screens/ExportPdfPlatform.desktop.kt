@@ -40,6 +40,7 @@ import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.document_payment_section_title
 import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
@@ -108,6 +109,7 @@ actual fun ExportPdfPlatform(
         },
         bankAccountIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban),
         bankAccountGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic),
+        paymentSectionTitle = stringResource(Res.string.document_payment_section_title),
     )
 
     val fileManager = remember { PdfFileManager() }

@@ -57,6 +57,10 @@ data class PdfStrings(
     // localised "N° de compte :" for non-IBAN countries (US, AU, NZ, ZA…).
     val bankAccountIbanLabel: String,
     val bankAccountGenericLabel: String,
+    // Fallback header for the greyed payment box on documents that don't carry
+    // a due date (credit notes). Invoices override it with "<dueDate label>
+    // <date>" built from the frozen dueDate string above.
+    val paymentSectionTitle: String,
 )
 
 /**

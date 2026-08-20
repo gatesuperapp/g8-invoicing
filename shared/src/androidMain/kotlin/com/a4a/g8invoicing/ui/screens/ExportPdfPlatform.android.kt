@@ -82,6 +82,7 @@ import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.document_payment_section_title
 import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.shared.resources.document_table_description
@@ -161,6 +162,7 @@ actual fun ExportPdfPlatform(
         },
         bankAccountIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban),
         bankAccountGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic),
+        paymentSectionTitle = stringResource(Res.string.document_payment_section_title),
     )
 
     // Strings for UI

@@ -274,75 +274,32 @@ class PdfGeneratorImpl(
             doc.add(createPrices(it, fontSize, currencyCode, formatLocale))
         }
 
-        // On invoices, keep the footer close to the due date (as in the preview) and
-        // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
-        // get the extra breathing room applied directly on the footer.
-        if (document is InvoiceState) {
-            if (showCurrencyNoticeLine) {
-                doc.add(createCurrencyNotice(currencyCodeForHeader))
-            }
-            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize, trimTopPadding = showCurrencyNoticeLine))
-            // BT-20 payment terms (free text) — invoice only. Rendered right
-            // above the payment means line so the payment block reads as one
-            // coherent group. Skipped when the user cleared the field.
-            createPaymentTermsBlock(document.paymentTermsDescription.text, fontSize)?.let { doc.add(it) }
-            // BT-81 payment means — invoice + credit note only. Segments are
-            // flattened at render time using [PdfStrings.paymentMeansLabels]
-            // (already locale-frozen), so mode names stay in the doc's original
-            // language even if the app locale changes later.
-            if (!document.paymentMeansHidden) {
-                createPaymentMeansBlock(document.paymentMeansSegments, fontSize)
-                    ?.let { doc.add(it) }
-            }
-            // BT-84 IBAN / BT-86 BIC — inserted between payment means and footer.
-            // Skipped when the picker's "Afficher les coordonnées bancaires"
-            // switch is off — frozen fields on DocumentClientOrIssuer stay
-            // populated regardless (BT-84/86 preserved for Factur-X export).
-            if (!document.paymentBankHidden) {
-                createIbanBicBlock(
-                    document.documentIssuer,
-                    (document as? com.a4a.g8invoicing.ui.states.InvoiceState)?.paymentBankSegments
-                        ?: emptyList(),
-                    fontSize,
-                )?.let { doc.add(it) }
-            }
-            doc.add(createFooter(document.footerText.text, fontSize))
-        } else {
-            if (showCurrencyNoticeLine) {
-                doc.add(createCurrencyNotice(currencyCodeForHeader))
-            }
-            val creditNote = document as? com.a4a.g8invoicing.ui.states.CreditNoteState
-            val paymentMeansBlock = if (creditNote?.paymentMeansHidden == true) null
-            else createPaymentMeansBlock(
-                creditNote?.paymentMeansSegments ?: emptyList(),
-                fontSize,
-            )
-            val ibanBlock = if (creditNote?.paymentBankHidden == true) null
-            else createIbanBicBlock(
-                document.documentIssuer,
-                creditNote?.paymentBankSegments ?: emptyList(),
-                fontSize,
-            )
-            // First block after the currency notice gets the 24pt top margin —
-            // subsequent blocks hug each other. Doubling would leave gaping holes.
-            when {
-                paymentMeansBlock != null -> {
-                    doc.add(paymentMeansBlock.setMarginTop(24F))
-                    ibanBlock?.let { doc.add(it) }
-                    doc.add(createFooter(document.footerText.text, fontSize))
-                }
-                ibanBlock != null -> {
-                    doc.add(ibanBlock.setMarginTop(24F))
-                    doc.add(createFooter(document.footerText.text, fontSize))
-                }
-                else -> doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
-            }
+        if (showCurrencyNoticeLine) {
+            doc.add(createCurrencyNotice(currencyCodeForHeader))
         }
 
-        // g8 watermark — text is frozen on the document at creation (watermark_text column).
-        // null/blank → no watermark for this doc.
-        document.watermarkText?.takeIf { it.isNotBlank() }?.let { watermark ->
-            doc.add(createWatermark(watermark))
+        // Grey box grouping "À régler avant le X" + payment means + IBAN/BIC.
+        // Same conditionals as the Compose preview: skip whole box if user
+        // hid both blocks OR neither is populated.
+        val paymentMeansStr = paymentMeansDisplayFor(document)
+        val bankStr = bankRenderedFor(document)
+        val showPaymentBox = paymentMeansStr != null || bankStr != null
+        if (showPaymentBox) {
+            doc.add(createPaymentBox(document, paymentMeansStr, bankStr, fontSize))
+        }
+
+        // Bottom band under a hairline: terms → footer text → watermark. The
+        // separator only draws when at least one of the three sits below it,
+        // matching the preview.
+        val paymentTerms = (document as? InvoiceState)?.paymentTermsDescription?.text
+            ?.trim()?.takeIf { it.isNotEmpty() }
+        val footerText = document.footerText.text.trim().takeIf { it.isNotEmpty() }
+        val watermarkText = document.watermarkText?.takeIf { it.isNotBlank() }
+        if (paymentTerms != null || footerText != null || watermarkText != null) {
+            doc.add(createSeparator(topMargin = 20f))
+            if (paymentTerms != null) doc.add(createPaymentTermsBlock(paymentTerms, fontSize))
+            if (footerText != null) doc.add(createFooter(footerText, fontSize, paymentTerms != null))
+            if (watermarkText != null) doc.add(createWatermark(watermarkText))
         }
 
         // "Paid" stamp — absolute-positioned via setFixedPosition inside
@@ -481,11 +438,12 @@ class PdfGeneratorImpl(
             "$labelPattern $currencyCode"
         }
         return Paragraph(text)
-            .setFontSize(9.5F)
-            .pdfBold()
-            .setTextAlignment(TextAlignment.CENTER)
-            .setFixedLeading(14F)
-            .setPaddingTop(12f)
+            .setFontSize(8F)
+            .setFontColor(ColorConstants.DARK_GRAY)
+            .setTextAlignment(TextAlignment.RIGHT)
+            .setFixedLeading(10F)
+            .setPaddingTop(5f)
+            .setPaddingRight(3f)
     }
 
     private fun createIssuerAndClientTable(
@@ -857,18 +815,123 @@ class PdfGeneratorImpl(
         )
     }
 
-    private fun createDueDate(date: String, fontSize: Float, trimTopPadding: Boolean = false): Paragraph {
-        val dueDateLabel = strings.dueDate.trimEnd() + " "
-        return Paragraph("$dueDateLabel$date")
-            .setFixedLeading(16F)
-            // Drop the top gap when the currency notice already sits above:
-            // the notice provides the block spacing to the totals, dueDate
-            // just needs to hug it. Without this, the two lines end up
-            // ~24pt apart instead of ~2.
-            .setPaddingTop(if (trimTopPadding) 2f else 12f)
-            .setTextAlignment(TextAlignment.CENTER)
-            .pdfBold()
-            .setFontSize(fontSize)
+    /**
+     * "À régler avant le dd/mm/yyyy" (invoices with a due date) or the
+     * generic "Paiement" fallback (credit notes). Used as the header of the
+     * greyed payment box, so it just returns a String — the box owns the
+     * bold + font size.
+     */
+    private fun paymentBoxTitle(document: DocumentState): String {
+        val invoiceDate = (document as? InvoiceState)?.dueDate
+            ?.substringBefore(" ")
+            ?.takeIf { it.isNotBlank() }
+        return if (invoiceDate != null) {
+            strings.dueDate.trimEnd() + " " + invoiceDate
+        } else {
+            strings.paymentSectionTitle
+        }
+    }
+
+    /** BT-81 flatten. Returns null when the block would render empty. */
+    private fun paymentMeansDisplayFor(document: DocumentState): String? {
+        val (segments, hidden) = when (document) {
+            is InvoiceState -> document.paymentMeansSegments to document.paymentMeansHidden
+            is com.a4a.g8invoicing.ui.states.CreditNoteState ->
+                document.paymentMeansSegments to document.paymentMeansHidden
+            else -> return null
+        }
+        if (hidden || segments.isEmpty()) return null
+        return com.a4a.g8invoicing.data.models
+            .flattenPaymentLabel(segments, strings.paymentMeansLabels)
+            .takeIf { it.isNotEmpty() }
+    }
+
+    /** BT-84/86 flatten. Returns "IBAN : … \n BIC : …", null when both empty. */
+    private fun bankRenderedFor(document: DocumentState): String? {
+        val bankHidden = when (document) {
+            is InvoiceState -> document.paymentBankHidden
+            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankHidden
+            else -> false
+        }
+        if (bankHidden) return null
+        val issuer = document.documentIssuer
+        val iban = issuer?.paymentIban?.text?.trim().orEmpty()
+        val bic = issuer?.paymentBic?.text?.trim().orEmpty()
+        if (iban.isEmpty() && bic.isEmpty()) return null
+        val country = issuer?.paymentCountry
+        val identifierLabel = if (com.a4a.g8invoicing.data.models.CountryCodes.isIbanCountry(country)
+            || country == null
+        ) strings.bankAccountIbanLabel else strings.bankAccountGenericLabel
+        val segments = when (document) {
+            is InvoiceState -> document.paymentBankSegments
+            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankSegments
+            else -> emptyList()
+        }
+        val effectiveSegments = segments.ifEmpty {
+            com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
+        }
+        return com.a4a.g8invoicing.data.models
+            .flattenPaymentBank(effectiveSegments, identifierLabel, iban, bic)
+            .takeIf { it.isNotEmpty() }
+    }
+
+    /**
+     * The grey rounded box below the totals — header line (due date or
+     * "Paiement") + means + IBAN/BIC. Built as a single-cell Table so the
+     * background paints under the whole content block, not per Paragraph.
+     * Table width is left unspecified so it hugs the widest inner line
+     * instead of stretching across the page.
+     */
+    private fun createPaymentBox(
+        document: DocumentState,
+        paymentMeansDisplay: String?,
+        bankRendered: String?,
+        fontSize: Float,
+    ): Table {
+        val cell = Cell()
+            .setBackgroundColor(com.itextpdf.kernel.colors.DeviceRgb(245, 245, 245))
+            .setBorder(Border.NO_BORDER)
+            .setPaddingTop(10f)
+            .setPaddingBottom(10f)
+            .setPaddingLeft(14f)
+            .setPaddingRight(14f)
+        cell.add(
+            Paragraph(paymentBoxTitle(document))
+                .setFontSize(fontSize)
+                .pdfBold()
+                .setFixedLeading(11F)
+                .setMarginBottom(4f)
+        )
+        val bodyLines = listOfNotNull(paymentMeansDisplay, bankRendered)
+            .joinToString("\n")
+        if (bodyLines.isNotEmpty()) {
+            cell.add(
+                Paragraph(bodyLines)
+                    .setFontSize(fontSize)
+                    .setFixedLeading(11F)
+            )
+        }
+        return Table(1)
+            .setBorder(Border.NO_BORDER)
+            .setMarginTop(12f)
+            .setHorizontalAlignment(HorizontalAlignment.LEFT)
+            .addCell(cell)
+    }
+
+    /** Hairline grey rule that groups the terms / footer / watermark trio. */
+    private fun createSeparator(topMargin: Float): Table {
+        return Table(1)
+            .useAllAvailableWidth()
+            .setBorder(Border.NO_BORDER)
+            .setMarginTop(topMargin)
+            .setMarginBottom(8f)
+            .addCell(
+                Cell()
+                    .setBorder(Border.NO_BORDER)
+                    .setBorderTop(SolidBorder(com.itextpdf.kernel.colors.DeviceRgb(224, 224, 224), 0.5f))
+                    .setPadding(0f)
+                    .setHeight(0.5f)
+            )
     }
 
     // Locale-aware "Paid" stamp. Resolve to the invoice's frozen formatLocale
@@ -899,80 +962,30 @@ class PdfGeneratorImpl(
         }
     }
 
-    private fun createFooter(text: String, fontSize: Float): Paragraph {
+    /**
+     * User-typed free field rendered under the hairline. Small black centered
+     * to match the preview footer. [precededByTerms] adds a small top margin
+     * so it doesn't hug the terms above.
+     */
+    private fun createFooter(text: String, fontSize: Float, precededByTerms: Boolean): Paragraph {
         return Paragraph(text)
-            .setFontSize(fontSize)
-            // 10pt leading on a 9.5pt font is a tight ~1.05 ratio — matches
-            // the preview's tighter line-height so a user-typed blank line
-            // reads as one blank line, not two. The earlier 14pt inflated
-            // every line gap and blew up empty separators.
+            .setFontSize(fontSize - 1.5F)
             .setFixedLeading(10F)
             .setTextAlignment(TextAlignment.CENTER)
+            .setMarginTop(if (precededByTerms) 6f else 0f)
     }
 
     /**
-     * BT-20 payment terms description — free text. Returns null when the field
-     * is empty so the caller can skip the block. No prefix / label — the text
-     * itself carries the mentions (LME + "30j net"), the user owns the wording.
+     * BT-20 payment terms description — free text. Sits under the hairline,
+     * left-aligned in muted grey (mention style). Non-null caller check
+     * ensures we don't render an empty paragraph.
      */
-    private fun createPaymentTermsBlock(text: String, fontSize: Float): Paragraph? {
-        val trimmed = text.trim()
-        if (trimmed.isEmpty()) return null
-        return Paragraph(trimmed)
-            .setFontSize(fontSize)
-            .setFixedLeading(10F)
-            .setTextAlignment(TextAlignment.CENTER)
-    }
-
-    /**
-     * BT-81 payment means block. Flatten [segments] using the frozen locale
-     * snapshot ([PdfStrings.paymentMeansLabels]) so a FR invoice keeps FR
-     * mode names after the app switches locale. Returns null when the flatten
-     * yields an empty string.
-     */
-    private fun createPaymentMeansBlock(
-        segments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>,
-        fontSize: Float,
-    ): Paragraph? {
-        val display = com.a4a.g8invoicing.data.models
-            .flattenPaymentLabel(segments, strings.paymentMeansLabels)
-        if (display.isEmpty()) return null
-        return Paragraph(display)
-            .setFontSize(fontSize)
-            .setFixedLeading(10F)
-            .setTextAlignment(TextAlignment.CENTER)
-    }
-
-    /**
-     * IBAN (BT-84) + BIC (BT-86) block. Sourced from the frozen documentIssuer
-     * snapshot (payment_iban / payment_bic on DocumentClientOrIssuer). Returns null
-     * when neither is set so the caller can skip the block entirely — same shape
-     * as the watermark handling above. Font/leading match [createFooter] so IBAN
-     * and BIC read visually as one block with the free-text footer that follows.
-     */
-    private fun createIbanBicBlock(
-        issuer: com.a4a.g8invoicing.ui.states.ClientOrIssuerState?,
-        segments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
-        fontSize: Float,
-    ): Paragraph? {
-        val iban = issuer?.paymentIban?.text?.trim().orEmpty()
-        val bic = issuer?.paymentBic?.text?.trim().orEmpty()
-        if (iban.isEmpty() && bic.isEmpty()) return null
-        val country = issuer?.paymentCountry
-        val identifierLabel = if (com.a4a.g8invoicing.data.models.CountryCodes.isIbanCountry(country)
-            || country == null
-        ) strings.bankAccountIbanLabel else strings.bankAccountGenericLabel
-        val effectiveSegments = segments.ifEmpty {
-            com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
-        }
-        val rendered = com.a4a.g8invoicing.data.models.flattenPaymentBank(
-            effectiveSegments, identifierLabel, iban, bic,
-        )
-        if (rendered.isEmpty()) return null
-        return Paragraph(rendered)
-            .setFontSize(fontSize)
-            .setFixedLeading(10F)
-            .setTextAlignment(TextAlignment.CENTER)
+    private fun createPaymentTermsBlock(text: String, fontSize: Float): Paragraph {
+        return Paragraph(text)
+            .setFontSize(fontSize - 1.5F)
+            .setFontColor(ColorConstants.DARK_GRAY)
+            .setFixedLeading(9F)
+            .setTextAlignment(TextAlignment.LEFT)
     }
 
     private fun createWatermark(text: String): Paragraph {
@@ -1108,6 +1121,7 @@ class PdfGeneratorImpl(
             companyId2Label = pick("company_identification2", defaults.companyId2Label),
             companyId3Label = pick("company_identification3", defaults.companyId3Label),
             currencyNoticeLabel = pick("pdf_currency_notice", defaults.currencyNoticeLabel),
+            paymentSectionTitle = pick("document_payment_section_title", defaults.paymentSectionTitle),
             // Freeze the mode labels (BT-81) per-chip so a FR invoice keeps
             // "Virement, chèque" after the user switches app to EN. Same
             // snapshot → localeFallback → app-default cascade as every other
