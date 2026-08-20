@@ -12,7 +12,7 @@
     <string name="document_default_footer"></string>
     <string name="document_default_payment_terms">Bei Zahlungsverzug werden Verzugszinsen zum gesetzlichen Zinssatz sowie eine pauschale Entschädigung von 40 € erhoben. Kein Skonto bei Vorauszahlung.</string>
     <string name="document_payment_terms">Zahlungsbedingungen</string>
-    <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel:</string>
+    <string name="document_payment_means_default_label">Zahlungsmittel:</string>
     <string name="document_payment_means_hide_list_a11y">Zahlungsmittel-Liste ausblenden</string>
     <string name="document_payment_means_show_list_a11y">Zahlungsmittel-Liste anzeigen</string>
     <string name="document_payment_means_show_switch">Akzeptierte Zahlungsmittel auf der Rechnung anzeigen</string>
