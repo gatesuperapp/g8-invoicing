@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.material3.MaterialTheme
@@ -17,10 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_tax_label
 import com.a4a.g8invoicing.shared.resources.document_total_with_tax
 import com.a4a.g8invoicing.shared.resources.document_total_without_tax
+import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
@@ -90,40 +93,68 @@ fun DocumentBasicTemplateTotalPrices(
         with(density) { maxPx.toDp() }
     }
 
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp, end = 3.dp),
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        // IntrinsicSize.Max on the Column so every Row shares the widest
-        // (label + gap + amount) natural size. Each Row then fillMaxWidth to
-        // stretch to that shared width, letting the label side (weight 1f,
-        // textAlign End) push its ":" against the amount and letting every
-        // label ":" land on the same vertical.
-        Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-            lines.forEachIndexed { index, line ->
-                val isLast = index == lines.lastIndex
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = if (isLast) 0.dp else paddingBottom),
-                ) {
-                    val style = if (line.bold) boldStyle else regularStyle
-                    Text(
-                        text = line.label + " ",
-                        style = style,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.weight(1f).alignByBaseline(),
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = line.amount,
-                        style = style,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.width(amountColumnWidthDp).alignByBaseline(),
-                    )
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, bottom = 0.dp, end = 3.dp),
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            // IntrinsicSize.Max on the Column so every Row shares the widest
+            // (label + gap + amount) natural size. Each Row then fillMaxWidth to
+            // stretch to that shared width, letting the label side (weight 1f,
+            // textAlign End) push its ":" against the amount and letting every
+            // label ":" land on the same vertical.
+            Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                lines.forEachIndexed { index, line ->
+                    val isLast = index == lines.lastIndex
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = if (isLast) 0.dp else paddingBottom),
+                    ) {
+                        val style = if (line.bold) boldStyle else regularStyle
+                        Text(
+                            text = line.label + " ",
+                            style = style,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.weight(1f).alignByBaseline(),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = line.amount,
+                            style = style,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.width(amountColumnWidthDp).alignByBaseline(),
+                        )
+                    }
                 }
+            }
+        }
+
+        // Currency reminder ("Devise : USD") — right-aligned grey mention
+        // shown only when the doc's currency isn't EUR. The invoice due date
+        // lives inside the Paiement box now, so it's not rendered here.
+        val currencyCode = uiState.currency.text
+        val showCurrencyNotice = uiState.showCurrencyAndAutoTaxColumn &&
+            currencyCode.isNotEmpty() && currencyCode != "EUR"
+        if (showCurrencyNotice) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp, end = 3.dp),
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                val snapshotValue = labels?.get("pdf_currency_notice")
+                    ?: DocumentLabels.localeFallback("pdf_currency_notice", uiState.formatLocale)
+                val pattern = snapshotValue ?: stringResource(Res.string.pdf_currency_notice)
+                Text(
+                    text = pattern.replace("%1\$s", currencyCode),
+                    style = MaterialTheme.typography.textForDocuments.copy(
+                        color = Color(0xFF666666),
+                        fontSize = 5.sp,
+                    ),
+                )
             }
         }
     }

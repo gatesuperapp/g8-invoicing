@@ -10,6 +10,7 @@ import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
+import com.a4a.g8invoicing.shared.resources.document_payment_section_title
 import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.document_table_description
 import com.a4a.g8invoicing.shared.resources.document_table_quantity
@@ -66,6 +67,7 @@ internal object DocumentLabels {
         "credit_note_number" to Res.string.credit_note_number,
         "delivery_note_number" to Res.string.delivery_note_number,
         "document_date_label" to Res.string.document_date_label,
+        "document_payment_section_title" to Res.string.document_payment_section_title,
         "document_reference_label" to Res.string.document_reference_label,
         "document_table_description" to Res.string.document_table_description,
         "document_table_quantity" to Res.string.document_table_quantity,
