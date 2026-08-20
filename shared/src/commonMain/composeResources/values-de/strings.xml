@@ -376,8 +376,9 @@
     <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡ \n\n …</string>
-    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie Rechnungen.\n\n Bevor du eine Rechnung erstellst empfehle ich dir, dich über …</string>
+    <string name="invoice_advice_legal_1">Du bist gerade in der Kategorie „Rechnungen".\n\n Tippe unten auf der Seite auf den Button „Erstellen", um deine erste Rechnung zu erstellen …</string>
+    <string name="invoice_advice_legal_2">Alle Dokumente, die du erstellst, sowie all deine Änderungen werden automatisch im Hintergrund gespeichert. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+
     <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5">Zu einem anderen Thema… \n …</string>
