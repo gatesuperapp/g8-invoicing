@@ -29,7 +29,6 @@
     <string name="addressed_to">Dirigido a</string>
     <string name="invoice_pdf_due_date">A pagar antes del </string>
     <string name="document_payment_section_title">Pago</string>
-    <string name="document_payment_section_mode">Modo</string>
     <string name="invoice_paid">Pagado ✔</string>
     <string name="pdf_currency_notice">Moneda: %1$s</string>
 
