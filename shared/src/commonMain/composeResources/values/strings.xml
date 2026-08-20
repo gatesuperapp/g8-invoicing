@@ -28,7 +28,7 @@
          joined mode list follows, the display becomes "<label> Virement, chèque" (label
          already carries the colon). When the list is hidden via the eye toggle, the
          renderer strips the trailing " :" so a lonely colon doesn't leak onto the doc. -->
-    <string name="document_payment_means_default_label">Modes de paiement :</string>
+    <string name="document_payment_means_default_label">Modes de paiement acceptés :</string>
     <!-- Accessibility labels for the eye icon inside the payment-means picker encart —
          toggles whether the joined mode list is rendered on preview + PDF. -->
     <string name="document_payment_means_hide_list_a11y">Masquer la liste des moyens de paiement</string>
@@ -54,7 +54,7 @@
     <string name="document_reference">Référence</string>
     <string name="document_reference_label">Référence : </string>
     <string name="addressed_to">Adressé à</string>
-    <string name="invoice_pdf_due_date">À régler avant le </string>
+    <string name="invoice_pdf_due_date">Échéance : </string>
     <string name="document_payment_section_title">Paiement</string>
     <string name="invoice_paid">Payée ✔</string>
     <string name="pdf_currency_notice">Devise : %1$s</string>
