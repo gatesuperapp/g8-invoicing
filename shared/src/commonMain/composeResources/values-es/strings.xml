@@ -12,7 +12,7 @@
     <string name="document_default_footer"></string>
     <string name="document_default_payment_terms">En caso de retraso en el pago, se aplicará una penalización al tipo legal vigente, más una indemnización a tanto alzado de 40 €. Sin descuento por pago anticipado.</string>
     <string name="document_payment_terms">Términos de pago</string>
-    <string name="document_payment_means_default_label">Medios de pago aceptados:</string>
+    <string name="document_payment_means_default_label">Medios de pago:</string>
     <string name="document_payment_means_hide_list_a11y">Ocultar la lista de medios de pago</string>
     <string name="document_payment_means_show_list_a11y">Mostrar la lista de medios de pago</string>
     <string name="document_payment_means_show_switch">Mostrar los medios de pago aceptados en la factura</string>
