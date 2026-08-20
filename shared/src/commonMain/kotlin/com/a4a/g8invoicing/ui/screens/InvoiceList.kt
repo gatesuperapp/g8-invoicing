@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,12 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
@@ -46,12 +39,7 @@ import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu1
 import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu2
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_1
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_2
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_3
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_4
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_5
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_6
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_help
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_url
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -74,8 +62,6 @@ import com.a4a.g8invoicing.ui.shared.animations.BatOpenMouth
 import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.textBody
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -335,7 +321,6 @@ fun InvoiceList(
 private fun DisplayBatHelperWelcome() {
     var visibleText by remember { mutableIntStateOf(0) }
     val numberOfIterations = remember { mutableIntStateOf(1) }
-    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = Modifier
@@ -356,7 +341,7 @@ private fun DisplayBatHelperWelcome() {
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ) {
-                if (visibleText < 5) {
+                if (visibleText < 2) {
                     visibleText += 1
                 } else visibleText = 0
                 numberOfIterations.intValue += 1
@@ -412,38 +397,6 @@ private fun DisplayBatHelperWelcome() {
         ) {
             Text(
                 text = stringResource(Res.string.invoice_advice_legal_2),
-                textAlign = TextAlign.Center
-            )
-        }
-
-
-        AnimatedVisibility(
-            visible = visibleText == 3,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            TextAdvice(uriHandler)
-        }
-
-        AnimatedVisibility(
-            visible = visibleText == 4,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = stringResource(Res.string.invoice_advice_legal_6),
                 textAlign = TextAlign.Center
             )
         }
@@ -543,33 +496,3 @@ private fun resetSelectedItems(
     keyToResetCheckboxes.value = !keyToResetCheckboxes.value
 }
 
-@Composable
-private fun TextAdvice(uriHandler: UriHandler) {
-    val text3 = stringResource(Res.string.invoice_advice_legal_3)
-    val text4 = stringResource(Res.string.invoice_advice_legal_4)
-    val text5 = stringResource(Res.string.invoice_advice_legal_5)
-    val url = stringResource(Res.string.invoice_advice_legal_url)
-
-    val annotatedString = buildAnnotatedString {
-        append("$text3 ")
-
-        pushStringAnnotation(
-            tag = "link",
-            annotation = url
-        )
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
-            append(text4)
-        }
-        append(text5)
-    }
-
-    ClickableText(
-        text = annotatedString,
-        style = MaterialTheme.typography.textBody.copy(textAlign = TextAlign.Center),
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "link", start = offset, end = offset)
-                .firstOrNull()?.let {
-                    uriHandler.openUri(it.item)
-                }
-        })
-}
