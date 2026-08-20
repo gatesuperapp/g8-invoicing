@@ -56,7 +56,6 @@
     <string name="addressed_to">Adressé à</string>
     <string name="invoice_pdf_due_date">À régler avant le </string>
     <string name="document_payment_section_title">Paiement</string>
-    <string name="document_payment_section_mode">Mode</string>
     <string name="invoice_paid">Payée ✔</string>
     <string name="pdf_currency_notice">Devise : %1$s</string>
 
