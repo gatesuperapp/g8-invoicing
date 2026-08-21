@@ -303,6 +303,7 @@
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">My companies</string>
     <string name="account_add_company">+ Add a company</string>
+    <string name="account_manage_companies">Manage my companies</string>
     <string name="account_section_advanced">Advanced</string>
     <string name="account_delete_cta">Delete my account</string>
     <string name="account_delete_dialog_title">Permanently delete your account?</string>

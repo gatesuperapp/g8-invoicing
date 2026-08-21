@@ -305,6 +305,7 @@
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">Mis empresas</string>
     <string name="account_add_company">+ Añadir una empresa</string>
+    <string name="account_manage_companies">Gestionar mis empresas</string>
     <string name="account_section_advanced">Avanzado</string>
     <string name="account_delete_cta">Eliminar mi cuenta</string>
     <string name="account_delete_dialog_title">¿Eliminar definitivamente tu cuenta?</string>
