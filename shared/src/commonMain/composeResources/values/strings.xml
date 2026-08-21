@@ -524,6 +524,7 @@
     <string name="drawer_g8">Infos</string>
     <string name="drawer_my_account">Mon Compte</string>
     <string name="drawer_gstore">𝕘Store</string>
+    <string name="drawer_my_company">Mon entreprise</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
