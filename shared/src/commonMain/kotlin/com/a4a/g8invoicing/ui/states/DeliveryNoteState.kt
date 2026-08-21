@@ -23,4 +23,5 @@ data class DeliveryNoteState(
     override var labelsSnapshot: String? = null,
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
+    override var originalCompanyId: Long? = null,
 ) : DocumentState()

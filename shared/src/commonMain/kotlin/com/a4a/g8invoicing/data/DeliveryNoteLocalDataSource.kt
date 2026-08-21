@@ -29,6 +29,7 @@ class DeliveryNoteLocalDataSource(
     private val activatedModules: ActivatedModulesRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -54,8 +55,12 @@ class DeliveryNoteLocalDataSource(
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        // Récupérer l'émetteur depuis la table maître
-        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        // Résout l'entreprise courante (menu latéral). Fallback getLastIssuer()
+        // pour les installs sans Settings hydratée (sécurité post-migration).
+        val currentCompanyId = currentCompanyRepository.current
+        val existingIssuer = currentCompanyId
+            ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
+            ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
@@ -74,6 +79,8 @@ class DeliveryNoteLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
+                originalCompanyId = currentCompanyId
+                    ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
             )
 
             saveInfoInDocumentTable(newDeliveryNoteState)
@@ -216,6 +223,7 @@ class DeliveryNoteLocalDataSource(
                 labelsSnapshot = it.labels_snapshot,
                 showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
                 formatLocale = it.format_locale,
+                originalCompanyId = it.original_company_id,
             )
         }
     }
@@ -497,6 +505,7 @@ class DeliveryNoteLocalDataSource(
                 labels_snapshot = document.labelsSnapshot,
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
+                original_company_id = document.originalCompanyId,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

@@ -23,6 +23,7 @@ data class CreditNoteState(
     override var labelsSnapshot: String? = null,
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
+    override var originalCompanyId: Long? = null,
     var dueDate: String = "",
     var linkedInvoice: InvoiceState? = null,
     // See InvoiceState.paymentMeansSelections — same semantics on credit notes since

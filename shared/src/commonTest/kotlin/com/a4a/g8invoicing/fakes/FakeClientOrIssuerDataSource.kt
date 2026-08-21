@@ -63,6 +63,30 @@ class FakeClientOrIssuerDataSource : ClientOrIssuerLocalDataSourceInterface {
             )
         }
 
+    override suspend fun getCurrentIssuer(companyId: Long): ClientOrIssuerState? =
+        clientsAndIssuers
+            .firstOrNull { it.type == ClientOrIssuerType.ISSUER && it.id?.toLong() == companyId }
+            ?.let { issuer ->
+                ClientOrIssuerState(
+                    id = null,
+                    type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                    originalClientOrIssuerId = issuer.id,
+                    firstName = issuer.firstName,
+                    name = issuer.name,
+                    phone = issuer.phone,
+                    emails = issuer.emails,
+                    addresses = issuer.addresses,
+                    notes = issuer.notes,
+                    companyId1Label = issuer.companyId1Label,
+                    companyId1Number = issuer.companyId1Number,
+                    companyId2Label = issuer.companyId2Label,
+                    companyId2Number = issuer.companyId2Number,
+                    companyId3Label = issuer.companyId3Label,
+                    companyId3Number = issuer.companyId3Number,
+                    logoPath = issuer.logoPath
+                )
+            }
+
     fun clear() {
         clientsAndIssuers.clear()
         documentClientsAndIssuers.clear()

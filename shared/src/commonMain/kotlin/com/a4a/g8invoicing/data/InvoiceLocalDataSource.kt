@@ -57,6 +57,7 @@ class InvoiceLocalDataSource(
     private val activatedModules: ActivatedModulesRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : InvoiceLocalDataSourceInterface {
     private val invoiceQueries = db.invoiceQueries
     private val invoiceTagQueries = db.invoiceTagQueries
@@ -80,8 +81,13 @@ class InvoiceLocalDataSource(
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        // Récupérer l'émetteur depuis la table maître (avec emails et adresses)
-        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        // Résout l'entreprise courante (menu latéral). Fallback getLastIssuer()
+        // pour les installs qui n'ont pas encore Settings hydratée — ne devrait
+        // jamais tomber ici post-migration 6→7, sécurité seulement.
+        val currentCompanyId = currentCompanyRepository.current
+        val existingIssuer = currentCompanyId
+            ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
+            ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
@@ -147,6 +153,11 @@ class InvoiceLocalDataSource(
                     reusedTerms ?: getExistingPaymentTermsDescription()
                         ?: getString(Res.string.document_default_payment_terms)
                 ),
+                // Frozen at creation. Falls back to the master id of the
+                // resolved issuer when currentCompanyRepository has nothing
+                // yet — keeps original_company_id NOT NULL for numbering.
+                originalCompanyId = currentCompanyId
+                    ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -398,6 +409,7 @@ class InvoiceLocalDataSource(
             paymentBankHidden = this.payment_bank_hidden != 0L,
             paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(this.payment_bank_label),
             paymentTermsDescription = TextFieldValue(text = this.payment_terms_description ?: ""),
+            originalCompanyId = this.original_company_id,
         )
     }
 
@@ -442,6 +454,8 @@ class InvoiceLocalDataSource(
                         getExistingPaymentTermsDescription()
                             ?: getString(Res.string.document_default_payment_terms)
                     ),
+                    originalCompanyId = currentCompanyRepository.current
+                        ?: deliveryNotes.firstOrNull()?.originalCompanyId,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -507,6 +521,8 @@ class InvoiceLocalDataSource(
                         getExistingPaymentTermsDescription()
                             ?: getString(Res.string.document_default_payment_terms)
                     ),
+                    originalCompanyId = currentCompanyRepository.current
+                        ?: quotes.firstOrNull()?.originalCompanyId,
                 )
                 saveInfoInInvoiceTable(newInvoiceState)
 
@@ -1005,6 +1021,7 @@ class InvoiceLocalDataSource(
                 payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
                 payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
                 payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                original_company_id = document.originalCompanyId,
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")

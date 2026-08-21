@@ -53,8 +53,8 @@ SELECT quote_id
 FROM Quote;
 
 save:
-INSERT INTO Quote (quote_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale)
-VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?);
+INSERT INTO Quote (quote_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id)
+VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Quote

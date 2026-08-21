@@ -34,6 +34,7 @@ class CreditNoteLocalDataSource(
     private val activatedModules: ActivatedModulesRepository,
     private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -57,8 +58,12 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun createNew(): Long? {
-        // Récupérer l'émetteur depuis la table maître
-        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        // Résout l'entreprise courante (menu latéral). Fallback getLastIssuer()
+        // pour les installs sans Settings hydratée (sécurité post-migration).
+        val currentCompanyId = currentCompanyRepository.current
+        val existingIssuer = currentCompanyId
+            ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
+            ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
@@ -112,6 +117,8 @@ class CreditNoteLocalDataSource(
                         getString(Res.string.document_payment_means_default_label)
                     ),
                 paymentBankSegments = reusedBankSegments ?: emptyList(),
+                originalCompanyId = currentCompanyId
+                    ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
             )
 
             saveInfoInCreditNoteTable(creditNote)
@@ -265,6 +272,7 @@ class CreditNoteLocalDataSource(
                 paymentMeansHidden = it.payment_means_hidden != 0L,
                 paymentBankHidden = it.payment_bank_hidden != 0L,
                 paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it.payment_bank_label),
+                originalCompanyId = it.original_company_id,
             )
         }
     }
@@ -321,6 +329,8 @@ class CreditNoteLocalDataSource(
                             ),
                         // Inherit hidden flag from source invoice so credit note looks the same.
                         paymentMeansHidden = invoices.firstOrNull()?.paymentMeansHidden ?: false,
+                        originalCompanyId = currentCompanyRepository.current
+                            ?: invoices.firstOrNull()?.originalCompanyId,
                     )
                 )
                 val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -606,6 +616,7 @@ class CreditNoteLocalDataSource(
                 payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
                 payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
                 payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                original_company_id = document.originalCompanyId,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

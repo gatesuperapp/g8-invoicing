@@ -48,4 +48,10 @@ abstract class DocumentState {
     // legacy doc; the renderer falls back to the current app language for
     // those (same as before the feature landed).
     abstract var formatLocale: String?
+    // Company (issuer master) that emitted this document, frozen at
+    // creation from CurrentCompanyRepository. Drives per-company
+    // numbering + list filtering. Null = pre-migration legacy doc; the
+    // 6→7 migration backfilled from the master issuer already pinned on
+    // DocumentClientOrIssuer.
+    abstract var originalCompanyId: Long?
 }
