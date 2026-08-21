@@ -124,7 +124,7 @@ class InvoiceLocalDataSource(
 
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
-                    getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
+                    getLastDocumentNumber(currentCompanyId)?.let { incrementDocumentNumber(it) }
                         ?: getString(Res.string.invoice_default_number)
                 ),
                 documentDate = todayFormatted,
@@ -189,9 +189,16 @@ class InvoiceLocalDataSource(
     }
 
     // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---
-    private fun getLastDocumentNumber(): String? {
+    // companyId non-null → the new invoice's number continues that entreprise's
+    // counter (multi-entreprise). Null falls back to the global counter for
+    // installs where the CurrentCompanyRepository isn't hydrated yet.
+    private fun getLastDocumentNumber(companyId: Long?): String? {
         try {
-            return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+            return if (companyId != null) {
+                invoiceQueries.getLastInvoiceNumberForCompany(companyId).executeAsOneOrNull()?.number
+            } else {
+                invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -419,8 +426,10 @@ class InvoiceLocalDataSource(
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val newCompanyId = currentCompanyRepository.current
+            ?: deliveryNotes.firstOrNull()?.originalCompanyId
         return withContext(DispatcherProvider.IO) {
-            val docNumber = getLastDocumentNumber()?.let {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.invoice_default_number)
 
@@ -454,8 +463,7 @@ class InvoiceLocalDataSource(
                         getExistingPaymentTermsDescription()
                             ?: getString(Res.string.document_default_payment_terms)
                     ),
-                    originalCompanyId = currentCompanyRepository.current
-                        ?: deliveryNotes.firstOrNull()?.originalCompanyId,
+                    originalCompanyId = newCompanyId,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -488,8 +496,10 @@ class InvoiceLocalDataSource(
     override suspend fun convertQuotesToInvoice(quotes: List<QuoteState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val newCompanyId = currentCompanyRepository.current
+            ?: quotes.firstOrNull()?.originalCompanyId
         return withContext(DispatcherProvider.IO) {
-            val docNumber = getLastDocumentNumber()?.let {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.invoice_default_number)
 
@@ -521,8 +531,7 @@ class InvoiceLocalDataSource(
                         getExistingPaymentTermsDescription()
                             ?: getString(Res.string.document_default_payment_terms)
                     ),
-                    originalCompanyId = currentCompanyRepository.current
-                        ?: quotes.firstOrNull()?.originalCompanyId,
+                    originalCompanyId = newCompanyId,
                 )
                 saveInfoInInvoiceTable(newInvoiceState)
 
@@ -636,7 +645,12 @@ class InvoiceLocalDataSource(
             val createdIds = mutableListOf<Long>()
             try {
                 documents.forEach { originalDocument ->
-                    val docNumber = getLastDocumentNumber()?.let { // DB Call
+                    // Duplicate keeps the source's company (per-company counter);
+                    // fall back to CurrentCompanyRepository if the source was
+                    // pre-migration and has no originalCompanyId yet.
+                    val docCompanyId = originalDocument.originalCompanyId
+                        ?: currentCompanyRepository.current
+                    val docNumber = getLastDocumentNumber(docCompanyId)?.let { // DB Call
                         incrementDocumentNumber(it)
                     } ?: getString(Res.string.invoice_default_number)
 

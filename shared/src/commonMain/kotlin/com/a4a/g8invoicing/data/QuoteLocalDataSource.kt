@@ -69,7 +69,7 @@ class QuoteLocalDataSource(
             val todayFormatted = DateUtils.getCurrentDateFormatted()
 
             val newQuoteState = QuoteState(
-                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                documentNumber = TextFieldValue(getLastDocumentNumber(currentCompanyId)?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.quote_default_number)),
                 documentDate = todayFormatted,
@@ -96,9 +96,15 @@ class QuoteLocalDataSource(
     }
 
     // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---
-    private fun getLastDocumentNumber(): String? {
+    // companyId non-null → the new quote's number continues that entreprise's
+    // counter. Null falls back to the global counter (pre-migration safety).
+    private fun getLastDocumentNumber(companyId: Long?): String? {
         try {
-            return quoteQueries.getLastQuoteNumber().executeAsOneOrNull()?.number
+            return if (companyId != null) {
+                quoteQueries.getLastQuoteNumberForCompany(companyId).executeAsOneOrNull()?.number
+            } else {
+                quoteQueries.getLastQuoteNumber().executeAsOneOrNull()?.number
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -258,7 +264,11 @@ class QuoteLocalDataSource(
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { originalDocument ->
-                    val docNumber = getLastDocumentNumber()?.let {
+                    // Duplicate keeps the source's company (per-company counter);
+                    // fall back to current if the source predates the migration.
+                    val docCompanyId = originalDocument.originalCompanyId
+                        ?: currentCompanyRepository.current
+                    val docNumber = getLastDocumentNumber(docCompanyId)?.let {
                         incrementDocumentNumber(it)
                     } ?: getString(Res.string.quote_default_number)
 

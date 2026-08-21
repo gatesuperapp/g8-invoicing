@@ -94,7 +94,7 @@ class CreditNoteLocalDataSource(
             }?.takeIf { it.isNotEmpty() }
 
             val creditNote = CreditNoteState(
-                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                documentNumber = TextFieldValue(getLastDocumentNumber(currentCompanyId)?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.credit_note_default_number)),
                 documentDate = todayFormatted,
@@ -133,9 +133,16 @@ class CreditNoteLocalDataSource(
         }
     }
 
-    private fun getLastDocumentNumber(): String? {
+    // companyId non-null → the new credit note's number continues that
+    // entreprise's counter. Null falls back to the global counter (pre-
+    // migration safety).
+    private fun getLastDocumentNumber(companyId: Long?): String? {
         try {
-            return creditNoteQueries.getLastCreditNoteNumber().executeAsOneOrNull()?.number
+            return if (companyId != null) {
+                creditNoteQueries.getLastCreditNoteNumberForCompany(companyId).executeAsOneOrNull()?.number
+            } else {
+                creditNoteQueries.getLastCreditNoteNumber().executeAsOneOrNull()?.number
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -287,8 +294,10 @@ class CreditNoteLocalDataSource(
             sourceNumbers.size == 1 -> getString(Res.string.credit_note_reference_from_invoice, sourceNumbers.single())
             else -> getString(Res.string.credit_note_reference_from_invoices, sourceNumbers.joinToString(", "))
         }
+        val newCompanyId = currentCompanyRepository.current
+            ?: invoices.firstOrNull()?.originalCompanyId
         return withContext(DispatcherProvider.IO) {
-            val docNumber = getLastDocumentNumber()?.let {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.credit_note_default_number)
 
@@ -329,8 +338,7 @@ class CreditNoteLocalDataSource(
                             ),
                         // Inherit hidden flag from source invoice so credit note looks the same.
                         paymentMeansHidden = invoices.firstOrNull()?.paymentMeansHidden ?: false,
-                        originalCompanyId = currentCompanyRepository.current
-                            ?: invoices.firstOrNull()?.originalCompanyId,
+                        originalCompanyId = newCompanyId,
                     )
                 )
                 val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -376,7 +384,11 @@ class CreditNoteLocalDataSource(
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach {
-                    val docNumber = getLastDocumentNumber()?.let {
+                    // Duplicate keeps the source's company (per-company counter);
+                    // fall back to current if the source predates the migration.
+                    val docCompanyId = it.originalCompanyId
+                        ?: currentCompanyRepository.current
+                    val docNumber = getLastDocumentNumber(docCompanyId)?.let {
                         incrementDocumentNumber(it)
                     } ?: getString(Res.string.credit_note_default_number)
                     val creditNote = it
