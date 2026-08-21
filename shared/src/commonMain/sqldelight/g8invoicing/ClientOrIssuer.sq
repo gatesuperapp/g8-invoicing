@@ -16,6 +16,15 @@ CREATE TABLE ClientOrIssuer (
   version INTEGER DEFAULT 1,
   vat_exempt INTEGER DEFAULT 0,
   intra_eu_sales INTEGER DEFAULT 0,
+  -- Self-FK vers un ClientOrIssuer type='issuer'. Sur une fiche 'client' :
+  -- l'entreprise (issuer maître) à laquelle le client est rattaché. Sur une
+  -- fiche 'issuer' : reste à NULL (une entreprise ne se rattache pas à
+  -- elle-même). Alimenté par la migration 6 et par la création côté client.
+  company_id INTEGER,
+  -- 'PROFESSIONAL' / 'INDIVIDUAL' / NULL. Distinction B2B vs B2C —
+  -- détermine si l'export Factur-X est déclenché ou si on retombe sur un
+  -- PDF simple. Pré-rempli à PROFESSIONAL quand un SIREN est saisi.
+  client_type TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -111,3 +120,31 @@ FROM ClientOrIssuer
 WHERE type = 'issuer'
 ORDER BY id DESC
 LIMIT 1;
+
+-- Multi-entreprise (étape 2). Liste des entreprises pour peupler le menu
+-- « Mon entreprise ». Ordre : la dernière touchée en premier (mêmes
+-- sémantiques que getLastIssuer, mais toute la liste).
+getAllIssuers:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY updated_at DESC;
+
+-- Clients rattachés à une entreprise donnée. Utilisé par la liste Clients
+-- une fois filtrée par current_company_id.
+getAllClientsForCompany:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = 'client' AND company_id = :company_id
+ORDER BY updated_at DESC;
+
+-- Compte le nombre total de documents (invoice + delivery note + credit
+-- note + quote) rattachés à une entreprise. Sert le check "impossible de
+-- supprimer votre entreprise avec des documents associés".
+countDocumentsForCompany:
+SELECT (
+  (SELECT COUNT(*) FROM Invoice WHERE original_company_id = :company_id) +
+  (SELECT COUNT(*) FROM DeliveryNote WHERE original_company_id = :company_id) +
+  (SELECT COUNT(*) FROM CreditNote WHERE original_company_id = :company_id) +
+  (SELECT COUNT(*) FROM Quote WHERE original_company_id = :company_id)
+) AS total_count;

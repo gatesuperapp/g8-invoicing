@@ -81,3 +81,95 @@ ALTER TABLE CreditNote ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0
 -- to defaultPaymentBankSegments() (both tokens, newline between).
 ALTER TABLE Invoice ADD COLUMN payment_bank_label TEXT;
 ALTER TABLE CreditNote ADD COLUMN payment_bank_label TEXT;
+
+-- 5) Multi-entreprise (étape 2 du chantier 1.9). Chaque client, produit et
+--    document est rattaché à une entreprise = un ClientOrIssuer type='issuer'
+--    maître. Sur les 4 tables de documents, original_company_id fige
+--    l'entreprise émettrice à la création — sert la numérotation par
+--    entreprise ET le filtrage des listes de docs par entreprise courante.
+ALTER TABLE ClientOrIssuer ADD COLUMN company_id INTEGER;
+ALTER TABLE Product ADD COLUMN company_id INTEGER;
+ALTER TABLE Invoice ADD COLUMN original_company_id INTEGER;
+ALTER TABLE DeliveryNote ADD COLUMN original_company_id INTEGER;
+ALTER TABLE CreditNote ADD COLUMN original_company_id INTEGER;
+ALTER TABLE Quote ADD COLUMN original_company_id INTEGER;
+
+-- Backfill : détermine l'issuer implicite (le plus récent). Si aucun n'existe
+-- (install jamais utilisée), en crée un par défaut "Mon entreprise". Puis
+-- rattache tous les clients + produits existants à celui-là. Les docs
+-- prennent leur original_company_id depuis l'issuer maître déjà figé dans
+-- LinkXxxToDocumentClientOrIssuer → DocumentClientOrIssuer.original_client_or_issuer_id.
+INSERT INTO ClientOrIssuer (name, type, created_at, updated_at)
+  SELECT 'Mon entreprise', 'issuer',
+         datetime('now', 'localtime'), datetime('now', 'localtime')
+  WHERE NOT EXISTS (SELECT 1 FROM ClientOrIssuer WHERE type = 'issuer');
+
+UPDATE ClientOrIssuer
+  SET company_id = (
+    SELECT id FROM ClientOrIssuer
+    WHERE type = 'issuer'
+    ORDER BY updated_at DESC
+    LIMIT 1
+  )
+  WHERE type = 'client';
+
+UPDATE Product
+  SET company_id = (
+    SELECT id FROM ClientOrIssuer
+    WHERE type = 'issuer'
+    ORDER BY updated_at DESC
+    LIMIT 1
+  );
+
+UPDATE Invoice
+  SET original_company_id = (
+    SELECT dci.original_client_or_issuer_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkInvoiceToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+    WHERE link.invoice_id = Invoice.invoice_id
+      AND dci.type = 'document_issuer'
+    LIMIT 1
+  );
+
+UPDATE DeliveryNote
+  SET original_company_id = (
+    SELECT dci.original_client_or_issuer_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkDeliveryNoteToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+    WHERE link.delivery_note_id = DeliveryNote.delivery_note_id
+      AND dci.type = 'document_issuer'
+    LIMIT 1
+  );
+
+UPDATE CreditNote
+  SET original_company_id = (
+    SELECT dci.original_client_or_issuer_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkCreditNoteToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+    WHERE link.credit_note_id = CreditNote.credit_note_id
+      AND dci.type = 'document_issuer'
+    LIMIT 1
+  );
+
+UPDATE Quote
+  SET original_company_id = (
+    SELECT dci.original_client_or_issuer_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkQuoteToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+    WHERE link.quote_id = Quote.quote_id
+      AND dci.type = 'document_issuer'
+    LIMIT 1
+  );
+
+-- 6) Type de client — Particulier / Professionnel / non renseigné. Sert de
+--    gate à l'export Factur-X (professionnel = e-invoicing, particulier =
+--    PDF simple). Pré-rempli automatiquement à PROFESSIONAL côté UI quand
+--    un SIREN est saisi ; l'user peut corriger. Nullable ; toutes les
+--    fiches existantes restent en null → l'export leur demande à trancher
+--    au moment de la génération.
+--    Valeurs stockées : 'PROFESSIONAL', 'INDIVIDUAL' ou NULL.
+ALTER TABLE ClientOrIssuer ADD COLUMN client_type TEXT;

@@ -23,6 +23,10 @@ CREATE TABLE CreditNote (
   payment_means_other_checked INTEGER NOT NULL DEFAULT 0,
   -- See Invoice.payment_bank_label.
   payment_bank_label TEXT,
+  -- Entreprise (issuer maître) émettrice, figée à la création. Sert la
+  -- numérotation par entreprise + le filtrage de la liste des avoirs par
+  -- entreprise courante.
+  original_company_id INTEGER,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -41,6 +45,15 @@ WHERE credit_note_id = :id;
 getLastCreditNoteNumber:
 SELECT number
 FROM CreditNote
+ORDER BY credit_note_id DESC
+LIMIT 1;
+
+-- Multi-entreprise (étape 2). Numérotation des avoirs indépendante par
+-- entreprise émettrice.
+getLastCreditNoteNumberForCompany:
+SELECT number
+FROM CreditNote
+WHERE original_company_id = :company_id
 ORDER BY credit_note_id DESC
 LIMIT 1;
 

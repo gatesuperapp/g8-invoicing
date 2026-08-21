@@ -42,6 +42,10 @@ CREATE TABLE Invoice (
   -- Editable bank-details label: JSON-serialised PaymentBankSegment list.
   -- Null / empty = fall back to defaultPaymentBankSegments().
   payment_bank_label TEXT,
+  -- Entreprise (issuer maître) émettrice, figée à la création. Sert la
+  -- numérotation par entreprise + le filtrage de la liste des factures par
+  -- entreprise courante.
+  original_company_id INTEGER,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -61,6 +65,15 @@ WHERE invoice_id = :id;
 getLastInvoiceNumber:
 SELECT number
 FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+-- Multi-entreprise (étape 2). Numérotation par entreprise : chaque compteur
+-- de factures suit indépendamment par entreprise émettrice, pas globalement.
+getLastInvoiceNumberForCompany:
+SELECT number
+FROM Invoice
+WHERE original_company_id = :company_id
 ORDER BY invoice_id DESC
 LIMIT 1;
 
