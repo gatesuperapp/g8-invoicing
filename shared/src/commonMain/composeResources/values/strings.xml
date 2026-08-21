@@ -582,6 +582,7 @@
     <string name="account_website_url">https://the-gate.fr</string>
     <string name="account_my_companies">Mes entreprises</string>
     <string name="account_add_company">+ Ajouter une entreprise</string>
+    <string name="account_manage_companies">Gérer mes entreprises</string>
     <string name="account_section_advanced">Avancé</string>
     <string name="account_delete_cta">Supprimer mon compte</string>
     <string name="account_delete_dialog_title">Supprimer définitivement votre compte ?</string>
