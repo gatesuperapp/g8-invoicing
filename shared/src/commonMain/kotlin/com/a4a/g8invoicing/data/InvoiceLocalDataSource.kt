@@ -47,7 +47,9 @@ import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkInvoiceDocumentProductToQuoteQueries
 import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
 import g8invoicing.LinkInvoiceToDocumentProductQueries
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -281,12 +283,20 @@ class InvoiceLocalDataSource(
     // The .map block executes on the collector's context.
     // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
     // because internal fetch* helpers are synchronous DB calls.
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<InvoiceState>>? {
         try {
-            return invoiceQueries.getAll()
-                .asFlow()
-                .map { // This .map runs on the collector's dispatcher
-                    it.executeAsList()
+            // Scoped to the entreprise courante — re-emits when the user
+            // switches company. Falls back to the global list only when the
+            // repository has no hydrated value (pre-migration safety).
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    invoiceQueries.getAllForCompany(companyId)
+                } else {
+                    invoiceQueries.getAll()
+                }
+                query.asFlow().map { rows -> // This .map runs on the collector's dispatcher
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.invoice_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -306,6 +316,7 @@ class InvoiceLocalDataSource(
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error fetchAll: ${e.message}")
         }

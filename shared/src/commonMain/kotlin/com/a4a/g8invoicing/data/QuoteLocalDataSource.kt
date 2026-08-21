@@ -20,7 +20,9 @@ import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.Quote
 import g8invoicing.DocumentClientOrIssuer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -153,12 +155,17 @@ class QuoteLocalDataSource(
     // The .map block executes on the collector's context.
     // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
     // because internal fetch* helpers are synchronous DB calls.
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<QuoteState>>? {
         try {
-            return quoteQueries.getAll()
-                .asFlow()
-                .map {
-                    it.executeAsList()
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    quoteQueries.getAllForCompany(companyId)
+                } else {
+                    quoteQueries.getAll()
+                }
+                query.asFlow().map { rows ->
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.quote_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -176,6 +183,7 @@ class QuoteLocalDataSource(
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }

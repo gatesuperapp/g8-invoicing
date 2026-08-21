@@ -81,6 +81,14 @@ getAll:
 SELECT *
 FROM Invoice;
 
+-- Multi-entreprise (étape 2). Liste des factures de l'entreprise courante,
+-- utilisée par InvoiceLocalDataSource.fetchAll() une fois combinée avec
+-- CurrentCompanyRepository.state.
+getAllForCompany:
+SELECT *
+FROM Invoice
+WHERE original_company_id = :company_id;
+
 getAllIds:
 SELECT invoice_id
 FROM Invoice;

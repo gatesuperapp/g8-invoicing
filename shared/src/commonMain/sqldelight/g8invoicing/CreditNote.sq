@@ -61,6 +61,13 @@ getAll:
 SELECT *
 FROM CreditNote;
 
+-- Multi-entreprise (étape 2). Filtre par entreprise courante — même
+-- pattern que Invoice.getAllForCompany.
+getAllForCompany:
+SELECT *
+FROM CreditNote
+WHERE original_company_id = :company_id;
+
 getAllIds:
 SELECT credit_note_id
 FROM CreditNote;

@@ -29,8 +29,8 @@ SELECT *
 FROM Product;
 
 saveProduct:
-INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type, company_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 updateProduct:
 UPDATE Product

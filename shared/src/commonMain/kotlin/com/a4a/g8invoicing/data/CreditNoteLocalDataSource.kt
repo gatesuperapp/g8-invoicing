@@ -24,7 +24,9 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import g8invoicing.CreditNote
 import g8invoicing.DocumentClientOrIssuer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -190,12 +192,17 @@ class CreditNoteLocalDataSource(
         } else state
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<CreditNoteState>>? {
         try {
-            return creditNoteQueries.getAll()
-                .asFlow()
-                .map {
-                    it.executeAsList()
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    creditNoteQueries.getAllForCompany(companyId)
+                } else {
+                    creditNoteQueries.getAll()
+                }
+                query.asFlow().map { rows ->
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.credit_note_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -213,6 +220,7 @@ class CreditNoteLocalDataSource(
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }

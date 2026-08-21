@@ -48,6 +48,13 @@ getAll:
 SELECT *
 FROM DeliveryNote;
 
+-- Multi-entreprise (étape 2). Filtre par entreprise courante — même
+-- pattern que Invoice.getAllForCompany.
+getAllForCompany:
+SELECT *
+FROM DeliveryNote
+WHERE original_company_id = :company_id;
+
 getAllIds:
 SELECT delivery_note_id
 FROM DeliveryNote;

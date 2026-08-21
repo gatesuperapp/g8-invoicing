@@ -19,7 +19,9 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -152,12 +154,17 @@ class DeliveryNoteLocalDataSource(
     // The .map block executes on the collector's context.
     // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
     // because internal fetch* helpers are synchronous DB calls.
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<DeliveryNoteState>>? {
         try {
-            return deliveryNoteQueries.getAll()
-                .asFlow()
-                .map {
-                    it.executeAsList()
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    deliveryNoteQueries.getAllForCompany(companyId)
+                } else {
+                    deliveryNoteQueries.getAll()
+                }
+                query.asFlow().map { rows ->
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.delivery_note_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -175,6 +182,7 @@ class DeliveryNoteLocalDataSource(
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }

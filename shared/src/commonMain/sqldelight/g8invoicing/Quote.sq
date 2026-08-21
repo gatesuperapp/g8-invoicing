@@ -48,6 +48,13 @@ getAll:
 SELECT *
 FROM Quote;
 
+-- Multi-entreprise (étape 2). Filtre par entreprise courante — même
+-- pattern que Invoice.getAllForCompany.
+getAllForCompany:
+SELECT *
+FROM Quote
+WHERE original_company_id = :company_id;
+
 getAllIds:
 SELECT quote_id
 FROM Quote;

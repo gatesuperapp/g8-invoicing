@@ -123,8 +123,8 @@ val appModule = module {
     single { SubscriptionRepository(get(), get(), get()) }
     single { ActivatedModulesRepository(get()) }
 
-    single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
-    single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
+    single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
+    single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
     single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get(), get()) }

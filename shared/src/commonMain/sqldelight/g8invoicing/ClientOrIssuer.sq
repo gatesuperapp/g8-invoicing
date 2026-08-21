@@ -61,8 +61,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, company_id, client_type)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuer

@@ -16,12 +16,15 @@ import g8invoicing.DocumentProduct
 import g8invoicing.Product
 import g8invoicing.ProductPriceQueries
 import g8invoicing.TaxRateQueries
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ProductLocalDataSource(
     db: Database,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : ProductLocalDataSourceInterface {
     private val productQueries = db.productQueries
     private val taxQueries = db.taxRateQueries
@@ -35,13 +38,22 @@ class ProductLocalDataSource(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAllProducts(): Flow<List<ProductState>> {
-        return productQueries.getAllProducts()
-            .asFlow()
-            .map { query ->
-                query.executeAsList()
+        // Scoped to the entreprise courante — re-emits when the user switches
+        // company. Falls back to the global list when the repository has no
+        // hydrated value (pre-migration safety).
+        return currentCompanyRepository.state.flatMapLatest { companyId ->
+            val query = if (companyId != null) {
+                productQueries.getAllProductsForCompany(companyId)
+            } else {
+                productQueries.getAllProducts()
+            }
+            query.asFlow().map { rows ->
+                rows.executeAsList()
                     .map { it.transformIntoEditableProduct(taxQueries, productPriceQueries) }
             }
+        }
     }
 
     override suspend fun saveProduct(product: ProductState): Long? {
@@ -58,7 +70,8 @@ class ProductLocalDataSource(
                         },
                         unit = product.unit?.text,
                         unit_code = product.unitCode,
-                        type = product.type?.name
+                        type = product.type?.name,
+                        company_id = currentCompanyRepository.current,
                     )
 
                     val lastInsertedProductId = productQueries.lastInsertRowId().executeAsOne()
@@ -113,7 +126,8 @@ class ProductLocalDataSource(
                                 },
                                 unit = product.unit?.text,
                                 unit_code = product.unitCode,
-                                type = product.type?.name
+                                type = product.type?.name,
+                                company_id = currentCompanyRepository.current,
                             )
 
                             val newProductId = productQueries.lastInsertRowId().executeAsOne()

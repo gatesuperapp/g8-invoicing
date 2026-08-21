@@ -15,14 +15,17 @@ import com.a4a.g8invoicing.data.models.PersonType
 import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuerAddress
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ClientOrIssuerLocalDataSource(
     db: Database,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : ClientOrIssuerLocalDataSourceInterface {
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
     private val clientOrIssuerAddressQueries = db.clientOrIssuerAddressQueries
@@ -99,19 +102,33 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>> {
-        return clientOrIssuerQueries.getAll(type.name.lowercase())
-            .asFlow()
-            .map { query ->
-                query.executeAsList()
-                    .map {
-                        it.transformIntoEditable(
-                            addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
-                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
-                        ).copy(banks = fetchIssuerBanks(it.id))
-                    }
+        // Clients are scoped to the entreprise courante; issuers ARE the
+        // entreprises, so the issuer list stays unfiltered.
+        val transform: (List<ClientOrIssuer>) -> List<ClientOrIssuerState> = { rows ->
+            rows.map {
+                it.transformIntoEditable(
+                    addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
+                    emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                ).copy(banks = fetchIssuerBanks(it.id))
             }
-            .flowOn(DispatcherProvider.IO)
+        }
+        return if (type == PersonType.CLIENT) {
+            currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    clientOrIssuerQueries.getAllClientsForCompany(companyId)
+                } else {
+                    clientOrIssuerQueries.getAll(type.name.lowercase())
+                }
+                query.asFlow().map { transform(it.executeAsList()) }
+            }.flowOn(DispatcherProvider.IO)
+        } else {
+            clientOrIssuerQueries.getAll(type.name.lowercase())
+                .asFlow()
+                .map { transform(it.executeAsList()) }
+                .flowOn(DispatcherProvider.IO)
+        }
     }
 
     fun fetchClientOrIssuerAddresses(clientOrIssuerId: Long): List<AddressState>? {
@@ -192,11 +209,11 @@ class ClientOrIssuerLocalDataSource(
     }
 
     private fun saveClientOrIssuerRow(clientOrIssuer: ClientOrIssuerState) {
+        val isClient = clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+            clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
         clientOrIssuerQueries.save(
             id = null,
-            type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-            ) ClientOrIssuerType.CLIENT.name.lowercase()
+            type = if (isClient) ClientOrIssuerType.CLIENT.name.lowercase()
             else ClientOrIssuerType.ISSUER.name.lowercase(),
             clientOrIssuer.firstName?.text?.trim(),
             clientOrIssuer.name.text.trim(),
@@ -212,6 +229,12 @@ class ClientOrIssuerLocalDataSource(
             clientOrIssuer.logoPath,
             if (clientOrIssuer.vatExempt) 1L else 0L,
             if (clientOrIssuer.intraEuSales) 1L else 0L,
+            // Clients rattachés à l'entreprise courante ; issuers ne
+            // s'auto-référencent pas.
+            company_id = if (isClient) currentCompanyRepository.current else null,
+            // TODO(Phase clientType) : câbler la valeur PROFESSIONAL/INDIVIDUAL
+            // une fois le champ ajouté au state + form. Pour l'instant : null.
+            client_type = null,
         )
     }
 
@@ -271,11 +294,11 @@ class ClientOrIssuerLocalDataSource(
     private suspend fun saveInfoInClientOrIssuerTable(clientOrIssuer: ClientOrIssuerState) {
         return withContext(DispatcherProvider.IO) {
             try {
+                val isClient = clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                    clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
                 clientOrIssuerQueries.save(
                     id = null,
-                    type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                        clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-                    ) ClientOrIssuerType.CLIENT.name.lowercase()
+                    type = if (isClient) ClientOrIssuerType.CLIENT.name.lowercase()
                     else ClientOrIssuerType.ISSUER.name.lowercase(),
                     clientOrIssuer.firstName?.text?.trim(),
                     clientOrIssuer.name.text.trim(),
@@ -291,6 +314,8 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.logoPath,
                     if (clientOrIssuer.vatExempt) 1L else 0L,
                     if (clientOrIssuer.intraEuSales) 1L else 0L,
+                    company_id = if (isClient) currentCompanyRepository.current else null,
+                    client_type = null,
                 )
             } catch (e: Exception) {
                 // Log error if needed
