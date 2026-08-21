@@ -17,6 +17,7 @@ import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrencyManager
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -64,6 +65,10 @@ val sharedModule = module {
 
     // Currency Manager (singleton)
     single { CurrencyManager() }
+
+    // Which company (issuer master) the user is currently working under.
+    // Drives scoping of clients/products/docs and numbering per company.
+    single { CurrentCompanyRepository() }
 
     // Unit code repository (localised names / short forms / search index)
     single { UnitCodeRepository() }

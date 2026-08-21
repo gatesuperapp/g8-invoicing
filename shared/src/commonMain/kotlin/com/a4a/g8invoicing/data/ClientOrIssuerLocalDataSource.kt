@@ -873,6 +873,44 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
+    override suspend fun getCurrentIssuer(companyId: Long): ClientOrIssuerState? {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.get(companyId).executeAsOneOrNull()?.let { issuer ->
+                    val banks = fetchIssuerBanks(issuer.id)
+                    val firstBank = banks.firstOrNull()
+                    ClientOrIssuerState(
+                        id = null, // Nouveau document, pas encore d'ID
+                        type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                        originalClientOrIssuerId = issuer.id.toInt(),
+                        originalVersion = issuer.version?.toInt() ?: 1,
+                        firstName = issuer.first_name?.let { TextFieldValue(text = it) },
+                        name = TextFieldValue(text = issuer.name),
+                        phone = issuer.phone?.let { TextFieldValue(text = it) },
+                        emails = fetchClientOrIssuerEmails(issuer.id),
+                        addresses = fetchClientOrIssuerAddresses(issuer.id),
+                        notes = issuer.notes?.let { TextFieldValue(text = it) },
+                        companyId1Label = issuer.company_id1_label?.let { TextFieldValue(text = it) },
+                        companyId1Number = issuer.company_id1_number?.let { TextFieldValue(text = it) },
+                        companyId2Label = issuer.company_id2_label?.let { TextFieldValue(text = it) },
+                        companyId2Number = issuer.company_id2_number?.let { TextFieldValue(text = it) },
+                        companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
+                        companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
+                        logoPath = issuer.logo_path,
+                        // Freeze the first bank (sort_order = 0) — same seed as
+                        // getLastIssuer; the payment-means picker can swap it later.
+                        paymentIban = firstBank?.identifier?.text?.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentBic = firstBank?.bic?.text?.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                    )
+                }
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
     override suspend fun getIssuerBanks(issuerId: Long): List<IssuerBankState> {
         return withContext(DispatcherProvider.IO) { fetchIssuerBanks(issuerId) }
     }

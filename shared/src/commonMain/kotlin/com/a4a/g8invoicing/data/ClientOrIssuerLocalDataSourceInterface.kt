@@ -23,6 +23,14 @@ interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun getLastCreatedClientId(): Long?
     suspend fun getLastCreatedIssuerId(): Long?
     suspend fun getLastIssuer(): ClientOrIssuerState?
+
+    /**
+     * Fetch the issuer matching [companyId] and wrap it as a
+     * DOCUMENT_ISSUER-typed snapshot ready to be pinned on a brand-new
+     * doc. Called from the 4 createNew() paths once
+     * CurrentCompanyRepository has resolved the current company.
+     */
+    suspend fun getCurrentIssuer(companyId: Long): ClientOrIssuerState?
     suspend fun getMasterVersion(masterId: Long): Int?
 
     // Bank accounts of a master issuer, ordered by sort_order asc.
