@@ -583,6 +583,7 @@
     <string name="cii_validation_client_type">Préciser si le client est un professionnel ou un particulier</string>
     <string name="cii_validation_client_siren">SIREN / SIRET du client (client professionnel)</string>
     <string name="cii_validation_client_siren_format">Le SIREN du client doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
+    <string name="cii_validation_client_email">Ajouter un email au client (adresse électronique nécessaire pour un client particulier)</string>
     <string name="cii_validation_client_address">Adresse complète du client (rue, code postal, ville)</string>
     <string name="cii_validation_products_empty">Ajouter au moins un produit à la facture</string>
     <string name="cii_validation_line_name">Ligne %1$d : nom du produit manquant</string>
