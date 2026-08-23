@@ -625,17 +625,20 @@ Une erreur s'est produite :
     <string name="cii_validation_issuer_missing">Añadir un emisor</string>
     <string name="cii_validation_issuer_name">Nombre del emisor</string>
     <string name="cii_validation_issuer_siren">Identificador fiscal del emisor (SIREN / CIF / NIF)</string>
+    <string name="cii_validation_issuer_siren_format">El SIREN del emisor debe contener exactamente 9 dígitos (o 14 para un SIRET)</string>
     <string name="cii_validation_issuer_vat">Número de IVA del emisor</string>
     <string name="cii_validation_issuer_address">Dirección completa del emisor (calle, C.P., ciudad)</string>
     <string name="cii_validation_client_missing">Añadir un cliente</string>
     <string name="cii_validation_client_name">Nombre del cliente</string>
     <string name="cii_validation_client_type">Indicar si el cliente es empresa o particular</string>
     <string name="cii_validation_client_siren">Identificador fiscal del cliente (cliente empresa)</string>
+    <string name="cii_validation_client_siren_format">El SIREN del cliente debe contener exactamente 9 dígitos (o 14 para un SIRET)</string>
     <string name="cii_validation_client_address">Dirección completa del cliente (calle, C.P., ciudad)</string>
     <string name="cii_validation_products_empty">Añadir al menos un producto a la factura</string>
     <string name="cii_validation_line_name">Línea %1$d: falta el nombre del producto</string>
     <string name="cii_validation_line_price">Línea %1$d: falta el precio unitario</string>
     <string name="cii_validation_line_tax_rate">Línea %1$d: falta el tipo de IVA</string>
+    <string name="cii_validation_line_tax_rate_invalid">Línea %1$d: el tipo de IVA %2$s %% no está permitido en Francia (valores aceptados: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fecha de vencimiento del pago</string>
 
     <!-- Country picker (address form) -->

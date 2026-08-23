@@ -615,17 +615,20 @@
     <string name="cii_validation_issuer_missing">Add an issuer</string>
     <string name="cii_validation_issuer_name">Issuer name</string>
     <string name="cii_validation_issuer_siren">Issuer company ID (SIREN / SIRET / VAT reg.)</string>
+    <string name="cii_validation_issuer_siren_format">Issuer SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
     <string name="cii_validation_issuer_vat">Issuer VAT number</string>
     <string name="cii_validation_issuer_address">Complete issuer address (street, ZIP, city)</string>
     <string name="cii_validation_client_missing">Add a client</string>
     <string name="cii_validation_client_name">Client name</string>
     <string name="cii_validation_client_type">Specify whether the client is a business or individual</string>
     <string name="cii_validation_client_siren">Client company ID (business client)</string>
+    <string name="cii_validation_client_siren_format">Client SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
     <string name="cii_validation_client_address">Complete client address (street, ZIP, city)</string>
     <string name="cii_validation_products_empty">Add at least one product to the invoice</string>
     <string name="cii_validation_line_name">Line %1$d: missing product name</string>
     <string name="cii_validation_line_price">Line %1$d: missing unit price</string>
     <string name="cii_validation_line_tax_rate">Line %1$d: missing VAT rate</string>
+    <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s %% is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Payment due date</string>
 
     <!-- Country picker (address form) -->

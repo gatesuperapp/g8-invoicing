@@ -620,17 +620,20 @@ Es ist ein Fehler aufgetreten :
     <string name="cii_validation_issuer_missing">Aussteller hinzufügen</string>
     <string name="cii_validation_issuer_name">Name des Ausstellers</string>
     <string name="cii_validation_issuer_siren">Handelsregister-Nr. / USt-IdNr. des Ausstellers</string>
+    <string name="cii_validation_issuer_siren_format">Die SIREN des Ausstellers muss genau 9 Ziffern enthalten (oder 14 bei SIRET)</string>
     <string name="cii_validation_issuer_vat">Umsatzsteuer-Nr. des Ausstellers</string>
     <string name="cii_validation_issuer_address">Vollständige Anschrift des Ausstellers (Straße, PLZ, Ort)</string>
     <string name="cii_validation_client_missing">Kunden hinzufügen</string>
     <string name="cii_validation_client_name">Name des Kunden</string>
     <string name="cii_validation_client_type">Angabe, ob der Kunde ein Unternehmen oder eine Privatperson ist</string>
     <string name="cii_validation_client_siren">Handelsregister-Nr. des Kunden (Geschäftskunde)</string>
+    <string name="cii_validation_client_siren_format">Die SIREN des Kunden muss genau 9 Ziffern enthalten (oder 14 bei SIRET)</string>
     <string name="cii_validation_client_address">Vollständige Anschrift des Kunden (Straße, PLZ, Ort)</string>
     <string name="cii_validation_products_empty">Mindestens ein Produkt zur Rechnung hinzufügen</string>
     <string name="cii_validation_line_name">Zeile %1$d: fehlender Produktname</string>
     <string name="cii_validation_line_price">Zeile %1$d: fehlender Einzelpreis</string>
     <string name="cii_validation_line_tax_rate">Zeile %1$d: fehlender USt-Satz</string>
+    <string name="cii_validation_line_tax_rate_invalid">Zeile %1$d: USt-Satz %2$s %% ist in Frankreich nicht zulässig (erlaubte Werte: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fälligkeitsdatum</string>
 
     <!-- Country picker (address form) -->
