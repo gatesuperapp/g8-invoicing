@@ -611,6 +611,9 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_cii_desc">Rechnungsstrukturdaten als CII-XML exportieren</string>
     <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um jede Rechnung als CII-XML-Datei zu exportieren (europäische Norm EN 16931, Extended-Profil). Nützlich, um Rechnungen an internationale E-Invoicing-Plattformen zu übermitteln, die das Factur-X-Format noch nicht akzeptieren. Die erzeugte Datei kann von jeder EN-16931-kompatiblen Buchhaltungssoftware geöffnet werden.</string>
     <string name="export_cii_button">Als CII exportieren</string>
+    <string name="export_chooser_title">Exportformat</string>
+    <string name="export_chooser_pdf">PDF</string>
+    <string name="export_chooser_cii">CII XML</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Land</string>

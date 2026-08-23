@@ -606,6 +606,9 @@
     <string name="gstore_module_cii_desc">Export the invoice's structured data as CII XML</string>
     <string name="gstore_module_cii_detail">Enable this module to export each invoice as a CII XML file (European standard EN 16931, Extended profile). Useful for sending your invoices to international e-invoicing platforms that don't accept the Factur-X format yet. The generated file can be opened by any accounting software compatible with EN 16931.</string>
     <string name="export_cii_button">Export as CII</string>
+    <string name="export_chooser_title">Export format</string>
+    <string name="export_chooser_pdf">PDF</string>
+    <string name="export_chooser_cii">CII XML</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Country</string>

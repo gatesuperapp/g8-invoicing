@@ -616,6 +616,9 @@ Une erreur s'est produite :
     <string name="gstore_module_cii_desc">Exportar los datos estructurados de la factura como XML CII</string>
     <string name="gstore_module_cii_detail">Activa este módulo para exportar cada factura como archivo XML CII (norma europea EN 16931, perfil Extended). Útil para enviar tus facturas a plataformas internacionales de facturación electrónica que aún no aceptan el formato Factur-X. El archivo generado puede abrirse con cualquier software contable compatible con EN 16931.</string>
     <string name="export_cii_button">Exportar como CII</string>
+    <string name="export_chooser_title">Formato de exportación</string>
+    <string name="export_chooser_pdf">PDF</string>
+    <string name="export_chooser_cii">CII XML</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">País</string>
