@@ -20,6 +20,8 @@ import g8invoicing.ClientOrIssuerQueries
 import g8invoicing.DeliveryNoteQueries
 import g8invoicing.InvoiceQueries
 import g8invoicing.ProductQueries
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.setSeenOnboarding18
@@ -70,6 +72,8 @@ fun MainCompose(
     val deliveryNoteQueries: DeliveryNoteQueries = koinInject()
     val productQueries: ProductQueries = koinInject()
     val clientOrIssuerQueries: ClientOrIssuerQueries = koinInject()
+    val currentCompanyRepository: CurrentCompanyRepository = koinInject()
+    val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
 
     // Initialize locale and version tracking on first composition
     LaunchedEffect(Unit) {
@@ -77,6 +81,12 @@ fun MainCompose(
         // Pour les nouvelles installations, enregistre la version actuelle
         // Ainsi lors de la prochaine mise à jour, la modale WhatsNew s'affichera
         initializeVersionTracking(context)
+        // Hydrate the "current entreprise" from the most-recent issuer on
+        // first launch. Without this, currentCompanyRepository.current stays
+        // null → doc list flows take the getAll() fallback (no filter) and
+        // switching entreprise from the sidebar looks like it does nothing.
+        val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
+        currentCompanyRepository.initIfMissing { lastIssuerId }
     }
 
     // What's New + Onboarding dialog state. The 1.8 onboarding takes priority

@@ -42,7 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.CompositionLocalProvider
@@ -116,6 +116,7 @@ import com.a4a.g8invoicing.shared.resources.account_auth_title
 import com.a4a.g8invoicing.shared.resources.account_add_company
 import com.a4a.g8invoicing.shared.resources.account_logout
 import com.a4a.g8invoicing.shared.resources.account_my_companies
+import com.a4a.g8invoicing.shared.resources.drawer_my_company
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription_url
 import com.a4a.g8invoicing.shared.resources.account_cancellation_date
@@ -146,17 +147,17 @@ import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.navigation.Screen
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textSecondary
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -175,10 +176,16 @@ fun Account(
     onSendDatabaseByEmail: (String) -> Unit = {},
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    // Optional hint from the nav arg (?section=my_companies) — when set to a
+    // known section id, the matching CollapsibleSection lands expanded.
+    expandSection: String? = null,
     viewModel: AccountViewModel = koinViewModel(),
+    issuersListViewModel: ClientOrIssuerListViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
     val uiState = viewModel.uiState
+    val issuersUiState by issuersListViewModel.issuersUiState.collectAsState()
+    val issuersCount = issuersUiState.clientsOrIssuerList.orEmpty().size
 
     val isDimActive = remember { mutableStateOf(false) }
 
@@ -221,7 +228,9 @@ fun Account(
         }
     }
 
-    Scaffold(
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         containerColor = AppColors.surface,
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
@@ -318,7 +327,15 @@ fun Account(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                CollapsibleSection(title = stringResource(Res.string.account_my_companies)) {
+                val myCompaniesTitle = if (issuersCount <= 1) {
+                    stringResource(Res.string.drawer_my_company)
+                } else {
+                    stringResource(Res.string.account_my_companies)
+                }
+                CollapsibleSection(
+                    title = myCompaniesTitle,
+                    initiallyExpanded = expandSection == "my_companies",
+                ) {
                     MyCompaniesSection(navController = navController)
                 }
 

@@ -40,6 +40,10 @@ fun NavGraph(
     onSendDatabaseByEmail: (String) -> Unit = {},
     onComposeEmail: (String, String, String) -> Unit = { _, _, _ -> },
 ) {
+    val handleCategoryClick: (Category) -> Unit = { category ->
+        navController.navigateAndReplaceStartDestination(category)
+    }
+
     NavHost(
         navController = navController,
         startDestination = Screen.InvoiceList.name,
@@ -47,9 +51,7 @@ fun NavGraph(
         // About
         about(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickBack = {
                 navigateBack(navController)
             },
@@ -61,9 +63,7 @@ fun NavGraph(
         // Account (magic link auth + subscription)
         account(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickBack = {
                 navigateBack(navController)
             },
@@ -75,9 +75,7 @@ fun NavGraph(
         // gStore (premium modules showcase, no commercial CTA)
         gStore(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickBack = {
                 navigateBack(navController)
             },
@@ -86,9 +84,7 @@ fun NavGraph(
         // Delivery Notes
         deliveryNoteList(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickListItem = {
                 val params = "?itemId=$it"
                 navController.navigate(Screen.DeliveryNoteAddEdit.name + params)
@@ -109,9 +105,7 @@ fun NavGraph(
         // Quotes
         quoteList(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickListItem = {
                 val params = "?itemId=$it"
                 navController.navigate(Screen.QuoteAddEdit.name + params)
@@ -132,9 +126,7 @@ fun NavGraph(
         // Invoices
         invoiceList(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickListItem = {
                 val params = "?itemId=$it"
                 navController.navigate(Screen.InvoiceAddEdit.name + params)
@@ -159,9 +151,7 @@ fun NavGraph(
         // Credit Notes
         creditNoteList(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickListItem = {
                 val params = "?itemId=$it"
                 navController.navigate(Screen.CreditNoteAddEdit.name + params)
@@ -178,9 +168,7 @@ fun NavGraph(
         // Clients/Issuers
         clientOrIssuerList(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickListItem = {
                 val params = "?itemId=${it.id}&type=client"
                 navController.navigate(Screen.ClientAddEdit.name + params)
@@ -245,9 +233,7 @@ fun NavGraph(
         // Products
         productList(
             navController = navController,
-            onClickCategory = {
-                navController.navigateAndReplaceStartDestination(it)
-            },
+            onClickCategory = handleCategoryClick,
             onClickListItem = {
                 val params = "?itemId=${it.id}&type=product"
                 navController.navigate("ProductCreation$params") {

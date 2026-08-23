@@ -10,6 +10,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.ui.navigation.CategorySidebar
 import com.a4a.g8invoicing.ui.navigation.NavGraph
@@ -25,11 +27,20 @@ import org.koin.compose.koinInject
 fun App(
     // Platform-specific callbacks can be passed here
     onSendReminder: (InvoiceState) -> Unit = {},
-    localeManager: LocaleManager = koinInject()
+    localeManager: LocaleManager = koinInject(),
+    currentCompanyRepository: CurrentCompanyRepository = koinInject(),
+    clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject(),
 ) {
-    // Initialize locale on first composition
+    // Initialize locale + hydrate the "current entreprise" from the most-recent
+    // issuer on first launch. Without this, currentCompanyRepository.current
+    // stays null → doc list flows take the getAll() fallback (no filter) and
+    // switching entreprise from the sidebar looks like it does nothing.
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
+        // getLastCreatedIssuerId() is suspend, so resolve it here and hand
+        // initIfMissing a plain lambda returning the pre-fetched id.
+        val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
+        currentCompanyRepository.initIfMissing { lastIssuerId }
     }
 
     // Use Crossfade for smooth transition when language changes

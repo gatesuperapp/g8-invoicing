@@ -14,6 +14,13 @@ sealed class Category(
     data object G8 : Category(Screen.About.name, Res.string.drawer_g8, null, null)
     data object MyAccount : Category(Screen.Account.name, Res.string.drawer_my_account, null, null)
     data object GStore : Category(Screen.GStore.name, Res.string.drawer_gstore, null, null)
+
+    // Not a screen — clicking this entry opens the entreprises picker
+    // bottom sheet at App level. The route is a synthetic marker that no
+    // NavGraph handles; the sidebar/dropdown callers intercept it before
+    // ever navigating.
+    data object MyCompany : Category("my_company_picker", Res.string.drawer_my_company, null, null)
+
     data object Clients : Category(Screen.ClientOrIssuerList.name, Res.string.appbar_client_list, null, null)
     data object Products : Category(Screen.ProductList.name, Res.string.appbar_products, null, null)
     data object CreditNotes : Category(Screen.CreditNoteList.name, Res.string.appbar_credit_notes, null, null)

@@ -26,7 +26,7 @@ import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -174,7 +174,9 @@ fun GStore(
     // Tapping a card opens a fullscreen detail dialog for that module. Null = no dialog.
     var selectedModule: GStoreModule? by remember { mutableStateOf(null) }
 
-    Scaffold(
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = stringResource(Res.string.gstore_title),
