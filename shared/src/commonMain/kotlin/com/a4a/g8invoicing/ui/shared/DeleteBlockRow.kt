@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.appbar_delete
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.textBody
+import com.a4a.g8invoicing.ui.theme.textBodySmall
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -34,19 +34,24 @@ fun DeleteBlockRow(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(start = 12.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
+            // Thinner row: top halved, bottom quartered vs previous 14/14dp so
+            // the "Supprimer" affordance stays discoverable without dragging
+            // the block visually below its content.
+            .padding(start = 12.dp, end = 16.dp, top = 7.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(16.dp),
             imageVector = Icons.Outlined.DeleteOutline,
-            tint = AppColors.iconSecondary,
+            tint = AppColors.dangerAccent,
             contentDescription = label,
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = label,
-            style = MaterialTheme.typography.textBody.copy(color = AppColors.iconSecondary),
+            // Match AddAddressButton's font (textBodySmall) so add/delete
+            // affordances read at the same visual weight across the form.
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.dangerAccent),
         )
     }
 }
