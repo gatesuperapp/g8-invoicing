@@ -569,6 +569,24 @@
     <string name="export_chooser_title">Format d'export</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <string name="cii_validation_title">Facture incomplète</string>
+    <string name="cii_validation_intro">Pour créer une facture électronique valide, complétez les champs suivants :</string>
+    <string name="cii_validation_confirm">J'ai compris</string>
+    <string name="cii_validation_issuer_missing">Ajouter un émetteur</string>
+    <string name="cii_validation_issuer_name">Nom de l'émetteur</string>
+    <string name="cii_validation_issuer_siren">SIREN / SIRET de l'émetteur</string>
+    <string name="cii_validation_issuer_vat">Numéro de TVA de l'émetteur</string>
+    <string name="cii_validation_issuer_address">Adresse complète de l'émetteur (rue, code postal, ville)</string>
+    <string name="cii_validation_client_missing">Ajouter un client</string>
+    <string name="cii_validation_client_name">Nom du client</string>
+    <string name="cii_validation_client_type">Préciser si le client est un professionnel ou un particulier</string>
+    <string name="cii_validation_client_siren">SIREN / SIRET du client (client professionnel)</string>
+    <string name="cii_validation_client_address">Adresse complète du client (rue, code postal, ville)</string>
+    <string name="cii_validation_products_empty">Ajouter au moins un produit à la facture</string>
+    <string name="cii_validation_line_name">Ligne %1$d : nom du produit manquant</string>
+    <string name="cii_validation_line_price">Ligne %1$d : prix unitaire manquant</string>
+    <string name="cii_validation_line_tax_rate">Ligne %1$d : taux de TVA manquant</string>
+    <string name="cii_validation_due_date">Date d'échéance de paiement</string>
 
     <!-- Account Screen -->
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>

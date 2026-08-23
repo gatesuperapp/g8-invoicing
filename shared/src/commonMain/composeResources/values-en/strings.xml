@@ -609,6 +609,24 @@
     <string name="export_chooser_title">Export format</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <string name="cii_validation_title">Invoice incomplete</string>
+    <string name="cii_validation_intro">To create a valid e-invoice, please fill in the following fields:</string>
+    <string name="cii_validation_confirm">Got it</string>
+    <string name="cii_validation_issuer_missing">Add an issuer</string>
+    <string name="cii_validation_issuer_name">Issuer name</string>
+    <string name="cii_validation_issuer_siren">Issuer company ID (SIREN / SIRET / VAT reg.)</string>
+    <string name="cii_validation_issuer_vat">Issuer VAT number</string>
+    <string name="cii_validation_issuer_address">Complete issuer address (street, ZIP, city)</string>
+    <string name="cii_validation_client_missing">Add a client</string>
+    <string name="cii_validation_client_name">Client name</string>
+    <string name="cii_validation_client_type">Specify whether the client is a business or individual</string>
+    <string name="cii_validation_client_siren">Client company ID (business client)</string>
+    <string name="cii_validation_client_address">Complete client address (street, ZIP, city)</string>
+    <string name="cii_validation_products_empty">Add at least one product to the invoice</string>
+    <string name="cii_validation_line_name">Line %1$d: missing product name</string>
+    <string name="cii_validation_line_price">Line %1$d: missing unit price</string>
+    <string name="cii_validation_line_tax_rate">Line %1$d: missing VAT rate</string>
+    <string name="cii_validation_due_date">Payment due date</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Country</string>
