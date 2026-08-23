@@ -584,6 +584,11 @@
     <string name="account_add_company">+ Ajouter une entreprise</string>
     <string name="account_manage_companies">Gérer mes entreprises</string>
     <string name="account_manage_company">Gérer mon entreprise</string>
+    <!-- Client type chip picker (top of client add/edit form). Drives the
+         Factur-X export gate: professionals get electronic invoices,
+         individuals get a plain PDF. -->
+    <string name="client_type_individual">Particulier</string>
+    <string name="client_type_professional">Professionnel</string>
     <string name="account_section_advanced">Avancé</string>
     <string name="account_delete_cta">Supprimer mon compte</string>
     <string name="account_delete_dialog_title">Supprimer définitivement votre compte ?</string>
