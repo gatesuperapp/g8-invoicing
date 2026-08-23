@@ -1465,6 +1465,11 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         payment_iban = documentClientOrIssuer.paymentIban?.text?.trim(),
         payment_bic = documentClientOrIssuer.paymentBic?.text?.trim(),
         payment_country = documentClientOrIssuer.paymentCountry?.trim()?.ifEmpty { null },
+        // Frozen only on the client-side snapshot; issuers keep NULL. Drives
+        // the Factur-X export gate deterministically per doc.
+        client_type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+        ) documentClientOrIssuer.clientType?.name else null,
     )
 }
 
@@ -1556,6 +1561,7 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         paymentIban = documentClientOrIssuer.payment_iban?.let { TextFieldValue(text = it) },
         paymentBic = documentClientOrIssuer.payment_bic?.let { TextFieldValue(text = it) },
         paymentCountry = documentClientOrIssuer.payment_country,
+        clientType = com.a4a.g8invoicing.data.models.ClientType.fromDb(documentClientOrIssuer.client_type),
     )
 }
 

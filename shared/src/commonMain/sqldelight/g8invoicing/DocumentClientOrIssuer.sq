@@ -22,6 +22,11 @@ CREATE TABLE DocumentClientOrIssuer (
   -- Country of the frozen bank (ISO 3166-1 alpha-2). Drives the rendered
   -- label on preview + PDF ("IBAN :" vs "N° de compte :").
   payment_country TEXT,
+  -- Frozen B2B/B2C flag at doc save time. Drives the Factur-X export gate
+  -- (PROFESSIONAL → electronic invoice, INDIVIDUAL → plain PDF). Kept
+  -- doc-side so re-exporting an old doc respects its original nature even
+  -- if the master client card is edited later.
+  client_type TEXT,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -48,8 +53,8 @@ FROM DocumentClientOrIssuer
 WHERE name = :name AND first_name =: first_name;
 
 save:
-INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, payment_iban, payment_bic, payment_country)
-VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path, :vat_exempt, :intra_eu_sales, :payment_iban, :payment_bic, :payment_country);
+INSERT INTO DocumentClientOrIssuer (id, type, original_client_id, original_version, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, payment_iban, payment_bic, payment_country, client_type)
+VALUES (:id, :type, :original_client_id, :original_version, :first_name, :name, :phone, :email, :notes, :company_id1_label, :company_id1_number, :company_id2_label, :company_id2_number, :company_id3_label, :company_id3_number, :logo_path, :vat_exempt, :intra_eu_sales, :payment_iban, :payment_bic, :payment_country, :client_type);
 
 update:
 UPDATE DocumentClientOrIssuer
@@ -72,7 +77,8 @@ SET type = :type,
     intra_eu_sales = :intra_eu_sales,
     payment_iban = :payment_iban,
     payment_bic = :payment_bic,
-    payment_country = :payment_country
+    payment_country = :payment_country,
+    client_type = :client_type
 WHERE
     id = :id;
 

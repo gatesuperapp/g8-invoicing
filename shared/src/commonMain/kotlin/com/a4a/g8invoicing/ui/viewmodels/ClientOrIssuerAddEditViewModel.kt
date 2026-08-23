@@ -760,7 +760,31 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.CLIENT_OR_ISSUER_NOTES -> person = person.copy(notes = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL -> person = person.copy(companyId1Label = value as TextFieldValue)
-            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> person = person.copy(companyId1Number = value as TextFieldValue)
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> {
+                val newNumber = value as TextFieldValue
+                // Typing anything into a client's SIREN slot (companyId1 is
+                // SIREN in FR defaults, and even under other locale-specific
+                // labels it's still a business tax id) auto-flags the client
+                // as a professional the FIRST time — user override wins on
+                // subsequent edits (we only touch clientType when it's null).
+                val autoTypeBump = if (
+                    person.type == ClientOrIssuerType.CLIENT &&
+                    person.clientType == null &&
+                    newNumber.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(companyId1Number = newNumber, clientType = autoTypeBump)
+            }
+            ScreenElement.CLIENT_TYPE -> {
+                // Wrapped payload — the picker fires ClientTypeChoice(null)
+                // when the user re-taps the active chip to clear the choice.
+                person = person.copy(
+                    clientType = (value as com.a4a.g8invoicing.data.models.ClientTypeChoice).value
+                )
+            }
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL -> person = person.copy(companyId2Label = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person = person.copy(companyId2Number = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person = person.copy(companyId3Label = value as TextFieldValue)
@@ -944,7 +968,27 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES -> person = person.copy(notes = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL -> person = person.copy(companyId1Label = value as TextFieldValue)
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> person = person.copy(companyId1Number = value as TextFieldValue)
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> {
+                val newNumber = value as TextFieldValue
+                // Same SIREN → PROFESSIONAL auto-bump as the master client
+                // form; only fires the first time (null → PROFESSIONAL).
+                val autoTypeBump = if (
+                    (person.type == ClientOrIssuerType.CLIENT ||
+                        person.type == ClientOrIssuerType.DOCUMENT_CLIENT) &&
+                    person.clientType == null &&
+                    newNumber.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(companyId1Number = newNumber, clientType = autoTypeBump)
+            }
+            ScreenElement.CLIENT_TYPE -> {
+                person = person.copy(
+                    clientType = (value as com.a4a.g8invoicing.data.models.ClientTypeChoice).value
+                )
+            }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL -> person = person.copy(companyId2Label = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person = person.copy(companyId2Number = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person = person.copy(companyId3Label = value as TextFieldValue)

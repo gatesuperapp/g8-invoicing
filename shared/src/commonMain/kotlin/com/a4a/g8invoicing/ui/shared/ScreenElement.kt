@@ -50,6 +50,9 @@ enum class ScreenElement {
     ISSUER_BANK_COUNTRY,
     ISSUER_VAT_EXEMPT,
     ISSUER_INTRA_EU_SALES,
+    // Client-side B2B/B2C chip picker. Value = ClientType? (null = "no answer",
+    // fired when the user re-taps the active chip to clear the choice).
+    CLIENT_TYPE,
     CLIENT_OR_ISSUER_IDENTIFICATION1,
     CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL,
     CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,

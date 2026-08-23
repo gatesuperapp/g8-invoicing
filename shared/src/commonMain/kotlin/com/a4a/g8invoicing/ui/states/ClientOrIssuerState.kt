@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui.states
 
 import androidx.compose.ui.text.input.TextFieldValue
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.ClientType
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 
 // This object is created to manipulate client or issuer data,
@@ -58,5 +59,11 @@ data class ClientOrIssuerState(
     // Débloque l'affichage du champ Product.type (SERVICE/GOODS) — inutile pour un
     // utilisateur non-UE ou qui ne facture que dans son propre pays.
     var intraEuSales: Boolean = false,
+    // B2B (PROFESSIONAL) vs B2C (INDIVIDUAL). Only meaningful on clients — the
+    // Factur-X export flow gates on this: professionals get electronic invoices,
+    // individuals get plain PDF. Null = user hasn't answered → export surfaces
+    // a modal to force the choice. Auto-filled to PROFESSIONAL on SIREN entry
+    // (see ClientOrIssuerAddEditViewModel) but the user can override.
+    var clientType: ClientType? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )

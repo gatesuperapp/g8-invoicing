@@ -81,6 +81,7 @@ SET type = :type,
     logo_path = :logo_path,
     vat_exempt = :vat_exempt,
     intra_eu_sales = :intra_eu_sales,
+    client_type = :client_type,
     version = COALESCE(version, 0) + 1,
     updated_at = datetime('now', 'localtime')
 WHERE

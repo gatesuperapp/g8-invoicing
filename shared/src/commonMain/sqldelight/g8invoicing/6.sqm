@@ -173,3 +173,8 @@ UPDATE Quote
 --    au moment de la génération.
 --    Valeurs stockées : 'PROFESSIONAL', 'INDIVIDUAL' ou NULL.
 ALTER TABLE ClientOrIssuer ADD COLUMN client_type TEXT;
+-- Frozen doc-side snapshot: once a doc is emitted, its "nature" (Factur-X
+-- or plain PDF) stays anchored to whatever the client type was at that
+-- moment. Editing the master client later doesn't retroactively change the
+-- doc's export flavour.
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN client_type TEXT;

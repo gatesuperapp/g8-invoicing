@@ -232,9 +232,9 @@ class ClientOrIssuerLocalDataSource(
             // Clients rattachés à l'entreprise courante ; issuers ne
             // s'auto-référencent pas.
             company_id = if (isClient) currentCompanyRepository.current else null,
-            // TODO(Phase clientType) : câbler la valeur PROFESSIONAL/INDIVIDUAL
-            // une fois le champ ajouté au state + form. Pour l'instant : null.
-            client_type = null,
+            // Only meaningful on clients (Factur-X gate). Issuers store NULL —
+            // the field doesn't apply on the emitting side.
+            client_type = if (isClient) clientOrIssuer.clientType?.name else null,
         )
     }
 
@@ -315,7 +315,7 @@ class ClientOrIssuerLocalDataSource(
                     if (clientOrIssuer.vatExempt) 1L else 0L,
                     if (clientOrIssuer.intraEuSales) 1L else 0L,
                     company_id = if (isClient) currentCompanyRepository.current else null,
-                    client_type = null,
+                    client_type = if (isClient) clientOrIssuer.clientType?.name else null,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -478,6 +478,8 @@ class ClientOrIssuerLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             try {
                 clientOrIssuer.id?.let {
+                    val isClient = clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                        clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
                     clientOrIssuerQueries.update(
                         id = it.toLong(),
                         type = clientOrIssuer.type?.name?.lowercase(),
@@ -495,6 +497,7 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = clientOrIssuer.logoPath,
                         vat_exempt = if (clientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (clientOrIssuer.intraEuSales) 1L else 0L,
+                        client_type = if (isClient) clientOrIssuer.clientType?.name else null,
                     )
                     // Bank accounts live in their own table; simplest robust sync
                     // is delete-all-then-reinsert (small lists, rare edits).
@@ -595,6 +598,9 @@ class ClientOrIssuerLocalDataSource(
                         payment_iban = syncedIban,
                         payment_bic = syncedBic,
                         payment_country = syncedCountry,
+                        client_type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+                        ) documentClientOrIssuer.clientType?.name else null,
                     )
                 }
                 // Addresses to delete
@@ -706,6 +712,11 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = documentClientOrIssuer.logoPath,
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+                        client_type = if (masterType == ClientOrIssuerType.CLIENT.name.lowercase()) {
+                            documentClientOrIssuer.clientType?.name
+                        } else {
+                            null
+                        },
                     )
                     // Banks handled unconditionally above — master-owned resource,
                     // not gated by syncToMaster.
@@ -1095,6 +1106,7 @@ fun ClientOrIssuer.transformIntoEditable(
         logoPath = clientOrIssuer.logo_path,
         vatExempt = (clientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (clientOrIssuer.intra_eu_sales ?: 0L) != 0L,
+        clientType = com.a4a.g8invoicing.data.models.ClientType.fromDb(clientOrIssuer.client_type),
     )
 }
 

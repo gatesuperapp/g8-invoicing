@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.models.CountryCodes
+import com.a4a.g8invoicing.ui.screens.shared.ClientTypePicker
 import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
 import androidx.compose.runtime.LaunchedEffect
 import org.koin.compose.koinInject
@@ -229,6 +230,30 @@ fun ClientOrIssuerAddEditForm(
             .padding(top = paddingTop, bottom = 60.dp)
             .imePadding()
     ) {
+        // B2B/B2C picker — only relevant on clients (issuers don't carry a
+        // client_type; the emitter is always "us"). Sits above every other
+        // block so the choice frames the rest of the form (Factur-X eligibility
+        // hinges on it) and mirrors the ordering asked for in the work log.
+        if (!isIssuer) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
+            ) {
+                ClientTypePicker(
+                    selected = clientOrIssuerUiState.clientType,
+                    onSelect = { newType ->
+                        // Wrap so the (nullable) choice survives the
+                        // onValueChange(_, Any) contract.
+                        onValueChange(
+                            ScreenElement.CLIENT_TYPE,
+                            com.a4a.g8invoicing.data.models.ClientTypeChoice(newType),
+                        )
+                    },
+                )
+            }
+            Spacer(Modifier.padding(bottom = 16.dp))
+        }
         Column(
             modifier = Modifier
                 .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
@@ -306,9 +331,21 @@ fun ClientOrIssuerAddEditForm(
                     else ScreenElement.CLIENT_OR_ISSUER_EMAIL_1
                 )
             )
+            // A professional client is a company — no personal first name to
+            // capture. Hide the field once the picker locks in PROFESSIONAL
+            // (individual + unset still show it, since a null clientType might
+            // resolve to individual at export time).
+            val hideFirstName = !isIssuer &&
+                clientOrIssuerUiState.clientType == com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL
+            val visibleInputs = if (hideFirstName) {
+                inputList.filter { form ->
+                    form.pageElement != ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME &&
+                        form.pageElement != ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME
+                }
+            } else inputList
             // Create the UI with list items
             FormUI(
-                inputList = inputList,
+                inputList = visibleInputs,
                 localFocusManager = localFocusManager,
                 placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
                 errors = clientOrIssuerUiState.errors
