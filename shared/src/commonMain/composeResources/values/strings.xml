@@ -558,6 +558,14 @@
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
     <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
+    <!-- CII XML export gStore module — same structured data as Factur-X but
+         delivered as a raw XML file, for international platforms that don't
+         accept the Factur-X PDF/A-3 container yet. Independent of client
+         type (works for a Particulier client too). -->
+    <string name="gstore_module_cii_title">Export CII XML</string>
+    <string name="gstore_module_cii_desc">Exporter les données structurées de la facture en XML CII</string>
+    <string name="gstore_module_cii_detail">Activez ce module pour exporter chaque facture au format CII XML (norme européenne EN 16931, profil Extended). Utile pour transmettre vos factures aux plateformes de facturation électronique à l'international qui n'acceptent pas encore le format Factur-X. Le fichier généré peut être ouvert par tout logiciel comptable compatible EN 16931.</string>
+    <string name="export_cii_button">Exporter en CII</string>
 
     <!-- Account Screen -->
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>

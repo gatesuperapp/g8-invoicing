@@ -592,6 +592,10 @@
     <string name="gstore_module_delivery_note_title">Delivery notes</string>
     <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
     <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted. The delivery note number will be shown on the matching invoice for accounting traceability. You can group several delivery notes into a single invoice.</string>
+    <string name="gstore_module_cii_title">CII XML Export</string>
+    <string name="gstore_module_cii_desc">Export the invoice's structured data as CII XML</string>
+    <string name="gstore_module_cii_detail">Enable this module to export each invoice as a CII XML file (European standard EN 16931, Extended profile). Useful for sending your invoices to international e-invoicing platforms that don't accept the Factur-X format yet. The generated file can be opened by any accounting software compatible with EN 16931.</string>
+    <string name="export_cii_button">Export as CII</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Country</string>

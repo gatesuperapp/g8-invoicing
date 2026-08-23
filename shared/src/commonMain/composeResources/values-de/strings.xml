@@ -597,6 +597,10 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_delivery_note_title">Lieferscheine</string>
     <string name="gstore_module_delivery_note_desc">Lieferscheine erstellen und in Rechnungen umwandeln</string>
     <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit. Du kannst mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
+    <string name="gstore_module_cii_title">CII-XML-Export</string>
+    <string name="gstore_module_cii_desc">Rechnungsstrukturdaten als CII-XML exportieren</string>
+    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um jede Rechnung als CII-XML-Datei zu exportieren (europäische Norm EN 16931, Extended-Profil). Nützlich, um Rechnungen an internationale E-Invoicing-Plattformen zu übermitteln, die das Factur-X-Format noch nicht akzeptieren. Die erzeugte Datei kann von jeder EN-16931-kompatiblen Buchhaltungssoftware geöffnet werden.</string>
+    <string name="export_cii_button">Als CII exportieren</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Land</string>
