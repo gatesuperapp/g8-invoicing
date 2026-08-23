@@ -575,17 +575,20 @@
     <string name="cii_validation_issuer_missing">Ajouter un émetteur</string>
     <string name="cii_validation_issuer_name">Nom de l'émetteur</string>
     <string name="cii_validation_issuer_siren">SIREN / SIRET de l'émetteur</string>
+    <string name="cii_validation_issuer_siren_format">Le SIREN de l'émetteur doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
     <string name="cii_validation_issuer_vat">Numéro de TVA de l'émetteur</string>
     <string name="cii_validation_issuer_address">Adresse complète de l'émetteur (rue, code postal, ville)</string>
     <string name="cii_validation_client_missing">Ajouter un client</string>
     <string name="cii_validation_client_name">Nom du client</string>
     <string name="cii_validation_client_type">Préciser si le client est un professionnel ou un particulier</string>
     <string name="cii_validation_client_siren">SIREN / SIRET du client (client professionnel)</string>
+    <string name="cii_validation_client_siren_format">Le SIREN du client doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
     <string name="cii_validation_client_address">Adresse complète du client (rue, code postal, ville)</string>
     <string name="cii_validation_products_empty">Ajouter au moins un produit à la facture</string>
     <string name="cii_validation_line_name">Ligne %1$d : nom du produit manquant</string>
     <string name="cii_validation_line_price">Ligne %1$d : prix unitaire manquant</string>
     <string name="cii_validation_line_tax_rate">Ligne %1$d : taux de TVA manquant</string>
+    <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s %% non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Date d'échéance de paiement</string>
 
     <!-- Account Screen -->
