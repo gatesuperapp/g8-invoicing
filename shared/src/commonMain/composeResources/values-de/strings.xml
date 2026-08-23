@@ -306,6 +306,8 @@
     <string name="account_add_company">+ Unternehmen hinzufügen</string>
     <string name="account_manage_companies">Meine Unternehmen verwalten</string>
     <string name="account_manage_company">Mein Unternehmen verwalten</string>
+    <string name="client_type_individual">Privatperson</string>
+    <string name="client_type_professional">Geschäftskunde</string>
     <string name="account_section_advanced">Erweitert</string>
     <string name="account_delete_cta">Mein Konto löschen</string>
     <string name="account_delete_dialog_title">Konto endgültig löschen?</string>
