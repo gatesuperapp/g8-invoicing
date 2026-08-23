@@ -623,6 +623,7 @@
     <string name="cii_validation_client_type">Specify whether the client is a business or individual</string>
     <string name="cii_validation_client_siren">Client company ID (business client)</string>
     <string name="cii_validation_client_siren_format">Client SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
+    <string name="cii_validation_client_email">Add an email to the client (electronic address required for an individual client)</string>
     <string name="cii_validation_client_address">Complete client address (street, ZIP, city)</string>
     <string name="cii_validation_products_empty">Add at least one product to the invoice</string>
     <string name="cii_validation_line_name">Line %1$d: missing product name</string>
