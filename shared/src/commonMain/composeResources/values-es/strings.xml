@@ -612,6 +612,10 @@ Une erreur s'est produite :
     <string name="gstore_module_delivery_note_title">Albaranes</string>
     <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
     <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados. El número de albarán se indicará en la factura correspondiente para la trazabilidad contable. Puedes agrupar varios albaranes en una sola factura.</string>
+    <string name="gstore_module_cii_title">Exportar XML CII</string>
+    <string name="gstore_module_cii_desc">Exportar los datos estructurados de la factura como XML CII</string>
+    <string name="gstore_module_cii_detail">Activa este módulo para exportar cada factura como archivo XML CII (norma europea EN 16931, perfil Extended). Útil para enviar tus facturas a plataformas internacionales de facturación electrónica que aún no aceptan el formato Factur-X. El archivo generado puede abrirse con cualquier software contable compatible con EN 16931.</string>
+    <string name="export_cii_button">Exportar como CII</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">País</string>
