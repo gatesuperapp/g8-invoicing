@@ -12,6 +12,12 @@
     <string name="document_default_footer"></string>
     <string name="document_default_payment_terms">In the event of late payment, a penalty at the legal rate in force will be applied, plus a fixed indemnity of €40. No discount for early payment.</string>
     <string name="document_payment_terms">Payment terms</string>
+    <string name="payment_terms_recovery_fees_label">Recovery fees</string>
+    <string name="payment_terms_late_fees_label">Late payment penalties</string>
+    <string name="payment_terms_discount_label">Early payment discount</string>
+    <string name="payment_terms_recovery_fees_default">Fixed indemnity for recovery fees of €40.</string>
+    <string name="payment_terms_late_fees_default">In case of late payment, a penalty at the ECB refinancing rate plus 10 points will be applied.</string>
+    <string name="payment_terms_discount_default">No discount for early payment.</string>
     <string name="document_payment_means_default_label">Accepted payment means:</string>
     <string name="document_payment_means_hide_list_a11y">Hide the payment means list</string>
     <string name="document_payment_means_show_list_a11y">Show the payment means list</string>
