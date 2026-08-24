@@ -21,6 +21,16 @@
          les pré-remplit pour que l'user ne les perde jamais par oubli. -->
     <string name="document_default_payment_terms">En cas de retard de paiement, une pénalité au taux d'intérêt appliqué par la BCE à son opération de refinancement la plus récente, majoré de 10 points, sera appliquée, à laquelle s'ajoutera une indemnité forfaitaire de 40 €. Pas d'escompte pour paiement anticipé.</string>
     <string name="document_payment_terms">Termes de paiement</string>
+    <!-- Payment terms split into 3 sub-mentions matching Factur-X BR-FR-05
+         SubjectCodes: PMT (frais de recouvrement) / PMD (pénalités de retard)
+         / AAB (escompte). Each is editable independently in the picker; the
+         PDF concatenates them and the CII XML emits one IncludedNote per code. -->
+    <string name="payment_terms_recovery_fees_label">Frais de recouvrement</string>
+    <string name="payment_terms_late_fees_label">Pénalités de retard</string>
+    <string name="payment_terms_discount_label">Escompte</string>
+    <string name="payment_terms_recovery_fees_default">Indemnité forfaitaire pour frais de recouvrement de 40 €.</string>
+    <string name="payment_terms_late_fees_default">En cas de retard de paiement, une pénalité au taux d'intérêt appliqué par la BCE à son opération de refinancement la plus récente, majoré de 10 points, sera appliquée.</string>
+    <string name="payment_terms_discount_default">Pas d'escompte pour paiement anticipé.</string>
     <!-- Default value of the (editable) payment-means label rendered on the PDF/preview.
          Shown as the placeholder inside the label field in the picker. The user can
          rename it — e.g. "Payer par". If left empty, the whole payment-means block is
