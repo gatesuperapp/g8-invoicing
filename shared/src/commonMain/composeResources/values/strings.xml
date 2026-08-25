@@ -536,6 +536,11 @@
     <string name="drawer_gstore">𝕘Store</string>
     <string name="drawer_my_company">Mon entreprise</string>
 
+    <!-- First-launch onboarding: ask for company name -->
+    <string name="first_launch_issuer_title">Quel est le nom de votre entreprise ?</string>
+    <string name="first_launch_issuer_placeholder">Nom de l'entreprise</string>
+    <string name="first_launch_issuer_cta">Commencer</string>
+
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Découvrez les modules disponibles avec un compte g8 premium.</string>
