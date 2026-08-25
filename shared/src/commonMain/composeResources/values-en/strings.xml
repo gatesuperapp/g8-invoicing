@@ -621,6 +621,9 @@
     <string name="export_chooser_title">Export format</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
+    <string name="export_vat_exempt_conflict_title">VAT-exempt regime</string>
+    <string name="export_vat_exempt_conflict_message">Your business is in the VAT-exempt regime but some products carry a VAT rate. Please remove it before exporting your invoice.</string>
     <string name="cii_validation_title">Invoice incomplete</string>
     <string name="cii_validation_intro">To create a valid e-invoice, please fill in the following fields:</string>
     <string name="cii_validation_confirm">Got it</string>

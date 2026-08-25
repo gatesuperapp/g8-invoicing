@@ -584,6 +584,9 @@
     <string name="export_chooser_title">Format d'export</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
+    <string name="export_vat_exempt_conflict_title">Franchise de TVA</string>
+    <string name="export_vat_exempt_conflict_message">Votre entreprise est en franchise de TVA mais vous avez ajouté de la TVA à certains produits. Veuillez la retirer pour pouvoir exporter votre facture.</string>
     <string name="cii_validation_title">Facture incomplète</string>
     <string name="cii_validation_intro">Pour créer une facture électronique valide, complétez les champs suivants :</string>
     <string name="cii_validation_confirm">J'ai compris</string>

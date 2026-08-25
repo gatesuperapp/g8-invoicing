@@ -631,6 +631,9 @@ Une erreur s'est produite :
     <string name="export_chooser_title">Formato de exportación</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
+    <string name="export_vat_exempt_conflict_title">Franquicia de IVA</string>
+    <string name="export_vat_exempt_conflict_message">Tu empresa está en régimen de franquicia de IVA, pero algunos productos tienen un tipo de IVA. Bórralo antes de exportar tu factura.</string>
     <string name="cii_validation_title">Factura incompleta</string>
     <string name="cii_validation_intro">Para crear una factura electrónica válida, completa los siguientes campos:</string>
     <string name="cii_validation_confirm">Entendido</string>
