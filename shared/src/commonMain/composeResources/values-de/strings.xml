@@ -616,6 +616,9 @@ Es ist ein Fehler aufgetreten :
     <string name="export_chooser_title">Exportformat</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
+    <string name="export_vat_exempt_conflict_title">Kleinunternehmerregelung</string>
+    <string name="export_vat_exempt_conflict_message">Ihr Unternehmen nutzt die Kleinunternehmerregelung, aber einige Produkte weisen einen Mehrwertsteuersatz auf. Bitte entfernen Sie diesen, um die Rechnung exportieren zu können.</string>
     <string name="cii_validation_title">Rechnung unvollständig</string>
     <string name="cii_validation_intro">Zum Erstellen einer gültigen elektronischen Rechnung müssen folgende Felder ausgefüllt werden:</string>
     <string name="cii_validation_confirm">Verstanden</string>
