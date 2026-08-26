@@ -282,6 +282,8 @@
     <string name="first_launch_issuer_title">Wie heißt Ihr Unternehmen?</string>
     <string name="first_launch_issuer_placeholder">Name des Unternehmens</string>
     <string name="first_launch_issuer_cta">Loslegen</string>
+    <string name="first_launch_issuer_next">Weiter</string>
+    <string name="first_launch_issuer_country_title">In welchem Land befindet sich Ihr Unternehmen?</string>
 
     <!-- Account Screen -->
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich (https://play.google.com/store/apps/details?id=com.a4a.g8invoicing) sowie auf F-Droid: https://f-droid.org/de/packages/com.a4a.g8invoicing/</string>

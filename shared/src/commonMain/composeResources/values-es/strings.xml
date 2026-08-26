@@ -284,6 +284,8 @@
     <string name="first_launch_issuer_title">¿Cuál es el nombre de tu empresa?</string>
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
     <string name="first_launch_issuer_cta">Empezar</string>
+    <string name="first_launch_issuer_next">Continuar</string>
+    <string name="first_launch_issuer_country_title">¿En qué país está tu empresa?</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
