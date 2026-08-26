@@ -271,6 +271,8 @@
     <string name="first_launch_issuer_title">What is the name of your business?</string>
     <string name="first_launch_issuer_placeholder">Business name</string>
     <string name="first_launch_issuer_cta">Get started</string>
+    <string name="first_launch_issuer_next">Continue</string>
+    <string name="first_launch_issuer_country_title">Where is your business located?</string>
 
     <!-- Account Screen -->
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
