@@ -641,6 +641,12 @@ Es ist ein Fehler aufgetreten :
     <string name="cii_validation_line_tax_rate">Zeile %1$d: fehlender USt-Satz</string>
     <string name="cii_validation_line_tax_rate_invalid">Zeile %1$d: USt-Satz %2$s %% ist in Frankreich nicht zulässig (erlaubte Werte: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fälligkeitsdatum</string>
+    <string name="cii_validation_vat_exemption_text">Grund der Steuerbefreiung (im Textmenü ausfüllen)</string>
+
+    <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
+    <string name="document_vat_exemption_label">Steuerbefreiung</string>
+    <string name="document_vat_exemption_modal_title">Grund der Steuerbefreiung</string>
+    <string name="document_vat_exemption_placeholder">Bitte die für Ihr Unternehmen geltende gesetzliche Grundlage angeben</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Land</string>

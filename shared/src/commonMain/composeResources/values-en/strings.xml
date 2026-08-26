@@ -636,6 +636,12 @@
     <string name="cii_validation_line_tax_rate">Line %1$d: missing VAT rate</string>
     <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s %% is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Payment due date</string>
+    <string name="cii_validation_vat_exemption_text">VAT exemption reason (fill in the text menu)</string>
+
+    <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
+    <string name="document_vat_exemption_label">VAT exemption</string>
+    <string name="document_vat_exemption_modal_title">VAT exemption reason</string>
+    <string name="document_vat_exemption_placeholder">Enter the legal citation applicable to your business</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Country</string>

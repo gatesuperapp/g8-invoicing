@@ -646,6 +646,12 @@ Une erreur s'est produite :
     <string name="cii_validation_line_tax_rate">Línea %1$d: falta el tipo de IVA</string>
     <string name="cii_validation_line_tax_rate_invalid">Línea %1$d: el tipo de IVA %2$s %% no está permitido en Francia (valores aceptados: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fecha de vencimiento del pago</string>
+    <string name="cii_validation_vat_exemption_text">Motivo de exención del IVA (indícalo en el menú de textos)</string>
+
+    <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
+    <string name="document_vat_exemption_label">Exención de IVA</string>
+    <string name="document_vat_exemption_modal_title">Motivo de exención del IVA</string>
+    <string name="document_vat_exemption_placeholder">Indica la referencia legal aplicable a tu empresa</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">País</string>

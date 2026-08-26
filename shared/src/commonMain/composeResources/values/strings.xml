@@ -609,6 +609,12 @@
     <string name="cii_validation_line_tax_rate">Ligne %1$d : taux de TVA manquant</string>
     <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s %% non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Date d'échéance de paiement</string>
+    <string name="cii_validation_vat_exemption_text">Mention d'exonération de TVA (à renseigner dans le menu texte)</string>
+
+    <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
+    <string name="document_vat_exemption_label">Exonération de TVA</string>
+    <string name="document_vat_exemption_modal_title">Mention d'exonération de TVA</string>
+    <string name="document_vat_exemption_placeholder">Ex : TVA non applicable, art. 293 B du CGI</string>
 
     <!-- Account Screen -->
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
