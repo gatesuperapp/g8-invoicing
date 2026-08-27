@@ -139,7 +139,6 @@ class ActivatedModulesRepository(
 
     companion object {
         const val MODULE_ORDERS = "orders"
-        const val MODULE_FACTURX = "facturx"
         const val MODULE_PAYMENTS = "payments"
         const val MODULE_THEMES = "themes"
         // Module that removes the "Document généré avec 𝕘𝟠" footer from invoices and PDFs.
@@ -160,11 +159,31 @@ class ActivatedModulesRepository(
         // Seeded on first load so existing users who used delivery notes before the
         // GStore card existed don't suddenly lose the category.
         const val MODULE_DELIVERY_NOTE = "delivery_note"
+        // Module that unlocks the "Export CII" action on invoices — writes the
+        // structured invoice data as a raw EN 16931 CII XML file, for
+        // international e-invoicing platforms that don't accept the Factur-X
+        // PDF/A-3 container. Independent of client type (works for a
+        // Particulier client too — the XML is just data, no legal claim to
+        // Factur-X compliance on its own). Free for now (pre-launch), will be
+        // moved back behind the premium gate before general rollout.
+        const val MODULE_CII_XML_EXPORT = "cii_xml_export"
+        // Module that unlocks the "Export Factur-X" action on invoices —
+        // writes the standard PDF with the CII XML embedded as
+        // `factur-x.xml` (/AF, AFRelationship=Data) so the file doubles
+        // as a structured e-invoicing payload. Free for now (pre-launch),
+        // same treatment as MODULE_CII_XML_EXPORT.
+        const val MODULE_FACTURX_EXPORT = "facturx_export"
 
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
         // so adding a future free module is one string.
-        val FREE_MODULES = setOf(MODULE_QUOTE_TRIAL, MODULE_DELIVERY_NOTE)
+        val FREE_MODULES = setOf(
+            MODULE_QUOTE_TRIAL,
+            MODULE_DELIVERY_NOTE,
+            MODULE_CII_XML_EXPORT,
+            MODULE_FACTURX_EXPORT,
+            MODULE_WATERMARK_REMOVAL,
+        )
 
         // Modules seeded into the activated set the first time the app boots after this
         // migration is deployed. Guarded by KEY_DEFAULTS_SEEDED so we don't re-add a

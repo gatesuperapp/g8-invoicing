@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.RequestQuote
 import androidx.compose.material.icons.outlined.WaterDrop
@@ -55,6 +57,12 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
 import com.a4a.g8invoicing.shared.resources.gstore_footer_free
+import com.a4a.g8invoicing.shared.resources.gstore_module_cii_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_cii_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_cii_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
@@ -103,6 +111,7 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_watermark_desc,
         detailRes = Res.string.gstore_module_watermark_detail,
         icon = Icons.Outlined.WaterDrop,
+        isFree = true,
     ),
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE,
@@ -129,6 +138,28 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_quote_trial_desc,
         detailRes = Res.string.gstore_module_quote_trial_detail,
         icon = Icons.Outlined.RequestQuote,
+        isFree = true,
+    ),
+    // Raw CII XML export for international e-invoicing platforms that don't
+    // accept Factur-X yet. Premium-only.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_CII_XML_EXPORT,
+        titleRes = Res.string.gstore_module_cii_title,
+        descRes = Res.string.gstore_module_cii_desc,
+        detailRes = Res.string.gstore_module_cii_detail,
+        icon = Icons.Outlined.Code,
+        isFree = true,
+    ),
+    // Factur-X hybrid PDF: visual PDF invoice + embedded CII XML
+    // (factur-x.xml, AFRelationship=Data). Same free treatment as CII
+    // XML for pre-launch, will move behind the premium gate before
+    // general rollout.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_FACTURX_EXPORT,
+        titleRes = Res.string.gstore_module_facturx_title,
+        descRes = Res.string.gstore_module_facturx_desc,
+        detailRes = Res.string.gstore_module_facturx_detail,
+        icon = Icons.Outlined.Code,
         isFree = true,
     ),
 )
@@ -203,51 +234,50 @@ fun GStore(
             if (isPremium) MODULES.filter { it.id != ActivatedModulesRepository.MODULE_QUOTE_TRIAL }
             else MODULES
         }
-        Column(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 28.dp,
+                bottom = 4.dp,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(top = 24.dp),
+                .padding(padding),
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                // weight(1f) with default fill=true so the grid takes ALL remaining
-                // Column height (minus the footer, which sits below with no weight).
-                // The previous fill=false + Spacer(weight=1f) split the leftover space
-                // 50/50 and clipped the grid at mid-column when more than one row
-                // fit, hiding the bottom of the second row.
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            ) {
-                items(visibleModules) { module ->
-                    GStoreModuleCard(
-                        title = stringResource(module.titleRes),
-                        description = stringResource(module.descRes),
-                        icon = module.icon,
-                        isPremium = isPremium,
-                        isFree = module.isFree,
-                        isActivated = module.id in activated,
-                        onToggle = { viewModel.toggleModule(module.id) },
-                        onPremiumHint = onPremiumHint,
-                        onClick = { selectedModule = module },
-                    )
-                }
+            items(visibleModules) { module ->
+                GStoreModuleCard(
+                    title = stringResource(module.titleRes),
+                    description = stringResource(module.descRes),
+                    icon = module.icon,
+                    isPremium = isPremium,
+                    isFree = module.isFree,
+                    isActivated = module.id in activated,
+                    onToggle = { viewModel.toggleModule(module.id) },
+                    onPremiumHint = onPremiumHint,
+                    onClick = { selectedModule = module },
+                )
             }
 
-            // Footer: info pointer to the-gate.fr root — only for non-premium users.
-            // Premium users don't see a "manage your account on …" line here because
-            // account management lives in Mon Compte → Customer Portal.
+            // Footer scrolls with the grid — sits just after the last card row
+            // with breathing space, so it's only in view once the user has
+            // scrolled past all modules. Only shown to non-premium users;
+            // premium account management lives in Mon Compte → Customer Portal.
             if (!isPremium) {
-                WebsiteFooter(
-                    prefix = stringResource(Res.string.gstore_footer_free),
-                    linkLabel = websiteLabel,
-                    onClickLink = { uriHandler.openUri(websiteUrl) },
-                )
-                Spacer(modifier = Modifier.height(20.dp))
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        WebsiteFooter(
+                            prefix = stringResource(Res.string.gstore_footer_free),
+                            linkLabel = websiteLabel,
+                            onClickLink = { uriHandler.openUri(websiteUrl) },
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
             }
         }
     }
