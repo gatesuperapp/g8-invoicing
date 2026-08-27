@@ -49,24 +49,21 @@ fun DocumentBasicTemplateFooter(
     // existing docs. null/blank = no watermark on this doc.
     val watermark = document.watermarkText?.takeIf { it.isNotBlank() }
 
-    val paymentMeansSegments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment> =
-        when (document) {
-            is InvoiceState -> document.paymentMeansSegments
-            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansSegments
-            else -> emptyList()
-        }
-    val paymentMeansHidden: Boolean = when (document) {
-        is InvoiceState -> document.paymentMeansHidden
-        is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansHidden
-        else -> false
-    }
-    val paymentBankHidden: Boolean = when (document) {
-        is InvoiceState -> document.paymentBankHidden
-        is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankHidden
-        else -> false
-    }
-    val iban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty()
-    val bic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty()
+    // Payment section (means + IBAN/BIC + terms) applies to INVOICES ONLY.
+    // A quote is a commercial proposal (no payment context); an avoir
+    // reverses the flow (seller owes buyer, no payment for the buyer to
+    // make). Bailing out on non-invoice types keeps the grey Paiement box
+    // off the PDF for those docs.
+    val invoice = document as? InvoiceState
+    val paymentMeansSegments = invoice?.paymentMeansSegments.orEmpty()
+    val paymentMeansHidden = invoice?.paymentMeansHidden ?: true
+    val paymentBankHidden = invoice?.paymentBankHidden ?: true
+    val iban = if (invoice != null) {
+        document.documentIssuer?.paymentIban?.text?.trim().orEmpty()
+    } else ""
+    val bic = if (invoice != null) {
+        document.documentIssuer?.paymentBic?.text?.trim().orEmpty()
+    } else ""
 
     val paymentMeansDisplay: String? = if (!paymentMeansHidden && paymentMeansSegments.isNotEmpty()) {
         val labelsByChip = com.a4a.g8invoicing.data.models.PaymentMeans.entries.associate {
@@ -81,11 +78,8 @@ fun DocumentBasicTemplateFooter(
             document.documentIssuer?.paymentCountry
         ) || document.documentIssuer?.paymentCountry == null
     ) "IBAN" else stringResource(Res.string.issuer_bank_identifier_generic)
-    val bankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = when (document) {
-        is InvoiceState -> document.paymentBankSegments
-        is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankSegments
-        else -> emptyList()
-    }
+    val bankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> =
+        invoice?.paymentBankSegments.orEmpty()
     val effectiveBankSegments = bankSegments.ifEmpty {
         com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
     }
@@ -97,9 +91,22 @@ fun DocumentBasicTemplateFooter(
 
     val showPaymentSection = paymentMeansDisplay != null || bankRendered != null
 
-    val paymentTerms = (document as? InvoiceState)?.paymentTermsDescription?.text
-        ?.takeIf { it.isNotBlank() }
+    // BT-20 = concat of the 3 subject-coded fields (PMT/PMD/AAB), rendered
+    // as one flowing paragraph — sentences joined with a single space, no
+    // newlines, so the block matches the PDF and stays visually tight.
+    val paymentTerms = (document as? InvoiceState)?.let { inv ->
+        listOf(
+            inv.paymentTermsRecoveryFees.text.trim(),
+            inv.paymentTermsLateFees.text.trim(),
+            inv.paymentTermsDiscount.text.trim(),
+        ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
+    }
     val footerText = document.footerText.text.takeIf { it.isNotBlank() }
+    // BT-120 legal mention — only surfaced when the issuer is in franchise
+    // en base and the user has entered a wording in the text menu.
+    val vatExemptionMention = if (document.documentIssuer?.vatExempt == true) {
+        document.vatExemptionText?.text?.takeIf { it.isNotBlank() }
+    } else null
 
     val bodyStyle = MaterialTheme.typography.textForDocuments
 
@@ -114,6 +121,19 @@ fun DocumentBasicTemplateFooter(
                 }
             )
     ) {
+        if (vatExemptionMention != null) {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = vatExemptionMention,
+                style = bodyStyle.copy(
+                    color = MentionColor,
+                    fontSize = SmallSize,
+                ),
+                textAlign = TextAlign.End,
+                lineHeight = 7.sp,
+            )
+        }
         if (showPaymentSection) {
             Spacer(Modifier.height(12.dp))
             // Box title is the invoice's due date ("À régler avant le

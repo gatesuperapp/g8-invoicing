@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.UnfoldLess
 import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -116,9 +118,15 @@ fun CategoriesDropdownMenu(
 
     // Snapshot the picker's row ordering the moment it opens so a click that
     // changes the current entreprise doesn't visually reshuffle the rows
-    // under the user during the Crossfade. Refreshed on each re-open.
+    // under the user during the Crossfade. Keyed on `issuers` too so if the
+    // list arrives asynchronously (empty at first, populated after the DB
+    // fetch resolves), the snapshot updates instead of staying stuck on the
+    // initial empty state — that used to hide the picker rows for users on
+    // fast picker taps or on cold start. Not keyed on currentCompanyId so
+    // selecting an issuer inside the picker doesn't retrigger the reshuffle
+    // the snapshot is meant to prevent.
     var pickerIssuers by remember { mutableStateOf<List<ClientOrIssuerState>>(emptyList()) }
-    LaunchedEffect(pickerExpanded) {
+    LaunchedEffect(pickerExpanded, issuers) {
         if (pickerExpanded) {
             val (current, others) = issuers.partition { it.id?.toLong() == currentCompanyId }
             pickerIssuers = current + others
@@ -136,8 +144,8 @@ fun CategoriesDropdownMenu(
 
     DropdownMenu(
         // Fixed width (not widthIn) so a long entreprise name in the header
-        // triggers the Text's ellipsis instead of growing the popup.
-        modifier = Modifier.width(260.dp),
+        // wraps to a second line inside the popup instead of growing it.
+        modifier = Modifier.width(220.dp),
         expanded = isExpanded,
         onDismissRequest = { dismissMenu() },
     ) {
@@ -160,14 +168,19 @@ fun CategoriesDropdownMenu(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .background(
-                    color = BlockBackground,
+                    color = AppColors.surfaceSubtle,
                     shape = RoundedCornerShape(12.dp),
                 )
-                .padding(vertical = 8.dp),
+                // Clip inner children (row selection backgrounds) to the
+                // rounded shape so the first / last selected row corners
+                // don't bleed past the block's rounded corners.
+                .clip(RoundedCornerShape(12.dp))
+                .padding(top = 8.dp, bottom = 0.dp),
         ) {
-            // 48dp header + 40dp per PillRow: pin the picker view to the
-            // collapsed view's height so the swap doesn't jump.
-            val blockMinHeight = 48.dp + 40.dp * subCategories.size
+            // 48dp header + 40dp per PillRow (bodyMedium + 8dp vertical padding)
+            // + 8dp for the Products/Avoirs divider. Pins the picker view
+            // to the collapsed view's height so the swap doesn't jump.
+            val blockMinHeight = 48.dp + 40.dp * subCategories.size + 8.dp
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -241,6 +254,19 @@ fun CategoriesDropdownMenu(
                                     onClickCategory?.invoke(category)
                                 },
                             )
+                            // Group cut between (Clients / Products) and the rest
+                            // (Avoirs / Devis / BL / Factures) — hairline separator
+                            // inset to sit inside the block's rounded corners.
+                            if (category is Category.Products) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(
+                                        horizontal = 12.dp,
+                                        vertical = 4.dp,
+                                    ),
+                                    thickness = 1.dp,
+                                    color = Color.LightGray.copy(alpha = 0.6f),
+                                )
+                            }
                         }
                     }
                 }
@@ -260,9 +286,7 @@ private fun TopMenuRow(
         label = label,
         selected = selected,
         onClick = onClick,
-        outerHorizontal = 4.dp,
         innerHorizontal = 16.dp,
-        unselectedColor = AppColors.textSecondary,
     )
 }
 
@@ -276,8 +300,7 @@ private fun BlockMenuRow(
         label = label,
         selected = selected,
         onClick = onClick,
-        outerHorizontal = 4.dp,
-        innerHorizontal = 8.dp,
+        innerHorizontal = 12.dp,
     )
 }
 
@@ -286,34 +309,34 @@ private fun PillRow(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
-    outerHorizontal: Dp,
     innerHorizontal: Dp,
-    unselectedColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val textColor = if (selected) MaterialTheme.colorScheme.onSurface else unselectedColor
+    // labelLarge (14sp, Medium 500) matches the DropdownMenuItem default
+    // that pre-refactor master used — same weight for utility rows (Info /
+    // Mon Compte / gStore) and doc-category rows (Clients / Products / …).
+    // Selection state adds a violet band that spans the container's full
+    // width — no lateral inset, so on the grey sub-cat block it touches
+    // the grey edges, and on the white top-row area it touches the menu
+    // edges. The parent's Modifier.clip on the block clips the highlight's
+    // corners at top / bottom of the block.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = outerHorizontal)
             .then(
                 if (selected) {
-                    Modifier.background(
-                        color = ColorVioletLight.copy(alpha = 0.10f),
-                        shape = RoundedCornerShape(8.dp),
-                    )
+                    Modifier.background(color = ColorVioletLight.copy(alpha = 0.10f))
                 } else {
                     Modifier
                 }
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = innerHorizontal, vertical = 10.dp),
+            .padding(horizontal = innerHorizontal, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = textColor,
-            fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
@@ -336,7 +359,10 @@ private fun CompanyHeaderRow(
         Text(
             modifier = Modifier.weight(1f),
             text = displayName,
-            style = MaterialTheme.typography.bodyMedium,
+            // Same size as sub-cat rows (labelLarge = 14sp) — Bold weight
+            // distinguishes the block header without inflating the type
+            // scale.
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
@@ -430,9 +456,12 @@ private fun IssuerPickerRow(
         Text(
             modifier = Modifier.weight(1f),
             text = name,
-            style = MaterialTheme.typography.bodyMedium,
+            // Same style as the collapsed CompanyHeaderRow so the current
+            // entreprise looks visually identical whether the picker is
+            // collapsed or expanded — only the neighbouring rows change.
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = if (isCurrent) FontWeight.Medium else FontWeight.Normal,
+            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -491,8 +520,6 @@ private fun initialsOf(name: String): String {
         else -> (words.first().first().toString() + words.last().first().toString()).uppercase()
     }
 }
-
-private val BlockBackground = Color(0xFFFCFCFB)
 
 private val VioletPalette = Color(0xFFEDE7F6) to Color(0xFF5E35B1)
 

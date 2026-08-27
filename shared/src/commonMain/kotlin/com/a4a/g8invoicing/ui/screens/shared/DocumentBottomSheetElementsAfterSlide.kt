@@ -33,6 +33,10 @@ import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
 import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
 import com.a4a.g8invoicing.shared.resources.document_payment_means_picker_title
 import com.a4a.g8invoicing.shared.resources.document_payment_terms
+import com.a4a.g8invoicing.shared.resources.document_vat_exemption_modal_title
+import com.a4a.g8invoicing.shared.resources.payment_terms_discount_label
+import com.a4a.g8invoicing.shared.resources.payment_terms_late_fees_label
+import com.a4a.g8invoicing.shared.resources.payment_terms_recovery_fees_label
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
@@ -82,6 +86,7 @@ fun DocumentBottomSheetElementsAfterSlide(
     val documentDueDateString = stringResource(Res.string.document_due_date)
     val documentFooterString = stringResource(Res.string.document_footer)
     val documentPaymentTermsString = stringResource(Res.string.document_payment_terms)
+    val documentVatExemptionModalTitle = stringResource(Res.string.document_vat_exemption_modal_title)
 
     if (pageElement == ScreenElement.DOCUMENT_CLIENT || pageElement == ScreenElement.DOCUMENT_ISSUER) {
         val pair = parameters as Pair<ClientOrIssuerState?, List<ClientOrIssuerState>>
@@ -200,8 +205,13 @@ fun DocumentBottomSheetElementsAfterSlide(
             )
     }
 
-    if (pageElement == ScreenElement.DOCUMENT_PAYMENT_TERMS) {
-        var termsText by remember { mutableStateOf(parameters as TextFieldValue) }
+    if (pageElement == ScreenElement.DOCUMENT_VAT_EXEMPTION) {
+        // parameters is nullable — a doc that just flipped to vatExempt has
+        // no seeded text yet, so we default to an empty TextFieldValue and
+        // let the user type. Same Cancel/Save shell as the footer editor.
+        var exemptionText by remember {
+            mutableStateOf(parameters as? TextFieldValue ?: TextFieldValue())
+        }
         var showBottomSheet by remember { mutableStateOf(true) }
 
         if (showBottomSheet)
@@ -211,19 +221,154 @@ fun DocumentBottomSheetElementsAfterSlide(
                     showBottomSheet = false
                 },
                 onClickDone = {
-                    onValueChange(it, termsText)
+                    onValueChange(it, exemptionText)
                     onClickBack()
                     showBottomSheet = false
                 },
-                bottomSheetTitle = documentPaymentTermsString,
+                bottomSheetTitle = documentVatExemptionModalTitle,
                 content = {
                     DocumentBottomSheetLargeText(
-                        text = termsText,
-                        onValueChange = { termsText = it },
+                        text = exemptionText,
+                        onValueChange = { exemptionText = it }
                     )
                 },
-                screenElement = ScreenElement.DOCUMENT_PAYMENT_TERMS,
+                screenElement = ScreenElement.DOCUMENT_VAT_EXEMPTION,
             )
+    }
+
+    if (pageElement == ScreenElement.DOCUMENT_PAYMENT_TERMS) {
+        // 3-way picker: opens a bottom sheet listing the 3 sub-mentions
+        // (recovery fees / late fees / discount) as forward rows. Each row's
+        // tap opens a scoped Cancel/Save text editor for that specific field.
+        // The FR Schematron BR-FR-05 requires the 3 SubjectCodes (PMT/PMD/AAB)
+        // to be present on the invoice; splitting them at edit time lets each
+        // field carry its own dedicated wording in the CII XML instead of the
+        // same paragraph triplicated.
+        val params = parameters as? PaymentTermsPickerParams
+            ?: PaymentTermsPickerParams(
+                recoveryFees = TextFieldValue(),
+                lateFees = TextFieldValue(),
+                discount = TextFieldValue(),
+            )
+        var showBottomSheet by remember { mutableStateOf(true) }
+        var showRecoveryFeesEditor by remember { mutableStateOf(false) }
+        var showLateFeesEditor by remember { mutableStateOf(false) }
+        var showDiscountEditor by remember { mutableStateOf(false) }
+
+        val recoveryFeesLabel = stringResource(Res.string.payment_terms_recovery_fees_label)
+        val lateFeesLabel = stringResource(Res.string.payment_terms_late_fees_label)
+        val discountLabel = stringResource(Res.string.payment_terms_discount_label)
+
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
+        if (showBottomSheet)
+            PaymentMeansPickerBottomSheet(
+                title = documentPaymentTermsString,
+                onDismiss = {
+                    onClickBack()
+                    showBottomSheet = false
+                },
+            ) {
+                // Same FormUI + FormInput + ForwardElement pattern as the
+                // "Émetteur" / "Client" rows in the main document form — one
+                // row per sub-mention, arrow on the right, tap dispatches
+                // through onClickForward to the matching sub-editor.
+                val termsInputList = listOf(
+                    com.a4a.g8invoicing.ui.shared.FormInput(
+                        label = recoveryFeesLabel,
+                        inputType = com.a4a.g8invoicing.ui.shared.ForwardElement(
+                            text = params.recoveryFees.text,
+                            maxLines = 2,
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES,
+                    ),
+                    com.a4a.g8invoicing.ui.shared.FormInput(
+                        label = lateFeesLabel,
+                        inputType = com.a4a.g8invoicing.ui.shared.ForwardElement(
+                            text = params.lateFees.text,
+                            maxLines = 2,
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS_LATE_FEES,
+                    ),
+                    com.a4a.g8invoicing.ui.shared.FormInput(
+                        label = discountLabel,
+                        inputType = com.a4a.g8invoicing.ui.shared.ForwardElement(
+                            text = params.discount.text,
+                            maxLines = 2,
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS_DISCOUNT,
+                    ),
+                )
+                com.a4a.g8invoicing.ui.shared.FormUI(
+                    inputList = termsInputList,
+                    localFocusManager = focusManager,
+                    onClickForward = { screenEl ->
+                        when (screenEl) {
+                            ScreenElement.DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES -> showRecoveryFeesEditor = true
+                            ScreenElement.DOCUMENT_PAYMENT_TERMS_LATE_FEES -> showLateFeesEditor = true
+                            ScreenElement.DOCUMENT_PAYMENT_TERMS_DISCOUNT -> showDiscountEditor = true
+                            else -> {}
+                        }
+                    },
+                )
+            }
+
+        if (showRecoveryFeesEditor) {
+            var text by remember { mutableStateOf(params.recoveryFees) }
+            DocumentBottomSheetFormSimple(
+                onClickCancel = { showRecoveryFeesEditor = false },
+                onClickDone = { screenEl ->
+                    onValueChange(screenEl, text)
+                    showRecoveryFeesEditor = false
+                },
+                bottomSheetTitle = recoveryFeesLabel,
+                content = {
+                    DocumentBottomSheetLargeText(
+                        text = text,
+                        onValueChange = { text = it },
+                    )
+                },
+                screenElement = ScreenElement.DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES,
+            )
+        }
+
+        if (showLateFeesEditor) {
+            var text by remember { mutableStateOf(params.lateFees) }
+            DocumentBottomSheetFormSimple(
+                onClickCancel = { showLateFeesEditor = false },
+                onClickDone = { screenEl ->
+                    onValueChange(screenEl, text)
+                    showLateFeesEditor = false
+                },
+                bottomSheetTitle = lateFeesLabel,
+                content = {
+                    DocumentBottomSheetLargeText(
+                        text = text,
+                        onValueChange = { text = it },
+                    )
+                },
+                screenElement = ScreenElement.DOCUMENT_PAYMENT_TERMS_LATE_FEES,
+            )
+        }
+
+        if (showDiscountEditor) {
+            var text by remember { mutableStateOf(params.discount) }
+            DocumentBottomSheetFormSimple(
+                onClickCancel = { showDiscountEditor = false },
+                onClickDone = { screenEl ->
+                    onValueChange(screenEl, text)
+                    showDiscountEditor = false
+                },
+                bottomSheetTitle = discountLabel,
+                content = {
+                    DocumentBottomSheetLargeText(
+                        text = text,
+                        onValueChange = { text = it },
+                    )
+                },
+                screenElement = ScreenElement.DOCUMENT_PAYMENT_TERMS_DISCOUNT,
+            )
+        }
     }
 
     if (pageElement == ScreenElement.DOCUMENT_PAYMENT_MEANS) {
@@ -419,6 +564,18 @@ private fun PaymentMeansPickerBottomSheet(
         }
     }
 }
+
+/**
+ * Payload passed to the payment-terms picker branch — the 3 current values
+ * for the sub-editors' initial state. Each field's Cancel/Save modal edits
+ * a snapshot of its own value and fires onValueChange with the matching
+ * ScreenElement on Save; nothing is auto-persisted.
+ */
+data class PaymentTermsPickerParams(
+    val recoveryFees: TextFieldValue,
+    val lateFees: TextFieldValue,
+    val discount: TextFieldValue,
+)
 
 /**
  * Payload passed to the payment-means picker branch: segments + hidden flag,
