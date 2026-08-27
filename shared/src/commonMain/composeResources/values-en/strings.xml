@@ -307,8 +307,6 @@
     <string name="gstore_footer_premium">Manage your account at </string>
     <string name="gstore_module_orders_title">Purchase orders</string>
     <string name="gstore_module_orders_desc">Manage your clients' orders</string>
-    <string name="gstore_module_facturx_title">Factur-X</string>
-    <string name="gstore_module_facturx_desc">Electronic invoicing</string>
     <string name="gstore_module_watermark_title">g8 mark</string>
     <string name="gstore_module_watermark_desc">Remove the g8 mention from your documents</string>
     <string name="gstore_module_watermark_detail">Activate this module to remove the « Made with g8, mobile invoicing app » mention from your invoices, delivery notes and credit notes.</string>
@@ -617,12 +615,18 @@
     <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
     <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted. The delivery note number will be shown on the matching invoice for accounting traceability. You can group several delivery notes into a single invoice.</string>
     <string name="gstore_module_cii_title">CII XML Export</string>
-    <string name="gstore_module_cii_desc">Export the invoice's structured data as CII XML</string>
-    <string name="gstore_module_cii_detail">Enable this module to export each invoice as a CII XML file (European standard EN 16931, Extended profile). Useful for sending your invoices to international e-invoicing platforms that don't accept the Factur-X format yet. The generated file can be opened by any accounting software compatible with EN 16931.</string>
+    <string name="gstore_module_cii_desc">Export the data in a core e-invoicing format</string>
+    <string name="gstore_module_cii_detail">Enable this module to export your invoices as CII XML (European standard, EN 16931, Extended profile).\n\nUseful for sending your invoices to e-invoicing platforms.\n\nThe generated file can be opened by any software compatible with EN 16931.</string>
+    <string name="gstore_module_facturx_title">Factur-X Export</string>
+    <string name="gstore_module_facturx_desc">Export the data in a core e-invoicing format</string>
+    <string name="gstore_module_facturx_detail">Enable this module to export your invoices as Factur-X (PDF with embedded CII XML, European standard EN 16931, Extended profile).\n\nUseful for sending your invoices to e-invoicing platforms while keeping a human-readable PDF for the client.\n\nThe generated file is a regular PDF that any reader can open, and any EN 16931 compatible software can read the structured data inside.</string>
     <string name="export_cii_button">Export as CII</string>
     <string name="export_chooser_title">Export format</string>
+    <string name="export_chooser_description">For an e-invoicing compatible format, use CII or Factur-X.</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <string name="export_chooser_facturx">Factur-X</string>
+    <string name="export_chooser_coming_soon">soon</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">VAT-exempt regime</string>
     <string name="export_vat_exempt_conflict_message">Your business is in the VAT-exempt regime but some products carry a VAT rate. Please remove it before exporting your invoice.</string>

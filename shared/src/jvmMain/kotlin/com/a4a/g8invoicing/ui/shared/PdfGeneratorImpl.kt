@@ -21,9 +21,12 @@ import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.geom.Rectangle
 import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfName
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.action.PdfAction
+import com.itextpdf.kernel.pdf.filespec.PdfFileSpec
+import com.itextpdf.kernel.xmp.XMPMetaFactory
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
@@ -118,6 +121,54 @@ class PdfGeneratorImpl(
 
         // Add page numbering
         return addPageNumbering(document, tempFileName, finalFileName)
+    }
+
+    /**
+     * Factur-X 1.0 (EN 16931) export. Renders the same visual PDF as
+     * [generatePdf] then embeds the CII XML as an associated file with
+     * AFRelationship=Data and the file name `factur-x.xml` — the naming
+     * convention the Factur-X spec requires for consumers to locate the
+     * structured payload. The XMP metadata is extended with the Factur-X
+     * schema so PDF/A-3 aware validators pick up the conformance level.
+     *
+     * Note: strict PDF/A-3 conformance is NOT enforced here (no
+     * PdfADocument + ICC profile). We ship a "hybrid" PDF with the
+     * embedded factur-x.xml + AFRelationship + XMP schema — enough for
+     * downstream platforms that look up the payload via /AF, which covers
+     * the pragmatic use case for 1.9. A follow-up can switch to
+     * PdfADocument for stricter validators.
+     */
+    fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String {
+        strings = effectiveStrings(document, defaultStrings)
+
+        val tempFileName = "${sanitizeForFileName(document.documentNumber.text).ifBlank { "document" }}_facturx_temp.pdf"
+        val finalFileName = buildFacturXFinalFileName(document)
+        val tempFilePath = fileManager.getTempFilePath(tempFileName)
+
+        File(tempFilePath).delete()
+
+        val writer = PdfWriter(tempFilePath)
+        val pdfDocument = PdfDocument(writer)
+
+        val doc = Document(pdfDocument, PageSize.A4)
+        doc.fontProvider = buildFontProvider()
+        doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+        doc.setFontSize(9.5F)
+
+        buildPdfContent(doc, document)
+
+        doc.close()
+        writer.close()
+        pdfDocument.close()
+
+        return addPageNumbering(document, tempFileName, finalFileName, xmlBytes)
+    }
+
+    private fun buildFacturXFinalFileName(document: DocumentState): String {
+        val docNumber = sanitizeForFileName(document.documentNumber.text).ifBlank { "document" }
+        val date = formatDateForFileName(document.documentDate)
+        val client = buildClientNameForFileName(document.documentClient)
+        return listOfNotNull(docNumber, date, client).joinToString("-") + "-facturx.pdf"
     }
 
     /**
@@ -291,8 +342,16 @@ class PdfGeneratorImpl(
         // Bottom band under a hairline: terms → footer text → watermark. The
         // separator only draws when at least one of the three sits below it,
         // matching the preview.
-        val paymentTerms = (document as? InvoiceState)?.paymentTermsDescription?.text
-            ?.trim()?.takeIf { it.isNotEmpty() }
+        // BT-20 concat of the 3 subject-coded fields (PMT / PMD / AAB), joined
+        // with a single space so the 3 sentences read as one flowing paragraph
+        // rather than a stack of 3 lines. Empty fields drop.
+        val paymentTerms = (document as? InvoiceState)?.let { inv ->
+            listOf(
+                inv.paymentTermsRecoveryFees.text.trim(),
+                inv.paymentTermsLateFees.text.trim(),
+                inv.paymentTermsDiscount.text.trim(),
+            ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
+        }
         val footerText = document.footerText.text.trim().takeIf { it.isNotEmpty() }
         val watermarkText = document.watermarkText?.takeIf { it.isNotBlank() }
         if (paymentTerms != null || footerText != null || watermarkText != null) {
@@ -310,7 +369,12 @@ class PdfGeneratorImpl(
         }
     }
 
-    private fun addPageNumbering(document: DocumentState, tempFileName: String, finalFileName: String): String {
+    private fun addPageNumbering(
+        document: DocumentState,
+        tempFileName: String,
+        finalFileName: String,
+        facturxXmlBytes: ByteArray? = null,
+    ): String {
         // No local fontRegular here anymore — the doc opened below sets
         // `fontProvider = buildFontProvider()` so every Paragraph resolves its
         // font through the provider (needed for currency glyphs that WinAnsi
@@ -338,6 +402,10 @@ class PdfGeneratorImpl(
                 }
             }
 
+            if (facturxXmlBytes != null) {
+                attachFacturXPayload(pdfDoc, facturxXmlBytes)
+            }
+
             doc.close()
             pdfDoc.close()
             fileManager.deleteTempFile(tempFilePath)
@@ -350,6 +418,40 @@ class PdfGeneratorImpl(
         }
 
         return finalFileName
+    }
+
+    /**
+     * Attach the Factur-X CII XML to the given PDF as an Associated File
+     * (/AF, AFRelationship = Data) named `factur-x.xml`, and extend the XMP
+     * metadata with the Factur-X namespace so PDF/A-3 aware readers pick
+     * up the profile. Fails silently if XMP construction hits an unexpected
+     * error — the file attachment still lands, which is the load-bearing
+     * part for consumers that don't parse XMP.
+     */
+    private fun attachFacturXPayload(pdfDoc: PdfDocument, xmlBytes: ByteArray) {
+        val fileSpec = PdfFileSpec.createEmbeddedFileSpec(
+            pdfDoc,
+            xmlBytes,
+            "Factur-X invoice",
+            "factur-x.xml",
+            PdfName("text/xml"),
+            null,
+            PdfName("Data"),
+        )
+        pdfDoc.addAssociatedFile("factur-x.xml", fileSpec)
+
+        try {
+            val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
+            val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+            xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
+            xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
+            xmpMeta.setProperty(fxNs, "Version", "1.0")
+            xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
+            pdfDoc.xmpMetadata = xmpMeta
+        } catch (_: Throwable) {
+            // XMP is a nice-to-have. The AF entry alone is enough for most
+            // e-invoicing platforms to locate the payload.
+        }
     }
 
     private fun createLogoAndTitleTable(
@@ -832,29 +934,24 @@ class PdfGeneratorImpl(
         }
     }
 
-    /** BT-81 flatten. Returns null when the block would render empty. */
+    /** BT-81 flatten. Invoice-only — avoir + devis + BL don't render this. */
     private fun paymentMeansDisplayFor(document: DocumentState): String? {
-        val (segments, hidden) = when (document) {
-            is InvoiceState -> document.paymentMeansSegments to document.paymentMeansHidden
-            is com.a4a.g8invoicing.ui.states.CreditNoteState ->
-                document.paymentMeansSegments to document.paymentMeansHidden
-            else -> return null
-        }
-        if (hidden || segments.isEmpty()) return null
+        val invoice = document as? InvoiceState ?: return null
+        if (invoice.paymentMeansHidden || invoice.paymentMeansSegments.isEmpty()) return null
         return com.a4a.g8invoicing.data.models
-            .flattenPaymentLabel(segments, strings.paymentMeansLabels)
+            .flattenPaymentLabel(invoice.paymentMeansSegments, strings.paymentMeansLabels)
             .takeIf { it.isNotEmpty() }
     }
 
-    /** BT-84/86 flatten. Returns "IBAN : … \n BIC : …", null when both empty. */
+    /**
+     * BT-84/86 flatten. Invoice-only for the same reason as
+     * paymentMeansDisplayFor — a devis has no payment context, an avoir
+     * reverses the flow. Returns "IBAN : … \n BIC : …", null when both empty.
+     */
     private fun bankRenderedFor(document: DocumentState): String? {
-        val bankHidden = when (document) {
-            is InvoiceState -> document.paymentBankHidden
-            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankHidden
-            else -> false
-        }
-        if (bankHidden) return null
-        val issuer = document.documentIssuer
+        val invoice = document as? InvoiceState ?: return null
+        if (invoice.paymentBankHidden) return null
+        val issuer = invoice.documentIssuer
         val iban = issuer?.paymentIban?.text?.trim().orEmpty()
         val bic = issuer?.paymentBic?.text?.trim().orEmpty()
         if (iban.isEmpty() && bic.isEmpty()) return null
@@ -862,12 +959,7 @@ class PdfGeneratorImpl(
         val identifierLabel = if (com.a4a.g8invoicing.data.models.CountryCodes.isIbanCountry(country)
             || country == null
         ) strings.bankAccountIbanLabel else strings.bankAccountGenericLabel
-        val segments = when (document) {
-            is InvoiceState -> document.paymentBankSegments
-            is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentBankSegments
-            else -> emptyList()
-        }
-        val effectiveSegments = segments.ifEmpty {
+        val effectiveSegments = invoice.paymentBankSegments.ifEmpty {
             com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
         }
         return com.a4a.g8invoicing.data.models

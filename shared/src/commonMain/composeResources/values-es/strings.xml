@@ -297,8 +297,6 @@
     <string name="gstore_footer_premium">Gestiona tu cuenta en </string>
     <string name="gstore_module_orders_title">Pedido</string>
     <string name="gstore_module_orders_desc">Gestiona los pedidos de tus clientes</string>
-    <string name="gstore_module_facturx_title">Factur-X</string>
-    <string name="gstore_module_facturx_desc">Facturación electrónica</string>
     <string name="gstore_module_watermark_title">Mención g8</string>
     <string name="gstore_module_watermark_desc">Retira la mención g8 de tus documentos</string>
     <string name="gstore_module_watermark_detail">Activa este módulo para eliminar la mención « Hecho con g8, aplicación móvil de facturación » de tus facturas, albaranes y notas de crédito.</string>
@@ -627,12 +625,18 @@ Une erreur s'est produite :
     <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
     <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados. El número de albarán se indicará en la factura correspondiente para la trazabilidad contable. Puedes agrupar varios albaranes en una sola factura.</string>
     <string name="gstore_module_cii_title">Exportar XML CII</string>
-    <string name="gstore_module_cii_desc">Exportar los datos estructurados de la factura como XML CII</string>
-    <string name="gstore_module_cii_detail">Activa este módulo para exportar cada factura como archivo XML CII (norma europea EN 16931, perfil Extended). Útil para enviar tus facturas a plataformas internacionales de facturación electrónica que aún no aceptan el formato Factur-X. El archivo generado puede abrirse con cualquier software contable compatible con EN 16931.</string>
+    <string name="gstore_module_cii_desc">Exportar los datos en un formato base de facturación electrónica</string>
+    <string name="gstore_module_cii_detail">Activa este módulo para exportar tus facturas como XML CII (norma europea, EN 16931, perfil Extended).\n\nÚtil para enviar tus facturas a plataformas de facturación electrónica.\n\nEl archivo generado puede abrirse con cualquier software compatible con EN 16931.</string>
+    <string name="gstore_module_facturx_title">Exportar Factur-X</string>
+    <string name="gstore_module_facturx_desc">Exportar los datos en un formato base de facturación electrónica</string>
+    <string name="gstore_module_facturx_detail">Activa este módulo para exportar tus facturas como Factur-X (PDF con XML CII embebido, norma europea EN 16931, perfil Extended).\n\nÚtil para enviar tus facturas a plataformas de facturación electrónica manteniendo un PDF legible para el cliente.\n\nEl archivo generado es un PDF normal que cualquier lector puede abrir, y cualquier software compatible con EN 16931 puede leer los datos estructurados dentro.</string>
     <string name="export_cii_button">Exportar como CII</string>
     <string name="export_chooser_title">Formato de exportación</string>
+    <string name="export_chooser_description">Para un formato compatible con la facturación electrónica, usa CII o Factur-X.</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <string name="export_chooser_facturx">Factur-X</string>
+    <string name="export_chooser_coming_soon">pronto</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">Franquicia de IVA</string>
     <string name="export_vat_exempt_conflict_message">Tu empresa está en régimen de franquicia de IVA, pero algunos productos tienen un tipo de IVA. Bórralo antes de exportar tu factura.</string>

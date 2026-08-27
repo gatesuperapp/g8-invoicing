@@ -48,4 +48,9 @@ actual class PdfGenerator actual constructor(
         // For now, return empty string to indicate not implemented
         return ""
     }
+
+    actual fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String {
+        // TODO: iOS Factur-X path — PDFKit + CGPDF document attachments.
+        return ""
+    }
 }

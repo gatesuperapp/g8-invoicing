@@ -230,4 +230,8 @@ actual class PdfGenerator actual constructor(
     actual fun generatePdf(document: DocumentState): String {
         return impl.generatePdf(document)
     }
+
+    actual fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String {
+        return impl.generateFacturX(document, xmlBytes)
+    }
 }

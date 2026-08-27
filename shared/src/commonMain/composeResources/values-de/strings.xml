@@ -308,8 +308,6 @@
     <string name="gstore_footer_premium">Verwalten Sie Ihr Konto auf </string>
     <string name="gstore_module_orders_title">Bestellungen</string>
     <string name="gstore_module_orders_desc">Verwalten Sie die Bestellungen Ihrer Kunden</string>
-    <string name="gstore_module_facturx_title">Factur-X</string>
-    <string name="gstore_module_facturx_desc">Elektronische Rechnungsstellung</string>
     <string name="gstore_module_watermark_title">g8-Hinweis</string>
     <string name="gstore_module_watermark_desc">Entfernen Sie den g8-Hinweis aus Ihren Dokumenten</string>
     <string name="gstore_module_watermark_detail">Aktivieren Sie dieses Modul, um den Hinweis „Erstellt mit g8, mobile Rechnungs-App" aus Ihren Rechnungen, Lieferscheinen und Gutschriften zu entfernen.</string>
@@ -622,12 +620,18 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_delivery_note_desc">Lieferscheine erstellen und in Rechnungen umwandeln</string>
     <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit. Du kannst mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
     <string name="gstore_module_cii_title">CII-XML-Export</string>
-    <string name="gstore_module_cii_desc">Rechnungsstrukturdaten als CII-XML exportieren</string>
-    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um jede Rechnung als CII-XML-Datei zu exportieren (europäische Norm EN 16931, Extended-Profil). Nützlich, um Rechnungen an internationale E-Invoicing-Plattformen zu übermitteln, die das Factur-X-Format noch nicht akzeptieren. Die erzeugte Datei kann von jeder EN-16931-kompatiblen Buchhaltungssoftware geöffnet werden.</string>
+    <string name="gstore_module_cii_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
+    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen als CII-XML zu exportieren (europäische Norm, EN 16931, Extended-Profil).\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln.\n\nDie erzeugte Datei kann von jeder EN-16931-kompatiblen Software geöffnet werden.</string>
+    <string name="gstore_module_facturx_title">Factur-X-Export</string>
+    <string name="gstore_module_facturx_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
+    <string name="gstore_module_facturx_detail">Aktiviere dieses Modul, um deine Rechnungen als Factur-X zu exportieren (PDF mit eingebettetem CII-XML, europäische Norm EN 16931, Extended-Profil).\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln und gleichzeitig ein lesbares PDF für den Kunden bereitzustellen.\n\nDie erzeugte Datei ist ein gewöhnliches PDF, das jeder Reader öffnen kann, während EN-16931-kompatible Software die eingebetteten strukturierten Daten liest.</string>
     <string name="export_cii_button">Als CII exportieren</string>
     <string name="export_chooser_title">Exportformat</string>
+    <string name="export_chooser_description">Für ein E-Invoicing-kompatibles Format CII oder Factur-X verwenden.</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <string name="export_chooser_facturx">Factur-X</string>
+    <string name="export_chooser_coming_soon">bald</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">Kleinunternehmerregelung</string>
     <string name="export_vat_exempt_conflict_message">Ihr Unternehmen nutzt die Kleinunternehmerregelung, aber einige Produkte weisen einen Mehrwertsteuersatz auf. Bitte entfernen Sie diesen, um die Rechnung exportieren zu können.</string>

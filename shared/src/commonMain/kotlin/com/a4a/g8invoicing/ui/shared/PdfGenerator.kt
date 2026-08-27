@@ -120,6 +120,15 @@ expect class PdfGenerator(strings: PdfStrings, fileManager: PdfFileManager) {
      * Returns the final file name.
      */
     fun generatePdf(document: DocumentState): String
+
+    /**
+     * Generate a Factur-X 1.0 PDF (EN 16931 CII payload embedded in a
+     * regular PDF with AFRelationship=Data and file name `factur-x.xml`).
+     * The [xmlBytes] should be the UTF-8 encoded CII XML from
+     * [com.a4a.g8invoicing.facturx.CiiXmlBuilder]. Returns the final file
+     * name.
+     */
+    fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String
 }
 
 /**

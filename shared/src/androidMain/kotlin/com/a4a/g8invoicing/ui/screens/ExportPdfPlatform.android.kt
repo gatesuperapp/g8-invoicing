@@ -118,6 +118,7 @@ enum class ExportStatus {
 actual fun ExportPdfPlatform(
     document: DocumentState,
     onDismissRequest: () -> Unit,
+    facturxXmlBytes: ByteArray?,
 ) {
     val context = LocalContext.current
     var exportStatus by remember { mutableStateOf(ExportStatus.WAITING_PERMISSION) }
@@ -315,7 +316,11 @@ actual fun ExportPdfPlatform(
                 launch(Dispatchers.Default) {
                     try {
                         val pdfGenerator = PdfGenerator(strings, fileManager)
-                        finalFileName = pdfGenerator.generatePdf(document)
+                        finalFileName = if (facturxXmlBytes != null) {
+                            pdfGenerator.generateFacturX(document, facturxXmlBytes)
+                        } else {
+                            pdfGenerator.generatePdf(document)
+                        }
                         exportStatus = ExportStatus.DONE
                     } catch (e: Exception) {
                         errorMessage = e.message ?: "Unknown error"

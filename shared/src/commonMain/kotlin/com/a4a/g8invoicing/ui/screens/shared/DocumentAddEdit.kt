@@ -17,6 +17,7 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,11 +27,18 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -48,6 +56,8 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerInputChange
@@ -74,15 +84,61 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
+import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.PaymentMeans
+import com.a4a.g8invoicing.facturx.CiiPreflightValidator
+import com.a4a.g8invoicing.facturx.CiiValidationIssue
+import com.a4a.g8invoicing.facturx.CiiXmlBuilder
+import com.a4a.g8invoicing.facturx.buildBankInfoText
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_address
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_email
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_missing
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_name
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_siren
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_siren_format
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_type
+import com.a4a.g8invoicing.shared.resources.cii_validation_confirm
+import com.a4a.g8invoicing.shared.resources.cii_validation_due_date
+import com.a4a.g8invoicing.shared.resources.cii_validation_vat_exemption_text
+import com.a4a.g8invoicing.shared.resources.cii_validation_intro
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_address
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_missing
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_name
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_siren
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_siren_format
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_vat
+import com.a4a.g8invoicing.shared.resources.cii_validation_line_name
+import com.a4a.g8invoicing.shared.resources.cii_validation_line_price
+import com.a4a.g8invoicing.shared.resources.cii_validation_line_tax_rate
+import com.a4a.g8invoicing.shared.resources.cii_validation_line_tax_rate_invalid
+import com.a4a.g8invoicing.shared.resources.cii_validation_products_empty
+import com.a4a.g8invoicing.shared.resources.cii_validation_title
+import com.a4a.g8invoicing.shared.resources.export_chooser_cii
+import com.a4a.g8invoicing.shared.resources.export_chooser_description
+import com.a4a.g8invoicing.shared.resources.export_chooser_facturx
+import com.a4a.g8invoicing.shared.resources.export_chooser_pdf
+import com.a4a.g8invoicing.shared.resources.export_chooser_title
+import com.a4a.g8invoicing.shared.resources.export_vat_exempt_conflict_message
+import com.a4a.g8invoicing.shared.resources.export_vat_exempt_conflict_title
 import com.a4a.g8invoicing.shared.resources.feature_coming_soon
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
+import com.a4a.g8invoicing.shared.resources.ok
+import com.a4a.g8invoicing.ui.screens.ExportCiiPlatform
+import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import kotlin.math.PI
 import kotlin.math.abs
 
@@ -264,6 +320,49 @@ fun DocumentAddEdit(
         var showPopup by rememberSaveable {
             mutableStateOf(false)
         }
+        // CII XML export gate — surface the chooser when the user has activated
+        // the gStore module. Free for now (pre-launch); will be re-gated behind
+        // premium later. Non-invoice types (BL / avoir / devis) always route
+        // straight to the PDF popup since CiiXmlBuilder is invoice-only for now.
+        val modulesRepo: ActivatedModulesRepository = koinInject()
+        val activated by modulesRepo.state.collectAsState()
+        val ciiUnlocked = document is InvoiceState &&
+            ActivatedModulesRepository.MODULE_CII_XML_EXPORT in activated
+        val facturxUnlocked = document is InvoiceState &&
+            ActivatedModulesRepository.MODULE_FACTURX_EXPORT in activated
+        val ciiExportUnlocked = ciiUnlocked || facturxUnlocked
+        var showExportChooser by rememberSaveable { mutableStateOf(false) }
+        var showCiiPopup by rememberSaveable { mutableStateOf(false) }
+        // Non-null while the Factur-X export dialog is on screen. Holds the
+        // pre-built CII XML bytes so ExportPdfPlatform can embed them as
+        // `factur-x.xml` in the PDF/A-3 hybrid without re-computing on
+        // recomposition.
+        var facturxXmlBytes by remember { mutableStateOf<ByteArray?>(null) }
+        // Blocks any export (PDF or CII) when the issuer is in the franchise en
+        // base regime but products still carry a non-zero VAT rate. Franchise is
+        // per-issuer legal status; taxed lines would produce a PDF that shows VAT
+        // the issuer isn't allowed to collect, and a CII XML whose category=E +
+        // rate>0 breaks EN16931.
+        var showVatExemptConflict by rememberSaveable { mutableStateOf(false) }
+        // Pre-flight validation issues surfaced when the user picks CII from the
+        // chooser but the invoice is missing EN 16931 mandatory fields. Empty =
+        // OK to export; non-empty = block export, show the list.
+        var ciiValidationIssues by remember { mutableStateOf(emptyList<CiiValidationIssue>()) }
+        val exportChooserTitle = stringResource(Res.string.export_chooser_title)
+        val exportChooserDescription = stringResource(Res.string.export_chooser_description)
+        val pdfLabel = stringResource(Res.string.export_chooser_pdf)
+        val ciiLabel = stringResource(Res.string.export_chooser_cii)
+        val facturxLabel = stringResource(Res.string.export_chooser_facturx)
+        val vatConflictTitle = stringResource(Res.string.export_vat_exempt_conflict_title)
+        val vatConflictMessage = stringResource(Res.string.export_vat_exempt_conflict_message)
+        val okLabel = stringResource(Res.string.ok)
+        // Preloaded so building the CII XML for Factur-X doesn't have to
+        // suspend on stringResource in an onClick callback.
+        val paymentMeansLabelsForFacturx: Map<String, String> = PaymentMeans.entries.associate {
+            it.chipId to stringResource(it.labelRes)
+        }
+        val bankIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban)
+        val bankGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic)
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
         Scaffold(
@@ -272,7 +371,13 @@ fun DocumentAddEdit(
                     navController = navController,
                     onClickBack = onClickBack,
                     onClickExport = {
-                        showPopup = true
+                        if (hasVatExemptConflict(document)) {
+                            showVatExemptConflict = true
+                        } else if (ciiExportUnlocked) {
+                            showExportChooser = true
+                        } else {
+                            showPopup = true
+                        }
                     }
                 )
             },
@@ -299,6 +404,113 @@ fun DocumentAddEdit(
                     onDismissRequest = { showPopup = false },
                     exportPdfContent = exportPdfContent
                 )
+            }
+
+            if (showVatExemptConflict) {
+                AlertDialog(
+                    onDismissRequest = { showVatExemptConflict = false },
+                    title = { Text(vatConflictTitle) },
+                    text = { Text(vatConflictMessage) },
+                    textContentColor = Color.Black,
+                    confirmButton = {
+                        Button(onClick = { showVatExemptConflict = false }) {
+                            Text(okLabel)
+                        }
+                    },
+                )
+            }
+
+            if (showExportChooser && document is InvoiceState) {
+                ExportFormatChooserDialog(
+                    title = exportChooserTitle,
+                    description = exportChooserDescription,
+                    ciiLabel = ciiLabel,
+                    facturxLabel = facturxLabel,
+                    pdfLabel = pdfLabel,
+                    showCii = ciiUnlocked,
+                    showFacturx = facturxUnlocked,
+                    onDismiss = { showExportChooser = false },
+                    onPickCii = {
+                        showExportChooser = false
+                        val issues = CiiPreflightValidator.validate(document)
+                        if (issues.isEmpty()) {
+                            showCiiPopup = true
+                        } else {
+                            ciiValidationIssues = issues
+                        }
+                    },
+                    onPickFacturx = {
+                        showExportChooser = false
+                        val issues = CiiPreflightValidator.validate(document)
+                        if (issues.isEmpty()) {
+                            val bankInfoText = buildBankInfoText(
+                                invoice = document,
+                                ibanLabel = bankIbanLabel,
+                                genericLabel = bankGenericLabel,
+                            )
+                            val xml = CiiXmlBuilder.build(
+                                invoice = document,
+                                paymentMeansLabels = paymentMeansLabelsForFacturx,
+                                bankInfoText = bankInfoText,
+                            )
+                            facturxXmlBytes = xml.encodeToByteArray()
+                        } else {
+                            ciiValidationIssues = issues
+                        }
+                    },
+                    onPickPdf = {
+                        showExportChooser = false
+                        showPopup = true
+                    },
+                )
+            }
+
+            if (ciiValidationIssues.isNotEmpty()) {
+                CiiValidationDialog(
+                    issues = ciiValidationIssues,
+                    onDismiss = { ciiValidationIssues = emptyList() },
+                )
+            }
+
+            if (showCiiPopup && document is InvoiceState) {
+                Dialog(
+                    onDismissRequest = {},
+                    properties = DialogProperties(usePlatformDefaultWidth = false),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .zIndex(10F),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        ExportCiiPlatform(
+                            invoice = document,
+                            onDismissRequest = { showCiiPopup = false },
+                        )
+                    }
+                }
+            }
+
+            facturxXmlBytes?.let { bytes ->
+                if (document is InvoiceState) {
+                    Dialog(
+                        onDismissRequest = {},
+                        properties = DialogProperties(usePlatformDefaultWidth = false),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .zIndex(10F),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            ExportPdfPlatform(
+                                document = document,
+                                onDismissRequest = { facturxXmlBytes = null },
+                                facturxXmlBytes = bytes,
+                            )
+                        }
+                    }
+                }
             }
 
             var zoom by remember { mutableFloatStateOf(1f) }
@@ -485,6 +697,17 @@ fun DocumentAddEdit(
 }
 
 
+// Franchise en base (issuer.vatExempt) is a per-issuer legal status: no VAT is
+// ever collected. If the doc still has products with a non-zero rate, exporting
+// as PDF would print VAT the issuer can't collect, and CII would emit
+// category=E + rate>0 which breaks EN16931. Block both routes and ask the user
+// to clear the rates first.
+private fun hasVatExemptConflict(document: DocumentState): Boolean {
+    if (document.documentIssuer?.vatExempt != true) return false
+    val products = document.documentProducts ?: return false
+    return products.any { (it.taxRate ?: BigDecimal.ZERO) > BigDecimal.ZERO }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetScaffoldState) {
     scope.launch { scaffoldState.bottomSheetState.partialExpand() }
@@ -560,6 +783,70 @@ fun ExportPopup(
             exportPdfContent(document, onDismissRequest)
         }
     }
+}
+
+/**
+ * Lists every EN 16931 mandatory field that's missing from the current
+ * invoice so the user fixes the whole set at once instead of hitting
+ * "Export CII" repeatedly. Modal — user has to acknowledge before
+ * touching anything else.
+ */
+@Composable
+private fun CiiValidationDialog(
+    issues: List<CiiValidationIssue>,
+    onDismiss: () -> Unit,
+) {
+    val title = stringResource(Res.string.cii_validation_title)
+    val intro = stringResource(Res.string.cii_validation_intro)
+    val confirmLabel = stringResource(Res.string.cii_validation_confirm)
+
+    // Resolve every issue to its localized label up-front — stringResource
+    // has to run inside the Composable, not inside a when-expression that
+    // would compose lazily on click.
+    val messages: List<String> = issues.map { issue -> issue.resolveMessage() }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        textContentColor = Color.Black,
+        text = {
+            Column {
+                Text(intro)
+                Spacer(Modifier.height(12.dp))
+                messages.forEach { line ->
+                    Text("• $line")
+                    Spacer(Modifier.height(4.dp))
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) { Text(confirmLabel) }
+        },
+    )
+}
+
+@Composable
+private fun CiiValidationIssue.resolveMessage(): String = when (this) {
+    CiiValidationIssue.IssuerMissing -> stringResource(Res.string.cii_validation_issuer_missing)
+    CiiValidationIssue.IssuerName -> stringResource(Res.string.cii_validation_issuer_name)
+    CiiValidationIssue.IssuerSiren -> stringResource(Res.string.cii_validation_issuer_siren)
+    CiiValidationIssue.IssuerSirenFormat -> stringResource(Res.string.cii_validation_issuer_siren_format)
+    CiiValidationIssue.IssuerVat -> stringResource(Res.string.cii_validation_issuer_vat)
+    CiiValidationIssue.IssuerAddress -> stringResource(Res.string.cii_validation_issuer_address)
+    CiiValidationIssue.ClientMissing -> stringResource(Res.string.cii_validation_client_missing)
+    CiiValidationIssue.ClientName -> stringResource(Res.string.cii_validation_client_name)
+    CiiValidationIssue.ClientTypeUnspecified -> stringResource(Res.string.cii_validation_client_type)
+    CiiValidationIssue.ClientSiren -> stringResource(Res.string.cii_validation_client_siren)
+    CiiValidationIssue.ClientSirenFormat -> stringResource(Res.string.cii_validation_client_siren_format)
+    CiiValidationIssue.ClientEmail -> stringResource(Res.string.cii_validation_client_email)
+    CiiValidationIssue.ClientAddress -> stringResource(Res.string.cii_validation_client_address)
+    CiiValidationIssue.ProductsEmpty -> stringResource(Res.string.cii_validation_products_empty)
+    is CiiValidationIssue.LineName -> stringResource(Res.string.cii_validation_line_name, lineNumber)
+    is CiiValidationIssue.LinePrice -> stringResource(Res.string.cii_validation_line_price, lineNumber)
+    is CiiValidationIssue.LineTaxRate -> stringResource(Res.string.cii_validation_line_tax_rate, lineNumber)
+    is CiiValidationIssue.LineTaxRateInvalid -> stringResource(Res.string.cii_validation_line_tax_rate_invalid, lineNumber, rate)
+    CiiValidationIssue.InvoiceDueDate -> stringResource(Res.string.cii_validation_due_date)
+    CiiValidationIssue.VatExemptionTextMissing -> stringResource(Res.string.cii_validation_vat_exemption_text)
 }
 
 enum class BottomSheetType {
@@ -672,5 +959,101 @@ private suspend fun PointerInputScope.customTransformGestures(
         } while (!canceled && event.changes.fastAny { it.pressed })
 
         onGestureEnd(pointer)
+    }
+}
+
+@Composable
+private fun ExportFormatChooserDialog(
+    title: String,
+    description: String,
+    ciiLabel: String,
+    facturxLabel: String,
+    pdfLabel: String,
+    showCii: Boolean,
+    showFacturx: Boolean,
+    onDismiss: () -> Unit,
+    onPickCii: () -> Unit,
+    onPickFacturx: () -> Unit,
+    onPickPdf: () -> Unit,
+) {
+    // Primary CTA priority: Factur-X > CII. Whichever is the "highest"
+    // structured format the user has unlocked wears the violet button; the
+    // remaining structured button (if any) sits below as outlined; PDF is
+    // always outlined at the bottom.
+    val primaryIsFacturx = showFacturx
+    val primaryIsCii = !showFacturx && showCii
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .background(AppColors.surface, shape = RoundedCornerShape(16.dp))
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.textScreenTitle.copy(fontSize = 18.sp),
+                    textAlign = TextAlign.Start,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                    textAlign = TextAlign.Start,
+                    lineHeight = 20.sp,
+                )
+                Spacer(Modifier.height(24.dp))
+                if (primaryIsFacturx) {
+                    Button(
+                        onClick = onPickFacturx,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AppColors.buttonActive,
+                            contentColor = AppColors.textOnAccent,
+                        ),
+                    ) { Text(facturxLabel) }
+                    Spacer(Modifier.height(8.dp))
+                }
+                if (primaryIsCii) {
+                    Button(
+                        onClick = onPickCii,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AppColors.buttonActive,
+                            contentColor = AppColors.textOnAccent,
+                        ),
+                    ) { Text(ciiLabel) }
+                    Spacer(Modifier.height(8.dp))
+                }
+                if (showFacturx && !primaryIsFacturx) {
+                    OutlinedButton(
+                        onClick = onPickFacturx,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
+                    ) { Text(facturxLabel) }
+                    Spacer(Modifier.height(8.dp))
+                }
+                if (showCii && !primaryIsCii) {
+                    OutlinedButton(
+                        onClick = onPickCii,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
+                    ) { Text(ciiLabel) }
+                    Spacer(Modifier.height(8.dp))
+                }
+                OutlinedButton(
+                    onClick = onPickPdf,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
+                ) { Text(pdfLabel) }
+            }
+        }
     }
 }
