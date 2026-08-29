@@ -212,7 +212,7 @@ fun About(
                         contactEmail = contactEmail,
                         brush = brush,
                         onComposeEmail = { address, body ->
-                            onComposeEmail(address, "[G8] ", body)
+                            onComposeEmail(address, "[g8] ", body)
                         }
                     )
                 }
@@ -282,7 +282,7 @@ fun About(
                             shape = RoundedCornerShape(50)
                         ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp),
-                    onClick = { onComposeEmail(contactEmail, "[G8] ", "") },
+                    onClick = { onComposeEmail(contactEmail, "[g8] ", "") },
                 ) {
                     Text(contactEmail)
                 }

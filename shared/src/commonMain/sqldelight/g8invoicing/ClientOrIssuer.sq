@@ -16,15 +16,18 @@ CREATE TABLE ClientOrIssuer (
   version INTEGER DEFAULT 1,
   vat_exempt INTEGER DEFAULT 0,
   intra_eu_sales INTEGER DEFAULT 0,
-  -- Self-FK vers un ClientOrIssuer type='issuer'. Sur une fiche 'client' :
-  -- l'entreprise (issuer maître) à laquelle le client est rattaché. Sur une
-  -- fiche 'issuer' : reste à NULL (une entreprise ne se rattache pas à
-  -- elle-même). Alimenté par la migration 6 et par la création côté client.
+  -- Self-FK to a ClientOrIssuer type='issuer'. On a 'client' row: the master
+  -- issuer/entreprise this client is attached to. On an 'issuer' row: stays
+  -- NULL. Seeded by migration 7.sqm and by the client-side create path.
   company_id INTEGER,
-  -- 'PROFESSIONAL' / 'INDIVIDUAL' / NULL. Distinction B2B vs B2C —
-  -- détermine si l'export Factur-X est déclenché ou si on retombe sur un
-  -- PDF simple. Pré-rempli à PROFESSIONAL quand un SIREN est saisi.
+  -- 'PROFESSIONAL' / 'INDIVIDUAL' / NULL. B2B vs B2C — gates the Factur-X
+  -- export (PROFESSIONAL → structured invoice, INDIVIDUAL → plain PDF).
+  -- Auto-set to PROFESSIONAL the first time a SIREN is entered.
   client_type TEXT,
+  -- Master switch on the issuer that gates tax-withholding (retention) lines
+  -- auto-seeded on new documents (invoice + credit note). Mirrored on
+  -- DocumentClientOrIssuer for doc-side snapshot (same pattern as vat_exempt).
+  tax_withholding_enabled INTEGER NOT NULL DEFAULT 0,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -61,8 +64,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, company_id, client_type)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, company_id, client_type, tax_withholding_enabled)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -82,6 +85,7 @@ SET type = :type,
     vat_exempt = :vat_exempt,
     intra_eu_sales = :intra_eu_sales,
     client_type = :client_type,
+    tax_withholding_enabled = :tax_withholding_enabled,
     version = COALESCE(version, 0) + 1,
     updated_at = datetime('now', 'localtime')
 WHERE

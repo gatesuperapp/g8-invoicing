@@ -1,0 +1,52 @@
+CREATE TABLE InvoiceRetention (
+  id INTEGER PRIMARY KEY NOT NULL,
+  invoice_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  rate REAL NOT NULL,
+  sort_order INTEGER,
+  hidden INTEGER NOT NULL DEFAULT 0,
+
+  FOREIGN KEY(invoice_id)
+        REFERENCES Invoice(invoice_id)
+        ON DELETE CASCADE
+);
+
+getForInvoice:
+SELECT *
+FROM InvoiceRetention
+WHERE invoice_id = :invoice_id
+ORDER BY sort_order ASC, id ASC;
+
+save:
+INSERT INTO InvoiceRetention (id, invoice_id, label, rate, sort_order, hidden)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateOne:
+UPDATE InvoiceRetention
+SET label = :label,
+    rate = :rate,
+    sort_order = :sort_order,
+    hidden = :hidden
+WHERE id = :id;
+
+deleteOne:
+DELETE FROM InvoiceRetention
+WHERE id = :id;
+
+deleteAllForInvoice:
+DELETE FROM InvoiceRetention
+WHERE invoice_id = :invoice_id;
+
+-- id of the most recently created invoice for this master issuer that owns
+-- at least one retention line. Callers use it as a lookup key for
+-- getForInvoice + a created_at comparison against CreditNote when the
+-- caller is a credit note (see CreditNoteRetention.getLastForIssuerTs).
+getLastInvoiceIdWithRetentionsForIssuer:
+SELECT i.invoice_id, i.created_at
+FROM Invoice i
+JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
+JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+JOIN InvoiceRetention ir ON ir.invoice_id = i.invoice_id
+WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+ORDER BY i.invoice_id DESC
+LIMIT 1;

@@ -1,0 +1,199 @@
+-- Migration 7 → 8 (release 1.9) — multi-entreprise + IBAN/BIC + payment
+-- means/terms + client type + BT-120 VAT exemption.
+--
+-- All the 1.9 schema deltas that used to sit in this branch's own 6.sqm
+-- collide with master's 1.8.1 tax-withholding 6.sqm on the same version
+-- number, so they've been re-emitted here as 7→8 after merging master.
+-- Everything below runs on top of master's 6→7 (which added the retention
+-- tables + tax_withholding_enabled), so users updating from 1.8.2 → 1.9
+-- get the two migrations in sequence.
+--
+-- 1) IBAN (BT-84) et BIC (BT-86) sur l'émetteur, dans le cadre du chantier
+--    Factur-X (cf. wip_facturx_gap_analysis + facturx-extended-fields.html).
+--    Stockés dans une table dédiée `IssuerBank` (many-to-one vers l'émetteur)
+--    pour supporter plusieurs comptes bancaires par émetteur — pattern miroir
+--    de ClientOrIssuerAddress. Le doc fige un seul compte (celui sélectionné
+--    dans le picker paiement) via les colonnes payment_iban/payment_bic sur
+--    DocumentClientOrIssuer, pour ne pas casser les factures déjà émises si
+--    l'user change de banque plus tard.
+
+CREATE TABLE IssuerBank (
+  issuer_bank_id INTEGER PRIMARY KEY NOT NULL,
+  issuer_id INTEGER NOT NULL,
+  label TEXT,
+  -- ISO 3166-1 alpha-2. Drives the identifier field label / hint / validation
+  -- (IBAN countries → "IBAN" + mod-97 check ; others → generic "Numéro de
+  -- compte" with country-specific hint).
+  country_code TEXT,
+  -- Account identifier — IBAN for IBAN countries, domestic BBAN otherwise.
+  -- Single string like BT-84 expects.
+  identifier TEXT,
+  bic TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+-- Doc-side freeze: one bank per doc (the one the user picked in the paiement
+-- modal). payment_iban + payment_bic mirror the picked IssuerBank at doc
+-- creation and only change when the user re-picks a different bank on that doc.
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_iban TEXT;
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_bic TEXT;
+-- Country of the picked bank at freeze time. Drives the rendered label
+-- ("IBAN :" for IBAN countries, "N° de compte :" for domestic-only).
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_country TEXT;
+
+-- 2) Payment Means selections — set multi-valeurs stocké en TEXT comma-separated
+--    des chip identities ("TRANSFER,CHEQUE" ou "PAYPAL,STRIPE"). SQLDelight n'a
+--    pas d'array natif. On stocke l'identité du chip et non le code UN/CEFACT
+--    4461 parce que PayPal et Stripe partagent le code 68 — sans l'identité on
+--    ne peut plus distinguer les deux au reload. Les codes 4461 sont dérivés
+--    à l'export Factur-X (unCefactCodesForExport()), avec fallback sur [1]
+--    "Instrument not defined" quand rien n'est coché.
+--    Facture uniquement — un avoir renverse le flux (vendeur doit au client)
+--    donc pas de mode de paiement à préciser. BL / devis ne sont pas des docs
+--    de règlement Factur-X non plus.
+ALTER TABLE Invoice ADD COLUMN payment_means_selections TEXT;
+-- Editable prefix rendered before the joined payment-means list. Empty = opt-out.
+ALTER TABLE Invoice ADD COLUMN payment_means_label TEXT;
+-- Eye toggle. 1 = whole payment-means block hidden on preview + PDF. Codes stay
+-- persisted so BT-81 Factur-X data is preserved regardless.
+ALTER TABLE Invoice ADD COLUMN payment_means_hidden INTEGER NOT NULL DEFAULT 0;
+-- "Autre" chip state — separate flag rather than a sentinel code. Keeps the
+-- selections column 100% UN/CEFACT-clean and enforces that OTHER is a UI-only
+-- marker that never renders on the invoice or in Factur-X exports.
+ALTER TABLE Invoice ADD COLUMN payment_means_other_checked INTEGER NOT NULL DEFAULT 0;
+
+-- 3) Payment Terms (BT-20) — split en 3 mentions distinctes pour aligner
+--    sur Factur-X BR-FR-05 SubjectCodes :
+--      * payment_terms_recovery_fees  → PMT (frais de recouvrement)
+--      * payment_terms_late_fees      → PMD (pénalités de retard)
+--      * payment_terms_discount       → AAB (escompte pour paiement anticipé)
+--    Édités indépendamment via un picker à 3 lignes. Le CII XML émet un
+--    <IncludedNote> par code (fin des 3× le même texte) ; le PDF concatène
+--    pour un rendu unique. Uniquement sur Invoice — un avoir n'a pas de
+--    conditions de paiement à respecter par le client.
+ALTER TABLE Invoice ADD COLUMN payment_terms_recovery_fees TEXT;
+ALTER TABLE Invoice ADD COLUMN payment_terms_late_fees TEXT;
+ALTER TABLE Invoice ADD COLUMN payment_terms_discount TEXT;
+
+-- 4) Bank details block visibility on the invoice preview + PDF. Paired with
+--    the "Afficher les coordonnées bancaires" switch inside the payment-means
+--    picker. 1 = block skipped on preview + PDF; the frozen IBAN/BIC stay in
+--    DocumentClientOrIssuer regardless (Factur-X BT-84/86 preserved).
+--    Facture uniquement (voir bloc 2 pour la raison).
+ALTER TABLE Invoice ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0;
+-- Editable bank-details label: same segments+tokens model as
+-- payment_means_label. Free segments carry user text; IbanToken / BicToken
+-- render "IBAN : <value>" / "BIC : <value>" at flatten time. Null = fall back
+-- to defaultPaymentBankSegments() (both tokens, newline between).
+ALTER TABLE Invoice ADD COLUMN payment_bank_label TEXT;
+
+-- 5) Multi-entreprise (étape 2 du chantier 1.9). Chaque client, produit et
+--    document est rattaché à une entreprise = un ClientOrIssuer type='issuer'
+--    maître. Sur les 4 tables de documents, original_company_id fige
+--    l'entreprise émettrice à la création — sert la numérotation par
+--    entreprise ET le filtrage des listes de docs par entreprise courante.
+ALTER TABLE ClientOrIssuer ADD COLUMN company_id INTEGER;
+ALTER TABLE Product ADD COLUMN company_id INTEGER;
+ALTER TABLE Invoice ADD COLUMN original_company_id INTEGER;
+ALTER TABLE DeliveryNote ADD COLUMN original_company_id INTEGER;
+ALTER TABLE CreditNote ADD COLUMN original_company_id INTEGER;
+ALTER TABLE Quote ADD COLUMN original_company_id INTEGER;
+
+-- Backfill : détermine l'issuer implicite (le plus récent). Si aucun n'existe
+-- (install jamais utilisée), en crée un par défaut "Mon entreprise". Puis
+-- rattache tous les clients + produits existants à celui-là. Les docs
+-- prennent leur original_company_id depuis l'issuer maître déjà figé dans
+-- LinkXxxToDocumentClientOrIssuer → DocumentClientOrIssuer.original_client_or_issuer_id.
+INSERT INTO ClientOrIssuer (name, type, created_at, updated_at)
+  SELECT 'Mon entreprise', 'issuer',
+         datetime('now', 'localtime'), datetime('now', 'localtime')
+  WHERE NOT EXISTS (SELECT 1 FROM ClientOrIssuer WHERE type = 'issuer');
+
+UPDATE ClientOrIssuer
+  SET company_id = (
+    SELECT id FROM ClientOrIssuer
+    WHERE type = 'issuer'
+    ORDER BY updated_at DESC
+    LIMIT 1
+  )
+  WHERE type = 'client';
+
+UPDATE Product
+  SET company_id = (
+    SELECT id FROM ClientOrIssuer
+    WHERE type = 'issuer'
+    ORDER BY updated_at DESC
+    LIMIT 1
+  );
+
+UPDATE Invoice
+  SET original_company_id = (
+    SELECT dci.original_client_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkInvoiceToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.id
+    WHERE link.invoice_id = Invoice.invoice_id
+      AND dci.type = 'issuer'
+    LIMIT 1
+  );
+
+UPDATE DeliveryNote
+  SET original_company_id = (
+    SELECT dci.original_client_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkDeliveryNoteToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.id
+    WHERE link.delivery_note_id = DeliveryNote.delivery_note_id
+      AND dci.type = 'issuer'
+    LIMIT 1
+  );
+
+UPDATE CreditNote
+  SET original_company_id = (
+    SELECT dci.original_client_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkCreditNoteToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.id
+    WHERE link.credit_note_id = CreditNote.credit_note_id
+      AND dci.type = 'issuer'
+    LIMIT 1
+  );
+
+UPDATE Quote
+  SET original_company_id = (
+    SELECT dci.original_client_id
+    FROM DocumentClientOrIssuer dci
+    JOIN LinkQuoteToDocumentClientOrIssuer link
+      ON link.document_client_or_issuer_id = dci.id
+    WHERE link.quote_id = Quote.quote_id
+      AND dci.type = 'issuer'
+    LIMIT 1
+  );
+
+-- 6) Type de client — Particulier / Professionnel / non renseigné. Sert de
+--    gate à l'export Factur-X (professionnel = e-invoicing, particulier =
+--    PDF simple). Pré-rempli automatiquement à PROFESSIONAL côté UI quand
+--    un SIREN est saisi ; l'user peut corriger. Nullable ; toutes les
+--    fiches existantes restent en null → l'export leur demande à trancher
+--    au moment de la génération.
+--    Valeurs stockées : 'PROFESSIONAL', 'INDIVIDUAL' ou NULL.
+ALTER TABLE ClientOrIssuer ADD COLUMN client_type TEXT;
+-- Frozen doc-side snapshot: once a doc is emitted, its "nature" (Factur-X
+-- or plain PDF) stays anchored to whatever the client type was at that
+-- moment. Editing the master client later doesn't retroactively change the
+-- doc's export flavour.
+ALTER TABLE DocumentClientOrIssuer ADD COLUMN client_type TEXT;
+
+-- 7) VAT exemption reason (BT-120) — required text on Invoice / CreditNote
+--    whenever the issuer is in the franchise en base regime and thus emits
+--    with tax category E. Per-doc rather than per-issuer so the user can
+--    override the wording if the operation cited a different exemption
+--    article (e.g. art. 261-4 formation vs 293 B franchise). Seeded at
+--    document creation from the issuer's country ("TVA non applicable, art.
+--    293 B du CGI" for FR, "Steuerbefreit nach § 19 UStG" for DE) — other
+--    countries have no auto-fill because the app can't guarantee a correct
+--    legal citation, so the user must fill it before exporting.
+ALTER TABLE Invoice ADD COLUMN vat_exemption_text TEXT;
+ALTER TABLE CreditNote ADD COLUMN vat_exemption_text TEXT;

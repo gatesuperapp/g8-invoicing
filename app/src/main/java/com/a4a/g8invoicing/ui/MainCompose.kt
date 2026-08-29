@@ -27,9 +27,11 @@ import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.models.PersonType
+import com.a4a.g8invoicing.data.setSeenEInvoiceIntro
 import com.a4a.g8invoicing.data.setSeenOnboarding18
 import com.a4a.g8invoicing.data.setSeenWhatsNew
 import com.a4a.g8invoicing.data.shouldShowBackupPopupNow
+import com.a4a.g8invoicing.data.shouldShowEInvoiceIntro
 import com.a4a.g8invoicing.data.shouldShowOnboarding18
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
@@ -90,7 +92,12 @@ fun MainCompose(
     val productDataSource: ProductLocalDataSourceInterface = koinInject()
     val modulesRepo: ActivatedModulesRepository = koinInject()
 
-    // Initialize locale and version tracking on first composition.
+    // Initialize locale and version tracking on first composition. The done
+    // flag gates the popup-firing LaunchedEffect below — without it, a fresh
+    // install races: shouldShowEInvoiceIntro emits `true` (HAS_SEEN=false) a
+    // fraction of a second before initializeVersionTracking has had time to
+    // flip HAS_SEEN=true, and the popup fires anyway.
+    var versionTrackingDone by remember { mutableStateOf(false) }
     // Also: hydrate the "current entreprise" from the most-recent issuer, or
     // if no issuer exists (fresh install), flip the first-launch dialog on.
     // Without a hydrated currentCompanyId, doc-list flows take the getAll()
@@ -105,8 +112,6 @@ fun MainCompose(
     var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
-        // Pour les nouvelles installations, enregistre la version actuelle
-        // Ainsi lors de la prochaine mise à jour, la modale WhatsNew s'affichera
         initializeVersionTracking(context)
         val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
         if (lastIssuerId == null) {
@@ -135,6 +140,7 @@ fun MainCompose(
                 }
             }
         }
+        versionTrackingDone = true
     }
 
     if (needsFirstLaunchIssuer) {
@@ -196,27 +202,44 @@ fun MainCompose(
     // below for the race the null guard prevents.
     val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = null)
     val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = null)
+    val shouldShowEInvoice by shouldShowEInvoiceIntro(context).collectAsState(initial = null)
     var showWhatsNew by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
+    var showEInvoiceIntro by remember { mutableStateOf(false) }
     // Backup reminder: shown once when the user has >3 rows in any main table.
     // Suppressed while onboarding / what's new are pending to avoid stacking
     // modals at cold start.
     var showBackupDialog by remember { mutableStateOf(false) }
     var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
-    LaunchedEffect(shouldShow, shouldShowOnboarding) {
-        // Wait until BOTH DataStore flags have emitted their real value.
-        // Without this guard, the very first composition fires the effect
-        // with initial=null on both, which used to pass the "!shouldShow &&
-        // !shouldShowOnboarding" check and briefly flip showBackupDialog on
-        // — even during a version upgrade where the onboarding was actually
-        // due. The onboarding then displayed a moment later, but the backup
-        // dialog was already open behind it.
+    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, versionTrackingDone) {
+        // Wait until every DataStore flag has emitted its real value —
+        // guarding against the initial=null race that used to flip
+        // showBackupDialog on a version upgrade before the onboarding flag
+        // resolved. versionTrackingDone gates the fresh-install path so
+        // shouldShowEInvoice is read after HAS_SEEN_EINVOICE_INTRO has been
+        // flipped for fresh installs.
+        if (!versionTrackingDone) return@LaunchedEffect
         val whatsNew = shouldShow ?: return@LaunchedEffect
         val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
+        val eInvoice = shouldShowEInvoice ?: return@LaunchedEffect
         showOnboarding = onboarding
         showWhatsNew = whatsNew && !onboarding
-        if (!whatsNew && !onboarding) {
+        // 1.8.1 e-invoice popup: only when the device is set to country=FR.
+        // Country (not language) — the e-invoice obligation follows where the
+        // phone is used, not which UI language the user picked. Reads a
+        // snapshot taken in G8Invoicing.onCreate, BEFORE anything can call
+        // Locale.setDefault; that's the only reliable way to read the Android
+        // 13+ "Regional preferences → Region" setting (Resources.getSystem()
+        // only carries the Language picker). Suppressed while the 1.8
+        // onboarding wizard is pending. Mark SEEN=true immediately per product
+        // decision.
+        val systemCountry = com.a4a.g8invoicing.SystemRegionSnapshot.formatCountry
+        if (eInvoice && !onboarding && systemCountry == "FR") {
+            showEInvoiceIntro = true
+            setSeenEInvoiceIntro(context)
+        }
+        if (!whatsNew && !onboarding && !showEInvoiceIntro) {
             showBackupDialog = shouldShowBackupPopupNow(
                 context,
                 invoiceQueries,
@@ -225,6 +248,35 @@ fun MainCompose(
                 clientOrIssuerQueries,
             )
         }
+    }
+
+    if (showEInvoiceIntro) {
+        val uriHandler = LocalUriHandler.current
+        com.a4a.g8invoicing.ui.shared.EInvoiceIntroDialog(
+            onDismiss = { showEInvoiceIntro = false },
+            onOpenUrl = { url ->
+                try {
+                    uriHandler.openUri(url)
+                } catch (_: Exception) {
+                    // Fallback: Android Intent if the ComposeUriHandler chokes
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
+            },
+            onComposeEmail = { address, subject, body ->
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:")
+                    putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
+                    putExtra(Intent.EXTRA_SUBJECT, subject)
+                    putExtra(Intent.EXTRA_TEXT, body)
+                }
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                }
+            },
+        )
     }
 
     if (showBackupDialog) {

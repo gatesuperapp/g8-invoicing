@@ -36,4 +36,6 @@ data class CreditNoteState(
     // for a SEPA reverse transfer) exist but are rare and out of scope
     // for now. Keeping the state minimal avoids the "empty payment box"
     // artefacts that used to render on the PDF.
+    // See InvoiceState.retentions.
+    var retentions: List<RetentionState> = emptyList(),
 ) : DocumentState()

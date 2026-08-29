@@ -114,6 +114,7 @@ class ClientOrIssuerAddEditViewModel(
             logoPath = clientOrIssuer.logoPath,
             vatExempt = clientOrIssuer.vatExempt,
             intraEuSales = clientOrIssuer.intraEuSales,
+            taxWithholdingEnabled = clientOrIssuer.taxWithholdingEnabled,
             errors = mutableListOf()
         )
     }
@@ -162,6 +163,7 @@ class ClientOrIssuerAddEditViewModel(
                 // master has zero linked accounts, so the payment-means picker
                 // dropdown shows the empty-state hint on the next open.
                 banks = _documentIssuerUiState.value.banks,
+                taxWithholdingEnabled = _documentIssuerUiState.value.taxWithholdingEnabled,
             )
         }
     }
@@ -810,6 +812,10 @@ class ClientOrIssuerAddEditViewModel(
                 person = person.copy(intraEuSales = value as Boolean)
             }
 
+            ScreenElement.ISSUER_TAX_WITHHOLDING -> {
+                person = person.copy(taxWithholdingEnabled = value as Boolean)
+            }
+
             else -> {}
         }
         return person
@@ -1022,6 +1028,10 @@ class ClientOrIssuerAddEditViewModel(
                 person = person.copy(intraEuSales = value as Boolean)
             }
 
+            ScreenElement.DOCUMENT_ISSUER_TAX_WITHHOLDING -> {
+                person = person.copy(taxWithholdingEnabled = value as Boolean)
+            }
+
             else -> {}
         }
         return person
@@ -1216,6 +1226,7 @@ class ClientOrIssuerAddEditViewModel(
             logoPath = masterData.logoPath,
             vatExempt = masterData.vatExempt,
             intraEuSales = masterData.intraEuSales,
+            taxWithholdingEnabled = masterData.taxWithholdingEnabled,
             originalVersion = masterData.version // Update to current master version
         )
 

@@ -11,6 +11,9 @@ import com.a4a.g8invoicing.shared.resources.credit_note_default_number
 import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoice
 import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoices
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
+import com.a4a.g8invoicing.shared.resources.retention_default_label
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import org.jetbrains.compose.resources.getString
@@ -21,7 +24,9 @@ import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import g8invoicing.CreditNote
+import g8invoicing.CreditNoteRetention
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -38,6 +43,8 @@ class CreditNoteLocalDataSource(
     private val currentCompanyRepository: CurrentCompanyRepository,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
+    private val creditNoteRetentionQueries = db.creditNoteRetentionQueries
+    private val invoiceRetentionQueries = db.invoiceRetentionQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
     private val linkDocumentClientOrIssuerToAddressQueries =
@@ -59,14 +66,28 @@ class CreditNoteLocalDataSource(
     }
 
     override suspend fun createNew(): Long? {
-        // Résout l'entreprise courante (menu latéral). Fallback getLastIssuer()
-        // pour les installs sans Settings hydratée (sécurité post-migration).
+        // Resolves the current entreprise (side menu). getLastIssuer() fallback
+        // for installs without a hydrated Settings entry (post-migration safety).
         val currentCompanyId = currentCompanyRepository.current
         val existingIssuer = currentCompanyId
             ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
             ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+
+        // Reuse retentions from the most recent doc (credit note or invoice)
+        // for this master issuer; fall back to country defaults.
+        val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
+            if (existingIssuer?.taxWithholdingEnabled == true) {
+                existingIssuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                    fetchLatestReusedRetentions(masterId)
+                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                    existingIssuer,
+                    getString(Res.string.retention_default_label),
+                    getString(Res.string.retention_default_mx_isr),
+                    getString(Res.string.retention_default_mx_iva),
+                )
+            } else emptyList()
 
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
@@ -93,6 +114,7 @@ class CreditNoteLocalDataSource(
                         it.addresses?.firstOrNull()?.countryCode
                     ) }
                     ?.let { TextFieldValue(it) },
+                retentions = reusedRetentions,
             )
 
             saveInfoInCreditNoteTable(creditNote)
@@ -101,9 +123,90 @@ class CreditNoteLocalDataSource(
 
             newCreditNoteId?.let { id ->
                 saveInfoInOtherTables(creditNote)
+                saveRetentionsForCreditNote(id, reusedRetentions)
             }
 
             newCreditNoteId
+        }
+    }
+
+    // Cross-doc lookup: newest doc (CN or invoice) with retentions wins,
+    // so a credit note following an invoice inherits from it.
+    private fun fetchLatestReusedRetentions(
+        masterIssuerId: Long,
+    ): List<com.a4a.g8invoicing.ui.states.RetentionState> {
+        val cnRow = creditNoteRetentionQueries
+            .getLastCreditNoteIdWithRetentionsForIssuer(masterIssuerId)
+            .executeAsOneOrNull()
+        val invRow = invoiceRetentionQueries
+            .getLastInvoiceIdWithRetentionsForIssuer(masterIssuerId)
+            .executeAsOneOrNull()
+
+        val cnTs = cnRow?.created_at
+        val invTs = invRow?.created_at
+
+        val pickInvoice = when {
+            invTs == null -> false
+            cnTs == null -> true
+            else -> invTs >= cnTs
+        }
+
+        return if (pickInvoice && invRow != null) {
+            invoiceRetentionQueries.getForInvoice(invRow.invoice_id)
+                .executeAsList()
+                .map { it.transformIntoRetentionState() }
+        } else if (cnRow != null) {
+            creditNoteRetentionQueries.getForCreditNote(cnRow.credit_note_id)
+                .executeAsList()
+                .map { it.transformIntoRetentionState() }
+        } else emptyList()
+    }
+
+    private fun CreditNoteRetention.transformIntoRetentionState(): com.a4a.g8invoicing.ui.states.RetentionState =
+        com.a4a.g8invoicing.ui.states.RetentionState(
+            id = this.id.toInt(),
+            label = TextFieldValue(this.label),
+            rate = BigDecimal.parseString(this.rate.toString()),
+            sortOrder = this.sort_order?.toInt() ?: 0,
+            hidden = this.hidden != 0L,
+        )
+
+    private fun g8invoicing.InvoiceRetention.transformIntoRetentionState(): com.a4a.g8invoicing.ui.states.RetentionState =
+        com.a4a.g8invoicing.ui.states.RetentionState(
+            id = this.id.toInt(),
+            label = TextFieldValue(this.label),
+            rate = BigDecimal.parseString(this.rate.toString()),
+            sortOrder = this.sort_order?.toInt() ?: 0,
+            hidden = this.hidden != 0L,
+        )
+
+    private fun saveRetentionsForCreditNote(
+        creditNoteId: Long,
+        retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>,
+    ) {
+        try {
+            creditNoteRetentionQueries.deleteAllForCreditNote(creditNoteId)
+            retentions.forEachIndexed { index, r ->
+                creditNoteRetentionQueries.save(
+                    id = null,
+                    credit_note_id = creditNoteId,
+                    label = r.label.text,
+                    rate = r.rate.doubleValue(false),
+                    sort_order = index.toLong(),
+                    hidden = if (r.hidden) 1L else 0L,
+                )
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun fetchRetentions(creditNoteId: Long): List<com.a4a.g8invoicing.ui.states.RetentionState> {
+        return try {
+            creditNoteRetentionQueries.getForCreditNote(creditNoteId)
+                .executeAsList()
+                .map { it.transformIntoRetentionState() }
+        } catch (_: Exception) {
+            emptyList()
         }
     }
 
@@ -239,7 +342,9 @@ class CreditNoteLocalDataSource(
                 documentIssuer = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_ISSUER }?.maxByOrNull { it.id ?: 0 },
                 documentClient = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_CLIENT }?.maxByOrNull { it.id ?: 0 },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
-                documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
+                documentTotalPrices = documentProducts?.let { prods ->
+                    calculateDocumentPrices(prods, fetchRetentions(it.credit_note_id))
+                },
                 currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
                 dueDate = it.due_date ?: "",
                 footerText = TextFieldValue(text = it.footer ?: ""),
@@ -250,6 +355,7 @@ class CreditNoteLocalDataSource(
                 formatLocale = it.format_locale,
                 originalCompanyId = it.original_company_id,
                 vatExemptionText = it.vat_exemption_text?.let { TextFieldValue(text = it) },
+                retentions = fetchRetentions(it.credit_note_id),
             )
         }
     }
@@ -333,9 +439,30 @@ class CreditNoteLocalDataSource(
                     vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
+                document.documentId?.toLong()?.let { id ->
+                    saveRetentionsForCreditNote(id, document.retentions)
+                }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
+        }
+    }
+
+    override suspend fun deleteAllRetentions(creditNoteId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                creditNoteRetentionQueries.deleteAllForCreditNote(creditNoteId)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    override suspend fun saveRetentions(
+        creditNoteId: Long,
+        retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            saveRetentionsForCreditNote(creditNoteId, retentions)
         }
     }
 

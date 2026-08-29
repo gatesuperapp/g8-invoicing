@@ -33,6 +33,8 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun convertQuotesToInvoice(quotes: List<com.a4a.g8invoicing.ui.states.QuoteState>): Long?
     suspend fun update(document: InvoiceState)
     suspend fun updateHideLinkedSourceHeaders(invoiceId: Long, hide: Boolean)
+    suspend fun deleteAllRetentions(invoiceId: Long)
+    suspend fun saveRetentions(invoiceId: Long, retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>)
     suspend fun delete(documents: List<InvoiceState>)
     suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase)
     suspend fun deleteTag(invoiceId: Long)

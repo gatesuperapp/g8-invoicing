@@ -183,6 +183,9 @@ fun DocumentAddEdit(
     showProductType: Boolean = false,
     hideLinkedSourceHeaders: Boolean = false,
     onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
+    // Retention CRUD, only wired non-noop by Invoice + CreditNote NavGraphs.
+    onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit = { _, _ -> },
+    onToggleRetentionHidden: (Int) -> Unit = {},
 ) {
     // We use BottomSheetScaffold to open a bottom sheet modal
     // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
@@ -310,6 +313,8 @@ fun DocumentAddEdit(
                     showProductType = showProductType,
                     hideLinkedSourceHeaders = hideLinkedSourceHeaders,
                     onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
+                    onSaveRetention = onSaveRetention,
+                    onToggleRetentionHidden = onToggleRetentionHidden,
                 )
             }
         },

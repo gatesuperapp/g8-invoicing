@@ -23,5 +23,7 @@ interface CreditNoteLocalDataSourceInterface {
     suspend fun update(document: CreditNoteState)
     suspend fun delete(documents: List<CreditNoteState>)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+    suspend fun deleteAllRetentions(creditNoteId: Long)
+    suspend fun saveRetentions(creditNoteId: Long, retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>)
 
 }

@@ -23,6 +23,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_tax_label
 import com.a4a.g8invoicing.shared.resources.document_total_with_tax
 import com.a4a.g8invoicing.shared.resources.document_total_without_tax
+import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
@@ -64,6 +65,32 @@ fun DocumentBasicTemplateTotalPrices(
                         ?: stringResource(Res.string.document_tax_label, taxRate)
                     add(Line(label = taxLabel, amount = formatAmount(it.second, currencyCode, formatLocale), bold = false))
                 }
+            }
+        }
+        // Rendered between VAT and total-with-tax. Iterate state (not
+        // computed amounts) so an empty doc still shows the row with " - ".
+        val stateRetentions = when (uiState) {
+            is com.a4a.g8invoicing.ui.states.InvoiceState -> uiState.retentions
+            is com.a4a.g8invoicing.ui.states.CreditNoteState -> uiState.retentions
+            else -> emptyList()
+        }.filter { !it.hidden }
+        if (stateRetentions.isNotEmpty()) {
+            val retentionSeparator = labels?.get("label_separator")
+                ?: stringResource(Res.string.label_separator)
+            val computedByLabel = uiState.documentTotalPrices
+                ?.retentionAmounts
+                ?.associate { it.label to it.amount }
+                ?: emptyMap()
+            stateRetentions.forEach { r ->
+                val label = r.label.text.ifBlank { "Retención" }
+                val rateStr = "${r.rate.stripTrailingZeros().toPlainString().replace(".", ",")} %"
+                val amount = computedByLabel[label]
+                add(Line(
+                    label = "$label $rateStr$retentionSeparator",
+                    amount = amount?.let { "− " + formatAmount(it, currencyCode, formatLocale) }
+                        ?: " - ",
+                    bold = false,
+                ))
             }
         }
         if (footerArray.any { it == PricesRowName.TOTAL_WITH_TAX.name }) {

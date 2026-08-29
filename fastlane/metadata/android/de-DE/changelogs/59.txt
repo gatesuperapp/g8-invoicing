@@ -1,0 +1,4 @@
+v1.8.1
+
+- Quellensteuer (IRPF, Ritenuta, ISR/IVA...) für Aussteller in Spanien, Portugal, Italien, Japan, Chile, Peru, Mexiko, Brasilien, Kolumbien
+- Quellensteuer-Zeile automatisch auf Rechnungen und Gutschriften eingefügt, pro Rechnung bearbeitbar + ausblendbar

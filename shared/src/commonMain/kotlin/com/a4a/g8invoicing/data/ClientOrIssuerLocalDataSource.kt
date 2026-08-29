@@ -235,6 +235,7 @@ class ClientOrIssuerLocalDataSource(
             // Only meaningful on clients (Factur-X gate). Issuers store NULL —
             // the field doesn't apply on the emitting side.
             client_type = if (isClient) clientOrIssuer.clientType?.name else null,
+            tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
         )
     }
 
@@ -319,6 +320,7 @@ class ClientOrIssuerLocalDataSource(
                     if (clientOrIssuer.intraEuSales) 1L else 0L,
                     company_id = if (isClient) currentCompanyRepository.current else null,
                     client_type = if (isClient) clientOrIssuer.clientType?.name else null,
+                    tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -501,6 +503,7 @@ class ClientOrIssuerLocalDataSource(
                         vat_exempt = if (clientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (clientOrIssuer.intraEuSales) 1L else 0L,
                         client_type = if (isClient) clientOrIssuer.clientType?.name else null,
+                        tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
                     // Bank accounts live in their own table; simplest robust sync
                     // is delete-all-then-reinsert (small lists, rare edits).
@@ -604,6 +607,7 @@ class ClientOrIssuerLocalDataSource(
                         client_type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
                             documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
                         ) documentClientOrIssuer.clientType?.name else null,
+                        tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
                 }
                 // Addresses to delete
@@ -720,6 +724,7 @@ class ClientOrIssuerLocalDataSource(
                         } else {
                             null
                         },
+                        tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
                     // Banks handled unconditionally above — master-owned resource,
                     // not gated by syncToMaster.
@@ -899,6 +904,7 @@ class ClientOrIssuerLocalDataSource(
                             // set on their entreprise from Mon Compte.
                             vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
                             intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
+                            taxWithholdingEnabled = issuer.tax_withholding_enabled != 0L,
                             banks = fetchIssuerBanks(issuer.id),
                             // Freeze the first bank (sort_order = 0) on the new doc.
                             // The payment-means picker on the invoice lets the user
@@ -1135,6 +1141,7 @@ fun ClientOrIssuer.transformIntoEditable(
         vatExempt = (clientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (clientOrIssuer.intra_eu_sales ?: 0L) != 0L,
         clientType = com.a4a.g8invoicing.data.models.ClientType.fromDb(clientOrIssuer.client_type),
+        taxWithholdingEnabled = clientOrIssuer.tax_withholding_enabled != 0L,
     )
 }
 

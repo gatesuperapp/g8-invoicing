@@ -24,6 +24,11 @@ object PrefKeys {
     // per install. Not tied to LAST_SEEN_VERSION because we may need to re-show
     // a v1.9 wizard later without re-triggering this one.
     val HAS_SEEN_ONBOARDING_1_8 = booleanPreferencesKey("has_seen_onboarding_1_8")
+    // 1.8.1 e-invoicing intro popup (PR speech-bubble flow about the Sept 2026
+    // PA obligation). One-shot, gated on FR locale by the caller. Independent
+    // from LAST_SEEN_VERSION because the standard WhatsNew flow shouldn't
+    // fire again for users updating from 1.8 → 1.8.1.
+    val HAS_SEEN_EINVOICE_INTRO = booleanPreferencesKey("has_seen_einvoice_intro")
 }
 
 // Écrire le flag (pour la popup d'export DB)
@@ -74,6 +79,11 @@ suspend fun initializeVersionTracking(context: Context) {
     // Seulement pour les vraies nouvelles installations
     if (lastSeenVersion == null && !hasSeenPopup) {
         setSeenWhatsNew(context)
+        // Le popup e-invoice cible les mises à jour depuis 1.8/antérieur :
+        // pour les fresh installs on flip SEEN=true directement pour qu'il
+        // n'apparaisse jamais (l'utilisateur découvre l'appli avec la
+        // facturation électronique déjà intégrée aux features).
+        setSeenEInvoiceIntro(context)
         // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
         // The onboarding must run for fresh installs too (with the empty-issuer
         // path skipping the per-issuer loop) so a user quitting via the Home
@@ -100,6 +110,20 @@ fun shouldShowOnboarding18(context: Context) =
             else -> false
         }
     }
+
+// 1.8.1 e-invoicing intro popup. Fires once, only if not seen. Locale gating
+// (FR only) is applied by the caller — DataStore.kt is Android-side and has
+// no access to AppLocaleHolder.
+fun shouldShowEInvoiceIntro(context: Context) =
+    context.dataStore.data.map { prefs ->
+        prefs[PrefKeys.HAS_SEEN_EINVOICE_INTRO] != true
+    }
+
+suspend fun setSeenEInvoiceIntro(context: Context) {
+    context.dataStore.edit { prefs ->
+        prefs[PrefKeys.HAS_SEEN_EINVOICE_INTRO] = true
+    }
+}
 
 suspend fun setSeenOnboarding18(context: Context) {
     context.dataStore.edit { prefs ->

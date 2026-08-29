@@ -7,6 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.calculateDocumentPrices
+import com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.retention_default_label
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
+import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
@@ -80,6 +86,27 @@ class CreditNoteAddEditViewModel(
         }
     }
 
+    // See InvoiceAddEditViewModel.clearRetentionsInDb.
+    suspend fun clearRetentionsInDb() {
+        _documentUiState.value.documentId?.toLong()?.let { id ->
+            documentDataSource.deleteAllRetentions(id)
+        }
+    }
+
+    // See InvoiceAddEditViewModel.seedDefaultRetentionsInDb.
+    suspend fun seedDefaultRetentionsInDb(issuer: ClientOrIssuerState) {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        val defaults = defaultRetentionsForIssuer(
+            issuer,
+            getString(Res.string.retention_default_label),
+            getString(Res.string.retention_default_mx_isr),
+            getString(Res.string.retention_default_mx_iva),
+        )
+        if (defaults.isNotEmpty()) {
+            documentDataSource.saveRetentions(id, defaults)
+        }
+    }
+
     private suspend fun createNewCreditNote(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
@@ -142,6 +169,34 @@ class CreditNoteAddEditViewModel(
         }
     }
 
+    fun updateRetentionAt(index: Int, retention: com.a4a.g8invoicing.ui.states.RetentionState) {
+        val current = _documentUiState.value.retentions.toMutableList()
+        if (index in current.indices) {
+            current[index] = retention.copy(sortOrder = index)
+            _documentUiState.value = _documentUiState.value.copy(
+                retentions = current,
+                documentTotalPrices = calculateDocumentPrices(
+                    _documentUiState.value.documentProducts ?: emptyList(),
+                    current,
+                ),
+            )
+        }
+    }
+
+    fun toggleRetentionHiddenAt(index: Int) {
+        val current = _documentUiState.value.retentions.toMutableList()
+        if (index in current.indices) {
+            current[index] = current[index].copy(hidden = !current[index].hidden)
+            _documentUiState.value = _documentUiState.value.copy(
+                retentions = current,
+                documentTotalPrices = calculateDocumentPrices(
+                    _documentUiState.value.documentProducts ?: emptyList(),
+                    current,
+                ),
+            )
+        }
+    }
+
     fun removeDocumentProductFromUiState(documentProductId: Int) {
         try {
             val list = _documentUiState.value.documentProducts
@@ -152,7 +207,9 @@ class CreditNoteAddEditViewModel(
 
             _documentUiState.value.documentProducts?.let {
                 _documentUiState.value =
-                    _documentUiState.value.copy(documentTotalPrices = calculateDocumentPrices(it))
+                    _documentUiState.value.copy(
+                        documentTotalPrices = calculateDocumentPrices(it, _documentUiState.value.retentions)
+                    )
             }
         } catch (e: Exception) {
             // Error handling
@@ -172,7 +229,7 @@ class CreditNoteAddEditViewModel(
         _documentUiState.update { currentState ->
             currentState.copy(
                 documentProducts = newList.toList(),
-                documentTotalPrices = calculateDocumentPrices(newList.toList())
+                documentTotalPrices = calculateDocumentPrices(newList.toList(), currentState.retentions)
             )
         }
     }
@@ -266,9 +323,42 @@ class CreditNoteAddEditViewModel(
             _documentUiState.value = _documentUiState.value.copy(
                 documentClient = documentClientOrIssuer
             )
-        else _documentUiState.value = _documentUiState.value.copy(
-            documentIssuer = documentClientOrIssuer
-        )
+        else {
+            _documentUiState.value = _documentUiState.value.copy(
+                documentIssuer = documentClientOrIssuer
+            )
+            // Toggle-driven: ON seeds country defaults, OFF wipes.
+            val hasRetentions = _documentUiState.value.retentions.isNotEmpty()
+            if (documentClientOrIssuer.taxWithholdingEnabled && !hasRetentions) {
+                viewModelScope.launch {
+                    val defaults = defaultRetentionsForIssuer(
+                        documentClientOrIssuer,
+                        getString(Res.string.retention_default_label),
+                        getString(Res.string.retention_default_mx_isr),
+                        getString(Res.string.retention_default_mx_iva),
+                    )
+                    if (_documentUiState.value.retentions.isEmpty() &&
+                        _documentUiState.value.documentIssuer?.taxWithholdingEnabled == true
+                    ) {
+                        _documentUiState.value = _documentUiState.value.copy(
+                            retentions = defaults,
+                            documentTotalPrices = calculateDocumentPrices(
+                                _documentUiState.value.documentProducts ?: emptyList(),
+                                defaults,
+                            ),
+                        )
+                    }
+                }
+            } else if (!documentClientOrIssuer.taxWithholdingEnabled && hasRetentions) {
+                _documentUiState.value = _documentUiState.value.copy(
+                    retentions = emptyList(),
+                    documentTotalPrices = calculateDocumentPrices(
+                        _documentUiState.value.documentProducts ?: emptyList(),
+                        emptyList(),
+                    ),
+                )
+            }
+        }
     }
 
     fun updateUiState(screenElement: ScreenElement, value: Any) {
@@ -342,7 +432,7 @@ fun updateCreditNoteUiState(
                 doc
             )?.let {
                 doc = doc.copy(documentProducts = it)
-                doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it))
+                doc = doc.copy(documentTotalPrices = calculateDocumentPrices(it, doc.retentions))
             }
         }
 
