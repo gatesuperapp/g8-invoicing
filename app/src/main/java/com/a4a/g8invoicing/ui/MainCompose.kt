@@ -242,7 +242,18 @@ fun MainCompose(
                         issuer.copy(addresses = listOf(updatedAddress) + otherAddresses)
                     )
                 },
-                markSeen = { modulesRepo.markMigration19Seen() },
+                markSeen = {
+                    // Completing the migration wizard is the user's definitive
+                    // acknowledgement of the 1.9 upgrade — mark every legacy
+                    // onboarding / popup flag as seen so nothing else pops on
+                    // subsequent boots. Without this the 1.8 Devis wizard, the
+                    // e-invoice intro and the generic What's New would still
+                    // fire on the next launch because their flags predate 1.9.
+                    modulesRepo.markMigration19Seen()
+                    setSeenOnboarding18(context)
+                    setSeenEInvoiceIntro(context)
+                    setSeenWhatsNew(context)
+                },
             ),
             onDismiss = { migration19Context = null },
         )
@@ -266,7 +277,7 @@ fun MainCompose(
     var showBackupDialog by remember { mutableStateOf(false) }
     var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
-    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, versionTrackingDone) {
+    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, versionTrackingDone, migration19Context) {
         // Wait until every DataStore flag has emitted its real value —
         // guarding against the initial=null race that used to flip
         // showBackupDialog on a version upgrade before the onboarding flag
@@ -274,6 +285,11 @@ fun MainCompose(
         // shouldShowEInvoice is read after HAS_SEEN_EINVOICE_INTRO has been
         // flipped for fresh installs.
         if (!versionTrackingDone) return@LaunchedEffect
+        // Migration19 wizard is the definitive "welcome to 1.9" experience.
+        // Skip every other popup while it's pending — otherwise a 1.8.2 → 1.9
+        // upgrader gets stacked with "Bienvenue 1.8", What's New and the
+        // e-invoice intro on top of the wizard.
+        if (migration19Context != null) return@LaunchedEffect
         val whatsNew = shouldShow ?: return@LaunchedEffect
         val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
         val eInvoice = shouldShowEInvoice ?: return@LaunchedEffect
