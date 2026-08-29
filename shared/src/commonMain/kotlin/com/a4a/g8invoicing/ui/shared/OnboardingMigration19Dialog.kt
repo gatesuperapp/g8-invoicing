@@ -567,6 +567,8 @@ private fun CleanupStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        EmojiSlot("🧹")
+        Spacer(Modifier.height(24.dp))
         StepTitle(stringResource(Res.string.onboarding_19_cleanup_title, issuers.size))
         Spacer(Modifier.height(20.dp))
         Text(
@@ -628,6 +630,8 @@ private fun AttachIntroStep19(onNext: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        EmojiSlot("🔗")
+        Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(Res.string.onboarding_19_attach_intro_body),
             style = MaterialTheme.typography.textBody,
@@ -656,6 +660,8 @@ private fun AttachStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        EmojiSlot("🔗")
+        Spacer(Modifier.height(24.dp))
         StepTitle(stringResource(Res.string.onboarding_19_attach_step_title, issuerIdx, issuerName))
         Spacer(Modifier.height(20.dp))
         Text(
@@ -736,6 +742,8 @@ private fun BankDetailsStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.Start,
     ) {
+        EmojiSlot("🏦")
+        Spacer(Modifier.height(24.dp))
         val title = if (issuerIdx != null) {
             stringResource(
                 Res.string.onboarding_19_bank_title_with_issuer,
@@ -745,12 +753,7 @@ private fun BankDetailsStep19(
         } else {
             stringResource(Res.string.onboarding_19_bank_title)
         }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.textScreenTitle,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        StepTitle(title)
         Spacer(Modifier.height(20.dp))
         Text(
             text = stringResource(Res.string.onboarding_19_bank_body),
@@ -814,6 +817,8 @@ private fun OrphansStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        EmojiSlot("🔍")
+        Spacer(Modifier.height(24.dp))
         StepTitle(title)
         Spacer(Modifier.height(20.dp))
         Text(
@@ -898,6 +903,8 @@ private fun NewFieldsRecapStep19(onNext: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        EmojiSlot("✨")
+        Spacer(Modifier.height(24.dp))
         StepTitle(stringResource(Res.string.onboarding_19_new_fields_title))
         Spacer(Modifier.height(24.dp))
         Text(
@@ -997,17 +1004,14 @@ private fun IssuerNameStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.Start,
     ) {
-        Text(
-            text = "Comment s'appelle votre entreprise ?",
-            style = MaterialTheme.typography.textScreenTitle,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        EmojiSlot("🏢")
+        Spacer(Modifier.height(24.dp))
+        StepTitle("Comment s'appelle votre entreprise ?")
         Spacer(Modifier.height(20.dp))
         Text(
             text = "Vous pourrez la modifier à tout moment dans « Mon entreprise ».",
             style = MaterialTheme.typography.textBody,
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             lineHeight = 24.sp,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -1042,17 +1046,14 @@ private fun IssuerCountryStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.Start,
     ) {
-        Text(
-            text = "Dans quel pays est-elle établie ?",
-            style = MaterialTheme.typography.textScreenTitle,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth(),
-        )
+        EmojiSlot("🌍")
+        Spacer(Modifier.height(24.dp))
+        StepTitle("Dans quel pays est-elle établie ?")
         Spacer(Modifier.height(20.dp))
         Text(
             text = "Ce choix pilote l'IBAN / BBAN attendu et le texte d'exonération de TVA si vous êtes en franchise en base.",
             style = MaterialTheme.typography.textBody,
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             lineHeight = 24.sp,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -1136,6 +1137,24 @@ private fun MascotSlot(content: @Composable () -> Unit) {
             .fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) { content() }
+}
+
+// Fixed-height slot for a single big emoji, sized to match MascotSlot so the
+// title sits at the same vertical position regardless of which anchor a given
+// step uses. Font is large enough to read as a "hero" glyph, not inline text.
+@Composable
+private fun EmojiSlot(emoji: String) {
+    Box(
+        modifier = Modifier
+            .height(64.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = emoji,
+            fontSize = 48.sp,
+        )
+    }
 }
 
 @Composable
