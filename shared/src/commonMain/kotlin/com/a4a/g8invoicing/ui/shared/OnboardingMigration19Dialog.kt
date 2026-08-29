@@ -29,15 +29,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -68,9 +71,19 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.facturx.extractBankInfoFromFooters
+import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_message
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_no
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_title
+import com.a4a.g8invoicing.shared.resources.account_backup_dialog_yes
+import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_clients_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_title
+import com.a4a.g8invoicing.shared.resources.onboarding_next
+import com.a4a.g8invoicing.shared.resources.onboarding_privacy_cta_backup
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_cta
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_intro_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_intro_cta
@@ -146,6 +159,12 @@ class Migration19Actions(
     val saveIssuerBank: suspend (issuer: ClientOrIssuerState, iban: String, bic: String) -> Unit,
     val updateIssuerName: suspend (issuer: ClientOrIssuerState, newName: String) -> Unit,
     val updateIssuerCountry: suspend (issuer: ClientOrIssuerState, countryCode: String) -> Unit,
+    // Database export + email plumbing for the Backup step. Same pair the
+    // 1.8 OnboardingDialog uses on its Privacy step — the wizard exports
+    // locally then optionally offers to send the file by email, so the
+    // user never leaves this non-dismissable modal.
+    val exportDatabase: () -> ExportResult,
+    val sendDatabaseByEmail: (filePath: String) -> Unit,
     val markSeen: suspend () -> Unit,
 )
 
@@ -201,8 +220,32 @@ fun OnboardingMigration19Dialog(
         context.issuers.size == 1 && context.issuers.first().addresses.isNullOrEmpty()
     }
 
+    // Database backup flow state — driven from the Backup step's
+    // "Sauvegarder ma base de données" CTA. Same pattern as
+    // OnboardingDialog: export → optional email dialog. Kept inside the
+    // wizard's own state so the non-dismissable modal never has to yield
+    // the screen to a nav destination.
+    var exportedFilePath by remember { mutableStateOf<String?>(null) }
+    var showSendByEmailDialog by remember { mutableStateOf(false) }
+    var exportErrorMessage by remember { mutableStateOf<String?>(null) }
+    val onBackupClick: () -> Unit = {
+        when (val result = actions.exportDatabase()) {
+            is ExportResult.Success -> {
+                exportedFilePath = result.filePath
+                showSendByEmailDialog = true
+            }
+            is ExportResult.Error -> {
+                exportErrorMessage = result.message
+            }
+        }
+    }
+
     // --- Step transitions ---------------------------------------------------
     fun goForwardFromWelcome() {
+        step = Step19.Backup
+    }
+
+    fun goForwardFromBackup() {
         step = when {
             needsIssuerBootstrap -> Step19.IssuerName
             isMulti -> Step19.Cleanup
@@ -335,6 +378,10 @@ fun OnboardingMigration19Dialog(
                 ) {
                     when (step) {
                         Step19.Welcome -> WelcomeStep19(onNext = { goForwardFromWelcome() })
+                        Step19.Backup -> BackupStep19(
+                            onBackup = onBackupClick,
+                            onNext = { goForwardFromBackup() },
+                        )
                         Step19.IssuerName -> {
                             val issuer = remainingIssuers.firstOrNull() ?: run {
                                 step = Step19.BankDetails
@@ -493,6 +540,54 @@ fun OnboardingMigration19Dialog(
             }
         }
     }
+
+    // Post-export dialogs. Mirrors OnboardingDialog's success/email-offer +
+    // error handling so a backup failure surfaces instead of failing silently.
+    if (showSendByEmailDialog && exportedFilePath != null) {
+        AlertDialog(
+            onDismissRequest = { showSendByEmailDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = Color(0xFF4CAF50),
+                )
+            },
+            title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
+            text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showSendByEmailDialog = false
+                    exportedFilePath?.let { actions.sendDatabaseByEmail(it) }
+                }) {
+                    Text(
+                        stringResource(Res.string.account_backup_dialog_yes),
+                        color = AppColors.textLink,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showSendByEmailDialog = false }) {
+                    Text(
+                        stringResource(Res.string.account_backup_dialog_no),
+                        color = AppColors.textLink,
+                    )
+                }
+            },
+        )
+    }
+
+    exportErrorMessage?.let { msg ->
+        AlertDialog(
+            onDismissRequest = { exportErrorMessage = null },
+            text = { Text(msg) },
+            confirmButton = {
+                TextButton(onClick = { exportErrorMessage = null }) {
+                    Text(stringResource(Res.string.ok), color = AppColors.textLink)
+                }
+            },
+        )
+    }
 }
 
 // ============================================================================
@@ -501,6 +596,7 @@ fun OnboardingMigration19Dialog(
 
 private enum class Step19 {
     Welcome,
+    Backup,
     IssuerName,
     IssuerCountry,
     Cleanup,
@@ -523,9 +619,10 @@ private fun previousStep19(
     setCurrentIssuerIdx: (Int) -> Unit,
 ): Step19 = when (step) {
     Step19.Welcome -> Step19.Welcome
-    Step19.IssuerName -> Step19.Welcome
+    Step19.Backup -> Step19.Welcome
+    Step19.IssuerName -> Step19.Backup
     Step19.IssuerCountry -> Step19.IssuerName
-    Step19.Cleanup -> Step19.Welcome
+    Step19.Cleanup -> Step19.Backup
     Step19.AttachIntro -> Step19.Cleanup
     Step19.AttachClients -> {
         if (currentIssuerIdx > 0) {
@@ -540,7 +637,7 @@ private fun previousStep19(
     Step19.BankDetails -> when {
         isMulti -> Step19.AttachProducts
         needsIssuerBootstrap -> Step19.IssuerCountry
-        else -> Step19.Welcome
+        else -> Step19.Backup
     }
     Step19.OrphansClients -> Step19.BankDetails
     Step19.OrphansProducts -> Step19.OrphansClients
@@ -552,6 +649,55 @@ private fun previousStep19(
 // ============================================================================
 // Steps
 // ============================================================================
+
+@Composable
+private fun BackupStep19(
+    onBackup: () -> Unit,
+    onNext: () -> Unit,
+) {
+    // Shield icon (not EmojiSlot) reuses the 1.8 OnboardingDialog PrivacyStep
+    // visual anchor — the "reassurance / take a moment" beat should read the
+    // same in both wizards. Primary CTA = backup (filled), secondary = skip
+    // (outlined) so the safer path is the more prominent one.
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        MascotSlot {
+            Icon(
+                imageVector = Icons.Outlined.Shield,
+                contentDescription = null,
+                tint = AppColors.accent,
+                modifier = Modifier.size(44.dp),
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_19_backup_title))
+        Spacer(Modifier.height(24.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_backup_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(32.dp))
+        Button(
+            onClick = onBackup,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AppColors.buttonActive,
+                contentColor = AppColors.textOnAccent,
+            ),
+        ) { Text(stringResource(Res.string.onboarding_privacy_cta_backup)) }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = onNext,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.textLink),
+        ) { Text(stringResource(Res.string.onboarding_next)) }
+    }
+}
 
 @Composable
 private fun WelcomeStep19(onNext: () -> Unit) {

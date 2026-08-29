@@ -847,6 +847,8 @@ Une erreur s'est produite :
 
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Bienvenido·a a la versión 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Primero, una copia de seguridad</string>
+    <string name="onboarding_19_backup_body">Voy a reorganizar tus clientes y productos por empresa. Antes de empezar, guarda una copia de seguridad — por si acaso.</string>
     <string name="onboarding_19_welcome_body">Esta versión añade nuevos campos para la facturación electrónica. Vamos a configurarlos juntos.</string>
     <string name="onboarding_19_welcome_cta">Adelante</string>
     <string name="onboarding_19_cleanup_title">Parece que gestionas %1$d empresas</string>

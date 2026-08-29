@@ -176,6 +176,15 @@ fun App(
                         issuer.copy(addresses = listOf(updatedAddress) + otherAddresses)
                     )
                 },
+                // Desktop/iOS shell — DB export isn't wired here yet, surface a
+                // "not available" so the wizard's Backup step still lets the
+                // user click Suivant and continue instead of just no-oping.
+                exportDatabase = {
+                    com.a4a.g8invoicing.ui.screens.ExportResult.Error(
+                        "Database export is not available on this platform yet."
+                    )
+                },
+                sendDatabaseByEmail = { /* no-op */ },
                 markSeen = { modulesRepo.markMigration19Seen() },
             ),
             onDismiss = { migration19Context = null },

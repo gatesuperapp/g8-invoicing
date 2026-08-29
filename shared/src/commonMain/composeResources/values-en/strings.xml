@@ -840,6 +840,8 @@
 
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Welcome to version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Let's back up first</string>
+    <string name="onboarding_19_backup_body">I'm about to reorganize your clients and products by company. Before we start, back up your database — just in case.</string>
     <string name="onboarding_19_welcome_body">This version brings new fields for e-invoicing. Let's set them up together.</string>
     <string name="onboarding_19_welcome_cta">Let's go</string>
     <string name="onboarding_19_cleanup_title">Looks like you manage %1$d businesses</string>

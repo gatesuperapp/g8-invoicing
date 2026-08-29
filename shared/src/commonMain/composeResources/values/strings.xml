@@ -950,6 +950,8 @@ Une erreur s'est produite :
          export modules at the end.
          =================================================================== -->
     <string name="onboarding_19_welcome_title">Bienvenue sur la version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Sauvegardons d'abord</string>
+    <string name="onboarding_19_backup_body">Je vais réorganiser tes clients et tes produits en les rattachant à ton entreprise. Avant qu'on démarre, sauvegarde ta base — au cas où.</string>
     <string name="onboarding_19_welcome_body">Cette version apporte de nouveaux champs pour la facturation électronique. Configurons-les ensemble.</string>
     <string name="onboarding_19_welcome_cta">C'est parti</string>
 

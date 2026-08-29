@@ -250,6 +250,19 @@ fun MainCompose(
                         issuer.copy(addresses = listOf(updatedAddress) + otherAddresses)
                     )
                 },
+                exportDatabase = {
+                    try {
+                        val file = exportDatabaseToDownloads(context)
+                        ExportResult.Success(file.absolutePath)
+                    } catch (e: Exception) {
+                        ExportResult.Error(e.message ?: "Unknown error")
+                    }
+                },
+                sendDatabaseByEmail = { filePath ->
+                    coroutineScope.launch {
+                        sendDatabaseByEmail(context, File(filePath))
+                    }
+                },
                 markSeen = {
                     // Completing the migration wizard is the user's definitive
                     // acknowledgement of the 1.9 upgrade — mark every legacy

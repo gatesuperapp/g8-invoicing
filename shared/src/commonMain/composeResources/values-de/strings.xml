@@ -845,6 +845,8 @@ Es ist ein Fehler aufgetreten :
 
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Willkommen zu Version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Sichern wir zuerst</string>
+    <string name="onboarding_19_backup_body">Ich werde gleich deine Kunden und Produkte nach Unternehmen neu ordnen. Bevor wir loslegen, sichere deine Datenbank — nur zur Sicherheit.</string>
     <string name="onboarding_19_welcome_body">Diese Version bringt neue Felder für die elektronische Rechnungsstellung. Wir richten sie gemeinsam ein.</string>
     <string name="onboarding_19_welcome_cta">Los geht's</string>
     <string name="onboarding_19_cleanup_title">Es sieht so aus, als hättest du %1$d Unternehmen</string>
