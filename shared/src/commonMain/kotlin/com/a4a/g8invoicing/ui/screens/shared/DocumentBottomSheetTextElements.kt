@@ -2,9 +2,7 @@ package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -29,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -106,14 +105,15 @@ fun DocumentBottomSheetTextElements(
         Box(
             modifier = Modifier
                 .background(Color.Transparent)
-                .fillMaxWidth() // Prend toute la largeur
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        localFocusManager.clearFocus() // Efface le focus, ce qui devrait cacher le clavier
-                    }
-                )
+                .fillMaxWidth()
+                // Was `.clickable { clearFocus() }` — but that raced with the
+                // BasicTextField children on release-build timings, and Compose
+                // would sometimes fire the outer onClick even when the tap was
+                // on a text field, clearing focus before the keyboard could
+                // rise. dismissKeyboardOnUnconsumedTap only fires when the
+                // Final pointer pass shows nothing consumed downstream — i.e.
+                // the tap really did land on empty space.
+                .dismissKeyboardOnUnconsumedTap()
                 .focusable(false)
         ) {
             // Keep the main elements list rendered even when a slide-in is open, so
