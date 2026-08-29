@@ -24,8 +24,11 @@ import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.PrefKeys
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.dataStore
 import com.a4a.g8invoicing.data.initializeVersionTracking
+import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.data.setSeenEInvoiceIntro
 import com.a4a.g8invoicing.data.setSeenOnboarding18
@@ -112,10 +115,36 @@ fun MainCompose(
     var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
+        // Snapshot the "returning user" signal BEFORE initializeVersionTracking
+        // runs — on a fresh install it seeds LAST_SEEN_VERSION itself, which
+        // would then look identical to a real upgrade if we read it later.
+        val bootPrefs = context.dataStore.data.first()
+        val isReturningUser = bootPrefs[PrefKeys.LAST_SEEN_VERSION] != null
+            || (bootPrefs[PrefKeys.HAS_SEEN_POPUP] ?: false)
         initializeVersionTracking(context)
         val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
         if (lastIssuerId == null) {
-            needsFirstLaunchIssuer = true
+            if (isReturningUser) {
+                // Existing user with a wiped or never-populated issuer table.
+                // Would only happen if migration 7.sqm's "Mon entreprise" seed
+                // was skipped for some reason. Repair silently — don't hit an
+                // upgrader with the fresh-install welcome wizard.
+                val defaultCountry = CountryCodes.pickDefaultForNewAddress(null)
+                val seededIssuer = ClientOrIssuerState(
+                    type = ClientOrIssuerType.ISSUER,
+                    name = TextFieldValue("Mon entreprise"),
+                    addresses = listOf(
+                        com.a4a.g8invoicing.ui.states.AddressState(
+                            countryCode = defaultCountry,
+                        )
+                    ),
+                )
+                clientOrIssuerDataSource.createNewAndReturnId(seededIssuer)
+                    ?.let { currentCompanyRepository.setCurrent(it) }
+                modulesRepo.markMigration19Seen()
+            } else {
+                needsFirstLaunchIssuer = true
+            }
         } else {
             currentCompanyRepository.initIfMissing { lastIssuerId }
             if (!modulesRepo.hasSeenMigration19()) {
