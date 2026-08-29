@@ -28,6 +28,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
@@ -60,7 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.facturx.extractBankInfoFromFooters
+import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_clients_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_cta
@@ -134,6 +137,8 @@ class Migration19Actions(
     val attachClients: suspend (clientIds: List<Long>, issuerId: Long) -> Unit,
     val attachProducts: suspend (productIds: List<Long>, issuerId: Long) -> Unit,
     val saveIssuerBank: suspend (issuer: ClientOrIssuerState, iban: String, bic: String) -> Unit,
+    val updateIssuerName: suspend (issuer: ClientOrIssuerState, newName: String) -> Unit,
+    val updateIssuerCountry: suspend (issuer: ClientOrIssuerState, countryCode: String) -> Unit,
     val markSeen: suspend () -> Unit,
 )
 
@@ -176,9 +181,29 @@ fun OnboardingMigration19Dialog(
 
     val isMulti: Boolean = remainingIssuers.size > 1
 
+    // Bootstrap detection: post-migration 7.sqm seeds a "Mon entreprise" issuer
+    // (no address) whenever the 1.8.x DB had none. Route those users through
+    // two extra steps (name + country) before BankDetails, so the wizard
+    // doubles as a first-time-setup flow instead of quietly locking in the
+    // placeholder name.
+    val needsIssuerBootstrap = remainingIssuers.size == 1 &&
+        remainingIssuers.first().addresses.isNullOrEmpty()
+
     // --- Step transitions ---------------------------------------------------
     fun goForwardFromWelcome() {
-        step = if (isMulti) Step19.Cleanup else Step19.BankDetails
+        step = when {
+            needsIssuerBootstrap -> Step19.IssuerName
+            isMulti -> Step19.Cleanup
+            else -> Step19.BankDetails
+        }
+    }
+
+    fun goForwardFromIssuerName() {
+        step = Step19.IssuerCountry
+    }
+
+    fun goForwardFromIssuerCountry() {
+        step = Step19.BankDetails
     }
 
     fun goForwardFromCleanup() {
@@ -258,7 +283,7 @@ fun OnboardingMigration19Dialog(
 
     // --- Rendering ----------------------------------------------------------
     val previous = { s: Step19 ->
-        step = previousStep19(s, isMulti, currentIssuerIdx) { newIdx -> currentIssuerIdx = newIdx }
+        step = previousStep19(s, isMulti, needsIssuerBootstrap, currentIssuerIdx) { newIdx -> currentIssuerIdx = newIdx }
     }
 
     Dialog(
@@ -279,15 +304,70 @@ fun OnboardingMigration19Dialog(
                     canGoBack = step != Step19.Welcome && step != Step19.Final,
                     onBack = { previous(step) },
                 )
+                // Skip verticalScroll on the Final step. The confetti Canvas
+                // uses fillMaxSize(), and inside a scrollable parent (infinite
+                // height constraint) it resolves to a degenerate size — the
+                // particles collapse into a narrow horizontal band instead of
+                // filling the screen.
+                val contentModifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .let { if (step != Step19.Final) it.verticalScroll(rememberScrollState()) else it }
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
+                    modifier = contentModifier,
                     contentAlignment = Alignment.Center,
                 ) {
                     when (step) {
                         Step19.Welcome -> WelcomeStep19(onNext = { goForwardFromWelcome() })
+                        Step19.IssuerName -> {
+                            val issuer = remainingIssuers.firstOrNull() ?: run {
+                                step = Step19.BankDetails
+                                return@Box
+                            }
+                            IssuerNameStep19(
+                                initial = issuer.name.text.takeIf {
+                                    // Placeholder from migration seed; blank the field so the
+                                    // user types their real entreprise name from scratch.
+                                    it != "Mon entreprise"
+                                }.orEmpty(),
+                                onSubmit = { entered ->
+                                    scope.launch {
+                                        actions.updateIssuerName(issuer, entered)
+                                        // Mutate local list so downstream steps see the new name
+                                        // without waiting for a re-fetch.
+                                        remainingIssuers = remainingIssuers.map { i ->
+                                            if (i.id == issuer.id) i.copy(name = TextFieldValue(entered.trim())) else i
+                                        }
+                                        goForwardFromIssuerName()
+                                    }
+                                },
+                            )
+                        }
+                        Step19.IssuerCountry -> {
+                            val issuer = remainingIssuers.firstOrNull() ?: run {
+                                step = Step19.BankDetails
+                                return@Box
+                            }
+                            IssuerCountryStep19(
+                                initial = issuer.addresses?.firstOrNull()?.countryCode
+                                    ?: CountryCodes.pickDefaultForNewAddress(null),
+                                onSubmit = { picked ->
+                                    scope.launch {
+                                        actions.updateIssuerCountry(issuer, picked)
+                                        remainingIssuers = remainingIssuers.map { i ->
+                                            if (i.id == issuer.id) {
+                                                val existing = i.addresses?.firstOrNull()
+                                                val updated = existing?.copy(countryCode = picked)
+                                                    ?: com.a4a.g8invoicing.ui.states.AddressState(countryCode = picked)
+                                                val rest = i.addresses?.drop(1).orEmpty()
+                                                i.copy(addresses = listOf(updated) + rest)
+                                            } else i
+                                        }
+                                        goForwardFromIssuerCountry()
+                                    }
+                                },
+                            )
+                        }
                         Step19.Cleanup -> CleanupStep19(
                             issuers = remainingIssuers,
                             onDelete = { issuer ->
@@ -404,6 +484,8 @@ fun OnboardingMigration19Dialog(
 
 private enum class Step19 {
     Welcome,
+    IssuerName,
+    IssuerCountry,
     Cleanup,
     AttachIntro,
     AttachClients,
@@ -418,10 +500,13 @@ private enum class Step19 {
 private fun previousStep19(
     step: Step19,
     isMulti: Boolean,
+    needsIssuerBootstrap: Boolean,
     currentIssuerIdx: Int,
     setCurrentIssuerIdx: (Int) -> Unit,
 ): Step19 = when (step) {
     Step19.Welcome -> Step19.Welcome
+    Step19.IssuerName -> Step19.Welcome
+    Step19.IssuerCountry -> Step19.IssuerName
     Step19.Cleanup -> Step19.Welcome
     Step19.AttachIntro -> Step19.Cleanup
     Step19.AttachClients -> {
@@ -434,7 +519,11 @@ private fun previousStep19(
         }
     }
     Step19.AttachProducts -> Step19.AttachClients
-    Step19.BankDetails -> if (isMulti) Step19.AttachProducts else Step19.Welcome
+    Step19.BankDetails -> when {
+        isMulti -> Step19.AttachProducts
+        needsIssuerBootstrap -> Step19.IssuerCountry
+        else -> Step19.Welcome
+    }
     Step19.OrphansClients -> Step19.BankDetails
     Step19.OrphansProducts -> Step19.OrphansClients
     Step19.NewFieldsRecap -> if (isMulti) Step19.OrphansProducts else Step19.BankDetails
@@ -877,6 +966,134 @@ private fun FinalStep19(onDone: () -> Unit) {
                 onClick = { if (!fadingOut) fadingOut = true },
             )
         }
+    }
+}
+
+// ============================================================================
+// Bootstrap steps (only when the auto-seeded "Mon entreprise" is detected)
+// ============================================================================
+
+// TODO(strings): move the FR literals in IssuerNameStep19 + IssuerCountryStep19
+// to composeResources/values/strings.xml on the `translations` branch. Suggested
+// keys:
+//   onboarding_19_issuer_name_title    = "Comment s'appelle votre entreprise ?"
+//   onboarding_19_issuer_name_body     = "Vous pourrez la modifier à tout moment dans « Mon entreprise »."
+//   onboarding_19_issuer_name_label    = "Nom de l'entreprise"
+//   onboarding_19_issuer_name_cta      = "Suivant"
+//   onboarding_19_issuer_country_title = "Dans quel pays est-elle établie ?"
+//   onboarding_19_issuer_country_body  = "Ce choix pilote l'IBAN / BBAN attendu et le texte d'exonération de TVA si vous êtes en franchise en base."
+//   onboarding_19_issuer_country_label = "Pays"
+//   onboarding_19_issuer_country_cta   = "Suivant"
+
+@Composable
+private fun IssuerNameStep19(
+    initial: String,
+    onSubmit: (String) -> Unit,
+) {
+    var name by remember {
+        mutableStateOf(TextFieldValue(initial, TextRange(initial.length)))
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        Text(
+            text = "Comment s'appelle votre entreprise ?",
+            style = MaterialTheme.typography.textScreenTitle,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = "Vous pourrez la modifier à tout moment dans « Mon entreprise ».",
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(24.dp))
+        FieldLabel19("Nom de l'entreprise")
+        Spacer(Modifier.height(6.dp))
+        CompactTextField19(
+            value = name,
+            onValueChange = { name = it },
+            placeholder = "Ma boîte",
+            imeAction = ImeAction.Done,
+        )
+        Spacer(Modifier.height(32.dp))
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            PrimaryCta19(
+                text = "Suivant",
+                enabled = name.text.trim().isNotEmpty(),
+                onClick = { onSubmit(name.text.trim()) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun IssuerCountryStep19(
+    initial: String,
+    onSubmit: (String) -> Unit,
+) {
+    var country by remember { mutableStateOf(initial) }
+    var pickerOpen by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        Text(
+            text = "Dans quel pays est-elle établie ?",
+            style = MaterialTheme.typography.textScreenTitle,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = "Ce choix pilote l'IBAN / BBAN attendu et le texte d'exonération de TVA si vous êtes en franchise en base.",
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(24.dp))
+        FieldLabel19("Pays")
+        Spacer(Modifier.height(6.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFFF5F2F8))
+                .border(BorderStroke(1.dp, Color(0xFFE4DEED)), RoundedCornerShape(10.dp))
+                .clickable { pickerOpen = true }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = CountryCodes.displayNameOf(country),
+                style = MaterialTheme.typography.textBody.copy(color = AppColors.textPrimary),
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = AppColors.accent,
+            )
+        }
+        Spacer(Modifier.height(32.dp))
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            PrimaryCta19(
+                text = "Suivant",
+                onClick = { onSubmit(country) },
+            )
+        }
+    }
+    if (pickerOpen) {
+        CountryPicker(
+            currentCode = country,
+            onSelect = { picked -> country = picked; pickerOpen = false },
+            onDismiss = { pickerOpen = false },
+        )
     }
 }
 

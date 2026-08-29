@@ -145,11 +145,36 @@ fun App(
                     productDataSource.bulkAttachToCompany(ids, issuerId)
                 },
                 saveIssuerBank = { issuer, iban, bic ->
-                    val updated = issuer.copy(
-                        paymentIban = if (iban.isNotBlank()) TextFieldValue(iban) else issuer.paymentIban,
-                        paymentBic = if (bic.isNotBlank()) TextFieldValue(bic) else issuer.paymentBic,
+                    // Master ClientOrIssuer has no payment_iban / payment_bic
+                    // columns — those live on DocumentClientOrIssuer as a
+                    // frozen doc-side snapshot. Persist to the master by
+                    // building an IssuerBankState and letting updateClientOrIssuer
+                    // upsert the IssuerBank table via saveIssuerBanks(banks).
+                    if (iban.isNotBlank() || bic.isNotBlank()) {
+                        val newBank = com.a4a.g8invoicing.ui.states.IssuerBankState(
+                            id = null,
+                            countryCode = issuer.addresses?.firstOrNull()?.countryCode,
+                            identifier = TextFieldValue(iban),
+                            bic = TextFieldValue(bic),
+                            sortOrder = 0,
+                        )
+                        val updated = issuer.copy(banks = listOf(newBank))
+                        clientOrIssuerDataSource.updateClientOrIssuer(updated)
+                    }
+                },
+                updateIssuerName = { issuer, newName ->
+                    clientOrIssuerDataSource.updateClientOrIssuer(
+                        issuer.copy(name = TextFieldValue(newName.trim()))
                     )
-                    clientOrIssuerDataSource.updateClientOrIssuer(updated)
+                },
+                updateIssuerCountry = { issuer, countryCode ->
+                    val existing = issuer.addresses?.firstOrNull()
+                    val updatedAddress = existing?.copy(countryCode = countryCode)
+                        ?: com.a4a.g8invoicing.ui.states.AddressState(countryCode = countryCode)
+                    val otherAddresses = issuer.addresses?.drop(1).orEmpty()
+                    clientOrIssuerDataSource.updateClientOrIssuer(
+                        issuer.copy(addresses = listOf(updatedAddress) + otherAddresses)
+                    )
                 },
                 markSeen = { modulesRepo.markMigration19Seen() },
             ),
