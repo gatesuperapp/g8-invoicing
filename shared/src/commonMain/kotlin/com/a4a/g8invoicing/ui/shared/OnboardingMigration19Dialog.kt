@@ -186,8 +186,13 @@ fun OnboardingMigration19Dialog(
     // two extra steps (name + country) before BankDetails, so the wizard
     // doubles as a first-time-setup flow instead of quietly locking in the
     // placeholder name.
-    val needsIssuerBootstrap = remainingIssuers.size == 1 &&
-        remainingIssuers.first().addresses.isNullOrEmpty()
+    // Frozen at wizard open — computing this off `remainingIssuers` would flip
+    // to false as soon as the IssuerCountry step commits an address, breaking
+    // the Back navigation from BankDetails (would jump back to Welcome instead
+    // of the IssuerCountry -> IssuerName trail the user just walked through).
+    val needsIssuerBootstrap = remember(context.issuers) {
+        context.issuers.size == 1 && context.issuers.first().addresses.isNullOrEmpty()
+    }
 
     // --- Step transitions ---------------------------------------------------
     fun goForwardFromWelcome() {
