@@ -982,11 +982,11 @@ Une erreur s'est produite :
     <string name="onboarding_19_orphans_cta">Continuer</string>
 
     <!-- New-fields recap + final annoucement -->
-    <string name="onboarding_19_new_fields_title">Encore quelques infos utiles</string>
+    <string name="onboarding_19_new_fields_title">Autres champs nouveaux</string>
     <string name="onboarding_19_new_fields_body">J'ai aussi ajouté dans les factures les champs suivants :\n• mode de paiement\n• termes de paiement\n• exonération de TVA (pour les entreprises en franchise)\n\nSi tu avais mis ces informations dans le pied de page, tu peux faire des copier-coller dans les champs adéquats.</string>
     <string name="onboarding_19_new_fields_cta">Suivant</string>
-    <string name="onboarding_19_final_title">Tu es maintenant prêt·e pour émettre des factures électroniques !</string>
-    <string name="onboarding_19_final_body1">Dans cette nouvelle version, je te propose des modules d'export de Factur-X et de XML CII. Tu pourras importer ces factures directement dans ta plateforme agréée.</string>
-    <string name="onboarding_19_final_body2">Active ces modules dans le gStore (si tu es membre premium — sinon, tu peux t'abonner sur le site internet).</string>
+    <string name="onboarding_19_final_title">C'est bon, tout est carré !</string>
+    <string name="onboarding_19_final_body1">Tu peux même exporter des factures électroniques. Dans le gStore, active les modules d'export de Factur-X ou XML CII. Tu pourras importer ces factures directement dans ta plateforme agréée :)</string>
+    <string name="onboarding_19_final_body2">Tu peux rejoindre les membres premium en t'abonnant depuis le site internet 🌟</string>
     <string name="onboarding_19_final_cta">Terminer</string>
 </resources>

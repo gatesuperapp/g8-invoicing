@@ -864,11 +864,11 @@
     <string name="onboarding_19_orphans_products_title">A few products left to sort</string>
     <string name="onboarding_19_orphans_products_body">These products aren't linked to any business. Pick one for each.</string>
     <string name="onboarding_19_orphans_cta">Continue</string>
-    <string name="onboarding_19_new_fields_title">One more helpful thing</string>
+    <string name="onboarding_19_new_fields_title">Other new fields</string>
     <string name="onboarding_19_new_fields_body">I also added these fields on invoices:\n• payment means\n• payment terms\n• VAT exemption reason (for businesses in the VAT-exempt regime)\n\nIf you had this info in the footer text, feel free to copy-paste it into the matching fields.</string>
     <string name="onboarding_19_new_fields_cta">Next</string>
-    <string name="onboarding_19_final_title">You're ready to send e-invoices!</string>
-    <string name="onboarding_19_final_body1">This new version brings Factur-X and CII XML export modules. You'll be able to upload these invoices straight to your registered e-invoicing platform.</string>
-    <string name="onboarding_19_final_body2">Turn these modules on in the gStore (premium members — otherwise you can subscribe on our website).</string>
+    <string name="onboarding_19_final_title">All set, you're good to go!</string>
+    <string name="onboarding_19_final_body1">You can even export electronic invoices. In the gStore, turn on the Factur-X or CII XML export modules. You'll be able to upload these invoices straight to your registered platform :)</string>
+    <string name="onboarding_19_final_body2">Join our premium members by subscribing on our website 🌟</string>
     <string name="onboarding_19_final_cta">Done</string>
 </resources>

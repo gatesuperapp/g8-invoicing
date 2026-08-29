@@ -869,11 +869,11 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_orphans_products_title">Noch ein paar Produkte zu sortieren</string>
     <string name="onboarding_19_orphans_products_body">Diese Produkte sind noch keinem Unternehmen zugeordnet. Wähle jeweils eines aus.</string>
     <string name="onboarding_19_orphans_cta">Weiter</string>
-    <string name="onboarding_19_new_fields_title">Noch ein nützlicher Hinweis</string>
+    <string name="onboarding_19_new_fields_title">Weitere neue Felder</string>
     <string name="onboarding_19_new_fields_body">Ich habe auch folgende Felder in die Rechnungen aufgenommen:\n• Zahlungsart\n• Zahlungsbedingungen\n• USt-Befreiungsgrund (für Kleinunternehmen)\n\nWenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
     <string name="onboarding_19_new_fields_cta">Weiter</string>
-    <string name="onboarding_19_final_title">Du bist bereit für elektronische Rechnungen!</string>
-    <string name="onboarding_19_final_body1">In dieser neuen Version gibt es Factur-X- und CII-XML-Export-Module. Damit lädst du deine Rechnungen direkt auf deine registrierte E-Invoicing-Plattform hoch.</string>
-    <string name="onboarding_19_final_body2">Aktiviere diese Module im gStore (Premium-Mitglieder — sonst kannst du dich auf unserer Website anmelden).</string>
+    <string name="onboarding_19_final_title">Alles klar, du bist startklar!</string>
+    <string name="onboarding_19_final_body1">Du kannst sogar elektronische Rechnungen exportieren. Aktiviere im gStore die Module Factur-X- oder CII-XML-Export. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch :)</string>
+    <string name="onboarding_19_final_body2">Werde Premium-Mitglied — abonniere auf unserer Website 🌟</string>
     <string name="onboarding_19_final_cta">Fertig</string>
 </resources>

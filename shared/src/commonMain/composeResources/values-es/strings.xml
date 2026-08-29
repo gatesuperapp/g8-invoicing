@@ -871,11 +871,11 @@ Une erreur s'est produite :
     <string name="onboarding_19_orphans_products_title">Aún quedan algunos productos por organizar</string>
     <string name="onboarding_19_orphans_products_body">Estos productos no están vinculados a ninguna empresa. Elige una para cada uno.</string>
     <string name="onboarding_19_orphans_cta">Continuar</string>
-    <string name="onboarding_19_new_fields_title">Un dato útil más</string>
+    <string name="onboarding_19_new_fields_title">Otros campos nuevos</string>
     <string name="onboarding_19_new_fields_body">También he añadido los siguientes campos a las facturas:\n• medio de pago\n• condiciones de pago\n• exención de IVA (para empresas en régimen de franquicia)\n\nSi ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
     <string name="onboarding_19_new_fields_cta">Siguiente</string>
-    <string name="onboarding_19_final_title">¡Ya estás listo·a para emitir facturas electrónicas!</string>
-    <string name="onboarding_19_final_body1">Esta nueva versión ofrece módulos de exportación en Factur-X y XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada.</string>
-    <string name="onboarding_19_final_body2">Activa esos módulos en el gStore (si eres miembro premium — si no, puedes suscribirte en la web).</string>
+    <string name="onboarding_19_final_title">¡Listo, todo está en orden!</string>
+    <string name="onboarding_19_final_body1">Incluso puedes exportar facturas electrónicas. En el gStore, activa los módulos de exportación Factur-X o XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada :)</string>
+    <string name="onboarding_19_final_body2">Únete a los miembros premium suscribiéndote en nuestra web 🌟</string>
     <string name="onboarding_19_final_cta">Finalizar</string>
 </resources>
