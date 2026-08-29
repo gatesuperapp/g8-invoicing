@@ -849,7 +849,7 @@ Une erreur s'est produite :
     <string name="onboarding_19_welcome_title">Bienvenido·a a la versión 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Primero, una copia de seguridad</string>
     <string name="onboarding_19_backup_body">Voy a reorganizar tus clientes y productos por empresa. Antes de empezar, guarda una copia de seguridad — por si acaso.</string>
-    <string name="onboarding_19_welcome_body">Esta versión añade nuevos campos para la facturación electrónica. Vamos a configurarlos juntos.</string>
+    <string name="onboarding_19_welcome_body">Esta versión termina de implantar los campos normalizados. Vamos a configurarlos juntos.</string>
     <string name="onboarding_19_welcome_cta">Adelante</string>
     <string name="onboarding_19_cleanup_title">Parece que gestionas %1$d empresas</string>
     <string name="onboarding_19_cleanup_body">¿Es así? Si no, elimina las que no uses. Tranquilo·a, tus documentos no se verán afectados.</string>
@@ -874,12 +874,13 @@ Une erreur s'est produite :
     <string name="onboarding_19_orphans_products_body">Estos productos no están vinculados a ninguna empresa. Elige una para cada uno.</string>
     <string name="onboarding_19_orphans_cta">Continuar</string>
     <string name="onboarding_19_new_fields_title">Otros campos añadidos</string>
-    <string name="onboarding_19_new_fields_body">También he añadido los siguientes campos a las facturas:\n• **medio de pago**\n• **condiciones de pago**\n• **exención de IVA** (para empresas en régimen de franquicia)\n\nSi ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
+    <string name="onboarding_19_new_fields_body">También he añadido los siguientes campos a las facturas:\n\n• **medio de pago**\n• **condiciones de pago**\n• **exención de IVA** (para empresas en régimen de franquicia)</string>
+    <string name="onboarding_19_new_fields_hint">Si ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
     <string name="onboarding_19_new_fields_cta">Siguiente</string>
     <string name="onboarding_19_einvoice_title">Facturación electrónica</string>
     <string name="onboarding_19_einvoice_intro">Ahora puedes exportar facturas electrónicas.</string>
-    <string name="onboarding_19_einvoice_body">En el gStore, activa los módulos de exportación Factur-X o XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada :)</string>
-    <string name="onboarding_19_einvoice_sub">Únete a los miembros premium suscribiéndote en nuestra web 🌟</string>
+    <string name="onboarding_19_einvoice_body">En el gStore, activa los módulos Factur-X, XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada.</string>
+    <string name="onboarding_19_einvoice_sub">Puedes hacerte miembro premium suscribiéndote en nuestra web 🌟</string>
     <string name="onboarding_19_einvoice_cta">Siguiente</string>
     <string name="onboarding_19_final_title">¡Listo, todo está en orden!</string>
 </resources>

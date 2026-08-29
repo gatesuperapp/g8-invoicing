@@ -31,8 +31,14 @@ fun extractBankInfoFromFooters(footers: List<String>): DetectedBankInfo {
     // Note: character class uses a literal space, not \s, so newline / carriage
     // return / tab all terminate the capture — critical to keep a "BIC …" on
     // the next line from being appended to the IBAN.
-    val ibanRegex = Regex("""(?i)\bIBAN\b[^A-Z\n\r]{0,10}?([A-Z]{2}\d{2}[A-Z0-9 ]{11,30})""")
-    val bicRegex = Regex("""(?i)\bBIC\b[^A-Z\n\r]{0,10}?([A-Z0-9]{8,11})""")
+    val ibanRegex = Regex("""(?i)\bIBAN\b[^A-Z\n\r]{0,15}?([A-Z]{2}\d{2}[A-Z0-9 ]{11,30})""")
+    val bicRegex = Regex("""(?i)\bBIC\b[^A-Z\n\r]{0,15}?([A-Z0-9]{8,11})""")
+    // Per-line fallback for the BIC. Same shape as bicRegex but relaxes the
+    // "no letters between label and payload" rule (anything non-newline
+    // between the BIC label and its value) — catches footers where the user
+    // squished "BIC:BNPAFRPP" tight or added text like "BIC N°2: XXX" that
+    // the strict pattern refuses.
+    val bicLineFallback = Regex("""(?i)\bBIC\b[^\n\r]*?([A-Z0-9]{8,11})""")
     for (footer in footers) {
         if (footer.isBlank()) continue
         val ibanMatch = ibanRegex.find(footer) ?: continue
@@ -42,6 +48,9 @@ fun extractBankInfoFromFooters(footers: List<String>): DetectedBankInfo {
             .takeIf { it.length in 15..34 }
             ?: continue
         val bic = bicRegex.find(footer)?.groupValues?.get(1)?.uppercase()
+            ?: footer.split('\n', '\r')
+                .firstNotNullOfOrNull { line -> bicLineFallback.find(line)?.groupValues?.get(1) }
+                ?.uppercase()
         return DetectedBankInfo(iban, bic)
     }
     return DetectedBankInfo(null, null)

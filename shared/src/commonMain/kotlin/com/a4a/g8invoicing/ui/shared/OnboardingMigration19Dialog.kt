@@ -108,6 +108,7 @@ import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_final_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_hint
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_clients_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_clients_title
@@ -212,12 +213,18 @@ fun OnboardingMigration19Dialog(
     // two extra steps (name + country) before BankDetails, so the wizard
     // doubles as a first-time-setup flow instead of quietly locking in the
     // placeholder name.
+    // Narrowed to the exact auto-seeded fingerprint: name literally
+    // "Mon entreprise" (hardcoded in 7.sqm + MainCompose's safety net) AND no
+    // address. A real user-created issuer with a name they picked never
+    // matches — the user shouldn't be re-prompted for information they've
+    // already filled in.
     // Frozen at wizard open — computing this off `remainingIssuers` would flip
     // to false as soon as the IssuerCountry step commits an address, breaking
-    // the Back navigation from BankDetails (would jump back to Welcome instead
-    // of the IssuerCountry -> IssuerName trail the user just walked through).
+    // the Back navigation from BankDetails.
     val needsIssuerBootstrap = remember(context.issuers) {
-        context.issuers.size == 1 && context.issuers.first().addresses.isNullOrEmpty()
+        context.issuers.size == 1 &&
+            context.issuers.first().addresses.isNullOrEmpty() &&
+            context.issuers.first().name.text == "Mon entreprise"
     }
 
     // Database backup flow state — driven from the Backup step's
@@ -732,7 +739,7 @@ private fun CleanupStep19(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        EmojiSlot("🧹")
+        EmojiSlot("🏢")
         Spacer(Modifier.height(24.dp))
         StepTitle(stringResource(Res.string.onboarding_19_cleanup_title, issuers.size))
         Spacer(Modifier.height(20.dp))
@@ -927,6 +934,19 @@ private fun BankDetailsStep19(
             lineHeight = 24.sp,
             modifier = Modifier.fillMaxWidth(),
         )
+        Spacer(Modifier.height(16.dp))
+        // Hint moved above the fields (was at the bottom of the step) so the
+        // "I found it in your footer" / "I couldn't find it" context lands
+        // before the user starts scanning the pre-filled inputs.
+        Text(
+            text = if (prefilled)
+                stringResource(Res.string.onboarding_19_bank_prefilled_hint)
+            else
+                stringResource(Res.string.onboarding_19_bank_not_found_hint),
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            lineHeight = 20.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
         Spacer(Modifier.height(24.dp))
         FieldLabel19(stringResource(Res.string.onboarding_19_bank_iban_label))
         Spacer(Modifier.height(6.dp))
@@ -944,16 +964,6 @@ private fun BankDetailsStep19(
             onValueChange = { bic = it },
             placeholder = "BNPAFRPP",
             imeAction = ImeAction.Done,
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = if (prefilled)
-                stringResource(Res.string.onboarding_19_bank_prefilled_hint)
-            else
-                stringResource(Res.string.onboarding_19_bank_not_found_hint),
-            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-            lineHeight = 20.sp,
-            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(32.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -1079,6 +1089,16 @@ private fun NewFieldsRecapStep19(onNext: () -> Unit) {
             lineHeight = 24.sp,
             modifier = Modifier.fillMaxWidth(),
         )
+        Spacer(Modifier.height(20.dp))
+        // "Si tu avais mis ces informations…" — demoted to a hint so the
+        // three bolded field labels above stay the focal point.
+        Text(
+            text = stringResource(Res.string.onboarding_19_new_fields_hint),
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            textAlign = TextAlign.Start,
+            lineHeight = 22.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
         Spacer(Modifier.height(32.dp))
         PrimaryCta19(text = stringResource(Res.string.onboarding_19_new_fields_cta), onClick = onNext)
     }
@@ -1097,7 +1117,7 @@ private fun EInvoiceStep19(onNext: () -> Unit) {
         Text(
             text = stringResource(Res.string.onboarding_19_einvoice_intro),
             style = MaterialTheme.typography.textBody,
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
             lineHeight = 24.sp,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -1113,7 +1133,7 @@ private fun EInvoiceStep19(onNext: () -> Unit) {
         Text(
             text = stringResource(Res.string.onboarding_19_einvoice_sub),
             style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-            textAlign = TextAlign.Center,
+            textAlign = TextAlign.Start,
             lineHeight = 22.sp,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -1138,11 +1158,18 @@ private fun FinalStep19(onDone: () -> Unit) {
         animationSpec = tween(durationMillis = 700),
         label = "migration19FinalFade",
     )
+    // Split into two effects so a tap-to-skip triggers onDone right after the
+    // fade — the previous single-effect version stayed blocked on delay(5000)
+    // even after the user tapped, leaving a ~4 s blank screen post-fade.
     LaunchedEffect(Unit) {
         delay(5000L)
-        fadingOut = true
-        delay(700L)
-        onDone()
+        if (!fadingOut) fadingOut = true
+    }
+    LaunchedEffect(fadingOut) {
+        if (fadingOut) {
+            delay(700L)
+            onDone()
+        }
     }
     val interactionSource = remember { MutableInteractionSource() }
     Box(
@@ -1257,14 +1284,6 @@ private fun IssuerCountryStep19(
         EmojiSlot("🌍")
         Spacer(Modifier.height(24.dp))
         StepTitle("Dans quel pays est-elle établie ?")
-        Spacer(Modifier.height(20.dp))
-        Text(
-            text = "Ce choix pilote l'IBAN / BBAN attendu et le texte d'exonération de TVA si vous êtes en franchise en base.",
-            style = MaterialTheme.typography.textBody,
-            textAlign = TextAlign.Center,
-            lineHeight = 24.sp,
-            modifier = Modifier.fillMaxWidth(),
-        )
         Spacer(Modifier.height(24.dp))
         FieldLabel19("Pays")
         Spacer(Modifier.height(6.dp))

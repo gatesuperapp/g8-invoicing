@@ -847,7 +847,7 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_welcome_title">Willkommen zu Version 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Sichern wir zuerst</string>
     <string name="onboarding_19_backup_body">Ich werde gleich deine Kunden und Produkte nach Unternehmen neu ordnen. Bevor wir loslegen, sichere deine Datenbank — nur zur Sicherheit.</string>
-    <string name="onboarding_19_welcome_body">Diese Version bringt neue Felder für die elektronische Rechnungsstellung. Wir richten sie gemeinsam ein.</string>
+    <string name="onboarding_19_welcome_body">Diese Version schließt die standardisierten Felder ab. Wir richten sie gemeinsam ein.</string>
     <string name="onboarding_19_welcome_cta">Los geht's</string>
     <string name="onboarding_19_cleanup_title">Es sieht so aus, als hättest du %1$d Unternehmen</string>
     <string name="onboarding_19_cleanup_body">Stimmt das? Sonst kannst du die ungenutzten löschen. Keine Sorge, deine Dokumente bleiben unberührt.</string>
@@ -872,12 +872,13 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_orphans_products_body">Diese Produkte sind noch keinem Unternehmen zugeordnet. Wähle jeweils eines aus.</string>
     <string name="onboarding_19_orphans_cta">Weiter</string>
     <string name="onboarding_19_new_fields_title">Weitere hinzugefügte Felder</string>
-    <string name="onboarding_19_new_fields_body">Ich habe auch folgende Felder in die Rechnungen aufgenommen:\n• **Zahlungsart**\n• **Zahlungsbedingungen**\n• **USt-Befreiungsgrund** (für Kleinunternehmen)\n\nWenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
+    <string name="onboarding_19_new_fields_body">Ich habe auch folgende Felder in die Rechnungen aufgenommen:\n\n• **Zahlungsart**\n• **Zahlungsbedingungen**\n• **USt-Befreiungsgrund** (für Kleinunternehmen)</string>
+    <string name="onboarding_19_new_fields_hint">Wenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
     <string name="onboarding_19_new_fields_cta">Weiter</string>
     <string name="onboarding_19_einvoice_title">Elektronische Rechnungen</string>
     <string name="onboarding_19_einvoice_intro">Du kannst jetzt elektronische Rechnungen exportieren.</string>
-    <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module Factur-X- oder CII-XML-Export. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch :)</string>
-    <string name="onboarding_19_einvoice_sub">Werde Premium-Mitglied — abonniere auf unserer Website 🌟</string>
+    <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module Factur-X, CII XML. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch.</string>
+    <string name="onboarding_19_einvoice_sub">Du kannst Premium-Mitglied werden — abonniere auf unserer Website 🌟</string>
     <string name="onboarding_19_einvoice_cta">Weiter</string>
     <string name="onboarding_19_final_title">Alles klar, du bist startklar!</string>
 </resources>
