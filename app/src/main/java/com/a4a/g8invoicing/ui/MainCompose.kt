@@ -141,7 +141,15 @@ fun MainCompose(
                 )
                 clientOrIssuerDataSource.createNewAndReturnId(seededIssuer)
                     ?.let { currentCompanyRepository.setCurrent(it) }
+                // Silent-repair path: nothing pops on screen, so consume every
+                // legacy onboarding flag here too. Otherwise the 1.8 Devis
+                // wizard / e-invoice popup / generic What's New would surface
+                // on the very next boot, right after we quietly booted the
+                // user straight into the app.
                 modulesRepo.markMigration19Seen()
+                setSeenOnboarding18(context)
+                setSeenEInvoiceIntro(context)
+                setSeenWhatsNew(context)
             } else {
                 needsFirstLaunchIssuer = true
             }
