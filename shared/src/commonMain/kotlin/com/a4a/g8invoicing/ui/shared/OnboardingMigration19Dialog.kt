@@ -53,10 +53,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -82,9 +87,11 @@ import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_title_with_issuer
 import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_cta
 import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_title
-import com.a4a.g8invoicing.shared.resources.onboarding_19_final_body1
-import com.a4a.g8invoicing.shared.resources.onboarding_19_final_body2
-import com.a4a.g8invoicing.shared.resources.onboarding_19_final_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_intro
+import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_sub
+import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_final_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_cta
@@ -257,6 +264,10 @@ fun OnboardingMigration19Dialog(
     }
 
     fun goForwardFromNewFieldsRecap() {
+        step = Step19.EInvoice
+    }
+
+    fun goForwardFromEInvoice() {
         step = Step19.Final
     }
 
@@ -475,6 +486,7 @@ fun OnboardingMigration19Dialog(
                             )
                         }
                         Step19.NewFieldsRecap -> NewFieldsRecapStep19(onNext = { goForwardFromNewFieldsRecap() })
+                        Step19.EInvoice -> EInvoiceStep19(onNext = { goForwardFromEInvoice() })
                         Step19.Final -> FinalStep19(onDone = commit)
                     }
                 }
@@ -499,6 +511,7 @@ private enum class Step19 {
     OrphansClients,
     OrphansProducts,
     NewFieldsRecap,
+    EInvoice,
     Final,
 }
 
@@ -532,7 +545,8 @@ private fun previousStep19(
     Step19.OrphansClients -> Step19.BankDetails
     Step19.OrphansProducts -> Step19.OrphansClients
     Step19.NewFieldsRecap -> if (isMulti) Step19.OrphansProducts else Step19.BankDetails
-    Step19.Final -> Step19.NewFieldsRecap
+    Step19.EInvoice -> Step19.NewFieldsRecap
+    Step19.Final -> Step19.EInvoice
 }
 
 // ============================================================================
@@ -913,7 +927,7 @@ private fun NewFieldsRecapStep19(onNext: () -> Unit) {
         StepTitle(stringResource(Res.string.onboarding_19_new_fields_title))
         Spacer(Modifier.height(24.dp))
         Text(
-            text = stringResource(Res.string.onboarding_19_new_fields_body),
+            text = boldMarkdown(stringResource(Res.string.onboarding_19_new_fields_body)),
             style = MaterialTheme.typography.textBody,
             textAlign = TextAlign.Start,
             lineHeight = 24.sp,
@@ -925,27 +939,76 @@ private fun NewFieldsRecapStep19(onNext: () -> Unit) {
 }
 
 @Composable
+private fun EInvoiceStep19(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        EmojiSlot("🧞")
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_19_einvoice_title))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_einvoice_intro),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_einvoice_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_einvoice_sub),
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(32.dp))
+        PrimaryCta19(
+            text = stringResource(Res.string.onboarding_19_einvoice_cta),
+            onClick = onNext,
+        )
+    }
+}
+
+@Composable
 private fun FinalStep19(onDone: () -> Unit) {
+    // Auto-dismiss celebration: kaomoji + confetti + title. 5 s hold, then a
+    // 700 ms fade. Tapping anywhere on the slide fast-forwards to the fade —
+    // mirrors FirstLaunchIssuerNameDialog.CompletionStep so the two "you're
+    // done" moments feel identical whether the user came in via fresh install
+    // or upgrade.
     var fadingOut by remember { mutableStateOf(false) }
     val alpha by animateFloatAsState(
         targetValue = if (fadingOut) 0f else 1f,
         animationSpec = tween(durationMillis = 700),
         label = "migration19FinalFade",
     )
-    LaunchedEffect(fadingOut) {
-        if (fadingOut) {
-            delay(700L)
-            onDone()
-        }
+    LaunchedEffect(Unit) {
+        delay(5000L)
+        fadingOut = true
+        delay(700L)
+        onDone()
     }
     val interactionSource = remember { MutableInteractionSource() }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .alpha(alpha)
-            .clickable(interactionSource = interactionSource, indication = null) { /* absorb */ },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+            ) { if (!fadingOut) fadingOut = true },
     ) {
-        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 6000)
+        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 5000)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -956,27 +1019,21 @@ private fun FinalStep19(onDone: () -> Unit) {
             MascotSlot { AnimatedKaomojiThanks(fontSize = 22.sp, loop = true) }
             Spacer(Modifier.height(24.dp))
             StepTitle(stringResource(Res.string.onboarding_19_final_title))
-            Spacer(Modifier.height(20.dp))
-            Text(
-                text = stringResource(Res.string.onboarding_19_final_body1),
-                style = MaterialTheme.typography.textBody,
-                textAlign = TextAlign.Center,
-                lineHeight = 24.sp,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(Res.string.onboarding_19_final_body2),
-                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-                textAlign = TextAlign.Center,
-                lineHeight = 22.sp,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(28.dp))
-            PrimaryCta19(
-                text = stringResource(Res.string.onboarding_19_final_cta),
-                onClick = { if (!fadingOut) fadingOut = true },
-            )
+        }
+    }
+}
+
+// Render a plain string with **bold** markers as an AnnotatedString — a tiny
+// subset of Markdown that lets a stringResource carry lightweight emphasis
+// without pulling in a full HTML/markdown parser. Odd-index parts (between
+// paired `**`) get FontWeight.Bold, even-index parts stay unstyled.
+private fun boldMarkdown(text: String): AnnotatedString = buildAnnotatedString {
+    val parts = text.split("**")
+    parts.forEachIndexed { index, part ->
+        if (index % 2 == 1) {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part) }
+        } else {
+            append(part)
         }
     }
 }
