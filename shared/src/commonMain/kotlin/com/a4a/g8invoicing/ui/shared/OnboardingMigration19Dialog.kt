@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -31,7 +32,9 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.AlertDialog
@@ -70,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.a4a.g8invoicing.data.models.CountryCodes
+import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.facturx.extractBankInfoFromFooters
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
@@ -82,8 +86,16 @@ import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_clients_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_no_clients
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_no_products
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_section_clients
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_section_products
+import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_title
 import com.a4a.g8invoicing.shared.resources.onboarding_next
-import com.a4a.g8invoicing.shared.resources.onboarding_privacy_cta_backup
+import com.a4a.g8invoicing.shared.resources.whats_new_close
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_cta
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_intro_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_intro_cta
@@ -126,6 +138,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBody
+import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import kotlinx.coroutines.delay
@@ -291,12 +304,14 @@ fun OnboardingMigration19Dialog(
                 currentIssuerIdx += 1
                 step = Step19.AttachClients
             } else {
-                // Per-issuer loop is done; check orphans.
+                // Per-issuer loop is done; check orphans. Anything with no
+                // orphans still routes to Confirm — user gets one final
+                // review-and-X-remove pass before commit.
                 val orphanClients = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
                 step = if (orphanClients.isNotEmpty()) Step19.OrphansClients else Step19.OrphansProducts
                 val orphanProducts = context.products.filter { it.id?.toLong() !in productAssignments.keys }
                 if (step == Step19.OrphansProducts && orphanProducts.isEmpty()) {
-                    step = Step19.NewFieldsRecap
+                    step = Step19.Confirm
                 }
             }
         } else {
@@ -306,10 +321,14 @@ fun OnboardingMigration19Dialog(
 
     fun goForwardFromOrphansClients() {
         val orphanProducts = context.products.filter { it.id?.toLong() !in productAssignments.keys }
-        step = if (orphanProducts.isNotEmpty()) Step19.OrphansProducts else Step19.NewFieldsRecap
+        step = if (orphanProducts.isNotEmpty()) Step19.OrphansProducts else Step19.Confirm
     }
 
     fun goForwardFromOrphansProducts() {
+        step = Step19.Confirm
+    }
+
+    fun goForwardFromConfirm() {
         step = Step19.NewFieldsRecap
     }
 
@@ -367,7 +386,13 @@ fun OnboardingMigration19Dialog(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopBar19(
-                    canGoBack = step != Step19.Welcome && step != Step19.Final,
+                    // Confirm step is the "point of no return" review — going
+                    // back would put the user right where they came from without
+                    // a way to fix anything the current step doesn't already
+                    // offer. Keep it forward-only.
+                    canGoBack = step != Step19.Welcome &&
+                        step != Step19.Confirm &&
+                        step != Step19.Final,
                     onBack = { previous(step) },
                 )
                 // Skip verticalScroll on the Final step. The confetti Canvas
@@ -455,16 +480,23 @@ fun OnboardingMigration19Dialog(
                                 return@Box
                             }
                             val available = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+                            var previewClient by remember(currentIssuerIdx) { mutableStateOf<ClientOrIssuerState?>(null) }
                             AttachStep19(
                                 issuer = issuer,
                                 issuerIdx = currentIssuerIdx + 1,
                                 bodyText = stringResource(Res.string.onboarding_19_attach_clients_body),
                                 items = available.map { AttachItem(it.id!!.toLong(), it.name.text, it.emails?.firstOrNull()?.email?.text.orEmpty()) },
+                                onDetailsClick = { id ->
+                                    previewClient = available.firstOrNull { it.id?.toLong() == id }
+                                },
                                 onConfirm = { ids ->
                                     clientAssignments = clientAssignments + ids.associateWith { issuer.id!!.toLong() }
                                     goForwardFromAttachClients()
                                 },
                             )
+                            previewClient?.let { c ->
+                                ClientDetailsDialog19(client = c, onDismiss = { previewClient = null })
+                            }
                         }
                         Step19.AttachProducts -> {
                             val issuer = remainingIssuers.getOrNull(currentIssuerIdx) ?: run {
@@ -472,16 +504,32 @@ fun OnboardingMigration19Dialog(
                                 return@Box
                             }
                             val available = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+                            var previewProduct by remember(currentIssuerIdx) { mutableStateOf<ProductState?>(null) }
                             AttachStep19(
                                 issuer = issuer,
                                 issuerIdx = currentIssuerIdx + 1,
                                 bodyText = stringResource(Res.string.onboarding_19_attach_products_body),
-                                items = available.map { AttachItem(it.id!!.toLong(), it.name.text, it.defaultPriceWithoutTax?.toPlainString().orEmpty()) },
+                                // Secondary shows the description (was the default price) — user
+                                // needs to disambiguate products that share a name but not
+                                // their description. Full details live in the info dialog.
+                                items = available.map {
+                                    AttachItem(
+                                        it.id!!.toLong(),
+                                        it.name.text,
+                                        it.description?.text.orEmpty(),
+                                    )
+                                },
+                                onDetailsClick = { id ->
+                                    previewProduct = available.firstOrNull { it.id?.toLong() == id }
+                                },
                                 onConfirm = { ids ->
                                     productAssignments = productAssignments + ids.associateWith { issuer.id!!.toLong() }
                                     goForwardFromAttachProducts()
                                 },
                             )
+                            previewProduct?.let { p ->
+                                ProductDetailsDialog19(product = p, onDismiss = { previewProduct = null })
+                            }
                         }
                         Step19.BankDetails -> {
                             val issuer = if (isMulti) remainingIssuers.getOrNull(currentIssuerIdx) else remainingIssuers.firstOrNull()
@@ -530,7 +578,9 @@ fun OnboardingMigration19Dialog(
                             OrphansStep19(
                                 title = stringResource(Res.string.onboarding_19_orphans_products_title),
                                 body = stringResource(Res.string.onboarding_19_orphans_products_body),
-                                items = orphans.map { OrphanItem(it.id!!.toLong(), it.name.text, it.defaultPriceWithoutTax?.toPlainString().orEmpty()) },
+                                // Match the AttachStep19 products list — secondary = description
+                                // (was default price) so the same disambiguation applies here too.
+                                items = orphans.map { OrphanItem(it.id!!.toLong(), it.name.text, it.description?.text.orEmpty()) },
                                 issuers = remainingIssuers,
                                 onAssign = { itemId, issuerId ->
                                     productAssignments = productAssignments + (itemId to issuerId)
@@ -539,6 +589,24 @@ fun OnboardingMigration19Dialog(
                                 onNext = { goForwardFromOrphansProducts() },
                             )
                         }
+                        Step19.Confirm -> ConfirmStep19(
+                            issuers = remainingIssuers,
+                            clientsById = remember(context.clients) {
+                                context.clients.mapNotNull { c -> c.id?.toLong()?.let { it to c } }.toMap()
+                            },
+                            productsById = remember(context.products) {
+                                context.products.mapNotNull { p -> p.id?.toLong()?.let { it to p } }.toMap()
+                            },
+                            clientAssignments = clientAssignments,
+                            productAssignments = productAssignments,
+                            onRemoveClient = { clientId ->
+                                clientAssignments = clientAssignments - clientId
+                            },
+                            onRemoveProduct = { productId ->
+                                productAssignments = productAssignments - productId
+                            },
+                            onNext = { goForwardFromConfirm() },
+                        )
                         Step19.NewFieldsRecap -> NewFieldsRecapStep19(onNext = { goForwardFromNewFieldsRecap() })
                         Step19.EInvoice -> EInvoiceStep19(onNext = { goForwardFromEInvoice() })
                         Step19.Final -> FinalStep19(onDone = commit)
@@ -613,6 +681,7 @@ private enum class Step19 {
     BankDetails,
     OrphansClients,
     OrphansProducts,
+    Confirm,
     NewFieldsRecap,
     EInvoice,
     Final,
@@ -648,7 +717,10 @@ private fun previousStep19(
     }
     Step19.OrphansClients -> Step19.BankDetails
     Step19.OrphansProducts -> Step19.OrphansClients
-    Step19.NewFieldsRecap -> if (isMulti) Step19.OrphansProducts else Step19.BankDetails
+    // Confirm has no back button (canGoBack excludes it) — the X-remove
+    // controls inside the step are the escape hatch for wrong assignments.
+    Step19.Confirm -> Step19.Confirm
+    Step19.NewFieldsRecap -> if (isMulti) Step19.Confirm else Step19.BankDetails
     Step19.EInvoice -> Step19.NewFieldsRecap
     Step19.Final -> Step19.EInvoice
 }
@@ -696,7 +768,7 @@ private fun BackupStep19(
                 containerColor = AppColors.buttonActive,
                 contentColor = AppColors.textOnAccent,
             ),
-        ) { Text(stringResource(Res.string.onboarding_privacy_cta_backup)) }
+        ) { Text(stringResource(Res.string.onboarding_19_backup_cta)) }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(
             onClick = onNext,
@@ -735,6 +807,7 @@ private fun CleanupStep19(
     onNext: () -> Unit,
 ) {
     var pendingDelete by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+    var pendingDetails by remember { mutableStateOf<ClientOrIssuerState?>(null) }
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -757,6 +830,11 @@ private fun CleanupStep19(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFFF5F2F8))
+                    // Tap anywhere on the row (outside the delete icon) opens a
+                    // read-only details modal — mirrors the 1.8 OnboardingDialog
+                    // IssuerCleanupStep so users have a way to disambiguate
+                    // similarly-named issuers before choosing which to delete.
+                    .clickable { pendingDetails = issuer }
                     .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -777,6 +855,9 @@ private fun CleanupStep19(
         }
         Spacer(Modifier.height(24.dp))
         PrimaryCta19(text = stringResource(Res.string.onboarding_19_cleanup_cta), onClick = onNext)
+    }
+    pendingDetails?.let { issuer ->
+        IssuerDetailsDialog19(issuer = issuer, onDismiss = { pendingDetails = null })
     }
     pendingDelete?.let { toDelete ->
         AlertDialog(
@@ -824,6 +905,10 @@ private fun AttachStep19(
     issuerIdx: Int,
     bodyText: String,
     items: List<AttachItem>,
+    // Tapping the info icon opens a per-item details dialog. Rendered by the
+    // caller since the payload type differs (ClientOrIssuerState vs ProductState)
+    // and the dialog composables are shape-specific.
+    onDetailsClick: (Long) -> Unit,
     onConfirm: (List<Long>) -> Unit,
 ) {
     var selectedIds by remember(issuer.id, items.size) { mutableStateOf<Set<Long>>(emptySet()) }
@@ -880,8 +965,17 @@ private fun AttachStep19(
                             Text(
                                 text = item.secondary,
                                 style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                                maxLines = 2,
                             )
                         }
+                    }
+                    IconButton(onClick = { onDetailsClick(item.id) }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = null,
+                            tint = AppColors.iconSecondary,
+                            modifier = Modifier.size(20.dp),
+                        )
                     }
                 }
                 Spacer(Modifier.height(6.dp))
@@ -1207,6 +1301,257 @@ private fun boldMarkdown(text: String): AnnotatedString = buildAnnotatedString {
             withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(part) }
         } else {
             append(part)
+        }
+    }
+}
+
+// ============================================================================
+// Read-only details dialogs + review/confirm step
+// ============================================================================
+
+@Composable
+private fun IssuerDetailsDialog19(
+    issuer: ClientOrIssuerState,
+    onDismiss: () -> Unit,
+) {
+    DetailsDialogShell(onDismiss = onDismiss, title = issuer.name.text.ifBlank { "—" }) {
+        issuer.firstName?.text?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+        }
+        Spacer(Modifier.height(12.dp))
+        issuer.addresses.orEmpty().forEach { addr ->
+            val lines = listOfNotNull(
+                addr.addressLine1?.text?.takeIf { it.isNotBlank() },
+                addr.addressLine2?.text?.takeIf { it.isNotBlank() },
+                listOfNotNull(
+                    addr.zipCode?.text?.takeIf { it.isNotBlank() },
+                    addr.city?.text?.takeIf { it.isNotBlank() },
+                ).joinToString(" ").takeIf { it.isNotBlank() },
+                addr.countryCode?.takeIf { it.isNotBlank() }?.let(CountryCodes::displayNameOf),
+            )
+            if (lines.isNotEmpty()) {
+                lines.forEach {
+                    Text(it, style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+                }
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+        issuer.phone?.text?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+        }
+        issuer.emails?.firstOrNull()?.email?.text?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+        }
+        val companyIds = listOfNotNull(
+            issuer.companyId1Label?.text to issuer.companyId1Number?.text,
+            issuer.companyId2Label?.text to issuer.companyId2Number?.text,
+            issuer.companyId3Label?.text to issuer.companyId3Number?.text,
+        ).filter { (_, num) -> !num.isNullOrBlank() }
+        if (companyIds.isNotEmpty()) Spacer(Modifier.height(8.dp))
+        companyIds.forEach { (label, number) ->
+            val prefix = label?.takeIf { it.isNotBlank() }?.let { "$it : " } ?: ""
+            Text("$prefix$number", style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+        }
+    }
+}
+
+@Composable
+private fun ClientDetailsDialog19(
+    client: ClientOrIssuerState,
+    onDismiss: () -> Unit,
+) {
+    // Same shape as IssuerDetailsDialog19 — the underlying state is the same
+    // ClientOrIssuerState type, so the dialog just delegates.
+    IssuerDetailsDialog19(issuer = client, onDismiss = onDismiss)
+}
+
+@Composable
+private fun ProductDetailsDialog19(
+    product: ProductState,
+    onDismiss: () -> Unit,
+) {
+    DetailsDialogShell(onDismiss = onDismiss, title = product.name.text.ifBlank { "—" }) {
+        product.description?.text?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+            Spacer(Modifier.height(12.dp))
+        }
+        val price = product.defaultPriceWithoutTax?.stripTrailingZeros()?.toPlainString()
+        val unit = product.unit?.text?.takeIf { it.isNotBlank() }
+        if (price != null) {
+            val priceLine = buildString {
+                append(price)
+                if (unit != null) append(" / ").append(unit)
+            }
+            Text(priceLine, style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+        }
+        product.taxRate?.let {
+            val rate = it.stripTrailingZeros().toPlainString().replace(".", ",")
+            Text("TVA $rate%", style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary))
+        }
+    }
+}
+
+@Composable
+private fun DetailsDialogShell(
+    onDismiss: () -> Unit,
+    title: String,
+    body: @Composable ColumnScope.() -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(text = title, style = MaterialTheme.typography.textScreenTitle)
+                Spacer(Modifier.height(16.dp))
+                body()
+                Spacer(Modifier.height(20.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = AppColors.buttonActive,
+                        contentColor = AppColors.textOnAccent,
+                    ),
+                ) { Text(stringResource(Res.string.whats_new_close)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfirmStep19(
+    issuers: List<ClientOrIssuerState>,
+    clientsById: Map<Long, ClientOrIssuerState>,
+    productsById: Map<Long, ProductState>,
+    clientAssignments: Map<Long, Long>,
+    productAssignments: Map<Long, Long>,
+    onRemoveClient: (Long) -> Unit,
+    onRemoveProduct: (Long) -> Unit,
+    onNext: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        EmojiSlot("✅")
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_19_confirm_title))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_confirm_body),
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            textAlign = TextAlign.Start,
+            lineHeight = 22.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(20.dp))
+        issuers.forEach { issuer ->
+            val issuerId = issuer.id?.toLong() ?: return@forEach
+            val myClients = clientAssignments.filter { it.value == issuerId }
+                .keys.mapNotNull { clientsById[it] }
+                .sortedBy { it.name.text.lowercase() }
+            val myProducts = productAssignments.filter { it.value == issuerId }
+                .keys.mapNotNull { productsById[it] }
+                .sortedBy { it.name.text.lowercase() }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Color(0xFFF5F2F8))
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
+            ) {
+                Text(
+                    text = issuer.name.text.ifBlank { "—" },
+                    style = MaterialTheme.typography.textBodyBold,
+                )
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = stringResource(Res.string.onboarding_19_confirm_section_clients),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                )
+                Spacer(Modifier.height(4.dp))
+                if (myClients.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.onboarding_19_confirm_no_clients),
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
+                    )
+                } else {
+                    myClients.forEach { c ->
+                        ConfirmAssignmentRow(
+                            primary = c.name.text.ifBlank { "—" },
+                            secondary = c.emails?.firstOrNull()?.email?.text.orEmpty(),
+                            onRemove = { onRemoveClient(c.id!!.toLong()) },
+                        )
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    text = stringResource(Res.string.onboarding_19_confirm_section_products),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                )
+                Spacer(Modifier.height(4.dp))
+                if (myProducts.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.onboarding_19_confirm_no_products),
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
+                    )
+                } else {
+                    myProducts.forEach { p ->
+                        ConfirmAssignmentRow(
+                            primary = p.name.text.ifBlank { "—" },
+                            secondary = p.description?.text.orEmpty(),
+                            onRemove = { onRemoveProduct(p.id!!.toLong()) },
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+        }
+        Spacer(Modifier.height(20.dp))
+        PrimaryCta19(
+            text = stringResource(Res.string.onboarding_19_confirm_cta),
+            onClick = onNext,
+        )
+    }
+}
+
+@Composable
+private fun ConfirmAssignmentRow(
+    primary: String,
+    secondary: String,
+    onRemove: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(primary, style = MaterialTheme.typography.textBodySmall)
+            if (secondary.isNotBlank()) {
+                Text(
+                    text = secondary,
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
+                    maxLines = 1,
+                )
+            }
+        }
+        IconButton(onClick = onRemove) {
+            Icon(
+                imageVector = Icons.Outlined.Close,
+                contentDescription = null,
+                tint = AppColors.iconSecondary,
+                modifier = Modifier.size(18.dp),
+            )
         }
     }
 }

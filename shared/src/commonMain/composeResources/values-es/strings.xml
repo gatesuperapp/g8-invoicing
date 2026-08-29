@@ -848,7 +848,15 @@ Une erreur s'est produite :
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Bienvenido·a a la versión 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Primero, una copia de seguridad</string>
-    <string name="onboarding_19_backup_body">Voy a reorganizar tus clientes y productos por empresa. Antes de empezar, guarda una copia de seguridad — por si acaso.</string>
+    <string name="onboarding_19_backup_body">Antes de empezar, guarda una copia de seguridad — por si acaso.</string>
+    <string name="onboarding_19_backup_cta">Guardar</string>
+    <string name="onboarding_19_confirm_title">¿Todo correcto?</string>
+    <string name="onboarding_19_confirm_body">Revisa las asignaciones antes de guardarlas. Con la cruz puedes quitar un cliente o un producto.</string>
+    <string name="onboarding_19_confirm_cta">Confirmar</string>
+    <string name="onboarding_19_confirm_no_clients">Sin cliente asignado.</string>
+    <string name="onboarding_19_confirm_no_products">Sin producto asignado.</string>
+    <string name="onboarding_19_confirm_section_clients">Clientes</string>
+    <string name="onboarding_19_confirm_section_products">Productos</string>
     <string name="onboarding_19_welcome_body">Esta versión termina de implantar los campos normalizados. Vamos a configurarlos juntos.</string>
     <string name="onboarding_19_welcome_cta">Adelante</string>
     <string name="onboarding_19_cleanup_title">Parece que gestionas %1$d empresas</string>
@@ -878,7 +886,7 @@ Une erreur s'est produite :
     <string name="onboarding_19_new_fields_hint">Si ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
     <string name="onboarding_19_new_fields_cta">Siguiente</string>
     <string name="onboarding_19_einvoice_title">Facturación electrónica</string>
-    <string name="onboarding_19_einvoice_intro">Ahora puedes exportar facturas electrónicas.</string>
+    <string name="onboarding_19_einvoice_intro">La exportación de facturas electrónicas ya está disponible.</string>
     <string name="onboarding_19_einvoice_body">En el gStore, activa los módulos Factur-X, XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada.</string>
     <string name="onboarding_19_einvoice_sub">Puedes hacerte miembro premium suscribiéndote en nuestra web 🌟</string>
     <string name="onboarding_19_einvoice_cta">Siguiente</string>

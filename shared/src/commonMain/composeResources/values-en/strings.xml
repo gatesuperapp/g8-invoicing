@@ -841,7 +841,15 @@
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Welcome to version 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Let's back up first</string>
-    <string name="onboarding_19_backup_body">I'm about to reorganize your clients and products by company. Before we start, back up your database — just in case.</string>
+    <string name="onboarding_19_backup_body">Before we start, back up your database — just in case.</string>
+    <string name="onboarding_19_backup_cta">Back up</string>
+    <string name="onboarding_19_confirm_title">All good?</string>
+    <string name="onboarding_19_confirm_body">Check the assignments before we save them. Tap the cross to remove a client or product.</string>
+    <string name="onboarding_19_confirm_cta">Confirm</string>
+    <string name="onboarding_19_confirm_no_clients">No client attached.</string>
+    <string name="onboarding_19_confirm_no_products">No product attached.</string>
+    <string name="onboarding_19_confirm_section_clients">Clients</string>
+    <string name="onboarding_19_confirm_section_products">Products</string>
     <string name="onboarding_19_welcome_body">This version wraps up the standardised fields. Let's set them up together.</string>
     <string name="onboarding_19_welcome_cta">Let's go</string>
     <string name="onboarding_19_cleanup_title">Looks like you manage %1$d businesses</string>
@@ -871,7 +879,7 @@
     <string name="onboarding_19_new_fields_hint">If you had this info in the footer text, feel free to copy-paste it into the matching fields.</string>
     <string name="onboarding_19_new_fields_cta">Next</string>
     <string name="onboarding_19_einvoice_title">Electronic invoicing</string>
-    <string name="onboarding_19_einvoice_intro">You can now export electronic invoices.</string>
+    <string name="onboarding_19_einvoice_intro">Electronic invoice export is now available.</string>
     <string name="onboarding_19_einvoice_body">In the gStore, turn on the Factur-X, CII XML modules. You'll be able to upload these invoices straight to your registered platform.</string>
     <string name="onboarding_19_einvoice_sub">You can become a premium member by subscribing on our website 🌟</string>
     <string name="onboarding_19_einvoice_cta">Next</string>
