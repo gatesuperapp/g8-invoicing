@@ -123,6 +123,10 @@ val appModule = module {
     single { SubscriptionRepository(get(), get(), get()) }
     single { ActivatedModulesRepository(get()) }
 
+    // Factur-X: CII XML file writer + share sheet (Android actual). Injected
+    // into whatever screen fires "Export CII".
+    single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
+
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }

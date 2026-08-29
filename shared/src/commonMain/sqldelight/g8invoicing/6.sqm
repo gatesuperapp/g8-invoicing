@@ -46,41 +46,44 @@ ALTER TABLE DocumentClientOrIssuer ADD COLUMN payment_country TEXT;
 --    ne peut plus distinguer les deux au reload. Les codes 4461 sont dérivés
 --    à l'export Factur-X (unCefactCodesForExport()), avec fallback sur [1]
 --    "Instrument not defined" quand rien n'est coché.
---    Sur facture et avoir uniquement (BL et devis ne sont pas des docs de
---    règlement Factur-X).
+--    Facture uniquement — un avoir renverse le flux (vendeur doit au client)
+--    donc pas de mode de paiement à préciser. BL / devis ne sont pas des docs
+--    de règlement Factur-X non plus.
 ALTER TABLE Invoice ADD COLUMN payment_means_selections TEXT;
-ALTER TABLE CreditNote ADD COLUMN payment_means_selections TEXT;
 -- Editable prefix rendered before the joined payment-means list. Empty = opt-out.
 ALTER TABLE Invoice ADD COLUMN payment_means_label TEXT;
-ALTER TABLE CreditNote ADD COLUMN payment_means_label TEXT;
 -- Eye toggle. 1 = whole payment-means block hidden on preview + PDF. Codes stay
 -- persisted so BT-81 Factur-X data is preserved regardless.
 ALTER TABLE Invoice ADD COLUMN payment_means_hidden INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE CreditNote ADD COLUMN payment_means_hidden INTEGER NOT NULL DEFAULT 0;
 -- "Autre" chip state — separate flag rather than a sentinel code. Keeps the
 -- selections column 100% UN/CEFACT-clean and enforces that OTHER is a UI-only
 -- marker that never renders on the invoice or in Factur-X exports.
 ALTER TABLE Invoice ADD COLUMN payment_means_other_checked INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE CreditNote ADD COLUMN payment_means_other_checked INTEGER NOT NULL DEFAULT 0;
 
--- 3) Payment Terms Description (BT-20) — texte libre par facture. Porte les
---    mentions LME (escompte, taux de pénalité) et le délai de paiement.
---    Uniquement sur Invoice — un avoir crédite, il n'a pas de "conditions de
---    paiement" à respecter par le client.
-ALTER TABLE Invoice ADD COLUMN payment_terms_description TEXT;
+-- 3) Payment Terms (BT-20) — split en 3 mentions distinctes pour aligner
+--    sur Factur-X BR-FR-05 SubjectCodes :
+--      * payment_terms_recovery_fees  → PMT (frais de recouvrement)
+--      * payment_terms_late_fees      → PMD (pénalités de retard)
+--      * payment_terms_discount       → AAB (escompte pour paiement anticipé)
+--    Édités indépendamment via un picker à 3 lignes. Le CII XML émet un
+--    <IncludedNote> par code (fin des 3× le même texte) ; le PDF concatène
+--    pour un rendu unique. Uniquement sur Invoice — un avoir n'a pas de
+--    conditions de paiement à respecter par le client.
+ALTER TABLE Invoice ADD COLUMN payment_terms_recovery_fees TEXT;
+ALTER TABLE Invoice ADD COLUMN payment_terms_late_fees TEXT;
+ALTER TABLE Invoice ADD COLUMN payment_terms_discount TEXT;
 
 -- 4) Bank details block visibility on the invoice preview + PDF. Paired with
 --    the "Afficher les coordonnées bancaires" switch inside the payment-means
 --    picker. 1 = block skipped on preview + PDF; the frozen IBAN/BIC stay in
 --    DocumentClientOrIssuer regardless (Factur-X BT-84/86 preserved).
+--    Facture uniquement (voir bloc 2 pour la raison).
 ALTER TABLE Invoice ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE CreditNote ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0;
 -- Editable bank-details label: same segments+tokens model as
 -- payment_means_label. Free segments carry user text; IbanToken / BicToken
 -- render "IBAN : <value>" / "BIC : <value>" at flatten time. Null = fall back
 -- to defaultPaymentBankSegments() (both tokens, newline between).
 ALTER TABLE Invoice ADD COLUMN payment_bank_label TEXT;
-ALTER TABLE CreditNote ADD COLUMN payment_bank_label TEXT;
 
 -- 5) Multi-entreprise (étape 2 du chantier 1.9). Chaque client, produit et
 --    document est rattaché à une entreprise = un ClientOrIssuer type='issuer'
@@ -123,45 +126,45 @@ UPDATE Product
 
 UPDATE Invoice
   SET original_company_id = (
-    SELECT dci.original_client_or_issuer_id
+    SELECT dci.original_client_id
     FROM DocumentClientOrIssuer dci
     JOIN LinkInvoiceToDocumentClientOrIssuer link
-      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+      ON link.document_client_or_issuer_id = dci.id
     WHERE link.invoice_id = Invoice.invoice_id
-      AND dci.type = 'document_issuer'
+      AND dci.type = 'issuer'
     LIMIT 1
   );
 
 UPDATE DeliveryNote
   SET original_company_id = (
-    SELECT dci.original_client_or_issuer_id
+    SELECT dci.original_client_id
     FROM DocumentClientOrIssuer dci
     JOIN LinkDeliveryNoteToDocumentClientOrIssuer link
-      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+      ON link.document_client_or_issuer_id = dci.id
     WHERE link.delivery_note_id = DeliveryNote.delivery_note_id
-      AND dci.type = 'document_issuer'
+      AND dci.type = 'issuer'
     LIMIT 1
   );
 
 UPDATE CreditNote
   SET original_company_id = (
-    SELECT dci.original_client_or_issuer_id
+    SELECT dci.original_client_id
     FROM DocumentClientOrIssuer dci
     JOIN LinkCreditNoteToDocumentClientOrIssuer link
-      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+      ON link.document_client_or_issuer_id = dci.id
     WHERE link.credit_note_id = CreditNote.credit_note_id
-      AND dci.type = 'document_issuer'
+      AND dci.type = 'issuer'
     LIMIT 1
   );
 
 UPDATE Quote
   SET original_company_id = (
-    SELECT dci.original_client_or_issuer_id
+    SELECT dci.original_client_id
     FROM DocumentClientOrIssuer dci
     JOIN LinkQuoteToDocumentClientOrIssuer link
-      ON link.document_client_or_issuer_id = dci.document_client_or_issuer_id
+      ON link.document_client_or_issuer_id = dci.id
     WHERE link.quote_id = Quote.quote_id
-      AND dci.type = 'document_issuer'
+      AND dci.type = 'issuer'
     LIMIT 1
   );
 
@@ -178,3 +181,15 @@ ALTER TABLE ClientOrIssuer ADD COLUMN client_type TEXT;
 -- moment. Editing the master client later doesn't retroactively change the
 -- doc's export flavour.
 ALTER TABLE DocumentClientOrIssuer ADD COLUMN client_type TEXT;
+
+-- 7) VAT exemption reason (BT-120) — required text on Invoice / CreditNote
+--    whenever the issuer is in the franchise en base regime and thus emits
+--    with tax category E. Per-doc rather than per-issuer so the user can
+--    override the wording if the operation cited a different exemption
+--    article (e.g. art. 261-4 formation vs 293 B franchise). Seeded at
+--    document creation from the issuer's country ("TVA non applicable, art.
+--    293 B du CGI" for FR, "Steuerbefreit nach § 19 UStG" for DE) — other
+--    countries have no auto-fill because the app can't guarantee a correct
+--    legal citation, so the user must fill it before exporting.
+ALTER TABLE Invoice ADD COLUMN vat_exemption_text TEXT;
+ALTER TABLE CreditNote ADD COLUMN vat_exemption_text TEXT;

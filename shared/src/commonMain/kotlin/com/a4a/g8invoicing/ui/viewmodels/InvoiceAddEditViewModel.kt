@@ -434,8 +434,20 @@ class InvoiceAddEditViewModel(
                 }
             }
 
-            ScreenElement.DOCUMENT_PAYMENT_TERMS -> {
-                doc = doc.copy(paymentTermsDescription = value as TextFieldValue)
+            ScreenElement.DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES -> {
+                doc = doc.copy(paymentTermsRecoveryFees = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_TERMS_LATE_FEES -> {
+                doc = doc.copy(paymentTermsLateFees = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_TERMS_DISCOUNT -> {
+                doc = doc.copy(paymentTermsDiscount = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+                doc = doc.copy(vatExemptionText = (value as TextFieldValue))
             }
 
             else -> {}

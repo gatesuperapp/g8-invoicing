@@ -1,0 +1,987 @@
+package com.a4a.g8invoicing.ui.shared
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.a4a.g8invoicing.facturx.extractBankInfoFromFooters
+import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_clients_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_intro_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_intro_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_products_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_step_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_bic_label
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_iban_label
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_not_found_hint
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_prefilled_hint
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_title_with_issuer
+import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_final_body1
+import com.a4a.g8invoicing.shared.resources.onboarding_19_final_body2
+import com.a4a.g8invoicing.shared.resources.onboarding_19_final_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_final_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_clients_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_clients_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_products_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_products_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_welcome_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_welcome_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_welcome_title
+import com.a4a.g8invoicing.shared.resources.onboarding_cleanup_delete_confirm_no
+import com.a4a.g8invoicing.shared.resources.onboarding_cleanup_delete_confirm_title
+import com.a4a.g8invoicing.shared.resources.onboarding_cleanup_delete_confirm_yes
+import com.a4a.g8invoicing.shared.resources.onboarding_previous
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
+import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.textBody
+import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+
+/**
+ * Everything the 1.9 migration wizard needs to run its flow, wrapped in
+ * one data bag so [OnboardingMigration19Dialog] takes a single argument.
+ * All lists are snapshots taken at boot — the wizard doesn't observe
+ * subsequent DB writes.
+ *
+ * [footersByIssuer] maps master issuer id → the last N invoice footers
+ * of that issuer, in most-recent-first order. Used to auto-detect an
+ * IBAN/BIC to seed the bank-details slide.
+ */
+data class Migration19Context(
+    val issuers: List<ClientOrIssuerState>,
+    val clients: List<ClientOrIssuerState>,
+    val products: List<ProductState>,
+    val footersByIssuer: Map<Long, List<String>>,
+)
+
+/**
+ * Callbacks the wizard uses to persist decisions. All are suspend so the
+ * caller can flush to the DB before we jump to the next step.
+ */
+class Migration19Actions(
+    val deleteIssuer: suspend (ClientOrIssuerState) -> Unit,
+    val attachClients: suspend (clientIds: List<Long>, issuerId: Long) -> Unit,
+    val attachProducts: suspend (productIds: List<Long>, issuerId: Long) -> Unit,
+    val saveIssuerBank: suspend (issuer: ClientOrIssuerState, iban: String, bic: String) -> Unit,
+    val markSeen: suspend () -> Unit,
+)
+
+/**
+ * 1.9 migration wizard — shown once when upgrading from 1.8.x. Two
+ * branches share a common welcome/tail:
+ *  - Single-issuer: Welcome → BankDetails → NewFieldsRecap → Final
+ *  - Multi-issuer:  Welcome → Cleanup → AttachIntro → (per issuer:
+ *                   AttachClients → AttachProducts → BankDetails) →
+ *                   OrphansClients → OrphansProducts → NewFieldsRecap
+ *                   → Final
+ *
+ * Non-dismissable: the wizard must be completed once. Any orphan-slide
+ * is skipped when there's nothing to sort.
+ */
+@Composable
+fun OnboardingMigration19Dialog(
+    context: Migration19Context,
+    actions: Migration19Actions,
+    onDismiss: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+
+    // --- Mutable state ------------------------------------------------------
+    // Issuers are pared down as the user deletes duplicates in the cleanup
+    // step. `remainingIssuers` is what the per-issuer loop iterates on.
+    var remainingIssuers by remember(context) { mutableStateOf(context.issuers) }
+    var currentIssuerIdx by remember { mutableStateOf(0) }
+
+    // client id → issuer id and product id → issuer id, built up as the user
+    // walks the per-issuer loop and the orphan slides.
+    var clientAssignments by remember { mutableStateOf<Map<Long, Long>>(emptyMap()) }
+    var productAssignments by remember { mutableStateOf<Map<Long, Long>>(emptyMap()) }
+
+    // IBAN + BIC per issuer, seeded from footers on first entry.
+    var bankByIssuer by remember { mutableStateOf<Map<Long, Pair<String, String>>>(emptyMap()) }
+
+    var step by remember { mutableStateOf(Step19.Welcome) }
+    var submitting by remember { mutableStateOf(false) }
+
+    val isMulti: Boolean = remainingIssuers.size > 1
+
+    // --- Step transitions ---------------------------------------------------
+    fun goForwardFromWelcome() {
+        step = if (isMulti) Step19.Cleanup else Step19.BankDetails
+    }
+
+    fun goForwardFromCleanup() {
+        step = if (isMulti) Step19.AttachIntro else Step19.BankDetails
+    }
+
+    fun goForwardFromAttachIntro() {
+        currentIssuerIdx = 0
+        step = Step19.AttachClients
+    }
+
+    fun goForwardFromAttachClients() {
+        step = Step19.AttachProducts
+    }
+
+    fun goForwardFromAttachProducts() {
+        step = Step19.BankDetails
+    }
+
+    fun goForwardFromBankDetails() {
+        if (isMulti) {
+            if (currentIssuerIdx + 1 < remainingIssuers.size) {
+                currentIssuerIdx += 1
+                step = Step19.AttachClients
+            } else {
+                // Per-issuer loop is done; check orphans.
+                val orphanClients = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+                step = if (orphanClients.isNotEmpty()) Step19.OrphansClients else Step19.OrphansProducts
+                val orphanProducts = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+                if (step == Step19.OrphansProducts && orphanProducts.isEmpty()) {
+                    step = Step19.NewFieldsRecap
+                }
+            }
+        } else {
+            step = Step19.NewFieldsRecap
+        }
+    }
+
+    fun goForwardFromOrphansClients() {
+        val orphanProducts = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+        step = if (orphanProducts.isNotEmpty()) Step19.OrphansProducts else Step19.NewFieldsRecap
+    }
+
+    fun goForwardFromOrphansProducts() {
+        step = Step19.NewFieldsRecap
+    }
+
+    fun goForwardFromNewFieldsRecap() {
+        step = Step19.Final
+    }
+
+    // Commit fires only on tap of the Final CTA. Writes are grouped so a
+    // process-death mid-flow leaves the DB in a consistent state (all-or-
+    // nothing per DB write — no cross-table transaction because these
+    // touch multiple .sq files).
+    val commit = commit@ {
+        if (submitting) return@commit
+        submitting = true
+        scope.launch {
+            // Client attachments
+            clientAssignments.entries.groupBy { it.value }.forEach { (issuerId, entries) ->
+                actions.attachClients(entries.map { it.key }, issuerId)
+            }
+            // Product attachments
+            productAssignments.entries.groupBy { it.value }.forEach { (issuerId, entries) ->
+                actions.attachProducts(entries.map { it.key }, issuerId)
+            }
+            // Bank details per issuer
+            bankByIssuer.forEach { (issuerId, ibanBic) ->
+                val issuer = remainingIssuers.firstOrNull { it.id?.toLong() == issuerId } ?: return@forEach
+                actions.saveIssuerBank(issuer, ibanBic.first, ibanBic.second)
+            }
+            actions.markSeen()
+            onDismiss()
+        }
+    }
+
+    // --- Rendering ----------------------------------------------------------
+    val previous = { s: Step19 ->
+        step = previousStep19(s, isMulti, currentIssuerIdx) { newIdx -> currentIssuerIdx = newIdx }
+    }
+
+    Dialog(
+        onDismissRequest = { /* non-dismissable */ },
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(AppColors.surface),
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopBar19(
+                    canGoBack = step != Step19.Welcome && step != Step19.Final,
+                    onBack = { previous(step) },
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    when (step) {
+                        Step19.Welcome -> WelcomeStep19(onNext = { goForwardFromWelcome() })
+                        Step19.Cleanup -> CleanupStep19(
+                            issuers = remainingIssuers,
+                            onDelete = { issuer ->
+                                scope.launch {
+                                    actions.deleteIssuer(issuer)
+                                    remainingIssuers = remainingIssuers.filter { it.id != issuer.id }
+                                }
+                            },
+                            onNext = { goForwardFromCleanup() },
+                        )
+                        Step19.AttachIntro -> AttachIntroStep19(onNext = { goForwardFromAttachIntro() })
+                        Step19.AttachClients -> {
+                            val issuer = remainingIssuers.getOrNull(currentIssuerIdx) ?: run {
+                                goForwardFromBankDetails()
+                                return@Box
+                            }
+                            val available = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+                            AttachStep19(
+                                issuer = issuer,
+                                issuerIdx = currentIssuerIdx + 1,
+                                bodyText = stringResource(Res.string.onboarding_19_attach_clients_body),
+                                items = available.map { AttachItem(it.id!!.toLong(), it.name.text, it.emails?.firstOrNull()?.email?.text.orEmpty()) },
+                                onConfirm = { ids ->
+                                    clientAssignments = clientAssignments + ids.associateWith { issuer.id!!.toLong() }
+                                    goForwardFromAttachClients()
+                                },
+                            )
+                        }
+                        Step19.AttachProducts -> {
+                            val issuer = remainingIssuers.getOrNull(currentIssuerIdx) ?: run {
+                                goForwardFromBankDetails()
+                                return@Box
+                            }
+                            val available = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+                            AttachStep19(
+                                issuer = issuer,
+                                issuerIdx = currentIssuerIdx + 1,
+                                bodyText = stringResource(Res.string.onboarding_19_attach_products_body),
+                                items = available.map { AttachItem(it.id!!.toLong(), it.name.text, it.defaultPriceWithoutTax?.toPlainString().orEmpty()) },
+                                onConfirm = { ids ->
+                                    productAssignments = productAssignments + ids.associateWith { issuer.id!!.toLong() }
+                                    goForwardFromAttachProducts()
+                                },
+                            )
+                        }
+                        Step19.BankDetails -> {
+                            val issuer = if (isMulti) remainingIssuers.getOrNull(currentIssuerIdx) else remainingIssuers.firstOrNull()
+                            if (issuer == null) {
+                                step = Step19.NewFieldsRecap
+                                return@Box
+                            }
+                            val id = issuer.id!!.toLong()
+                            val footers = context.footersByIssuer[id].orEmpty()
+                            val detected = remember(footers) { extractBankInfoFromFooters(footers) }
+                            val current = bankByIssuer[id]
+                            val ibanInit = current?.first
+                                ?: issuer.paymentIban?.text?.trim()?.ifEmpty { null }
+                                ?: detected.iban.orEmpty()
+                            val bicInit = current?.second
+                                ?: issuer.paymentBic?.text?.trim()?.ifEmpty { null }
+                                ?: detected.bic.orEmpty()
+                            BankDetailsStep19(
+                                issuer = issuer,
+                                issuerIdx = if (isMulti) currentIssuerIdx + 1 else null,
+                                initialIban = ibanInit,
+                                initialBic = bicInit,
+                                prefilled = detected.iban != null,
+                                onNext = { ibanValue, bicValue ->
+                                    bankByIssuer = bankByIssuer + (id to (ibanValue to bicValue))
+                                    goForwardFromBankDetails()
+                                },
+                            )
+                        }
+                        Step19.OrphansClients -> {
+                            val orphans = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+                            OrphansStep19(
+                                title = stringResource(Res.string.onboarding_19_orphans_clients_title),
+                                body = stringResource(Res.string.onboarding_19_orphans_clients_body),
+                                items = orphans.map { OrphanItem(it.id!!.toLong(), it.name.text, it.emails?.firstOrNull()?.email?.text.orEmpty()) },
+                                issuers = remainingIssuers,
+                                onAssign = { itemId, issuerId ->
+                                    clientAssignments = clientAssignments + (itemId to issuerId)
+                                },
+                                assignments = clientAssignments,
+                                onNext = { goForwardFromOrphansClients() },
+                            )
+                        }
+                        Step19.OrphansProducts -> {
+                            val orphans = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+                            OrphansStep19(
+                                title = stringResource(Res.string.onboarding_19_orphans_products_title),
+                                body = stringResource(Res.string.onboarding_19_orphans_products_body),
+                                items = orphans.map { OrphanItem(it.id!!.toLong(), it.name.text, it.defaultPriceWithoutTax?.toPlainString().orEmpty()) },
+                                issuers = remainingIssuers,
+                                onAssign = { itemId, issuerId ->
+                                    productAssignments = productAssignments + (itemId to issuerId)
+                                },
+                                assignments = productAssignments,
+                                onNext = { goForwardFromOrphansProducts() },
+                            )
+                        }
+                        Step19.NewFieldsRecap -> NewFieldsRecapStep19(onNext = { goForwardFromNewFieldsRecap() })
+                        Step19.Final -> FinalStep19(onDone = commit)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ============================================================================
+// Step enum + navigation
+// ============================================================================
+
+private enum class Step19 {
+    Welcome,
+    Cleanup,
+    AttachIntro,
+    AttachClients,
+    AttachProducts,
+    BankDetails,
+    OrphansClients,
+    OrphansProducts,
+    NewFieldsRecap,
+    Final,
+}
+
+private fun previousStep19(
+    step: Step19,
+    isMulti: Boolean,
+    currentIssuerIdx: Int,
+    setCurrentIssuerIdx: (Int) -> Unit,
+): Step19 = when (step) {
+    Step19.Welcome -> Step19.Welcome
+    Step19.Cleanup -> Step19.Welcome
+    Step19.AttachIntro -> Step19.Cleanup
+    Step19.AttachClients -> {
+        if (currentIssuerIdx > 0) {
+            // Previous issuer's bank details slide
+            setCurrentIssuerIdx(currentIssuerIdx - 1)
+            Step19.BankDetails
+        } else {
+            Step19.AttachIntro
+        }
+    }
+    Step19.AttachProducts -> Step19.AttachClients
+    Step19.BankDetails -> if (isMulti) Step19.AttachProducts else Step19.Welcome
+    Step19.OrphansClients -> Step19.BankDetails
+    Step19.OrphansProducts -> Step19.OrphansClients
+    Step19.NewFieldsRecap -> if (isMulti) Step19.OrphansProducts else Step19.BankDetails
+    Step19.Final -> Step19.NewFieldsRecap
+}
+
+// ============================================================================
+// Steps
+// ============================================================================
+
+@Composable
+private fun WelcomeStep19(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        MascotSlot { AnimatedKaomojiThanks(fontSize = 22.sp, static = true) }
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_19_welcome_title))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_welcome_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(40.dp))
+        PrimaryCta19(text = stringResource(Res.string.onboarding_19_welcome_cta), onClick = onNext)
+    }
+}
+
+@Composable
+private fun CleanupStep19(
+    issuers: List<ClientOrIssuerState>,
+    onDelete: (ClientOrIssuerState) -> Unit,
+    onNext: () -> Unit,
+) {
+    var pendingDelete by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        StepTitle(stringResource(Res.string.onboarding_19_cleanup_title, issuers.size))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_cleanup_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(20.dp))
+        issuers.forEach { issuer ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F2F8))
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = issuer.name.text.ifBlank { "—" },
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.textBody,
+                )
+                IconButton(onClick = { pendingDelete = issuer }) {
+                    Icon(
+                        imageVector = Icons.Outlined.DeleteOutline,
+                        contentDescription = null,
+                        tint = AppColors.iconSecondary,
+                    )
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+        }
+        Spacer(Modifier.height(24.dp))
+        PrimaryCta19(text = stringResource(Res.string.onboarding_19_cleanup_cta), onClick = onNext)
+    }
+    pendingDelete?.let { toDelete ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_title)) },
+            confirmButton = {
+                Button(onClick = { onDelete(toDelete); pendingDelete = null }) {
+                    Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_yes))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { pendingDelete = null }) {
+                    Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_no))
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun AttachIntroStep19(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(Res.string.onboarding_19_attach_intro_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(40.dp))
+        PrimaryCta19(text = stringResource(Res.string.onboarding_19_attach_intro_cta), onClick = onNext)
+    }
+}
+
+private data class AttachItem(val id: Long, val primary: String, val secondary: String)
+
+@Composable
+private fun AttachStep19(
+    issuer: ClientOrIssuerState,
+    issuerIdx: Int,
+    bodyText: String,
+    items: List<AttachItem>,
+    onConfirm: (List<Long>) -> Unit,
+) {
+    var selectedIds by remember(issuer.id, items.size) { mutableStateOf<Set<Long>>(emptySet()) }
+    val issuerName = issuer.name.text.ifBlank { "—" }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        StepTitle(stringResource(Res.string.onboarding_19_attach_step_title, issuerIdx, issuerName))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = bodyText,
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(16.dp))
+        if (items.isEmpty()) {
+            Text(
+                text = "—",
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                modifier = Modifier.padding(vertical = 24.dp),
+            )
+        } else {
+            items.forEach { item ->
+                val checked = item.id in selectedIds
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (checked) Color(0xFFEDE7F6) else Color(0xFFF5F2F8))
+                        .clickable {
+                            selectedIds = if (checked) selectedIds - item.id else selectedIds + item.id
+                        }
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = if (checked) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                        contentDescription = null,
+                        tint = if (checked) AppColors.accent else AppColors.iconSecondary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = item.primary.ifBlank { "—" },
+                            style = MaterialTheme.typography.textBody,
+                        )
+                        if (item.secondary.isNotBlank()) {
+                            Text(
+                                text = item.secondary,
+                                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(6.dp))
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+        PrimaryCta19(
+            text = stringResource(Res.string.onboarding_19_attach_cta, issuerName),
+            onClick = { onConfirm(selectedIds.toList()) },
+        )
+    }
+}
+
+@Composable
+private fun BankDetailsStep19(
+    issuer: ClientOrIssuerState,
+    issuerIdx: Int?,
+    initialIban: String,
+    initialBic: String,
+    prefilled: Boolean,
+    onNext: (String, String) -> Unit,
+) {
+    var iban by remember(issuer.id) {
+        mutableStateOf(TextFieldValue(initialIban, TextRange(initialIban.length)))
+    }
+    var bic by remember(issuer.id) {
+        mutableStateOf(TextFieldValue(initialBic, TextRange(initialBic.length)))
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        val title = if (issuerIdx != null) {
+            stringResource(
+                Res.string.onboarding_19_bank_title_with_issuer,
+                issuerIdx,
+                issuer.name.text.ifBlank { "—" },
+            )
+        } else {
+            stringResource(Res.string.onboarding_19_bank_title)
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.textScreenTitle,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_bank_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(24.dp))
+        FieldLabel19(stringResource(Res.string.onboarding_19_bank_iban_label))
+        Spacer(Modifier.height(6.dp))
+        CompactTextField19(
+            value = iban,
+            onValueChange = { iban = it },
+            placeholder = "FR76 …",
+            imeAction = ImeAction.Next,
+        )
+        Spacer(Modifier.height(16.dp))
+        FieldLabel19(stringResource(Res.string.onboarding_19_bank_bic_label))
+        Spacer(Modifier.height(6.dp))
+        CompactTextField19(
+            value = bic,
+            onValueChange = { bic = it },
+            placeholder = "BNPAFRPP",
+            imeAction = ImeAction.Done,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = if (prefilled)
+                stringResource(Res.string.onboarding_19_bank_prefilled_hint)
+            else
+                stringResource(Res.string.onboarding_19_bank_not_found_hint),
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            lineHeight = 20.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(32.dp))
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            PrimaryCta19(
+                text = stringResource(Res.string.onboarding_19_bank_cta),
+                onClick = { onNext(iban.text.trim(), bic.text.trim()) },
+            )
+        }
+    }
+}
+
+private data class OrphanItem(val id: Long, val primary: String, val secondary: String)
+
+@Composable
+private fun OrphansStep19(
+    title: String,
+    body: String,
+    items: List<OrphanItem>,
+    issuers: List<ClientOrIssuerState>,
+    assignments: Map<Long, Long>,
+    onAssign: (itemId: Long, issuerId: Long) -> Unit,
+    onNext: () -> Unit,
+) {
+    val allAssigned = items.all { it.id in assignments.keys }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        StepTitle(title)
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(16.dp))
+        items.forEach { item ->
+            val currentAssignment = assignments[item.id]
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF5F2F8))
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+            ) {
+                Text(
+                    text = item.primary.ifBlank { "—" },
+                    style = MaterialTheme.typography.textBody,
+                )
+                if (item.secondary.isNotBlank()) {
+                    Text(
+                        text = item.secondary,
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                // Full-text chips per issuer — no truncation so users with
+                // similarly-named entreprises can still tell them apart.
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    issuers.forEach { issuer ->
+                        val id = issuer.id?.toLong() ?: return@forEach
+                        val selected = currentAssignment == id
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(999.dp))
+                                .background(
+                                    if (selected) AppColors.accent
+                                    else Color.White,
+                                )
+                                .border(
+                                    BorderStroke(
+                                        1.dp,
+                                        if (selected) AppColors.accent else Color(0xFFE4DEED),
+                                    ),
+                                    RoundedCornerShape(999.dp),
+                                )
+                                .clickable { onAssign(item.id, id) }
+                                .padding(horizontal = 12.dp, vertical = 6.dp),
+                        ) {
+                            Text(
+                                text = issuer.name.text.ifBlank { "—" },
+                                style = MaterialTheme.typography.textBodySmall.copy(
+                                    color = if (selected) AppColors.textOnAccent else AppColors.textPrimary,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+        Spacer(Modifier.height(24.dp))
+        PrimaryCta19(
+            text = stringResource(Res.string.onboarding_19_orphans_cta),
+            enabled = allAssigned,
+            onClick = onNext,
+        )
+    }
+}
+
+@Composable
+private fun NewFieldsRecapStep19(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        StepTitle(stringResource(Res.string.onboarding_19_new_fields_title))
+        Spacer(Modifier.height(24.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_new_fields_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(32.dp))
+        PrimaryCta19(text = stringResource(Res.string.onboarding_19_new_fields_cta), onClick = onNext)
+    }
+}
+
+@Composable
+private fun FinalStep19(onDone: () -> Unit) {
+    var fadingOut by remember { mutableStateOf(false) }
+    val alpha by animateFloatAsState(
+        targetValue = if (fadingOut) 0f else 1f,
+        animationSpec = tween(durationMillis = 700),
+        label = "migration19FinalFade",
+    )
+    LaunchedEffect(fadingOut) {
+        if (fadingOut) {
+            delay(700L)
+            onDone()
+        }
+    }
+    val interactionSource = remember { MutableInteractionSource() }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .alpha(alpha)
+            .clickable(interactionSource = interactionSource, indication = null) { /* absorb */ },
+    ) {
+        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 6000)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            MascotSlot { AnimatedKaomojiThanks(fontSize = 22.sp, loop = true) }
+            Spacer(Modifier.height(24.dp))
+            StepTitle(stringResource(Res.string.onboarding_19_final_title))
+            Spacer(Modifier.height(20.dp))
+            Text(
+                text = stringResource(Res.string.onboarding_19_final_body1),
+                style = MaterialTheme.typography.textBody,
+                textAlign = TextAlign.Center,
+                lineHeight = 24.sp,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = stringResource(Res.string.onboarding_19_final_body2),
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                textAlign = TextAlign.Center,
+                lineHeight = 22.sp,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(28.dp))
+            PrimaryCta19(
+                text = stringResource(Res.string.onboarding_19_final_cta),
+                onClick = { if (!fadingOut) fadingOut = true },
+            )
+        }
+    }
+}
+
+// ============================================================================
+// Reusable local UI bits
+// ============================================================================
+
+@Composable
+private fun TopBar19(canGoBack: Boolean, onBack: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .padding(top = 16.dp, start = 16.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        if (canGoBack) {
+            TextButton(
+                onClick = onBack,
+                colors = ButtonDefaults.textButtonColors(contentColor = AppColors.textLink),
+                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(2.dp))
+                Text(stringResource(Res.string.onboarding_previous))
+            }
+        }
+    }
+}
+
+@Composable
+private fun MascotSlot(content: @Composable () -> Unit) {
+    Box(
+        modifier = Modifier
+            .height(56.dp)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) { content() }
+}
+
+@Composable
+private fun StepTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.textScreenTitle,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun FieldLabel19(text: String) {
+    Text(text = text, style = MaterialTheme.typography.textBodySmall)
+}
+
+@Composable
+private fun CompactTextField19(
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
+    placeholder: String,
+    imeAction: ImeAction,
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        textStyle = MaterialTheme.typography.textBody.copy(color = AppColors.textPrimary),
+        cursorBrush = SolidColor(AppColors.accent),
+        keyboardOptions = KeyboardOptions(imeAction = imeAction),
+        keyboardActions = KeyboardActions(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color(0xFFF5F2F8))
+            .border(BorderStroke(1.dp, Color(0xFFE4DEED)), RoundedCornerShape(10.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        decorationBox = { innerTextField ->
+            if (value.text.isEmpty()) {
+                Text(
+                    text = placeholder,
+                    style = MaterialTheme.typography.textBody.copy(color = AppColors.textMuted),
+                )
+            }
+            innerTextField()
+        },
+    )
+}
+
+@Composable
+private fun PrimaryCta19(
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit,
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = AppColors.buttonActive,
+            contentColor = AppColors.textOnAccent,
+        ),
+        contentPadding = PaddingValues(horizontal = 32.dp, vertical = 8.dp),
+    ) { Text(text) }
+}

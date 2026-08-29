@@ -1,18 +1,28 @@
-𝕘𝟠 es una aplicación de facturación eficaz y de código abierto.
+𝕘𝟠 es una aplicación de facturación libre, que no comparte tus datos con terceros.
 
-Funcionalidades:
-- Crear y gestionar facturas
-- Crear albaranes y convertirlos en facturas
-- Crear presupuestos y convertirlos en facturas (opción premium)
-- Crear notas de crédito
-- Gestionar tus clientes y productos
+Funcionalidades gratuitas:
+- Facturas ilimitadas
+- Albaranes ilimitados, conversión en facturas
+- Clientes y productos ilimitados
 - Precios personalizados por cliente
 - Exportación de documentos a PDF
-- No es necesario crear una cuenta
+- Envío por correo, SMS o redes sociales
+- Gestión de varias empresas
+- Funciona sin conexión
+- Sello "Pagado" en las facturas
+- Notas de crédito y facturas rectificativas
+- Recordatorios en 1 clic
+- Retenciones fiscales en la fuente (IRPF, ISR, ReteFuente...)
 
-Perfecta para agricultores y agricultoras, autónomos y autónomas, pequeñas empresas y todas aquellas personas que necesiten crear facturas profesionales.
+Funcionalidades premium:
+- Presupuestos ilimitados
+- Conversión de presupuestos en facturas
 
-Sin publicidad • Sin rastreadores • Suscripción opcional
+
+Perfecta para productoras y productores, autónomos y autónomas, pequeñas empresas y todas aquellas personas que necesiten crear facturas profesionales.
+Y 𝕘𝟠 ofrecerá muy pronto la emisión de facturas electrónicas, ¡con conexión a una PDP!
+
+Sin publicidad • Sin rastreadores • Cuenta opcional
 
 Software libre 🇫🇷
 

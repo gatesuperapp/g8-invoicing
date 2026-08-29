@@ -104,6 +104,9 @@ kotlin {
         jvmMain.dependencies {
             // iText for PDF generation (shared between Android and Desktop)
             implementation("com.itextpdf:itext7-core:9.5.0")
+            // PDF/A-3 conformance + Factur-X XML embedding (via PdfADocument
+            // + PdfFileSpec.createEmbeddedFileSpec with AFRelationship=Data).
+            implementation("com.itextpdf:pdfa:9.5.0")
         }
 
         androidMain {

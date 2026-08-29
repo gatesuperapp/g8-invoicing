@@ -22,13 +22,17 @@ import g8invoicing.InvoiceQueries
 import g8invoicing.ProductQueries
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrentCompanyRepository
+import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.initializeVersionTracking
+import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.data.setSeenOnboarding18
 import com.a4a.g8invoicing.data.setSeenWhatsNew
 import com.a4a.g8invoicing.data.shouldShowBackupPopupNow
 import com.a4a.g8invoicing.data.shouldShowOnboarding18
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.AuthRepository
 import com.a4a.g8invoicing.data.auth.AuthResult
 import com.a4a.g8invoicing.data.auth.AuthState
@@ -46,12 +50,20 @@ import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
 import com.a4a.g8invoicing.ui.screens.sendDatabaseByEmail
+import com.a4a.g8invoicing.ui.shared.FirstLaunchIssuerNameDialog
+import com.a4a.g8invoicing.ui.shared.Migration19Actions
+import com.a4a.g8invoicing.ui.shared.Migration19Context
+import com.a4a.g8invoicing.ui.shared.OnboardingMigration19Dialog
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.platform.LocalUriHandler
 import android.content.Intent
 import android.net.Uri
 import java.io.File
 import com.a4a.g8invoicing.ui.theme.G8InvoicingTheme
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -74,19 +86,106 @@ fun MainCompose(
     val clientOrIssuerQueries: ClientOrIssuerQueries = koinInject()
     val currentCompanyRepository: CurrentCompanyRepository = koinInject()
     val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
+    val invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject()
+    val productDataSource: ProductLocalDataSourceInterface = koinInject()
+    val modulesRepo: ActivatedModulesRepository = koinInject()
 
-    // Initialize locale and version tracking on first composition
+    // Initialize locale and version tracking on first composition.
+    // Also: hydrate the "current entreprise" from the most-recent issuer, or
+    // if no issuer exists (fresh install), flip the first-launch dialog on.
+    // Without a hydrated currentCompanyId, doc-list flows take the getAll()
+    // fallback (no company filter) and any client created from the picker
+    // attaches to company_id=NULL — which double-inserts once master lists
+    // filter by company.
+    var needsFirstLaunchIssuer by remember { mutableStateOf(false) }
+    // 1.9 migration wizard state — surfaced only for existing installs (has
+    // at least one issuer) that never went through the wizard before. Fresh
+    // installs mark the flag straight after FirstLaunchIssuerNameDialog
+    // completes so the wizard never surfaces there.
+    var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
         // Pour les nouvelles installations, enregistre la version actuelle
         // Ainsi lors de la prochaine mise à jour, la modale WhatsNew s'affichera
         initializeVersionTracking(context)
-        // Hydrate the "current entreprise" from the most-recent issuer on
-        // first launch. Without this, currentCompanyRepository.current stays
-        // null → doc list flows take the getAll() fallback (no filter) and
-        // switching entreprise from the sidebar looks like it does nothing.
         val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
-        currentCompanyRepository.initIfMissing { lastIssuerId }
+        if (lastIssuerId == null) {
+            needsFirstLaunchIssuer = true
+        } else {
+            currentCompanyRepository.initIfMissing { lastIssuerId }
+            if (!modulesRepo.hasSeenMigration19()) {
+                val issuers = clientOrIssuerDataSource
+                    .fetchAll(PersonType.ISSUER).first()
+                if (issuers.isEmpty()) {
+                    modulesRepo.markMigration19Seen()
+                } else {
+                    val clients = clientOrIssuerDataSource
+                        .fetchAll(PersonType.CLIENT).first()
+                    val products = productDataSource.fetchAllProducts().first()
+                    val footersByIssuer = issuers.mapNotNull { issuer ->
+                        val id = issuer.id?.toLong() ?: return@mapNotNull null
+                        id to invoiceDataSource.getRecentFootersForCompany(id)
+                    }.toMap()
+                    migration19Context = Migration19Context(
+                        issuers = issuers,
+                        clients = clients,
+                        products = products,
+                        footersByIssuer = footersByIssuer,
+                    )
+                }
+            }
+        }
+    }
+
+    if (needsFirstLaunchIssuer) {
+        FirstLaunchIssuerNameDialog(
+            onSubmit = { enteredName, enteredCountry ->
+                val issuer = ClientOrIssuerState(
+                    type = ClientOrIssuerType.ISSUER,
+                    name = TextFieldValue(enteredName),
+                    addresses = listOf(
+                        com.a4a.g8invoicing.ui.states.AddressState(
+                            countryCode = enteredCountry,
+                        )
+                    ),
+                )
+                val newId = clientOrIssuerDataSource.createNewAndReturnId(issuer)
+                // setCurrent (not initIfMissing) so a stale Settings entry
+                // from a previous session — Settings survives a DB wipe —
+                // doesn't leave currentCompanyId pointing at a now-nonexistent
+                // issuer.
+                newId?.let { currentCompanyRepository.setCurrent(it) }
+                // Fresh installs never see the 1.9 migration wizard.
+                modulesRepo.markMigration19Seen()
+                needsFirstLaunchIssuer = false
+            }
+        )
+    }
+
+    migration19Context?.let { ctx ->
+        OnboardingMigration19Dialog(
+            context = ctx,
+            actions = Migration19Actions(
+                deleteIssuer = { issuer ->
+                    clientOrIssuerDataSource.deleteClientOrIssuer(issuer)
+                },
+                attachClients = { ids, issuerId ->
+                    clientOrIssuerDataSource.bulkAttachToCompany(ids, issuerId)
+                },
+                attachProducts = { ids, issuerId ->
+                    productDataSource.bulkAttachToCompany(ids, issuerId)
+                },
+                saveIssuerBank = { issuer, iban, bic ->
+                    val updated = issuer.copy(
+                        paymentIban = if (iban.isNotBlank()) TextFieldValue(iban) else issuer.paymentIban,
+                        paymentBic = if (bic.isNotBlank()) TextFieldValue(bic) else issuer.paymentBic,
+                    )
+                    clientOrIssuerDataSource.updateClientOrIssuer(updated)
+                },
+                markSeen = { modulesRepo.markMigration19Seen() },
+            ),
+            onDismiss = { migration19Context = null },
+        )
     }
 
     // What's New + Onboarding dialog state. The 1.8 onboarding takes priority

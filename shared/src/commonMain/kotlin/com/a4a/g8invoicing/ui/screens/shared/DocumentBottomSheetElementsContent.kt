@@ -15,6 +15,7 @@ import com.a4a.g8invoicing.shared.resources.document_due_date
 import com.a4a.g8invoicing.shared.resources.document_footer
 import com.a4a.g8invoicing.shared.resources.document_payment_means
 import com.a4a.g8invoicing.shared.resources.document_payment_terms
+import com.a4a.g8invoicing.shared.resources.document_vat_exemption_label
 import com.a4a.g8invoicing.data.models.joinPaymentMeansLabels
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
@@ -109,38 +110,51 @@ fun DocumentBottomSheetElementsContent(
                 )
             )
     }
-    // Payment means (BT-81) — invoice + credit note only. Row label is fixed;
-    // the user's editable per-doc label (rendered on the preview/PDF) lives
-    // inside the picker modal so the menu row stays findable regardless.
-    val paymentMeansSelections: Set<String>? = when (document) {
-        is InvoiceState -> document.paymentMeansSelections
-        is com.a4a.g8invoicing.ui.states.CreditNoteState -> document.paymentMeansSelections
-        else -> null
+    // BT-120 VAT exemption reason — surfaced only when the issuer is in
+    // franchise en base, since a taxed issuer never needs an exemption
+    // wording. Above payment means so a fresh reader spots the mention
+    // before the payment block.
+    if (document.documentIssuer?.vatExempt == true) {
+        val exemptionPreview = document.vatExemptionText?.text.orEmpty()
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_vat_exemption_label),
+                inputType = ForwardElement(
+                    text = exemptionPreview.ifEmpty { " - " },
+                    displayArrow = false,
+                    maxLines = 2,
+                ),
+                pageElement = ScreenElement.DOCUMENT_VAT_EXEMPTION,
+            )
+        )
     }
-    if (document is InvoiceState ||
-        document is com.a4a.g8invoicing.ui.states.CreditNoteState
-    ) {
-        val joined = joinPaymentMeansLabels(paymentMeansSelections)
+    // Payment means (BT-81) — invoice only. Avoir dropped: an avoir has no
+    // payment context (seller owes buyer). Devis + BL never had it.
+    if (document is InvoiceState) {
+        val joined = joinPaymentMeansLabels(document.paymentMeansSelections)
         inputList.add(
             FormInput(
                 label = stringResource(Res.string.document_payment_means),
                 inputType = ForwardElement(
                     text = joined.ifEmpty { " - " },
-                    isMultiline = false,
                     displayArrow = false,
+                    maxLines = 2,
                 ),
                 pageElement = ScreenElement.DOCUMENT_PAYMENT_MEANS,
             )
         )
     }
     if (document is InvoiceState) {
+        // Preview shows only the "pénalités de retard" mention truncated —
+        // that's the field that historically fit the row width. The 3
+        // sub-mentions are visible once the user taps and opens the picker.
         inputList.add(
             FormInput(
                 label = stringResource(Res.string.document_payment_terms),
                 inputType = ForwardElement(
-                    text = document.paymentTermsDescription.text.ifEmpty { " - " },
-                    isMultiline = false,
+                    text = document.paymentTermsLateFees.text.ifEmpty { " - " },
                     displayArrow = false,
+                    maxLines = 2,
                 ),
                 pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS,
             )

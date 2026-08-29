@@ -9,10 +9,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.ClientAddEdit
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -39,6 +41,7 @@ fun NavGraphBuilder.clientAddEdit(
         val viewModel: ClientOrIssuerAddEditViewModel = koinViewModel(
             parameters = { parametersOf(itemId, type) }
         )
+        val currentCompanyRepository: CurrentCompanyRepository = koinInject()
         val clientUiState by viewModel.clientUiState
         val issuerUiState by viewModel.issuerUiState
         val currentState = if (isIssuer) issuerUiState else clientUiState
@@ -69,7 +72,14 @@ fun NavGraphBuilder.clientAddEdit(
 
                     if (viewModel.validateInputs(effectiveType)) {
                         val success = if (isNew) {
-                            viewModel.createNew(effectiveType) != null
+                            val newId = viewModel.createNew(effectiveType)
+                            // Freshly created issuer becomes the active entreprise
+                            // — otherwise the picker stays on the previous one and
+                            // the new invoice/client is scoped to the wrong company.
+                            if (newId != null && effectiveType == ClientOrIssuerType.ISSUER) {
+                                currentCompanyRepository.setCurrent(newId)
+                            }
+                            newId != null
                         } else {
                             viewModel.updateClientOrIssuerInLocalDb(effectiveType)
                         }

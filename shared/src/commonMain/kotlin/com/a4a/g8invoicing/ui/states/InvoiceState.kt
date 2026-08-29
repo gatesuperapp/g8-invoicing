@@ -72,11 +72,23 @@ data class InvoiceState(
     // paymentMeansSegments). Empty list = fall back to
     // defaultPaymentBankSegments() at render time.
     var paymentBankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = emptyList(),
-    // BT-20 Payment Terms Description — free-text conditions, e.g. "Escompte pour
-    // paiement anticipé : néant\nTaux de pénalités : néant\nPaiement sous 30 jours net".
-    // Per-invoice (not on the issuer) since different clients can have different terms.
-    // Default seeded on createNew() from getExistingPaymentTermsDescription() → last
-    // used text → fallback to document_default_payment_terms (which carries the LME
-    // legal mentions in FR).
-    var paymentTermsDescription: TextFieldValue = TextFieldValue(),
+    // BT-20 Payment Terms — split into 3 mentions matching Factur-X BR-FR-05
+    // SubjectCodes:
+    //   PMT — Frais de recouvrement (recovery fees)
+    //   PMD — Pénalités de retard (late-payment penalties)
+    //   AAB — Escompte (early-payment discount)
+    // Each is edited independently in the picker (3-row bottom sheet). Per-invoice
+    // (not on the issuer) since different clients can have different terms. Seeded
+    // on createNew() from the last invoice's corresponding field → fallback to the
+    // localised default (payment_terms_*_default). The PDF concatenates them into
+    // one paragraph; the CII XML emits one <IncludedNote> per SubjectCode.
+    var paymentTermsRecoveryFees: TextFieldValue = TextFieldValue(),
+    var paymentTermsLateFees: TextFieldValue = TextFieldValue(),
+    var paymentTermsDiscount: TextFieldValue = TextFieldValue(),
+    // BT-120 VAT exemption reason. Only meaningful when the issuer is in the
+    // franchise en base regime (vatExempt=true → tax category E). Seeded on
+    // createNew() from the issuer's country ("TVA non applicable, art. 293 B
+    // du CGI" for FR, "§ 19 UStG" for DE) — other countries stay null and the
+    // user must fill it in the text menu before exporting Factur-X.
+    override var vatExemptionText: TextFieldValue? = null,
 ) : DocumentState()

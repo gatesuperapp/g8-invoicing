@@ -51,4 +51,10 @@ interface ProductLocalDataSourceInterface {
      * onboarding "Do you sell only services / only goods / a mix?" answer to
      * preseed the type on all existing products (which had null type pre-1.8). */
     suspend fun updateAllProductTypes(newType: ProductNature)
+
+    /** Move a batch of products under [companyId] in a single DB transaction.
+     *  Used by the 1.9 migration wizard to attach the products the user
+     *  selected for a given issuer, and to move orphans to their picked
+     *  issuer in the "à ranger" slide. */
+    suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long)
 }

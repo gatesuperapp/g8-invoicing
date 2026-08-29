@@ -49,25 +49,46 @@ private val FRAMES2 = listOf(
 
 private const val FRAME_DURATION_MS = 240L
 
-/** First-screen variant: waving mascot holding a flower that rotates. */
+/** First-screen variant: waving mascot holding a flower that rotates.
+ *  Set [static] to freeze it on frame 0 (used for the mid-flow info slides
+ *  in the first-launch wizard, where we want the mascot as a portrait, not
+ *  a live animation). */
 @Composable
 fun AnimatedKaomoji(
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 24.sp,
-) = AnimatedKaomojiFrames(frames = FRAMES, modifier = modifier, fontSize = fontSize)
+    loop: Boolean = false,
+    static: Boolean = false,
+) = AnimatedKaomojiFrames(
+    frames = FRAMES,
+    modifier = modifier,
+    fontSize = fontSize,
+    loop = loop,
+    static = static,
+)
 
 /** Thank-you-screen variant: eyes-and-cheeks morph (uses [FRAMES2]). */
 @Composable
 fun AnimatedKaomojiThanks(
     modifier: Modifier = Modifier,
     fontSize: TextUnit = 24.sp,
-) = AnimatedKaomojiFrames(frames = FRAMES2, modifier = modifier, fontSize = fontSize)
+    loop: Boolean = false,
+    static: Boolean = false,
+) = AnimatedKaomojiFrames(
+    frames = FRAMES2,
+    modifier = modifier,
+    fontSize = fontSize,
+    loop = loop,
+    static = static,
+)
 
 @Composable
 private fun AnimatedKaomojiFrames(
     frames: List<String>,
     modifier: Modifier,
     fontSize: TextUnit,
+    loop: Boolean = false,
+    static: Boolean = false,
 ) {
     var frameIndex by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
@@ -75,14 +96,21 @@ private fun AnimatedKaomojiFrames(
 
     // Play the animation once when the composable enters composition — greets
     // the user with a wave without waiting for them to notice the mascot is
-    // interactive. Subsequent replays are triggered by tap.
-    LaunchedEffect(Unit) {
-        for (i in 1 until frames.size) {
+    // interactive. When [loop] is true, the animation restarts forever
+    // (used on the confetti/completion slide where we want continuous
+    // motion behind the celebration). When [static] is true, we skip the
+    // entry animation entirely — the mascot stays on frame 0 and the tap
+    // interaction still replays a single cycle.
+    LaunchedEffect(loop, static) {
+        if (static) return@LaunchedEffect
+        do {
+            for (i in 1 until frames.size) {
+                delay(FRAME_DURATION_MS)
+                frameIndex = i
+            }
             delay(FRAME_DURATION_MS)
-            frameIndex = i
-        }
-        delay(FRAME_DURATION_MS)
-        frameIndex = 0
+            frameIndex = 0
+        } while (loop)
     }
 
     Text(

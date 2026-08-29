@@ -1,20 +1,45 @@
-𝕘𝟠 est une application de facturation efficace et open source.
+Créez vos devis et bons de livraison en quelques secondes, puis convertissez-les en facture en un clic.
 
-Fonctionnalités :
-- Créer et gérer des factures
-- Créer des bons de livraison et les convertir en factures
-- Créer des devis et les convertir en factures (option premium)
-- Créer des avoirs
-- Gérer vos clients et produits
-- Prix personnalisés par client
-- Export des documents en PDF
-- Aucun compte obligatoire
+▸ Devis, BL → Facture
+Transformez un devis, regroupez des bons de livraison,
+ou créez directement une facture. Aucune ressaisie.
 
-Parfait pour les paysan·nes, freelances, petites entreprises, toutes celles et ceux qui ont besoin de créer des factures professionnelles.
-Et 𝕘𝟠 sera conforme à la facturation électronique, avec connexion à une PDP !
+▸ Tous vos documents
+Factures, devis, bons de livraison, avoirs, factures rectificatives.
+Exportez en PDF, Factur-X ou CII-XML : les formats socles de la  facturation électronique, importables dans votre plateforme agréée ou logiciel de comptabilité.
 
-Zéro pub • Zéro traceur • Abonnement facultatif
+▸ Adaptée à votre métier
+Prix en HT ou TTC au choix, calcul automatique. N'importe quelle unité
+(kg, heure, pièce, botte...). Plusieurs prix possibles par produit selon le·la
+client·e. Gestion de plusieurs entreprises. TVA personnalisable.
 
-Logiciel libre 🇫🇷
+▸ À votre image
+Logo, libellés, descriptions, moyens de paiement,
+conditions de vente, pied de page, références.
 
-De nombreux efforts ont été consacrés au développement de cette application, pour vous aider à simplifier l'administratif tout en protégeant votre vie privée. Si vous avez une question, un problème ou une demande, il y a toujours une assistance en contactant Aude sur contact@the-gate.fr
+▸ Partage
+Envoi par email, SMS, messagerie instantanée. Impression possible.
+Tampon « Payé ». Relance en un clic,
+
+▸ Pas d'usine à gaz !
+Activez ou désactivez les fonctionnalités selon vos besoins, pour garder une appli simple et efficace.
+
+━━━━━━━━━━━━━━━━━━
+
+✨GRATUIT
+Factures, bons de livraison, avoirs, clients et produits en illimité.
+5 devis. Multi-entreprises.
+
+🌟 PREMIUM
+Devis illimités • Export Factur-X et CII
+
+━━━━━━━━━━━━━━━━━━
+
+Logiciel libre et open source. Vos données restent sur votre appareil.
+Zéro pub • Zéro traceur • Pas de partage à des tiers
+
+Le compte n'est nécessaire que pour l'abonnement.
+
+Conçue pour les producteur·ices, micro-entrepreneur·euses, artisan·es, freelances, et toute petite entreprise.
+
+Une question, une idée, un besoin ? Il y a toujours une assistance en contactant Aude sur contact@the-gate.fr

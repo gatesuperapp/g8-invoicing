@@ -151,9 +151,17 @@ enum class ScreenElement {
     DOCUMENT_PAYMENT_BANK_HIDDEN,
     // Structured bank-details label. Fires with List<PaymentBankSegment>.
     DOCUMENT_PAYMENT_BANK_LABEL,
-    // BT-20 — free-text payment terms description (LME mentions + "30j net"…).
-    // Per-invoice ; not on BL / avoir / devis.
+    // BT-20 — payment terms split in 3 fields mapped to Factur-X BR-FR-05
+    // SubjectCodes (PMT / PMD / AAB). Per-invoice ; not on BL / avoir / devis.
+    // The main-form row is DOCUMENT_PAYMENT_TERMS (opens the 3-row picker
+    // bottom sheet); each sub-row edits its own field.
     DOCUMENT_PAYMENT_TERMS,
+    DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES,
+    DOCUMENT_PAYMENT_TERMS_LATE_FEES,
+    DOCUMENT_PAYMENT_TERMS_DISCOUNT,
+    // BT-120 VAT exemption reason — only surfaced in the text menu when the
+    // doc's issuer has vatExempt=true. Fires with TextFieldValue.
+    DOCUMENT_VAT_EXEMPTION,
     SETTINGS_ACCOUNT,
     ELSE
 }

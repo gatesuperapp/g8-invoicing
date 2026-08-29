@@ -552,6 +552,14 @@ fun ClientOrIssuerAddEditForm(
             } else Spacer(Modifier.padding(bottom = 20.dp))
         }
 
+        // A particulier (INDIVIDUAL client) has no business identifiers by
+        // definition, so the whole SIRET / VAT / RCS block is hidden once
+        // the picker locks in INDIVIDUAL. Issuers always keep the section
+        // (an issuer is always a business entity in this app).
+        val hideCompanyIdentification = !isIssuer &&
+            clientOrIssuerUiState.clientType == com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL
+
+        if (!hideCompanyIdentification) {
         SectionTitle(stringResource(Res.string.client_or_issuer_section_identification))
 
         Column(
@@ -651,6 +659,7 @@ fun ClientOrIssuerAddEditForm(
                 errors = clientOrIssuerUiState.errors
             )
         }
+        }
 
         if (isIssuer) {
             Spacer(Modifier.padding(bottom = 16.dp))
@@ -699,7 +708,10 @@ fun ClientOrIssuerAddEditForm(
                     modifier = Modifier
                         .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                         .fillMaxWidth()
-                        .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                        // Match the 26.dp start-padding used on the "Franchise en
+                        // base de TVA" row above so both labels align on the same
+                        // vertical guide.
+                        .padding(start = 26.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
                     Text(

@@ -358,35 +358,14 @@ fun updateCreditNoteUiState(
             doc = doc.copy(footerText = value as TextFieldValue)
         }
 
-        ScreenElement.DOCUMENT_PAYMENT_MEANS_LABEL -> {
-            @Suppress("UNCHECKED_CAST")
-            val newSegments = value as List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>
-            doc = doc.copy(
-                paymentMeansSegments = newSegments,
-                paymentMeansSelections = com.a4a.g8invoicing.data.models
-                    .chipIdsFromSegments(newSegments)
-                    .takeIf { it.isNotEmpty() },
-            )
+        ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+            doc = doc.copy(vatExemptionText = value as TextFieldValue)
         }
 
-        ScreenElement.DOCUMENT_PAYMENT_MEANS_HIDDEN -> {
-            doc = doc.copy(paymentMeansHidden = value as Boolean)
-        }
-
-        ScreenElement.DOCUMENT_PAYMENT_MEANS_OTHER -> {
-            doc = doc.copy(paymentMeansOtherChecked = value as Boolean)
-        }
-
-        ScreenElement.DOCUMENT_PAYMENT_BANK_HIDDEN -> {
-            doc = doc.copy(paymentBankHidden = value as Boolean)
-        }
-
-        ScreenElement.DOCUMENT_PAYMENT_BANK_LABEL -> {
-            @Suppress("UNCHECKED_CAST")
-            doc = doc.copy(
-                paymentBankSegments = value as List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
-            )
-        }
+        // No payment-means / bank handlers on the credit-note ViewModel:
+        // CreditNoteState has no such fields anymore (an avoir has no
+        // payment context). Any stray fires from a shared UI path are
+        // swallowed silently (see the else branch at the bottom).
 
         ScreenElement.DOCUMENT_ISSUER_BANK_PICKED -> {
             val bank = value as com.a4a.g8invoicing.ui.states.IssuerBankState

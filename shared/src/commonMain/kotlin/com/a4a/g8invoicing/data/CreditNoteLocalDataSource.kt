@@ -11,7 +11,6 @@ import com.a4a.g8invoicing.shared.resources.credit_note_default_number
 import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoice
 import com.a4a.g8invoicing.shared.resources.credit_note_reference_from_invoices
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
-import com.a4a.g8invoicing.shared.resources.document_payment_means_default_label
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import org.jetbrains.compose.resources.getString
@@ -69,31 +68,9 @@ class CreditNoteLocalDataSource(
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
-        // Per-issuer reuse: mirror the Invoice createNew logic — pull payment
-        // means / bank segments from the most recent credit note for the same
-        // master issuer, so a new credit note inherits whatever the user last
-        // set on THIS company.
-        val reuse = existingIssuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
-            creditNoteQueries.getLastCreditNotePaymentReuseForIssuer(masterId)
-                .executeAsOneOrNull()
-        }
-
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
-
-            val reusedSelections = reuse?.payment_means_selections
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
-                ?.toSet()
-                ?.takeIf { it.isNotEmpty() }
-            val reusedSegments = reuse?.payment_means_label?.let {
-                com.a4a.g8invoicing.data.models.parsePaymentLabel(it)
-            }?.takeIf { it.isNotEmpty() }
-            val reusedBankSegments = reuse?.payment_bank_label?.let {
-                com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
-            }?.takeIf { it.isNotEmpty() }
 
             val creditNote = CreditNoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber(currentCompanyId)?.let {
@@ -108,19 +85,14 @@ class CreditNoteLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
-                paymentMeansSelections = reusedSelections ?: setOf(
-                    com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
-                    com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
-                    com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
-                ),
-                paymentMeansOtherChecked = (reuse?.payment_means_other_checked ?: 0L) != 0L,
-                paymentMeansSegments = reusedSegments
-                    ?: com.a4a.g8invoicing.data.models.defaultPaymentSegments(
-                        getString(Res.string.document_payment_means_default_label)
-                    ),
-                paymentBankSegments = reusedBankSegments ?: emptyList(),
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
+                vatExemptionText = existingIssuer
+                    ?.takeIf { it.vatExempt }
+                    ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                        it.addresses?.firstOrNull()?.countryCode
+                    ) }
+                    ?.let { TextFieldValue(it) },
             )
 
             saveInfoInCreditNoteTable(creditNote)
@@ -276,18 +248,8 @@ class CreditNoteLocalDataSource(
                 labelsSnapshot = it.labels_snapshot,
                 showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
                 formatLocale = it.format_locale,
-                paymentMeansSelections = it.payment_means_selections
-                    ?.split(",")
-                    ?.map { s -> s.trim() }
-                    ?.filter { s -> s.isNotEmpty() }
-                    ?.toSet()
-                    ?.takeIf { s -> s.isNotEmpty() },
-                paymentMeansOtherChecked = it.payment_means_other_checked != 0L,
-                paymentMeansSegments = com.a4a.g8invoicing.data.models.parsePaymentLabel(it.payment_means_label),
-                paymentMeansHidden = it.payment_means_hidden != 0L,
-                paymentBankHidden = it.payment_bank_hidden != 0L,
-                paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it.payment_bank_label),
                 originalCompanyId = it.original_company_id,
+                vatExemptionText = it.vat_exemption_text?.let { TextFieldValue(text = it) },
             )
         }
     }
@@ -310,6 +272,7 @@ class CreditNoteLocalDataSource(
             } ?: getString(Res.string.credit_note_default_number)
 
             try {
+                val issuerFromSource = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer
                 saveInfoInCreditNoteTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
@@ -317,7 +280,7 @@ class CreditNoteLocalDataSource(
                         reference = referenceText?.let { TextFieldValue(it) }
                             ?: invoices.firstOrNull { it.reference != null }?.reference,
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
-                        documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                        documentIssuer = issuerFromSource,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
                         currency = TextFieldValue(
                             invoices.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
@@ -328,25 +291,20 @@ class CreditNoteLocalDataSource(
                         labelsSnapshot = frozenLabels,
                         showCurrencyAndAutoTaxColumn = true,
                         formatLocale = AppLocaleHolder.languageCode,
-                        // On reprend les moyens de paiement de la facture source (99% des cas
-                        // même IBAN, mêmes chips). Fallback sur TRANSFER + CHEQUE + CASH si la
-                        // facture n'a rien renseigné.
-                        paymentMeansSelections = invoices.firstOrNull { it.paymentMeansSelections != null }
-                            ?.paymentMeansSelections
-                            ?: setOf(
-                                com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
-                                com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
-                                com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
-                            ),
-                        paymentMeansOtherChecked = invoices.firstOrNull()?.paymentMeansOtherChecked ?: false,
-                        paymentMeansSegments = invoices.firstOrNull { it.paymentMeansSegments.isNotEmpty() }
-                            ?.paymentMeansSegments
-                            ?: com.a4a.g8invoicing.data.models.defaultPaymentSegments(
-                                getString(Res.string.document_payment_means_default_label)
-                            ),
-                        // Inherit hidden flag from source invoice so credit note looks the same.
-                        paymentMeansHidden = invoices.firstOrNull()?.paymentMeansHidden ?: false,
+                        // No payment fields on the credit note — the source invoice's
+                        // payment means / bank are intentionally NOT carried over
+                        // (avoir reverses the flow, no payment for the buyer to make).
                         originalCompanyId = newCompanyId,
+                        // Carry the source invoice's exemption text if the user
+                        // set it there — cheaper than re-deriving from the issuer,
+                        // and preserves any wording override done on the invoice.
+                        vatExemptionText = invoices.firstOrNull { it.vatExemptionText != null }?.vatExemptionText
+                            ?: issuerFromSource
+                                ?.takeIf { it.vatExempt }
+                                ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                                    it.addresses?.firstOrNull()?.countryCode
+                                ) }
+                                ?.let { TextFieldValue(it) },
                     )
                 )
                 val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -372,12 +330,7 @@ class CreditNoteLocalDataSource(
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     footer = document.footerText.text,
-                    payment_means_selections = document.paymentMeansSelections?.joinToString(","),
-                    payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
-                    payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
-                    payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
-                    payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
-                    payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                    vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
             } catch (e: Exception) {
@@ -630,13 +583,8 @@ class CreditNoteLocalDataSource(
                 labels_snapshot = document.labelsSnapshot,
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
-                payment_means_selections = document.paymentMeansSelections?.joinToString(","),
-                payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
-                payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
-                payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
-                payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
-                payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
                 original_company_id = document.originalCompanyId,
+                vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

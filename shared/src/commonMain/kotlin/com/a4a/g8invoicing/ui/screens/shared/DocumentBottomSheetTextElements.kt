@@ -157,6 +157,9 @@ fun DocumentBottomSheetTextElements(
                     ScreenElement.DOCUMENT_FOOTER -> {
                         document.footerText
                     }
+                    ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+                        document.vatExemptionText ?: androidx.compose.ui.text.input.TextFieldValue()
+                    }
                     ScreenElement.DOCUMENT_PAYMENT_MEANS -> when (document) {
                         // PaymentPickerParams — see the data class definition below.
                         // Bundles segments + hidden flag + issuer info (for the IBAN
@@ -175,19 +178,8 @@ fun DocumentBottomSheetTextElements(
                             bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
                             bankCountry = document.documentIssuer?.paymentCountry,
                         )
-                        is com.a4a.g8invoicing.ui.states.CreditNoteState -> PaymentPickerParams(
-                            segments = document.paymentMeansSegments,
-                            hidden = document.paymentMeansHidden,
-                            masterIssuerId = document.documentIssuer?.originalClientOrIssuerId?.toLong(),
-                            selectedIban = document.documentIssuer?.paymentIban?.text,
-                            bankHidden = document.paymentBankHidden,
-                            hasIssuer = document.documentIssuer != null,
-                            otherChecked = document.paymentMeansOtherChecked,
-                            bankSegments = document.paymentBankSegments,
-                            bankIban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty(),
-                            bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
-                            bankCountry = document.documentIssuer?.paymentCountry,
-                        )
+                        // Avoir dropped: the payment picker isn't reachable
+                        // on a credit note anymore (row removed from the form).
                         else -> PaymentPickerParams(
                             segments = emptyList(),
                             hidden = false,
@@ -197,9 +189,20 @@ fun DocumentBottomSheetTextElements(
                             hasIssuer = false,
                         )
                     }
+                    // DOCUMENT_PAYMENT_TERMS opens the 3-row picker. The
+                    // picker branch reads the 3 current values from
+                    // PaymentTermsPickerParams to seed each sub-editor.
                     ScreenElement.DOCUMENT_PAYMENT_TERMS -> when (document) {
-                        is InvoiceState -> document.paymentTermsDescription
-                        else -> androidx.compose.ui.text.input.TextFieldValue()
+                        is InvoiceState -> PaymentTermsPickerParams(
+                            recoveryFees = document.paymentTermsRecoveryFees,
+                            lateFees = document.paymentTermsLateFees,
+                            discount = document.paymentTermsDiscount,
+                        )
+                        else -> PaymentTermsPickerParams(
+                            recoveryFees = androidx.compose.ui.text.input.TextFieldValue(),
+                            lateFees = androidx.compose.ui.text.input.TextFieldValue(),
+                            discount = androidx.compose.ui.text.input.TextFieldValue(),
+                        )
                     }
 
                     else -> {}

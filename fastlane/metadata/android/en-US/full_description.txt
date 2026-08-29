@@ -1,18 +1,28 @@
-𝕘𝟠 is an efficient, open-source invoicing app.
+𝕘𝟠 is a free and open-source invoicing app that does not share your data with third parties.
 
-Features:
-- Create and manage invoices
-- Create delivery slips and convert them into invoices
-- Create quotes and convert them into invoices (premium option)
-- Create credit memos
-- Manage your customers and products
+Free features:
+- Unlimited invoices
+- Unlimited delivery slips, conversion into invoices
+- Unlimited clients and products
 - Custom prices per customer
 - Export documents as PDFs
-- No account required
+- Send by email, SMS or social networks
+- Manage multiple businesses
+- Works offline
+- "Paid" stamp on invoices
+- Credit memos and corrective invoices
+- 1-click payment reminders
 
-Perfect for farmers, freelancers, small businesses, and anyone who needs to create professional invoices.
+Premium features:
+- Unlimited quotes
+- Convert quotes into invoices
 
-No ads • No trackers • Optional subscription
+
+Perfect for producers, freelancers, small businesses, and anyone who needs to create professional invoices.
+And 𝕘𝟠 will very soon offer electronic invoicing, with connection to a PDP!
+
+No ads • No trackers • Optional account
+
 Open-source software 🇫🇷
 
 A great deal of effort has gone into developing this app to help you simplify your administrative tasks while protecting your privacy. If you have a question, a problem, or a request, support is always available—just contact Aude at contact@the-gate.fr

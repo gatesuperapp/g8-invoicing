@@ -47,6 +47,13 @@ deleteProduct:
 DELETE FROM Product
 WHERE id = :id;
 
+-- 1.9 migration wizard: bulk-move a product under a specific
+-- issuer/company. Mirrors ClientOrIssuer.updateCompanyId.
+updateProductCompanyId:
+UPDATE Product
+SET company_id = :company_id
+WHERE id = :id;
+
 clearTaxRateFromProducts:
 UPDATE Product
 SET product_tax_id = NULL

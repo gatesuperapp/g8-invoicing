@@ -60,6 +60,21 @@ class ActivatedModulesRepository(
         settings.remove(KEY_ACTIVATED)
     }
 
+    // ---- 1.9 migration wizard flag ---------------------------------------
+    //
+    // Set once the user has walked through the 1.9 onboarding wizard (bank
+    // details + new-fields recap + Factur-X annoucement). Users who already
+    // finished it are recognised at boot and skip the wizard. Fresh installs
+    // are handled separately (they see FirstLaunchIssuerNameDialog and we
+    // seed the flag as `true` so they don't ever see the migration wizard
+    // afterwards).
+
+    fun hasSeenMigration19(): Boolean = settings.getBoolean(KEY_ONBOARDING_1_9_SEEN, false)
+
+    fun markMigration19Seen() {
+        settings.putBoolean(KEY_ONBOARDING_1_9_SEEN, true)
+    }
+
     /**
      * Nuke both the current activation and the ever-activated history. Only for
      * account-delete flows — logout must NOT call this, otherwise ex-premium users
@@ -195,6 +210,7 @@ class ActivatedModulesRepository(
         private const val KEY_QUOTE_TRIAL_COUNT = "gstore_quote_trial_count_v1"
         private const val KEY_EVER_ACTIVATED = "gstore_ever_activated_modules_v1"
         private const val KEY_EVER_ACTIVATED_SEEDED = "gstore_ever_activated_seeded_v1"
+        private const val KEY_ONBOARDING_1_9_SEEN = "onboarding_1_9_seen"
 
         /** Maximum number of "+ new quote" clicks a trial user can make before
          *  the exhausted modal takes over. Not user-configurable. */

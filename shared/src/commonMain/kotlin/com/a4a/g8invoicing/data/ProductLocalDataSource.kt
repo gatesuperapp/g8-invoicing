@@ -357,6 +357,17 @@ class ProductLocalDataSource(
             productQueries.updateAllTypes(newType.name)
         }
     }
+
+    override suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long) {
+        if (ids.isEmpty()) return
+        withContext(DispatcherProvider.IO) {
+            productQueries.transaction {
+                ids.forEach { id ->
+                    productQueries.updateProductCompanyId(companyId, id)
+                }
+            }
+        }
+    }
 }
 
 fun Product.transformIntoEditableProduct(

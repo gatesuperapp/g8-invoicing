@@ -1,19 +1,27 @@
-𝕘𝟠 ist eine effiziente und quelloffene Rechnungsstellungs-App.
+𝕘𝟠 ist eine freie Rechnungsstellungs-App, die Ihre Daten nicht an Dritte weitergibt.
 
-Funktionen:
-- Rechnungen erstellen und verwalten
-- Lieferscheine erstellen und in Rechnungen umwandeln
-- Angebote erstellen und in Rechnungen umwandeln (Premium-Option)
-- Gutschriften erstellen
-- Kunden und Produkte verwalten
+Kostenlose Funktionen:
+- Unbegrenzte Rechnungen
+- Unbegrenzte Lieferscheine, Umwandlung in Rechnungen
+- Unbegrenzte Kunden und Produkte
 - Individuelle Preise pro Kunde
 - Export von Dokumenten als PDF
-- Keine Registrierung erforderlich
+- Versand per E-Mail, SMS oder soziale Netzwerke
+- Verwaltung mehrerer Unternehmen
+- Funktioniert offline
+- „Bezahlt"-Stempel auf Rechnungen
+- Gutschriften und Korrekturrechnungen
+- Zahlungserinnerungen mit 1 Klick
 
-Perfekt für Landwirt*innen, Freiberufler*innen, kleine Unternehmen und alle, die professionelle Rechnungen erstellen müssen.
-Und 𝕘𝟠 wird die Anforderungen für die elektronische Rechnungsstellung erfüllen – mit Anbindung an eine PDP!
+Premium-Funktionen:
+- Unbegrenzte Angebote
+- Umwandlung von Angeboten in Rechnungen
 
-Keine Werbung • Keine Tracker • Abonnement optional
+
+Perfekt für Erzeuger*innen, Freiberufler*innen, kleine Unternehmen und alle, die professionelle Rechnungen erstellen müssen.
+Und 𝕘𝟠 wird sehr bald elektronische Rechnungsstellung anbieten, mit Anbindung an eine PDP!
+
+Keine Werbung • Keine Tracker • Konto optional
 
 Freie Software 🇫🇷
 

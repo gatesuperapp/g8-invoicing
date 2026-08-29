@@ -400,6 +400,11 @@ class ForwardElement(
     val text: String,
     val isMultiline: Boolean = true,
     val displayArrow: Boolean = true,
+    // Explicit line cap for the preview. Overrides the isMultiline fallback
+    // (1 line / 10 lines) when set — used for the text-menu rows that need
+    // exactly 2 lines with ellipsis (payment means / payment terms / VAT
+    // exemption).
+    val maxLines: Int? = null,
 )
 
 data class ListPicker(

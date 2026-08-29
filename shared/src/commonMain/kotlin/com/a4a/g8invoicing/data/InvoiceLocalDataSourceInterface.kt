@@ -38,4 +38,12 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun deleteTag(invoiceId: Long)
     suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+
+    /**
+     * Return the non-empty `footer` values of the [limit] most recent
+     * invoices belonging to [companyId]. Used by the 1.9 migration wizard
+     * to auto-detect an IBAN/BIC the user typed into free-form footers
+     * before the dedicated bank-details field existed.
+     */
+    suspend fun getRecentFootersForCompany(companyId: Long, limit: Int = 10): List<String>
 }

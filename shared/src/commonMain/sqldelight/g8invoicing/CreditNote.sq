@@ -11,22 +11,17 @@ CREATE TABLE CreditNote (
   labels_snapshot TEXT,
   show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
-  -- See Invoice.payment_means_selections.
-  payment_means_selections TEXT,
-  -- See Invoice.payment_means_label.
-  payment_means_label TEXT,
-  -- See Invoice.payment_means_hidden.
-  payment_means_hidden INTEGER NOT NULL DEFAULT 0,
-  -- See Invoice.payment_bank_hidden.
-  payment_bank_hidden INTEGER NOT NULL DEFAULT 0,
-  -- See Invoice.payment_means_other_checked.
-  payment_means_other_checked INTEGER NOT NULL DEFAULT 0,
-  -- See Invoice.payment_bank_label.
-  payment_bank_label TEXT,
+  -- No payment_means / payment_bank columns: an avoir reverses the flow
+  -- (seller owes buyer), so payment terms + means + IBAN don't apply.
+  -- Kept dropped in 6.sqm — the columns never make it out of release/1.9.
   -- Entreprise (issuer maître) émettrice, figée à la création. Sert la
   -- numérotation par entreprise + le filtrage de la liste des avoirs par
   -- entreprise courante.
   original_company_id INTEGER,
+  -- BT-120 VAT exemption reason. Mirror of Invoice.vat_exemption_text — a
+  -- credit note is still a taxable-flow doc under EN16931 so it needs the
+  -- same exemption wording when the issuer is in franchise en base.
+  vat_exemption_text TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -73,8 +68,8 @@ SELECT credit_note_id
 FROM CreditNote;
 
 save:
-INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, payment_means_selections, payment_means_label, payment_means_hidden, payment_bank_hidden, payment_means_other_checked, payment_bank_label, original_company_id)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, vat_exemption_text)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE CreditNote
@@ -85,12 +80,7 @@ SET number = :number,
     currency =: currency,
     due_date =: due_date,
     footer  =: footer,
-    payment_means_selections = :payment_means_selections,
-    payment_means_label = :payment_means_label,
-    payment_means_hidden = :payment_means_hidden,
-    payment_bank_hidden = :payment_bank_hidden,
-    payment_means_other_checked = :payment_means_other_checked,
-    payment_bank_label = :payment_bank_label,
+    vat_exemption_text = :vat_exemption_text,
     updated_at =: updated_at
 
 WHERE
@@ -110,33 +100,5 @@ getLastInsertedFooter:
 SELECT footer
 FROM CreditNote
 ORDER BY credit_note_id DESC
-LIMIT 1;
-
--- Per-issuer payment reuse for a fresh credit note: pick the most recently
--- created document (credit note OR invoice) attached to the same master
--- issuer and read its payment means/bank labels + chip selections. Falls back
--- to invoices because credit notes are rare — if the user just created a
--- normal invoice for this company, that's what they want to inherit from.
-getLastCreditNotePaymentReuseForIssuer:
-SELECT payment_means_selections, payment_means_label,
-       payment_means_other_checked, payment_bank_label
-FROM (
-    SELECT c.payment_means_selections, c.payment_means_label,
-           c.payment_means_other_checked, c.payment_bank_label,
-           c.created_at AS ts
-    FROM CreditNote c
-    JOIN LinkCreditNoteToDocumentClientOrIssuer l ON l.credit_note_id = c.credit_note_id
-    JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
-    WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
-    UNION ALL
-    SELECT i.payment_means_selections, i.payment_means_label,
-           i.payment_means_other_checked, i.payment_bank_label,
-           i.created_at AS ts
-    FROM Invoice i
-    JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
-    JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
-    WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
-)
-ORDER BY ts DESC
 LIMIT 1;
 

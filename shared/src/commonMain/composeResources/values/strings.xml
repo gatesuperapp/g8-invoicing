@@ -536,12 +536,22 @@
     <string name="drawer_gstore">𝕘Store</string>
     <string name="drawer_my_company">Mon entreprise</string>
 
-    <!-- First-launch onboarding: ask for company name -->
-    <string name="first_launch_issuer_title">Quel est le nom de votre entreprise ?</string>
-    <string name="first_launch_issuer_placeholder">Nom de l'entreprise</string>
-    <string name="first_launch_issuer_cta">Commencer</string>
-    <string name="first_launch_issuer_next">Continuer</string>
-    <string name="first_launch_issuer_country_title">Dans quel pays est votre entreprise ?</string>
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">Bienvenue sur 𝕘𝟠 aka The Gate</string>
+    <string name="first_launch_welcome_amigo">Je suis Petit Rhino, ton nouvel amigo</string>
+    <string name="first_launch_next">Suivant</string>
+    <string name="first_launch_liberty_body1">Je t'aide à tout gérer depuis ton téléphone : factures, bons de livraison, clients, produits…</string>
+    <string name="first_launch_liberty_body2">L'application fonctionne sans compte et hors ligne. Tes données restent sur ton téléphone et ne sont pas partagées à des tiers. ♡</string>
+    <string name="first_launch_gstore_intro">Certaines fonctionnalités s'activent à la demande depuis une petite boutique dans l'app, le 𝕘Store : devis, export aux formats de la facturation électronique et +.</string>
+    <string name="first_launch_gstore_premium">L'appli reste ainsi légère et personnalisable.</string>
+    <string name="first_launch_settings_intro">Avant de te laisser la main, il me faut 2 infos pour paramétrer l'interface :</string>
+    <string name="first_launch_settings_name_label">Nom de ton entreprise</string>
+    <string name="first_launch_settings_country_label">Pays</string>
+    <string name="first_launch_settings_cta">C'est parti</string>
+    <string name="first_launch_issuer_placeholder">Ferme des Trois Chênes</string>
+    <string name="first_launch_issuer_skip">Plus tard</string>
+    <string name="first_launch_issuer_default_name">Mon entreprise</string>
+    <string name="first_launch_completion_title">À tout de suite</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
@@ -592,7 +602,6 @@
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
-    <string name="export_chooser_coming_soon">bientôt</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">Franchise de TVA</string>
     <string name="export_vat_exempt_conflict_message">Votre entreprise est en franchise de TVA mais vous avez ajouté de la TVA à certains produits. Veuillez la retirer pour pouvoir exporter votre facture.</string>
@@ -739,9 +748,9 @@
     <string name="quote_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
     <!-- Invoice List Advice -->
-    <string name="invoice_advice_legal_help">Clique sur moi …!</string>
-    <string name="invoice_advice_legal_1">Tu es actuellement dans la catégorie «Factures».\n\n Clique sur le bouton Créer en bas de la page pour créer ta première facture …   </string>
-    <string name="invoice_advice_legal_2">Tous les documents que tu crées, ainsi que toutes tes modifications, s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="invoice_advice_legal_help">Clic sur moi, je te guide …</string>
+    <string name="invoice_advice_legal_1">Clique sur le bouton « Créer » ou « Menu » en bas de l'écran …   </string>
+    <string name="invoice_advice_legal_2">Tous les documents s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
 
     <!-- Held for the upcoming onboarding screen — moved out of the Invoice-tab
          petit-rhino popup in 1.9 (was invoice_advice_legal_1 before the trim). -->
@@ -933,4 +942,51 @@ Une erreur s'est produite :
     <string name="onboarding_thanks_title">C'est parfait !</string>
     <string name="onboarding_thanks_body">Merci de ta confiance. À bientôt !</string>
     <string name="onboarding_thanks_cta">Terminer</string>
+
+    <!-- ===================================================================
+         1.9 migration wizard — shown once when upgrading from 1.8.x.
+         Guides the user through the new e-invoicing fields (bank details,
+         per-issuer client/product attach) before revealing the CII/Factur-X
+         export modules at the end.
+         =================================================================== -->
+    <string name="onboarding_19_welcome_title">Bienvenue sur la version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_welcome_body">Cette version apporte de nouveaux champs pour la facturation électronique. Configurons-les ensemble.</string>
+    <string name="onboarding_19_welcome_cta">C'est parti</string>
+
+    <!-- Multi-issuer cleanup + attach flow -->
+    <string name="onboarding_19_cleanup_title">Il semble que tu gères %1$d entreprises</string>
+    <string name="onboarding_19_cleanup_body">Est-ce bien le cas ? Sinon, supprime les entreprises inutilisées. Pas d'inquiétude, les documents ne seront pas impactés.</string>
+    <string name="onboarding_19_cleanup_cta">Continuer</string>
+    <string name="onboarding_19_attach_intro_body">Nous allons rattacher les clients et produits à tes entreprises. Cela te permettra de basculer d'une entreprise à l'autre et d'avoir une numérotation spécifique pour tes documents.</string>
+    <string name="onboarding_19_attach_intro_cta">C'est parti</string>
+    <string name="onboarding_19_attach_step_title">Entreprise %1$d : %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Sélectionne les clients qui correspondent à cette entreprise.</string>
+    <string name="onboarding_19_attach_products_body">Sélectionne les produits qui correspondent à cette entreprise.</string>
+    <string name="onboarding_19_attach_cta">Rattacher à %1$s</string>
+
+    <!-- Bank details slide (always shown, once per issuer) -->
+    <string name="onboarding_19_bank_title">Coordonnées bancaires</string>
+    <string name="onboarding_19_bank_title_with_issuer">Entreprise %1$d : %2$s — Coordonnées bancaires</string>
+    <string name="onboarding_19_bank_body">Il existe désormais un champ dédié pour les coordonnées bancaires, au niveau de l'entreprise (émetteur).</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">J'ai retrouvé ces informations dans tes factures et je les ai préremplies. Modifie-les si besoin.</string>
+    <string name="onboarding_19_bank_not_found_hint">Je n'ai pas trouvé ces informations dans le pied de page de tes factures. Tu peux les remplir maintenant ou plus tard au niveau de ton entreprise.</string>
+    <string name="onboarding_19_bank_cta">Suivant</string>
+
+    <!-- Orphan clients/products left over after the per-issuer selection -->
+    <string name="onboarding_19_orphans_clients_title">Encore quelques clients à ranger</string>
+    <string name="onboarding_19_orphans_clients_body">Ces clients ne sont rattachés à aucune entreprise. Choisis pour chacun.</string>
+    <string name="onboarding_19_orphans_products_title">Encore quelques produits à ranger</string>
+    <string name="onboarding_19_orphans_products_body">Ces produits ne sont rattachés à aucune entreprise. Choisis pour chacun.</string>
+    <string name="onboarding_19_orphans_cta">Continuer</string>
+
+    <!-- New-fields recap + final annoucement -->
+    <string name="onboarding_19_new_fields_title">Encore quelques infos utiles</string>
+    <string name="onboarding_19_new_fields_body">J'ai aussi ajouté dans les factures les champs suivants :\n• mode de paiement\n• termes de paiement\n• exonération de TVA (pour les entreprises en franchise)\n\nSi tu avais mis ces informations dans le pied de page, tu peux faire des copier-coller dans les champs adéquats.</string>
+    <string name="onboarding_19_new_fields_cta">Suivant</string>
+    <string name="onboarding_19_final_title">Tu es maintenant prêt·e pour émettre des factures électroniques !</string>
+    <string name="onboarding_19_final_body1">Dans cette nouvelle version, je te propose des modules d'export de Factur-X et de XML CII. Tu pourras importer ces factures directement dans ta plateforme agréée.</string>
+    <string name="onboarding_19_final_body2">Active ces modules dans le gStore (si tu es membre premium — sinon, tu peux t'abonner sur le site internet).</string>
+    <string name="onboarding_19_final_cta">Terminer</string>
 </resources>

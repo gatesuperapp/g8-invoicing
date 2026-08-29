@@ -280,13 +280,16 @@
     <string name="drawer_gstore">𝕘Store</string>
     <string name="drawer_my_company">Mi empresa</string>
 
-    <!-- First-launch onboarding: ask for company name -->
-    <string name="first_launch_issuer_title">¿Cuál es el nombre de tu empresa?</string>
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">¡Bienvenido·a a 𝕘𝟠 aka The Gate!</string>
+    <string name="first_launch_welcome_amigo">Soy Petit Rhino, tu nuevo amigo ♡</string>
+    <string name="first_launch_next">Siguiente</string>
+    <string name="first_launch_gstore_intro">🏪 En la aplicación encontrarás una pequeña tienda donde puedes activar funciones a demanda:\n\n• Albaranes\n• Presupuestos\n• Facturación electrónica\n• …</string>
+    <string name="first_launch_gstore_premium">Algunos módulos están reservados a los miembros premium 🌟. Puedes hacerte miembro premium en la web de g8.</string>
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
-    <string name="first_launch_issuer_cta">Empezar</string>
-    <string name="first_launch_issuer_next">Continuar</string>
-    <string name="first_launch_issuer_country_title">¿En qué país está tu empresa?</string>
-
+    <string name="first_launch_issuer_skip">Más tarde</string>
+    <string name="first_launch_issuer_default_name">Mi empresa</string>
+    <string name="first_launch_completion_title">¡Feliz facturación!</string>
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
@@ -405,8 +408,8 @@
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
-    <string name="invoice_advice_legal_1">Estás en la categoría «Facturas».\n\n Toca el botón Crear en la parte inferior de la página para crear tu primera factura …   </string>
-    <string name="invoice_advice_legal_2">Todos los documentos que creas, así como todas tus modificaciones, se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="invoice_advice_legal_1">Toca el botón Crear en la parte inferior de la página para crear tu primera factura …   </string>
+    <string name="invoice_advice_legal_2">Todos los documentos que creas se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡</string>
 
     <string name="invoice_advice_legal_3">menciones obligatorias para una factura conforme. Para facilitarte la vida lo he resumido todo aquí: \n</string>
@@ -636,7 +639,6 @@ Une erreur s'est produite :
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
-    <string name="export_chooser_coming_soon">pronto</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">Franquicia de IVA</string>
     <string name="export_vat_exempt_conflict_message">Tu empresa está en régimen de franquicia de IVA, pero algunos productos tienen un tipo de IVA. Bórralo antes de exportar tu factura.</string>
@@ -842,4 +844,38 @@ Une erreur s'est produite :
     <string name="unit_hea_name">cabeza</string>
     <string name="unit_hea_short">cabeza</string>
     <string name="unit_hea_keywords">cabeza,cabezas,ganado,animales</string>
+
+    <!-- 1.9 migration wizard -->
+    <string name="onboarding_19_welcome_title">Bienvenido·a a la versión 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_welcome_body">Esta versión añade nuevos campos para la facturación electrónica. Vamos a configurarlos juntos.</string>
+    <string name="onboarding_19_welcome_cta">Adelante</string>
+    <string name="onboarding_19_cleanup_title">Parece que gestionas %1$d empresas</string>
+    <string name="onboarding_19_cleanup_body">¿Es así? Si no, elimina las que no uses. Tranquilo·a, tus documentos no se verán afectados.</string>
+    <string name="onboarding_19_cleanup_cta">Continuar</string>
+    <string name="onboarding_19_attach_intro_body">Vamos a vincular tus clientes y productos a tus empresas. Así podrás cambiar entre empresas y tener una numeración específica por empresa.</string>
+    <string name="onboarding_19_attach_intro_cta">Adelante</string>
+    <string name="onboarding_19_attach_step_title">Empresa %1$d: %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Selecciona los clientes que corresponden a esta empresa.</string>
+    <string name="onboarding_19_attach_products_body">Selecciona los productos que corresponden a esta empresa.</string>
+    <string name="onboarding_19_attach_cta">Vincular a %1$s</string>
+    <string name="onboarding_19_bank_title">Datos bancarios</string>
+    <string name="onboarding_19_bank_title_with_issuer">Empresa %1$d: %2$s — Datos bancarios</string>
+    <string name="onboarding_19_bank_body">Ahora hay un campo dedicado para los datos bancarios, a nivel de empresa (emisor).</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">He encontrado esta información en tus facturas y la he rellenado. Modifícala si hace falta.</string>
+    <string name="onboarding_19_bank_not_found_hint">No he encontrado esta información en el pie de página de tus facturas. Puedes rellenarla ahora o más tarde a nivel de empresa.</string>
+    <string name="onboarding_19_bank_cta">Siguiente</string>
+    <string name="onboarding_19_orphans_clients_title">Aún quedan algunos clientes por organizar</string>
+    <string name="onboarding_19_orphans_clients_body">Estos clientes no están vinculados a ninguna empresa. Elige una para cada uno.</string>
+    <string name="onboarding_19_orphans_products_title">Aún quedan algunos productos por organizar</string>
+    <string name="onboarding_19_orphans_products_body">Estos productos no están vinculados a ninguna empresa. Elige una para cada uno.</string>
+    <string name="onboarding_19_orphans_cta">Continuar</string>
+    <string name="onboarding_19_new_fields_title">Un dato útil más</string>
+    <string name="onboarding_19_new_fields_body">También he añadido los siguientes campos a las facturas:\n• medio de pago\n• condiciones de pago\n• exención de IVA (para empresas en régimen de franquicia)\n\nSi ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
+    <string name="onboarding_19_new_fields_cta">Siguiente</string>
+    <string name="onboarding_19_final_title">¡Ya estás listo·a para emitir facturas electrónicas!</string>
+    <string name="onboarding_19_final_body1">Esta nueva versión ofrece módulos de exportación en Factur-X y XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada.</string>
+    <string name="onboarding_19_final_body2">Activa esos módulos en el gStore (si eres miembro premium — si no, puedes suscribirte en la web).</string>
+    <string name="onboarding_19_final_cta">Finalizar</string>
 </resources>

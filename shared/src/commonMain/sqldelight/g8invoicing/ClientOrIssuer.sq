@@ -91,6 +91,15 @@ delete:
 DELETE FROM ClientOrIssuer
 WHERE id = :id;
 
+-- 1.9 migration wizard: bulk-move a client (or set of clients) under a
+-- specific issuer/company. Bumps updated_at but NOT version — this is a
+-- one-shot bookkeeping move, not a user edit.
+updateCompanyId:
+UPDATE ClientOrIssuer
+SET company_id = :company_id,
+    updated_at = datetime('now', 'localtime')
+WHERE id = :id;
+
 getLastInsertedRowId:
 SELECT id
 FROM ClientOrIssuer

@@ -73,6 +73,11 @@ val sharedModule = module {
     // Unit code repository (localised names / short forms / search index)
     single { UnitCodeRepository() }
 
+    // Factur-X: CII XML file writer + share sheet (Android + Desktop only;
+    // iOS is a stub until PDFKit port). Injected into whatever screen fires
+    // "Export CII".
+    single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
+
     // Database
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
     single { Database(get()) }

@@ -265,14 +265,17 @@ class ClientOrIssuerLocalDataSource(
         return true
     }
 
-    /** Country excluded — it's pre-filled by default, so a row with only
-     *  country would otherwise "look filled" and get persisted as noise. */
+    // An address is empty only if EVERY field, including country, is blank.
+    // A country-only row is kept: the first-launch onboarding seeds one so
+    // the VAT-exemption text can key off the issuer's country later, and a
+    // user who picks a country in the form clearly means it.
     private fun isAddressEmpty(address: AddressState): Boolean {
         return address.addressTitle?.text.isNullOrBlank() &&
             address.addressLine1?.text.isNullOrBlank() &&
             address.addressLine2?.text.isNullOrBlank() &&
             address.zipCode?.text.isNullOrBlank() &&
-            address.city?.text.isNullOrBlank()
+            address.city?.text.isNullOrBlank() &&
+            address.countryCode.isNullOrBlank()
     }
 
     private fun saveClientOrIssuerEmailRows(
@@ -890,6 +893,13 @@ class ClientOrIssuerLocalDataSource(
                             companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
                             companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
                             logoPath = issuer.logo_path,
+                            // Legal / regime flags must be copied from the master —
+                            // otherwise a new invoice always defaults to vatExempt=false /
+                            // intraEuSales=false, ignoring the toggles the user just
+                            // set on their entreprise from Mon Compte.
+                            vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
+                            intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
+                            banks = fetchIssuerBanks(issuer.id),
                             // Freeze the first bank (sort_order = 0) on the new doc.
                             // The payment-means picker on the invoice lets the user
                             // swap in a different bank later — this seeds the pick
@@ -900,6 +910,8 @@ class ClientOrIssuerLocalDataSource(
                             paymentBic = fetchIssuerBanks(issuer.id).firstOrNull()
                                 ?.bic?.text?.takeIf { it.isNotEmpty() }
                                 ?.let { TextFieldValue(text = it) },
+                            paymentCountry = fetchIssuerBanks(issuer.id).firstOrNull()
+                                ?.countryCode,
                         )
                     }
                 }
@@ -933,12 +945,17 @@ class ClientOrIssuerLocalDataSource(
                         companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
                         companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
                         logoPath = issuer.logo_path,
+                        // Copy the regime flags from the master row (see getLastIssuer).
+                        vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
+                        intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
+                        banks = banks,
                         // Freeze the first bank (sort_order = 0) — same seed as
                         // getLastIssuer; the payment-means picker can swap it later.
                         paymentIban = firstBank?.identifier?.text?.takeIf { it.isNotEmpty() }
                             ?.let { TextFieldValue(text = it) },
                         paymentBic = firstBank?.bic?.text?.takeIf { it.isNotEmpty() }
                             ?.let { TextFieldValue(text = it) },
+                        paymentCountry = firstBank?.countryCode,
                     )
                 }
             } catch (_: Exception) {
@@ -1048,6 +1065,17 @@ class ClientOrIssuerLocalDataSource(
                 .executeAsList()
                 .mapNotNull { it }
         }
+
+    override suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long) {
+        if (ids.isEmpty()) return
+        withContext(DispatcherProvider.IO) {
+            clientOrIssuerQueries.transaction {
+                ids.forEach { id ->
+                    clientOrIssuerQueries.updateCompanyId(companyId, id)
+                }
+            }
+        }
+    }
 }
 
 fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {

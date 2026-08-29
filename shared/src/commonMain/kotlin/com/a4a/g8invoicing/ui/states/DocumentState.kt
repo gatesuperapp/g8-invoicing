@@ -54,4 +54,9 @@ abstract class DocumentState {
     // 6→7 migration backfilled from the master issuer already pinned on
     // DocumentClientOrIssuer.
     abstract var originalCompanyId: Long?
+    // BT-120 VAT exemption reason surfaced in the text menu when the doc's
+    // issuer is in the franchise en base regime. Persisted on Invoice /
+    // CreditNote (open on the two doc types that end up in Factur-X); the
+    // Quote / DeliveryNote overrides are non-persisted stubs kept null.
+    open var vatExemptionText: TextFieldValue? = null
 }

@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -319,6 +321,8 @@ fun InvoiceList(
 
 @Composable
 private fun DisplayBatHelperWelcome() {
+    // Advice bubble on the empty invoice tab. Cycles 0 → 1 → 2 → 0 on
+    // every tap: "Clique sur moi …!" → actionable hint #1 → hint #2.
     var visibleText by remember { mutableIntStateOf(0) }
     val numberOfIterations = remember { mutableIntStateOf(1) }
 
@@ -341,9 +345,7 @@ private fun DisplayBatHelperWelcome() {
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ) {
-                if (visibleText < 2) {
-                    visibleText += 1
-                } else visibleText = 0
+                visibleText = if (visibleText < 2) visibleText + 1 else 0
                 numberOfIterations.intValue += 1
             }
         ) {
@@ -356,48 +358,26 @@ private fun DisplayBatHelperWelcome() {
             )
         }
 
-        AnimatedVisibility(
-            visible = visibleText == 0,
-            enter = fadeIn(tween(1000)),
-            exit = fadeOut(tween(100)),
-        ) {
+        // Symmetric 600 ms fade for every transition (0 → 1, 1 → 2, 2 → 0).
+        // fillMaxWidth on the Crossfade + inner Text pins the string to the
+        // centre column so length variation between advice #0/#1/#2 doesn't
+        // shift the block horizontally during the fade.
+        Crossfade(
+            targetState = visibleText,
+            animationSpec = tween(durationMillis = 600),
+            label = "invoiceAdviceText",
+            modifier = Modifier.fillMaxWidth(),
+        ) { state ->
+            val text = when (state) {
+                0 -> stringResource(Res.string.invoice_advice_legal_help)
+                1 -> stringResource(Res.string.invoice_advice_legal_1)
+                2 -> stringResource(Res.string.invoice_advice_legal_2)
+                else -> ""
+            }
             Text(
-                text = stringResource(Res.string.invoice_advice_legal_help),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        AnimatedVisibility(
-            visible = visibleText == 1,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = stringResource(Res.string.invoice_advice_legal_1),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        AnimatedVisibility(
-            visible = visibleText == 2,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = stringResource(Res.string.invoice_advice_legal_2),
-                textAlign = TextAlign.Center
+                text = text,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

@@ -26,18 +26,14 @@ data class CreditNoteState(
     override var originalCompanyId: Long? = null,
     var dueDate: String = "",
     var linkedInvoice: InvoiceState? = null,
-    // See InvoiceState.paymentMeansSelections — same semantics on credit notes since
-    // they are Factur-X payment documents too (type-code 381 for regular avoir, 384
-    // for corrective).
-    var paymentMeansSelections: Set<String>? = null,
-    // See InvoiceState.paymentMeansOtherChecked.
-    var paymentMeansOtherChecked: Boolean = false,
-    // See InvoiceState.paymentMeansSegments.
-    var paymentMeansSegments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment> = emptyList(),
-    // See InvoiceState.paymentMeansHidden.
-    var paymentMeansHidden: Boolean = false,
-    // See InvoiceState.paymentBankHidden.
-    var paymentBankHidden: Boolean = false,
-    // See InvoiceState.paymentBankSegments.
-    var paymentBankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = emptyList(),
+    // BT-120 VAT exemption reason — mirror of Invoice.vatExemptionText. An
+    // avoir is still a taxable-flow doc under EN16931 so it needs the same
+    // exemption wording when the issuer is in franchise en base.
+    override var vatExemptionText: TextFieldValue? = null,
+    // No payment-means / bank / terms fields on credit notes: an avoir
+    // reverses the flow — the seller owes the buyer, not the other way
+    // around, so there's nothing for the buyer to pay. Refund paths (RIB
+    // for a SEPA reverse transfer) exist but are rare and out of scope
+    // for now. Keeping the state minimal avoids the "empty payment box"
+    // artefacts that used to render on the PDF.
 ) : DocumentState()

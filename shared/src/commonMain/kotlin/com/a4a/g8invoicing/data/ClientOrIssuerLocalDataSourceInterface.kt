@@ -69,4 +69,12 @@ interface ClientOrIssuerLocalDataSourceInterface {
     /** Master ids of the 3 most recently used clients or issuers in documents,
      *  most recent first. Powers the "Recents" section in the picker sheets. */
     suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long>
+
+    /**
+     * Move a batch of clients under [companyId] in a single DB transaction.
+     * Used by the 1.9 migration wizard to attach the clients the user
+     * selected for a given issuer, and to move orphans to their picked
+     * issuer in the "à ranger" slide.
+     */
+    suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long)
 }

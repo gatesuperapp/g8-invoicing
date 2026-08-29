@@ -278,13 +278,16 @@
     <string name="drawer_my_account">Mein Konto</string>
     <string name="drawer_my_company">Mein Unternehmen</string>
 
-    <!-- First-launch onboarding: ask for company name -->
-    <string name="first_launch_issuer_title">Wie heißt Ihr Unternehmen?</string>
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">Willkommen bei 𝕘𝟠 aka The Gate!</string>
+    <string name="first_launch_welcome_amigo">Ich bin Little Rhino, dein neuer Amigo ♡</string>
+    <string name="first_launch_next">Weiter</string>
+    <string name="first_launch_gstore_intro">🏪 In der App findest du einen kleinen Store, in dem du Funktionen bei Bedarf aktivieren kannst:\n\n• Lieferscheine\n• Angebote\n• Elektronische Rechnungsstellung\n• …</string>
+    <string name="first_launch_gstore_premium">Einige Module sind Premium-Mitgliedern vorbehalten 🌟. Du kannst auf der g8-Website Premium-Mitglied werden.</string>
     <string name="first_launch_issuer_placeholder">Name des Unternehmens</string>
-    <string name="first_launch_issuer_cta">Loslegen</string>
-    <string name="first_launch_issuer_next">Weiter</string>
-    <string name="first_launch_issuer_country_title">In welchem Land befindet sich Ihr Unternehmen?</string>
-
+    <string name="first_launch_issuer_skip">Später</string>
+    <string name="first_launch_issuer_default_name">Mein Unternehmen</string>
+    <string name="first_launch_completion_title">Fröhliches Rechnungsschreiben!</string>
     <!-- Account Screen -->
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich (https://play.google.com/store/apps/details?id=com.a4a.g8invoicing) sowie auf F-Droid: https://f-droid.org/de/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -404,8 +407,8 @@
     <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Du bist gerade in der Kategorie „Rechnungen".\n\n Tippe unten auf der Seite auf den Button „Erstellen", um deine erste Rechnung zu erstellen …</string>
-    <string name="invoice_advice_legal_2">Alle Dokumente, die du erstellst, sowie all deine Änderungen werden automatisch im Hintergrund gespeichert. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="invoice_advice_legal_1">Tippe unten auf der Seite auf den Button „Erstellen", um deine erste Rechnung zu erstellen …</string>
+    <string name="invoice_advice_legal_2">Alle Dokumente, die du erstellst, werden automatisch im Hintergrund gespeichert. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡</string>
 
     <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
@@ -631,7 +634,6 @@ Es ist ein Fehler aufgetreten :
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
-    <string name="export_chooser_coming_soon">bald</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">Kleinunternehmerregelung</string>
     <string name="export_vat_exempt_conflict_message">Ihr Unternehmen nutzt die Kleinunternehmerregelung, aber einige Produkte weisen einen Mehrwertsteuersatz auf. Bitte entfernen Sie diesen, um die Rechnung exportieren zu können.</string>
@@ -840,4 +842,38 @@ Es ist ein Fehler aufgetreten :
     <string name="unit_hea_name">Kopf</string>
     <string name="unit_hea_short">Kopf</string>
     <string name="unit_hea_keywords">kopf,kopfe,köpfe,vieh,tiere</string>
+
+    <!-- 1.9 migration wizard -->
+    <string name="onboarding_19_welcome_title">Willkommen zu Version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_welcome_body">Diese Version bringt neue Felder für die elektronische Rechnungsstellung. Wir richten sie gemeinsam ein.</string>
+    <string name="onboarding_19_welcome_cta">Los geht's</string>
+    <string name="onboarding_19_cleanup_title">Es sieht so aus, als hättest du %1$d Unternehmen</string>
+    <string name="onboarding_19_cleanup_body">Stimmt das? Sonst kannst du die ungenutzten löschen. Keine Sorge, deine Dokumente bleiben unberührt.</string>
+    <string name="onboarding_19_cleanup_cta">Weiter</string>
+    <string name="onboarding_19_attach_intro_body">Wir ordnen deine Kunden und Produkte den Unternehmen zu. So kannst du zwischen Unternehmen wechseln und pro Unternehmen eigene Nummernkreise nutzen.</string>
+    <string name="onboarding_19_attach_intro_cta">Los geht's</string>
+    <string name="onboarding_19_attach_step_title">Unternehmen %1$d: %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Wähle die Kunden aus, die zu diesem Unternehmen gehören.</string>
+    <string name="onboarding_19_attach_products_body">Wähle die Produkte aus, die zu diesem Unternehmen gehören.</string>
+    <string name="onboarding_19_attach_cta">Zu %1$s zuordnen</string>
+    <string name="onboarding_19_bank_title">Bankverbindung</string>
+    <string name="onboarding_19_bank_title_with_issuer">Unternehmen %1$d: %2$s — Bankverbindung</string>
+    <string name="onboarding_19_bank_body">Es gibt jetzt ein eigenes Feld für die Bankverbindung auf Unternehmensebene (Aussteller).</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">Ich habe die Angaben in deinen Rechnungen gefunden und ausgefüllt. Ändere sie bei Bedarf.</string>
+    <string name="onboarding_19_bank_not_found_hint">Ich konnte die Angaben in der Fußzeile deiner Rechnungen nicht finden. Trage sie jetzt oder später am Unternehmen ein.</string>
+    <string name="onboarding_19_bank_cta">Weiter</string>
+    <string name="onboarding_19_orphans_clients_title">Noch ein paar Kunden zu sortieren</string>
+    <string name="onboarding_19_orphans_clients_body">Diese Kunden sind noch keinem Unternehmen zugeordnet. Wähle jeweils eines aus.</string>
+    <string name="onboarding_19_orphans_products_title">Noch ein paar Produkte zu sortieren</string>
+    <string name="onboarding_19_orphans_products_body">Diese Produkte sind noch keinem Unternehmen zugeordnet. Wähle jeweils eines aus.</string>
+    <string name="onboarding_19_orphans_cta">Weiter</string>
+    <string name="onboarding_19_new_fields_title">Noch ein nützlicher Hinweis</string>
+    <string name="onboarding_19_new_fields_body">Ich habe auch folgende Felder in die Rechnungen aufgenommen:\n• Zahlungsart\n• Zahlungsbedingungen\n• USt-Befreiungsgrund (für Kleinunternehmen)\n\nWenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
+    <string name="onboarding_19_new_fields_cta">Weiter</string>
+    <string name="onboarding_19_final_title">Du bist bereit für elektronische Rechnungen!</string>
+    <string name="onboarding_19_final_body1">In dieser neuen Version gibt es Factur-X- und CII-XML-Export-Module. Damit lädst du deine Rechnungen direkt auf deine registrierte E-Invoicing-Plattform hoch.</string>
+    <string name="onboarding_19_final_body2">Aktiviere diese Module im gStore (Premium-Mitglieder — sonst kannst du dich auf unserer Website anmelden).</string>
+    <string name="onboarding_19_final_cta">Fertig</string>
 </resources>

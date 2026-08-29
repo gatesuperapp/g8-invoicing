@@ -9,7 +9,9 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_default_footer
-import com.a4a.g8invoicing.shared.resources.document_default_payment_terms
+import com.a4a.g8invoicing.shared.resources.payment_terms_discount_default
+import com.a4a.g8invoicing.shared.resources.payment_terms_late_fees_default
+import com.a4a.g8invoicing.shared.resources.payment_terms_recovery_fees_default
 import com.a4a.g8invoicing.shared.resources.document_payment_means_default_label
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
@@ -34,6 +36,7 @@ import g8invoicing.DocumentClientOrIssuerAddressQueries
 import g8invoicing.DocumentClientOrIssuerEmailQueries
 import g8invoicing.DocumentClientOrIssuerQueries
 import g8invoicing.DocumentProductQueries
+import g8invoicing.GetLastInsertedInvoicePaymentTerms
 import g8invoicing.Invoice
 import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkCreditNoteToDocumentClientOrIssuerQueries
@@ -122,7 +125,14 @@ class InvoiceLocalDataSource(
             val reusedBankSegments = reuse?.payment_bank_label?.let {
                 com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
             }?.takeIf { it.isNotEmpty() }
-            val reusedTerms = reuse?.payment_terms_description?.takeIf { it.isNotEmpty() }
+            // 3-way payment terms — each field is seeded independently from
+            // the last invoice's corresponding column (so a user who only
+            // customised "pénalités de retard" keeps the other two on their
+            // localised defaults instead of getting blanks).
+            val reusedRecoveryFees = reuse?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+            val reusedLateFees = reuse?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+            val reusedDiscount = reuse?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+            val lastTerms = getLastInvoicePaymentTerms()
 
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
@@ -151,15 +161,36 @@ class InvoiceLocalDataSource(
                         getString(Res.string.document_payment_means_default_label)
                     ),
                 paymentBankSegments = reusedBankSegments ?: emptyList(),
-                paymentTermsDescription = TextFieldValue(
-                    reusedTerms ?: getExistingPaymentTermsDescription()
-                        ?: getString(Res.string.document_default_payment_terms)
+                paymentTermsRecoveryFees = TextFieldValue(
+                    reusedRecoveryFees
+                        ?: lastTerms?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+                        ?: getString(Res.string.payment_terms_recovery_fees_default)
+                ),
+                paymentTermsLateFees = TextFieldValue(
+                    reusedLateFees
+                        ?: lastTerms?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+                        ?: getString(Res.string.payment_terms_late_fees_default)
+                ),
+                paymentTermsDiscount = TextFieldValue(
+                    reusedDiscount
+                        ?: lastTerms?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+                        ?: getString(Res.string.payment_terms_discount_default)
                 ),
                 // Frozen at creation. Falls back to the master id of the
                 // resolved issuer when currentCompanyRepository has nothing
                 // yet — keeps original_company_id NOT NULL for numbering.
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
+                // BT-120 seed: only when the issuer is in franchise en base
+                // AND we know a legally-correct citation for their country.
+                // Foreign issuers get null → the export guard blocks Factur-X
+                // until the user fills the field via the text menu.
+                vatExemptionText = existingIssuer
+                    ?.takeIf { it.vatExempt }
+                    ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                        it.addresses?.firstOrNull()?.countryCode
+                    ) }
+                    ?.let { TextFieldValue(it) },
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -217,16 +248,39 @@ class InvoiceLocalDataSource(
         return footer
     }
 
-    // Last non-empty payment_terms_description used across invoices. Mirrors
-    // getExistingFooter() so a user who tailors their terms once has them
-    // pre-filled on every new invoice going forward. Fallback (when null) is
-    // resolved by callers to document_default_payment_terms (LME mentions).
-    private fun getExistingPaymentTermsDescription(): String? {
+    // Last invoice's 3 payment-terms columns — used by createNew() to seed
+    // each field independently (per-field last-used, not a blanket copy of
+    // the paragraph). Null when there are no invoices yet; callers fall
+    // back to the localised payment_terms_*_default per field.
+    private fun getLastInvoicePaymentTerms(): GetLastInsertedInvoicePaymentTerms? {
         return try {
             invoiceQueries.getLastInsertedInvoicePaymentTerms().executeAsOneOrNull()
         } catch (e: Exception) {
             null
         }
+    }
+
+    /**
+     * Seed the 3 payment-terms fields for a brand-new invoice: last-invoice
+     * value if non-empty, else the localised default. Called by createNew()
+     * and by the convertX toInvoice flows.
+     */
+    private suspend fun seedPaymentTermsForNewInvoice(): Triple<TextFieldValue, TextFieldValue, TextFieldValue> {
+        val last = getLastInvoicePaymentTerms()
+        return Triple(
+            TextFieldValue(
+                last?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+                    ?: getString(Res.string.payment_terms_recovery_fees_default)
+            ),
+            TextFieldValue(
+                last?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+                    ?: getString(Res.string.payment_terms_late_fees_default)
+            ),
+            TextFieldValue(
+                last?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+                    ?: getString(Res.string.payment_terms_discount_default)
+            ),
+        )
     }
 
     // --- fetch ---
@@ -426,8 +480,11 @@ class InvoiceLocalDataSource(
             paymentMeansHidden = this.payment_means_hidden != 0L,
             paymentBankHidden = this.payment_bank_hidden != 0L,
             paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(this.payment_bank_label),
-            paymentTermsDescription = TextFieldValue(text = this.payment_terms_description ?: ""),
+            paymentTermsRecoveryFees = TextFieldValue(text = this.payment_terms_recovery_fees ?: ""),
+            paymentTermsLateFees = TextFieldValue(text = this.payment_terms_late_fees ?: ""),
+            paymentTermsDiscount = TextFieldValue(text = this.payment_terms_discount ?: ""),
             originalCompanyId = this.original_company_id,
+            vatExemptionText = this.vat_exemption_text?.let { TextFieldValue(text = it) },
         )
     }
 
@@ -445,13 +502,15 @@ class InvoiceLocalDataSource(
             } ?: getString(Res.string.invoice_default_number)
 
             try {
+                val seededTerms = seedPaymentTermsForNewInvoice()
+                val issuerFromSource = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
                 val newInvoiceState = InvoiceState(
                     documentNumber = TextFieldValue(docNumber),
                     documentDate = DateUtils.getCurrentDateFormatted(),
                     dueDate = DateUtils.getDatePlusDaysFormatted(30),
                     reference = deliveryNotes.firstOrNull { it.reference != null }?.reference,
                     freeField = deliveryNotes.firstOrNull { it.freeField != null }?.freeField,
-                    documentIssuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentIssuer = issuerFromSource,
                     documentClient = deliveryNotes.firstOrNull { it.documentClient != null }?.documentClient,
                     currency = TextFieldValue(
                         deliveryNotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
@@ -470,11 +529,16 @@ class InvoiceLocalDataSource(
                     paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
                         getString(Res.string.document_payment_means_default_label)
                     ),
-                    paymentTermsDescription = TextFieldValue(
-                        getExistingPaymentTermsDescription()
-                            ?: getString(Res.string.document_default_payment_terms)
-                    ),
+                    paymentTermsRecoveryFees = seededTerms.first,
+                    paymentTermsLateFees = seededTerms.second,
+                    paymentTermsDiscount = seededTerms.third,
                     originalCompanyId = newCompanyId,
+                    vatExemptionText = issuerFromSource
+                        ?.takeIf { it.vatExempt }
+                        ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                            it.addresses?.firstOrNull()?.countryCode
+                        ) }
+                        ?.let { TextFieldValue(it) },
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
 
@@ -515,13 +579,15 @@ class InvoiceLocalDataSource(
             } ?: getString(Res.string.invoice_default_number)
 
             try {
+                val seededTerms = seedPaymentTermsForNewInvoice()
+                val issuerFromSource = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
                 val newInvoiceState = InvoiceState(
                     documentNumber = TextFieldValue(docNumber),
                     documentDate = DateUtils.getCurrentDateFormatted(),
                     dueDate = DateUtils.getDatePlusDaysFormatted(30),
                     reference = quotes.firstOrNull { it.reference != null }?.reference,
                     freeField = quotes.firstOrNull { it.freeField != null }?.freeField,
-                    documentIssuer = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                    documentIssuer = issuerFromSource,
                     documentClient = quotes.firstOrNull { it.documentClient != null }?.documentClient,
                     currency = TextFieldValue(
                         quotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
@@ -538,11 +604,16 @@ class InvoiceLocalDataSource(
                     paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
                         getString(Res.string.document_payment_means_default_label)
                     ),
-                    paymentTermsDescription = TextFieldValue(
-                        getExistingPaymentTermsDescription()
-                            ?: getString(Res.string.document_default_payment_terms)
-                    ),
+                    paymentTermsRecoveryFees = seededTerms.first,
+                    paymentTermsLateFees = seededTerms.second,
+                    paymentTermsDiscount = seededTerms.third,
                     originalCompanyId = newCompanyId,
+                    vatExemptionText = issuerFromSource
+                        ?.takeIf { it.vatExempt }
+                        ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                            it.addresses?.firstOrNull()?.countryCode
+                        ) }
+                        ?.let { TextFieldValue(it) },
                 )
                 saveInfoInInvoiceTable(newInvoiceState)
 
@@ -606,10 +677,13 @@ class InvoiceLocalDataSource(
                     payment_means_selections = document.paymentMeansSelections?.joinToString(","),
                     payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
                     payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
-                    payment_terms_description = document.paymentTermsDescription.text.takeIf { it.isNotEmpty() },
+                    payment_terms_recovery_fees = document.paymentTermsRecoveryFees.text.takeIf { it.isNotEmpty() },
+                    payment_terms_late_fees = document.paymentTermsLateFees.text.takeIf { it.isNotEmpty() },
+                    payment_terms_discount = document.paymentTermsDiscount.text.takeIf { it.isNotEmpty() },
                     payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
                     payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
                     payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                    vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 // Update tag if payment is late (due date expired)
@@ -1042,11 +1116,14 @@ class InvoiceLocalDataSource(
                 payment_means_selections = document.paymentMeansSelections?.joinToString(","),
                 payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
                 payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
-                payment_terms_description = document.paymentTermsDescription.text.takeIf { it.isNotEmpty() },
+                payment_terms_recovery_fees = document.paymentTermsRecoveryFees.text.takeIf { it.isNotEmpty() },
+                payment_terms_late_fees = document.paymentTermsLateFees.text.takeIf { it.isNotEmpty() },
+                payment_terms_discount = document.paymentTermsDiscount.text.takeIf { it.isNotEmpty() },
                 payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
                 payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
                 payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
                 original_company_id = document.originalCompanyId,
+                vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")
@@ -1131,6 +1208,17 @@ class InvoiceLocalDataSource(
                 // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
                 throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
             }
+        }
+    }
+
+    override suspend fun getRecentFootersForCompany(companyId: Long, limit: Int): List<String> {
+        return withContext(DispatcherProvider.IO) {
+            // The .sq query caps at 10 rows; [limit] is applied client-side so
+            // callers can further trim without a new query variant.
+            invoiceQueries.getRecentFootersForCompany(companyId)
+                .executeAsList()
+                .mapNotNull { it }
+                .take(limit)
         }
     }
 

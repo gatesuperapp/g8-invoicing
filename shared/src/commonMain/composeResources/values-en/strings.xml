@@ -277,13 +277,16 @@
     <string name="drawer_my_account">My Account</string>
     <string name="drawer_my_company">My business</string>
 
-    <!-- First-launch onboarding: ask for company name -->
-    <string name="first_launch_issuer_title">What is the name of your business?</string>
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">Welcome to 𝕘𝟠 aka The Gate!</string>
+    <string name="first_launch_welcome_amigo">I'm Little Rhino, your new amigo ♡</string>
+    <string name="first_launch_next">Next</string>
+    <string name="first_launch_gstore_intro">🏪 In the app you'll find a little store where you can toggle features on demand:\n\n• Delivery notes\n• Quotes\n• E-invoicing\n• …</string>
+    <string name="first_launch_gstore_premium">Some modules are reserved for premium members 🌟. You can become a premium member on the g8 website.</string>
     <string name="first_launch_issuer_placeholder">Business name</string>
-    <string name="first_launch_issuer_cta">Get started</string>
-    <string name="first_launch_issuer_next">Continue</string>
-    <string name="first_launch_issuer_country_title">Where is your business located?</string>
-
+    <string name="first_launch_issuer_skip">Later</string>
+    <string name="first_launch_issuer_default_name">My business</string>
+    <string name="first_launch_completion_title">Happy invoicing!</string>
     <!-- Account Screen -->
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -403,9 +406,9 @@
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
-    <string name="invoice_advice_legal_1">You\'re currently in the "Invoices" category.\n\n Tap the Create button at the bottom of the page to create your first invoice …</string>
-    <string name="invoice_advice_legal_2">All the documents you create, as well as all your changes, are saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
-    <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I\'m Little Horseshoe, your new amigo ♡</string>
+    <string name="invoice_advice_legal_1">Tap the Create button at the bottom of the page to create your first invoice …</string>
+    <string name="invoice_advice_legal_2">All the documents you create are saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡</string>
 
     <string name="invoice_advice_legal_3">mandatory information for a compliant invoice. To make your life easier, I've summarised everything here: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
@@ -626,7 +629,6 @@
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
-    <string name="export_chooser_coming_soon">soon</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_title">VAT-exempt regime</string>
     <string name="export_vat_exempt_conflict_message">Your business is in the VAT-exempt regime but some products carry a VAT rate. Please remove it before exporting your invoice.</string>
@@ -835,4 +837,38 @@
     <string name="unit_hea_name">head</string>
     <string name="unit_hea_short">head</string>
     <string name="unit_hea_keywords">head,heads,livestock,cattle</string>
+
+    <!-- 1.9 migration wizard -->
+    <string name="onboarding_19_welcome_title">Welcome to version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_welcome_body">This version brings new fields for e-invoicing. Let's set them up together.</string>
+    <string name="onboarding_19_welcome_cta">Let's go</string>
+    <string name="onboarding_19_cleanup_title">Looks like you manage %1$d businesses</string>
+    <string name="onboarding_19_cleanup_body">Is that right? Otherwise, delete the ones you don't use. Don't worry — your documents won't be affected.</string>
+    <string name="onboarding_19_cleanup_cta">Continue</string>
+    <string name="onboarding_19_attach_intro_body">We'll link your clients and products to each business. This lets you switch between businesses and use a specific document numbering per company.</string>
+    <string name="onboarding_19_attach_intro_cta">Let's go</string>
+    <string name="onboarding_19_attach_step_title">Business %1$d: %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Select the clients that belong to this business.</string>
+    <string name="onboarding_19_attach_products_body">Select the products that belong to this business.</string>
+    <string name="onboarding_19_attach_cta">Link to %1$s</string>
+    <string name="onboarding_19_bank_title">Bank details</string>
+    <string name="onboarding_19_bank_title_with_issuer">Business %1$d: %2$s — Bank details</string>
+    <string name="onboarding_19_bank_body">There's now a dedicated field for bank details, at the business (issuer) level.</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">I found this info in your invoices and prefilled it. Edit if needed.</string>
+    <string name="onboarding_19_bank_not_found_hint">I couldn't find this info in the footer of your invoices. Fill it in now or later, on your business.</string>
+    <string name="onboarding_19_bank_cta">Next</string>
+    <string name="onboarding_19_orphans_clients_title">A few clients left to sort</string>
+    <string name="onboarding_19_orphans_clients_body">These clients aren't linked to any business. Pick one for each.</string>
+    <string name="onboarding_19_orphans_products_title">A few products left to sort</string>
+    <string name="onboarding_19_orphans_products_body">These products aren't linked to any business. Pick one for each.</string>
+    <string name="onboarding_19_orphans_cta">Continue</string>
+    <string name="onboarding_19_new_fields_title">One more helpful thing</string>
+    <string name="onboarding_19_new_fields_body">I also added these fields on invoices:\n• payment means\n• payment terms\n• VAT exemption reason (for businesses in the VAT-exempt regime)\n\nIf you had this info in the footer text, feel free to copy-paste it into the matching fields.</string>
+    <string name="onboarding_19_new_fields_cta">Next</string>
+    <string name="onboarding_19_final_title">You're ready to send e-invoices!</string>
+    <string name="onboarding_19_final_body1">This new version brings Factur-X and CII XML export modules. You'll be able to upload these invoices straight to your registered e-invoicing platform.</string>
+    <string name="onboarding_19_final_body2">Turn these modules on in the gStore (premium members — otherwise you can subscribe on our website).</string>
+    <string name="onboarding_19_final_cta">Done</string>
 </resources>
