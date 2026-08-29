@@ -395,7 +395,7 @@
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
-    <string name="invoice_advice_legal_1">You\'re currently in the "Invoices" category.\n\n Tap the Create button at the bottom of the page to create your first invoice …</string>
+    <string name="invoice_advice_legal_1">Tap the "Create" button at the bottom of the screen to create a new invoice.</string>
     <string name="invoice_advice_legal_2">All the documents you create, as well as all your changes, are saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I\'m Little Horseshoe, your new amigo ♡</string>
 

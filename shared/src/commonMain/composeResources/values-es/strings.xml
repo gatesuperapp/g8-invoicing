@@ -397,7 +397,7 @@
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
-    <string name="invoice_advice_legal_1">Estás en la categoría «Facturas».\n\n Toca el botón Crear en la parte inferior de la página para crear tu primera factura …   </string>
+    <string name="invoice_advice_legal_1">Toca el botón «Crear» en la parte inferior de la pantalla para crear una nueva factura.</string>
     <string name="invoice_advice_legal_2">Todos los documentos que creas, así como todas tus modificaciones, se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡</string>
 

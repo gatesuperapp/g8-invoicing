@@ -733,7 +733,7 @@
 
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi …!</string>
-    <string name="invoice_advice_legal_1">Tu es actuellement dans la catégorie «Factures».\n\n Clique sur le bouton Créer en bas de la page pour créer ta première facture …   </string>
+    <string name="invoice_advice_legal_1">Clique sur le bouton « Créer » en bas de l'écran pour créer une nouvelle facture.</string>
     <string name="invoice_advice_legal_2">Tous les documents que tu crées, ainsi que toutes tes modifications, s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
 
     <!-- Held for the upcoming onboarding screen — moved out of the Invoice-tab
