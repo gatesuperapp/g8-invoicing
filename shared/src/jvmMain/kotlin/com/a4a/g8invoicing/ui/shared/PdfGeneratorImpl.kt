@@ -329,6 +329,23 @@ class PdfGeneratorImpl(
             doc.add(createCurrencyNotice(currencyCodeForHeader))
         }
 
+        // BT-120 legal mention — mirrors DocumentBasicTemplateFooter: only
+        // rendered when the issuer is in franchise en base AND the user has
+        // typed a wording in the text menu. Right-aligned, small grey.
+        val vatExemptionMention = if (document.documentIssuer?.vatExempt == true) {
+            document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() }
+        } else null
+        if (vatExemptionMention != null) {
+            doc.add(
+                Paragraph(vatExemptionMention)
+                    .setFontSize(fontSize)
+                    .setFontColor(ColorConstants.DARK_GRAY)
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setMarginTop(10f)
+                    .setFixedLeading(10F)
+            )
+        }
+
         // Grey box grouping "À régler avant le X" + payment means + IBAN/BIC.
         // Same conditionals as the Compose preview: skip whole box if user
         // hid both blocks OR neither is populated.
@@ -1008,7 +1025,10 @@ class PdfGeneratorImpl(
             cell.add(
                 Paragraph(bodyLines)
                     .setFontSize(fontSize)
-                    .setFixedLeading(11F)
+                    // Match the issuer companyInfo Paragraph's setFixedLeading(12F)
+                    // so 'Mode de paiement accepté / IBAN / BIC' reads with the
+                    // same interline as SIREN / TVA above.
+                    .setFixedLeading(12F)
             )
         }
         return Table(1)
