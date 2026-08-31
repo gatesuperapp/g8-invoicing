@@ -240,6 +240,24 @@ fun OnboardingMigration19Dialog(
             context.issuers.first().name.text == "Mon entreprise"
     }
 
+    // Country-fix targets: any existing named issuer whose ClientOrIssuerAddress
+    // has no country. Country was added to issuer addresses in 1.8.1 — anyone
+    // upgrading from 1.7.x or earlier lands here with country = null. We need
+    // the country upstream of BankDetails so the picker knows whether to render
+    // an IBAN field or a domestic account number, and upstream of Factur-X
+    // exports for the exemption text seed.
+    // Bootstrap's single seeded issuer is excluded — it walks the fuller
+    // name+country prompt via IssuerName / IssuerCountry instead.
+    // Frozen at wizard open for the same reason as needsIssuerBootstrap.
+    val issuersNeedingCountryFix = remember(context.issuers) {
+        if (needsIssuerBootstrap) emptyList()
+        else context.issuers.filter { issuer ->
+            val address = issuer.addresses?.firstOrNull()
+            address?.countryCode.isNullOrBlank()
+        }
+    }
+    var fixCountryIdx by remember { mutableStateOf(0) }
+
     // Database backup flow state — driven from the Backup step's
     // "Sauvegarder ma base de données" CTA. Same pattern as
     // OnboardingDialog: export → optional email dialog. Kept inside the
@@ -267,9 +285,25 @@ fun OnboardingMigration19Dialog(
 
     fun goForwardFromBackup() {
         step = when {
+            issuersNeedingCountryFix.isNotEmpty() -> Step19.FixCountry
             needsIssuerBootstrap -> Step19.IssuerName
             isMulti -> Step19.Cleanup
             else -> Step19.BankDetails
+        }
+    }
+
+    fun goForwardFromFixCountry() {
+        // Advance through the loop; when exhausted, resume the normal flow —
+        // the same fork Backup would have taken had there been no missing
+        // countries in the first place.
+        if (fixCountryIdx + 1 < issuersNeedingCountryFix.size) {
+            fixCountryIdx += 1
+        } else {
+            step = when {
+                needsIssuerBootstrap -> Step19.IssuerName
+                isMulti -> Step19.Cleanup
+                else -> Step19.BankDetails
+            }
         }
     }
 
@@ -399,8 +433,10 @@ fun OnboardingMigration19Dialog(
                     // Confirm step is the "point of no return" review — going
                     // back would put the user right where they came from without
                     // a way to fix anything the current step doesn't already
-                    // offer. Keep it forward-only.
+                    // offer. FixCountry is the same story — a repair loop
+                    // that has to finish before the wizard can move on.
                     canGoBack = step != Step19.Welcome &&
+                        step != Step19.FixCountry &&
                         step != Step19.Confirm &&
                         step != Step19.Final,
                     onBack = { previous(step) },
@@ -424,6 +460,35 @@ fun OnboardingMigration19Dialog(
                             onBackup = onBackupClick,
                             onNext = { goForwardFromBackup() },
                         )
+                        Step19.FixCountry -> {
+                            val issuer = issuersNeedingCountryFix.getOrNull(fixCountryIdx) ?: run {
+                                goForwardFromFixCountry()
+                                return@Box
+                            }
+                            IssuerCountryStep19(
+                                initial = issuer.addresses?.firstOrNull()?.countryCode.orEmpty()
+                                    .ifEmpty { CountryCodes.pickDefaultForNewAddress(null) },
+                                issuerName = issuer.name.text.ifBlank { "—" },
+                                onSubmit = { picked ->
+                                    scope.launch {
+                                        actions.updateIssuerCountry(issuer, picked)
+                                        // Mirror the picked country into the local snapshot so
+                                        // subsequent steps (BankDetails IBAN vs BBAN, VAT
+                                        // exemption seed) see the update without a re-fetch.
+                                        remainingIssuers = remainingIssuers.map { i ->
+                                            if (i.id == issuer.id) {
+                                                val existing = i.addresses?.firstOrNull()
+                                                val updated = existing?.copy(countryCode = picked)
+                                                    ?: com.a4a.g8invoicing.ui.states.AddressState(countryCode = picked)
+                                                val rest = i.addresses?.drop(1).orEmpty()
+                                                i.copy(addresses = listOf(updated) + rest)
+                                            } else i
+                                        }
+                                        goForwardFromFixCountry()
+                                    }
+                                },
+                            )
+                        }
                         Step19.IssuerName -> {
                             val issuer = remainingIssuers.firstOrNull() ?: run {
                                 step = Step19.BankDetails
@@ -704,6 +769,11 @@ fun OnboardingMigration19Dialog(
 private enum class Step19 {
     Welcome,
     Backup,
+    // Existing-issuer country repair — one iteration per issuer whose
+    // ClientOrIssuerAddress row has no country. Country was added in 1.8.1
+    // so anyone upgrading from 1.7.x or earlier lands here first (bootstrap
+    // covers the auto-seeded "Mon entreprise" case separately).
+    FixCountry,
     IssuerName,
     IssuerCountry,
     Cleanup,
@@ -728,6 +798,9 @@ private fun previousStep19(
 ): Step19 = when (step) {
     Step19.Welcome -> Step19.Welcome
     Step19.Backup -> Step19.Welcome
+    // FixCountry is a repair loop; a back nav out of it mid-loop leaves
+    // some issuers still missing country. Simpler to disallow.
+    Step19.FixCountry -> Step19.FixCountry
     Step19.IssuerName -> Step19.Backup
     Step19.IssuerCountry -> Step19.IssuerName
     Step19.Cleanup -> Step19.Backup
@@ -1672,8 +1745,13 @@ private fun IssuerNameStep19(
 private fun IssuerCountryStep19(
     initial: String,
     onSubmit: (String) -> Unit,
+    // Optional issuer name — surfaced in the title when the step is used to
+    // fix a country on an existing named issuer (multi-issuer migration path
+    // from a pre-1.8.1 install). Bootstrap case (single seeded issuer) passes
+    // null and gets the original generic prompt.
+    issuerName: String? = null,
 ) {
-    var country by remember { mutableStateOf(initial) }
+    var country by remember(initial) { mutableStateOf(initial) }
     var pickerOpen by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
@@ -1681,7 +1759,10 @@ private fun IssuerCountryStep19(
     ) {
         EmojiSlot("🌍")
         Spacer(Modifier.height(24.dp))
-        StepTitle("Dans quel pays est-elle établie ?")
+        StepTitle(
+            if (issuerName != null) "$issuerName — Dans quel pays est-elle établie ?"
+            else "Dans quel pays est-elle établie ?"
+        )
         Spacer(Modifier.height(24.dp))
         FieldLabel19("Pays")
         Spacer(Modifier.height(6.dp))
