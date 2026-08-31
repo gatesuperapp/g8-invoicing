@@ -483,7 +483,7 @@
     <!-- gStore Quote (unlimited + trial) -->
     <string name="gstore_module_quote_title">Unlimited quotes</string>
     <string name="gstore_module_quote_desc">Create quotes and convert them to invoices</string>
-    <string name="gstore_module_quote_detail">Enable this module to create quotes, send them to your clients, and convert them to an invoice once accepted. The quote number will appear on the corresponding invoice for accounting traceability.</string>
+    <string name="gstore_module_quote_detail">Enable this module to create quotes, send them to your clients, and convert them to an invoice once accepted.\n\nThe quote number will appear on the corresponding invoice for accounting traceability.</string>
     <string name="gstore_module_quote_trial_title">Discover quotes</string>
     <string name="gstore_module_quote_trial_desc">5 free quotes to try the feature</string>
     <string name="gstore_module_quote_trial_detail">Enabling this module gives you 5 free quotes to try the feature and see if it suits you. You will then need to become a premium member to get unlimited quotes.</string>
@@ -618,16 +618,16 @@
     <!-- gStore delivery-note module -->
     <string name="gstore_module_delivery_note_title">Delivery notes</string>
     <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
-    <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted. The delivery note number will be shown on the matching invoice for accounting traceability. You can group several delivery notes into a single invoice.</string>
+    <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted.\n\nThe delivery note number will be shown on the matching invoice for accounting traceability.\n\nYou can convert a delivery note into an invoice, and group several DNs into a single invoice.</string>
     <string name="gstore_module_multi_entreprise_title">Multi-business</string>
-    <string name="gstore_module_multi_entreprise_desc">Manage several businesses from the same app</string>
-    <string name="gstore_module_multi_entreprise_detail">Enable this module if you invoice under several businesses (different registration numbers, separate activities…). You'll be able to add more businesses from My account, switch between them from the menu, and keep separate clients, products, numbering and bank details per business.</string>
+    <string name="gstore_module_multi_entreprise_desc">Manage several businesses</string>
+    <string name="gstore_module_multi_entreprise_detail">Enable this module if you invoice under several businesses (different registration numbers, separate activities…).\n\nYou'll be able to add more businesses from "My account" and switch between them from the menu.\n\nYour clients, products, numbering and bank details will be kept separate per business.</string>
     <string name="gstore_module_cii_title">CII XML Export</string>
     <string name="gstore_module_cii_desc">Export the data in a core e-invoicing format</string>
-    <string name="gstore_module_cii_detail">Enable this module to export your invoices as CII XML (European standard, EN 16931, Extended profile).\n\nUseful for sending your invoices to e-invoicing platforms.\n\nThe generated file can be opened by any software compatible with EN 16931.</string>
+    <string name="gstore_module_cii_detail">Enable this module to export your invoices as Cross Industry Invoice (CII), an internationally recognised e-invoicing standard.\n\nThe XML data can be read by software, including e-invoicing platforms.\n\nUnlike Factur-X, it doesn't include a PDF.</string>
     <string name="gstore_module_facturx_title">Factur-X Export</string>
     <string name="gstore_module_facturx_desc">Export the data in a core e-invoicing format</string>
-    <string name="gstore_module_facturx_detail">Enable this module to export your invoices as Factur-X (PDF with embedded CII XML, European standard EN 16931, Extended profile).\n\nUseful for sending your invoices to e-invoicing platforms while keeping a human-readable PDF for the client.\n\nThe generated file is a regular PDF that any reader can open, and any EN 16931 compatible software can read the structured data inside.</string>
+    <string name="gstore_module_facturx_detail">Enable this module to export your invoices as Factur-X, a Franco-German e-invoicing standard.\n\nThe generated file is a regular PDF paired with a machine-readable XML file.\n\nUseful for sending your invoices to e-invoicing platforms while keeping a human-readable PDF for the client.</string>
     <string name="export_cii_button">Export as CII</string>
     <string name="export_chooser_title">Export format</string>
     <string name="export_chooser_description">For an e-invoicing compatible format, use CII or Factur-X.</string>

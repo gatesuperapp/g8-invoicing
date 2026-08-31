@@ -493,7 +493,7 @@ Une erreur s'est produite :
     <!-- gStore Quote (unlimited + trial) -->
     <string name="gstore_module_quote_title">Presupuestos ilimitados</string>
     <string name="gstore_module_quote_desc">Crear presupuestos y convertirlos en facturas</string>
-    <string name="gstore_module_quote_detail">Activa este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados. El número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
+    <string name="gstore_module_quote_detail">Activa este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados.\n\nEl número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
     <string name="gstore_module_quote_trial_title">Descubre los presupuestos</string>
     <string name="gstore_module_quote_trial_desc">5 presupuestos gratis para probar la función</string>
     <string name="gstore_module_quote_trial_detail">Activar este módulo permite obtener 5 presupuestos gratis para probar la función y ver si te conviene. Después habrá que hacerse miembro premium para tener presupuestos ilimitados.</string>
@@ -628,16 +628,16 @@ Une erreur s'est produite :
     <!-- gStore delivery-note module -->
     <string name="gstore_module_delivery_note_title">Albaranes</string>
     <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
-    <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados. El número de albarán se indicará en la factura correspondiente para la trazabilidad contable. Puedes agrupar varios albaranes en una sola factura.</string>
+    <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados.\n\nEl número de albarán se indicará en la factura correspondiente para la trazabilidad contable.\n\nPuedes convertir un albarán en factura y agrupar varios albaranes en una sola factura.</string>
     <string name="gstore_module_multi_entreprise_title">Multiempresa</string>
-    <string name="gstore_module_multi_entreprise_desc">Gestionar varias empresas desde la misma app</string>
-    <string name="gstore_module_multi_entreprise_detail">Activa este módulo si facturas bajo varias empresas (distintos NIF/CIF, actividades separadas…). Podrás añadir más empresas desde Mi cuenta, cambiar entre ellas desde el menú y tener clientes, productos, numeración y datos bancarios separados por empresa.</string>
+    <string name="gstore_module_multi_entreprise_desc">Gestionar varias empresas</string>
+    <string name="gstore_module_multi_entreprise_detail">Activa este módulo si facturas bajo varias empresas (distintos NIF/CIF, actividades separadas…).\n\nPodrás añadir más empresas desde «Mi cuenta» y cambiar entre ellas desde el menú.\n\nTus clientes, productos, numeración y datos bancarios se mantendrán separados por empresa.</string>
     <string name="gstore_module_cii_title">Exportar XML CII</string>
     <string name="gstore_module_cii_desc">Exportar los datos en un formato base de facturación electrónica</string>
-    <string name="gstore_module_cii_detail">Activa este módulo para exportar tus facturas como XML CII (norma europea, EN 16931, perfil Extended).\n\nÚtil para enviar tus facturas a plataformas de facturación electrónica.\n\nEl archivo generado puede abrirse con cualquier software compatible con EN 16931.</string>
+    <string name="gstore_module_cii_detail">Activa este módulo para exportar tus facturas en formato Cross Industry Invoice (CII), una norma de facturación electrónica reconocida a nivel internacional.\n\nSus datos XML son legibles por software, en particular por plataformas de facturación electrónica.\n\nA diferencia de Factur-X, no incluye un PDF.</string>
     <string name="gstore_module_facturx_title">Exportar Factur-X</string>
     <string name="gstore_module_facturx_desc">Exportar los datos en un formato base de facturación electrónica</string>
-    <string name="gstore_module_facturx_detail">Activa este módulo para exportar tus facturas como Factur-X (PDF con XML CII embebido, norma europea EN 16931, perfil Extended).\n\nÚtil para enviar tus facturas a plataformas de facturación electrónica manteniendo un PDF legible para el cliente.\n\nEl archivo generado es un PDF normal que cualquier lector puede abrir, y cualquier software compatible con EN 16931 puede leer los datos estructurados dentro.</string>
+    <string name="gstore_module_facturx_detail">Activa este módulo para exportar tus facturas en formato Factur-X, una norma franco-alemana de facturación electrónica.\n\nEl archivo generado es un PDF normal acompañado de un archivo XML legible por máquinas.\n\nÚtil para enviar tus facturas a plataformas de facturación electrónica manteniendo un PDF legible para el cliente.</string>
     <string name="export_cii_button">Exportar como CII</string>
     <string name="export_chooser_title">Formato de exportación</string>
     <string name="export_chooser_description">Para un formato compatible con la facturación electrónica, usa CII o Factur-X.</string>

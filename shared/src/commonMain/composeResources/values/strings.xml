@@ -573,7 +573,7 @@
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
     <string name="gstore_module_quote_title">Devis illimités</string>
     <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
-    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés.\n\nLe numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
     <string name="gstore_module_quote_trial_title">Devis découverte</string>
     <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
     <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle vous convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.</string>
@@ -582,23 +582,23 @@
     <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
-    <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
+    <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés.\n\nLe numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\nVous pouvez convertir un bon de livraison en facture, et grouper plusieurs BLs en une seule facture.</string>
     <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
-    <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises depuis la même app</string>
-    <string name="gstore_module_multi_entreprise_detail">Activez ce module si vous facturez sous plusieurs entreprises (SIRET différents, activités séparées…). Vous pourrez ajouter d'autres entreprises depuis Mon compte, basculer entre elles depuis le menu, et avoir des clients, produits, numérotations et coordonnées bancaires distincts par entreprise.</string>
+    <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises</string>
+    <string name="gstore_module_multi_entreprise_detail">Activez ce module si vous facturez sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nVous pourrez ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nVos clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
     <!-- CII XML export gStore module — same structured data as Factur-X but
          delivered as a raw XML file, for international platforms that don't
          accept the Factur-X PDF/A-3 container yet. Independent of client
          type (works for a Particulier client too). -->
     <string name="gstore_module_cii_title">Export CII XML</string>
     <string name="gstore_module_cii_desc">Exporter les données dans un format socle de facturation électronique</string>
-    <string name="gstore_module_cii_detail">Activer ce module pour pouvoir exporter vos factures au format CII XML (norme européenne, EN 16931, profil extended).\n\nUtile pour transmettre vos factures aux plateformes de facturation électronique.\n\nLe fichier généré peut être ouvert par tout logiciel compatible EN 16931.</string>
+    <string name="gstore_module_cii_detail">Activer ce module pour pouvoir exporter vos factures au format Cross Industry Invoice (CII), une norme de facturation électronique reconnue à l'international.\n\nSes données XML sont lisibles par des logiciels, notamment des plateformes de facturation électronique.\n\nIl ne contient pas de PDF contrairement au format Factur-X.</string>
     <!-- Factur-X (PDF/A-3 hybrid) export gStore module — visual PDF + CII XML
          embedded as `factur-x.xml` (/AF, AFRelationship=Data). Same pre-launch
          free treatment as MODULE_CII_XML_EXPORT. -->
     <string name="gstore_module_facturx_title">Export Factur-X</string>
     <string name="gstore_module_facturx_desc">Exporter les données dans un format socle de facturation électronique</string>
-    <string name="gstore_module_facturx_detail">Activer ce module pour pouvoir exporter vos factures au format Factur-X (PDF + XML CII embarqué, norme européenne EN 16931, profil extended).\n\nUtile pour transmettre vos factures aux plateformes de facturation électronique tout en gardant un PDF lisible pour le client.\n\nLe fichier généré est un PDF classique qu'un lecteur PDF peut ouvrir, et un logiciel compatible EN 16931 sait lire les données structurées à l'intérieur.</string>
+    <string name="gstore_module_facturx_detail">Activer ce module pour pouvoir exporter vos factures au format Factur-X, une norme de facturation électronique franco-allemande.\n\nLe fichier généré est un PDF classique adossé à un fichier XML lisible par les machines.\n\nUtile pour transmettre vos factures aux plateformes de facturation électronique tout en gardant un PDF lisible pour le client.</string>
     <string name="export_cii_button">Exporter en CII</string>
     <string name="export_chooser_title">Format d'export</string>
     <string name="export_chooser_description">Pour un format compatible facturation électronique, utilisez CII ou Factur-X.</string>

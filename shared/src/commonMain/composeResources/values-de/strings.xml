@@ -488,7 +488,7 @@ Es ist ein Fehler aufgetreten :
     <!-- gStore Quote (unlimited + trial) -->
     <string name="gstore_module_quote_title">Unbegrenzte Kostenvoranschläge</string>
     <string name="gstore_module_quote_desc">Kostenvoranschläge erstellen und in Rechnungen umwandeln</string>
-    <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
+    <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln.\n\nDie Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
     <string name="gstore_module_quote_trial_title">Kostenvoranschläge entdecken</string>
     <string name="gstore_module_quote_trial_desc">5 kostenlose Kostenvoranschläge</string>
     <string name="gstore_module_quote_trial_detail">Wenn du dieses Modul aktivierst, erhältst du 5 kostenlose Kostenvoranschläge, um die Funktion auszuprobieren und zu sehen, ob sie dir zusagt. Danach musst du Premium-Mitglied werden, um unbegrenzt Kostenvoranschläge zu haben.</string>
@@ -623,16 +623,16 @@ Es ist ein Fehler aufgetreten :
     <!-- gStore delivery-note module -->
     <string name="gstore_module_delivery_note_title">Lieferscheine</string>
     <string name="gstore_module_delivery_note_desc">Lieferscheine erstellen und in Rechnungen umwandeln</string>
-    <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit. Du kannst mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
+    <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln.\n\nDie Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.\n\nDu kannst einen Lieferschein in eine Rechnung umwandeln und mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
     <string name="gstore_module_multi_entreprise_title">Mehrere Unternehmen</string>
-    <string name="gstore_module_multi_entreprise_desc">Mehrere Unternehmen aus derselben App verwalten</string>
-    <string name="gstore_module_multi_entreprise_detail">Aktiviere dieses Modul, wenn du unter mehreren Unternehmen abrechnest (verschiedene Handelsregisternummern, getrennte Tätigkeiten…). Du kannst dann weitere Unternehmen unter Mein Konto hinzufügen, im Menü zwischen ihnen wechseln und pro Unternehmen eigene Kunden, Produkte, Nummernkreise und Bankdaten pflegen.</string>
+    <string name="gstore_module_multi_entreprise_desc">Mehrere Unternehmen verwalten</string>
+    <string name="gstore_module_multi_entreprise_detail">Aktiviere dieses Modul, wenn du unter mehreren Unternehmen abrechnest (verschiedene Handelsregisternummern, getrennte Tätigkeiten…).\n\nDu kannst weitere Unternehmen unter „Mein Konto" hinzufügen und im Menü zwischen ihnen wechseln.\n\nDeine Kunden, Produkte, Nummernkreise und Bankdaten werden pro Unternehmen getrennt geführt.</string>
     <string name="gstore_module_cii_title">CII-XML-Export</string>
     <string name="gstore_module_cii_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
-    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen als CII-XML zu exportieren (europäische Norm, EN 16931, Extended-Profil).\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln.\n\nDie erzeugte Datei kann von jeder EN-16931-kompatiblen Software geöffnet werden.</string>
+    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen im Format Cross Industry Invoice (CII) zu exportieren — einer international anerkannten Norm für elektronische Rechnungen.\n\nDie XML-Daten sind für Software lesbar, insbesondere für E-Invoicing-Plattformen.\n\nIm Unterschied zu Factur-X enthält CII kein PDF.</string>
     <string name="gstore_module_facturx_title">Factur-X-Export</string>
     <string name="gstore_module_facturx_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
-    <string name="gstore_module_facturx_detail">Aktiviere dieses Modul, um deine Rechnungen als Factur-X zu exportieren (PDF mit eingebettetem CII-XML, europäische Norm EN 16931, Extended-Profil).\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln und gleichzeitig ein lesbares PDF für den Kunden bereitzustellen.\n\nDie erzeugte Datei ist ein gewöhnliches PDF, das jeder Reader öffnen kann, während EN-16931-kompatible Software die eingebetteten strukturierten Daten liest.</string>
+    <string name="gstore_module_facturx_detail">Aktiviere dieses Modul, um deine Rechnungen im Format Factur-X zu exportieren — einer deutsch-französischen Norm für elektronische Rechnungen.\n\nDie erzeugte Datei ist ein gewöhnliches PDF mit einer maschinenlesbaren XML-Datei daneben.\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln und gleichzeitig ein lesbares PDF für den Kunden bereitzustellen.</string>
     <string name="export_cii_button">Als CII exportieren</string>
     <string name="export_chooser_title">Exportformat</string>
     <string name="export_chooser_description">Für ein E-Invoicing-kompatibles Format CII oder Factur-X verwenden.</string>
