@@ -617,6 +617,9 @@
     <string name="gstore_module_delivery_note_title">Delivery notes</string>
     <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
     <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted. The delivery note number will be shown on the matching invoice for accounting traceability. You can group several delivery notes into a single invoice.</string>
+    <string name="gstore_module_multi_entreprise_title">Multi-business</string>
+    <string name="gstore_module_multi_entreprise_desc">Manage several businesses from the same app</string>
+    <string name="gstore_module_multi_entreprise_detail">Enable this module if you invoice under several businesses (different registration numbers, separate activities…). You'll be able to add more businesses from My account, switch between them from the menu, and keep separate clients, products, numbering and bank details per business.</string>
     <string name="gstore_module_cii_title">CII XML Export</string>
     <string name="gstore_module_cii_desc">Export the data in a core e-invoicing format</string>
     <string name="gstore_module_cii_detail">Enable this module to export your invoices as CII XML (European standard, EN 16931, Extended profile).\n\nUseful for sending your invoices to e-invoicing platforms.\n\nThe generated file can be opened by any software compatible with EN 16931.</string>
@@ -841,7 +844,7 @@
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Welcome to version 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Let's back up first</string>
-    <string name="onboarding_19_backup_body">Before we start, back up your database — just in case.</string>
+    <string name="onboarding_19_backup_body">Before we start, I'd recommend backing up your database just in case.</string>
     <string name="onboarding_19_backup_cta">Back up</string>
     <string name="onboarding_19_confirm_title">All good?</string>
     <string name="onboarding_19_confirm_body">Check the assignments before we save them. Tap the cross to remove a client or product.</string>
@@ -879,7 +882,7 @@
     <string name="onboarding_19_new_fields_hint">If you had this info in the footer text, feel free to copy-paste it into the matching fields.</string>
     <string name="onboarding_19_new_fields_cta">Next</string>
     <string name="onboarding_19_einvoice_title">Electronic invoicing</string>
-    <string name="onboarding_19_einvoice_intro">Electronic invoice export is now available.</string>
+    <string name="onboarding_19_einvoice_intro">Electronic invoice export is now available!</string>
     <string name="onboarding_19_einvoice_body">In the gStore, turn on the Factur-X, CII XML modules. You'll be able to upload these invoices straight to your registered platform.</string>
     <string name="onboarding_19_einvoice_sub">You can become a premium member by subscribing on our website 🌟</string>
     <string name="onboarding_19_einvoice_cta">Next</string>

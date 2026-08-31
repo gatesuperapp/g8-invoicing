@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.RequestQuote
@@ -66,6 +67,9 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_title
@@ -119,6 +123,14 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_delivery_note_desc,
         detailRes = Res.string.gstore_module_delivery_note_detail,
         icon = Icons.Outlined.LocalShipping,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE,
+        titleRes = Res.string.gstore_module_multi_entreprise_title,
+        descRes = Res.string.gstore_module_multi_entreprise_desc,
+        detailRes = Res.string.gstore_module_multi_entreprise_detail,
+        icon = Icons.Outlined.Business,
         isFree = true,
     ),
     GStoreModule(

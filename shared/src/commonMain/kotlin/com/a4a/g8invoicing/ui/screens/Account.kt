@@ -163,6 +163,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -923,9 +924,12 @@ private fun formatRenewalDate(epochMs: Long): String {
 private fun MyCompaniesSection(
     navController: NavController,
     listViewModel: ClientOrIssuerListViewModel = koinViewModel(),
+    modulesRepo: ActivatedModulesRepository = koinInject(),
 ) {
     val issuersUiState by listViewModel.issuersUiState.collectAsState()
     val issuers = issuersUiState.clientsOrIssuerList.orEmpty()
+    val activated by modulesRepo.state.collectAsState()
+    val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activated
 
     issuers.forEach { issuer ->
         IssuerListRow(
@@ -942,17 +946,20 @@ private fun MyCompaniesSection(
         Spacer(modifier = Modifier.height(8.dp))
     }
 
-    // "+ Ajouter une entreprise" — violet plain CTA, no fill, tight to the list.
-    Text(
-        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-        color = ColorVioletLink,
-        modifier = Modifier
-            .padding(start = 4.dp, top = 4.dp)
-            .clickable {
-                navController.navigate(Screen.ClientAddEdit.name + "?type=issuer")
-            },
-        text = stringResource(Res.string.account_add_company),
-    )
+    // "+ Ajouter une entreprise" — hidden when the multi-entreprise module is off
+    // (single-entreprise UX). The gStore card is where users go to opt in.
+    if (multiEntrepriseOn) {
+        Text(
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            color = ColorVioletLink,
+            modifier = Modifier
+                .padding(start = 4.dp, top = 4.dp)
+                .clickable {
+                    navController.navigate(Screen.ClientAddEdit.name + "?type=issuer")
+                },
+            text = stringResource(Res.string.account_add_company),
+        )
+    }
 }
 
 @Composable

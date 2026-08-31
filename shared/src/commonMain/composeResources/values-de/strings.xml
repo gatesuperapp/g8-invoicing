@@ -622,6 +622,9 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_delivery_note_title">Lieferscheine</string>
     <string name="gstore_module_delivery_note_desc">Lieferscheine erstellen und in Rechnungen umwandeln</string>
     <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit. Du kannst mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
+    <string name="gstore_module_multi_entreprise_title">Mehrere Unternehmen</string>
+    <string name="gstore_module_multi_entreprise_desc">Mehrere Unternehmen aus derselben App verwalten</string>
+    <string name="gstore_module_multi_entreprise_detail">Aktiviere dieses Modul, wenn du unter mehreren Unternehmen abrechnest (verschiedene Handelsregisternummern, getrennte Tätigkeiten…). Du kannst dann weitere Unternehmen unter Mein Konto hinzufügen, im Menü zwischen ihnen wechseln und pro Unternehmen eigene Kunden, Produkte, Nummernkreise und Bankdaten pflegen.</string>
     <string name="gstore_module_cii_title">CII-XML-Export</string>
     <string name="gstore_module_cii_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
     <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen als CII-XML zu exportieren (europäische Norm, EN 16931, Extended-Profil).\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln.\n\nDie erzeugte Datei kann von jeder EN-16931-kompatiblen Software geöffnet werden.</string>
@@ -846,7 +849,7 @@ Es ist ein Fehler aufgetreten :
     <!-- 1.9 migration wizard -->
     <string name="onboarding_19_welcome_title">Willkommen zu Version 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Sichern wir zuerst</string>
-    <string name="onboarding_19_backup_body">Bevor wir loslegen, sichere deine Datenbank — nur zur Sicherheit.</string>
+    <string name="onboarding_19_backup_body">Bevor wir loslegen, empfehle ich dir, deine Datenbank zur Sicherheit zu sichern.</string>
     <string name="onboarding_19_backup_cta">Sichern</string>
     <string name="onboarding_19_confirm_title">Alles korrekt?</string>
     <string name="onboarding_19_confirm_body">Prüfe die Zuordnungen, bevor wir sie speichern. Mit dem Kreuz kannst du einen Kunden oder ein Produkt entfernen.</string>
@@ -884,7 +887,7 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_new_fields_hint">Wenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
     <string name="onboarding_19_new_fields_cta">Weiter</string>
     <string name="onboarding_19_einvoice_title">Elektronische Rechnungen</string>
-    <string name="onboarding_19_einvoice_intro">Der Export elektronischer Rechnungen ist jetzt verfügbar.</string>
+    <string name="onboarding_19_einvoice_intro">Der Export elektronischer Rechnungen ist jetzt verfügbar!</string>
     <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module Factur-X, CII XML. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch.</string>
     <string name="onboarding_19_einvoice_sub">Du kannst Premium-Mitglied werden — abonniere auf unserer Website 🌟</string>
     <string name="onboarding_19_einvoice_cta">Weiter</string>

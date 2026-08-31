@@ -60,6 +60,22 @@ class ActivatedModulesRepository(
         settings.remove(KEY_ACTIVATED)
     }
 
+    /**
+     * Idempotent activation — no-op if [moduleId] is already on. Meant for
+     * server-side / migration-driven activations (e.g. flipping
+     * MODULE_MULTI_ENTREPRISE on for users who had several issuers before
+     * 1.9) where [toggle] would incorrectly turn a re-activated module off.
+     * Bypasses the premium check because the caller is the system, not the
+     * user tapping in the gStore.
+     */
+    fun forceActivate(moduleId: String) {
+        val current = _state.value
+        if (moduleId in current) return
+        val updated = current + moduleId
+        _state.value = updated
+        settings.putString(KEY_ACTIVATED, updated.joinToString(","))
+    }
+
     // ---- 1.9 migration wizard flag ---------------------------------------
     //
     // Set once the user has walked through the 1.9 onboarding wizard (bank
@@ -188,6 +204,15 @@ class ActivatedModulesRepository(
         // as a structured e-invoicing payload. Free for now (pre-launch),
         // same treatment as MODULE_CII_XML_EXPORT.
         const val MODULE_FACTURX_EXPORT = "facturx_export"
+        // Module that unlocks the multi-entreprise UX (chevron picker in the
+        // menu, "Ajouter une entreprise" button in Mon Compte). Free for
+        // everyone. Off by default for fresh installs and for users with
+        // a single issuer at 1.9 migration time — they see a single-entreprise
+        // shell (tap on the menu name opens the entreprise form directly).
+        // Activated automatically on migration when the DB already holds
+        // multiple issuers, so existing multi-entreprise users don't lose
+        // access.
+        const val MODULE_MULTI_ENTREPRISE = "multi_entreprise"
 
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
@@ -198,6 +223,7 @@ class ActivatedModulesRepository(
             MODULE_CII_XML_EXPORT,
             MODULE_FACTURX_EXPORT,
             MODULE_WATERMARK_REMOVAL,
+            MODULE_MULTI_ENTREPRISE,
         )
 
         // Modules seeded into the activated set the first time the app boots after this

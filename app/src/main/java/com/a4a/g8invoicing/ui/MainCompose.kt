@@ -284,6 +284,14 @@ fun MainCompose(
                     setSeenOnboarding18(context)
                     setSeenEInvoiceIntro(context)
                     setSeenWhatsNew(context)
+                    // Grandfather multi-entreprise users: they had >1 issuer
+                    // before 1.9 (which is why the wizard fired with a Cleanup
+                    // / Attach flow) so keep that UX turned on. Single-issuer
+                    // users get the module off by default — they discover it
+                    // in gStore if / when they need it.
+                    if (ctx.issuers.size > 1) {
+                        modulesRepo.forceActivate(ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE)
+                    }
                 },
             ),
             onDismiss = { migration19Context = null },

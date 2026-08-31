@@ -239,10 +239,26 @@ fun CategoriesDropdownMenu(
                     }
                 } else {
                     Column(modifier = Modifier.fillMaxWidth()) {
+                        val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activatedModules
                         CompanyHeaderRow(
                             displayName = displayName,
                             logoPath = currentLogoPath,
-                            onClick = { pickerExpanded = true },
+                            // Chevron only surfaces when the module is on. Off →
+                            // the row acts as a shortcut to the single issuer's
+                            // form instead of opening the picker.
+                            showChevron = multiEntrepriseOn,
+                            onClick = {
+                                if (multiEntrepriseOn) {
+                                    pickerExpanded = true
+                                } else {
+                                    dismissMenu()
+                                    currentIssuer?.id?.let { id ->
+                                        navController.navigate(
+                                            Screen.ClientAddEdit.name + "?itemId=$id&type=issuer"
+                                        )
+                                    }
+                                }
+                            },
                         )
                         subCategories.forEach { category ->
                             val selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == category.route } == true
@@ -346,6 +362,7 @@ private fun CompanyHeaderRow(
     displayName: String,
     logoPath: String?,
     onClick: () -> Unit,
+    showChevron: Boolean = true,
 ) {
     Row(
         modifier = Modifier
@@ -368,12 +385,14 @@ private fun CompanyHeaderRow(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Icon(
-            modifier = Modifier.size(16.dp),
-            imageVector = Icons.Filled.UnfoldMore,
-            contentDescription = null,
-            tint = AppColors.textSecondary,
-        )
+        if (showChevron) {
+            Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Filled.UnfoldMore,
+                contentDescription = null,
+                tint = AppColors.textSecondary,
+            )
+        }
     }
 }
 

@@ -583,6 +583,9 @@
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
     <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Vous pouvez grouper plusieurs bons de livraison en une seule facture.</string>
+    <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
+    <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises depuis la même app</string>
+    <string name="gstore_module_multi_entreprise_detail">Activez ce module si vous facturez sous plusieurs entreprises (SIRET différents, activités séparées…). Vous pourrez ajouter d'autres entreprises depuis Mon compte, basculer entre elles depuis le menu, et avoir des clients, produits, numérotations et coordonnées bancaires distincts par entreprise.</string>
     <!-- CII XML export gStore module — same structured data as Factur-X but
          delivered as a raw XML file, for international platforms that don't
          accept the Factur-X PDF/A-3 container yet. Independent of client
@@ -951,7 +954,7 @@ Une erreur s'est produite :
          =================================================================== -->
     <string name="onboarding_19_welcome_title">Bienvenue sur la version 1.9 — Tilia cordata</string>
     <string name="onboarding_19_backup_title">Sauvegardons d'abord</string>
-    <string name="onboarding_19_backup_body">Avant qu'on démarre, sauvegarde ta base de données — au cas où.</string>
+    <string name="onboarding_19_backup_body">Avant qu'on démarre, je te conseille de sauvegarder ta base de données au cas où.</string>
     <string name="onboarding_19_backup_cta">Sauvegarder</string>
     <string name="onboarding_19_confirm_title">C'est tout bon ?</string>
     <string name="onboarding_19_confirm_body">Vérifie les rattachements avant qu'on les enregistre. Tu peux retirer un client ou un produit avec la croix.</string>
@@ -997,7 +1000,7 @@ Une erreur s'est produite :
     <string name="onboarding_19_new_fields_hint">Si tu avais mis ces informations dans le pied de page, tu peux faire des copier-coller dans les champs adéquats.</string>
     <string name="onboarding_19_new_fields_cta">Suivant</string>
     <string name="onboarding_19_einvoice_title">Facturation électronique</string>
-    <string name="onboarding_19_einvoice_intro">L'export des factures électroniques est désormais disponible.</string>
+    <string name="onboarding_19_einvoice_intro">L'export des factures électroniques est désormais disponible !</string>
     <string name="onboarding_19_einvoice_body">Dans le gStore, active les modules Factur-X, XML CII. Tu pourras importer ces factures directement dans ta plateforme agréée.</string>
     <string name="onboarding_19_einvoice_sub">Tu peux devenir membre premium en t'abonnant depuis le site internet 🌟</string>
     <string name="onboarding_19_einvoice_cta">Suivant</string>
