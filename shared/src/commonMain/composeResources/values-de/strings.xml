@@ -282,7 +282,9 @@
     <string name="first_launch_welcome_title">Willkommen bei 𝕘𝟠 aka The Gate!</string>
     <string name="first_launch_welcome_amigo">Ich bin Little Rhino, dein neuer Amigo ♡</string>
     <string name="first_launch_next">Weiter</string>
-    <string name="first_launch_gstore_intro">🏪 In der App findest du einen kleinen Store, in dem du Funktionen bei Bedarf aktivieren kannst:\n\n• Lieferscheine\n• Angebote\n• Elektronische Rechnungsstellung\n• …</string>
+    <string name="first_launch_liberty_body1">Ich helfe dir, alles vom Handy aus zu verwalten: Rechnungen, Lieferscheine, Kunden, Produkte… und deine Dokumente mit einem Tipp in Rechnungen umzuwandeln!</string>
+    <string name="first_launch_liberty_body2">Die App funktioniert offline, das Konto ist optional und deine Daten werden nicht an Dritte weitergegeben ♡</string>
+    <string name="first_launch_gstore_intro">Bestimmte Funktionen aktivierst du bei Bedarf im 𝕘Store-Tab: Angebote, Export…</string>
     <string name="first_launch_gstore_premium">Einige Module sind Premium-Mitgliedern vorbehalten 🌟. Du kannst auf der g8-Website Premium-Mitglied werden.</string>
     <string name="first_launch_issuer_placeholder">Name des Unternehmens</string>
     <string name="first_launch_issuer_skip">Später</string>

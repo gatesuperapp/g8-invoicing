@@ -281,7 +281,9 @@
     <string name="first_launch_welcome_title">Welcome to 𝕘𝟠 aka The Gate!</string>
     <string name="first_launch_welcome_amigo">I'm Little Rhino, your new amigo ♡</string>
     <string name="first_launch_next">Next</string>
-    <string name="first_launch_gstore_intro">🏪 In the app you'll find a little store where you can toggle features on demand:\n\n• Delivery notes\n• Quotes\n• E-invoicing\n• …</string>
+    <string name="first_launch_liberty_body1">I'll help you manage everything from your phone: invoices, delivery notes, clients, products… and convert your documents into invoices in one tap!</string>
+    <string name="first_launch_liberty_body2">The app works offline, the account is optional and your data isn't shared with third parties ♡</string>
+    <string name="first_launch_gstore_intro">Some features are enabled on demand from the 𝕘Store tab: quotes, export…</string>
     <string name="first_launch_gstore_premium">Some modules are reserved for premium members 🌟. You can become a premium member on the g8 website.</string>
     <string name="first_launch_issuer_placeholder">Business name</string>
     <string name="first_launch_issuer_skip">Later</string>

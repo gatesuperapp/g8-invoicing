@@ -284,7 +284,9 @@
     <string name="first_launch_welcome_title">¡Bienvenido·a a 𝕘𝟠 aka The Gate!</string>
     <string name="first_launch_welcome_amigo">Soy Petit Rhino, tu nuevo amigo ♡</string>
     <string name="first_launch_next">Siguiente</string>
-    <string name="first_launch_gstore_intro">🏪 En la aplicación encontrarás una pequeña tienda donde puedes activar funciones a demanda:\n\n• Albaranes\n• Presupuestos\n• Facturación electrónica\n• …</string>
+    <string name="first_launch_liberty_body1">Te ayudo a gestionar todo desde tu móvil: facturas, albaranes, clientes, productos… ¡y a convertir tus documentos en factura con un toque!</string>
+    <string name="first_launch_liberty_body2">La app funciona sin conexión, la cuenta es opcional y tus datos no se comparten con terceros ♡</string>
+    <string name="first_launch_gstore_intro">Algunas funciones se activan a demanda desde la pestaña 𝕘Store: presupuestos, exportación…</string>
     <string name="first_launch_gstore_premium">Algunos módulos están reservados a los miembros premium 🌟. Puedes hacerte miembro premium en la web de g8.</string>
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
     <string name="first_launch_issuer_skip">Más tarde</string>

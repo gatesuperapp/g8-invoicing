@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -347,7 +348,6 @@ private fun SettingsStep(
             value = name,
             onValueChange = onNameChange,
             placeholder = placeholder,
-            onImeNext = onSubmit,
         )
         Spacer(Modifier.height(20.dp))
 
@@ -390,16 +390,20 @@ private fun CompactTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     placeholder: String,
-    onImeNext: () -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
         textStyle = MaterialTheme.typography.textBody.copy(color = AppColors.textPrimary),
         cursorBrush = SolidColor(AppColors.accent),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-        keyboardActions = KeyboardActions(onNext = { onImeNext() }),
+        // Done (not Next) so tapping the IME action just closes the keyboard —
+        // Next used to fire onSubmit() and skip the user straight past the
+        // Country picker to the Completion slide, which surprised users who
+        // tapped it expecting to jump into the country dropdown.
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
