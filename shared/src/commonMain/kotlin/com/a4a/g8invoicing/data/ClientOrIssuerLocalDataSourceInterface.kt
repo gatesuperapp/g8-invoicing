@@ -33,6 +33,22 @@ interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun getCurrentIssuer(companyId: Long): ClientOrIssuerState?
     suspend fun getMasterVersion(masterId: Long): Int?
 
+    /**
+     * Persists `original_version = <current master version>` on a document's
+     * client/issuer snapshot. Semantically = "the user acknowledged that the
+     * master card had drifted, and chose to keep the frozen data anyway".
+     * Prevents the version-mismatch dialog from re-firing on every reopen
+     * until the master gets edited *again* (which bumps master.version and
+     * re-triggers the mismatch check).
+     *
+     * Returns the version that got written, or null if the master or doc
+     * couldn't be found.
+     */
+    suspend fun acknowledgeDocumentClientOrIssuerVersion(
+        documentClientOrIssuerId: Long,
+        masterId: Long,
+    ): Int?
+
     // Bank accounts of a master issuer, ordered by sort_order asc.
     suspend fun getIssuerBanks(issuerId: Long): List<com.a4a.g8invoicing.ui.states.IssuerBankState>
 

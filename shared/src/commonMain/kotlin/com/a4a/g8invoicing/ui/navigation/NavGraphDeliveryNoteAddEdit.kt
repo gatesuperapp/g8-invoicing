@@ -144,10 +144,20 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     Button(
                         onClick = {
                             val opensForm = pendingIssuerOpensForm
+                            val issuerToAck = pendingIssuerToEdit
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
                             pendingIssuerOpensForm = false
                             if (opensForm) showDocumentForm = true
+                            // Bump the doc snapshot's originalVersion to master so the
+                            // dialog stops re-firing on every reopen. Data stays frozen.
+                            issuerToAck?.let { issuer ->
+                                scope.launch {
+                                    clientOrIssuerAddEditViewModel
+                                        .acknowledgeMasterVersion(issuer)
+                                        ?.let { deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(it) }
+                                }
+                            }
                         }
                     ) {
                         Text(
@@ -198,10 +208,18 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     Button(
                         onClick = {
                             val opensForm = pendingClientOpensForm
+                            val clientToAck = pendingClientToEdit
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
                             pendingClientOpensForm = false
                             if (opensForm) showDocumentForm = true
+                            clientToAck?.let { client ->
+                                scope.launch {
+                                    clientOrIssuerAddEditViewModel
+                                        .acknowledgeMasterVersion(client)
+                                        ?.let { deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(it) }
+                                }
+                            }
                         }
                     ) {
                         Text(

@@ -1126,7 +1126,8 @@ class ClientOrIssuerAddEditViewModel(
     }
 
     /**
-     * Checks if the master version has changed since the document was created.
+     * Checks if the master version has changed since the document was created
+     * (or since the user last acknowledged the drift via "Keep current").
      * Returns true if versions don't match (master was updated elsewhere).
      * For legacy documents without originalVersion, compares against master version > 1.
      */
@@ -1139,6 +1140,49 @@ class ClientOrIssuerAddEditViewModel(
             return masterVersion > 1
         }
         return documentVersion != masterVersion
+    }
+
+    /**
+     * "Keep current" flow: bump the doc snapshot's originalVersion to the
+     * master's current version so the mismatch dialog stops re-firing on every
+     * reopen. Data stays frozen (no field is refreshed) — we only record that
+     * the user has *seen* this master version and chosen to skip it.
+     *
+     * Persists the change to DB, refreshes the VM's internal editing state so
+     * a following EDIT_CLIENT/EDIT_ISSUER form save doesn't write the stale
+     * originalVersion back to DB, and returns a fresh state copy so the caller
+     * can push it into the invoice/quote/BL/avoir UiState (the check reads
+     * originalVersion from that state on the next open).
+     */
+    suspend fun acknowledgeMasterVersion(
+        documentClientOrIssuer: ClientOrIssuerState,
+    ): ClientOrIssuerState? {
+        val docId = documentClientOrIssuer.id?.toLong() ?: return null
+        val masterId = documentClientOrIssuer.originalClientOrIssuerId?.toLong() ?: return null
+        val newVersion = dataSource.acknowledgeDocumentClientOrIssuerVersion(docId, masterId)
+            ?: return null
+        val updated = documentClientOrIssuer.copy(originalVersion = newVersion)
+        // Sync the internal editing state so onClickDoneForm's
+        // updateClientOrIssuerInLocalDb picks up the acknowledged version.
+        // The edit-block flow seeds this state to the pre-ack snapshot right
+        // before the dialog fires — without this sync, closing the edit form
+        // would silently overwrite the DB write we just did.
+        when (documentClientOrIssuer.type) {
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                val current = _documentClientUiState.value
+                if (current.id == documentClientOrIssuer.id) {
+                    _documentClientUiState.value = current.copy(originalVersion = newVersion)
+                }
+            }
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                val current = _documentIssuerUiState.value
+                if (current.id == documentClientOrIssuer.id) {
+                    _documentIssuerUiState.value = current.copy(originalVersion = newVersion)
+                }
+            }
+            else -> {}
+        }
+        return updated
     }
 
     /**

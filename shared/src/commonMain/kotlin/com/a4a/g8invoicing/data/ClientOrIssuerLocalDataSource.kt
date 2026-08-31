@@ -1003,6 +1003,25 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
+    override suspend fun acknowledgeDocumentClientOrIssuerVersion(
+        documentClientOrIssuerId: Long,
+        masterId: Long,
+    ): Int? {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                val version = clientOrIssuerQueries.get(masterId)
+                    .executeAsOneOrNull()?.version ?: return@withContext null
+                documentClientOrIssuerQueries.updateOriginalVersion(
+                    id = documentClientOrIssuerId,
+                    original_version = version,
+                )
+                version.toInt()
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
     override suspend fun getLastCountryCode(): String? {
         return withContext(DispatcherProvider.IO) {
             try {
