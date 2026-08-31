@@ -19,12 +19,18 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
@@ -119,10 +125,54 @@ fun DocumentBottomSheetTextElements(
             // Keep the main elements list rendered even when a slide-in is open, so
             // ModalBottomSheet sub-sheets (date, footer…) show it greyed under their
             // scrim. Non-modal sub-sheets below must fillMaxSize so they cover it.
+            val elementsScrollState = rememberScrollState()
+            val overscrollScope = rememberCoroutineScope()
+            // Overscroll hook: at partial height, if the user reaches the footer
+            // and keeps swiping up → expand the sheet. At full height, scrolled
+            // to the top, if the user swipes down → collapse. Mirrors the
+            // standard bottom-sheet gesture without re-enabling
+            // sheetSwipeEnabled (which would swallow the custom drag handle).
+            //
+            // Sign convention: available.y in NestedScrollConnection carries a
+            // scroll delta (not a raw pointer delta), so positive = scroll
+            // FORWARD (finger swipes UP, content moves up to reveal what's
+            // below) and negative = scroll BACKWARD (finger swipes DOWN,
+            // content moves down to reveal what's above).
+            val overscrollConnection = remember(isSheetFullScreen, elementsScrollState) {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        if (source != NestedScrollSource.UserInput) return Offset.Zero
+                        // Collapse: finger DOWN (available.y < 0) while expanded
+                        // and content at the top (nothing to scroll backward into)
+                        if (isSheetFullScreen && available.y < 0f && elementsScrollState.value == 0) {
+                            overscrollScope.launch { onSheetStepDown() }
+                            return available
+                        }
+                        return Offset.Zero
+                    }
+
+                    override fun onPostScroll(
+                        consumed: Offset,
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset {
+                        if (source != NestedScrollSource.UserInput) return Offset.Zero
+                        // Expand: finger UP (available.y > 0) at partial height
+                        // with excess scroll the child couldn't consume (already
+                        // at the bottom, canScrollForward = false)
+                        if (!isSheetFullScreen && available.y > 0f) {
+                            overscrollScope.launch { onSheetDragUp() }
+                            return available
+                        }
+                        return Offset.Zero
+                    }
+                }
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
+                    .nestedScroll(overscrollConnection)
+                    .verticalScroll(elementsScrollState)
                     .padding(bottom = 50.dp)
             ) {
                 // MAIN ELEMENTS
