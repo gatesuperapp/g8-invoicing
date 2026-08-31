@@ -11,10 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.launch
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -36,6 +42,7 @@ fun DocumentBottomSheetProducts(
     isSheetFullScreen: Boolean,
     onSheetDragUp: () -> Unit,
     onSheetStepDown: () -> Unit,
+    onSheetCollapseToPartial: () -> Unit,
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
@@ -78,7 +85,40 @@ fun DocumentBottomSheetProducts(
         onDragDown = onSheetStepDown,
         onTap = onSheetStepDown,
     )
-    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+    // Overscroll hook mirrors DocumentBottomSheetTextElements: at partial height,
+    // hitting the bottom of the list and pulling further up expands the sheet; at
+    // full height, pulling down at the top of the list steps down one notch to
+    // partial. Never chains all the way to Hidden — full close still requires an
+    // explicit gesture on the drag handle.
+    //
+    // Sign convention (matches the text sheet, verified empirically): available.y
+    // carries the raw pointer delta. Finger DOWN = positive y, finger UP = negative y.
+    val overscrollScope = rememberCoroutineScope()
+    val overscrollConnection = remember(isSheetFullScreen) {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (source != NestedScrollSource.UserInput) return Offset.Zero
+                if (!isSheetFullScreen && available.y < 0f) {
+                    overscrollScope.launch { onSheetDragUp() }
+                    return available
+                }
+                if (isSheetFullScreen && available.y > 0f) {
+                    overscrollScope.launch { onSheetCollapseToPartial() }
+                    return available
+                }
+                return Offset.Zero
+            }
+        }
+    }
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .weight(1f)
+        .nestedScroll(overscrollConnection)
+    ) {
         var isProductListVisible by remember { mutableStateOf(false) }
         var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
             mutableStateOf(

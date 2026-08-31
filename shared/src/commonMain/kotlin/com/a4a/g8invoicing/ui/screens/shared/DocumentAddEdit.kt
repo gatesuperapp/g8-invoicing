@@ -246,6 +246,17 @@ fun DocumentAddEdit(
                             }
                         }
                     },
+                    // Overscroll from the content only ever collapses Expanded→Partial
+                    // (never chains to Hidden). Prevents the race where a fast swipe
+                    // dispatches two overscroll frames back-to-back and the second one
+                    // reads currentValue after partialExpand settled, dismissing the sheet.
+                    onSheetCollapseToPartial = {
+                        scope.launch {
+                            if (scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded) {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                        }
+                    },
                     clients = clientList,
                     issuers = issuerList,
                     documentClientUiState = documentClientUiState,
@@ -290,6 +301,13 @@ fun DocumentAddEdit(
                                 scaffoldState.bottomSheetState.partialExpand()
                             } else {
                                 hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+                            }
+                        }
+                    },
+                    onSheetCollapseToPartial = {
+                        scope.launch {
+                            if (scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded) {
+                                scaffoldState.bottomSheetState.partialExpand()
                             }
                         }
                     },

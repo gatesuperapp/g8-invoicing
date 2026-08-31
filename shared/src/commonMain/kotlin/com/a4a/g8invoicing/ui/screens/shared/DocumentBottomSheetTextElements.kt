@@ -49,6 +49,7 @@ fun DocumentBottomSheetTextElements(
     isSheetFullScreen: Boolean,
     onSheetDragUp: () -> Unit,
     onSheetStepDown: () -> Unit,
+    onSheetCollapseToPartial: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
     issuers: MutableList<ClientOrIssuerState>,
@@ -129,9 +130,11 @@ fun DocumentBottomSheetTextElements(
             val overscrollScope = rememberCoroutineScope()
             // Overscroll hook: at partial height, if the user reaches the footer
             // and keeps swiping up → expand the sheet. At full height, scrolled
-            // to the top, if the user swipes down → collapse. Mirrors the
-            // standard bottom-sheet gesture without re-enabling
-            // sheetSwipeEnabled (which would swallow the custom drag handle).
+            // to the top, if the user swipes down → collapse to partial (never
+            // straight to hidden — closing requires a second gesture on the
+            // drag handle). Mirrors the standard bottom-sheet gesture without
+            // re-enabling sheetSwipeEnabled (which would swallow the custom
+            // drag handle).
             //
             // Sign convention (verified empirically on this project's Compose
             // version): available.y carries the raw pointer delta, not the
@@ -140,10 +143,12 @@ fun DocumentBottomSheetTextElements(
                 object : NestedScrollConnection {
                     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                         if (source != NestedScrollSource.UserInput) return Offset.Zero
-                        // Collapse: finger DOWN (available.y > 0) while expanded
-                        // and content at the top (nothing to scroll backward into)
+                        // Collapse to partial: finger DOWN (available.y > 0) while
+                        // expanded and content at the top (nothing to scroll backward
+                        // into). Never chains to Hidden — a single continuous swipe
+                        // steps down at most one notch.
                         if (isSheetFullScreen && available.y > 0f && elementsScrollState.value == 0) {
-                            overscrollScope.launch { onSheetStepDown() }
+                            overscrollScope.launch { onSheetCollapseToPartial() }
                             return available
                         }
                         return Offset.Zero
