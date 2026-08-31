@@ -58,9 +58,9 @@
     <string name="product_price_without_tax">Excl. tax</string>
     <string name="product_price_with_tax">Incl. tax</string>
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Are you sure? \n\nIf you have already sent the invoice, it is not legal to delete it:</string>
-    <string name="alert_dialog_delete_invoice_2">Learn more\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nIn any case, deletion is irreversible.</string>
+    <string name="alert_dialog_delete_invoice_1">Are you sure? \n\nIn some countries, it is not legal to delete an invoice that has already been sent.\n\nIn any case, deletion is irreversible.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/en</string>
     <string name="alert_dialog_delete_general">Are you sure? This action is irreversible.</string>
     <string name="alert_dialog_delete_confirm">Yes, delete</string>

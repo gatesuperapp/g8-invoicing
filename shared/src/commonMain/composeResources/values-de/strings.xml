@@ -58,9 +58,9 @@
     <string name="product_price_without_tax">Netto</string>
     <string name="product_price_with_tax">Brutto</string>
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Bist du sicher? \n\nWenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:</string>
-    <string name="alert_dialog_delete_invoice_2">Mehr erfahren\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_invoice_1">Bist du sicher? \n\nIn einigen Ländern ist es nicht legal, eine bereits versendete Rechnung zu löschen.\n\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>

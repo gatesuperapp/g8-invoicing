@@ -93,9 +93,9 @@
     <string name="product_price_with_tax">TTC</string>
 
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n'est pas légal de la supprimer :</string>
-    <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
+    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nDans certains pays, il n'est pas légal de supprimer une facture déjà envoyée.\n\nDans tous les cas, la suppression est irréversible.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>

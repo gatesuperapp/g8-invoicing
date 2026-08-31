@@ -58,9 +58,9 @@
     <string name="product_price_without_tax">s/IVA</string>
     <string name="product_price_with_tax">c/IVA</string>
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nSi ya has enviado la factura, no es legal eliminarla:</string>
-    <string name="alert_dialog_delete_invoice_2">Más información\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nEn cualquier caso, la eliminación es irreversible.</string>
+    <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nEn algunos países, no es legal eliminar una factura que ya se ha enviado.\n\nEn cualquier caso, la eliminación es irreversible.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/es</string>
     <string name="alert_dialog_delete_general">¿Estás seguro? Esta acción es irreversible.</string>
     <string name="alert_dialog_delete_confirm">Sí, eliminar</string>
