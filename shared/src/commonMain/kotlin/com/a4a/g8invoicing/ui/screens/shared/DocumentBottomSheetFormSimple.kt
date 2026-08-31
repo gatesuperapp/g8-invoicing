@@ -4,9 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -65,9 +63,11 @@ fun DocumentBottomSheetFormSimple(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        top = 40.dp, bottom = 16.dp, end = 30.dp, start = 30.dp
-                    )
+                    // Header spacing mirrors DocumentBottomSheetHeader (used by
+                    // the product / client / issuer edit modals): shallower top,
+                    // no bottom row padding, and Save carries the bottom pad so
+                    // content starts closer to the buttons.
+                    .padding(top = 30.dp, end = 30.dp, start = 30.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -78,7 +78,9 @@ fun DocumentBottomSheetFormSimple(
                             style = MaterialTheme.typography.textCta,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
-                                .padding(top = 20.dp)
+                                // top=32 pushes the Cancel below the title's baseline
+                                // so the two read as separate rows visually.
+                                .padding(top = 32.dp)
                                 .clickable {
                                     onClickCancel()
                                 },
@@ -101,7 +103,7 @@ fun DocumentBottomSheetFormSimple(
                         Text(
                             style = MaterialTheme.typography.textCta,
                             modifier = Modifier
-                                .padding(top = 20.dp)
+                                .padding(top = 32.dp, bottom = 20.dp)
                                 .clickable {
                                     onClickDone(screenElement)
                                 }
@@ -110,11 +112,6 @@ fun DocumentBottomSheetFormSimple(
                         )
                 }
             }
-            // Extra breathing room below the header row. Kept small because
-            // most content composables (payment picker, footer text) also add
-            // their own top padding via a surfaceMuted band, so this Spacer +
-            // content padding together produce the visible gap.
-            Spacer(modifier = Modifier.height(12.dp))
             content()
         }
     }
