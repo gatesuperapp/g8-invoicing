@@ -110,14 +110,6 @@ private data class GStoreModule(
 
 private val MODULES = listOf(
     GStoreModule(
-        id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
-        titleRes = Res.string.gstore_module_watermark_title,
-        descRes = Res.string.gstore_module_watermark_desc,
-        detailRes = Res.string.gstore_module_watermark_detail,
-        icon = Icons.Outlined.WaterDrop,
-        isFree = true,
-    ),
-    GStoreModule(
         id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE,
         titleRes = Res.string.gstore_module_delivery_note_title,
         descRes = Res.string.gstore_module_delivery_note_desc,
@@ -172,6 +164,16 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_facturx_desc,
         detailRes = Res.string.gstore_module_facturx_detail,
         icon = Icons.Outlined.Code,
+        isFree = true,
+    ),
+    // Kept last: cosmetic-only, no functional impact. Users looking for a
+    // feature to enable see the useful modules first.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
+        titleRes = Res.string.gstore_module_watermark_title,
+        descRes = Res.string.gstore_module_watermark_desc,
+        detailRes = Res.string.gstore_module_watermark_detail,
+        icon = Icons.Outlined.WaterDrop,
         isFree = true,
     ),
 )
