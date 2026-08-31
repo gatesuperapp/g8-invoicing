@@ -16,6 +16,8 @@ import androidx.compose.foundation.gestures.calculateRotation
 import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +44,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -210,6 +213,19 @@ fun DocumentAddEdit(
     val isSheetVisible = scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden
     PlatformBackHandler(enabled = isSheetVisible) {
         hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+    }
+
+    // Auto-expand the sheet the moment the IME opens while we're at the partial
+    // half-height — otherwise Reference / Numéro / Champ libre etc. would sit
+    // under the keyboard on the half-height sheet.
+    val imeVisible = WindowInsets.ime
+        .getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
+    LaunchedEffect(imeVisible) {
+        if (imeVisible &&
+            scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded
+        ) {
+            scaffoldState.bottomSheetState.expand()
+        }
     }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
