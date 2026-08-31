@@ -34,9 +34,9 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Shield
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -329,7 +329,17 @@ fun OnboardingMigration19Dialog(
     }
 
     fun goForwardFromConfirm() {
-        step = Step19.NewFieldsRecap
+        // X-removes on Confirm can turn previously-assigned items back into
+        // orphans. Loop them through the corresponding Orphans step again so
+        // the wizard never commits with unassigned rows — user re-picks a
+        // target and comes back to Confirm.
+        val orphanClients = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+        val orphanProducts = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+        step = when {
+            orphanClients.isNotEmpty() -> Step19.OrphansClients
+            orphanProducts.isNotEmpty() -> Step19.OrphansProducts
+            else -> Step19.NewFieldsRecap
+        }
     }
 
     fun goForwardFromNewFieldsRecap() {
@@ -560,7 +570,14 @@ fun OnboardingMigration19Dialog(
                             )
                         }
                         Step19.OrphansClients -> {
-                            val orphans = context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+                            // Snapshot on step entry — assignments change as the user picks
+                            // pastilles, but we don't want the row to disappear when it
+                            // becomes assigned. The pastille selection is what changes;
+                            // the row stays visible.
+                            val orphans = remember {
+                                context.clients.filter { it.id?.toLong() !in clientAssignments.keys }
+                            }
+                            var previewClient by remember { mutableStateOf<ClientOrIssuerState?>(null) }
                             OrphansStep19(
                                 title = stringResource(Res.string.onboarding_19_orphans_clients_title),
                                 body = stringResource(Res.string.onboarding_19_orphans_clients_body),
@@ -569,12 +586,21 @@ fun OnboardingMigration19Dialog(
                                 onAssign = { itemId, issuerId ->
                                     clientAssignments = clientAssignments + (itemId to issuerId)
                                 },
+                                onDetailsClick = { id ->
+                                    previewClient = orphans.firstOrNull { it.id?.toLong() == id }
+                                },
                                 assignments = clientAssignments,
                                 onNext = { goForwardFromOrphansClients() },
                             )
+                            previewClient?.let { c ->
+                                ClientDetailsDialog19(client = c, onDismiss = { previewClient = null })
+                            }
                         }
                         Step19.OrphansProducts -> {
-                            val orphans = context.products.filter { it.id?.toLong() !in productAssignments.keys }
+                            val orphans = remember {
+                                context.products.filter { it.id?.toLong() !in productAssignments.keys }
+                            }
+                            var previewProduct by remember { mutableStateOf<ProductState?>(null) }
                             OrphansStep19(
                                 title = stringResource(Res.string.onboarding_19_orphans_products_title),
                                 body = stringResource(Res.string.onboarding_19_orphans_products_body),
@@ -585,9 +611,15 @@ fun OnboardingMigration19Dialog(
                                 onAssign = { itemId, issuerId ->
                                     productAssignments = productAssignments + (itemId to issuerId)
                                 },
+                                onDetailsClick = { id ->
+                                    previewProduct = orphans.firstOrNull { it.id?.toLong() == id }
+                                },
                                 assignments = productAssignments,
                                 onNext = { goForwardFromOrphansProducts() },
                             )
+                            previewProduct?.let { p ->
+                                ProductDetailsDialog19(product = p, onDismiss = { previewProduct = null })
+                            }
                         }
                         Step19.Confirm -> ConfirmStep19(
                             issuers = remainingIssuers,
@@ -971,7 +1003,7 @@ private fun AttachStep19(
                     }
                     IconButton(onClick = { onDetailsClick(item.id) }) {
                         Icon(
-                            imageVector = Icons.Outlined.Info,
+                            imageVector = Icons.Outlined.Visibility,
                             contentDescription = null,
                             tint = AppColors.iconSecondary,
                             modifier = Modifier.size(20.dp),
@@ -1079,6 +1111,9 @@ private fun OrphansStep19(
     issuers: List<ClientOrIssuerState>,
     assignments: Map<Long, Long>,
     onAssign: (itemId: Long, issuerId: Long) -> Unit,
+    // Tapping the eye opens the same read-only details modal as AttachStep19.
+    // Rendered by the caller so the payload type stays polymorphic.
+    onDetailsClick: (Long) -> Unit,
     onNext: () -> Unit,
 ) {
     val allAssigned = items.all { it.id in assignments.keys }
@@ -1100,64 +1135,78 @@ private fun OrphansStep19(
         Spacer(Modifier.height(16.dp))
         items.forEach { item ->
             val currentAssignment = assignments[item.id]
-            Column(
+            // Header block (grey) with name + description + eye. Chips render
+            // separately below on the white background so the block reads as
+            // "this is the item, here's how you can attach it" — the chips
+            // aren't inline decorations of the item card.
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFFF5F2F8))
                     .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = item.primary.ifBlank { "—" },
-                    style = MaterialTheme.typography.textBody,
-                )
-                if (item.secondary.isNotBlank()) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = item.secondary,
-                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                        text = item.primary.ifBlank { "—" },
+                        style = MaterialTheme.typography.textBody,
                     )
-                }
-                Spacer(Modifier.height(8.dp))
-                // Full-text chips per issuer — no truncation so users with
-                // similarly-named entreprises can still tell them apart.
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    issuers.forEach { issuer ->
-                        val id = issuer.id?.toLong() ?: return@forEach
-                        val selected = currentAssignment == id
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(999.dp))
-                                .background(
-                                    if (selected) AppColors.accent
-                                    else Color.White,
-                                )
-                                .border(
-                                    BorderStroke(
-                                        1.dp,
-                                        if (selected) AppColors.accent else Color(0xFFE4DEED),
-                                    ),
-                                    RoundedCornerShape(999.dp),
-                                )
-                                .clickable { onAssign(item.id, id) }
-                                .padding(horizontal = 12.dp, vertical = 6.dp),
-                        ) {
-                            Text(
-                                text = issuer.name.text.ifBlank { "—" },
-                                style = MaterialTheme.typography.textBodySmall.copy(
-                                    color = if (selected) AppColors.textOnAccent else AppColors.textPrimary,
-                                ),
-                            )
-                        }
+                    if (item.secondary.isNotBlank()) {
+                        Text(
+                            text = item.secondary,
+                            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                            maxLines = 2,
+                        )
                     }
+                }
+                IconButton(onClick = { onDetailsClick(item.id) }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Visibility,
+                        contentDescription = null,
+                        tint = AppColors.iconSecondary,
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
             Spacer(Modifier.height(8.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                issuers.forEach { issuer ->
+                    val id = issuer.id?.toLong() ?: return@forEach
+                    val selected = currentAssignment == id
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(999.dp))
+                            .background(
+                                if (selected) AppColors.accent
+                                else Color.White,
+                            )
+                            .border(
+                                BorderStroke(
+                                    1.dp,
+                                    if (selected) AppColors.accent else Color(0xFFE4DEED),
+                                ),
+                                RoundedCornerShape(999.dp),
+                            )
+                            .clickable { onAssign(item.id, id) }
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Text(
+                            text = issuer.name.text.ifBlank { "—" },
+                            style = MaterialTheme.typography.textBodySmall.copy(
+                                color = if (selected) AppColors.textOnAccent else AppColors.textPrimary,
+                            ),
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(16.dp))
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
         PrimaryCta19(
             text = stringResource(Res.string.onboarding_19_orphans_cta),
             enabled = allAssigned,
@@ -1452,70 +1501,71 @@ private fun ConfirmStep19(
             lineHeight = 22.sp,
             modifier = Modifier.fillMaxWidth(),
         )
-        Spacer(Modifier.height(20.dp))
-        issuers.forEach { issuer ->
-            val issuerId = issuer.id?.toLong() ?: return@forEach
+        Spacer(Modifier.height(24.dp))
+        // Per issuer: name (bold, on the plain surface), then section labels
+        // and one grey pill per attached client / product. The old design
+        // wrapped everything in a single grey card which flattened the
+        // hierarchy — user asked for individual pills so removals feel like
+        // they touch a discrete item.
+        issuers.forEachIndexed { index, issuer ->
+            val issuerId = issuer.id?.toLong() ?: return@forEachIndexed
             val myClients = clientAssignments.filter { it.value == issuerId }
                 .keys.mapNotNull { clientsById[it] }
                 .sortedBy { it.name.text.lowercase() }
             val myProducts = productAssignments.filter { it.value == issuerId }
                 .keys.mapNotNull { productsById[it] }
                 .sortedBy { it.name.text.lowercase() }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFF5F2F8))
-                    .padding(horizontal = 12.dp, vertical = 12.dp),
-            ) {
+            Text(
+                text = issuer.name.text.ifBlank { "—" },
+                style = MaterialTheme.typography.textBodyBold,
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            )
+            Text(
+                text = stringResource(Res.string.onboarding_19_confirm_section_clients),
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+            )
+            if (myClients.isEmpty()) {
                 Text(
-                    text = issuer.name.text.ifBlank { "—" },
-                    style = MaterialTheme.typography.textBodyBold,
+                    text = stringResource(Res.string.onboarding_19_confirm_no_clients),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                 )
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = stringResource(Res.string.onboarding_19_confirm_section_clients),
-                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-                )
-                Spacer(Modifier.height(4.dp))
-                if (myClients.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.onboarding_19_confirm_no_clients),
-                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
+            } else {
+                myClients.forEach { c ->
+                    ConfirmAssignmentPill(
+                        primary = c.name.text.ifBlank { "—" },
+                        secondary = c.emails?.firstOrNull()?.email?.text.orEmpty(),
+                        onRemove = { onRemoveClient(c.id!!.toLong()) },
                     )
-                } else {
-                    myClients.forEach { c ->
-                        ConfirmAssignmentRow(
-                            primary = c.name.text.ifBlank { "—" },
-                            secondary = c.emails?.firstOrNull()?.email?.text.orEmpty(),
-                            onRemove = { onRemoveClient(c.id!!.toLong()) },
-                        )
-                    }
-                }
-                Spacer(Modifier.height(10.dp))
-                Text(
-                    text = stringResource(Res.string.onboarding_19_confirm_section_products),
-                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-                )
-                Spacer(Modifier.height(4.dp))
-                if (myProducts.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.onboarding_19_confirm_no_products),
-                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
-                    )
-                } else {
-                    myProducts.forEach { p ->
-                        ConfirmAssignmentRow(
-                            primary = p.name.text.ifBlank { "—" },
-                            secondary = p.description?.text.orEmpty(),
-                            onRemove = { onRemoveProduct(p.id!!.toLong()) },
-                        )
-                    }
                 }
             }
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(14.dp))
+            Text(
+                text = stringResource(Res.string.onboarding_19_confirm_section_products),
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+            )
+            if (myProducts.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.onboarding_19_confirm_no_products),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                )
+            } else {
+                myProducts.forEach { p ->
+                    ConfirmAssignmentPill(
+                        primary = p.name.text.ifBlank { "—" },
+                        secondary = p.description?.text.orEmpty(),
+                        onRemove = { onRemoveProduct(p.id!!.toLong()) },
+                    )
+                }
+            }
+            if (index < issuers.lastIndex) {
+                Spacer(Modifier.height(24.dp))
+            }
         }
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(28.dp))
         PrimaryCta19(
             text = stringResource(Res.string.onboarding_19_confirm_cta),
             onClick = onNext,
@@ -1524,7 +1574,7 @@ private fun ConfirmStep19(
 }
 
 @Composable
-private fun ConfirmAssignmentRow(
+private fun ConfirmAssignmentPill(
     primary: String,
     secondary: String,
     onRemove: () -> Unit,
@@ -1532,7 +1582,10 @@ private fun ConfirmAssignmentRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(bottom = 6.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFFF5F2F8))
+            .padding(start = 12.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
