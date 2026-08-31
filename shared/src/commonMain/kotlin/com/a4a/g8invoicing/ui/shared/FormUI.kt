@@ -80,10 +80,10 @@ fun FormUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = 10.dp,
-                bottom = 8.dp
-            )
+            // No start padding here — separators inherit the outer Column's
+            // width and span edge-to-edge of the surface card. Rows push
+            // their own start=16dp inset for the labels.
+            .padding(bottom = 8.dp)
             .absorbAndDispatchTap("formui") { pos ->
                 val y = pos.y.toInt()
                 val exact = rowYRanges.firstOrNull { y in it.second..it.third }
@@ -239,6 +239,8 @@ fun RowWithLabelAndInput(
                 }
             )
             .fillMaxWidth()
+            // start=16 pushes the label inside; separator (rendered by the parent
+            // FormUI Column with no start padding) stays edge-to-edge.
             .padding(
                 start = 16.dp,
                 end = if (formInput.pageElement.name.startsWith("DOCUMENT_PRODUCT")) 0.dp else 16.dp,

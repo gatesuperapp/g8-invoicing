@@ -35,9 +35,9 @@ fun DeleteBlockRow(onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            // Match RowWithLabelAndInput's padding (16/16/14/14) so the row reads
-            // at the same width AND height as the classic "prix / client / …"
-            // rows above it in the same block.
+            // Match RowWithLabelAndInput's padding so the trash+label lines up
+            // with the classic row labels above it (start=16 pushes content
+            // inside; separator stays edge-to-edge at the parent Column level).
             .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
