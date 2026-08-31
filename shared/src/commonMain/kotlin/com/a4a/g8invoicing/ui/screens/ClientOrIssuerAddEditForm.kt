@@ -241,23 +241,19 @@ fun ClientOrIssuerAddEditForm(
         // block so the choice frames the rest of the form (Factur-X eligibility
         // hinges on it) and mirrors the ordering asked for in the work log.
         if (!isIssuer) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
-            ) {
-                ClientTypePicker(
-                    selected = clientOrIssuerUiState.clientType,
-                    onSelect = { newType ->
-                        // Wrap so the (nullable) choice survives the
-                        // onValueChange(_, Any) contract.
-                        onValueChange(
-                            ScreenElement.CLIENT_TYPE,
-                            com.a4a.g8invoicing.data.models.ClientTypeChoice(newType),
-                        )
-                    },
-                )
-            }
+            // No surface card behind the picker — the grey rail is the entire
+            // affordance, we want it to sit directly on the screen background.
+            ClientTypePicker(
+                selected = clientOrIssuerUiState.clientType,
+                onSelect = { newType ->
+                    // Wrap so the (nullable) choice survives the
+                    // onValueChange(_, Any) contract.
+                    onValueChange(
+                        ScreenElement.CLIENT_TYPE,
+                        com.a4a.g8invoicing.data.models.ClientTypeChoice(newType),
+                    )
+                },
+            )
             Spacer(Modifier.padding(bottom = 16.dp))
         }
         Column(
