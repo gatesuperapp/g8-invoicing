@@ -540,9 +540,9 @@
     <string name="first_launch_welcome_title">Bienvenue sur 𝕘𝟠 aka The Gate</string>
     <string name="first_launch_welcome_amigo">Je suis Petit Rhino, ton nouvel amigo</string>
     <string name="first_launch_next">Suivant</string>
-    <string name="first_launch_liberty_body1">Je t'aide à tout gérer depuis ton téléphone : factures, bons de livraison, clients, produits… et à convertir tes documents en facture en un clic !</string>
+    <string name="first_launch_liberty_body1">Je t'aide à tout gérer depuis ton téléphone : factures, bons de livraison, clients, produits… et à convertir des documents en facture !</string>
     <string name="first_launch_liberty_body2">L'application fonctionne hors ligne, le compte est facultatif et tes données ne sont pas partagées à des tiers ♡</string>
-    <string name="first_launch_gstore_intro">Certaines fonctionnalités s'activent à la demande depuis l'onglet 𝕘Store : devis, export…</string>
+    <string name="first_launch_gstore_intro">Certaines fonctionnalités s'activent à la demande depuis l'onglet 𝕘Store : devis, BL, export aux formats de la facturation électronique et +.</string>
     <string name="first_launch_gstore_premium">L'appli reste ainsi légère et personnalisable.</string>
     <string name="first_launch_settings_intro">Avant de te laisser la main, il me faut 2 infos pour paramétrer l'interface :</string>
     <string name="first_launch_settings_name_label">Nom de ton entreprise</string>

@@ -133,18 +133,16 @@ fun DocumentBottomSheetTextElements(
             // standard bottom-sheet gesture without re-enabling
             // sheetSwipeEnabled (which would swallow the custom drag handle).
             //
-            // Sign convention: available.y in NestedScrollConnection carries a
-            // scroll delta (not a raw pointer delta), so positive = scroll
-            // FORWARD (finger swipes UP, content moves up to reveal what's
-            // below) and negative = scroll BACKWARD (finger swipes DOWN,
-            // content moves down to reveal what's above).
+            // Sign convention (verified empirically on this project's Compose
+            // version): available.y carries the raw pointer delta, not the
+            // scroll delta. Finger DOWN = positive y, finger UP = negative y.
             val overscrollConnection = remember(isSheetFullScreen, elementsScrollState) {
                 object : NestedScrollConnection {
                     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                         if (source != NestedScrollSource.UserInput) return Offset.Zero
-                        // Collapse: finger DOWN (available.y < 0) while expanded
+                        // Collapse: finger DOWN (available.y > 0) while expanded
                         // and content at the top (nothing to scroll backward into)
-                        if (isSheetFullScreen && available.y < 0f && elementsScrollState.value == 0) {
+                        if (isSheetFullScreen && available.y > 0f && elementsScrollState.value == 0) {
                             overscrollScope.launch { onSheetStepDown() }
                             return available
                         }
@@ -157,10 +155,10 @@ fun DocumentBottomSheetTextElements(
                         source: NestedScrollSource,
                     ): Offset {
                         if (source != NestedScrollSource.UserInput) return Offset.Zero
-                        // Expand: finger UP (available.y > 0) at partial height
+                        // Expand: finger UP (available.y < 0) at partial height
                         // with excess scroll the child couldn't consume (already
                         // at the bottom, canScrollForward = false)
-                        if (!isSheetFullScreen && available.y > 0f) {
+                        if (!isSheetFullScreen && available.y < 0f) {
                             overscrollScope.launch { onSheetDragUp() }
                             return available
                         }
