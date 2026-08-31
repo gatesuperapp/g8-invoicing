@@ -150,13 +150,26 @@ fun ClientOrIssuerAddEditForm(
         // fallback would clobber whatever they intended (e.g. an onboarding-set
         // country the client-list flow hasn't propagated yet).
         if (clientOrIssuerUiState.id == null) {
-            clientOrIssuerUiState.addresses?.forEachIndexed { index, address ->
-                if (address.countryCode.isNullOrBlank()) {
-                    val screenEl = if (isInBottomSheetModal)
-                        ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
-                    else
-                        ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
-                    onValueChange(screenEl, TextFieldValue(fallback))
+            val addresses = clientOrIssuerUiState.addresses
+            if (addresses.isNullOrEmpty()) {
+                // No AddressState exists yet ("Ajouter une entreprise" starts
+                // with addresses=null). Seed COUNTRY_1 so the VM's write path
+                // creates the first address with the cascade country — without
+                // this, the display fallback lied about what was persisted and
+                // the country was empty on reopen.
+                val screenEl = if (isInBottomSheetModal)
+                    ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_1
+                else ScreenElement.CLIENT_OR_ISSUER_COUNTRY_1
+                onValueChange(screenEl, TextFieldValue(fallback))
+            } else {
+                addresses.forEachIndexed { index, address ->
+                    if (address.countryCode.isNullOrBlank()) {
+                        val screenEl = if (isInBottomSheetModal)
+                            ScreenElement.valueOf("DOCUMENT_CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                        else
+                            ScreenElement.valueOf("CLIENT_OR_ISSUER_COUNTRY_${index + 1}")
+                        onValueChange(screenEl, TextFieldValue(fallback))
+                    }
                 }
             }
         }
