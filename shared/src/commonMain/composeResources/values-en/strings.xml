@@ -314,7 +314,7 @@
     <string name="gstore_module_orders_desc">Manage your clients' orders</string>
     <string name="gstore_module_watermark_title">g8 mark</string>
     <string name="gstore_module_watermark_desc">Remove the g8 mention from your documents</string>
-    <string name="gstore_module_watermark_detail">Activate this module to remove the « Made with g8, mobile invoicing app » mention from your invoices, delivery notes and credit notes.</string>
+    <string name="gstore_module_watermark_detail">Enable this module to remove the "Made with g8, mobile invoicing app" watermark from your documents.</string>
     <string name="invoice_watermark_default">Made with g8 (www.the-gate.fr), mobile invoicing app</string>
     <string name="gstore_module_payments_title">Payments</string>
     <string name="gstore_module_payments_desc">Record card, check, cash payments</string>

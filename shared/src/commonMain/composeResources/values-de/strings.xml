@@ -315,7 +315,7 @@
     <string name="gstore_module_orders_desc">Verwalten Sie die Bestellungen Ihrer Kunden</string>
     <string name="gstore_module_watermark_title">g8-Hinweis</string>
     <string name="gstore_module_watermark_desc">Entfernen Sie den g8-Hinweis aus Ihren Dokumenten</string>
-    <string name="gstore_module_watermark_detail">Aktivieren Sie dieses Modul, um den Hinweis „Erstellt mit g8, mobile Rechnungs-App" aus Ihren Rechnungen, Lieferscheinen und Gutschriften zu entfernen.</string>
+    <string name="gstore_module_watermark_detail">Aktiviere dieses Modul, um das Wasserzeichen „Erstellt mit g8, mobile Rechnungs-App" aus deinen Dokumenten zu entfernen.</string>
     <string name="invoice_watermark_default">Erstellt mit g8 (www.the-gate.fr), mobile Rechnungs-App</string>
     <string name="gstore_module_payments_title">Zahlungen</string>
     <string name="gstore_module_payments_desc">Erfassen Sie Karten-, Scheck- und Barzahlungen</string>

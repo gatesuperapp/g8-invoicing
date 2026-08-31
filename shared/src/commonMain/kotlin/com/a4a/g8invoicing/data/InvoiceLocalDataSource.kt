@@ -273,19 +273,16 @@ class InvoiceLocalDataSource(
         }
     }
 
-    // Compute the watermark to freeze on a newly-created invoice. Returns null when the
-    // user is currently premium AND has the watermark-removal module active — that
-    // invoice will then render without watermark forever, even if the user later loses
-    // premium or un-activates the module. Conversely, an invoice created without
-    // removal keeps its watermark forever, even if the user activates removal later.
-    // The "freeze at creation" behavior is the whole point of persisting the string
-    // in the DB. Requiring premium here prevents ex-premium users from continuing to
-    // produce watermark-free documents via a stale preference flag.
+    // Compute the watermark to freeze on a newly-created invoice. Returns null
+    // when the watermark-removal module is active — the invoice then renders
+    // without a watermark forever, even if the user later un-activates the
+    // module. Conversely, an invoice created without removal keeps its
+    // watermark forever, even if the module is activated later. Freezing at
+    // creation is the whole point of persisting the string in the DB.
+    // Module is free since the 1.9 gStore pass — no premium gate here.
     private suspend fun computeWatermark(): String? {
-        val removalActive =
-            activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL) &&
-                subscriptionRepository.isPremium()
-        return if (removalActive) null else getString(Res.string.invoice_watermark_default)
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) null
+        else getString(Res.string.invoice_watermark_default)
     }
 
     // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---

@@ -304,7 +304,7 @@
     <string name="gstore_module_orders_desc">Gestiona los pedidos de tus clientes</string>
     <string name="gstore_module_watermark_title">Mención g8</string>
     <string name="gstore_module_watermark_desc">Retira la mención g8 de tus documentos</string>
-    <string name="gstore_module_watermark_detail">Activa este módulo para eliminar la mención « Hecho con g8, aplicación móvil de facturación » de tus facturas, albaranes y notas de crédito.</string>
+    <string name="gstore_module_watermark_detail">Activa este módulo para eliminar la marca de agua «Hecho con g8, aplicación móvil de facturación» de tus documentos.</string>
     <string name="invoice_watermark_default">Hecho con g8 (www.the-gate.fr), aplicación móvil de facturación</string>
     <string name="gstore_module_payments_title">Pagos</string>
     <string name="gstore_module_payments_desc">Registra tarjetas, cheques, efectivo</string>

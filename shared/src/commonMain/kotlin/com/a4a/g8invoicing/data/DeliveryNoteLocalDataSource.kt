@@ -47,10 +47,8 @@ class DeliveryNoteLocalDataSource(
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
-        val removalActive =
-            activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL) &&
-                subscriptionRepository.isPremium()
-        return if (removalActive) null else getString(Res.string.invoice_watermark_default)
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) null
+        else getString(Res.string.invoice_watermark_default)
     }
 
     // --- createNew ---
