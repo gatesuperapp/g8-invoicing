@@ -684,7 +684,7 @@ fun ClientOrIssuerAddEditForm(
                 modifier = Modifier
                     .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
-                    .padding(start = 26.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             ) {
                 Text(
@@ -727,7 +727,7 @@ fun ClientOrIssuerAddEditForm(
                         // Match the 26.dp start-padding used on the "Franchise en
                         // base de TVA" row above so both labels align on the same
                         // vertical guide.
-                        .padding(start = 26.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                        .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
                 ) {
                     Text(
@@ -871,12 +871,15 @@ fun ClientOrIssuerAddEditForm(
                 modifier = Modifier
                     .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     .fillMaxWidth()
-                    .padding(start = 26.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
+                    .padding(start = 16.dp, end = 12.dp, top = 4.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(Res.string.document_form_sync_to_master),
-                    style = MaterialTheme.typography.textBodyBold,
+                    // Match the Franchise / Intra-EU / Withholding switch rows
+                    // above so the four switches read at the same visual weight.
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 15.dp),
