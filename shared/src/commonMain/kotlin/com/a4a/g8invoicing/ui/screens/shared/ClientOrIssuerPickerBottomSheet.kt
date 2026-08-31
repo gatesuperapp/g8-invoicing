@@ -201,8 +201,20 @@ fun ClientOrIssuerPickerBottomSheet(
                         onClick = { onClickEdit(currentSelected) },
                         onClickDelete = { onClickDeselect() },
                         onClickRefreshFromMaster = { onClickRefreshFromMaster(currentSelected) },
+                        // Issuers can't be removed from a doc — they're always
+                        // the doc's current company (managed in Mon compte >
+                        // Mes entreprises). Trash icon hidden.
+                        showDelete = !isIssuer,
                     )
                 }
+                return@Column
+            }
+
+            // For issuers with no selection (edge case — new docs always seed
+            // the current company as issuer), we don't show the picker list
+            // + '+' button either. Issuer management lives in Mon compte >
+            // Mes entreprises, not in the document flow.
+            if (isIssuer) {
                 return@Column
             }
 
@@ -444,6 +456,7 @@ private fun ClientOrIssuerPickerRow(
     onClick: () -> Unit,
     onClickDelete: () -> Unit,
     onClickRefreshFromMaster: () -> Unit,
+    showDelete: Boolean = true,
 ) {
     val displayName = entry.name.text +
         (entry.firstName?.text?.takeIf { it.isNotBlank() }?.let { " $it" } ?: "")
@@ -515,18 +528,20 @@ private fun ClientOrIssuerPickerRow(
                     )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .clickable { onClickDelete() },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Remove",
-                    modifier = Modifier.size(18.dp),
-                )
+            if (showDelete) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .clickable { onClickDelete() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Remove",
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
             }
         }
     }
