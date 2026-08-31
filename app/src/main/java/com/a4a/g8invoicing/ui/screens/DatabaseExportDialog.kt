@@ -137,6 +137,31 @@ fun exportDatabaseToDownloads(context: Context): File {
     return exportFile
 }
 
+/**
+ * Silent safety-net snapshot to the app's internal files directory.
+ * Meant to run right before the 1.9 migration wizard starts mutating the
+ * schema — so even if the user skips the "Sauvegarder" CTA, we still have
+ * a pre-wizard copy on disk. The file lives in filesDir/backups/, which
+ * needs root or ADB pull to extract, but it's better than nothing.
+ *
+ * Returns the created file, or null on failure (missing source DB, IO
+ * error, permission). Caller should log-and-ignore — this is a best-effort
+ * safety net, not a hard requirement of the wizard.
+ */
+fun snapshotDatabaseInternally(context: Context, tag: String): File? {
+    return try {
+        val dbFile = context.getDatabasePath("g8_invoicing.db")
+        if (!dbFile.exists()) return null
+        val backupDir = File(context.filesDir, "backups").apply { if (!exists()) mkdirs() }
+        val safeTag = tag.replace(Regex("[^A-Za-z0-9._-]"), "_")
+        val backupFile = File(backupDir, "${safeTag}_${System.currentTimeMillis()}.db")
+        dbFile.copyTo(backupFile, overwrite = false)
+        backupFile
+    } catch (_: Exception) {
+        null
+    }
+}
+
 suspend fun sendDatabaseByEmail(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(
         context,

@@ -54,6 +54,7 @@ import com.a4a.g8invoicing.ui.screens.DatabaseExportDialog
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
+import com.a4a.g8invoicing.ui.screens.snapshotDatabaseInternally
 import com.a4a.g8invoicing.ui.screens.sendDatabaseByEmail
 import com.a4a.g8invoicing.ui.shared.FirstLaunchIssuerNameDialog
 import com.a4a.g8invoicing.ui.shared.Migration19Actions
@@ -139,6 +140,10 @@ fun MainCompose(
                         )
                     ),
                 )
+                // Best-effort silent snapshot before mutating anything. Lands
+                // in filesDir/backups/ so it's not user-visible but recoverable
+                // via ADB pull if something goes sideways downstream.
+                snapshotDatabaseInternally(context, "before_1_9_safety_seed")
                 clientOrIssuerDataSource.createNewAndReturnId(seededIssuer)
                     ?.let { currentCompanyRepository.setCurrent(it) }
                 // Silent-repair path: nothing pops on screen, so consume every
@@ -168,6 +173,11 @@ fun MainCompose(
                         val id = issuer.id?.toLong() ?: return@mapNotNull null
                         id to invoiceDataSource.getRecentFootersForCompany(id)
                     }.toMap()
+                    // Silent snapshot before firing the wizard — user still gets
+                    // the explicit "Sauvegarder" CTA in the Backup step to grab
+                    // a copy in Downloads/, but this one guarantees a pre-wizard
+                    // file exists in the app's internal dir even if they skip it.
+                    snapshotDatabaseInternally(context, "before_1_9_migration")
                     migration19Context = Migration19Context(
                         issuers = issuers,
                         clients = clients,
