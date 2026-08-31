@@ -171,14 +171,16 @@ fun DocumentBasicTemplateFooter(
             }
         }
 
-        // Terms + footer + watermark share the bottom band under a hairline.
-        // The separator only shows when there's something below it — if all
-        // three are absent (empty terms, no free-text footer, watermark
-        // module off in gStore), it would dangle under empty space.
+        // Terms + footer + watermark share the bottom band. The hairline
+        // separator only shows when there's a payment section above it —
+        // on avoirs / quotes / delivery notes the payment section is
+        // suppressed, so the divider would sit under empty space.
         if (paymentTerms != null || footerText != null || watermark != null) {
             Spacer(Modifier.height(if (showPaymentSection) 12.dp else 20.dp))
-            HorizontalDivider(color = SeparatorColor, thickness = 0.5.dp)
-            Spacer(Modifier.height(8.dp))
+            if (showPaymentSection) {
+                HorizontalDivider(color = SeparatorColor, thickness = 0.5.dp)
+                Spacer(Modifier.height(8.dp))
+            }
             if (paymentTerms != null) {
                 Text(
                     text = paymentTerms,
