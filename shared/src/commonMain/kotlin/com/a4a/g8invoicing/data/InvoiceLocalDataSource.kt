@@ -1357,7 +1357,15 @@ fun incrementDocumentNumber(docNumber: String): String {
     val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
     if (numberToIncrement.isNotEmpty()) {
         val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
-        return firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
+        val incremented = (numberToIncrement.toInt() + 1).toString()
+        // Pad to the trailing digit block's ORIGINAL length so we preserve
+        // whatever zero-padding the user picked:
+        //   F00GJ3   → F00GJ4    (1-digit trailer → keep 1 digit)
+        //   F00GJ003 → F00GJ004  (3-digit padding preserved)
+        //   f00368   → f00369    (5-digit padding preserved)
+        // padStart is a no-op when the incremented value already exceeds the
+        // original length (e.g. F999 → F1000), so overflow is handled cleanly.
+        return firstPartOfDocNumber + incremented.padStart(numberToIncrement.length, '0')
     } else return docNumber
 }
 
