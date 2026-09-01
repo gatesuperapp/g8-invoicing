@@ -110,11 +110,15 @@ fun DocumentBottomSheetElementsContent(
                 )
             )
     }
-    // BT-120 VAT exemption reason — surfaced only when the issuer is in
-    // franchise en base, since a taxed issuer never needs an exemption
-    // wording. Above payment means so a fresh reader spots the mention
+    // BT-120 VAT exemption reason — surfaced only on invoices + avoirs (the
+    // only doc types whose PDF renders a tax mention), and only when the
+    // issuer is in franchise en base. Devis + BL don't carry a VAT-exempt
+    // reason: a quote is a proposal (no fiscal event), a BL isn't a taxable
+    // document. Above payment means so a fresh reader spots the mention
     // before the payment block.
-    if (document.documentIssuer?.vatExempt == true) {
+    val hasTaxContext = document is InvoiceState ||
+        document is com.a4a.g8invoicing.ui.states.CreditNoteState
+    if (hasTaxContext && document.documentIssuer?.vatExempt == true) {
         val exemptionPreview = document.vatExemptionText?.text.orEmpty()
         inputList.add(
             FormInput(
