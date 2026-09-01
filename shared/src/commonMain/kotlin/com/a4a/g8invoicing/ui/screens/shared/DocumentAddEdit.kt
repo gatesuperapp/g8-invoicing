@@ -30,8 +30,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,8 +39,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -90,6 +87,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.theme.ColorLightGrey
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
@@ -190,171 +188,115 @@ fun DocumentAddEdit(
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit = { _, _ -> },
     onToggleRetentionHidden: (Int) -> Unit = {},
 ) {
-    // We use BottomSheetScaffold to open a bottom sheet modal
-    // (We could use ModalBottomSheet but there are issues with overlapping system navigation)
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.Hidden,
-            skipHiddenState = false
-        )
-    )
-    val bottomSheetType = remember { mutableStateOf(BottomSheetType.ITEMS) }
+    // ModalBottomSheet lives in a separate window (Dialog), so it naturally
+    // draws over the DocumentAddEditBottomBar with no z-order gymnastics —
+    // and each nested sheet (issuer / client / date / footer picker) stacks
+    // in its own window too.
+    var currentSheet by remember { mutableStateOf<BottomSheetType?>(null) }
+    // Toggled by a drag gesture on the DragHandle. False = half-height (default
+    // when a sheet opens); true = full-height. Wrapped in an explicit
+    // MutableState (rather than a `by` delegate) so the confirmValueChange
+    // lambda below can read the live value.
+    val expandedByHandleState = remember(currentSheet) { mutableStateOf(false) }
+    var expandedByHandle by expandedByHandleState
     val scope = rememberCoroutineScope()
 
-    val focusManager = LocalFocusManager.current // Obtenir le FocusManager
-    val keyboardController =
-        LocalSoftwareKeyboardController.current // Obtenir le KeyboardController
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
 
     // Store string for callback (can't use stringResource in lambda)
     val comingSoonMessage = stringResource(Res.string.feature_coming_soon)
 
-    // When the bottom sheet is open (either partially expanded or fully expanded)
-    // intercept system back to close it instead of popping back to the document list.
-    val isSheetVisible = scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden
-    PlatformBackHandler(enabled = isSheetVisible) {
-        hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
+    // --- Dismissal hardening -------------------------------------------------
+    // Material3 1.5.0-alpha19 doesn't expose positionalThreshold /
+    // velocityThreshold. Both are hard-coded to 56.dp and 125.dp px/s inside
+    // AnchoredDraggableState. So a fast flick or a >56dp drag validates
+    // Hidden — too easy to close by mistake.
+    //
+    // We hijack confirmValueChange (the only public lever) to reject the
+    // Hidden target unless the user has physically dragged the sheet down by
+    // more than 200dp. AnchoredDraggableState then bounces back to Expanded.
+    // Velocity never wins on its own because we filter the *result*, not the
+    // gesture.
+    //
+    // Side-effect: programmatic hide() calls (bouton, back, drag-handle path)
+    // would also be rejected. `allowProgrammaticHide` bypasses the filter for
+    // that narrow window; set true right before hide(), reset in
+    // invokeOnCompletion.
+    //
+    // Chicken-and-egg: the lambda needs sheetState.requireOffset(), but
+    // sheetState is being created. `sheetStateRef` breaks the loop.
+    val allowProgrammaticHide = remember { mutableStateOf(false) }
+    val sheetStateRef = remember {
+        mutableStateOf<androidx.compose.material3.SheetState?>(null)
     }
+    // Latest measured screen height in px. Updated from inside
+    // BoxWithConstraints via SideEffect below.
+    val layoutHeightPx = remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
 
-    // Auto-expand the sheet the moment the IME opens while we're at the partial
-    // half-height — otherwise Reference / Numéro / Champ libre etc. would sit
-    // under the keyboard on the half-height sheet.
-    val imeVisible = WindowInsets.ime
-        .getBottom(androidx.compose.ui.platform.LocalDensity.current) > 0
-    LaunchedEffect(imeVisible) {
-        if (imeVisible &&
-            scaffoldState.bottomSheetState.currentValue == SheetValue.PartiallyExpanded
-        ) {
-            scaffoldState.bottomSheetState.expand()
+    val confirmValueChange = remember(density) {
+        val dismissThresholdPx = with(density) { 200.dp.toPx() }
+        val fullscreenTopInsetPx = with(density) { 50.dp.toPx() }
+        val halfBottomOffsetPx = with(density) { 30.dp.toPx() }
+        fun(target: androidx.compose.material3.SheetValue): Boolean {
+            // Always allow: non-Hidden targets, and programmatic hide().
+            if (target != androidx.compose.material3.SheetValue.Hidden ||
+                allowProgrammaticHide.value
+            ) return true
+            val currentOffset = sheetStateRef.value?.let {
+                runCatching { it.requireOffset() }.getOrNull()
+            } ?: return true
+            val h = layoutHeightPx.floatValue
+            if (h == 0f) return true
+            // Mirror the animated sheet height math from below.
+            val expandedContentPx = if (expandedByHandleState.value) {
+                h - fullscreenTopInsetPx
+            } else {
+                h / 2f - halfBottomOffsetPx
+            }
+            val expandedOffsetPx = h - expandedContentPx
+            val delta = currentOffset - expandedOffsetPx
+            // Allow when:
+            // - delta <= 0 → sheet hasn't been dragged (tap-outside, back-press
+            //   check happens with the sheet still at Expanded position)
+            // - delta > threshold → user dragged far enough to confirm
+            // Reject the middle "dragged a bit but not enough" range → sheet
+            // bounces back to Expanded.
+            return delta <= 0f || delta > dismissThresholdPx
         }
     }
 
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = confirmValueChange,
+    )
+    LaunchedEffect(sheetState) { sheetStateRef.value = sheetState }
+
+    // Shared close routine: bypass the dismissal filter, animate the sheet
+    // away, then flip currentSheet back to null so the ModalBottomSheet
+    // unmounts.
+    val dismissSheet: () -> Unit = {
+        allowProgrammaticHide.value = true
+        scope.launch {
+            sheetState.hide()
+        }.invokeOnCompletion {
+            allowProgrammaticHide.value = false
+            focusManager.clearFocus()
+            keyboardController?.hide()
+            currentSheet = null
+        }
+    }
+
+    // System back closes the sheet instead of popping the document.
+    PlatformBackHandler(enabled = currentSheet != null) { dismissSheet() }
+
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
     val sheetLayoutHeight = maxHeight
-    val partialPeekHeight = sheetLayoutHeight / 2
-
-    BottomSheetScaffold(
-        sheetSwipeEnabled = false,
-        sheetDragHandle = null,
-        sheetShape = RoundedCornerShape(
-            topStart = 0.dp,
-            topEnd = 0.dp
-        ),// Remove rounded corners (must be a better way..)
-        scaffoldState = scaffoldState,
-        sheetPeekHeight = partialPeekHeight,
-        sheetContent = {
-            if (bottomSheetType.value == BottomSheetType.ELEMENTS) {
-                DocumentBottomSheetTextElements(
-                    document = document,
-                    onDismissBottomSheet = {
-                        hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
-                    },
-                    sheetMaxHeight = sheetLayoutHeight,
-                    isSheetFullScreen = scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded,
-                    onSheetDragUp = {
-                        scope.launch { scaffoldState.bottomSheetState.expand() }
-                    },
-                    onSheetStepDown = {
-                        scope.launch {
-                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                                scaffoldState.bottomSheetState.partialExpand()
-                            } else {
-                                hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
-                            }
-                        }
-                    },
-                    // Overscroll from the content only ever collapses Expanded→Partial
-                    // (never chains to Hidden). Prevents the race where a fast swipe
-                    // dispatches two overscroll frames back-to-back and the second one
-                    // reads currentValue after partialExpand settled, dismissing the sheet.
-                    onSheetCollapseToPartial = {
-                        scope.launch {
-                            if (scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded) {
-                                scaffoldState.bottomSheetState.partialExpand()
-                            }
-                        }
-                    },
-                    clients = clientList,
-                    issuers = issuerList,
-                    documentClientUiState = documentClientUiState,
-                    documentIssuerUiState = documentIssuerUiState,
-                    taxRates = taxRates,
-                    onValueChange = onValueChange,
-                    onSelectClientOrIssuer = onSelectClientOrIssuer,
-                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
-                    onClickEditDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
-                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
-                    currentClientId = document.documentClient?.id,
-                    currentIssuerId = document.documentIssuer?.id,
-                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = onClickDoneForm,
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    localFocusManager = LocalFocusManager.current,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm,
-                    onClickDeleteAddress = onClickDeleteAddress,
-                    onClickDeleteEmail = onClickDeleteEmail,
-                    onAddEmail = onAddEmail,
-                    onPendingEmailValidationResult = onPendingEmailValidationResult,
-                    showProductType = showProductType,
-                )
-            } else {
-                DocumentBottomSheetProducts(
-                    document = document,
-                    onDismissBottomSheet = {
-                        hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
-                    },
-                    sheetMaxHeight = sheetLayoutHeight,
-                    isSheetFullScreen = scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded,
-                    onSheetDragUp = {
-                        scope.launch { scaffoldState.bottomSheetState.expand() }
-                    },
-                    onSheetStepDown = {
-                        scope.launch {
-                            if (scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
-                                scaffoldState.bottomSheetState.partialExpand()
-                            } else {
-                                hideBottomSheet(scope, scaffoldState, focusManager, keyboardController)
-                            }
-                        }
-                    },
-                    onSheetCollapseToPartial = {
-                        scope.launch {
-                            if (scaffoldState.bottomSheetState.targetValue == SheetValue.Expanded) {
-                                scaffoldState.bottomSheetState.partialExpand()
-                            }
-                        }
-                    },
-                    documentProductUiState = documentProductUiState,
-                    products = products,
-                    taxRates = taxRates,
-                    onClickProduct = { product ->
-                        onSelectProduct(product, document.documentClient?.originalClientOrIssuerId)
-                    },
-                    onClickNewProduct = onClickNewDocumentProduct,
-                    onClickDocumentProduct = onClickEditDocumentProduct,
-                    onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
-                    bottomFormOnValueChange = bottomFormOnValueChange,
-                    bottomFormPlaceCursor = bottomFormPlaceCursor,
-                    onClickDoneForm = onClickDoneForm,
-                    onClickCancelForm = onClickCancelForm,
-                    onSelectTaxRate = onSelectTaxRate,
-                    showDocumentForm = showDocumentForm,
-                    onShowDocumentForm = onShowDocumentForm,
-                    onOrderChange = onOrderChange,
-                    showProductType = showProductType,
-                    hideLinkedSourceHeaders = hideLinkedSourceHeaders,
-                    onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
-                    onSaveRetention = onSaveRetention,
-                    onToggleRetentionHidden = onToggleRetentionHidden,
-                )
-            }
-        },
-        sheetShadowElevation = 30.dp
-    )
-    { paddingValues ->
+    // Feed the layout height to the confirmValueChange lambda above.
+    androidx.compose.runtime.SideEffect {
+        layoutHeightPx.floatValue = with(density) { sheetLayoutHeight.toPx() }
+    }
 
         var showPopup by rememberSaveable {
             mutableStateOf(false)
@@ -423,17 +365,14 @@ fun DocumentAddEdit(
             bottomBar = {
                 DocumentAddEditBottomBar(
                     onClickElements = {
-                        bottomSheetType.value = BottomSheetType.ELEMENTS
-                        expandBottomSheet(scope, scaffoldState)
+                        currentSheet = BottomSheetType.ELEMENTS
                     },
                     onClickItems = {
-                        bottomSheetType.value = BottomSheetType.ITEMS
-                        expandBottomSheet(scope, scaffoldState)
+                        currentSheet = BottomSheetType.ITEMS
                     },
                     onClickStyle = {
-                        bottomSheetType.value = BottomSheetType.STYLE
                         onShowMessage(comingSoonMessage)
-                    }
+                    },
                 )
             }
         ) { innerPadding ->
@@ -583,9 +522,7 @@ fun DocumentAddEdit(
                                 Modifier.fillMaxSize()
                             }
                         )
-                        .padding(
-                            innerPadding
-                        )
+                        .padding(innerPadding)
                         .pointerInput(Unit) {
                             customTransformGestures(
                                 pass = PointerEventPass.Initial,
@@ -685,16 +622,10 @@ fun DocumentAddEdit(
                     DocumentBasicTemplate(
                         uiState = document,
                         onClickElement = {
-                            if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
-                                hideBottomSheet(
-                                    scope,
-                                    scaffoldState,
-                                    focusManager,
-                                    keyboardController
-                                )
-
+                            if (currentSheet != null) {
+                                dismissSheet()
                             } else {
-                                if (it == ScreenElement.DOCUMENT_HEADER ||
+                                currentSheet = if (it == ScreenElement.DOCUMENT_HEADER ||
                                     it == ScreenElement.DOCUMENT_NUMBER ||
                                     it == ScreenElement.DOCUMENT_DATE ||
                                     it == ScreenElement.DOCUMENT_ISSUER ||
@@ -702,33 +633,171 @@ fun DocumentAddEdit(
                                     it == ScreenElement.DOCUMENT_FOOTER ||
                                     it == ScreenElement.DOCUMENT_REFERENCE
                                 ) {
-                                    bottomSheetType.value = BottomSheetType.ELEMENTS
+                                    BottomSheetType.ELEMENTS
                                 } else {
-                                    bottomSheetType.value = BottomSheetType.ITEMS
+                                    BottomSheetType.ITEMS
                                 }
-                                expandBottomSheet(scope, scaffoldState)
-                                /*                        when(it) {
-                                                ScreenElement.DOCUMENT_NUMBER ->
-                                                 selectedItem = ScreenElement.DOCUMENT_ORDER_NUMBER
-                                                ScreenElement.DOCUMENT_DATE ->
-                                                ScreenElement.DOCUMENT_ISSUER ->
-                                                ScreenElement.DOCUMENT_CLIENT ->
-                                                ScreenElement.DOCUMENT_ORDER_NUMBER ->
-                                                ScreenElement.DOCUMENT_PRODUCTS ->*/
                             }
                         },
                         onClickRestOfThePage = {
-                            if (scaffoldState.bottomSheetState.currentValue != SheetValue.Hidden) {
-                                hideBottomSheet(
-                                    scope,
-                                    scaffoldState,
-                                    focusManager,
-                                    keyboardController
-                                )
-                            }
+                            if (currentSheet != null) dismissSheet()
                         },
                     )
                 }
+            }
+
+        }
+
+    // ModalBottomSheet lives in its own window → paints above the Scaffold's
+    // bottomBar automatically, no cross-layer z-order fight. currentSheet
+    // gates mounting; sheetState animates in/out; onDismissRequest handles
+    // the scrim tap + swipe-to-dismiss.
+    // Animated content height. Toggling expandedByHandle triggers a smooth
+    // interpolation between the two heights rather than an instant snap.
+    // - Fullscreen : stops 50dp below the top so the handle stays reachable
+    //   (otherwise it slides up under the top system bar).
+    // - Half       : 30dp lower than the geometric mid-screen — the sheet
+    //   Surface starts a bit further down, which feels less imposing on
+    //   short forms.
+    val animatedSheetHeight by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (expandedByHandle) sheetLayoutHeight - 50.dp
+        else sheetLayoutHeight / 2 - 30.dp,
+        label = "sheet-content-height",
+    )
+    currentSheet?.let { sheet ->
+        androidx.compose.material3.ModalBottomSheet(
+            onDismissRequest = { dismissSheet() },
+            sheetState = sheetState,
+            // Kill the sheet-wide draggable. At Expanded (fullscreen) it eats
+            // pointer events across the whole Surface, which was making every
+            // field un-tappable until the sheet was collapsed back to half.
+            // Our custom drag handle handles half↔full, the outer NSC handles
+            // full→half via scroll-leftover, and dismissal goes through
+            // dismissSheet() (tap-outside, back, buttons). No path relies on
+            // dragging the sheet body itself.
+            sheetGesturesEnabled = false,
+            // Custom drag handle: vertical drag toggles expandedByHandle.
+            // - Half → full : drag up past ~20dp of accumulated delta.
+            // - Full → half : drag down past ~20dp of accumulated delta.
+            // Consumes the gesture on trigger so the sheet's anchoredDraggable
+            // doesn't try to fight the height animation. Downward drag past
+            // the handle when already at half still passes through untouched
+            // → anchoredDraggable dismisses (Expanded → Hidden).
+            dragHandle = {
+                // Custom drag handle (not BottomSheetDefaults.DragHandle) so
+                // we avoid its internal 22dp vertical padding — that padding
+                // was the "vide au-dessus du numéro" the user was seeing, and
+                // squeezed the pill out of view when the outer Box was tight.
+                //
+                // Box = full width × 30dp for a comfortable touch zone; the
+                // small grey pill sits centered inside.
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                        .pointerInput(expandedByHandle) {
+                            var totalY = 0f
+                            var handled = false
+                            detectVerticalDragGestures(
+                                onDragStart = { totalY = 0f; handled = false },
+                                onDragEnd = { totalY = 0f; handled = false },
+                                onDragCancel = { totalY = 0f; handled = false },
+                            ) { change: PointerInputChange, dragAmount: Float ->
+                                totalY += dragAmount
+                                if (!handled) {
+                                    if (!expandedByHandle && totalY < -20f) {
+                                        expandedByHandle = true
+                                        handled = true
+                                        change.consume()
+                                    } else if (expandedByHandle && totalY > 20f) {
+                                        expandedByHandle = false
+                                        handled = true
+                                        change.consume()
+                                    }
+                                }
+                            }
+                        },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(ColorLightGrey),
+                    )
+                }
+            },
+            // Square corners — the sheet reads as a flush edge over the doc
+            // preview instead of a floating card.
+            shape = androidx.compose.ui.graphics.RectangleShape,
+            scrimColor = Color.Transparent,
+            contentWindowInsets = { WindowInsets(0) },
+        ) {
+            when (sheet) {
+                BottomSheetType.ELEMENTS -> DocumentBottomSheetTextElements(
+                    document = document,
+                    onDismissBottomSheet = { dismissSheet() },
+                    sheetContentHeight = animatedSheetHeight,
+                    isSheetExpanded = expandedByHandle,
+                    onCollapseToHalf = { expandedByHandle = false },
+                    clients = clientList,
+                    issuers = issuerList,
+                    documentClientUiState = documentClientUiState,
+                    documentIssuerUiState = documentIssuerUiState,
+                    taxRates = taxRates,
+                    onValueChange = onValueChange,
+                    onSelectClientOrIssuer = onSelectClientOrIssuer,
+                    onClickNewDocumentClientOrIssuer = onClickNewDocumentClientOrIssuer,
+                    onClickEditDocumentClientOrIssuer = onClickDocumentClientOrIssuer,
+                    onClickDeleteDocumentClientOrIssuer = onClickDeleteDocumentClientOrIssuer,
+                    currentClientId = document.documentClient?.id,
+                    currentIssuerId = document.documentIssuer?.id,
+                    placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                    bottomFormOnValueChange = bottomFormOnValueChange,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
+                    onClickDoneForm = onClickDoneForm,
+                    onClickCancelForm = onClickCancelForm,
+                    onSelectTaxRate = onSelectTaxRate,
+                    localFocusManager = LocalFocusManager.current,
+                    showDocumentForm = showDocumentForm,
+                    onShowDocumentForm = onShowDocumentForm,
+                    onClickDeleteAddress = onClickDeleteAddress,
+                    onClickDeleteEmail = onClickDeleteEmail,
+                    onAddEmail = onAddEmail,
+                    onPendingEmailValidationResult = onPendingEmailValidationResult,
+                    showProductType = showProductType,
+                )
+                BottomSheetType.ITEMS -> DocumentBottomSheetProducts(
+                    document = document,
+                    onDismissBottomSheet = { dismissSheet() },
+                    sheetContentHeight = animatedSheetHeight,
+                    isSheetExpanded = expandedByHandle,
+                    onCollapseToHalf = { expandedByHandle = false },
+                    documentProductUiState = documentProductUiState,
+                    products = products,
+                    taxRates = taxRates,
+                    onClickProduct = { product ->
+                        onSelectProduct(product, document.documentClient?.originalClientOrIssuerId)
+                    },
+                    onClickNewProduct = onClickNewDocumentProduct,
+                    onClickDocumentProduct = onClickEditDocumentProduct,
+                    onClickDeleteDocumentProduct = onClickDeleteDocumentProduct,
+                    bottomFormOnValueChange = bottomFormOnValueChange,
+                    bottomFormPlaceCursor = bottomFormPlaceCursor,
+                    onClickDoneForm = onClickDoneForm,
+                    onClickCancelForm = onClickCancelForm,
+                    onSelectTaxRate = onSelectTaxRate,
+                    showDocumentForm = showDocumentForm,
+                    onShowDocumentForm = onShowDocumentForm,
+                    onOrderChange = onOrderChange,
+                    showProductType = showProductType,
+                    hideLinkedSourceHeaders = hideLinkedSourceHeaders,
+                    onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
+                    onSaveRetention = onSaveRetention,
+                    onToggleRetentionHidden = onToggleRetentionHidden,
+                )
+                BottomSheetType.STYLE, BottomSheetType.IMAGES -> {} // never surfaces as a sheet
             }
         }
     }
@@ -745,25 +814,6 @@ private fun hasVatExemptConflict(document: DocumentState): Boolean {
     if (document.documentIssuer?.vatExempt != true) return false
     val products = document.documentProducts ?: return false
     return products.any { (it.taxRate ?: BigDecimal.ZERO) > BigDecimal.ZERO }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-private fun expandBottomSheet(scope: CoroutineScope, scaffoldState: BottomSheetScaffoldState) {
-    scope.launch { scaffoldState.bottomSheetState.partialExpand() }
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
-private fun hideBottomSheet(
-    scope: CoroutineScope,
-    scaffoldState: BottomSheetScaffoldState,
-    focusManager: FocusManager,
-    keyboardController: SoftwareKeyboardController?,
-) {
-    scope.launch {
-        focusManager.clearFocus() // Effacer le focus d'abord
-        keyboardController?.hide() // Puis cacher le clavier explicitement
-        scaffoldState.bottomSheetState.hide()
-    }
 }
 
 @Composable

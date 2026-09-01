@@ -1,6 +1,5 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
@@ -9,17 +8,17 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.geometry.Offset
@@ -27,10 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
@@ -45,11 +42,13 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 fun DocumentBottomSheetTextElements(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
-    sheetMaxHeight: Dp,
-    isSheetFullScreen: Boolean,
-    onSheetDragUp: () -> Unit,
-    onSheetStepDown: () -> Unit,
-    onSheetCollapseToPartial: () -> Unit,
+    sheetContentHeight: Dp,
+    // When true, the sheet is at its fullscreen mode. Content-drag downward
+    // past the scroll-top edge should collapse back to half-height (via
+    // onCollapseToHalf) rather than propagate to the sheet's anchoredDraggable
+    // (which would dismiss the sheet in one shot).
+    isSheetExpanded: Boolean,
+    onCollapseToHalf: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
     issuers: MutableList<ClientOrIssuerState>,
@@ -77,23 +76,36 @@ fun DocumentBottomSheetTextElements(
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
     showProductType: Boolean = false,
 ) {
-    val density = LocalDensity.current
-    val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
-    val sheetMaxContentHeight = sheetMaxHeight - topInsetDp
-    val visibleContentHeight by animateDpAsState(
-        targetValue = if (isSheetFullScreen) sheetMaxContentHeight else sheetMaxHeight / 2,
-        label = "text-sheet-content-height",
-    )
-
-    Box(
-        modifier = Modifier
-            .height(sheetMaxContentHeight)
-            .imePadding()
-    ) {
+    // NSC on the content column: when at fullscreen (isSheetExpanded=true)
+    // and the internal verticalScroll surfaces a downward leftover (user
+    // scrolled past the top of the content), we consume it and trigger the
+    // half-height collapse. That way the fullscreen sheet's first
+    // scroll-down step is a mode switch, not an immediate dismissal. Once
+    // in half mode, this NSC is inert (condition false) → next leftover
+    // propagates to the sheet's anchoredDraggable as usual (drag-to-dismiss).
+    val collapseOnFullscreenScrollDown = remember(isSheetExpanded) {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (isSheetExpanded && source == NestedScrollSource.UserInput &&
+                    available.y > 0f
+                ) {
+                    onCollapseToHalf()
+                    return available
+                }
+                return Offset.Zero
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(visibleContentHeight)
+            .height(sheetContentHeight)
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+            .nestedScroll(collapseOnFullscreenScrollDown)
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
 
@@ -103,80 +115,19 @@ fun DocumentBottomSheetTextElements(
             slideOtherComponent.value = null
         }
 
-        SheetDragHandle(
-            onDragUp = onSheetDragUp,
-            onDragDown = onSheetStepDown,
-            onTap = onSheetStepDown,
-        )
-
         Box(
             modifier = Modifier
                 .background(Color.Transparent)
-                .fillMaxWidth()
-                // Was `.clickable { clearFocus() }` — but that raced with the
-                // BasicTextField children on release-build timings, and Compose
-                // would sometimes fire the outer onClick even when the tap was
-                // on a text field, clearing focus before the keyboard could
-                // rise. dismissKeyboardOnUnconsumedTap only fires when the
-                // Final pointer pass shows nothing consumed downstream — i.e.
-                // the tap really did land on empty space.
+                .fillMaxSize()
                 .dismissKeyboardOnUnconsumedTap()
                 .focusable(false)
         ) {
-            // Keep the main elements list rendered even when a slide-in is open, so
-            // ModalBottomSheet sub-sheets (date, footer…) show it greyed under their
-            // scrim. Non-modal sub-sheets below must fillMaxSize so they cover it.
             val elementsScrollState = rememberScrollState()
-            val overscrollScope = rememberCoroutineScope()
-            // Overscroll hook: at partial height, if the user reaches the footer
-            // and keeps swiping up → expand the sheet. At full height, scrolled
-            // to the top, if the user swipes down → collapse to partial (never
-            // straight to hidden — closing requires a second gesture on the
-            // drag handle). Mirrors the standard bottom-sheet gesture without
-            // re-enabling sheetSwipeEnabled (which would swallow the custom
-            // drag handle).
-            //
-            // Sign convention (verified empirically on this project's Compose
-            // version): available.y carries the raw pointer delta, not the
-            // scroll delta. Finger DOWN = positive y, finger UP = negative y.
-            val overscrollConnection = remember(isSheetFullScreen, elementsScrollState) {
-                object : NestedScrollConnection {
-                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                        if (source != NestedScrollSource.UserInput) return Offset.Zero
-                        // Collapse to partial: finger DOWN (available.y > 0) while
-                        // expanded and content at the top (nothing to scroll backward
-                        // into). Never chains to Hidden — a single continuous swipe
-                        // steps down at most one notch.
-                        if (isSheetFullScreen && available.y > 0f && elementsScrollState.value == 0) {
-                            overscrollScope.launch { onSheetCollapseToPartial() }
-                            return available
-                        }
-                        return Offset.Zero
-                    }
-
-                    override fun onPostScroll(
-                        consumed: Offset,
-                        available: Offset,
-                        source: NestedScrollSource,
-                    ): Offset {
-                        if (source != NestedScrollSource.UserInput) return Offset.Zero
-                        // Expand: finger UP (available.y < 0) at partial height
-                        // with excess scroll the child couldn't consume (already
-                        // at the bottom, canScrollForward = false)
-                        if (!isSheetFullScreen && available.y < 0f) {
-                            overscrollScope.launch { onSheetDragUp() }
-                            return available
-                        }
-                        return Offset.Zero
-                    }
-                }
-            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(overscrollConnection)
                     .verticalScroll(elementsScrollState)
-                    .padding(bottom = 50.dp)
+                    .padding(bottom = 24.dp)
             ) {
                 // MAIN ELEMENTS
                 DocumentBottomSheetElementsContent(
@@ -293,7 +244,6 @@ fun DocumentBottomSheetTextElements(
                 showProductType = showProductType,
             )
         }
-    }
     }
 }
 

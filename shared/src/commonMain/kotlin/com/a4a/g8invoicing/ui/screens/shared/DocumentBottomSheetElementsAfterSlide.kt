@@ -550,9 +550,10 @@ private fun PaymentMeansPickerBottomSheet(
         contentWindowInsets = { WindowInsets(0) },
         dragHandle = { BottomSheetDefaults.DragHandle(color = Color(0xFFE0E0E0)) },
     ) {
-        // fillMaxHeight(0.85f) mirrors the ClientOrIssuerPickerBottomSheet so
-        // both modals rise to the same visual height on the screen.
-        Column(modifier = Modifier.fillMaxHeight(0.85f)) {
+        // fillMaxHeight(0.95f) so the sub-sheet's top sits above the parent
+        // main sheet — the parent's drag-handle strip no longer peeks over
+        // the top of the payment picker.
+        Column(modifier = Modifier.fillMaxHeight(0.95f)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

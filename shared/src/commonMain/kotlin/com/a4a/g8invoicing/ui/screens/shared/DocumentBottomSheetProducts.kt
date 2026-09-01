@@ -1,26 +1,25 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import kotlinx.coroutines.launch
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -38,11 +37,9 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 fun DocumentBottomSheetProducts(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
-    sheetMaxHeight: Dp,
-    isSheetFullScreen: Boolean,
-    onSheetDragUp: () -> Unit,
-    onSheetStepDown: () -> Unit,
-    onSheetCollapseToPartial: () -> Unit,
+    sheetContentHeight: Dp,
+    isSheetExpanded: Boolean,
+    onCollapseToHalf: () -> Unit,
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
@@ -66,58 +63,36 @@ fun DocumentBottomSheetProducts(
     onSaveRetention: (Int, RetentionState) -> Unit = { _, _ -> },
     onToggleRetentionHidden: (Int) -> Unit = {},
 ) {
-    val density = LocalDensity.current
-    val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
-    // The sheet Surface is held at the max-visible height (fullscreen state minus
-    // the top inset) at all states, so its white background always fills whatever
-    // area the sheet occupies on screen and no preview leaks through during the
-    // Partial→Expanded animation. The visible-content Column inside then animates
-    // between peekHeight and the max to drive the LazyColumn viewport dynamically.
-    val sheetMaxContentHeight = sheetMaxHeight - topInsetDp
-    val visibleContentHeight by animateDpAsState(
-        targetValue = if (isSheetFullScreen) sheetMaxContentHeight else sheetMaxHeight / 2,
-        label = "sheet-content-height",
-    )
-    Box(modifier = Modifier.height(sheetMaxContentHeight)) {
-    Column(modifier = Modifier.fillMaxWidth().height(visibleContentHeight)) {
-    SheetDragHandle(
-        onDragUp = onSheetDragUp,
-        onDragDown = onSheetStepDown,
-        onTap = onSheetStepDown,
-    )
-    // Overscroll hook mirrors DocumentBottomSheetTextElements: at partial height,
-    // hitting the bottom of the list and pulling further up expands the sheet; at
-    // full height, pulling down at the top of the list steps down one notch to
-    // partial. Never chains all the way to Hidden — full close still requires an
-    // explicit gesture on the drag handle.
-    //
-    // Sign convention (matches the text sheet, verified empirically): available.y
-    // carries the raw pointer delta. Finger DOWN = positive y, finger UP = negative y.
-    val overscrollScope = rememberCoroutineScope()
-    val overscrollConnection = remember(isSheetFullScreen) {
+    // NSC: at fullscreen, downward leftover from the LazyList → collapse to
+    // half instead of dismissing. See DocumentBottomSheetTextElements for
+    // the full rationale.
+    val collapseOnFullscreenScrollDown = remember(isSheetExpanded) {
         object : NestedScrollConnection {
             override fun onPostScroll(
                 consumed: Offset,
                 available: Offset,
                 source: NestedScrollSource,
             ): Offset {
-                if (source != NestedScrollSource.UserInput) return Offset.Zero
-                if (!isSheetFullScreen && available.y < 0f) {
-                    overscrollScope.launch { onSheetDragUp() }
-                    return available
-                }
-                if (isSheetFullScreen && available.y > 0f) {
-                    overscrollScope.launch { onSheetCollapseToPartial() }
+                if (isSheetExpanded && source == NestedScrollSource.UserInput &&
+                    available.y > 0f
+                ) {
+                    onCollapseToHalf()
                     return available
                 }
                 return Offset.Zero
             }
         }
     }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(sheetContentHeight)
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+            .nestedScroll(collapseOnFullscreenScrollDown)
+    ) {
     Box(modifier = Modifier
         .fillMaxWidth()
         .weight(1f)
-        .nestedScroll(overscrollConnection)
     ) {
         var isProductListVisible by remember { mutableStateOf(false) }
         var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
@@ -223,7 +198,5 @@ fun DocumentBottomSheetProducts(
         }
     }
     }
-    }
-
 }
 
