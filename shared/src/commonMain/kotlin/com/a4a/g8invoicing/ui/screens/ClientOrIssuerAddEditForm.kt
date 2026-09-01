@@ -575,6 +575,11 @@ fun ClientOrIssuerAddEditForm(
             clientOrIssuerUiState.clientType == com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL
 
         if (!hideCompanyIdentification) {
+        // Breathing room between the address block(s) and the identification
+        // header — the address stack can be tall (up to 3 blocks + "+ Ajouter"
+        // button + delete row) and without this the identification title
+        // felt visually glued to the last address.
+        Spacer(Modifier.height(30.dp))
         SectionTitle(stringResource(Res.string.client_or_issuer_section_identification))
 
         Column(
