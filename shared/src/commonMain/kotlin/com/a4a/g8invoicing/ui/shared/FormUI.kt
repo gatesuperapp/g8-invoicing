@@ -407,11 +407,6 @@ class ForwardElement(
     // exactly 2 lines with ellipsis (payment means / payment terms / VAT
     // exemption).
     val maxLines: Int? = null,
-    // Optional refresh action pinned before the forward arrow. Non-null →
-    // renders a small tappable refresh icon (e.g. "master card has drifted,
-    // pull the latest version into this doc"). The parent row's tap keeps
-    // its own behaviour; this only adds a secondary in-row affordance.
-    val onRefreshClick: (() -> Unit)? = null,
 )
 
 data class ListPicker(
