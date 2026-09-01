@@ -1703,6 +1703,18 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
     addresses: List<AddressState>?,
 ) {
     addresses?.forEach { address ->
+        // Skip fully-empty rows: the client form always renders at least one
+        // address slot, so a save without touching any address field would
+        // otherwise persist a blank row that reads back as a ghost slot on
+        // reopen. Mirrors the master-side filter in
+        // ClientOrIssuerLocalDataSource.saveClientOrIssuerAddressRows.
+        val hasContent = !address.addressTitle?.text.isNullOrBlank() ||
+            !address.addressLine1?.text.isNullOrBlank() ||
+            !address.addressLine2?.text.isNullOrBlank() ||
+            !address.zipCode?.text.isNullOrBlank() ||
+            !address.city?.text.isNullOrBlank() ||
+            !address.countryCode.isNullOrBlank()
+        if (!hasContent) return@forEach
         // 1: Save address
         documentClientOrIssuerAddressQueries.save( // DB call
             id = null,
