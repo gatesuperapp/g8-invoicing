@@ -643,7 +643,24 @@ class ClientOrIssuerAddEditViewModel(
 
         when (element) {
             ScreenElement.CLIENT_OR_ISSUER_NAME -> person = person.copy(name = value as TextFieldValue)
-            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> person = person.copy(firstName = value as TextFieldValue)
+            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> {
+                val newFirstName = value as TextFieldValue
+                // Symmetric to the SIREN → PROFESSIONAL bump below: typing a
+                // first name on an unclassified client (clientType == null)
+                // flips the rail to Particulier so the user sees where they
+                // stand. Only touches an unset type — an explicit choice
+                // (Particulier or Professionnel) wins on subsequent edits.
+                val autoTypeBump = if (
+                    person.type == ClientOrIssuerType.CLIENT &&
+                    person.clientType == null &&
+                    newFirstName.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(firstName = newFirstName, clientType = autoTypeBump)
+            }
             ScreenElement.CLIENT_OR_ISSUER_PHONE -> person = person.copy(phone = value as TextFieldValue)
 
             ScreenElement.CLIENT_OR_ISSUER_EMAIL_1 -> {
@@ -855,7 +872,22 @@ class ClientOrIssuerAddEditViewModel(
 
         when (element) {
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> person = person.copy(name = value as TextFieldValue)
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> person = person.copy(firstName = value as TextFieldValue)
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> {
+                val newFirstName = value as TextFieldValue
+                // Same first-name → INDIVIDUAL auto-bump as the master client
+                // form; only fires the first time (null → INDIVIDUAL).
+                val autoTypeBump = if (
+                    (person.type == ClientOrIssuerType.CLIENT ||
+                        person.type == ClientOrIssuerType.DOCUMENT_CLIENT) &&
+                    person.clientType == null &&
+                    newFirstName.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(firstName = newFirstName, clientType = autoTypeBump)
+            }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> person = person.copy(phone = value as TextFieldValue)
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1 -> {

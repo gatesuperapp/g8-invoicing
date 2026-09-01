@@ -134,20 +134,24 @@ fun DocumentBasicTemplateFooter(
                 lineHeight = 7.sp,
             )
         }
+        // "À régler avant le dd/mm/yyyy" (invoices) or the generic "Paiement"
+        // fallback (credit notes). Computed once and reused: it's the grey
+        // box's title when the payment section renders, and a standalone
+        // bold line when the user has hidden both payment means and bank —
+        // in that case the due date still needs to show, just without the
+        // grey background.
+        val invoiceDueDate = (document as? InvoiceState)?.dueDate
+            ?.substringBefore(" ")
+            ?.takeIf { it.isNotBlank() }
+        val paymentBlockTitle = when {
+            invoiceDueDate != null ->
+                documentLabel(labels, "invoice_pdf_due_date", Res.string.invoice_pdf_due_date) + invoiceDueDate
+            showPaymentSection ->
+                documentLabel(labels, "document_payment_section_title", Res.string.document_payment_section_title)
+            else -> null
+        }
         if (showPaymentSection) {
             Spacer(Modifier.height(12.dp))
-            // Box title is the invoice's due date ("À régler avant le
-            // dd/mm/yyyy") when available; falls back to the generic
-            // "Paiement" label for docs that don't carry a due date (credit
-            // notes).
-            val invoiceDueDate = (document as? InvoiceState)?.dueDate
-                ?.substringBefore(" ")
-                ?.takeIf { it.isNotBlank() }
-            val boxTitle = if (invoiceDueDate != null) {
-                documentLabel(labels, "invoice_pdf_due_date", Res.string.invoice_pdf_due_date) + invoiceDueDate
-            } else {
-                documentLabel(labels, "document_payment_section_title", Res.string.document_payment_section_title)
-            }
             // No fillMaxWidth → the box wraps the widest inner line + its own
             // horizontal padding, so the grey background hugs the content
             // instead of spanning the whole page.
@@ -157,7 +161,7 @@ fun DocumentBasicTemplateFooter(
                     .padding(horizontal = 10.dp, vertical = 8.dp),
             ) {
                 Text(
-                    text = boxTitle,
+                    text = paymentBlockTitle.orEmpty(),
                     style = MaterialTheme.typography.textForDocumentsBold,
                 )
                 Spacer(Modifier.height(4.dp))
@@ -169,15 +173,27 @@ fun DocumentBasicTemplateFooter(
                     .joinToString("\n")
                 Text(text = paymentLines, style = bodyStyle, lineHeight = 8.sp)
             }
+        } else if (invoiceDueDate != null && paymentBlockTitle != null) {
+            // Both payment means and bank are hidden but this is still an
+            // invoice with a due date — surface it on plain background so the
+            // client can see when the invoice needs to be paid.
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = paymentBlockTitle,
+                style = MaterialTheme.typography.textForDocumentsBold,
+            )
         }
 
         // Terms + footer + watermark share the bottom band. The hairline
-        // separator only shows when there's a payment section above it —
-        // on avoirs / quotes / delivery notes the payment section is
-        // suppressed, so the divider would sit under empty space.
+        // separator only shows when there's a payment section (grey box or
+        // standalone due-date line) above it — on avoirs / quotes / delivery
+        // notes the payment section is suppressed, so the divider would sit
+        // under empty space.
+        val hasPaymentHeader = showPaymentSection ||
+            (invoiceDueDate != null && paymentBlockTitle != null)
         if (paymentTerms != null || footerText != null || watermark != null) {
-            Spacer(Modifier.height(if (showPaymentSection) 12.dp else 20.dp))
-            if (showPaymentSection) {
+            Spacer(Modifier.height(if (hasPaymentHeader) 12.dp else 20.dp))
+            if (hasPaymentHeader) {
                 HorizontalDivider(color = SeparatorColor, thickness = 0.5.dp)
                 Spacer(Modifier.height(8.dp))
             }

@@ -1,7 +1,8 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,12 +19,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.models.ClientType
 import com.a4a.g8invoicing.shared.resources.Res
@@ -68,14 +73,29 @@ fun ClientTypePicker(
             ClientType.INDIVIDUAL, null -> 0.dp
             ClientType.PROFESSIONAL -> segmentWidth
         }
-        val pillOffset by animateDpAsState(
-            targetValue = targetOffset,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessMediumLow,
-            ),
-            label = "client-type-pill-offset",
-        )
+        // Only user-driven segment taps animate the pill. Anything else — the
+        // form (re)loading with a pre-set clientType, the auto-bump on
+        // firstname/SIREN typing, a viewmodel refresh — snaps. Otherwise a
+        // Professionnel client opened for editing shows the pill sliding in
+        // from Particulier for a beat, which reads as "the app just changed
+        // my client type."
+        val pillAnimatable = remember { Animatable(targetOffset, Dp.VectorConverter) }
+        var userTapped by remember { mutableStateOf(false) }
+        LaunchedEffect(selected, segmentWidth) {
+            if (userTapped && selected != null) {
+                pillAnimatable.animateTo(
+                    targetOffset,
+                    spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow,
+                    ),
+                )
+            } else {
+                pillAnimatable.snapTo(targetOffset)
+            }
+            userTapped = false
+        }
+        val pillOffset = pillAnimatable.value
 
         // White pill only rendered when a segment is selected. Matches iOS:
         // null state stays a plain rail.
@@ -114,6 +134,7 @@ fun ClientTypePicker(
                     interactionSource = interactionSource,
                     indication = null,
                 ) {
+                    userTapped = true
                     onSelect(
                         if (selected == ClientType.INDIVIDUAL) null
                         else ClientType.INDIVIDUAL,
@@ -132,6 +153,7 @@ fun ClientTypePicker(
                     interactionSource = interactionSource,
                     indication = null,
                 ) {
+                    userTapped = true
                     onSelect(
                         if (selected == ClientType.PROFESSIONAL) null
                         else ClientType.PROFESSIONAL,
