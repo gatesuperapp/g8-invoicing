@@ -898,5 +898,5 @@ Une erreur s'est produite :
     <string name="onboarding_19_einvoice_cta">Siguiente</string>
     <string name="onboarding_19_final_title">¡Listo, todo está en orden!</string>
     <string name="entreprise_delete_blocked_title">Eliminación imposible</string>
-    <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. No se puede eliminar.</string>
+    <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. Para eliminarla, elimine primero esos elementos.</string>
 </resources>

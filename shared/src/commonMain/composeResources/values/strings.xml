@@ -948,7 +948,7 @@ Une erreur s'est produite :
 
     <!-- Multi-entreprise: guard when the user tries to delete an issuer that still owns data. -->
     <string name="entreprise_delete_blocked_title">Suppression impossible</string>
-    <string name="entreprise_delete_blocked_message">Votre entreprise contient des clients, produits ou documents rattachés. Il n\'est pas possible de la supprimer.</string>
+    <string name="entreprise_delete_blocked_message">Votre entreprise contient des clients, produits ou documents rattachés. Si vous souhaitez la supprimer, il faut d'abord supprimer ces derniers.</string>
 
 
     <!-- ===================================================================

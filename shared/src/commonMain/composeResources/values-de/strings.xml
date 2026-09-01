@@ -896,5 +896,5 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_einvoice_cta">Weiter</string>
     <string name="onboarding_19_final_title">Alles klar, du bist startklar!</string>
     <string name="entreprise_delete_blocked_title">Löschen nicht möglich</string>
-    <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Es kann nicht gelöscht werden.</string>
+    <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Um es zu löschen, entfernen Sie diese zuerst.</string>
 </resources>
