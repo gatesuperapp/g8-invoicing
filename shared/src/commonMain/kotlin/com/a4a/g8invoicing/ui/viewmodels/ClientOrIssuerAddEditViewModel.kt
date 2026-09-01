@@ -843,8 +843,19 @@ class ClientOrIssuerAddEditViewModel(
         addresses: List<AddressState>?,
         addressIndex: Int,
     ): List<AddressState> {
-        return if (addresses.isNullOrEmpty()) listOf(newAddress)
-        else addresses.slice(0 until addressIndex) + newAddress + addresses.slice(addressIndex + 1 until addresses.size)
+        // Bounds-safe rewrite of the old slice() version. The client form now
+        // lets the user tap "+ Ajouter une adresse" without filling slot 1
+        // first (the previousAddressIsFilled guard was dropped so the button
+        // stays discoverable), so typing into slot 2 or 3 while the state
+        // still holds a shorter list would blow slice() up with
+        // IndexOutOfBounds. Pad the gap with empty AddressStates instead;
+        // saveInfoInDocumentClientOrIssuerAddressTables / isAddressEmpty
+        // strip them on save, so nothing blank ever reaches the DB.
+        val existing = addresses ?: emptyList()
+        val before = existing.take(addressIndex)
+        val gap = List(maxOf(0, addressIndex - existing.size)) { AddressState() }
+        val after = existing.drop(addressIndex + 1)
+        return before + gap + newAddress + after
     }
 
     private fun getNewEmails(
