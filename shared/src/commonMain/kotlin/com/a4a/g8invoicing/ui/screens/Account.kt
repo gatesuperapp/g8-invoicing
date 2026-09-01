@@ -52,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -143,6 +144,8 @@ import com.a4a.g8invoicing.shared.resources.account_delete_success_message
 import com.a4a.g8invoicing.shared.resources.account_delete_success_title
 import com.a4a.g8invoicing.shared.resources.account_section_advanced
 import com.a4a.g8invoicing.shared.resources.drawer_my_account
+import com.a4a.g8invoicing.shared.resources.entreprise_delete_blocked_message
+import com.a4a.g8invoicing.shared.resources.entreprise_delete_blocked_title
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
@@ -158,6 +161,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textSecondary
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -930,6 +934,12 @@ private fun MyCompaniesSection(
     val issuers = issuersUiState.clientsOrIssuerList.orEmpty()
     val activated by modulesRepo.state.collectAsState()
     val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activated
+    val scope = rememberCoroutineScope()
+    // Non-null when the user tapped delete on an entreprise that still has
+    // clients/products/documents attached. Triggers the alert; user can only
+    // dismiss (destructive path is deliberately not offered — data must be
+    // detached or deleted first).
+    var deleteBlocked by remember { mutableStateOf(false) }
 
     issuers.forEach { issuer ->
         IssuerListRow(
@@ -940,10 +950,35 @@ private fun MyCompaniesSection(
                 )
             },
             onDelete = {
-                listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                val issuerId = issuer.id?.toLong()
+                if (issuerId == null) {
+                    listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                } else {
+                    scope.launch {
+                        val attached = listViewModel.countAttachedForIssuer(issuerId)
+                        if (attached == 0L) {
+                            listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                        } else {
+                            deleteBlocked = true
+                        }
+                    }
+                }
             },
         )
         Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    if (deleteBlocked) {
+        AlertDialog(
+            onDismissRequest = { deleteBlocked = false },
+            title = { Text(stringResource(Res.string.entreprise_delete_blocked_title)) },
+            text = { Text(stringResource(Res.string.entreprise_delete_blocked_message)) },
+            confirmButton = {
+                TextButton(onClick = { deleteBlocked = false }) {
+                    Text(stringResource(Res.string.ok))
+                }
+            },
+        )
     }
 
     // "+ Ajouter une entreprise" — hidden when the multi-entreprise module is off

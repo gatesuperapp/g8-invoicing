@@ -97,3 +97,7 @@ getAllProductsForCompany:
 SELECT *
 FROM Product
 WHERE company_id = :company_id;
+
+-- Pré-check de suppression d'entreprise : compte les produits rattachés.
+countProductsForCompany:
+SELECT COUNT(*) FROM Product WHERE company_id = :company_id;

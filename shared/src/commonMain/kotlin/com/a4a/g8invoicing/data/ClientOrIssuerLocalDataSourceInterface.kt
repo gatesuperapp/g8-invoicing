@@ -93,4 +93,12 @@ interface ClientOrIssuerLocalDataSourceInterface {
      * issuer in the "à ranger" slide.
      */
     suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long)
+
+    /**
+     * Pre-delete guard for an entreprise. Returns the aggregate count of
+     * clients + products + documents (invoice + credit note + delivery note
+     * + quote) still attached to [companyId]. Zero → deletion is safe;
+     * non-zero → the caller shows an alert instead of firing delete.
+     */
+    suspend fun countAttachedForCompany(companyId: Long): Long
 }

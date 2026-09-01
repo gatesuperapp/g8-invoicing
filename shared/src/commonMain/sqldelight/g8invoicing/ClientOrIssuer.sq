@@ -162,3 +162,8 @@ SELECT (
   (SELECT COUNT(*) FROM CreditNote WHERE original_company_id = :company_id) +
   (SELECT COUNT(*) FROM Quote WHERE original_company_id = :company_id)
 ) AS total_count;
+
+-- Clients rattachés à une entreprise. Même usage que countDocumentsForCompany
+-- côté check pré-suppression.
+countClientsForCompany:
+SELECT COUNT(*) FROM ClientOrIssuer WHERE type = 'client' AND company_id = :company_id;

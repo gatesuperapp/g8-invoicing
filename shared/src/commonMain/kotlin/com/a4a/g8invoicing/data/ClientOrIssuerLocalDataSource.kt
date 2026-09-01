@@ -37,6 +37,7 @@ class ClientOrIssuerLocalDataSource(
     private val clientOrIssuerEmailQueries = db.clientOrIssuerEmailQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
     private val issuerBankQueries = db.issuerBankQueries
+    private val productQueries = db.productQueries
 
     override suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
         return withContext(DispatcherProvider.IO) {
@@ -824,6 +825,22 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuerAddressQueries.delete(it.id!!.toLong())
                 }
             } catch (cause: Throwable) {
+            }
+        }
+    }
+
+    override suspend fun countAttachedForCompany(companyId: Long): Long {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                val clients = clientOrIssuerQueries
+                    .countClientsForCompany(companyId).executeAsOne()
+                val products = productQueries
+                    .countProductsForCompany(companyId).executeAsOne()
+                val docs = clientOrIssuerQueries
+                    .countDocumentsForCompany(companyId).executeAsOne()
+                clients + products + docs
+            } catch (cause: Throwable) {
+                0L
             }
         }
     }
