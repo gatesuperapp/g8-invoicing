@@ -100,7 +100,9 @@ fun PaymentMeansMultiSelect(
         modifier = Modifier
             .background(AppColors.surface)
             .fillMaxWidth()
-            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 100.dp)
+            // start=16 matches the modal title's inset (PaymentMeansPickerBottomSheet)
+            // so the whole content column lines up with "Mode de paiement" above.
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 100.dp)
     ) {
         // Chips — natural flow-wrap. Row 1 fits Virement / Chèque / CB / SEPA
         // thanks to the short SEPA label; row 2 gets the longer online-brand
@@ -135,7 +137,7 @@ fun PaymentMeansMultiSelect(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 4.dp, end = 4.dp),
+                .padding(end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -168,7 +170,7 @@ fun PaymentMeansMultiSelect(
                     textDecoration = TextDecoration.Underline,
                 ),
                 modifier = Modifier
-                    .padding(start = 4.dp, top = 5.dp)
+                    .padding(top = 5.dp)
                     .clickable { onClickEditPrefix() },
             )
         }
@@ -181,7 +183,7 @@ fun PaymentMeansMultiSelect(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 4.dp, end = 4.dp),
+                .padding(end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -231,7 +233,7 @@ fun PaymentMeansMultiSelect(
                         textDecoration = TextDecoration.Underline,
                     ),
                     modifier = Modifier
-                        .padding(start = 4.dp, top = topPad)
+                        .padding(top = topPad)
                         .clickable { onClickEditBankPrefix() },
                 )
             }

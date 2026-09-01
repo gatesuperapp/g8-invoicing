@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_date_emitting
@@ -424,6 +425,7 @@ fun DocumentBottomSheetElementsAfterSlide(
                     onClickBack()
                     showBottomSheet = false
                 },
+                titleStartPadding = 5.dp,
             ) {
                 PaymentMeansMultiSelect(
                     selectedChips = selectedChips,
@@ -535,6 +537,10 @@ fun DocumentBottomSheetElementsAfterSlide(
 private fun PaymentMeansPickerBottomSheet(
     title: String,
     onDismiss: () -> Unit,
+    // Extra start inset applied only to the title. The payment-means caller
+    // needs a small +5dp bump to align optically with its chip flow-row; the
+    // payment-terms caller (whose content is a FormUI) uses 0 and looks fine.
+    titleStartPadding: Dp = 0.dp,
     content: @Composable () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState()
@@ -551,13 +557,17 @@ private fun PaymentMeansPickerBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
-                    .padding(horizontal = 24.dp, vertical = 6.dp),
+                    // start=16 aligns the title with the FormUI row labels below
+                    // (FormUI's RowWithLabelAndInput uses start=16 too), so
+                    // "Termes de paiement" sits at the same X as "Frais de
+                    // recouvrement" / "Pénalités de retard" / …
+                    .padding(start = 16.dp, end = 24.dp, top = 6.dp, bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 12.dp),
+                    modifier = Modifier.padding(start = titleStartPadding),
                 )
             }
             content()
