@@ -22,6 +22,7 @@ import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import org.jetbrains.compose.resources.stringResource
@@ -33,7 +34,32 @@ fun DocumentBottomSheetElementsContent(
     onClickForward: (ScreenElement) -> Unit, // Clicking on client/issuer/items
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit,
     localFocusManager: FocusManager,
+    // Master lists used to detect version drift on the doc's frozen
+    // client/issuer snapshot and surface the refresh affordance next to the
+    // corresponding row. Empty lists → no icon shown (equivalent to no
+    // detectable drift).
+    clients: List<ClientOrIssuerState> = emptyList(),
+    issuers: List<ClientOrIssuerState> = emptyList(),
+    // Fired when the user taps the row-level refresh icon. Same handler the
+    // picker sub-sheet uses (openFormOnCompletion = false), routes through
+    // the NavGraph's checkVersionMismatch → dialog → loadLatestMasterVersion.
+    onRefreshClientOrIssuer: (ClientOrIssuerState) -> Unit = {},
 ) {
+    // Drift = master.version > snapshot.originalVersion. Both must be
+    // non-null; a missing originalVersion means the doc predates the
+    // versioning migration, and we intentionally stay quiet in that case.
+    val issuerNeedsRefresh = document.documentIssuer?.let { snap ->
+        val master = issuers.firstOrNull { it.id == snap.originalClientOrIssuerId }
+        val masterVersion = master?.version
+        val snapVersion = snap.originalVersion
+        masterVersion != null && snapVersion != null && masterVersion > snapVersion
+    } == true
+    val clientNeedsRefresh = document.documentClient?.let { snap ->
+        val master = clients.firstOrNull { it.id == snap.originalClientOrIssuerId }
+        val masterVersion = master?.version
+        val snapVersion = snap.originalVersion
+        masterVersion != null && snapVersion != null && masterVersion > snapVersion
+    } == true
 
     val inputList = mutableListOf(
         FormInput(
@@ -61,6 +87,9 @@ fun DocumentBottomSheetElementsContent(
                 text = document.documentIssuer?.let {
                     it.name.text + (it.firstName?.let { " " + it.text } ?: "")
                 } ?: "",
+                onRefreshClick = if (issuerNeedsRefresh) {
+                    { document.documentIssuer?.let(onRefreshClientOrIssuer) }
+                } else null,
             ),
             pageElement = ScreenElement.DOCUMENT_ISSUER
         ),
@@ -70,6 +99,9 @@ fun DocumentBottomSheetElementsContent(
                 text = document.documentClient?.let {
                     it.name.text + (it.firstName?.let { " " + it.text } ?: "")
                 } ?: "",
+                onRefreshClick = if (clientNeedsRefresh) {
+                    { document.documentClient?.let(onRefreshClientOrIssuer) }
+                } else null,
             ),
             pageElement = ScreenElement.DOCUMENT_CLIENT
         ),

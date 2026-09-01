@@ -1,11 +1,14 @@
 package com.a4a.g8invoicing.ui.shared
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +35,17 @@ fun FormInputCreatorGoForward(
                 ?: if (!forwardInput.isMultiline) 1 else 10,
             overflow = TextOverflow.Ellipsis
         )
+        forwardInput.onRefreshClick?.let { onRefresh ->
+            Icon(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(18.dp)
+                    .clickable(onClick = onRefresh),
+                tint = AppColors.textLink,
+                imageVector = Icons.Filled.Refresh,
+                contentDescription = "Refresh from master card",
+            )
+        }
         if(forwardInput.displayArrow)
         Icon(
             modifier = Modifier

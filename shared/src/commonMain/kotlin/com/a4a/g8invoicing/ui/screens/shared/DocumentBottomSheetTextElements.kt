@@ -138,7 +138,16 @@ fun DocumentBottomSheetTextElements(
                         slideOtherComponent.value = it
                     },
                     placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                    localFocusManager = localFocusManager
+                    localFocusManager = localFocusManager,
+                    clients = clients,
+                    issuers = issuers,
+                    // The NavGraph's onClickEditDocumentClientOrIssuer already
+                    // routes through checkVersionMismatch; passing
+                    // openFormOnCompletion = false makes it a refresh-only
+                    // action (no form pops after the dialog).
+                    onRefreshClientOrIssuer = { snap ->
+                        onClickEditDocumentClientOrIssuer(snap, false)
+                    },
                 )
             }
 
