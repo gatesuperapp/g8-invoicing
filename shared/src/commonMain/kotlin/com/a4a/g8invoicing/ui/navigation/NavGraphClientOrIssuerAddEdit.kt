@@ -52,6 +52,14 @@ fun NavGraphBuilder.clientAddEdit(
         val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
 
+        // Skip the flash between "VM's initial empty ClientOrIssuerState" and
+        // the row fetched from DB by fetchFromLocalDb. Without this the form
+        // paints once with clientType = null (grey rail with divider, empty
+        // placeholders), then recomposes with the real values — reading as
+        // "the app just wiped my client". A truly new client (itemId == null)
+        // never runs the fetch, so it renders straight away.
+        if (!isNew && currentState.id == null) return@composable
+
         ClientAddEdit(
             navController = navController,
             clientOrIssuer = currentState,
