@@ -95,6 +95,7 @@
     <string name="payment_means_48">Card</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Cash</string>
+    <string name="payment_means_other">Other</string>
     <string name="document_footer">Footer</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Issued from invoice %1$s</string>
@@ -821,4 +822,6 @@
     <string name="unit_hea_name">head</string>
     <string name="unit_hea_short">head</string>
     <string name="unit_hea_keywords">head,heads,livestock,cattle</string>
+    <string name="entreprise_delete_blocked_title">Cannot delete</string>
+    <string name="entreprise_delete_blocked_message">This company still has attached clients, products or documents. You can\'t delete it.</string>
 </resources>

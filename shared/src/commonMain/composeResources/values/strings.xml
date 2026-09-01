@@ -926,4 +926,7 @@ Une erreur s'est produite :
     <string name="onboarding_thanks_title">C'est parfait !</string>
     <string name="onboarding_thanks_body">Merci de ta confiance. À bientôt !</string>
     <string name="onboarding_thanks_cta">Terminer</string>
+    <!-- Multi-entreprise: guard when the user tries to delete an issuer that still owns data. -->
+    <string name="entreprise_delete_blocked_title">Suppression impossible</string>
+    <string name="entreprise_delete_blocked_message">Votre entreprise contient des clients, produits ou documents rattachés. Il n\'est pas possible de la supprimer.</string>
 </resources>

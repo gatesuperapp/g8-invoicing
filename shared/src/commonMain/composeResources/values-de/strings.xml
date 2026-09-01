@@ -95,6 +95,7 @@
     <string name="payment_means_48">Karte</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Bargeld</string>
+    <string name="payment_means_other">Andere</string>
     <string name="document_footer">Fußzeile</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Ausgestellt zu Rechnung %1$s</string>
@@ -826,4 +827,6 @@ Es ist ein Fehler aufgetreten :
     <string name="unit_hea_name">Kopf</string>
     <string name="unit_hea_short">Kopf</string>
     <string name="unit_hea_keywords">kopf,kopfe,köpfe,vieh,tiere</string>
+    <string name="entreprise_delete_blocked_title">Löschen nicht möglich</string>
+    <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Es kann nicht gelöscht werden.</string>
 </resources>
