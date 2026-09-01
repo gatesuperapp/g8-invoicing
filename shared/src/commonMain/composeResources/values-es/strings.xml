@@ -105,6 +105,7 @@
     <string name="payment_means_48">Tarjeta</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Efectivo</string>
+    <string name="payment_means_other">Otro</string>
     <string name="document_footer">Pie de pagina</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Emitida a partir de la factura %1$s</string>
@@ -896,4 +897,6 @@ Une erreur s'est produite :
     <string name="onboarding_19_einvoice_sub">Puedes hacerte miembro premium suscribiéndote en nuestra web 🌟</string>
     <string name="onboarding_19_einvoice_cta">Siguiente</string>
     <string name="onboarding_19_final_title">¡Listo, todo está en orden!</string>
+    <string name="entreprise_delete_blocked_title">Eliminación imposible</string>
+    <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. No se puede eliminar.</string>
 </resources>

@@ -105,6 +105,7 @@
     <string name="payment_means_48">Card</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Cash</string>
+    <string name="payment_means_other">Other</string>
     <string name="document_footer">Footer</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Issued from invoice %1$s</string>
@@ -889,4 +890,6 @@
     <string name="onboarding_19_einvoice_sub">You can become a premium member by subscribing on our website 🌟</string>
     <string name="onboarding_19_einvoice_cta">Next</string>
     <string name="onboarding_19_final_title">All set, you're good to go!</string>
+    <string name="entreprise_delete_blocked_title">Cannot delete</string>
+    <string name="entreprise_delete_blocked_message">This company still has attached clients, products or documents. You can\'t delete it.</string>
 </resources>
