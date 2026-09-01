@@ -823,5 +823,5 @@
     <string name="unit_hea_short">head</string>
     <string name="unit_hea_keywords">head,heads,livestock,cattle</string>
     <string name="entreprise_delete_blocked_title">Cannot delete</string>
-    <string name="entreprise_delete_blocked_message">This company still has attached clients, products or documents. You can\'t delete it.</string>
+    <string name="entreprise_delete_blocked_message">This company still has attached clients, products or documents. To delete it, remove them first.</string>
 </resources>

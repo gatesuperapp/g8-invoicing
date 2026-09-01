@@ -830,5 +830,5 @@ Une erreur s'est produite :
     <string name="unit_hea_short">cabeza</string>
     <string name="unit_hea_keywords">cabeza,cabezas,ganado,animales</string>
     <string name="entreprise_delete_blocked_title">Eliminación imposible</string>
-    <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. No se puede eliminar.</string>
+    <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. Para eliminarla, elimine primero esos elementos.</string>
 </resources>

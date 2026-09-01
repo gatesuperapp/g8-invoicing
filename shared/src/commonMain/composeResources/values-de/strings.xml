@@ -828,5 +828,5 @@ Es ist ein Fehler aufgetreten :
     <string name="unit_hea_short">Kopf</string>
     <string name="unit_hea_keywords">kopf,kopfe,köpfe,vieh,tiere</string>
     <string name="entreprise_delete_blocked_title">Löschen nicht möglich</string>
-    <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Es kann nicht gelöscht werden.</string>
+    <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Um es zu löschen, entfernen Sie diese zuerst.</string>
 </resources>
