@@ -973,11 +973,10 @@ private fun MyCompaniesSection(
     }
 
     if (deleteBlocked) {
-        // Mirrors the export-format chooser card (see DocumentAddEdit.
-        // ExportFormatChooserDialog) so both product-level modal alerts read
-        // as the same in-app dialog family: rounded 16dp surface, title in
-        // textScreenTitle 18sp, body in textBodySmall/textSecondary with
-        // 20sp line height, single primary CTA aligned to the end.
+        // Violet card, white title/body, white CTA with violet label — this
+        // is the "product decision" modal family (contrast with the neutral
+        // white-card confirmation dialogs). Same rounded-16dp shape as the
+        // export chooser but flipped colourway so it reads as a soft alert.
         Dialog(
             onDismissRequest = { deleteBlocked = false },
             properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -986,7 +985,7 @@ private fun MyCompaniesSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)
-                    .background(AppColors.surface, shape = RoundedCornerShape(16.dp))
+                    .background(AppColors.buttonActive, shape = RoundedCornerShape(16.dp))
                     .padding(horizontal = 24.dp, vertical = 24.dp),
             ) {
                 Column(
@@ -995,19 +994,28 @@ private fun MyCompaniesSection(
                 ) {
                     Text(
                         text = stringResource(Res.string.entreprise_delete_blocked_title),
-                        style = MaterialTheme.typography.textScreenTitle.copy(fontSize = 18.sp),
+                        style = MaterialTheme.typography.textScreenTitle.copy(
+                            fontSize = 18.sp,
+                            color = AppColors.textOnAccent,
+                        ),
                         textAlign = TextAlign.Start,
                     )
                     Spacer(Modifier.height(12.dp))
                     Text(
                         text = stringResource(Res.string.entreprise_delete_blocked_message),
-                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textOnAccent),
                         textAlign = TextAlign.Start,
                         lineHeight = 20.sp,
                     )
                     Spacer(Modifier.height(24.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { deleteBlocked = false }) {
+                        Button(
+                            onClick = { deleteBlocked = false },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AppColors.surface,
+                                contentColor = AppColors.buttonActive,
+                            ),
+                        ) {
                             Text(stringResource(Res.string.ok))
                         }
                     }

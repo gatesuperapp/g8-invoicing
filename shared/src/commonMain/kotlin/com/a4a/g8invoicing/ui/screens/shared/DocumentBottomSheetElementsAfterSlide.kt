@@ -95,8 +95,18 @@ fun DocumentBottomSheetElementsAfterSlide(
         val master = pair.second.firstOrNull { it.id == snapshot?.originalClientOrIssuerId }
         val snapshotVersion = snapshot?.originalVersion
         val masterVersion = master?.version
-        val hasMasterUpdate = snapshotVersion != null && masterVersion != null &&
-            masterVersion > snapshotVersion
+        // Mirror the null-snapshotVersion fallback used by
+        // ClientOrIssuerAddEditViewModel.checkVersionMismatch: legacy docs
+        // (originalVersion never written — the case for clients picked before
+        // the versioning wiring, and the current NEW_CLIENT flow which doesn't
+        // set it either) still light up the refresh icon when the master has
+        // moved past its default v1. Without this the dialog fires on tap but
+        // the visual cue is missing, which is exactly the "invisible drift"
+        // symptom reported on client rows.
+        val hasMasterUpdate = masterVersion != null && when (snapshotVersion) {
+            null -> masterVersion > 1
+            else -> masterVersion > snapshotVersion
+        }
         ClientOrIssuerPickerBottomSheet(
             pageElement = pageElement,
             list = pair.second,
