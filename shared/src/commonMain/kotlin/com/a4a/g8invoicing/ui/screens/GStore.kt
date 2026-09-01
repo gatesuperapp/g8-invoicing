@@ -118,14 +118,6 @@ private val MODULES = listOf(
         isFree = true,
     ),
     GStoreModule(
-        id = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE,
-        titleRes = Res.string.gstore_module_multi_entreprise_title,
-        descRes = Res.string.gstore_module_multi_entreprise_desc,
-        detailRes = Res.string.gstore_module_multi_entreprise_detail,
-        icon = Icons.Outlined.Business,
-        isFree = true,
-    ),
-    GStoreModule(
         id = ActivatedModulesRepository.MODULE_QUOTE,
         titleRes = Res.string.gstore_module_quote_title,
         descRes = Res.string.gstore_module_quote_desc,
@@ -166,14 +158,22 @@ private val MODULES = listOf(
         icon = Icons.Outlined.Code,
         isFree = true,
     ),
-    // Kept last: cosmetic-only, no functional impact. Users looking for a
-    // feature to enable see the useful modules first.
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
         titleRes = Res.string.gstore_module_watermark_title,
         descRes = Res.string.gstore_module_watermark_desc,
         detailRes = Res.string.gstore_module_watermark_detail,
         icon = Icons.Outlined.WaterDrop,
+        isFree = true,
+    ),
+    // Pinned last per product ordering — feature-y modules read first, then
+    // watermark, then multi-entreprise (which reshapes the whole app menu).
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE,
+        titleRes = Res.string.gstore_module_multi_entreprise_title,
+        descRes = Res.string.gstore_module_multi_entreprise_desc,
+        detailRes = Res.string.gstore_module_multi_entreprise_detail,
+        icon = Icons.Outlined.Business,
         isFree = true,
     ),
 )

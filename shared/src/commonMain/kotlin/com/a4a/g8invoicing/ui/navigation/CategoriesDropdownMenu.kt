@@ -161,6 +161,40 @@ fun CategoriesDropdownMenu(
             )
         }
 
+        val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activatedModules
+
+        // Single-entreprise → skip the entire grey block + company header
+        // wrapper. Render sub-categories flat on white, with a hairline
+        // separator before them (mirrors the pre-multi-entreprise layout).
+        // The grey block only comes back once MULTI_ENTREPRISE is activated
+        // from gStore.
+        if (!multiEntrepriseOn) {
+            HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                thickness = 1.dp,
+                color = Color.LightGray.copy(alpha = 0.6f),
+            )
+            subCategories.forEach { category ->
+                val selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == category.route } == true
+                TopMenuRow(
+                    label = stringResource(category.resourceId),
+                    selected = selected,
+                    onClick = {
+                        dismissMenu()
+                        onClickCategory?.invoke(category)
+                    },
+                )
+                if (category is Category.Products) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        thickness = 1.dp,
+                        color = Color.LightGray.copy(alpha = 0.6f),
+                    )
+                }
+            }
+            return@DropdownMenu
+        }
+
         Spacer(modifier = Modifier.size(8.dp))
 
         Column(
@@ -239,26 +273,14 @@ fun CategoriesDropdownMenu(
                     }
                 } else {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activatedModules
+                        // Reached only when MULTI_ENTREPRISE is on (the flat
+                        // white layout early-returns above), so the header
+                        // always has a chevron and opens the picker.
                         CompanyHeaderRow(
                             displayName = displayName,
                             logoPath = currentLogoPath,
-                            // Chevron only surfaces when the module is on. Off →
-                            // the row acts as a shortcut to the single issuer's
-                            // form instead of opening the picker.
-                            showChevron = multiEntrepriseOn,
-                            onClick = {
-                                if (multiEntrepriseOn) {
-                                    pickerExpanded = true
-                                } else {
-                                    dismissMenu()
-                                    currentIssuer?.id?.let { id ->
-                                        navController.navigate(
-                                            Screen.ClientAddEdit.name + "?itemId=$id&type=issuer"
-                                        )
-                                    }
-                                }
-                            },
+                            showChevron = true,
+                            onClick = { pickerExpanded = true },
                         )
                         subCategories.forEach { category ->
                             val selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == category.route } == true
@@ -275,10 +297,7 @@ fun CategoriesDropdownMenu(
                             // inset to sit inside the block's rounded corners.
                             if (category is Category.Products) {
                                 HorizontalDivider(
-                                    modifier = Modifier.padding(
-                                        horizontal = 12.dp,
-                                        vertical = 4.dp,
-                                    ),
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                                     thickness = 1.dp,
                                     color = Color.LightGray.copy(alpha = 0.6f),
                                 )

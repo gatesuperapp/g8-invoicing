@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.UnfoldLess
 import androidx.compose.material.icons.filled.UnfoldMore
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -150,6 +151,37 @@ fun CategorySidebar(
                 )
             }
 
+            val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activatedModules
+
+            // Single-entreprise → skip the entire grey block + company header
+            // wrapper. Render sub-categories flat on white with a hairline
+            // separator before them (mirrors the pre-multi-entreprise layout).
+            // The grey block only comes back once MULTI_ENTREPRISE is activated
+            // from gStore.
+            if (!multiEntrepriseOn) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    thickness = 1.dp,
+                    color = Color.LightGray.copy(alpha = 0.6f),
+                )
+                subCategories.forEach { category ->
+                    val selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == category.route } == true
+                    TopMenuRow(
+                        label = stringResource(category.resourceId),
+                        selected = selected,
+                        onClick = { onClickCategory(category) },
+                    )
+                    if (category is Category.Products) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            thickness = 1.dp,
+                            color = Color.LightGray.copy(alpha = 0.6f),
+                        )
+                    }
+                }
+                return@Column
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Column(
@@ -228,25 +260,14 @@ fun CategorySidebar(
                         }
                     } else {
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activatedModules
+                            // Reached only when MULTI_ENTREPRISE is on (the flat
+                            // white layout early-returns above), so the header
+                            // always has a chevron and opens the picker.
                             CompanyHeaderRow(
                                 displayName = displayName,
                                 logoPath = currentLogoPath,
-                                // Chevron + picker only when multi-entreprise is on.
-                                // Single-entreprise UX: tap the row to jump to the
-                                // issuer form (matches MyCompaniesSection tap path).
-                                showChevron = multiEntrepriseOn,
-                                onClick = {
-                                    if (multiEntrepriseOn) {
-                                        pickerExpanded = true
-                                    } else {
-                                        currentIssuer?.id?.let { id ->
-                                            navController.navigate(
-                                                Screen.ClientAddEdit.name + "?itemId=$id&type=issuer"
-                                            )
-                                        }
-                                    }
-                                },
+                                showChevron = true,
+                                onClick = { pickerExpanded = true },
                             )
                             subCategories.forEach { category ->
                                 val selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == category.route } == true
