@@ -75,7 +75,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -160,6 +163,7 @@ import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -969,16 +973,47 @@ private fun MyCompaniesSection(
     }
 
     if (deleteBlocked) {
-        AlertDialog(
+        // Mirrors the export-format chooser card (see DocumentAddEdit.
+        // ExportFormatChooserDialog) so both product-level modal alerts read
+        // as the same in-app dialog family: rounded 16dp surface, title in
+        // textScreenTitle 18sp, body in textBodySmall/textSecondary with
+        // 20sp line height, single primary CTA aligned to the end.
+        Dialog(
             onDismissRequest = { deleteBlocked = false },
-            title = { Text(stringResource(Res.string.entreprise_delete_blocked_title)) },
-            text = { Text(stringResource(Res.string.entreprise_delete_blocked_message)) },
-            confirmButton = {
-                TextButton(onClick = { deleteBlocked = false }) {
-                    Text(stringResource(Res.string.ok))
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .background(AppColors.surface, shape = RoundedCornerShape(16.dp))
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start,
+                ) {
+                    Text(
+                        text = stringResource(Res.string.entreprise_delete_blocked_title),
+                        style = MaterialTheme.typography.textScreenTitle.copy(fontSize = 18.sp),
+                        textAlign = TextAlign.Start,
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(Res.string.entreprise_delete_blocked_message),
+                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                        textAlign = TextAlign.Start,
+                        lineHeight = 20.sp,
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextButton(onClick = { deleteBlocked = false }) {
+                            Text(stringResource(Res.string.ok))
+                        }
+                    }
                 }
-            },
-        )
+            }
+        }
     }
 
     // "+ Ajouter une entreprise" — hidden when the multi-entreprise module is off
