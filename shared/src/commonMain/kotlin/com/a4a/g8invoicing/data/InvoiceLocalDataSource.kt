@@ -1703,17 +1703,18 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
     addresses: List<AddressState>?,
 ) {
     addresses?.forEach { address ->
-        // Skip fully-empty rows: the client form always renders at least one
-        // address slot, so a save without touching any address field would
-        // otherwise persist a blank row that reads back as a ghost slot on
-        // reopen. Mirrors the master-side filter in
-        // ClientOrIssuerLocalDataSource.saveClientOrIssuerAddressRows.
+        // Skip rows without meaningful content. Country doesn't count — the
+        // form auto-seeds it (LaunchedEffect + address value-typing handlers
+        // that seed defaultCountryCode on any fresh AddressState), so a
+        // country-only row is almost always a ghost slot (user tapped
+        // "+ Ajouter une adresse" twice and only filled slot 3 → slot 2 is
+        // just the auto-country). Mirrors the master-side isAddressEmpty
+        // in ClientOrIssuerLocalDataSource.
         val hasContent = !address.addressTitle?.text.isNullOrBlank() ||
             !address.addressLine1?.text.isNullOrBlank() ||
             !address.addressLine2?.text.isNullOrBlank() ||
             !address.zipCode?.text.isNullOrBlank() ||
-            !address.city?.text.isNullOrBlank() ||
-            !address.countryCode.isNullOrBlank()
+            !address.city?.text.isNullOrBlank()
         if (!hasContent) return@forEach
         // 1: Save address
         documentClientOrIssuerAddressQueries.save( // DB call

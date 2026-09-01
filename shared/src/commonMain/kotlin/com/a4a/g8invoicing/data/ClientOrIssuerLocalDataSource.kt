@@ -267,17 +267,22 @@ class ClientOrIssuerLocalDataSource(
         return true
     }
 
-    // An address is empty only if EVERY field, including country, is blank.
-    // A country-only row is kept: the first-launch onboarding seeds one so
-    // the VAT-exemption text can key off the issuer's country later, and a
-    // user who picks a country in the form clearly means it.
+    // Country alone doesn't count — the form auto-seeds COUNTRY_1 with the
+    // cascade fallback (ClientOrIssuerAddEditForm.kt:144 LaunchedEffect) and
+    // the ADDRESS_LINE_1/ZIP/CITY value-typing handlers seed defaultCountry
+    // on any fresh AddressState. So a country-only row is almost always a
+    // placeholder / ghost slot (e.g. user tapped "+ Ajouter une adresse"
+    // twice and only filled slot 3 → slot 2 has just the auto-country).
+    // Persist only when the user typed at least one of the meaningful
+    // fields (title, lines, zip, city). Onboarding paths that need the
+    // issuer's country to survive on a bare row must seed a placeholder
+    // title too (see OnboardingViewModel commit()).
     private fun isAddressEmpty(address: AddressState): Boolean {
         return address.addressTitle?.text.isNullOrBlank() &&
             address.addressLine1?.text.isNullOrBlank() &&
             address.addressLine2?.text.isNullOrBlank() &&
             address.zipCode?.text.isNullOrBlank() &&
-            address.city?.text.isNullOrBlank() &&
-            address.countryCode.isNullOrBlank()
+            address.city?.text.isNullOrBlank()
     }
 
     private fun saveClientOrIssuerEmailRows(

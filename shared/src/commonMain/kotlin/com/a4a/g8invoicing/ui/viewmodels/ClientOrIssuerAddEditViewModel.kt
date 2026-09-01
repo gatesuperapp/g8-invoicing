@@ -1293,24 +1293,7 @@ class ClientOrIssuerAddEditViewModel(
 
         // Reset IDs for addresses and emails so they will be created as new document entries
         // (Master IDs are from ClientOrIssuerAddress/Email, not DocumentClientOrIssuerAddress/Email)
-        // Also drop country-only rows: the new-client form's LaunchedEffect
-        // seeds COUNTRY_1 with the cascade fallback so the picker isn't
-        // blank, and that seed lands as a country-only master address after
-        // createNewAndReturnId. On subsequent EDIT_CLIENT + syncToMaster the
-        // fresh address gets created as a *second* master row (the seed row
-        // wasn't linked to the doc snapshot), so a naive refresh here would
-        // pull both back and show N+1 slots. Dropping addresses whose only
-        // content is the auto-seeded country restores the 1:1 mapping the
-        // user expects after refresh.
-        val addressesWithNullIds = masterData.addresses
-            ?.filter { addr ->
-                !addr.addressTitle?.text.isNullOrBlank() ||
-                    !addr.addressLine1?.text.isNullOrBlank() ||
-                    !addr.addressLine2?.text.isNullOrBlank() ||
-                    !addr.zipCode?.text.isNullOrBlank() ||
-                    !addr.city?.text.isNullOrBlank()
-            }
-            ?.map { it.copy(id = null) }
+        val addressesWithNullIds = masterData.addresses?.map { it.copy(id = null) }
         val emailsWithNullIds = masterData.emails?.map { it.copy(id = null) }
 
         // Create updated state keeping document-specific fields but with master data
