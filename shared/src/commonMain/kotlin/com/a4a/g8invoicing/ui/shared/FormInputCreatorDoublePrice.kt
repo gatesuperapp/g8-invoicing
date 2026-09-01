@@ -125,7 +125,12 @@ fun FormInputCreatorDoublePrice(
         CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
 
             BasicTextField(
-                maxLines = 1,
+                // singleLine=true → stays on one line, cursor sticks to the right
+                // edge as the user types, existing text scrolls left off-screen.
+                // Wrapping would break the layout because the HT / TTC labels
+                // sit in a separate Column and don't follow the price field's
+                // line growth.
+                singleLine = true,
                 // Price fields — nothing to autofill, opt out.
                 modifier = customModifier.clearAndSetSemantics {},
                 value = textPriceWithoutTax?.replace(".", ",") ?: "",
@@ -171,7 +176,7 @@ fun FormInputCreatorDoublePrice(
             //     it displays price WITH tax (HT = 4.4)
             if (taxRate != null) {
                 BasicTextField(
-                    maxLines = 1,
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clearAndSetSemantics {},
