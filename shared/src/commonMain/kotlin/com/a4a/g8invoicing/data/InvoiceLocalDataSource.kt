@@ -1717,20 +1717,22 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
     documentClientOrIssuerId: Long,
     addresses: List<AddressState>?,
 ) {
-    addresses?.forEach { address ->
-        // Skip rows without meaningful content. Country doesn't count — the
-        // form auto-seeds it (LaunchedEffect + address value-typing handlers
-        // that seed defaultCountryCode on any fresh AddressState), so a
-        // country-only row is almost always a ghost slot (user tapped
-        // "+ Ajouter une adresse" twice and only filled slot 3 → slot 2 is
-        // just the auto-country). Mirrors the master-side isAddressEmpty
-        // in ClientOrIssuerLocalDataSource.
+    addresses?.forEachIndexed { index, address ->
+        // Skip rows on slots ≥ 2 without meaningful content. Country doesn't
+        // count on those — the form auto-seeds it (LaunchedEffect + address
+        // value-typing handlers that seed defaultCountryCode on any fresh
+        // AddressState), so a country-only slot ≥ 2 is almost always a ghost
+        // slot (user tapped "+ Ajouter une adresse" twice and only filled
+        // slot 3 → slot 2 is just the auto-country). Slot 0 is always kept:
+        // every issuer/client must carry at least one address (country is
+        // required for Factur-X / EN 16931). Mirrors the master-side
+        // isAddressEmpty in ClientOrIssuerLocalDataSource.
         val hasContent = !address.addressTitle?.text.isNullOrBlank() ||
             !address.addressLine1?.text.isNullOrBlank() ||
             !address.addressLine2?.text.isNullOrBlank() ||
             !address.zipCode?.text.isNullOrBlank() ||
             !address.city?.text.isNullOrBlank()
-        if (!hasContent) return@forEach
+        if (index > 0 && !hasContent) return@forEachIndexed
         // 1: Save address
         documentClientOrIssuerAddressQueries.save( // DB call
             id = null,

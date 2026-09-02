@@ -245,8 +245,8 @@ class ClientOrIssuerLocalDataSource(
         addresses: List<AddressState>?,
     ): Boolean {
         if (addresses.isNullOrEmpty()) return true
-        for (address in addresses) {
-            if (isAddressEmpty(address)) continue
+        for ((index, address) in addresses.withIndex()) {
+            if (index > 0 && isAddressEmpty(address)) continue
             clientOrIssuerAddressQueries.save(
                 id = null,
                 address_title = address.addressTitle?.text?.trim(),
@@ -270,13 +270,13 @@ class ClientOrIssuerLocalDataSource(
     // Country alone doesn't count — the form auto-seeds COUNTRY_1 with the
     // cascade fallback (ClientOrIssuerAddEditForm.kt:144 LaunchedEffect) and
     // the ADDRESS_LINE_1/ZIP/CITY value-typing handlers seed defaultCountry
-    // on any fresh AddressState. So a country-only row is almost always a
-    // placeholder / ghost slot (e.g. user tapped "+ Ajouter une adresse"
-    // twice and only filled slot 3 → slot 2 has just the auto-country).
-    // Persist only when the user typed at least one of the meaningful
-    // fields (title, lines, zip, city). Onboarding paths that need the
-    // issuer's country to survive on a bare row must seed a placeholder
-    // title too (see OnboardingViewModel commit()).
+    // on any fresh AddressState. So a country-only row on slots ≥ 2 is
+    // almost always a placeholder / ghost slot (e.g. user tapped "+ Ajouter
+    // une adresse" twice and only filled slot 3 → slot 2 has just the
+    // auto-country). Callers therefore skip this check for slot index 0:
+    // every issuer/client must keep at least one address (the country is
+    // legally required on Factur-X / EN 16931), and a country-only first
+    // slot is the natural state right after issuer creation.
     private fun isAddressEmpty(address: AddressState): Boolean {
         return address.addressTitle?.text.isNullOrBlank() &&
             address.addressLine1?.text.isNullOrBlank() &&
@@ -344,8 +344,8 @@ class ClientOrIssuerLocalDataSource(
 
         return withContext(DispatcherProvider.IO) {
             try {
-                for (address in addresses) {
-                    if (isAddressEmpty(address)) continue
+                for ((index, address) in addresses.withIndex()) {
+                    if (index > 0 && isAddressEmpty(address)) continue
                     clientOrIssuerAddressQueries.save(
                         id = null,
                         address_title = address.addressTitle?.text?.trim(),
@@ -426,8 +426,8 @@ class ClientOrIssuerLocalDataSource(
     ) {
         return withContext(DispatcherProvider.IO) {
             try {
-                addresses?.forEach { address ->
-                    if (isAddressEmpty(address)) return@forEach
+                addresses?.forEachIndexed { index, address ->
+                    if (index > 0 && isAddressEmpty(address)) return@forEachIndexed
                     documentClientOrIssuerAddressQueries.save(
                         id = null,
                         original_address_id = address.originalAddressId?.toLong(),
