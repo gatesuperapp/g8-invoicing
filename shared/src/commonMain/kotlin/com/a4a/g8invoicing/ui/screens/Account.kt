@@ -120,6 +120,7 @@ import com.a4a.g8invoicing.shared.resources.account_auth_title
 import com.a4a.g8invoicing.shared.resources.account_add_company
 import com.a4a.g8invoicing.shared.resources.account_logout
 import com.a4a.g8invoicing.shared.resources.account_my_companies
+import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_edit_link
 import com.a4a.g8invoicing.shared.resources.drawer_my_company
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription_url
@@ -163,6 +164,7 @@ import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSecondary
 import kotlinx.coroutines.launch
@@ -1063,11 +1065,27 @@ private fun IssuerListRow(
             .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            modifier = Modifier.weight(1F),
-            text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
-            style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
-        )
+        Column(modifier = Modifier.weight(1F)) {
+            Text(
+                text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
+                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
+            )
+            // "Éditer" affordance mirrors the picker's edit hint (same textCaption
+            // size, underline) — but black instead of the picker's violet since
+            // this block sits on a grey background where violet washes out.
+            // Tapping it fires the same onClick as the row body, so it's purely
+            // a discoverability nudge (the whole surface is already tappable).
+            Text(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .clickable(onClick = onClick),
+                text = stringResource(Res.string.document_bottom_sheet_picker_edit_link),
+                style = MaterialTheme.typography.textCaption.copy(
+                    color = AppColors.textPrimary,
+                    textDecoration = TextDecoration.Underline,
+                ),
+            )
+        }
         if (showDelete) {
             Icon(
                 modifier = Modifier
