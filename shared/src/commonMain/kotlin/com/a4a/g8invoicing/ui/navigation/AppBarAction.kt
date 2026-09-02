@@ -12,8 +12,8 @@ import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.Brush
-import androidx.compose.material.icons.outlined.FontDownload
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.IndeterminateCheckBox
@@ -303,7 +303,7 @@ fun actionStyle(onClick: () -> Unit) =
 @Composable
 fun actionFont(onClick: () -> Unit) =
     AppBarAction(
-        icon = Icons.Outlined.FontDownload,
+        icon = Icons.Outlined.AutoFixHigh,
         label = stringResource(Res.string.action_font_label),
         description = stringResource(Res.string.action_font_description),
         isSecondary = false,

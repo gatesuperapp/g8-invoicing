@@ -216,6 +216,10 @@ class InvoiceLocalDataSource(
                     ) }
                     ?.let { TextFieldValue(it) },
                 retentions = reusedRetentions,
+                // Reuse the last invoice's picked typeface so users don't
+                // have to re-pick on every new doc. Null (no invoices yet)
+                // → DocumentFont.Default resolves at render time.
+                fontFamily = getExistingFont(),
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -310,6 +314,14 @@ class InvoiceLocalDataSource(
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
         return footer
+    }
+
+    private fun getExistingFont(): String? {
+        return try {
+            invoiceQueries.getLastInsertedInvoiceFont().executeAsOneOrNull()?.font_family
+        } catch (e: Exception) {
+            null
+        }
     }
 
     // Last invoice's 3 payment-terms columns — used by createNew() to seed

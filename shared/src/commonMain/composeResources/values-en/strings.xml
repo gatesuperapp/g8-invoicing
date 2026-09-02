@@ -386,6 +386,10 @@
     <string name="account_legal_privacy_label">privacy policy</string>
     <string name="about_share_text_2">Share it with your friends!</string>
     <string name="about_share_button">Share</string>
+    <string name="about_title_licenses">Licences</string>
+    <string name="about_licenses_code_line">The app source code is released under the GPL-3.0 licence and is available here: %1$s</string>
+    <string name="about_licenses_code_url">https://github.com/gatesuperapp/g8-invoicing</string>
+    <string name="about_licenses_ofl_heading">SIL Open Font License 1.1</string>
     <string name="about_title_version">App version</string>
     <!-- Language Selection -->
     <string name="about_title_language">Language</string>

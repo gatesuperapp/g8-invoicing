@@ -37,6 +37,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -85,7 +86,11 @@ import com.a4a.g8invoicing.shared.resources.about_title_about
 import com.a4a.g8invoicing.shared.resources.about_title_assistance
 import com.a4a.g8invoicing.shared.resources.about_title_backup
 import com.a4a.g8invoicing.shared.resources.about_title_community
+import com.a4a.g8invoicing.shared.resources.about_licenses_code_line
+import com.a4a.g8invoicing.shared.resources.about_licenses_code_url
+import com.a4a.g8invoicing.shared.resources.about_licenses_ofl_heading
 import com.a4a.g8invoicing.shared.resources.about_title_legal
+import com.a4a.g8invoicing.shared.resources.about_title_licenses
 import com.a4a.g8invoicing.shared.resources.about_title_version
 import com.a4a.g8invoicing.shared.resources.about_title_website
 import com.a4a.g8invoicing.shared.resources.about_website_cta
@@ -107,6 +112,7 @@ import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -260,6 +266,12 @@ fun About(
 
                 Spacer(modifier = Modifier.height(30.dp))
 
+                CollapsibleSection(title = stringResource(Res.string.about_title_licenses)) {
+                    LicensesSection(uriHandler)
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
                 CollapsibleSection(title = stringResource(Res.string.about_title_version)) {
                     Text(
                         text = versionName,
@@ -330,6 +342,128 @@ fun About(
         }
 
     }
+}
+
+// Loaded lazily on first section expand from composeResources/files/licenses/.
+// NOTICE-polices.md carries the per-font copyrights + section headings;
+// OFL-1.1.txt is the licence body reproduced verbatim (minus the ASCII
+// separator lines, which don't render nicely as plain Text). Both are
+// piped through a tiny markdown-ish renderer that handles `# ` / `## `
+// headings and `**bold**` runs — enough for the layout we want, without
+// dragging in a full markdown lib.
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+private fun LicensesSection(uriHandler: UriHandler) {
+    val codeTemplate = stringResource(Res.string.about_licenses_code_line)
+    val codeUrl = stringResource(Res.string.about_licenses_code_url)
+    val oflHeading = stringResource(Res.string.about_licenses_ofl_heading)
+
+    // Splice the URL into the localised template at %1$s so translators can
+    // move the URL wherever it reads naturally in the sentence. The URL
+    // itself is what renders clickable (no separate "ici" / "here" label).
+    val placeholder = "%1\$s"
+    val idx = codeTemplate.indexOf(placeholder)
+    val codeAnnotated = buildAnnotatedString {
+        if (idx >= 0) {
+            append(codeTemplate.substring(0, idx))
+            pushStringAnnotation(tag = "code", annotation = codeUrl)
+            withStyle(SpanStyle(color = ColorVioletLight)) {
+                append(codeUrl)
+            }
+            pop()
+            append(codeTemplate.substring(idx + placeholder.length))
+        } else {
+            append(codeTemplate)
+        }
+    }
+
+    var noticeText by remember { mutableStateOf<String?>(null) }
+    var oflText by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        noticeText = Res.readBytes("files/licenses/NOTICE-polices.md").decodeToString()
+        oflText = Res.readBytes("files/licenses/OFL-1.1.txt").decodeToString()
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        ClickableText(
+            text = codeAnnotated,
+            // bodyMedium matches the NOTICE body below — user asked the intro
+            // and the fine-print licence text to read at the same size.
+            style = MaterialTheme.typography.bodyMedium,
+            onClick = { offset ->
+                codeAnnotated.getStringAnnotations(tag = "code", start = offset, end = offset)
+                    .firstOrNull()?.let { uriHandler.openUri(it.item) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        noticeText?.let { MarkdownishText(it) }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = oflHeading,
+            // Same size as the body; SemiBold is the only visual cue that
+            // this is a heading — matches the "## " headings inside the
+            // NOTICE.
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            ),
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        oflText?.let { MarkdownishText(it) }
+    }
+}
+
+// Minimal markdown renderer for the licence blobs. Handles only what the
+// bundled files use:
+//   - blank line = paragraph break
+//   - "# X" / "## X" = SemiBold line
+//   - "**X**" inline = bold span
+// Everything else renders as-is (whitespace inside a paragraph is
+// preserved so the font blocks in NOTICE-polices.md keep their
+// name / copyright / URL on three separate lines).
+@Composable
+private fun MarkdownishText(md: String) {
+    val paragraphs = md.trim().split(Regex("\\n\\s*\\n"))
+    Column {
+        paragraphs.forEachIndexed { i, raw ->
+            val para = raw.trimEnd()
+            when {
+                para.startsWith("# ") -> Text(
+                    text = para.removePrefix("# ").trim(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    ),
+                )
+                para.startsWith("## ") -> Text(
+                    text = para.removePrefix("## ").trim(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    ),
+                )
+                else -> Text(
+                    text = parseBoldSpans(para),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            if (i < paragraphs.lastIndex) Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
+}
+
+private fun parseBoldSpans(text: String) = buildAnnotatedString {
+    val pattern = Regex("\\*\\*(.+?)\\*\\*")
+    var cursor = 0
+    for (match in pattern.findAll(text)) {
+        append(text.substring(cursor, match.range.first))
+        withStyle(SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)) {
+            append(match.groupValues[1])
+        }
+        cursor = match.range.last + 1
+    }
+    if (cursor < text.length) append(text.substring(cursor))
 }
 
 @Composable

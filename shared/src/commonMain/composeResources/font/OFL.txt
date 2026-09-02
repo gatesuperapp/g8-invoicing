@@ -1,6 +1,8 @@
 The .ttf files shipped in this directory are all licensed under the SIL
 Open Font License, Version 1.1. Copyright holders:
 
+  * Arimo — Copyright 2013 The Arimo Project Authors, Ascender Corporation
+      https://github.com/googlefonts/Arimo
   * Noto Sans, Noto Serif — Copyright 2022 The Noto Project Authors
       https://github.com/notofonts/latin-greek-cyrillic
   * Cabin — Copyright (c) 2010, Pablo Impallari (www.impallari.com|impallari@gmail.com)

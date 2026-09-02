@@ -5,6 +5,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.arimo
 import com.a4a.g8invoicing.shared.resources.cabinbold
 import com.a4a.g8invoicing.shared.resources.cabinregular
 import com.a4a.g8invoicing.shared.resources.inter
@@ -41,6 +42,11 @@ enum class DocumentFont(
     val displayName: String,
     val isPremium: Boolean,
 ) {
+    // Arimo — Google/Ascender metric-compatible Helvetica clone, OFL. New
+    // default because it matches the shape most users expect from a
+    // "generic sans" invoice font (previously Helvetica, retired for
+    // licensing reasons).
+    ARIMO("arimo", "Arimo", isPremium = false),
     NOTO_SANS("noto_sans", "Noto Sans", isPremium = false),
     NOTO_SERIF("noto_serif", "Noto Serif", isPremium = false),
     CABIN("cabin", "Cabin", isPremium = true),
@@ -53,7 +59,7 @@ enum class DocumentFont(
 
     companion object {
         /** Free default. Anything unknown / null / legacy resolves here. */
-        val Default = NOTO_SANS
+        val Default = ARIMO
 
         fun fromId(id: String?): DocumentFont =
             entries.firstOrNull { it.id == id } ?: Default
@@ -69,6 +75,8 @@ val LocalDocumentFont = compositionLocalOf { DocumentFont.Default }
 
 @Composable
 fun DocumentFont.regularFamily(): FontFamily = when (this) {
+    // Variable font — one file for every weight via wght axis.
+    DocumentFont.ARIMO -> FontFamily(Font(Res.font.arimo, FontWeight.Normal))
     DocumentFont.NOTO_SANS -> FontFamily(Font(Res.font.notosansregular, FontWeight.Normal))
     DocumentFont.NOTO_SERIF -> FontFamily(Font(Res.font.notoserifregular, FontWeight.Normal))
     DocumentFont.CABIN -> FontFamily(Font(Res.font.cabinregular, FontWeight.Normal))
@@ -84,6 +92,7 @@ fun DocumentFont.regularFamily(): FontFamily = when (this) {
 
 @Composable
 fun DocumentFont.boldFamily(): FontFamily = when (this) {
+    DocumentFont.ARIMO -> FontFamily(Font(Res.font.arimo, FontWeight.Bold))
     DocumentFont.NOTO_SANS -> FontFamily(Font(Res.font.notosansbold, FontWeight.Bold))
     DocumentFont.NOTO_SERIF -> FontFamily(Font(Res.font.notoserifbold, FontWeight.Bold))
     DocumentFont.CABIN -> FontFamily(Font(Res.font.cabinbold, FontWeight.Bold))

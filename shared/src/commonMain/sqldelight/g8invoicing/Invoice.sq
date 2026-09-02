@@ -138,6 +138,16 @@ SET number = :number,
 WHERE
     invoice_id = :invoice_id;
 
+-- Font seeded on createNew() from the most recently created invoice, so the
+-- user's picked font persists across new invoices without them having to
+-- re-pick every time. NULL = user has never picked (fall back to
+-- DocumentFont.Default at read time).
+getLastInsertedInvoiceFont:
+SELECT font_family
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
 -- Fetch the last invoice's 3 payment-terms fields so createNew() can seed
 -- each one from the most recent non-empty value (per-field, so if the user
 -- has only ever customised the "pénalités de retard" one, the other two
