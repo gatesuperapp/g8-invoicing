@@ -13,6 +13,8 @@ import com.a4a.g8invoicing.shared.resources.quote_default_number
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
@@ -45,6 +47,8 @@ class QuoteLocalDataSource(
     private val linkQuoteToDocumentClientOrIssuerQueries =
         db.linkQuoteToDocumentClientOrIssuerQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
+    private val quoteTagQueries = db.quoteTagQueries
+    private val linkQuoteToTagQueries = db.linkQuoteToTagQueries
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
@@ -90,6 +94,7 @@ class QuoteLocalDataSource(
 
             newQuoteId?.let { id ->
                 saveInfoInOtherTables(id, newQuoteState)
+                saveTag(id, newQuoteState.documentTag)
             }
             newQuoteId
         }
@@ -138,7 +143,8 @@ class QuoteLocalDataSource(
                                 documentClientOrIssuerQueries,
                                 documentClientOrIssuerAddressQueries,
                                 documentClientOrIssuerEmailQueries
-                            )
+                            ),
+                            fetchTag(it.quote_id)
                         )
                     }
             } catch (e: Exception) {
@@ -177,7 +183,8 @@ class QuoteLocalDataSource(
 
                             document.transformIntoEditableQuote(
                                 products,
-                                clientAndIssuer
+                                clientAndIssuer,
+                                fetchTag(document.quote_id)
                             )
                         }
                 }
@@ -212,15 +219,35 @@ class QuoteLocalDataSource(
         return null
     }
 
+    // --- fetchTag ---
+    // Synchronous private helper, performs DB IO.
+    // Called from a Dispatchers.IO context.
+    private fun fetchTag(documentId: Long): DocumentTag? {
+        try {
+            val tagId = linkQuoteToTagQueries.getQuoteTag(documentId)
+                .executeAsOneOrNull()?.tag_id
+            tagId?.let {
+                quoteTagQueries.getTag(it).executeAsOneOrNull()?.let { tagName ->
+                    return enumValueOf<DocumentTag>(tagName)
+                }
+            }
+        } catch (e: Exception) {
+            //Log.e("QuoteDS", "Error fetchTag for documentId $documentId: ${e.message}")
+        }
+        return null
+    }
+
     // --- transformIntoEditableQuote ---
     // Pure transformation function, no IO, no suspend/withContext needed.
     private fun Quote.transformIntoEditableQuote(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
+        documentTag: DocumentTag? = null,
     ): QuoteState {
         this.let {
             return QuoteState(
                 documentId = it.quote_id.toInt(),
+                documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
@@ -301,6 +328,7 @@ class QuoteLocalDataSource(
                             id,
                             duplicatedDocumentState
                         )
+                        saveTag(id, DocumentTag.DRAFT)
                     }
                 }
             } catch (e: Exception) {
@@ -443,6 +471,8 @@ class QuoteLocalDataSource(
                         linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
                     }
 
+                    // Delete linked tag
+                    linkQuoteToTagQueries.delete(document.documentId!!.toLong())
 
                     // Delete the main document
                     quoteQueries.delete(id = document.documentId!!.toLong())
@@ -588,6 +618,76 @@ class QuoteLocalDataSource(
                 // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
                 throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
             }
+        }
+    }
+
+    // --- setTag ---
+    // Public entry-point called by the ViewModel when the user picks a tag
+    // in the bottom-bar picker, or by the auto-tag flow after a quote has
+    // been converted to an invoice.
+    override suspend fun setTag(
+        documents: List<QuoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                documents.forEach { quote ->
+                    quote.documentId?.toLong()?.let { quoteId ->
+                        linkDocumentToDocumentTag(
+                            quoteId,
+                            newTag = tag,
+                            updateCase = tagUpdateCase,
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                //Log.e("QuoteDS", "Error setTag: ${e.message}")
+            }
+        }
+    }
+
+    // Upsert on quote_id — same rationale as DeliveryNoteLocalDataSource's
+    // linkDocumentToDocumentTag: check-then-branch handles both fresh quotes
+    // and pre-migration quotes with no junction row.
+    private suspend fun linkDocumentToDocumentTag(
+        documentId: Long,
+        newTag: DocumentTag,
+        @Suppress("UNUSED_PARAMETER") updateCase: TagUpdateOrCreationCase,
+    ) {
+        try {
+            withContext(DispatcherProvider.IO) {
+                val tagId = quoteTagQueries.getTagId(newTag.name)
+                    .executeAsOneOrNull() ?: return@withContext
+                val existing = linkQuoteToTagQueries.getQuoteTag(documentId)
+                    .executeAsOneOrNull()
+                if (existing == null) {
+                    linkQuoteToTagQueries.saveQuoteTag(
+                        id = null,
+                        quote_id = documentId,
+                        tag_id = tagId,
+                    )
+                } else {
+                    linkQuoteToTagQueries.updateQuoteTag(
+                        quote_id = documentId,
+                        tag_id = tagId,
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            //Log.e("QuoteDS", "Error linkDocToDocTag: ${e.message}")
+        }
+    }
+
+    private suspend fun saveTag(documentId: Long, tag: DocumentTag) {
+        try {
+            linkDocumentToDocumentTag(
+                documentId = documentId,
+                newTag = tag,
+                updateCase = TagUpdateOrCreationCase.TAG_CREATION,
+            )
+        } catch (e: Exception) {
+            //Log.e("QuoteDS", "Error saveTag for documentId $documentId: ${e.message}")
         }
     }
 }

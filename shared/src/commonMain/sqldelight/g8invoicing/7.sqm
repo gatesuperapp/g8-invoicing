@@ -210,3 +210,57 @@ ALTER TABLE Invoice ADD COLUMN font_family TEXT;
 ALTER TABLE CreditNote ADD COLUMN font_family TEXT;
 ALTER TABLE DeliveryNote ADD COLUMN font_family TEXT;
 ALTER TABLE Quote ADD COLUMN font_family TEXT;
+
+-- 9) Tags on Delivery Notes and Quotes (release 1.9, gStore modules
+--    "delivery_note_tagging" and "quote_tagging"). Structure is a straight
+--    copy of InvoiceTag + LinkInvoiceToTag: a reference table with the
+--    allowed tag names + a junction row per document. Kept as separate
+--    tables per document type so future tag sets can diverge (an invoice
+--    will never carry INVOICED, a BL will never carry PAID/LATE/REMINDED).
+--    Four tags each: DRAFT (grey), SENT (blue), CANCELLED (yellow) and
+--    INVOICED (green). INVOICED is auto-applied when the user converts a
+--    BL/Devis into an invoice via the bottom-bar Convert action, but can
+--    still be manually overridden from the tag picker afterwards.
+CREATE TABLE DeliveryNoteTag (
+  delivery_note_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO DeliveryNoteTag (delivery_note_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'CANCELLED'),
+(4, 'INVOICED');
+
+CREATE TABLE LinkDeliveryNoteToTag (
+    id INTEGER PRIMARY KEY NOT NULL,
+    delivery_note_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    updated_by_user_at TEXT,
+
+  FOREIGN KEY(tag_id)
+         REFERENCES DeliveryNoteTag(delivery_note_tag_id)
+         ON DELETE CASCADE
+);
+
+CREATE TABLE QuoteTag (
+  quote_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO QuoteTag (quote_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'CANCELLED'),
+(4, 'INVOICED');
+
+CREATE TABLE LinkQuoteToTag (
+    id INTEGER PRIMARY KEY NOT NULL,
+    quote_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    updated_by_user_at TEXT,
+
+  FOREIGN KEY(tag_id)
+         REFERENCES QuoteTag(quote_tag_id)
+         ON DELETE CASCADE
+);

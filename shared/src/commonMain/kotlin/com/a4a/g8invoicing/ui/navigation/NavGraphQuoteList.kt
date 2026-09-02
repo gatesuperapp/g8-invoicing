@@ -32,6 +32,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.gstore_quote_trial_exhausted_body
 import com.a4a.g8invoicing.shared.resources.gstore_quote_trial_exhausted_cta
@@ -62,6 +63,9 @@ fun NavGraphBuilder.quoteList(
         val quotesUiState by viewModel.quotesUiState.collectAsState()
         val activatedModules = koinInject<ActivatedModulesRepository>()
         val subscriptionRepository = koinInject<SubscriptionRepository>()
+        val activatedState by activatedModules.state.collectAsState()
+        val isTagPickerEnabled =
+            ActivatedModulesRepository.MODULE_QUOTE_TAGGING in activatedState
 
         var isCategoriesMenuOpen by remember { mutableStateOf(false) }
         var lastBackPressTime by remember { mutableStateOf(0L) }
@@ -141,6 +145,10 @@ fun NavGraphBuilder.quoteList(
                 onClickViewCreatedInvoice(invoiceId)
             },
             onDismissInvoiceCreatedDialog = viewModel::clearCreatedInvoiceId,
+            onClickTag = { selected, tag ->
+                viewModel.setTag(selected, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
+            },
+            isTagPickerEnabled = isTagPickerEnabled,
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
             showCategoryButton = showCategoryButton

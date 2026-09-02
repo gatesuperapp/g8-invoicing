@@ -27,11 +27,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
+import com.a4a.g8invoicing.ui.navigation.actionTagCancelledMasc
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
+import com.a4a.g8invoicing.ui.navigation.actionTagInvoiced
 import com.a4a.g8invoicing.ui.navigation.actionTagLate
 import com.a4a.g8invoicing.ui.navigation.actionTagPaid
 import com.a4a.g8invoicing.ui.navigation.actionTagReminded
 import com.a4a.g8invoicing.ui.navigation.actionTagSent
+import com.a4a.g8invoicing.ui.navigation.actionTagSentMasc
 import com.a4a.g8invoicing.ui.navigation.actionTagUndefined
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.DocumentType
@@ -52,14 +55,19 @@ fun DocumentListItem(
     onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckbox: Boolean,
 ) {
-    // Get the action based on document tag - computed in composable context
+    // Get the action based on document tag - computed in composable context.
+    // BL / Devis share the same enum as invoices but use the masculine label
+    // variants ("Envoyé" / "Annulé") and INVOICED (green) instead of the
+    // invoice-only PAID / LATE / REMINDED palette.
+    val isInvoice = document is InvoiceState
     val action = when (document.documentTag) {
         DocumentTag.DRAFT -> actionTagDraft()
-        DocumentTag.SENT -> actionTagSent()
+        DocumentTag.SENT -> if (isInvoice) actionTagSent() else actionTagSentMasc()
         DocumentTag.PAID -> actionTagPaid()
         DocumentTag.LATE -> actionTagLate()
         DocumentTag.REMINDED -> actionTagReminded()
-        DocumentTag.CANCELLED -> actionTagCancelled()
+        DocumentTag.CANCELLED -> if (isInvoice) actionTagCancelled() else actionTagCancelledMasc()
+        DocumentTag.INVOICED -> actionTagInvoiced()
         else -> actionTagUndefined()
     }
     var isPressed = remember { mutableStateOf(false) }
@@ -113,16 +121,19 @@ fun DocumentListItem(
             verticalAlignment = CenterVertically,
         ) {
 
-            // Cancelled invoices are visually greyed out: white pill (not the
+            // Cancelled docs are visually greyed out: white pill (not the
             // yellow "cancelled" fill), primary text in a light muted grey,
             // price struck-through. The tag lookup still returns
             // actionTagCancelled() so the tag dropdown / bottom bar keep their
-            // pale-yellow chip semantics elsewhere.
-            val isCancelled = document is InvoiceState &&
-                document.documentTag == DocumentTag.CANCELLED
+            // pale-yellow chip semantics elsewhere. Same treatment for BL /
+            // Devis: a cancelled source doc should read as clearly de-emphasised.
+            val isCancelled = document.documentTag == DocumentTag.CANCELLED
 
             val statusColor: Color = when (document.documentTag) {
                 DocumentTag.PAID -> AppColors.statusPaid
+                // BL / Devis final state: green like PAID so the row reads as
+                // "closed / invoiced" at a glance.
+                DocumentTag.INVOICED -> AppColors.statusPaid
                 DocumentTag.LATE -> AppColors.statusLate
                 else -> AppColors.textPrimary
             }
@@ -150,7 +161,13 @@ fun DocumentListItem(
                     checkboxFace = if (checkedState.value) CheckboxFace.Front
                     else CheckboxFace.Back,
                     checkedState = checkedState.value,
-                    displayBorder = document.documentType != DocumentType.INVOICE || isCancelled,
+                    // Border is only shown when the fill is white — either
+                    // because the doc is cancelled (yellow chip forced to
+                    // white on the row) or the tag is undefined (very old
+                    // docs pre-tagging module). Coloured chips (blue, green,
+                    // grey draft…) already contrast on the surface.
+                    displayBorder = isCancelled ||
+                        document.documentTag == DocumentTag.UNDEFINED,
                 )
             }
 
@@ -234,32 +251,32 @@ fun DocumentListItem(
                         textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
                     ),
                 )
-                if (document is InvoiceState) {
-                    // Status label under the price. For late invoices the
-                    // flat 'En retard' label swells to 'En retard de X jour(s)'
-                    // so the row surfaces exactly how overdue it is; the
-                    // colour still matches the price so paid/late read as one
-                    // green / one red signal.
-                    val overdueDays = if (document.documentTag == DocumentTag.LATE &&
-                        daysUntilDue != null && daysUntilDue < 0) -daysUntilDue else null
-                    val labelText = when {
-                        overdueDays != null -> stringResource(
-                            countdownStringFor(-overdueDays),
-                            overdueDays,
-                        )
-                        else -> action.label
-                    }
-                    labelText?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.textSecondary.copy(
-                                color = if (isCancelled) AppColors.textMuted else statusColor,
-                            ),
-                        )
-                    }
+                // Status label under the price. For late invoices the flat
+                // 'En retard' label swells to 'En retard de X jour(s)' so the
+                // row surfaces exactly how overdue it is; the colour still
+                // matches the price so paid/late read as one green / one red
+                // signal. BL / Devis share the same slot so users see the
+                // tag they picked ("Brouillon", "Envoyé", "Facturé"…) next
+                // to the chip.
+                val overdueDays = if (document is InvoiceState &&
+                    document.documentTag == DocumentTag.LATE &&
+                    daysUntilDue != null && daysUntilDue < 0
+                ) -daysUntilDue else null
+                val labelText = when {
+                    overdueDays != null -> stringResource(
+                        countdownStringFor(-overdueDays),
+                        overdueDays,
+                    )
+                    else -> action.label
                 }
-                // Non-invoice types: no second line on the right — the price
-                // sits alone and centres vertically with the left column.
+                labelText?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.textSecondary.copy(
+                            color = if (isCancelled) AppColors.textMuted else statusColor,
+                        ),
+                    )
+                }
             }
         }
     }

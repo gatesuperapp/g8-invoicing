@@ -12,6 +12,8 @@ import com.a4a.g8invoicing.shared.resources.delivery_note_default_number
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
@@ -44,6 +46,8 @@ class DeliveryNoteLocalDataSource(
     private val linkDeliveryNoteToDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
+    private val deliveryNoteTagQueries = db.deliveryNoteTagQueries
+    private val linkDeliveryNoteToTagQueries = db.linkDeliveryNoteToTagQueries
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
@@ -89,6 +93,7 @@ class DeliveryNoteLocalDataSource(
 
             newDeliveryNoteId?.let { id ->
                 saveInfoInOtherTables(id, newDeliveryNoteState)
+                saveTag(id, newDeliveryNoteState.documentTag)
             }
             newDeliveryNoteId
         }
@@ -137,7 +142,8 @@ class DeliveryNoteLocalDataSource(
                                 documentClientOrIssuerQueries,
                                 documentClientOrIssuerAddressQueries,
                                 documentClientOrIssuerEmailQueries
-                            )
+                            ),
+                            fetchTag(it.delivery_note_id)
                         )
                     }
             } catch (e: Exception) {
@@ -176,7 +182,8 @@ class DeliveryNoteLocalDataSource(
 
                             document.transformIntoEditableDeliveryNote(
                                 products,
-                                clientAndIssuer
+                                clientAndIssuer,
+                                fetchTag(document.delivery_note_id)
                             )
                         }
                 }
@@ -211,15 +218,35 @@ class DeliveryNoteLocalDataSource(
         return null
     }
 
+    // --- fetchTag ---
+    // Synchronous private helper, performs DB IO.
+    // Called from a Dispatchers.IO context.
+    private fun fetchTag(documentId: Long): DocumentTag? {
+        try {
+            val tagId = linkDeliveryNoteToTagQueries.getDeliveryNoteTag(documentId)
+                .executeAsOneOrNull()?.tag_id
+            tagId?.let {
+                deliveryNoteTagQueries.getTag(it).executeAsOneOrNull()?.let { tagName ->
+                    return enumValueOf<DocumentTag>(tagName)
+                }
+            }
+        } catch (e: Exception) {
+            //Log.e("DeliveryNoteDS", "Error fetchTag for documentId $documentId: ${e.message}")
+        }
+        return null
+    }
+
     // --- transformIntoEditableDeliveryNote ---
     // Pure transformation function, no IO, no suspend/withContext needed.
     private fun DeliveryNote.transformIntoEditableDeliveryNote(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
+        documentTag: DocumentTag? = null,
     ): DeliveryNoteState {
         this.let {
             return DeliveryNoteState(
                 documentId = it.delivery_note_id.toInt(),
+                documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
@@ -300,6 +327,7 @@ class DeliveryNoteLocalDataSource(
                             id,
                             duplicatedDocumentState
                         )
+                        saveTag(id, DocumentTag.DRAFT)
                     }
                 }
             } catch (e: Exception) {
@@ -442,6 +470,8 @@ class DeliveryNoteLocalDataSource(
                         linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
                     }
 
+                    // Delete linked tag
+                    linkDeliveryNoteToTagQueries.delete(document.documentId!!.toLong())
 
                     // Delete the main document
                     deliveryNoteQueries.delete(id = document.documentId!!.toLong())
@@ -587,6 +617,79 @@ class DeliveryNoteLocalDataSource(
                 // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
                 throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
             }
+        }
+    }
+
+    // --- setTag ---
+    // Public entry-point called by the ViewModel when the user picks a tag
+    // in the bottom-bar picker, or by the auto-tag flow after a BL has been
+    // converted to an invoice.
+    override suspend fun setTag(
+        documents: List<DeliveryNoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                documents.forEach { deliveryNote ->
+                    deliveryNote.documentId?.toLong()?.let { deliveryNoteId ->
+                        linkDocumentToDocumentTag(
+                            deliveryNoteId,
+                            newTag = tag,
+                            updateCase = tagUpdateCase,
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                //Log.e("DeliveryNoteDS", "Error setTag: ${e.message}")
+            }
+        }
+    }
+
+    // Upsert on delivery_note_id. Junction rows don't carry a unique
+    // constraint on delivery_note_id (only on the surrogate PK), so a naive
+    // INSERT OR REPLACE would just stack duplicate rows. Check-then-branch
+    // covers both the fresh-BL path and the pre-migration path where the
+    // BL predates the tagging module and has no junction row yet.
+    private suspend fun linkDocumentToDocumentTag(
+        documentId: Long,
+        newTag: DocumentTag,
+        @Suppress("UNUSED_PARAMETER") updateCase: TagUpdateOrCreationCase,
+    ) {
+        try {
+            withContext(DispatcherProvider.IO) {
+                val tagId = deliveryNoteTagQueries.getTagId(newTag.name)
+                    .executeAsOneOrNull() ?: return@withContext
+                val existing = linkDeliveryNoteToTagQueries
+                    .getDeliveryNoteTag(documentId).executeAsOneOrNull()
+                if (existing == null) {
+                    linkDeliveryNoteToTagQueries.saveDeliveryNoteTag(
+                        id = null,
+                        delivery_note_id = documentId,
+                        tag_id = tagId,
+                    )
+                } else {
+                    linkDeliveryNoteToTagQueries.updateDeliveryNoteTag(
+                        delivery_note_id = documentId,
+                        tag_id = tagId,
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            //Log.e("DeliveryNoteDS", "Error linkDocToDocTag: ${e.message}")
+        }
+    }
+
+    // Seeds the initial tag row on createNew / duplicate.
+    private suspend fun saveTag(documentId: Long, tag: DocumentTag) {
+        try {
+            linkDocumentToDocumentTag(
+                documentId = documentId,
+                newTag = tag,
+                updateCase = TagUpdateOrCreationCase.TAG_CREATION,
+            )
+        } catch (e: Exception) {
+            //Log.e("DeliveryNoteDS", "Error saveTag for documentId $documentId: ${e.message}")
         }
     }
 }

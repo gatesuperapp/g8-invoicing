@@ -218,6 +218,13 @@ class ActivatedModulesRepository(
         // some fonts inside are premium-only — the export flow gates them.
         const val MODULE_FONT = "font"
 
+        // Marquer les BLs / devis. Same tag mechanic as invoices but with a
+        // BL/devis-specific palette (DRAFT / SENT / CANCELLED / INVOICED).
+        // Free during the 1.9 rollout — will move behind the premium gate
+        // in a later release (same trajectory as the export modules).
+        const val MODULE_DELIVERY_NOTE_TAGGING = "delivery_note_tagging"
+        const val MODULE_QUOTE_TAGGING = "quote_tagging"
+
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
         // so adding a future free module is one string.
@@ -229,6 +236,8 @@ class ActivatedModulesRepository(
             MODULE_WATERMARK_REMOVAL,
             MODULE_MULTI_ENTREPRISE,
             MODULE_FONT,
+            MODULE_DELIVERY_NOTE_TAGGING,
+            MODULE_QUOTE_TAGGING,
         )
 
         // Modules seeded into the activated set the first time the app boots after this

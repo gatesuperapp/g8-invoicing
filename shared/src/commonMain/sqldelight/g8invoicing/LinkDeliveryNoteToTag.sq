@@ -1,0 +1,32 @@
+CREATE TABLE LinkDeliveryNoteToTag (
+    id INTEGER PRIMARY KEY NOT NULL,
+    delivery_note_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    updated_by_user_at TEXT,
+
+  FOREIGN KEY(tag_id)
+         REFERENCES DeliveryNoteTag(delivery_note_tag_id)
+         ON DELETE CASCADE
+);
+
+saveDeliveryNoteTag:
+INSERT OR REPLACE
+INTO LinkDeliveryNoteToTag (id, delivery_note_id, tag_id, updated_by_user_at)
+VALUES (?, ?, ?, NULL );
+
+updateDeliveryNoteTag:
+UPDATE LinkDeliveryNoteToTag
+SET delivery_note_id = :delivery_note_id,
+    tag_id = :tag_id,
+    updated_by_user_at = (datetime('now', 'localtime'))
+WHERE
+    delivery_note_id = :delivery_note_id;
+
+getDeliveryNoteTag:
+SELECT *
+FROM LinkDeliveryNoteToTag
+WHERE delivery_note_id = :delivery_note_id;
+
+delete:
+DELETE FROM LinkDeliveryNoteToTag
+WHERE delivery_note_id = :id;

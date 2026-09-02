@@ -606,9 +606,8 @@
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
-    <string name="export_vat_exempt_conflict_title">Franchise de TVA</string>
     <string name="export_vat_exempt_conflict_message">Votre entreprise est en franchise de TVA mais vous avez ajouté de la TVA à certains produits. Veuillez la retirer pour pouvoir exporter votre facture.</string>
-    <string name="cii_validation_title">Facture incomplète</string>
+    <string name="cii_validation_title">Oups</string>
     <string name="cii_validation_intro">Pour créer une facture électronique valide, complétez les champs suivants :</string>
     <string name="cii_validation_confirm">J'ai compris</string>
     <string name="cii_validation_issuer_missing">Ajouter un émetteur</string>
@@ -719,12 +718,11 @@
     <string name="account_legal_privacy_label">politique de confidentialité</string>
     <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
     <string name="about_share_button">Partager</string>
-    <!-- Licences section (About > Licences). Le corps NOTICE-polices.md +
-         OFL-1.1.txt est chargé depuis composeResources/files/licenses/ à
-         l'ouverture de la section. %1$s dans _code_line est remplacé par
-         _code_url (URL cliquable rendue en clair). -->
+    <!-- Licences section: code (GPL-3.0) + polices embarquées (OFL 1.1). Le
+         corps NOTICE-polices.md + OFL-1.1.txt est chargé depuis
+         composeResources/files/licenses/ à l'ouverture de la section. -->
     <string name="about_title_licenses">Licences</string>
-    <string name="about_licenses_code_line">Le code de l'application est sous licence GPL-3.0 et est disponible ici : %1$s</string>
+    <string name="about_licenses_code_line">Le code de l'application est sous licence GPL-3.0.</string>
     <string name="about_licenses_code_url">https://github.com/gatesuperapp/g8-invoicing</string>
     <string name="about_licenses_ofl_heading">SIL Open Font License 1.1</string>
     <string name="about_title_version">Version de l'application</string>
@@ -1026,6 +1024,20 @@ Une erreur s'est produite :
     <string name="action_font_label">Police</string>
     <string name="action_font_description">Choisir la police du document</string>
     <string name="font_picker_title">Police du document</string>
-    <string name="export_error_premium_font_title">Police premium</string>
     <string name="export_error_premium_font_message">Votre document utilise une police premium mais vous n'êtes pas membre premium.</string>
+
+    <!-- Tags BL / Devis (masculin) + statut « Facturé » -->
+    <string name="appbar_tag_sent_masc">Envoyé</string>
+    <string name="appbar_tag_cancelled_masc">Annulé</string>
+    <string name="appbar_tag_invoiced">Facturé</string>
+
+    <!-- gStore: Marquer les BLs -->
+    <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut à vos bons de livraison</string>
+    <string name="gstore_module_delivery_note_tagging_detail">Activez ce module pour ajouter un statut à vos bons de livraison : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un bon de livraison est converti en facture, mais vous pouvez le modifier à tout moment.</string>
+
+    <!-- gStore: Marquer les Devis -->
+    <string name="gstore_module_quote_tagging_title">Marquer les devis</string>
+    <string name="gstore_module_quote_tagging_desc">Ajouter un statut à vos devis</string>
+    <string name="gstore_module_quote_tagging_detail">Activez ce module pour ajouter un statut à vos devis : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un devis est converti en facture, mais vous pouvez le modifier à tout moment.</string>
 </resources>

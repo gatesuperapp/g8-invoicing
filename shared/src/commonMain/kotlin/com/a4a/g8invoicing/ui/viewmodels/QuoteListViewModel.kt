@@ -2,6 +2,8 @@ package com.a4a.g8invoicing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
@@ -25,6 +27,7 @@ class QuoteListViewModel(
     private var deleteJob: Job? = null
     private var duplicateJob: Job? = null
     private var convertJob: Job? = null
+    private var setTagJob: Job? = null
 
     init {
         fetchQuotes()
@@ -74,9 +77,33 @@ class QuoteListViewModel(
         convertJob = viewModelScope.launch {
             try {
                 val invoiceId = invoiceDataSource.convertQuotesToInvoice(selectedQuotes)
+                // Auto-mark the source quotes as INVOICED. The user can still
+                // override this manually from the tag picker afterwards.
+                selectedQuotes.forEach { it.documentTag = DocumentTag.INVOICED }
+                quoteDataSource.setTag(
+                    selectedQuotes,
+                    DocumentTag.INVOICED,
+                    TagUpdateOrCreationCase.UPDATED_BY_USER,
+                )
                 _quotesUiState.update { state ->
                     state.copy(createdInvoiceId = invoiceId)
                 }
+            } catch (e: Exception) {
+                // Error handling
+            }
+        }
+    }
+
+    fun setTag(
+        selectedQuotes: List<QuoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    ) {
+        setTagJob?.cancel()
+        setTagJob = viewModelScope.launch {
+            try {
+                selectedQuotes.forEach { it.documentTag = tag }
+                quoteDataSource.setTag(selectedQuotes, tag, tagUpdateCase)
             } catch (e: Exception) {
                 // Error handling
             }

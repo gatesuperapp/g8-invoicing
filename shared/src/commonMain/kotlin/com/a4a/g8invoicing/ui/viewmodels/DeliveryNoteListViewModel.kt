@@ -2,6 +2,8 @@ package com.a4a.g8invoicing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
@@ -25,6 +27,7 @@ class DeliveryNoteListViewModel(
     private var deleteJob: Job? = null
     private var duplicateJob: Job? = null
     private var convertJob: Job? = null
+    private var setTagJob: Job? = null
 
     init {
         fetchDeliveryNotes()
@@ -74,9 +77,33 @@ class DeliveryNoteListViewModel(
         convertJob = viewModelScope.launch {
             try {
                 val invoiceId = invoiceDataSource.convertDeliveryNotesToInvoice(selectedDeliveryNotes)
+                // Auto-mark the source BLs as INVOICED. The user can still
+                // override this manually from the tag picker afterwards.
+                selectedDeliveryNotes.forEach { it.documentTag = DocumentTag.INVOICED }
+                deliveryNoteDataSource.setTag(
+                    selectedDeliveryNotes,
+                    DocumentTag.INVOICED,
+                    TagUpdateOrCreationCase.UPDATED_BY_USER,
+                )
                 _deliveryNotesUiState.update { state ->
                     state.copy(createdInvoiceId = invoiceId)
                 }
+            } catch (e: Exception) {
+                // Error handling
+            }
+        }
+    }
+
+    fun setTag(
+        selectedDeliveryNotes: List<DeliveryNoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    ) {
+        setTagJob?.cancel()
+        setTagJob = viewModelScope.launch {
+            try {
+                selectedDeliveryNotes.forEach { it.documentTag = tag }
+                deliveryNoteDataSource.setTag(selectedDeliveryNotes, tag, tagUpdateCase)
             } catch (e: Exception) {
                 // Error handling
             }

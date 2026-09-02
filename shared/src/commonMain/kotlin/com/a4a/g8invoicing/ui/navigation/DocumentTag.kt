@@ -7,5 +7,8 @@ enum class DocumentTag {
     PAID,
     LATE,
     REMINDED,
-    CANCELLED
+    CANCELLED,
+    // Delivery notes / quotes only: set automatically when the source
+    // document is converted to an invoice via the bottom-bar Convert action.
+    INVOICED
 }

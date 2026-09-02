@@ -389,7 +389,7 @@
     <string name="about_share_text_2">¡Compártela con tus amigos!</string>
     <string name="about_share_button">Compartir</string>
     <string name="about_title_licenses">Licencias</string>
-    <string name="about_licenses_code_line">El código de la aplicación está bajo licencia GPL-3.0 y está disponible aquí: %1$s</string>
+    <string name="about_licenses_code_line">El código de la aplicación está bajo licencia GPL-3.0.</string>
     <string name="about_licenses_code_url">https://github.com/gatesuperapp/g8-invoicing</string>
     <string name="about_licenses_ofl_heading">SIL Open Font License 1.1</string>
     <string name="about_title_version">Versión de la aplicación</string>
@@ -650,9 +650,8 @@ Une erreur s'est produite :
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
-    <string name="export_vat_exempt_conflict_title">Franquicia de IVA</string>
     <string name="export_vat_exempt_conflict_message">Tu empresa está en régimen de franquicia de IVA, pero algunos productos tienen un tipo de IVA. Bórralo antes de exportar tu factura.</string>
-    <string name="cii_validation_title">Factura incompleta</string>
+    <string name="cii_validation_title">Ups</string>
     <string name="cii_validation_intro">Para crear una factura electrónica válida, completa los siguientes campos:</string>
     <string name="cii_validation_confirm">Entendido</string>
     <string name="cii_validation_issuer_missing">Añadir un emisor</string>
@@ -911,6 +910,20 @@ Une erreur s'est produite :
     <string name="action_font_label">Fuente</string>
     <string name="action_font_description">Elegir la fuente del documento</string>
     <string name="font_picker_title">Fuente del documento</string>
-    <string name="export_error_premium_font_title">Fuente premium</string>
     <string name="export_error_premium_font_message">Tu documento usa una fuente premium pero no eres miembro premium.</string>
+
+    <!-- Etiquetas de albaranes / presupuestos (masculino en FR) + estado Facturado -->
+    <string name="appbar_tag_sent_masc">Enviado</string>
+    <string name="appbar_tag_cancelled_masc">Cancelado</string>
+    <string name="appbar_tag_invoiced">Facturado</string>
+
+    <!-- gStore: Etiquetar albaranes -->
+    <string name="gstore_module_delivery_note_tagging_title">Etiquetar albaranes</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Añadir un estado a tus albaranes</string>
+    <string name="gstore_module_delivery_note_tagging_detail">Activa este módulo para añadir un estado a tus albaranes: borrador, enviado, cancelado o facturado.\n\nEl estado « Facturado » se aplica automáticamente cuando un albarán se convierte en factura, pero puedes cambiarlo en cualquier momento.</string>
+
+    <!-- gStore: Etiquetar presupuestos -->
+    <string name="gstore_module_quote_tagging_title">Etiquetar presupuestos</string>
+    <string name="gstore_module_quote_tagging_desc">Añadir un estado a tus presupuestos</string>
+    <string name="gstore_module_quote_tagging_detail">Activa este módulo para añadir un estado a tus presupuestos: borrador, enviado, cancelado o facturado.\n\nEl estado « Facturado » se aplica automáticamente cuando un presupuesto se convierte en factura, pero puedes cambiarlo en cualquier momento.</string>
 </resources>

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.RequestQuote
+import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
@@ -71,6 +72,12 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_font_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_title
@@ -176,6 +183,22 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_font_desc,
         detailRes = Res.string.gstore_module_font_detail,
         icon = Icons.Outlined.TextFields,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE_TAGGING,
+        titleRes = Res.string.gstore_module_delivery_note_tagging_title,
+        descRes = Res.string.gstore_module_delivery_note_tagging_desc,
+        detailRes = Res.string.gstore_module_delivery_note_tagging_detail,
+        icon = Icons.Outlined.Sell,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_QUOTE_TAGGING,
+        titleRes = Res.string.gstore_module_quote_tagging_title,
+        descRes = Res.string.gstore_module_quote_tagging_desc,
+        detailRes = Res.string.gstore_module_quote_tagging_detail,
+        icon = Icons.Outlined.Sell,
         isFree = true,
     ),
     // Pinned last per product ordering — feature-y modules read first, then

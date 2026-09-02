@@ -179,6 +179,18 @@ fun actionTag() =
         isSecondary = false,
     )
 
+// Distinct sentinel so BottomBarActionView can pick the BL/Devis dropdown
+// palette (masculine SENT / CANCELLED + INVOICED) instead of the invoice one.
+@Composable
+fun actionTagBLDevis() =
+    AppBarAction(
+        name = "TAG_BLDEVIS",
+        icon = Icons.Outlined.Sell,
+        description = stringResource(Res.string.appbar_label_description),
+        label = stringResource(Res.string.appbar_tag),
+        isSecondary = false,
+    )
+
 @Composable
 fun actionTagUndefined() =
     AppBarAction(
@@ -255,6 +267,42 @@ fun actionTagCancelled() =
         description = stringResource(Res.string.appbar_tag_cancelled),
         label = stringResource(Res.string.appbar_tag_cancelled),
         onClick = {} // see ButtonWithDropdownMenu
+    )
+
+// BL/Devis palette. Same enum values as invoices, but the labels drop the
+// feminine agreement ("Envoyé" / "Annulé") and add an INVOICED entry that
+// invoices never carry.
+@Composable
+fun actionTagSentMasc() =
+    AppBarAction(
+        tag = DocumentTag.SENT,
+        icon = Icons.Filled.Circle,
+        iconColor = ColorSent,
+        description = stringResource(Res.string.appbar_tag_sent_masc),
+        label = stringResource(Res.string.appbar_tag_sent_masc),
+        onClick = {}
+    )
+
+@Composable
+fun actionTagCancelledMasc() =
+    AppBarAction(
+        tag = DocumentTag.CANCELLED,
+        icon = Icons.Filled.Circle,
+        iconColor = ColorCancelled,
+        description = stringResource(Res.string.appbar_tag_cancelled_masc),
+        label = stringResource(Res.string.appbar_tag_cancelled_masc),
+        onClick = {}
+    )
+
+@Composable
+fun actionTagInvoiced() =
+    AppBarAction(
+        tag = DocumentTag.INVOICED,
+        icon = Icons.Filled.Circle,
+        iconColor = ColorGreenPaid,
+        description = stringResource(Res.string.appbar_tag_invoiced),
+        label = stringResource(Res.string.appbar_tag_invoiced),
+        onClick = {}
     )
 
 @Composable

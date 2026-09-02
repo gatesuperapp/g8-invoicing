@@ -37,6 +37,7 @@ import com.a4a.g8invoicing.shared.resources.quote_advice_convert
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert1
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert2
 import com.a4a.g8invoicing.ui.navigation.Category
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
@@ -61,6 +62,8 @@ fun QuoteList(
     onClickBack: () -> Unit,
     onClickViewCreatedInvoice: (Long) -> Unit = {},
     onDismissInvoiceCreatedDialog: () -> Unit = {},
+    onClickTag: (List<QuoteState>, DocumentTag) -> Unit = { _, _ -> },
+    isTagPickerEnabled: Boolean = false,
     // Callbacks for platform-specific back handling
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
@@ -123,7 +126,12 @@ fun QuoteList(
                 },
                 onClickNew = { onClickNew() },
                 onClickCategory = onClickCategory,
+                onClickTag = { tag ->
+                    onClickTag(selectedItems.toList(), tag)
+                    resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                },
                 isConvertible = true,
+                isTagPickerEnabled = isTagPickerEnabled,
                 onChangeBackground = {
                     isDimActive.value = !isDimActive.value
                 },

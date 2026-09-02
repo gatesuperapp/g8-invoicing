@@ -119,6 +119,21 @@ fun BottomBarActionView(
                                     },
                                     onChangeBackground = onChangeBackground
                                 )
+                            } else if (action.name == "TAG_BLDEVIS") {
+                                ButtonWithDropdownMenu(
+                                    action,
+                                    listOf(
+                                        actionTagDraft(),
+                                        actionTagSentMasc(),
+                                        actionTagCancelledMasc(),
+                                        actionTagInvoiced(),
+                                    ),
+                                    iconSize = 16.dp,
+                                    onClickTag = {
+                                        onClickTag(it)
+                                    },
+                                    onChangeBackground = onChangeBackground
+                                )
                             } else {
                                 AddIconAndLabelInColumn(
                                     action,

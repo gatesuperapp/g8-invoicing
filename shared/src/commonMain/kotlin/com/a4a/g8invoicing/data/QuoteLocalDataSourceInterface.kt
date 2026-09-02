@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.data
 
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -34,5 +36,10 @@ interface QuoteLocalDataSourceInterface {
     suspend fun update(document: QuoteState)
     suspend fun delete(documents: List<QuoteState>)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+    suspend fun setTag(
+        documents: List<QuoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    )
 
 }

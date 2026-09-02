@@ -1,0 +1,33 @@
+CREATE TABLE DeliveryNoteTag (
+  delivery_note_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO DeliveryNoteTag (delivery_note_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'CANCELLED'),
+(4, 'INVOICED');
+
+getTagId:
+SELECT delivery_note_tag_id
+FROM DeliveryNoteTag
+WHERE name = :name;
+
+getTag:
+SELECT name
+FROM DeliveryNoteTag
+WHERE delivery_note_tag_id = :delivery_note_tag_id;
+
+getAllTags:
+SELECT *
+FROM DeliveryNoteTag;
+
+saveTag:
+INSERT
+INTO DeliveryNoteTag (delivery_note_tag_id, name)
+VALUES (?, ?);
+
+deleteTagById:
+DELETE FROM DeliveryNoteTag
+WHERE delivery_note_tag_id = :id;
