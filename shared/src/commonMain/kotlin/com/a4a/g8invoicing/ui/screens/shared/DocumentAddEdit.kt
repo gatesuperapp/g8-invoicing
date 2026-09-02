@@ -132,9 +132,7 @@ import com.a4a.g8invoicing.shared.resources.export_chooser_facturx
 import com.a4a.g8invoicing.shared.resources.export_chooser_pdf
 import com.a4a.g8invoicing.shared.resources.export_chooser_title
 import com.a4a.g8invoicing.shared.resources.export_error_premium_font_message
-import com.a4a.g8invoicing.shared.resources.export_error_premium_font_title
 import com.a4a.g8invoicing.shared.resources.export_vat_exempt_conflict_message
-import com.a4a.g8invoicing.shared.resources.export_vat_exempt_conflict_title
 import com.a4a.g8invoicing.shared.resources.feature_coming_soon
 import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
 import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
@@ -330,35 +328,25 @@ fun DocumentAddEdit(
         // `factur-x.xml` in the PDF/A-3 hybrid without re-computing on
         // recomposition.
         var facturxXmlBytes by remember { mutableStateOf<ByteArray?>(null) }
-        // Blocks any export (PDF or CII) when the issuer is in the franchise en
-        // base regime but products still carry a non-zero VAT rate. Franchise is
-        // per-issuer legal status; taxed lines would produce a PDF that shows VAT
-        // the issuer isn't allowed to collect, and a CII XML whose category=E +
-        // rate>0 breaks EN16931.
-        var showVatExemptConflict by rememberSaveable { mutableStateOf(false) }
-        // Pre-flight validation issues surfaced when the user picks CII from the
-        // chooser but the invoice is missing EN 16931 mandatory fields. Empty =
-        // OK to export; non-empty = block export, show the list.
+        // Unified "Oups" export blocker: aggregates the three pre-flight
+        // failures that can prevent exporting (premium font w/o subscription,
+        // franchise-de-TVA line with a non-zero rate, EN 16931 mandatory fields
+        // missing on Facturx/CII). Rendered as a single dialog by [OupsDialog]
+        // so the user sees the full punch list at once instead of fixing one
+        // and re-hitting Export to discover the next.
+        var oupsFontBlock by rememberSaveable { mutableStateOf(false) }
+        var oupsVatBlock by rememberSaveable { mutableStateOf(false) }
         var ciiValidationIssues by remember { mutableStateOf(emptyList<CiiValidationIssue>()) }
-        // Font module + subscription state — the picker is only surfaced when
-        // the user has activated the Police module in gStore, and export is
-        // blocked with a modal when the picked font is premium and the user
-        // isn't a subscriber.
         val fontModuleOn = ActivatedModulesRepository.MODULE_FONT in activated
         val subscriptionRepo: com.a4a.g8invoicing.data.auth.SubscriptionRepository = koinInject()
         val subscription by subscriptionRepo.state.collectAsState()
         val isPremium: Boolean = subscription.isPremium()
         val currentFont = DocumentFont.fromId(document.fontFamily)
-        var showPremiumFontError by rememberSaveable { mutableStateOf(false) }
-        val premiumFontErrorTitle = stringResource(Res.string.export_error_premium_font_title)
-        val premiumFontErrorMessage = stringResource(Res.string.export_error_premium_font_message)
         val exportChooserTitle = stringResource(Res.string.export_chooser_title)
         val exportChooserDescription = stringResource(Res.string.export_chooser_description)
         val pdfLabel = stringResource(Res.string.export_chooser_pdf)
         val ciiLabel = stringResource(Res.string.export_chooser_cii)
         val facturxLabel = stringResource(Res.string.export_chooser_facturx)
-        val vatConflictTitle = stringResource(Res.string.export_vat_exempt_conflict_title)
-        val vatConflictMessage = stringResource(Res.string.export_vat_exempt_conflict_message)
         val okLabel = stringResource(Res.string.ok)
         // Preloaded so building the CII XML for Factur-X doesn't have to
         // suspend on stringResource in an onClick callback.
@@ -376,15 +364,20 @@ fun DocumentAddEdit(
                     navController = navController,
                     onClickBack = onClickBack,
                     onClickExport = {
-                        val fontBlocksExport = currentFont.isPremium && !isPremium
-                        if (hasVatExemptConflict(document)) {
-                            showVatExemptConflict = true
-                        } else if (fontBlocksExport) {
-                            showPremiumFontError = true
-                        } else if (ciiExportUnlocked) {
+                        if (ciiExportUnlocked) {
+                            // Facturx/CII active — chooser first, then per-format
+                            // gates are applied in its callbacks below (so a user
+                            // picking PDF isn't hit with a Facturx-only warning).
                             showExportChooser = true
                         } else {
-                            showPopup = true
+                            val fontBlocks = currentFont.isPremium && !isPremium
+                            val vatBlocks = hasVatExemptConflict(document)
+                            if (fontBlocks || vatBlocks) {
+                                oupsFontBlock = fontBlocks
+                                oupsVatBlock = vatBlocks
+                            } else {
+                                showPopup = true
+                            }
                         }
                     }
                 )
@@ -414,34 +407,6 @@ fun DocumentAddEdit(
                 )
             }
 
-            if (showPremiumFontError) {
-                AlertDialog(
-                    onDismissRequest = { showPremiumFontError = false },
-                    title = { Text(premiumFontErrorTitle) },
-                    text = { Text(premiumFontErrorMessage) },
-                    textContentColor = Color.Black,
-                    confirmButton = {
-                        Button(onClick = { showPremiumFontError = false }) {
-                            Text(okLabel)
-                        }
-                    },
-                )
-            }
-
-            if (showVatExemptConflict) {
-                AlertDialog(
-                    onDismissRequest = { showVatExemptConflict = false },
-                    title = { Text(vatConflictTitle) },
-                    text = { Text(vatConflictMessage) },
-                    textContentColor = Color.Black,
-                    confirmButton = {
-                        Button(onClick = { showVatExemptConflict = false }) {
-                            Text(okLabel)
-                        }
-                    },
-                )
-            }
-
             if (showExportChooser && document is InvoiceState) {
                 ExportFormatChooserDialog(
                     title = exportChooserTitle,
@@ -454,17 +419,27 @@ fun DocumentAddEdit(
                     onDismiss = { showExportChooser = false },
                     onPickCii = {
                         showExportChooser = false
+                        val fontBlocks = currentFont.isPremium && !isPremium
+                        val vatBlocks = hasVatExemptConflict(document)
                         val issues = CiiPreflightValidator.validate(document)
-                        if (issues.isEmpty()) {
-                            showCiiPopup = true
-                        } else {
+                        if (fontBlocks || vatBlocks || issues.isNotEmpty()) {
+                            oupsFontBlock = fontBlocks
+                            oupsVatBlock = vatBlocks
                             ciiValidationIssues = issues
+                        } else {
+                            showCiiPopup = true
                         }
                     },
                     onPickFacturx = {
                         showExportChooser = false
+                        val fontBlocks = currentFont.isPremium && !isPremium
+                        val vatBlocks = hasVatExemptConflict(document)
                         val issues = CiiPreflightValidator.validate(document)
-                        if (issues.isEmpty()) {
+                        if (fontBlocks || vatBlocks || issues.isNotEmpty()) {
+                            oupsFontBlock = fontBlocks
+                            oupsVatBlock = vatBlocks
+                            ciiValidationIssues = issues
+                        } else {
                             val bankInfoText = buildBankInfoText(
                                 invoice = document,
                                 ibanLabel = bankIbanLabel,
@@ -476,21 +451,35 @@ fun DocumentAddEdit(
                                 bankInfoText = bankInfoText,
                             )
                             facturxXmlBytes = xml.encodeToByteArray()
-                        } else {
-                            ciiValidationIssues = issues
                         }
                     },
                     onPickPdf = {
                         showExportChooser = false
-                        showPopup = true
+                        // Plain PDF path — font + VAT gates still apply (both
+                        // print on the PDF); no CII validation because there's
+                        // no XML to conform to.
+                        val fontBlocks = currentFont.isPremium && !isPremium
+                        val vatBlocks = hasVatExemptConflict(document)
+                        if (fontBlocks || vatBlocks) {
+                            oupsFontBlock = fontBlocks
+                            oupsVatBlock = vatBlocks
+                        } else {
+                            showPopup = true
+                        }
                     },
                 )
             }
 
-            if (ciiValidationIssues.isNotEmpty()) {
-                CiiValidationDialog(
-                    issues = ciiValidationIssues,
-                    onDismiss = { ciiValidationIssues = emptyList() },
+            if (oupsFontBlock || oupsVatBlock || ciiValidationIssues.isNotEmpty()) {
+                OupsDialog(
+                    showFont = oupsFontBlock,
+                    showVat = oupsVatBlock,
+                    ciiIssues = ciiValidationIssues,
+                    onDismiss = {
+                        oupsFontBlock = false
+                        oupsVatBlock = false
+                        ciiValidationIssues = emptyList()
+                    },
                 )
             }
 
@@ -934,36 +923,60 @@ fun ExportPopup(
 }
 
 /**
- * Lists every EN 16931 mandatory field that's missing from the current
- * invoice so the user fixes the whole set at once instead of hitting
- * "Export CII" repeatedly. Modal — user has to acknowledge before
- * touching anything else.
+ * Aggregated export blocker. Shows any combination of:
+ * - 🪄 premium font picked while user isn't a subscriber
+ * - 💸 franchise-de-TVA issuer with a taxed line
+ * - 📄 EN 16931 mandatory fields missing (Facturx/CII path)
+ *
+ * User fixes the whole punch list at once rather than dismissing one modal
+ * per issue and re-hitting Export.
  */
 @Composable
-private fun CiiValidationDialog(
-    issues: List<CiiValidationIssue>,
+private fun OupsDialog(
+    showFont: Boolean,
+    showVat: Boolean,
+    ciiIssues: List<CiiValidationIssue>,
     onDismiss: () -> Unit,
 ) {
     val title = stringResource(Res.string.cii_validation_title)
-    val intro = stringResource(Res.string.cii_validation_intro)
+    val fontLine = stringResource(Res.string.export_error_premium_font_message)
+    val vatLine = stringResource(Res.string.export_vat_exempt_conflict_message)
+    val ciiIntro = stringResource(Res.string.cii_validation_intro)
     val confirmLabel = stringResource(Res.string.cii_validation_confirm)
 
-    // Resolve every issue to its localized label up-front — stringResource
-    // has to run inside the Composable, not inside a when-expression that
-    // would compose lazily on click.
-    val messages: List<String> = issues.map { issue -> issue.resolveMessage() }
+    // Resolve every CII issue to its localized label up-front — stringResource
+    // must run inside the Composable, not inside a when-expression that would
+    // compose lazily.
+    val ciiMessages: List<String> = ciiIssues.map { issue -> issue.resolveMessage() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         textContentColor = Color.Black,
         text = {
-            Column {
-                Text(intro)
-                Spacer(Modifier.height(12.dp))
-                messages.forEach { line ->
-                    Text("• $line")
-                    Spacer(Modifier.height(4.dp))
+            // Scrollable so the modal stays usable on short devices when
+            // all three blockers fire at once (🪄 + 💸 + a long list of
+            // missing Facturx fields easily overflows).
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                if (showFont) {
+                    Text("🪄  $fontLine")
+                    if (showVat || ciiMessages.isNotEmpty()) {
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
+                if (showVat) {
+                    Text("💸  $vatLine")
+                    if (ciiMessages.isNotEmpty()) {
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
+                if (ciiMessages.isNotEmpty()) {
+                    Text("📄  $ciiIntro")
+                    Spacer(Modifier.height(12.dp))
+                    ciiMessages.forEach { line ->
+                        Text("• $line")
+                        Spacer(Modifier.height(4.dp))
+                    }
                 }
             }
         },

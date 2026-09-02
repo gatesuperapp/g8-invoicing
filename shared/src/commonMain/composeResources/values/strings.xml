@@ -606,10 +606,10 @@
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
-    <string name="export_vat_exempt_conflict_message">Votre entreprise est en franchise de TVA mais vous avez ajouté de la TVA à certains produits. Veuillez la retirer pour pouvoir exporter votre facture.</string>
+    <string name="export_vat_exempt_conflict_message">Ton entreprise est en franchise de TVA mais tu as ajouté de la TVA à certains produits. Retire-la pour pouvoir exporter ta facture.</string>
     <string name="cii_validation_title">Oups</string>
-    <string name="cii_validation_intro">Pour créer une facture électronique valide, complétez les champs suivants :</string>
-    <string name="cii_validation_confirm">J'ai compris</string>
+    <string name="cii_validation_intro">Pour créer une facture électronique valide, complète les champs suivants :</string>
+    <string name="cii_validation_confirm">D'accord</string>
     <string name="cii_validation_issuer_missing">Ajouter un émetteur</string>
     <string name="cii_validation_issuer_name">Nom de l'émetteur</string>
     <string name="cii_validation_issuer_siren">SIREN / SIRET de l'émetteur</string>
@@ -1024,7 +1024,7 @@ Une erreur s'est produite :
     <string name="action_font_label">Police</string>
     <string name="action_font_description">Choisir la police du document</string>
     <string name="font_picker_title">Police du document</string>
-    <string name="export_error_premium_font_message">Votre document utilise une police premium mais vous n'êtes pas membre premium.</string>
+    <string name="export_error_premium_font_message">Ton document utilise une police premium mais tu n'es pas membre premium.</string>
 
     <!-- Tags BL / Devis (masculin) + statut « Facturé » -->
     <string name="appbar_tag_sent_masc">Envoyé</string>
