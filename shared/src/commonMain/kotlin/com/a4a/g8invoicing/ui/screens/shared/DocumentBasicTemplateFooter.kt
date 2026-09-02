@@ -124,7 +124,12 @@ fun DocumentBasicTemplateFooter(
         if (vatExemptionMention != null) {
             Spacer(Modifier.height(10.dp))
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                // end=3.dp matches DocumentBasicTemplateTotalPrices' right
+                // padding, so the mention's right edge lands on the same
+                // vertical as the € column of the totals block above.
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 3.dp),
                 text = vatExemptionMention,
                 style = bodyStyle.copy(
                     color = MentionColor,

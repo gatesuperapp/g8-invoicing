@@ -341,6 +341,10 @@ class PdfGeneratorImpl(
                     .setFontSize(fontSize)
                     .setFontColor(ColorConstants.DARK_GRAY)
                     .setTextAlignment(TextAlignment.RIGHT)
+                    // 4f matches the totals table's setPaddingRight(4f) —
+                    // the mention's right edge lands on the same vertical
+                    // as the € column of the totals block above.
+                    .setMarginRight(4f)
                     .setMarginTop(10f)
                     .setFixedLeading(10F)
             )
