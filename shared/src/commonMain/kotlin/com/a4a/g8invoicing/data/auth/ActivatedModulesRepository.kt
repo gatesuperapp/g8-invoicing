@@ -214,6 +214,10 @@ class ActivatedModulesRepository(
         // access.
         const val MODULE_MULTI_ENTREPRISE = "multi_entreprise"
 
+        // Document font picker. Free module (any user can turn it on), but
+        // some fonts inside are premium-only — the export flow gates them.
+        const val MODULE_FONT = "font"
+
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
         // so adding a future free module is one string.
@@ -224,6 +228,7 @@ class ActivatedModulesRepository(
             MODULE_FACTURX_EXPORT,
             MODULE_WATERMARK_REMOVAL,
             MODULE_MULTI_ENTREPRISE,
+            MODULE_FONT,
         )
 
         // Modules seeded into the activated set the first time the app boots after this

@@ -138,6 +138,13 @@ class CreditNoteAddEditViewModel(
         }
     }
 
+    // Mirror of InvoiceAddEditViewModel.setDocumentFont — updates the
+    // credit-note state + persists font_family via the standard update path.
+    fun setDocumentFont(fontId: String?) {
+        _documentUiState.value = _documentUiState.value.copy(fontFamily = fontId)
+        viewModelScope.launch { updateCreditNoteInLocalDb() }
+    }
+
     suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
         val currentDocumentId = _documentUiState.value.documentId?.toLong()
             ?: return null

@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -77,6 +78,7 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.ui.navigation.DocumentBottomBar
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.navigation.actionExport
+import com.a4a.g8invoicing.ui.navigation.actionFont
 import com.a4a.g8invoicing.ui.navigation.actionItems
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
@@ -88,9 +90,12 @@ import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorLightGrey
+import com.a4a.g8invoicing.ui.theme.DocumentFont
+import com.a4a.g8invoicing.ui.theme.LocalDocumentFont
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.isPremium
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.models.PaymentMeans
 import com.a4a.g8invoicing.facturx.CiiPreflightValidator
@@ -126,6 +131,8 @@ import com.a4a.g8invoicing.shared.resources.export_chooser_description
 import com.a4a.g8invoicing.shared.resources.export_chooser_facturx
 import com.a4a.g8invoicing.shared.resources.export_chooser_pdf
 import com.a4a.g8invoicing.shared.resources.export_chooser_title
+import com.a4a.g8invoicing.shared.resources.export_error_premium_font_message
+import com.a4a.g8invoicing.shared.resources.export_error_premium_font_title
 import com.a4a.g8invoicing.shared.resources.export_vat_exempt_conflict_message
 import com.a4a.g8invoicing.shared.resources.export_vat_exempt_conflict_title
 import com.a4a.g8invoicing.shared.resources.feature_coming_soon
@@ -187,6 +194,10 @@ fun DocumentAddEdit(
     // Retention CRUD, only wired non-noop by Invoice + CreditNote NavGraphs.
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit = { _, _ -> },
     onToggleRetentionHidden: (Int) -> Unit = {},
+    // Font picker: fired when the user picks a font in the Police sheet.
+    // Persists the DocumentFont.id on the doc row. Default no-op so callers
+    // that haven't wired it yet still compile.
+    onFontSelect: (DocumentFont) -> Unit = {},
 ) {
     // ModalBottomSheet lives in a separate window (Dialog), so it naturally
     // draws over the DocumentAddEditBottomBar with no z-order gymnastics —
@@ -329,6 +340,18 @@ fun DocumentAddEdit(
         // chooser but the invoice is missing EN 16931 mandatory fields. Empty =
         // OK to export; non-empty = block export, show the list.
         var ciiValidationIssues by remember { mutableStateOf(emptyList<CiiValidationIssue>()) }
+        // Font module + subscription state — the picker is only surfaced when
+        // the user has activated the Police module in gStore, and export is
+        // blocked with a modal when the picked font is premium and the user
+        // isn't a subscriber.
+        val fontModuleOn = ActivatedModulesRepository.MODULE_FONT in activated
+        val subscriptionRepo: com.a4a.g8invoicing.data.auth.SubscriptionRepository = koinInject()
+        val subscription by subscriptionRepo.state.collectAsState()
+        val isPremium: Boolean = subscription.isPremium()
+        val currentFont = DocumentFont.fromId(document.fontFamily)
+        var showPremiumFontError by rememberSaveable { mutableStateOf(false) }
+        val premiumFontErrorTitle = stringResource(Res.string.export_error_premium_font_title)
+        val premiumFontErrorMessage = stringResource(Res.string.export_error_premium_font_message)
         val exportChooserTitle = stringResource(Res.string.export_chooser_title)
         val exportChooserDescription = stringResource(Res.string.export_chooser_description)
         val pdfLabel = stringResource(Res.string.export_chooser_pdf)
@@ -346,14 +369,18 @@ fun DocumentAddEdit(
         val bankGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic)
         // As it's not possible to have a bottom bar inside a BottomSheetScaffold,
         // as a temporary solution, we use Scaffold inside BottomSheetScaffold
+        CompositionLocalProvider(LocalDocumentFont provides currentFont) {
         Scaffold(
             topBar = {
                 DeliveryNoteAddEditTopBar(
                     navController = navController,
                     onClickBack = onClickBack,
                     onClickExport = {
+                        val fontBlocksExport = currentFont.isPremium && !isPremium
                         if (hasVatExemptConflict(document)) {
                             showVatExemptConflict = true
+                        } else if (fontBlocksExport) {
+                            showPremiumFontError = true
                         } else if (ciiExportUnlocked) {
                             showExportChooser = true
                         } else {
@@ -373,6 +400,9 @@ fun DocumentAddEdit(
                     onClickStyle = {
                         onShowMessage(comingSoonMessage)
                     },
+                    onClickFont = if (fontModuleOn) {
+                        { currentSheet = BottomSheetType.FONT }
+                    } else null,
                 )
             }
         ) { innerPadding ->
@@ -381,6 +411,20 @@ fun DocumentAddEdit(
                     document = document,
                     onDismissRequest = { showPopup = false },
                     exportPdfContent = exportPdfContent
+                )
+            }
+
+            if (showPremiumFontError) {
+                AlertDialog(
+                    onDismissRequest = { showPremiumFontError = false },
+                    title = { Text(premiumFontErrorTitle) },
+                    text = { Text(premiumFontErrorMessage) },
+                    textContentColor = Color.Black,
+                    confirmButton = {
+                        Button(onClick = { showPremiumFontError = false }) {
+                            Text(okLabel)
+                        }
+                    },
                 )
             }
 
@@ -797,10 +841,19 @@ fun DocumentAddEdit(
                     onSaveRetention = onSaveRetention,
                     onToggleRetentionHidden = onToggleRetentionHidden,
                 )
+                BottomSheetType.FONT -> DocumentBottomSheetFont(
+                    sheetContentHeight = animatedSheetHeight,
+                    selected = currentFont,
+                    onSelect = { picked ->
+                        onFontSelect(picked)
+                        dismissSheet()
+                    },
+                )
                 BottomSheetType.STYLE, BottomSheetType.IMAGES -> {} // never surfaces as a sheet
             }
         }
     }
+    } // CompositionLocalProvider(LocalDocumentFont)
     }
 }
 
@@ -839,14 +892,17 @@ private fun DocumentAddEditBottomBar(
     onClickItems: () -> Unit,
     onClickStyle: () -> Unit,
     onClickSavePayment: () -> Unit = {},
+    onClickFont: (() -> Unit)? = null,
 ) {
     DocumentBottomBar(
-        actions = arrayOf(
-            actionTextElements(onClickElements),
-            actionItems(onClickItems),
-            //actionStyle(onClickStyle),
-            // actionSavePayment(onClickSavePayment)
-        )
+        actions = buildList {
+            add(actionTextElements(onClickElements))
+            add(actionItems(onClickItems))
+            // Only surfaced when the Font module is activated in gStore —
+            // the DocumentAddEdit callsite gates this via
+            // MODULE_FONT ∈ activatedModules.
+            onClickFont?.let { add(actionFont(it)) }
+        }.toTypedArray()
     )
 }
 
@@ -939,7 +995,7 @@ private fun CiiValidationIssue.resolveMessage(): String = when (this) {
 }
 
 enum class BottomSheetType {
-    ELEMENTS, ITEMS, IMAGES, STYLE
+    ELEMENTS, ITEMS, IMAGES, STYLE, FONT
 }
 
 private suspend fun PointerInputScope.customTransformGestures(

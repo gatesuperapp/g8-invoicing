@@ -189,6 +189,13 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    // Set the document font: state mirror + persist via the standard update
+    // path (writes font_family on the Invoice row alongside the other fields).
+    fun setDocumentFont(fontId: String?) {
+        _documentUiState.value = _documentUiState.value.copy(fontFamily = fontId)
+        updateInvoiceInLocalDb()
+    }
+
     private fun updateInvoiceInLocalDb() {
         updateJob?.cancel()
         updateJob = viewModelScope.launch {

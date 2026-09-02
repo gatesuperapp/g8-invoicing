@@ -113,6 +113,13 @@ class QuoteAddEditViewModel(
         }
     }
 
+    // Mirror of InvoiceAddEditViewModel.setDocumentFont — persists font_family
+    // on the quote row via the standard update path.
+    fun setDocumentFont(fontId: String?) {
+        _documentUiState.value = _documentUiState.value.copy(fontFamily = fontId)
+        updateQuoteInLocalDb()
+    }
+
     suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
         val currentDocumentId = _documentUiState.value.documentId?.toLong()
         if (currentDocumentId == null) {

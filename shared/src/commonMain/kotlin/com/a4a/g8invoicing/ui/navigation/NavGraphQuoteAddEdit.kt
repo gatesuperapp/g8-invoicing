@@ -450,6 +450,9 @@ fun NavGraphBuilder.quoteAddEdit(
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent,
             showProductType = showProductType,
+            onFontSelect = { font ->
+                quoteViewModel.setDocumentFont(font.id)
+            },
         )
     }
 }

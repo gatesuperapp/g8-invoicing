@@ -466,6 +466,9 @@ fun NavGraphBuilder.creditNoteAddEdit(
             onToggleRetentionHidden = { idx ->
                 creditNoteViewModel.toggleRetentionHiddenAt(idx)
             },
+            onFontSelect = { font ->
+                creditNoteViewModel.setDocumentFont(font.id)
+            },
         )
     }
 }

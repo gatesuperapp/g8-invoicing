@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.RequestQuote
+import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -64,6 +65,9 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_cii_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_font_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_font_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_font_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
@@ -164,6 +168,14 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_watermark_desc,
         detailRes = Res.string.gstore_module_watermark_detail,
         icon = Icons.Outlined.WaterDrop,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_FONT,
+        titleRes = Res.string.gstore_module_font_title,
+        descRes = Res.string.gstore_module_font_desc,
+        detailRes = Res.string.gstore_module_font_detail,
+        icon = Icons.Outlined.TextFields,
         isFree = true,
     ),
     // Pinned last per product ordering — feature-y modules read first, then

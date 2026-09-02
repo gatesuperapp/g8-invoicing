@@ -500,6 +500,9 @@ fun NavGraphBuilder.invoiceAddEdit(
             onToggleRetentionHidden = { idx ->
                 invoiceViewModel.toggleRetentionHiddenAt(idx)
             },
+            onFontSelect = { font ->
+                invoiceViewModel.setDocumentFont(font.id)
+            },
         )
     }
 }

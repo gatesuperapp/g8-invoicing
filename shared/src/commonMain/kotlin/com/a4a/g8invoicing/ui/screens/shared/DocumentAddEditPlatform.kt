@@ -56,4 +56,5 @@ expect fun DocumentAddEditPlatform(
     onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit = { _, _ -> },
     onToggleRetentionHidden: (Int) -> Unit = {},
+    onFontSelect: (com.a4a.g8invoicing.ui.theme.DocumentFont) -> Unit = {},
 )

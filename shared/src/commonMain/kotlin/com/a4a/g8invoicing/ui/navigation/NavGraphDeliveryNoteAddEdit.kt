@@ -450,6 +450,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent,
             showProductType = showProductType,
+            onFontSelect = { font ->
+                deliveryNoteViewModel.setDocumentFont(font.id)
+            },
         )
     }
 }

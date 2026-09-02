@@ -51,6 +51,7 @@ actual fun DocumentAddEditPlatform(
     onToggleHideLinkedSourceHeaders: (() -> Unit)?,
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit,
     onToggleRetentionHidden: (Int) -> Unit,
+    onFontSelect: (com.a4a.g8invoicing.ui.theme.DocumentFont) -> Unit,
 ) {
     // Android uses the mobile DocumentAddEdit with bottom sheets
     DocumentAddEdit(
@@ -93,5 +94,6 @@ actual fun DocumentAddEditPlatform(
         onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
         onSaveRetention = onSaveRetention,
         onToggleRetentionHidden = onToggleRetentionHidden,
+        onFontSelect = onFontSelect,
     )
 }
