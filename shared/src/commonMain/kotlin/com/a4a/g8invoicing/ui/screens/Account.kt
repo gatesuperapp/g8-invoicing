@@ -981,55 +981,21 @@ private fun MyCompaniesSection(
     }
 
     if (deleteBlocked) {
-        // Violet card, white title/body, white CTA with violet label — this
-        // is the "product decision" modal family (contrast with the neutral
-        // white-card confirmation dialogs). Same rounded-16dp shape as the
-        // export chooser but flipped colourway so it reads as a soft alert.
-        Dialog(
+        // Same AlertDialog shape as the export-blocker "Oups" modal in
+        // DocumentAddEdit — neutral white card, black body, single confirm
+        // button. The bespoke violet card this used to render broke the
+        // dialog family for no product reason.
+        AlertDialog(
             onDismissRequest = { deleteBlocked = false },
-            properties = DialogProperties(usePlatformDefaultWidth = false),
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-                    .background(AppColors.buttonActive, shape = RoundedCornerShape(16.dp))
-                    .padding(horizontal = 24.dp, vertical = 24.dp),
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start,
-                ) {
-                    Text(
-                        text = stringResource(Res.string.entreprise_delete_blocked_title),
-                        style = MaterialTheme.typography.textScreenTitle.copy(
-                            fontSize = 18.sp,
-                            color = AppColors.textOnAccent,
-                        ),
-                        textAlign = TextAlign.Start,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(Res.string.entreprise_delete_blocked_message),
-                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textOnAccent),
-                        textAlign = TextAlign.Start,
-                        lineHeight = 20.sp,
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                        Button(
-                            onClick = { deleteBlocked = false },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = AppColors.surface,
-                                contentColor = AppColors.buttonActive,
-                            ),
-                        ) {
-                            Text(stringResource(Res.string.ok))
-                        }
-                    }
+            title = { Text(stringResource(Res.string.entreprise_delete_blocked_title)) },
+            text = { Text(stringResource(Res.string.entreprise_delete_blocked_message)) },
+            textContentColor = Color.Black,
+            confirmButton = {
+                Button(onClick = { deleteBlocked = false }) {
+                    Text(stringResource(Res.string.ok))
                 }
-            }
-        }
+            },
+        )
     }
 
     // "+ Ajouter une entreprise" — hidden when the multi-entreprise module is off
