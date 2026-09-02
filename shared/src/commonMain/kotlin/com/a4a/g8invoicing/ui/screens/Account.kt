@@ -945,9 +945,15 @@ private fun MyCompaniesSection(
     // detached or deleted first).
     var deleteBlocked by remember { mutableStateOf(false) }
 
+    // Deleting the last remaining entreprise would leave the doc-edit flows
+    // with no issuer to attach — the picker + numbering counter both rely on
+    // at least one existing issuer row. Hide the trash affordance in that
+    // case so the state simply can't be reached from this screen.
+    val canDeleteRow = issuers.size > 1
     issuers.forEach { issuer ->
         IssuerListRow(
             issuer = issuer,
+            showDelete = canDeleteRow,
             onClick = {
                 navController.navigate(
                     Screen.ClientAddEdit.name + "?itemId=${issuer.id}&type=issuer"
@@ -1043,6 +1049,7 @@ private fun MyCompaniesSection(
 @Composable
 private fun IssuerListRow(
     issuer: ClientOrIssuerState,
+    showDelete: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -1061,13 +1068,15 @@ private fun IssuerListRow(
             text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
             style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
         )
-        Icon(
-            modifier = Modifier
-                .size(18.dp)
-                .clickable(onClick = onDelete),
-            imageVector = Icons.Outlined.DeleteOutline,
-            contentDescription = null,
-        )
+        if (showDelete) {
+            Icon(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable(onClick = onDelete),
+                imageVector = Icons.Outlined.DeleteOutline,
+                contentDescription = null,
+            )
+        }
     }
 }
 
