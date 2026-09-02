@@ -892,4 +892,14 @@
     <string name="onboarding_19_final_title">All set, you're good to go!</string>
     <string name="entreprise_delete_blocked_title">Cannot delete</string>
     <string name="entreprise_delete_blocked_message">This company still has attached clients, products or documents. To delete it, remove them first.</string>
+
+    <!-- Font picker (Fonts module) -->
+    <string name="gstore_module_font_title">Fonts</string>
+    <string name="gstore_module_font_desc">Change the font of your documents.</string>
+    <string name="gstore_module_font_detail">Turn this module on to unlock more fonts for your documents. Some are free, others are reserved for premium members.\n\nAvailable fonts: Noto Sans (free), Noto Serif (free), Cabin, Source Sans, Lato, Inter, Spectral, Onest and IBM Plex Sans.</string>
+    <string name="action_font_label">Font</string>
+    <string name="action_font_description">Choose the document font</string>
+    <string name="font_picker_title">Document font</string>
+    <string name="export_error_premium_font_title">Premium font</string>
+    <string name="export_error_premium_font_message">Your document uses a premium font but you are not a premium member.</string>
 </resources>

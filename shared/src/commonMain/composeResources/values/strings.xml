@@ -1010,4 +1010,14 @@ Une erreur s'est produite :
     <string name="onboarding_19_einvoice_sub">Tu peux devenir membre premium en t'abonnant depuis le site internet 🌟</string>
     <string name="onboarding_19_einvoice_cta">Suivant</string>
     <string name="onboarding_19_final_title">C'est bon, tout est carré !</string>
+
+    <!-- Font picker (module Polices) -->
+    <string name="gstore_module_font_title">Polices</string>
+    <string name="gstore_module_font_desc">Changer la police de vos documents.</string>
+    <string name="gstore_module_font_detail">Activez ce module pour débloquer des polices pour vos documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans (gratuite), Noto Serif (gratuite), Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
+    <string name="action_font_label">Police</string>
+    <string name="action_font_description">Choisir la police du document</string>
+    <string name="font_picker_title">Police du document</string>
+    <string name="export_error_premium_font_title">Police premium</string>
+    <string name="export_error_premium_font_message">Votre document utilise une police premium mais vous n'êtes pas membre premium.</string>
 </resources>

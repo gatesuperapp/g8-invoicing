@@ -897,4 +897,14 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_final_title">Alles klar, du bist startklar!</string>
     <string name="entreprise_delete_blocked_title">Löschen nicht möglich</string>
     <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Um es zu löschen, entfernen Sie diese zuerst.</string>
+
+    <!-- Font picker (Modul Schriftarten) -->
+    <string name="gstore_module_font_title">Schriftarten</string>
+    <string name="gstore_module_font_desc">Ändere die Schriftart deiner Dokumente.</string>
+    <string name="gstore_module_font_detail">Aktiviere dieses Modul, um weitere Schriftarten für deine Dokumente freizuschalten. Einige sind kostenlos, andere sind Premium-Mitgliedern vorbehalten.\n\nVerfügbare Schriftarten: Noto Sans (kostenlos), Noto Serif (kostenlos), Cabin, Source Sans, Lato, Inter, Spectral, Onest und IBM Plex Sans.</string>
+    <string name="action_font_label">Schrift</string>
+    <string name="action_font_description">Dokumentschriftart wählen</string>
+    <string name="font_picker_title">Dokumentschriftart</string>
+    <string name="export_error_premium_font_title">Premium-Schriftart</string>
+    <string name="export_error_premium_font_message">Dein Dokument verwendet eine Premium-Schriftart, aber du bist kein Premium-Mitglied.</string>
 </resources>

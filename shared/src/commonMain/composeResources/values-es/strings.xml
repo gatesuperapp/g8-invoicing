@@ -899,4 +899,14 @@ Une erreur s'est produite :
     <string name="onboarding_19_final_title">¡Listo, todo está en orden!</string>
     <string name="entreprise_delete_blocked_title">Eliminación imposible</string>
     <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. Para eliminarla, elimine primero esos elementos.</string>
+
+    <!-- Font picker (módulo Fuentes) -->
+    <string name="gstore_module_font_title">Fuentes</string>
+    <string name="gstore_module_font_desc">Cambia la fuente de tus documentos.</string>
+    <string name="gstore_module_font_detail">Activa este módulo para desbloquear más fuentes para tus documentos. Algunas son gratuitas, otras están reservadas a los miembros premium.\n\nFuentes disponibles: Noto Sans (gratuita), Noto Serif (gratuita), Cabin, Source Sans, Lato, Inter, Spectral, Onest e IBM Plex Sans.</string>
+    <string name="action_font_label">Fuente</string>
+    <string name="action_font_description">Elegir la fuente del documento</string>
+    <string name="font_picker_title">Fuente del documento</string>
+    <string name="export_error_premium_font_title">Fuente premium</string>
+    <string name="export_error_premium_font_message">Tu documento usa una fuente premium pero no eres miembro premium.</string>
 </resources>
