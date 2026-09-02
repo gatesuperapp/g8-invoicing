@@ -694,7 +694,7 @@ fun DocumentAddEdit(
     //   short forms.
     val animatedSheetHeight by androidx.compose.animation.core.animateDpAsState(
         targetValue = if (expandedByHandle) sheetLayoutHeight - 50.dp
-        else sheetLayoutHeight / 2 - 30.dp,
+        else sheetLayoutHeight / 2 - 60.dp,
         label = "sheet-content-height",
     )
     currentSheet?.let { sheet ->

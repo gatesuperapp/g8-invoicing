@@ -41,7 +41,10 @@ fun DocumentBasicTemplateTotalPrices(
 ) {
     val currencyCode = uiState.currency.text.ifEmpty { "EUR" }
     val formatLocale = uiState.formatLocale
-    val paddingBottom = 5.dp
+    // 3dp inter-row spacing on the preview totals block (VAT, retention, totals).
+    // PDF path renders through a separate template so this doesn't shift the
+    // exported document.
+    val paddingBottom = 3.dp
 
     data class Line(val label: String, val amount: String, val bold: Boolean)
     val lines = buildList {
