@@ -1120,7 +1120,19 @@ private fun IssuerBankRow(
                     text = bank.identifier,
                     placeholder = identifierPlaceholder,
                     onValueChange = {
-                        onBankChange(bank.copy(identifier = it as TextFieldValue))
+                        onBankChange(
+                            bank.copy(
+                                identifier = it as TextFieldValue,
+                                // Freeze the effective country onto the bank the
+                                // first time real content lands here, so a later
+                                // change to the issuer address country doesn't
+                                // silently swap the bank's country/label (IBAN
+                                // vs generic) under the user. Empty banks keep
+                                // countryCode = null so they still track the
+                                // address default.
+                                countryCode = freezeBankCountryIfNeeded(bank, it.text, effectiveCountry),
+                            )
+                        )
                     },
                     // The FR76… placeholder wraps to 2 lines on narrow phones;
                     // reserve 2 lines when IBAN so the field height stays
@@ -1142,7 +1154,12 @@ private fun IssuerBankRow(
                         text = bank.bic,
                         placeholder = "XXXXFRPPXXX",
                         onValueChange = {
-                            onBankChange(bank.copy(bic = it as TextFieldValue))
+                            onBankChange(
+                                bank.copy(
+                                    bic = it as TextFieldValue,
+                                    countryCode = freezeBankCountryIfNeeded(bank, bank.identifier.text.ifBlank { it.text }, effectiveCountry),
+                                )
+                            )
                         },
                     ),
                     pageElement = ScreenElement.ISSUER_BANKS,
@@ -1168,5 +1185,22 @@ private fun IssuerBankRow(
             } else null,
         )
     }
+}
+
+// Called from the identifier/BIC onValueChange handlers. Returns the country
+// code that should be persisted on the bank state:
+// - unchanged if the bank already has an explicit countryCode,
+// - unchanged (null) if the bank stays empty (no identifier / bic typed),
+// - snapshotted from [effectiveCountry] the first time real content lands,
+//   so subsequent changes to the issuer address country don't drift the
+//   bank's country label under the user.
+private fun freezeBankCountryIfNeeded(
+    bank: com.a4a.g8invoicing.ui.states.IssuerBankState,
+    newContent: String,
+    effectiveCountry: String?,
+): String? {
+    if (!bank.countryCode.isNullOrBlank()) return bank.countryCode
+    if (newContent.isBlank()) return bank.countryCode
+    return effectiveCountry
 }
 
