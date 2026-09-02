@@ -97,7 +97,7 @@
     <string name="alert_dialog_delete_invoice_2"></string>
     <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
-    <string name="alert_dialog_delete_general">Êtes vous sûr·e ? Cette action est irréversible.</string>
+    <string name="alert_dialog_delete_general">Es-tu sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
     <string name="alert_dialog_cancel">Annuler</string>
 
@@ -121,11 +121,11 @@
     <string name="document_modal_product_back">Retour</string>
 
     <!-- Invoice Created Dialog -->
-    <string name="invoice_created_title">Votre facture a bien été créée !</string>
+    <string name="invoice_created_title">Ta facture a bien été créée !</string>
     <string name="invoice_created_button">Voir ma facture</string>
-    <string name="credit_note_created_title">Votre avoir a bien été créé !</string>
+    <string name="credit_note_created_title">Ton avoir a bien été créé !</string>
     <string name="credit_note_created_button">Voir mon avoir</string>
-    <string name="corrected_invoice_created_title">Votre facture rectificative a bien été créée !</string>
+    <string name="corrected_invoice_created_title">Ta facture rectificative a bien été créée !</string>
     <string name="corrected_invoice_created_button">Voir ma facture rectificative</string>
 
     <!-- Document Form Strings -->
@@ -385,14 +385,14 @@
     <string name="product_type_info_desc">Info type de produit</string>
     <string name="issuer_intra_eu_sales_label">Ventes hors de mon pays (UE)</string>
     <string name="issuer_intra_eu_sales_info_modal_title">Ventes intra-UE</string>
-    <string name="issuer_intra_eu_sales_info_modal_content">Cochez si :\n- votre entreprise est dans l'Union européenne\n- Et que vous facturez au moins un client hors de votre pays.\n\ng8 vous demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans votre pays, ou hors UE ? Laissez décoché.</string>
+    <string name="issuer_intra_eu_sales_info_modal_content">Coche si :\n- ton entreprise est dans l'Union européenne\n- Et que tu factures au moins un client hors de ton pays.\n\ng8 te demandera alors, pour chaque produit, s'il s'agit d'un service ou d'un bien — les règles de TVA diffèrent.\n\nFacturation uniquement dans ton pays, ou hors UE ? Laisse décoché.</string>
     <string name="issuer_intra_eu_sales_info_desc">Info ventes intra-UE</string>
     <string name="issuer_vat_exempt_label">Franchise en base de TVA</string>
     <string name="issuer_vat_exempt_info_modal_title">Franchise en base de TVA</string>
-    <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à votre pays sur les factures.</string>
+    <string name="issuer_vat_exempt_info_modal_content">Utile pour la conformité facture électronique — permet à g8 d'ajouter automatiquement la mention légale de franchise TVA adaptée à ton pays sur les factures.</string>
     <string name="product_unit_code_label">Code unité</string>
     <string name="product_unit_code_info_modal_title">Code unité</string>
-    <string name="product_unit_code_info_modal_content">Il est déduit automatiquement de l'unité que vous saisissez. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.\n\nSi l'unité que vous utilisez ne correspond à aucun code, pas de souci — c'est aussi valable.</string>
+    <string name="product_unit_code_info_modal_content">Il est déduit automatiquement de l'unité que tu saisis. C'est un champ obligatoire pour la conformité facture électronique.\n\nIl n'apparaît pas sur la facture PDF.\n\nSi l'unité que tu utilises ne correspond à aucun code, pas de souci — c'est aussi valable.</string>
     <string name="info_tooltip_dismiss">Ne plus afficher</string>
     <string name="info_tooltip_ok">OK</string>
     <string name="product_unit_code_info_desc">Info code unité</string>
@@ -442,13 +442,13 @@
     <string name="document_payment_bank_picker_title">Coordonnées bancaires</string>
     <!-- Empty-state placeholder in the payment-means IBAN dropdown when the
          issuer has no bank configured yet. -->
-    <string name="document_payment_bank_iban_empty">Ajoutez un compte bancaire à votre entreprise</string>
+    <string name="document_payment_bank_iban_empty">Ajoute un compte bancaire à ton entreprise</string>
     <!-- Empty-state variant when the invoice doesn't have an issuer set at
          all yet — the user needs to pick one before we can talk about their
          bank accounts. -->
-    <string name="document_payment_bank_iban_empty_no_issuer">Ajoutez un émetteur à votre facture</string>
+    <string name="document_payment_bank_iban_empty_no_issuer">Ajoute un émetteur à ta facture</string>
     <string name="client_selection_title">Sélectionner les clients</string>
-    <string name="client_selection_empty">Vous n'avez pas encore créé de client·e. Vous pouvez le faire depuis la catégorie "Client·es".</string>
+    <string name="client_selection_empty">Tu n'as pas encore créé de client·e. Tu peux le faire depuis la catégorie "Client·es".</string>
     <string name="client_selection_all_used">Tous les clients sont déjà assignés à d'autres prix.</string>
     <string name="client_selection_validate">Valider</string>
     <string name="select_placeholder">Sélectionner…</string>
@@ -468,17 +468,17 @@
     <string name="whats_new_close">Fermer</string>
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
-    <string name="whats_new_discover">Découvrez les nouveautés...</string>
+    <string name="whats_new_discover">Découvre les nouveautés...</string>
     <string name="whats_new_gstore_title">𝕘Store</string>
     <string name="whats_new_gstore_description">Un petit magasin pour débloquer des fonctionnalités.</string>
     <string name="whats_new_watermark_title">Fait avec 𝕘8</string>
-    <string name="whats_new_watermark_description">Une discrète mention « Fait avec 𝕘8 » apparaît maintenant sur vos documents. Vous pouvez la retirer en devenant membre premium, et soutenir l'app par la même occasion !</string>
+    <string name="whats_new_watermark_description">Une discrète mention « Fait avec 𝕘8 » apparaît maintenant sur tes documents. Tu peux la retirer en devenant membre premium, et soutenir l'app par la même occasion !</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
     <string name="whats_new_spanish_description">𝕘8 parle maintenant espagnol !</string>
     <string name="whats_new_currency_title">Money money</string>
-    <string name="whats_new_currency_description">Vous pouvez désormais utiliser d'autres devises que l'euro. Changez de monnaie dans "Mon compte" &gt; "Devise et langue".</string>
+    <string name="whats_new_currency_description">Tu peux désormais utiliser d'autres devises que l'euro. Change de monnaie dans "Mon compte" &gt; "Devise et langue".</string>
     <string name="whats_new_companies_title">Mes entreprises</string>
-    <string name="whats_new_companies_description">Gérez plus facilement les émetteurs utilisés dans vos documents depuis "Mon compte" &gt; "Mes entreprises".</string>
+    <string name="whats_new_companies_description">Gère plus facilement les émetteurs utilisés dans tes documents depuis "Mon compte" &gt; "Mes entreprises".</string>
 
     <!-- Toast messages -->
     <string name="feature_coming_soon">Bientôt disponible :)</string>
@@ -555,53 +555,53 @@
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
-    <string name="gstore_subtitle_free">Découvrez les modules disponibles avec un compte g8 premium.</string>
-    <string name="gstore_subtitle_premium">Activez les modules que vous souhaitez utiliser.</string>
+    <string name="gstore_subtitle_free">Découvre les modules disponibles avec un compte g8 premium.</string>
+    <string name="gstore_subtitle_premium">Active les modules que tu souhaites utiliser.</string>
     <string name="gstore_premium_badge">★ PREMIUM</string>
     <string name="gstore_footer_free">Plus d'informations sur </string>
     <string name="gstore_premium_only_message">Cette fonctionnalité est réservée aux membres premium.</string>
-    <string name="gstore_footer_premium">Gérez votre compte sur </string>
+    <string name="gstore_footer_premium">Gère ton compte sur </string>
     <string name="gstore_module_orders_title">Bon de commande</string>
-    <string name="gstore_module_orders_desc">Gérez les commandes de vos clients</string>
+    <string name="gstore_module_orders_desc">Gère les commandes de tes clients</string>
     <string name="gstore_module_watermark_title">Mention g8</string>
-    <string name="gstore_module_watermark_desc">Retirer la mention g8 de vos documents</string>
-    <string name="gstore_module_watermark_detail">Activez ce module pour supprimer le filigrane « Fait avec g8, application mobile de facturation » de vos documents.</string>
+    <string name="gstore_module_watermark_desc">Retirer la mention g8 de tes documents</string>
+    <string name="gstore_module_watermark_detail">Le filigrane « Fait avec g8, application mobile de facturation » est affiché par défaut dans les documents. Il permet de soutenir le projet en le faisant connaître :) Tu peux cependant le retirer en activant ce module.</string>
     <string name="invoice_watermark_default">Fait avec g8 (www.the-gate.fr), application mobile de facturation</string>
     <string name="gstore_module_payments_title">Paiements</string>
-    <string name="gstore_module_payments_desc">Enregistrez CB, chèques, espèces</string>
+    <string name="gstore_module_payments_desc">Enregistre CB, chèques, espèces</string>
     <string name="gstore_module_themes_title">Thèmes premium</string>
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
     <string name="gstore_module_quote_title">Devis illimités</string>
     <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
-    <string name="gstore_module_quote_detail">Activez ce module pour créer des devis, les envoyer à vos client·es, et les convertir en facture une fois acceptés.\n\nLe numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_detail">Active ce module pour créer des devis, les envoyer à tes client·es, et les convertir en facture une fois acceptés.\n\nLe numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
     <string name="gstore_module_quote_trial_title">Devis découverte</string>
     <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
-    <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle vous convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.</string>
+    <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle te convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.</string>
     <string name="gstore_quote_trial_exhausted_title">Devis gratuits épuisés</string>
-    <string name="gstore_quote_trial_exhausted_body">Vos 5 devis gratuits sont écoulés. Si vous souhaitez continuer à utiliser les devis, vous pouvez devenir membre premium.</string>
+    <string name="gstore_quote_trial_exhausted_body">Tes 5 devis gratuits sont écoulés. Si tu souhaites continuer à utiliser les devis, tu peux devenir membre premium.</string>
     <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
-    <string name="gstore_module_delivery_note_detail">Activez ce module pour créer des bons de livraison, les envoyer à vos client·es et les convertir en facture une fois acceptés.\n\nLe numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\nVous pouvez convertir un bon de livraison en facture, et grouper plusieurs BLs en une seule facture.</string>
+    <string name="gstore_module_delivery_note_detail">Active ce module pour créer des bons de livraison, les envoyer à tes client·es et les convertir en facture une fois acceptés.\n\nLe numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\nTu peux convertir un bon de livraison en facture, et grouper plusieurs BLs en une seule facture.</string>
     <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
     <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises</string>
-    <string name="gstore_module_multi_entreprise_detail">Activez ce module si vous facturez sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nVous pourrez ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nVos clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
+    <string name="gstore_module_multi_entreprise_detail">Active ce module si tu factures sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nTu pourras ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nTes clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
     <!-- CII XML export gStore module — same structured data as Factur-X but
          delivered as a raw XML file, for international platforms that don't
          accept the Factur-X PDF/A-3 container yet. Independent of client
          type (works for a Particulier client too). -->
     <string name="gstore_module_cii_title">Export CII XML</string>
-    <string name="gstore_module_cii_desc">Exporter les données dans un format socle de facturation électronique</string>
-    <string name="gstore_module_cii_detail">Activer ce module pour pouvoir exporter vos factures au format Cross Industry Invoice (CII), une norme de facturation électronique reconnue à l'international.\n\nSes données XML sont lisibles par des logiciels, notamment des plateformes de facturation électronique.\n\nIl ne contient pas de PDF contrairement au format Factur-X.</string>
+    <string name="gstore_module_cii_desc">Exporter les factures dans un format socle de facturation électronique</string>
+    <string name="gstore_module_cii_detail">Active ce module pour pouvoir exporter tes factures au format Cross Industry Invoice (CII), une norme de facturation électronique reconnue à l'international.\n\nSes données XML sont lisibles par des logiciels, notamment des plateformes de facturation électronique.\n\nIl ne contient pas de PDF contrairement au format Factur-X.</string>
     <!-- Factur-X (PDF/A-3 hybrid) export gStore module — visual PDF + CII XML
          embedded as `factur-x.xml` (/AF, AFRelationship=Data). Same pre-launch
          free treatment as MODULE_CII_XML_EXPORT. -->
     <string name="gstore_module_facturx_title">Export Factur-X</string>
-    <string name="gstore_module_facturx_desc">Exporter les données dans un format socle de facturation électronique</string>
-    <string name="gstore_module_facturx_detail">Activer ce module pour pouvoir exporter vos factures au format Factur-X, une norme de facturation électronique franco-allemande.\n\nLe fichier généré est un PDF classique adossé à un fichier XML lisible par les machines.\n\nUtile pour transmettre vos factures aux plateformes de facturation électronique tout en gardant un PDF lisible pour le client.</string>
+    <string name="gstore_module_facturx_desc">Exporter les factures dans un format socle de facturation électronique</string>
+    <string name="gstore_module_facturx_detail">Active ce module pour pouvoir exporter tes factures au format Factur-X, une norme de facturation électronique franco-allemande.\n\nLe fichier généré est un PDF classique adossé à un fichier XML lisible par les machines.\n\nUtile pour transmettre tes factures aux plateformes de facturation électronique tout en gardant un PDF lisible pour le client.</string>
     <string name="export_cii_button">Exporter en CII</string>
     <string name="export_chooser_title">Format d'export</string>
-    <string name="export_chooser_description">Pour un format compatible facturation électronique, utilisez CII ou Factur-X.</string>
+    <string name="export_chooser_description">Pour un format compatible facturation électronique, utilise CII ou Factur-X.</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
     <string name="export_chooser_facturx">Factur-X</string>
@@ -639,14 +639,14 @@
     <!-- Account Screen -->
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
-    <string name="account_auth_title">Vous êtes membre premium ? Connectez-vous ci-dessous :</string>
-    <string name="account_auth_subtitle">Recevez un lien de connexion par email.</string>
+    <string name="account_auth_title">Tu es membre premium ? Connecte-toi ci-dessous :</string>
+    <string name="account_auth_subtitle">Reçois un lien de connexion par email.</string>
     <string name="account_auth_email_label">Email</string>
     <string name="account_auth_send_link">Recevoir mon lien de connexion</string>
-    <string name="account_auth_link_sent">✅ Un email avec le lien de connexion vous a été envoyé. Si vous ne le recevez pas, vérifiez dans vos spams, et n'hésitez pas à nous écrire à </string>
-    <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Vous pouvez réessayer dans quelques minutes, et n'hésitez pas à nous écrire à </string>
-    <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Vous pouvez demander un nouveau lien. Si le problème persiste, écrivez-nous à </string>
-    <string name="account_auth_login_failed">La connexion est pour l'instant impossible. Vous pouvez réessayer un peu plus tard.\n\nSi le problème persiste, écrivez-nous à </string>
+    <string name="account_auth_link_sent">✅ Un email avec le lien de connexion t'a été envoyé. Si tu ne le reçois pas, vérifie dans tes spams, et n'hésite pas à nous écrire à </string>
+    <string name="account_auth_error">Impossible d'envoyer le lien pour le moment. Tu peux réessayer dans quelques minutes, et n'hésite pas à nous écrire à </string>
+    <string name="account_auth_link_expired">⏰ Ce lien a expiré ou a déjà été utilisé. Tu peux demander un nouveau lien. Si le problème persiste, écris-nous à </string>
+    <string name="account_auth_login_failed">La connexion est pour l'instant impossible. Tu peux réessayer un peu plus tard.\n\nSi le problème persiste, écris-nous à </string>
     <string name="account_auth_invalid_email">Adresse e-mail invalide.</string>
     <string name="account_logout">Me déconnecter</string>
     <string name="account_status_premium_fly">𝕘𝟠 Fly ⭐ — Membre Premium</string>
@@ -668,29 +668,29 @@
     <string name="client_type_professional">Professionnel</string>
     <string name="account_section_advanced">Avancé</string>
     <string name="account_delete_cta">Supprimer mon compte</string>
-    <string name="account_delete_dialog_title">Supprimer définitivement votre compte ?</string>
-    <string name="account_delete_dialog_message">Cette action est irréversible. Votre abonnement sera annulé immédiatement, votre compte sera supprimé de nos serveurs et vous serez déconnecté·e. Vos factures et données enregistrées localement sur votre appareil resteront intactes.</string>
+    <string name="account_delete_dialog_title">Supprimer définitivement ton compte ?</string>
+    <string name="account_delete_dialog_message">Cette action est irréversible. Ton abonnement sera annulé immédiatement, ton compte sera supprimé de nos serveurs et tu seras déconnecté·e. Tes factures et données enregistrées localement sur ton appareil resteront intactes.</string>
     <string name="account_delete_dialog_confirm">Oui, supprimer</string>
     <string name="account_delete_dialog_cancel">Annuler</string>
-    <string name="account_delete_error">Impossible de supprimer votre compte pour le moment. Vérifiez votre connexion et réessayez, ou écrivez-nous à </string>
+    <string name="account_delete_error">Impossible de supprimer ton compte pour le moment. Vérifie ta connexion et réessaie, ou écris-nous à </string>
     <string name="account_delete_success_title">Compte supprimé</string>
-    <string name="account_delete_success_message">Votre compte a bien été supprimé. Vos factures et données enregistrées localement sur cet appareil sont conservées.</string>
+    <string name="account_delete_success_message">Ton compte a bien été supprimé. Tes factures et données enregistrées localement sur cet appareil sont conservées.</string>
 
     <!-- About Screen -->
     <string name="about">𝕘𝟠 est une application pratique et engagée :\n• Fonctionne hors-ligne \n• Ni pub ni traceur \n• Logiciel libre, open-source\n• Conçue pour les producteur·ices bio\n• Souhaite financer des projets de protection de la faune sauvage, en particulier des chiroptères.</string>
     <string name="about_title_about">À propos</string>
     <string name="about_title_website">Site internet</string>
-    <string name="about_website_intro">Rendez-vous sur notre site internet </string>
+    <string name="about_website_intro">Rends-toi sur notre site internet </string>
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr</string>
     <string name="about_website_tail"> !</string>
     <string name="about_title_community">Communauté</string>
-    <string name="about_community_text">Venez discuter de vos besoins, vos idées et échanger sur le</string>
+    <string name="about_community_text">Viens discuter de tes besoins, tes idées et échanger sur le</string>
     <string name="about_community_cta">forum de la communauté.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Assistance</string>
-    <string name="about_assistance_intro">Vous pouvez nous écrire à tout moment pour signaler un bug, proposer une fonctionnalité ou demander de l'aide.</string>
-    <string name="about_assistance_more_lead">Vous pouvez également consulter la </string>
+    <string name="about_assistance_intro">Tu peux nous écrire à tout moment pour signaler un bug, proposer une fonctionnalité ou demander de l'aide.</string>
+    <string name="about_assistance_more_lead">Tu peux également consulter la </string>
     <string name="about_assistance_forum_link_text">rubrique « Aide » du forum</string>
     <string name="about_assistance_forum_link">https://forum.the-gate.fr/c/aide/7</string>
     <string name="about_assistance_more_middle">, parcourir les </string>
@@ -699,14 +699,14 @@
     <string name="about_assistance_more_tail"> sur le site.</string>
     <string name="about_contact_email">contact@the-gate.fr</string>
     <string name="about_title_backup">Sauvegarde</string>
-    <string name="about_backup_text">Pensez à télécharger votre base de données régulièrement, pour la restaurer en cas de perte de votre téléphone.</string>
+    <string name="about_backup_text">Pense à télécharger ta base de données régulièrement, pour la restaurer en cas de perte de ton téléphone.</string>
     <string name="about_download_database">💎 Sauvegarder 💎</string>
     <string name="account_backup_dialog_title">Sauvegarde téléchargée</string>
-    <string name="account_backup_dialog_message">Votre base de données a été enregistrée dans le dossier Téléchargements. Voulez-vous également l'envoyer par e-mail ?</string>
+    <string name="account_backup_dialog_message">Ta base de données a été enregistrée dans le dossier Téléchargements. Veux-tu également l'envoyer par e-mail ?</string>
     <string name="account_backup_dialog_yes">Oui, envoyer par e-mail</string>
     <string name="account_backup_dialog_no">Non, c'est tout</string>
     <string name="about_title_legal">Mentions légales</string>
-    <string name="about_terms_of_service_header">En utilisant l'application, vous acceptez les</string>
+    <string name="about_terms_of_service_header">En utilisant l'application, tu acceptes les</string>
     <string name="about_terms_of_service">conditions d'utilisation</string>
     <string name="about_terms_of_service_header_2">et la</string>
     <string name="about_terms_of_service_url_1">https://www.the-gate.fr/conditions-generales</string>
@@ -716,7 +716,7 @@
     <string name="account_legal_line">Lire les %1$s et la %2$s</string>
     <string name="account_legal_terms_label">conditions d'utilisation</string>
     <string name="account_legal_privacy_label">politique de confidentialité</string>
-    <string name="about_share_text_2">Partagez-la à vos ami·es !</string>
+    <string name="about_share_text_2">Partage-la à tes ami·es !</string>
     <string name="about_share_button">Partager</string>
     <!-- Licences section: code (GPL-3.0) + polices embarquées (OFL 1.1). Le
          corps NOTICE-polices.md + OFL-1.1.txt est chargé depuis
@@ -779,7 +779,7 @@
     <string name="export_ongoing">Export en cours…</string>
     <string name="export_done">Export terminé</string>
     <string name="export_error">Échec de l&apos;export.</string>
-    <string name="export_permission_denied">L&apos;accès au stockage est nécessaire pour enregistrer le PDF. Vous pouvez autoriser l&apos;accès dans les paramètres de l&apos;application.</string>
+    <string name="export_permission_denied">L&apos;accès au stockage est nécessaire pour enregistrer le PDF. Tu peux autoriser l&apos;accès dans les paramètres de l&apos;application.</string>
     <string name="export_done_file_location">Enregistré dans l&apos;appareil (Téléchargements/g8) </string>
     <string name="export_clickable_text">• ֊ •</string>
     <string name="export_info_popup">• Le fichier peut parfois mettre un peu de temps à apparaître dans le dossier de téléchargements (rafraîchir peut aider).\n\n• Si le fichier n&apos;apparaît pas, il est possible qu&apos;il soit dans un sous-dossier du dossier de téléchargement (surtout si tu passes par une app de fichiers type Samsung)\n\n• Tu peux également retrouver le fichier en faisant une recherche à partir du nom de fichier.</string>
@@ -788,7 +788,7 @@
     <string name="export_send_file_content">Bonjour, \n\nVeuillez trouver votre document ci-joint.\n\nCordialement</string>
     <string name="export_share_file">Partager</string>
     <string name="export_close">Terminer</string>
-    <string name="export_error_sharing">Le fichier n&apos;a pas pu être partagé.\n\nVeuillez l&apos;ouvrir directement depuis le dossier Téléchargements/g8.</string>
+    <string name="export_error_sharing">Le fichier n&apos;a pas pu être partagé.\n\nOuvre-le directement depuis le dossier Téléchargements/g8.</string>
     <string name="export_email_subject">Votre %1$s N°%2$s</string>
     <string name="export_email_subject_invoice">facture</string>
     <string name="export_email_subject_delivery_note">bon de livraison</string>
@@ -803,17 +803,17 @@ Une erreur s'est produite :
 
     <!-- Version mismatch dialog -->
     <string name="version_mismatch_title">Émetteur modifié</string>
-    <string name="version_mismatch_message">L&apos;émetteur a été modifié depuis un autre document. Souhaitez-vous charger la dernière version ?</string>
+    <string name="version_mismatch_message">L&apos;émetteur a été modifié depuis un autre document. Souhaites-tu charger la dernière version ?</string>
     <string name="version_mismatch_load_latest">Charger la dernière version</string>
     <string name="version_mismatch_keep_current">Garder la version actuelle</string>
 
     <!-- Version mismatch dialog for clients -->
     <string name="version_mismatch_client_title">Client modifié</string>
-    <string name="version_mismatch_client_message">Le client a été modifié depuis un autre document. Souhaitez-vous charger la dernière version ?</string>
+    <string name="version_mismatch_client_message">Le client a été modifié depuis un autre document. Souhaites-tu charger la dernière version ?</string>
 
     <!-- Sync client to master dialog -->
     <string name="sync_client_title">Mettre à jour le client ?</string>
-    <string name="sync_client_message">Voulez-vous appliquer ces modifications au client dans votre liste de clients ?</string>
+    <string name="sync_client_message">Veux-tu appliquer ces modifications au client dans ta liste de clients ?</string>
     <string name="sync_client_yes">Oui, mettre à jour</string>
     <string name="sync_client_no">Non, uniquement ce document</string>
 
@@ -954,7 +954,7 @@ Une erreur s'est produite :
 
     <!-- Multi-entreprise: guard when the user tries to delete an issuer that still owns data. -->
     <string name="entreprise_delete_blocked_title">Suppression impossible</string>
-    <string name="entreprise_delete_blocked_message">Votre entreprise contient des clients, produits ou documents rattachés. Si vous souhaitez la supprimer, il faut d'abord supprimer ces derniers.</string>
+    <string name="entreprise_delete_blocked_message">Ton entreprise contient des clients, produits ou documents rattachés. Si tu souhaites la supprimer, il faut d'abord supprimer ces derniers.</string>
 
 
     <!-- ===================================================================
@@ -1019,8 +1019,8 @@ Une erreur s'est produite :
 
     <!-- Font picker (module Polices) -->
     <string name="gstore_module_font_title">Polices</string>
-    <string name="gstore_module_font_desc">Changer la police de vos documents.</string>
-    <string name="gstore_module_font_detail">Activez ce module pour débloquer des polices pour vos documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans (gratuite), Noto Serif (gratuite), Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
+    <string name="gstore_module_font_desc">Changer la police de tes documents.</string>
+    <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans (gratuite), Noto Serif (gratuite), Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
     <string name="action_font_label">Police</string>
     <string name="action_font_description">Choisir la police du document</string>
     <string name="font_picker_title">Police du document</string>
@@ -1033,11 +1033,11 @@ Une erreur s'est produite :
 
     <!-- gStore: Marquer les BLs -->
     <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>
-    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut à vos bons de livraison</string>
-    <string name="gstore_module_delivery_note_tagging_detail">Activez ce module pour ajouter un statut à vos bons de livraison : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un bon de livraison est converti en facture, mais vous pouvez le modifier à tout moment.</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut à tes bons de livraison</string>
+    <string name="gstore_module_delivery_note_tagging_detail">Active ce module pour ajouter un statut à tes bons de livraison : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un bon de livraison est converti en facture, mais tu peux le modifier à tout moment.</string>
 
     <!-- gStore: Marquer les Devis -->
     <string name="gstore_module_quote_tagging_title">Marquer les devis</string>
-    <string name="gstore_module_quote_tagging_desc">Ajouter un statut à vos devis</string>
-    <string name="gstore_module_quote_tagging_detail">Activez ce module pour ajouter un statut à vos devis : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un devis est converti en facture, mais vous pouvez le modifier à tout moment.</string>
+    <string name="gstore_module_quote_tagging_desc">Ajouter un statut à tes devis</string>
+    <string name="gstore_module_quote_tagging_detail">Active ce module pour ajouter un statut à tes devis : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un devis est converti en facture, mais tu peux le modifier à tout moment.</string>
 </resources>
