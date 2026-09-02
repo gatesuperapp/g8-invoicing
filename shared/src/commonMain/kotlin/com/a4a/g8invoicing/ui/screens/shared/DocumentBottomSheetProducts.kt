@@ -117,6 +117,7 @@ fun DocumentBottomSheetProducts(
         val retentions = when (document) {
             is InvoiceState -> document.retentions
             is CreditNoteState -> document.retentions
+            is com.a4a.g8invoicing.ui.states.QuoteState -> document.retentions
             else -> emptyList()
         }
         // Which retention row is being edited (null when the form is not in

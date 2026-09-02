@@ -264,3 +264,21 @@ CREATE TABLE LinkQuoteToTag (
          REFERENCES QuoteTag(quote_tag_id)
          ON DELETE CASCADE
 );
+
+-- 10) Quote retention lines (release 1.9). Mirrors InvoiceRetention /
+--     CreditNoteRetention: withholding preview on a devis so the client-
+--     facing total reflects what the eventual facture will show. MX ships
+--     two rows (ISR + IVA), other retention-eligible issuers (ES, LATAM…)
+--     ship one row seeded from CountryCodes.defaultRetentionRate.
+CREATE TABLE QuoteRetention (
+  id INTEGER PRIMARY KEY NOT NULL,
+  quote_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  rate REAL NOT NULL,
+  sort_order INTEGER,
+  hidden INTEGER NOT NULL DEFAULT 0,
+
+  FOREIGN KEY(quote_id)
+        REFERENCES Quote(quote_id)
+        ON DELETE CASCADE
+);

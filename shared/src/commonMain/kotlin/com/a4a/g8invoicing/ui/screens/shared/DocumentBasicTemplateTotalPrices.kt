@@ -75,6 +75,7 @@ fun DocumentBasicTemplateTotalPrices(
         val stateRetentions = when (uiState) {
             is com.a4a.g8invoicing.ui.states.InvoiceState -> uiState.retentions
             is com.a4a.g8invoicing.ui.states.CreditNoteState -> uiState.retentions
+            is com.a4a.g8invoicing.ui.states.QuoteState -> uiState.retentions
             else -> emptyList()
         }.filter { !it.hidden }
         if (stateRetentions.isNotEmpty()) {

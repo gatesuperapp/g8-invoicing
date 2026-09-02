@@ -25,4 +25,9 @@ data class QuoteState(
     override var formatLocale: String? = null,
     override var originalCompanyId: Long? = null,
     override var fontFamily: String? = null,
+    // See InvoiceState.retentions. A devis previews the final billed amount
+    // so it needs the same retention lines the corresponding invoice will
+    // carry — otherwise the client-facing total on the quote wouldn't match
+    // the eventual facture for a retention-eligible issuer.
+    var retentions: List<RetentionState> = emptyList(),
 ) : DocumentState()

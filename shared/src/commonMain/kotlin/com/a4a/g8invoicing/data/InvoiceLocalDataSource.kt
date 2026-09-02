@@ -672,21 +672,34 @@ class InvoiceLocalDataSource(
         val newCompanyId = currentCompanyRepository.current
             ?: quotes.firstOrNull()?.originalCompanyId
         val issuer = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Retention hierarchy on convert:
+        //   1. the quote's own retentions (user's most recent intent — they may
+        //      have edited label / rate on the quote and expect that to carry
+        //      over verbatim to the resulting facture),
+        //   2. the last invoice for the same master issuer (reuse across docs),
+        //   3. country defaults.
+        // Reset ids to null so saveRetentionsForInvoice inserts fresh rows on
+        // the new invoice rather than referencing the quote's row ids.
+        val quoteRetentions = quotes.firstOrNull { it.retentions.isNotEmpty() }
+            ?.retentions
+            ?.map { it.copy(id = null) }
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
             if (issuer?.taxWithholdingEnabled == true) {
-                issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
-                    invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
-                        .executeAsOneOrNull()?.let { row ->
-                            invoiceRetentionQueries.getForInvoice(row.invoice_id)
-                                .executeAsList()
-                                .map { it.transformIntoRetentionState() }
-                        }
-                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
-                    issuer,
-                    getString(Res.string.retention_default_label),
-                    getString(Res.string.retention_default_mx_isr),
-                    getString(Res.string.retention_default_mx_iva),
-                )
+                quoteRetentions
+                    ?: issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                        invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
+                            .executeAsOneOrNull()?.let { row ->
+                                invoiceRetentionQueries.getForInvoice(row.invoice_id)
+                                    .executeAsList()
+                                    .map { it.transformIntoRetentionState() }
+                            }
+                    }
+                    ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                        issuer,
+                        getString(Res.string.retention_default_label),
+                        getString(Res.string.retention_default_mx_isr),
+                        getString(Res.string.retention_default_mx_iva),
+                    )
             } else emptyList()
         return withContext(DispatcherProvider.IO) {
             val docNumber = getLastDocumentNumber(newCompanyId)?.let {

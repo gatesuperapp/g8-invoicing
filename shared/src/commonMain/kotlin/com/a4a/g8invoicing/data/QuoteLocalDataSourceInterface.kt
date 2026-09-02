@@ -6,6 +6,7 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.RetentionState
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -41,5 +42,12 @@ interface QuoteLocalDataSourceInterface {
         tag: DocumentTag,
         tagUpdateCase: TagUpdateOrCreationCase,
     )
+
+    // Retention CRUD — mirrors InvoiceLocalDataSourceInterface. Used by the
+    // ViewModel when the user toggles the retention switch on the doc's issuer
+    // (clear on OFF, seed defaults on ON) so the change lands in DB before the
+    // subsequent reloadDocument reads state back.
+    suspend fun deleteAllRetentions(quoteId: Long)
+    suspend fun saveRetentions(quoteId: Long, retentions: List<RetentionState>)
 
 }

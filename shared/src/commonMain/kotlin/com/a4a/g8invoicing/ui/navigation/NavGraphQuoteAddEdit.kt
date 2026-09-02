@@ -128,6 +128,16 @@ fun NavGraphBuilder.quoteAddEdit(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
                                 if (updated != null) {
+                                    // Retention toggle transition — same as EDIT_ISSUER: DB
+                                    // rows must be written synchronously before the following
+                                    // reload reads state back, otherwise the retentions block
+                                    // stays out of sync until a subsequent EDIT_ISSUER.
+                                    val hadRetentions = quoteViewModel.quoteUiState.value.retentions.isNotEmpty()
+                                    if (updated.taxWithholdingEnabled && !hadRetentions) {
+                                        quoteViewModel.seedDefaultRetentionsInDb(updated)
+                                    } else if (!updated.taxWithholdingEnabled && hadRetentions) {
+                                        quoteViewModel.clearRetentionsInDb()
+                                    }
                                     quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
                                     quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
                                 }
@@ -385,9 +395,17 @@ fun NavGraphBuilder.quoteAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                val hadRetentions = quoteViewModel.quoteUiState.value.retentions.isNotEmpty()
+                                val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
+                                val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
+                                if (turnedOffRetention) {
+                                    quoteViewModel.clearRetentionsInDb()
+                                } else if (turnedOnRetention) {
+                                    quoteViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
                                 quoteViewModel.reloadDocument()
                                 showDocumentForm = false
                             }
@@ -452,6 +470,12 @@ fun NavGraphBuilder.quoteAddEdit(
             showProductType = showProductType,
             onFontSelect = { font ->
                 quoteViewModel.setDocumentFont(font.id)
+            },
+            onSaveRetention = { idx, updated ->
+                quoteViewModel.updateRetentionAt(idx, updated)
+            },
+            onToggleRetentionHidden = { idx ->
+                quoteViewModel.toggleRetentionHiddenAt(idx)
             },
         )
     }

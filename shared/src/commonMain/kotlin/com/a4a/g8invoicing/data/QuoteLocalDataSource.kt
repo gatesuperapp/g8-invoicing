@@ -11,6 +11,9 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.quote_default_footer
 import com.a4a.g8invoicing.shared.resources.quote_default_number
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
+import com.a4a.g8invoicing.shared.resources.retention_default_label
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
+import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
@@ -20,7 +23,10 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.RetentionState
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import g8invoicing.Quote
+import g8invoicing.QuoteRetention
 import g8invoicing.DocumentClientOrIssuer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -49,6 +55,7 @@ class QuoteLocalDataSource(
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
     private val quoteTagQueries = db.quoteTagQueries
     private val linkQuoteToTagQueries = db.linkQuoteToTagQueries
+    private val quoteRetentionQueries = db.quoteRetentionQueries
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
@@ -69,6 +76,27 @@ class QuoteLocalDataSource(
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
+        // Reuse retentions from the most recent quote for this master issuer;
+        // fall back to country defaults. Mirrors the invoice / credit-note
+        // seed path so a devis for a retention-eligible issuer (MX, ES…)
+        // previews the same withholding lines the eventual facture will carry.
+        val reusedRetentions: List<RetentionState> =
+            if (existingIssuer?.taxWithholdingEnabled == true) {
+                existingIssuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                    quoteRetentionQueries.getLastQuoteIdWithRetentionsForIssuer(masterId)
+                        .executeAsOneOrNull()?.let { row ->
+                            quoteRetentionQueries.getForQuote(row.quote_id)
+                                .executeAsList()
+                                .map { it.transformIntoRetentionState() }
+                        }
+                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                    existingIssuer,
+                    getString(Res.string.retention_default_label),
+                    getString(Res.string.retention_default_mx_isr),
+                    getString(Res.string.retention_default_mx_iva),
+                )
+            } else emptyList()
+
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
 
@@ -86,6 +114,7 @@ class QuoteLocalDataSource(
                 formatLocale = AppLocaleHolder.languageCode,
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
+                retentions = reusedRetentions,
             )
 
             saveInfoInDocumentTable(newQuoteState)
@@ -95,6 +124,7 @@ class QuoteLocalDataSource(
             newQuoteId?.let { id ->
                 saveInfoInOtherTables(id, newQuoteState)
                 saveTag(id, newQuoteState.documentTag)
+                saveRetentionsForQuote(id, reusedRetentions)
             }
             newQuoteId
         }
@@ -144,7 +174,8 @@ class QuoteLocalDataSource(
                                 documentClientOrIssuerAddressQueries,
                                 documentClientOrIssuerEmailQueries
                             ),
-                            fetchTag(it.quote_id)
+                            fetchTag(it.quote_id),
+                            fetchRetentions(it.quote_id),
                         )
                     }
             } catch (e: Exception) {
@@ -184,7 +215,8 @@ class QuoteLocalDataSource(
                             document.transformIntoEditableQuote(
                                 products,
                                 clientAndIssuer,
-                                fetchTag(document.quote_id)
+                                fetchTag(document.quote_id),
+                                fetchRetentions(document.quote_id),
                             )
                         }
                 }
@@ -243,6 +275,7 @@ class QuoteLocalDataSource(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
         documentTag: DocumentTag? = null,
+        retentions: List<RetentionState> = emptyList(),
     ): QuoteState {
         this.let {
             return QuoteState(
@@ -255,7 +288,7 @@ class QuoteLocalDataSource(
                 documentIssuer = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_ISSUER }?.maxByOrNull { it.id ?: 0 },
                 documentClient = documentClientAndIssuer?.filter { it.type == ClientOrIssuerType.DOCUMENT_CLIENT }?.maxByOrNull { it.id ?: 0 },
                 documentProducts = documentProducts?.sortedBy { it.sortOrder },
-                documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it) },
+                documentTotalPrices = documentProducts?.let { calculateDocumentPrices(it, retentions) },
                 currency = TextFieldValue(it.currency ?: CurrencyManager.DEFAULT_FALLBACK),
                 footerText = TextFieldValue(text = it.footer ?: ""),
                 createdDate = it.created_at,
@@ -265,6 +298,7 @@ class QuoteLocalDataSource(
                 formatLocale = it.format_locale,
                 originalCompanyId = it.original_company_id,
                 fontFamily = it.font_family,
+                retentions = retentions,
             )
         }
     }
@@ -285,11 +319,73 @@ class QuoteLocalDataSource(
                     font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
+                document.documentId?.toLong()?.let { id ->
+                    saveRetentionsForQuote(id, document.retentions)
+                }
             } catch (e: Exception) {
                 //Log.e(ContentValues.TAG, "Error: ${e.message}")
             }
         }
     }
+
+    override suspend fun deleteAllRetentions(quoteId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                quoteRetentionQueries.deleteAllForQuote(quoteId)
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    override suspend fun saveRetentions(
+        quoteId: Long,
+        retentions: List<RetentionState>,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            saveRetentionsForQuote(quoteId, retentions)
+        }
+    }
+
+    // Wipe + re-insert on save; N is tiny (1-3 rows) so per-row diffing isn't
+    // worth the bookkeeping. Mirrors InvoiceLocalDataSource.saveRetentionsForInvoice.
+    private fun saveRetentionsForQuote(
+        quoteId: Long,
+        retentions: List<RetentionState>,
+    ) {
+        try {
+            quoteRetentionQueries.deleteAllForQuote(quoteId)
+            retentions.forEachIndexed { index, r ->
+                quoteRetentionQueries.save(
+                    id = null,
+                    quote_id = quoteId,
+                    label = r.label.text,
+                    rate = r.rate.doubleValue(false),
+                    sort_order = index.toLong(),
+                    hidden = if (r.hidden) 1L else 0L,
+                )
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    private fun fetchRetentions(quoteId: Long): List<RetentionState> {
+        return try {
+            quoteRetentionQueries.getForQuote(quoteId)
+                .executeAsList()
+                .map { it.transformIntoRetentionState() }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    private fun QuoteRetention.transformIntoRetentionState(): RetentionState =
+        RetentionState(
+            id = this.id.toInt(),
+            label = TextFieldValue(this.label),
+            rate = BigDecimal.parseString(this.rate.toString()),
+            sortOrder = this.sort_order?.toInt() ?: 0,
+            hidden = this.hidden != 0L,
+        )
 
     // --- duplicate ---
     // Uses withContext(Dispatchers.IO).
@@ -329,6 +425,7 @@ class QuoteLocalDataSource(
                             duplicatedDocumentState
                         )
                         saveTag(id, DocumentTag.DRAFT)
+                        saveRetentionsForQuote(id, duplicatedDocumentState.retentions)
                     }
                 }
             } catch (e: Exception) {
