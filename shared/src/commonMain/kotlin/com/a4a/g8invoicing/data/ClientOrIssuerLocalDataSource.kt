@@ -976,6 +976,7 @@ class ClientOrIssuerLocalDataSource(
                         // Copy the regime flags from the master row (see getLastIssuer).
                         vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
                         intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
+                        taxWithholdingEnabled = issuer.tax_withholding_enabled != 0L,
                         banks = banks,
                         // Freeze the first bank (sort_order = 0) — same seed as
                         // getLastIssuer; the payment-means picker can swap it later.
