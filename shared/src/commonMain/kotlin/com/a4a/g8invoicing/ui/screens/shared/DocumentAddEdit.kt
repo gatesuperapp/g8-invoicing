@@ -1,8 +1,10 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -532,6 +534,44 @@ fun DocumentAddEdit(
             var clickEnabled by remember { mutableStateOf(true) } // To disable clicking 2 items at a time
             var newOffsetY by remember { mutableFloatStateOf(0f) }
 
+            // Double-tap zoom toggle wired to every preview clickable via
+            // LocalPreviewDoubleTap. Smoothly animates zoom to 1.8× on the
+            // first tap-tap; back to 1× on the second, alongside a matching
+            // ease-back of the pan offsets. Also enables Compose's
+            // double-tap window on every click, which fixes the "double-tap
+            // flashes the system bar" bug (sheet was opening + immediately
+            // closing on double clicks).
+            val onDoubleTapZoom: () -> Unit = {
+                val start = zoom
+                val target = if (start > 1f) 1f else 1.8f
+                coroutineScope.launch {
+                    val anim = Animatable(start)
+                    anim.animateTo(
+                        targetValue = target,
+                        animationSpec = tween(
+                            durationMillis = 260,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    ) {
+                        zoom = value
+                    }
+                }
+                if (target == 1f) {
+                    coroutineScope.launch {
+                        animatableOffsetX.animateTo(
+                            0f,
+                            animationSpec = spring(stiffness = Spring.StiffnessLow),
+                        )
+                    }
+                    coroutineScope.launch {
+                        animatableOffsetY.animateTo(
+                            0f,
+                            animationSpec = spring(stiffness = Spring.StiffnessLow),
+                        )
+                    }
+                }
+            }
+
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
@@ -652,30 +692,32 @@ fun DocumentAddEdit(
                         }
 
                 ) {
-                    DocumentBasicTemplate(
-                        uiState = document,
-                        onClickElement = {
-                            if (currentSheet != null) {
-                                dismissSheet()
-                            } else {
-                                currentSheet = if (it == ScreenElement.DOCUMENT_HEADER ||
-                                    it == ScreenElement.DOCUMENT_NUMBER ||
-                                    it == ScreenElement.DOCUMENT_DATE ||
-                                    it == ScreenElement.DOCUMENT_ISSUER ||
-                                    it == ScreenElement.DOCUMENT_CLIENT ||
-                                    it == ScreenElement.DOCUMENT_FOOTER ||
-                                    it == ScreenElement.DOCUMENT_REFERENCE
-                                ) {
-                                    BottomSheetType.ELEMENTS
+                    CompositionLocalProvider(LocalPreviewDoubleTap provides onDoubleTapZoom) {
+                        DocumentBasicTemplate(
+                            uiState = document,
+                            onClickElement = {
+                                if (currentSheet != null) {
+                                    dismissSheet()
                                 } else {
-                                    BottomSheetType.ITEMS
+                                    currentSheet = if (it == ScreenElement.DOCUMENT_HEADER ||
+                                        it == ScreenElement.DOCUMENT_NUMBER ||
+                                        it == ScreenElement.DOCUMENT_DATE ||
+                                        it == ScreenElement.DOCUMENT_ISSUER ||
+                                        it == ScreenElement.DOCUMENT_CLIENT ||
+                                        it == ScreenElement.DOCUMENT_FOOTER ||
+                                        it == ScreenElement.DOCUMENT_REFERENCE
+                                    ) {
+                                        BottomSheetType.ELEMENTS
+                                    } else {
+                                        BottomSheetType.ITEMS
+                                    }
                                 }
-                            }
-                        },
-                        onClickRestOfThePage = {
-                            if (currentSheet != null) dismissSheet()
-                        },
-                    )
+                            },
+                            onClickRestOfThePage = {
+                                if (currentSheet != null) dismissSheet()
+                            },
+                        )
+                    }
                 }
             }
 
