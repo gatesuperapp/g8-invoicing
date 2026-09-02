@@ -142,10 +142,15 @@ fun CategoriesDropdownMenu(
         stringResource(Res.string.account_manage_companies)
     }
 
+    // Single-entreprise UX: no picker chevron, no "Mes entreprises" pill,
+    // so we can trim 20dp off the menu to sit tighter under the app-bar
+    // avatar. Multi-entreprise keeps the wider popup so the picker rows
+    // and the manage-companies pill breathe.
+    val menuWidth = if (issuers.size <= 1) 200.dp else 220.dp
     DropdownMenu(
         // Fixed width (not widthIn) so a long entreprise name in the header
         // wraps to a second line inside the popup instead of growing it.
-        modifier = Modifier.width(220.dp),
+        modifier = Modifier.width(menuWidth),
         expanded = isExpanded,
         onDismissRequest = { dismissMenu() },
     ) {
