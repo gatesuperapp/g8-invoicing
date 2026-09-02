@@ -684,9 +684,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr</string>
     <string name="about_website_tail"> !</string>
-    <string name="about_title_community">Communauté</string>
-    <string name="about_community_text">Viens discuter de tes besoins, tes idées et échanger sur le</string>
-    <string name="about_community_cta">forum de la communauté.</string>
+    <string name="about_title_community">Nouveautés</string>
+    <string name="about_community_text">Consulte les nouveautés de chaque version ainsi que les actualités du produit sur le</string>
+    <string name="about_community_cta">forum de g8.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Assistance</string>
     <string name="about_assistance_intro">Tu peux nous écrire à tout moment pour signaler un bug, proposer une fonctionnalité ou demander de l'aide.</string>

@@ -491,8 +491,8 @@ Es ist ein Fehler aufgetreten :
     <string name="database_email_chooser">Datenbank per E-Mail senden</string>
 
     <!-- gStore Quote (unlimited + trial) -->
-    <string name="gstore_module_quote_title">Unbegrenzte Kostenvoranschläge</string>
-    <string name="gstore_module_quote_desc">Kostenvoranschläge erstellen und in Rechnungen umwandeln</string>
+    <string name="gstore_module_quote_title">Unbegrenzte Angebote</string>
+    <string name="gstore_module_quote_desc">Angebote erstellen und in Rechnungen umwandeln</string>
     <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln.\n\nDie Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
     <string name="gstore_module_quote_trial_title">Kostenvoranschläge entdecken</string>
     <string name="gstore_module_quote_trial_desc">5 kostenlose Kostenvoranschläge</string>
