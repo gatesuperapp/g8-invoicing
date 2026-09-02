@@ -164,7 +164,8 @@ LIMIT 1;
 getLastInvoicePaymentReuseForIssuer:
 SELECT i.payment_terms_recovery_fees, i.payment_terms_late_fees, i.payment_terms_discount,
        i.payment_means_selections,
-       i.payment_means_label, i.payment_means_other_checked, i.payment_bank_label
+       i.payment_means_label, i.payment_means_other_checked, i.payment_bank_label,
+       i.vat_exemption_text
 FROM Invoice i
 JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
 JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id

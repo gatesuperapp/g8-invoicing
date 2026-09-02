@@ -44,6 +44,7 @@ class CreditNoteLocalDataSource(
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val creditNoteRetentionQueries = db.creditNoteRetentionQueries
+    private val invoiceQueries = db.invoiceQueries
     private val invoiceRetentionQueries = db.invoiceRetentionQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
@@ -108,9 +109,19 @@ class CreditNoteLocalDataSource(
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
                 vatExemptionText = existingIssuer
                     ?.takeIf { it.vatExempt }
-                    ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                        it.addresses?.firstOrNull()?.countryCode
-                    ) }
+                    ?.let {
+                        // Reuse the previous invoice's BT-120 wording for this
+                        // master issuer (per-issuer reuse — mirrors InvoiceDS).
+                        val reused = existingIssuer.originalClientOrIssuerId?.toLong()
+                            ?.let { masterId ->
+                                invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                                    .executeAsOneOrNull()?.vat_exemption_text
+                            }
+                            ?.trim()?.takeIf { s -> s.isNotEmpty() }
+                        reused ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                            it.addresses?.firstOrNull()?.countryCode
+                        )
+                    }
                     ?.let { TextFieldValue(it) },
                 retentions = reusedRetentions,
             )

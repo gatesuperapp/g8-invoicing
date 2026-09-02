@@ -205,15 +205,24 @@ class InvoiceLocalDataSource(
                 // yet — keeps original_company_id NOT NULL for numbering.
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
-                // BT-120 seed: only when the issuer is in franchise en base
-                // AND we know a legally-correct citation for their country.
-                // Foreign issuers get null → the export guard blocks Factur-X
-                // until the user fills the field via the text menu.
+                // BT-120 seed. Preference order:
+                //   1. the wording the user set on the previous invoice for
+                //      this master issuer (per-issuer reuse — they'll rarely
+                //      re-word between two consecutive invoices, and losing
+                //      their custom wording on every "New invoice" is jarring),
+                //   2. the country-based legal default (only when we know a
+                //      correct citation for the issuer's country).
+                // Foreign issuers with no reuse and no default get null → the
+                // export guard blocks Factur-X until the user fills the field
+                // via the text menu.
                 vatExemptionText = existingIssuer
                     ?.takeIf { it.vatExempt }
-                    ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                        it.addresses?.firstOrNull()?.countryCode
-                    ) }
+                    ?.let {
+                        reuse?.vat_exemption_text?.trim()?.takeIf { s -> s.isNotEmpty() }
+                            ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                                it.addresses?.firstOrNull()?.countryCode
+                            )
+                    }
                     ?.let { TextFieldValue(it) },
                 retentions = reusedRetentions,
                 // Reuse the last invoice's picked typeface so users don't
@@ -576,6 +585,13 @@ class InvoiceLocalDataSource(
         val newCompanyId = currentCompanyRepository.current
             ?: deliveryNotes.firstOrNull()?.originalCompanyId
         val issuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Reuse the previous invoice's BT-120 wording for this master issuer
+        // (see createNew for the full rationale on why per-issuer reuse beats
+        // re-seeding the country default on every new doc).
+        val reusedVatExemptionText = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()?.vat_exemption_text
+        }
         // Same seed rule as createNew (reuse → country defaults).
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
             if (issuer?.taxWithholdingEnabled == true) {
@@ -631,9 +647,12 @@ class InvoiceLocalDataSource(
                     originalCompanyId = newCompanyId,
                     vatExemptionText = issuer
                         ?.takeIf { it.vatExempt }
-                        ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                            it.addresses?.firstOrNull()?.countryCode
-                        ) }
+                        ?.let {
+                            reusedVatExemptionText?.trim()?.takeIf { s -> s.isNotEmpty() }
+                                ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                                    it.addresses?.firstOrNull()?.countryCode
+                                )
+                        }
                         ?.let { TextFieldValue(it) },
                     retentions = reusedRetentions,
                 )
@@ -683,6 +702,10 @@ class InvoiceLocalDataSource(
         val quoteRetentions = quotes.firstOrNull { it.retentions.isNotEmpty() }
             ?.retentions
             ?.map { it.copy(id = null) }
+        val reusedVatExemptionText = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()?.vat_exemption_text
+        }
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
             if (issuer?.taxWithholdingEnabled == true) {
                 quoteRetentions
@@ -737,9 +760,12 @@ class InvoiceLocalDataSource(
                     originalCompanyId = newCompanyId,
                     vatExemptionText = issuer
                         ?.takeIf { it.vatExempt }
-                        ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                            it.addresses?.firstOrNull()?.countryCode
-                        ) }
+                        ?.let {
+                            reusedVatExemptionText?.trim()?.takeIf { s -> s.isNotEmpty() }
+                                ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
+                                    it.addresses?.firstOrNull()?.countryCode
+                                )
+                        }
                         ?.let { TextFieldValue(it) },
                     retentions = reusedRetentions,
                 )
