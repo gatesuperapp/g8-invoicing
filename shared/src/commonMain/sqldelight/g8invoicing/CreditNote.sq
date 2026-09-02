@@ -22,6 +22,8 @@ CREATE TABLE CreditNote (
   -- credit note is still a taxable-flow doc under EN16931 so it needs the
   -- same exemption wording when the issuer is in franchise en base.
   vat_exemption_text TEXT,
+  -- DocumentFont.id — null = Noto Sans default. See Invoice.font_family.
+  font_family TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -68,8 +70,8 @@ SELECT credit_note_id
 FROM CreditNote;
 
 save:
-INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, vat_exemption_text)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, vat_exemption_text, font_family)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE CreditNote
@@ -81,6 +83,7 @@ SET number = :number,
     due_date =: due_date,
     footer  =: footer,
     vat_exemption_text = :vat_exemption_text,
+    font_family = :font_family,
     updated_at =: updated_at
 
 WHERE

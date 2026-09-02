@@ -59,4 +59,10 @@ abstract class DocumentState {
     // CreditNote (open on the two doc types that end up in Factur-X); the
     // Quote / DeliveryNote overrides are non-persisted stubs kept null.
     open var vatExemptionText: TextFieldValue? = null
+
+    // Frozen typeface for preview + PDF. null = free Noto Sans default
+    // (see DocumentFont.Default). Every doc type (invoice, credit note,
+    // delivery note, quote) carries its own pick so old docs keep
+    // rendering with the font in effect when they were issued.
+    abstract var fontFamily: String?
 }

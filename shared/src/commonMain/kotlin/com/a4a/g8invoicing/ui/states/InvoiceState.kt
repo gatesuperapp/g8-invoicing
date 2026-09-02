@@ -91,6 +91,7 @@ data class InvoiceState(
     // du CGI" for FR, "§ 19 UStG" for DE) — other countries stay null and the
     // user must fill it in the text menu before exporting Factur-X.
     override var vatExemptionText: TextFieldValue? = null,
+    override var fontFamily: String? = null,
     // Withholding lines pinned at the bottom of the totals block. Independent
     // from documentProducts (never mixed / reordered together). Sorted by
     // sortOrder when > 1 line — Mexican CFDI needs ISR before IVA retention.

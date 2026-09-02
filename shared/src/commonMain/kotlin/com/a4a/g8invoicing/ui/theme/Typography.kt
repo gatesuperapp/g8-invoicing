@@ -11,8 +11,6 @@ import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.dmsansmedium
 import com.a4a.g8invoicing.shared.resources.dmsansregular
-import com.a4a.g8invoicing.shared.resources.helvetica
-import com.a4a.g8invoicing.shared.resources.helveticabold
 import org.jetbrains.compose.resources.Font
 
 @Composable
@@ -21,11 +19,15 @@ fun getUiFont(): FontFamily = FontFamily(Font(Res.font.dmsansregular))
 @Composable
 fun getUiFontBold(): FontFamily = FontFamily(Font(Res.font.dmsansmedium))
 
+// PDF / preview font resolution goes through LocalDocumentFont (see
+// AppFonts.kt) so every textForDocuments* style below auto-picks the font
+// the user chose for the current document. The proprietary Helvetica bundle
+// has been retired in favour of Noto Sans as the free default.
 @Composable
-fun getPdfFont(): FontFamily = FontFamily(Font(Res.font.helvetica))
+fun getPdfFont(): FontFamily = LocalDocumentFont.current.regularFamily()
 
 @Composable
-fun getPdfFontBold(): FontFamily = FontFamily(Font(Res.font.helveticabold))
+fun getPdfFontBold(): FontFamily = LocalDocumentFont.current.boldFamily()
 
 // Default typography using system fonts (for non-composable contexts)
 private val defaultTypography = Typography()

@@ -24,4 +24,5 @@ data class QuoteState(
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
     override var originalCompanyId: Long? = null,
+    override var fontFamily: String? = null,
 ) : DocumentState()

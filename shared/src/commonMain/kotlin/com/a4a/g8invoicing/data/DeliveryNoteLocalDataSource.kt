@@ -236,6 +236,7 @@ class DeliveryNoteLocalDataSource(
                 showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
                 formatLocale = it.format_locale,
                 originalCompanyId = it.original_company_id,
+                fontFamily = it.font_family,
             )
         }
     }
@@ -253,6 +254,7 @@ class DeliveryNoteLocalDataSource(
                     free_field = document.freeField?.text,
                     currency = document.currency.text,
                     footer = document.footerText.text,
+                    font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
             } catch (e: Exception) {
@@ -522,6 +524,7 @@ class DeliveryNoteLocalDataSource(
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
                 original_company_id = document.originalCompanyId,
+                font_family = document.fontFamily,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

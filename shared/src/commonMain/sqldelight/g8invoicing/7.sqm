@@ -197,3 +197,16 @@ ALTER TABLE DocumentClientOrIssuer ADD COLUMN client_type TEXT;
 --    legal citation, so the user must fill it before exporting.
 ALTER TABLE Invoice ADD COLUMN vat_exemption_text TEXT;
 ALTER TABLE CreditNote ADD COLUMN vat_exemption_text TEXT;
+
+-- 8) Document font (release 1.9). Per-doc so each invoice/quote/BL/avoir
+--    can freeze its own typeface, and old docs keep rendering with whatever
+--    was in effect when they were issued. NULL = fall back to the free
+--    Noto Sans default (DocumentFont.Default in AppFonts.kt). Values are
+--    the enum's stable `id` strings (e.g. 'noto_sans', 'cabin', …) — do NOT
+--    rename an id without a migration to update existing rows. The
+--    subscription gate lives on export, not on the picker: any user can
+--    pick a premium font, only export requires premium.
+ALTER TABLE Invoice ADD COLUMN font_family TEXT;
+ALTER TABLE CreditNote ADD COLUMN font_family TEXT;
+ALTER TABLE DeliveryNote ADD COLUMN font_family TEXT;
+ALTER TABLE Quote ADD COLUMN font_family TEXT;

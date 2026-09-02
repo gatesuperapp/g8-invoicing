@@ -30,6 +30,7 @@ data class CreditNoteState(
     // avoir is still a taxable-flow doc under EN16931 so it needs the same
     // exemption wording when the issuer is in franchise en base.
     override var vatExemptionText: TextFieldValue? = null,
+    override var fontFamily: String? = null,
     // No payment-means / bank / terms fields on credit notes: an avoir
     // reverses the flow — the seller owes the buyer, not the other way
     // around, so there's nothing for the buyer to pay. Refund paths (RIB

@@ -550,6 +550,7 @@ class InvoiceLocalDataSource(
             paymentTermsDiscount = TextFieldValue(text = this.payment_terms_discount ?: ""),
             originalCompanyId = this.original_company_id,
             vatExemptionText = this.vat_exemption_text?.let { TextFieldValue(text = it) },
+            fontFamily = this.font_family,
             retentions = retentions,
         )
     }
@@ -787,6 +788,7 @@ class InvoiceLocalDataSource(
                     payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
                     payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
                     vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                    font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 document.documentId?.toLong()?.let { id ->
@@ -1248,6 +1250,7 @@ class InvoiceLocalDataSource(
                 payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
                 original_company_id = document.originalCompanyId,
                 vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                font_family = document.fontFamily,
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")

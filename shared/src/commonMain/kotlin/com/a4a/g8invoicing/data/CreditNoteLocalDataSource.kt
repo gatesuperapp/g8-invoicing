@@ -353,6 +353,7 @@ class CreditNoteLocalDataSource(
                 formatLocale = it.format_locale,
                 originalCompanyId = it.original_company_id,
                 vatExemptionText = it.vat_exemption_text?.let { TextFieldValue(text = it) },
+                fontFamily = it.font_family,
                 retentions = fetchRetentions(it.credit_note_id),
             )
         }
@@ -435,6 +436,7 @@ class CreditNoteLocalDataSource(
                     due_date = document.dueDate,
                     footer = document.footerText.text,
                     vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                    font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 document.documentId?.toLong()?.let { id ->
@@ -710,6 +712,7 @@ class CreditNoteLocalDataSource(
                 format_locale = document.formatLocale,
                 original_company_id = document.originalCompanyId,
                 vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                font_family = document.fontFamily,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

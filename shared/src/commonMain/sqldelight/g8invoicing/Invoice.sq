@@ -58,6 +58,11 @@ CREATE TABLE Invoice (
   -- has no reliable auto-fill.
   vat_exemption_text TEXT,
 
+  -- Document typeface id (DocumentFont.id). NULL → free Noto Sans default.
+  -- Frozen per doc so old invoices keep rendering with the font in effect
+  -- when they were issued, even if the user later switches their pick.
+  font_family TEXT,
+
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
   deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
@@ -105,8 +110,8 @@ SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers, payment_means_selections, payment_means_label, payment_means_hidden, payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount, payment_bank_hidden, payment_means_other_checked, payment_bank_label, original_company_id, vat_exemption_text)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers, payment_means_selections, payment_means_label, payment_means_hidden, payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount, payment_bank_hidden, payment_means_other_checked, payment_bank_label, original_company_id, vat_exemption_text, font_family)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
@@ -128,6 +133,7 @@ SET number = :number,
     payment_means_other_checked = :payment_means_other_checked,
     payment_bank_label = :payment_bank_label,
     vat_exemption_text = :vat_exemption_text,
+    font_family = :font_family,
     updated_at =: updated_at
 WHERE
     invoice_id = :invoice_id;
