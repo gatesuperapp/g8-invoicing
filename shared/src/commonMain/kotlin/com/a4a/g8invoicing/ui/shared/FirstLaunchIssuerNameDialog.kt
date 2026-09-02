@@ -424,7 +424,7 @@ private fun CompactTextField(
 
 @Composable
 private fun CompletionStep(onDone: () -> Unit) {
-    // 5 s confetti burst then a 700 ms fade before the parent pops the
+    // 2 s confetti burst then a 700 ms fade before the parent pops the
     // dialog. Tapping anywhere on the slide fast-forwards to the fade so
     // an eager user isn't held hostage by the celebration.
     var fadingOut by remember { mutableStateOf(false) }
@@ -434,7 +434,7 @@ private fun CompletionStep(onDone: () -> Unit) {
         label = "completionFade",
     )
     LaunchedEffect(Unit) {
-        delay(5000L)
+        delay(2000L)
         fadingOut = true
         delay(700L)
         onDone()
@@ -452,7 +452,7 @@ private fun CompletionStep(onDone: () -> Unit) {
                 indication = null,
             ) { if (!fadingOut) fadingOut = true },
     ) {
-        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 5000)
+        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 2000)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -460,8 +460,6 @@ private fun CompletionStep(onDone: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            MascotSlot { AnimatedKaomojiThanks(fontSize = 22.sp, loop = true) }
-            Spacer(Modifier.height(28.dp))
             StepTitle(stringResource(Res.string.first_launch_completion_title))
         }
     }
