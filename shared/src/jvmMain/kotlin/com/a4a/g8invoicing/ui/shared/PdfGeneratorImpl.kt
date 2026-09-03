@@ -20,14 +20,18 @@ import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.geom.Rectangle
+import com.itextpdf.kernel.pdf.PdfAConformance
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfName
+import com.itextpdf.kernel.pdf.PdfOutputIntent
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.filespec.PdfFileSpec
-import com.itextpdf.kernel.xmp.XMPMetaFactory
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.xmp.XMPMetaFactory
+import com.itextpdf.pdfa.PdfADocument
+import java.io.ByteArrayInputStream
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.IPropertyContainer
@@ -77,6 +81,12 @@ class PdfGeneratorImpl(
         // Android assets tree at this exact path, so context.assets.open() and
         // JVM ClassLoader.getResourceAsStream() both resolve it uniformly.
         const val ARIMO_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/arimo.ttf"
+        // sRGB IEC61966-2.1 ICC v2 profile (extracted from the JVM's built-in
+        // ColorSpace.CS_sRGB) — required as the OutputIntent for PDF/A-3
+        // conformance so validators like veraPDF have an unambiguous colour
+        // reference. Bundled under composeResources/files/color/ so both
+        // platforms resolve it via the same path.
+        const val SRGB_ICC_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/files/color/sRGB.icc"
 
         // Right edge of the totals block, in points from the start of the
         // paragraph. Amounts right-align there; the label's right edge is
@@ -129,19 +139,17 @@ class PdfGeneratorImpl(
     }
 
     /**
-     * Factur-X 1.0 (EN 16931) export. Renders the same visual PDF as
-     * [generatePdf] then embeds the CII XML as an associated file with
-     * AFRelationship=Data and the file name `factur-x.xml` — the naming
-     * convention the Factur-X spec requires for consumers to locate the
-     * structured payload. The XMP metadata is extended with the Factur-X
-     * schema so PDF/A-3 aware validators pick up the conformance level.
+     * Factur-X 1.0 (EN 16931) export as a PDF/A-3B document with the CII XML
+     * attached as an Associated File (AFRelationship=Data, filename
+     * `factur-x.xml`). The XMP metadata carries pdfaid:part=3 / conformance=B
+     * plus the Factur-X extension schema (fx:DocumentType / DocumentFileName
+     * / Version / ConformanceLevel) so veraPDF and downstream e-invoicing
+     * platforms both accept the file.
      *
-     * Note: strict PDF/A-3 conformance is NOT enforced here (no
-     * PdfADocument + ICC profile). We ship a "hybrid" PDF with the
-     * embedded factur-x.xml + AFRelationship + XMP schema — enough for
-     * downstream platforms that look up the payload via /AF, which covers
-     * the pragmatic use case for 1.9. A follow-up can switch to
-     * PdfADocument for stricter validators.
+     * PDF/A-3B requires: embedded fonts (Arimo covers Latin; the FontProvider
+     * subsets whichever glyph the FontSelector matches), a colour OutputIntent
+     * (sRGB ICC profile), no encryption, and mandatory metadata (dc:title,
+     * xmp:CreateDate, pdf:Producer — set below).
      */
     fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String {
         strings = effectiveStrings(document, defaultStrings)
@@ -153,7 +161,7 @@ class PdfGeneratorImpl(
         File(tempFilePath).delete()
 
         val writer = PdfWriter(tempFilePath)
-        val pdfDocument = PdfDocument(writer)
+        val pdfDocument = PdfADocument(writer, PdfAConformance.PDF_A_3B, sRGBOutputIntent())
 
         val doc = Document(pdfDocument, PageSize.A4)
         doc.fontProvider = buildFontProvider()
@@ -167,6 +175,22 @@ class PdfGeneratorImpl(
         pdfDocument.close()
 
         return addPageNumbering(document, tempFileName, finalFileName, xmlBytes)
+    }
+
+    // sRGB IEC61966-2.1 as the PDF/A-3 output intent. Constructed fresh per
+    // Factur-X export — iText consumes the InputStream inside PdfOutputIntent
+    // during PdfADocument construction, so a shared reusable instance would
+    // fail on the second export with a closed-stream error.
+    private fun sRGBOutputIntent(): PdfOutputIntent {
+        val iccBytes = fileManager.loadAssetBytes(SRGB_ICC_ASSET)
+            ?: error("sRGB ICC profile missing — required for PDF/A-3 output intent")
+        return PdfOutputIntent(
+            "sRGB IEC61966-2.1",
+            "",
+            "http://www.color.org",
+            "sRGB IEC61966-2.1",
+            ByteArrayInputStream(iccBytes),
+        )
     }
 
     private fun buildFacturXFinalFileName(document: DocumentState): String {
@@ -411,7 +435,15 @@ class PdfGeneratorImpl(
         File(finalTempPath).delete()
 
         try {
-            val pdfDoc = PdfDocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
+            // Stamping mode: reopen the first-pass PDF and add page numbers.
+            // For Factur-X we also attach the CII XML + wire the PDF/A-3 XMP
+            // extension schema — using PdfADocument(reader, writer) preserves
+            // the pdfaid:part / conformance set on the initial write.
+            val pdfDoc = if (facturxXmlBytes != null) {
+                PdfADocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
+            } else {
+                PdfDocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
+            }
             val doc = Document(pdfDoc)
             doc.fontProvider = buildFontProvider()
             doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
@@ -428,7 +460,7 @@ class PdfGeneratorImpl(
             }
 
             if (facturxXmlBytes != null) {
-                attachFacturXPayload(pdfDoc, facturxXmlBytes)
+                attachFacturXPayload(pdfDoc, facturxXmlBytes, document)
             }
 
             doc.close()
@@ -447,13 +479,22 @@ class PdfGeneratorImpl(
 
     /**
      * Attach the Factur-X CII XML to the given PDF as an Associated File
-     * (/AF, AFRelationship = Data) named `factur-x.xml`, and extend the XMP
-     * metadata with the Factur-X namespace so PDF/A-3 aware readers pick
-     * up the profile. Fails silently if XMP construction hits an unexpected
-     * error — the file attachment still lands, which is the load-bearing
-     * part for consumers that don't parse XMP.
+     * (/AF, AFRelationship = Data) named `factur-x.xml`, set the mandatory
+     * DocumentInfo entries (title/creator/producer) that PDF/A-3 requires,
+     * and overwrite the XMP packet with a Factur-X-aware template so the
+     * pdfaExtension:schemas array is present alongside pdfaid and the four
+     * fx: properties consumers key off.
+     *
+     * The raw-XMP approach is deliberate: iText's XMPMeta API for building
+     * pdfaExtension:schemas is brittle (nested Bag/Seq of Structs) and the
+     * subtle wrong-format failures only surface at veraPDF validation time.
+     * A hand-authored template stays predictable across iText versions.
      */
-    private fun attachFacturXPayload(pdfDoc: PdfDocument, xmlBytes: ByteArray) {
+    private fun attachFacturXPayload(
+        pdfDoc: PdfDocument,
+        xmlBytes: ByteArray,
+        document: DocumentState,
+    ) {
         val fileSpec = PdfFileSpec.createEmbeddedFileSpec(
             pdfDoc,
             xmlBytes,
@@ -465,19 +506,118 @@ class PdfGeneratorImpl(
         )
         pdfDoc.addAssociatedFile("factur-x.xml", fileSpec)
 
+        // Populate the DocumentInfo dictionary in parallel with the XMP —
+        // some readers (Acrobat, Foxit) prefer the info dict, veraPDF looks
+        // at the XMP; both must be present and mutually consistent for
+        // PDF/A-3 compliance.
+        val docTypeLabel = getDocumentTypeName(document.documentType, strings)
+        val title = "$docTypeLabel ${document.documentNumber.text}"
+        val author = document.documentIssuer?.name?.text?.takeIf { it.isNotBlank() } ?: "g8"
+        val info = pdfDoc.documentInfo
+        info.title = title
+        info.author = author
+        info.creator = "g8"
+        info.producer = "g8 (iText)"
+
         try {
-            val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
-            val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
-            xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
-            xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
-            xmpMeta.setProperty(fxNs, "Version", "1.0")
-            xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
-            pdfDoc.xmpMetadata = xmpMeta
+            val xmpXml = buildFacturXXmpPacket(title = title, creator = author)
+            val xmpMeta = XMPMetaFactory.parseFromString(xmpXml)
+            pdfDoc.setXmpMetadata(xmpMeta)
         } catch (_: Throwable) {
             // XMP is a nice-to-have. The AF entry alone is enough for most
             // e-invoicing platforms to locate the payload.
         }
     }
+
+    /**
+     * Render a valid PDF/A-3B + Factur-X XMP packet as XML.
+     *
+     * Layout: single rdf:Description carrying pdfaid, dc, xmp, pdf, fx, and
+     * the pdfaExtension:schemas declaration for the fx namespace. Dates are
+     * emitted in ISO-8601 with a Z suffix (UTC) — the format PDF/A validators
+     * expect.
+     */
+    private fun buildFacturXXmpPacket(title: String, creator: String): String {
+        val safeTitle = xmlEscape(title)
+        val safeCreator = xmlEscape(creator)
+        val now = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)
+            .withNano(0)
+            .format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        return """<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="g8">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <rdf:Description rdf:about=""
+        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
+        xmlns:dc="http://purl.org/dc/elements/1.1/"
+        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+        xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
+        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+        xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"
+        xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"
+        xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">
+      <pdfaid:part>3</pdfaid:part>
+      <pdfaid:conformance>B</pdfaid:conformance>
+      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">$safeTitle</rdf:li></rdf:Alt></dc:title>
+      <dc:creator><rdf:Seq><rdf:li>$safeCreator</rdf:li></rdf:Seq></dc:creator>
+      <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Factur-X invoice</rdf:li></rdf:Alt></dc:description>
+      <xmp:CreatorTool>g8</xmp:CreatorTool>
+      <xmp:CreateDate>$now</xmp:CreateDate>
+      <xmp:ModifyDate>$now</xmp:ModifyDate>
+      <xmp:MetadataDate>$now</xmp:MetadataDate>
+      <pdf:Producer>g8 (iText)</pdf:Producer>
+      <fx:DocumentType>INVOICE</fx:DocumentType>
+      <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
+      <fx:Version>1.0</fx:Version>
+      <fx:ConformanceLevel>EXTENDED</fx:ConformanceLevel>
+      <pdfaExtension:schemas>
+        <rdf:Bag>
+          <rdf:li rdf:parseType="Resource">
+            <pdfaSchema:schema>Factur-X PDFA Extension Schema</pdfaSchema:schema>
+            <pdfaSchema:namespaceURI>urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#</pdfaSchema:namespaceURI>
+            <pdfaSchema:prefix>fx</pdfaSchema:prefix>
+            <pdfaSchema:property>
+              <rdf:Seq>
+                <rdf:li rdf:parseType="Resource">
+                  <pdfaProperty:name>DocumentType</pdfaProperty:name>
+                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+                  <pdfaProperty:category>external</pdfaProperty:category>
+                  <pdfaProperty:description>Factur-X document type (INVOICE)</pdfaProperty:description>
+                </rdf:li>
+                <rdf:li rdf:parseType="Resource">
+                  <pdfaProperty:name>DocumentFileName</pdfaProperty:name>
+                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+                  <pdfaProperty:category>external</pdfaProperty:category>
+                  <pdfaProperty:description>Name of the embedded Factur-X XML file</pdfaProperty:description>
+                </rdf:li>
+                <rdf:li rdf:parseType="Resource">
+                  <pdfaProperty:name>Version</pdfaProperty:name>
+                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+                  <pdfaProperty:category>external</pdfaProperty:category>
+                  <pdfaProperty:description>Version of the Factur-X profile</pdfaProperty:description>
+                </rdf:li>
+                <rdf:li rdf:parseType="Resource">
+                  <pdfaProperty:name>ConformanceLevel</pdfaProperty:name>
+                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
+                  <pdfaProperty:category>external</pdfaProperty:category>
+                  <pdfaProperty:description>Factur-X conformance level (MINIMUM, BASIC, EN 16931, EXTENDED)</pdfaProperty:description>
+                </rdf:li>
+              </rdf:Seq>
+            </pdfaSchema:property>
+          </rdf:li>
+        </rdf:Bag>
+      </pdfaExtension:schemas>
+    </rdf:Description>
+  </rdf:RDF>
+</x:xmpmeta>
+<?xpacket end="w"?>"""
+    }
+
+    private fun xmlEscape(text: String): String =
+        text.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&apos;")
 
     private fun createLogoAndTitleTable(
         logoPath: String,
