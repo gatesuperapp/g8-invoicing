@@ -43,6 +43,7 @@ fun DocumentBottomSheetProducts(
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>> = emptyList(),
     onClickProduct: (ProductState) -> Unit,
     onClickNewProduct: () -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
@@ -52,6 +53,7 @@ fun DocumentBottomSheetProducts(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit = {},
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
@@ -174,6 +176,7 @@ fun DocumentBottomSheetProducts(
                 typeOfCreation = typeOfCreation,
                 documentProduct = documentProductUiState,
                 taxRates = taxRates,
+                taxRatesWithIds = taxRatesWithIds,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
                 onClickCancel = {
@@ -186,6 +189,7 @@ fun DocumentBottomSheetProducts(
                     isProductListVisible = false
                 },
                 onSelectTaxRate = onSelectTaxRate,
+                onSaveTaxRates = onSaveTaxRates,
                 showProductType = showProductType,
                 retention = editingRetention,
                 onRetentionSave = { updated ->

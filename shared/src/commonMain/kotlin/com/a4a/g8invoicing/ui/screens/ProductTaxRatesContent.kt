@@ -152,8 +152,11 @@ fun ProductTaxRatesContent(
             }
         }
 
-        // Settings icon below the block, aligned to the right
-        if (onClickEditRates != null && !isDisplayedInBottomSheet) {
+        // Settings icon below the block, aligned to the right. Surfaced both in
+        // the full-screen Products>VAT context and in the doc-product tax picker
+        // (see DocumentBottomSheetTaxSelection, which opens the edit UI in an
+        // AlertDialog rather than navigating to a new screen).
+        if (onClickEditRates != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -193,7 +196,7 @@ fun ProductTaxRatesEditContent(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         Column(
             modifier = Modifier
@@ -218,10 +221,13 @@ fun ProductTaxRatesEditContent(
             }
         }
 
-        // "Ajouter un taux" button with background
+        // "Ajouter un taux" button — right-aligned and pulled close to the
+        // block above so it reads as an appendix to the rate list rather
+        // than as a standalone action.
         Box(
             modifier = Modifier
-                .padding(start = 4.dp, top = 4.dp)
+                .align(Alignment.End)
+                .padding(top = 2.dp)
                 .background(
                     color = Color(0xFFf7f7f7),
                     shape = RoundedCornerShape(6.dp)

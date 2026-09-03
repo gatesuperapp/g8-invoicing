@@ -231,6 +231,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             )
         }
 
+        // Observe the counter so validating the doc-product tax edit dialog
+        // triggers a recomposition and the picker re-reads the fresh list.
+        val taxRatesRefreshCounter by productAddEditViewModel.taxRatesRefreshCounter.collectAsState()
+
         DocumentAddEditPlatform(
             navController = navController,
             document = deliveryNoteUiState,
@@ -240,7 +244,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
             documentProductUiState = documentProduct,
-            taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
+            taxRates = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesFromLocalDb() },
+            taxRatesWithIds = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesWithIdsFromLocalDb() },
             products = productListUiState.products.toMutableList(),
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateUiState(pageElement, value)
@@ -431,6 +436,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onClickCancelForm = {},
             onSelectTaxRate = {
                 productAddEditViewModel.updateTaxRate(it, ProductType.DOCUMENT_PRODUCT)
+            },
+            onSaveTaxRates = { rates ->
+                productAddEditViewModel.saveTaxRates(rates)
             },
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = { showDocumentForm = it },

@@ -162,6 +162,7 @@ fun DocumentAddEdit(
     documentIssuerUiState: ClientOrIssuerState,
     documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>> = emptyList(),
     products: MutableList<ProductState>,
     onClickBack: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit, // OUT : update ui state with user input
@@ -179,6 +180,7 @@ fun DocumentAddEdit(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit = {},
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
@@ -852,6 +854,7 @@ fun DocumentAddEdit(
                     documentProductUiState = documentProductUiState,
                     products = products,
                     taxRates = taxRates,
+                    taxRatesWithIds = taxRatesWithIds,
                     onClickProduct = { product ->
                         onSelectProduct(product, document.documentClient?.originalClientOrIssuerId)
                     },
@@ -863,6 +866,7 @@ fun DocumentAddEdit(
                     onClickDoneForm = onClickDoneForm,
                     onClickCancelForm = onClickCancelForm,
                     onSelectTaxRate = onSelectTaxRate,
+                    onSaveTaxRates = onSaveTaxRates,
                     showDocumentForm = showDocumentForm,
                     onShowDocumentForm = onShowDocumentForm,
                     onOrderChange = onOrderChange,

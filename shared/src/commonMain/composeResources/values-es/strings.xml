@@ -133,6 +133,7 @@
     <string name="product_tax">Impuesto</string>
     <string name="tax_rate_screen_title">Tasa de IVA</string>
     <string name="tax_rate_add_rate">+ Añadir una tasa</string>
+    <string name="tax_rate_edit_dialog_title">Editar tipo de IVA</string>
     <string name="product_price">Precio</string>
     <string name="product_price_input">3</string>
     <string name="product_price_default">Precio por defecto</string>
