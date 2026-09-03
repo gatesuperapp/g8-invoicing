@@ -104,6 +104,7 @@ import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.account_currency_title
 import com.a4a.g8invoicing.shared.resources.account_currency_and_language_title
+import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.WebsiteFooter
@@ -946,6 +947,11 @@ private fun MyCompaniesSection(
     // dismiss (destructive path is deliberately not offered — data must be
     // detached or deleted first).
     var deleteBlocked by remember { mutableStateOf(false) }
+    // Non-null when the user tapped delete on an empty entreprise: hold until
+    // the user confirms via the AlertDialogDeleteDocument prompt. Deleting an
+    // entreprise is irreversible, so the single-tap trash affordance always
+    // routes through the shared confirm dialog first.
+    var pendingDeleteIssuer by remember { mutableStateOf<ClientOrIssuerState?>(null) }
 
     // Deleting the last remaining entreprise would leave the doc-edit flows
     // with no issuer to attach — the picker + numbering counter both rely on
@@ -964,12 +970,12 @@ private fun MyCompaniesSection(
             onDelete = {
                 val issuerId = issuer.id?.toLong()
                 if (issuerId == null) {
-                    listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                    pendingDeleteIssuer = issuer
                 } else {
                     scope.launch {
                         val attached = listViewModel.countAttachedForIssuer(issuerId)
                         if (attached == 0L) {
-                            listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                            pendingDeleteIssuer = issuer
                         } else {
                             deleteBlocked = true
                         }
@@ -978,6 +984,16 @@ private fun MyCompaniesSection(
             },
         )
         Spacer(modifier = Modifier.height(8.dp))
+    }
+
+    pendingDeleteIssuer?.let { issuer ->
+        AlertDialogDeleteDocument(
+            onDismissRequest = { pendingDeleteIssuer = null },
+            onConfirmation = {
+                listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                pendingDeleteIssuer = null
+            },
+        )
     }
 
     if (deleteBlocked) {
