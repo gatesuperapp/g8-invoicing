@@ -13,7 +13,6 @@ import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.itextpdf.io.font.FontProgramFactory
 import com.itextpdf.io.font.PdfEncodings
-import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
@@ -277,9 +276,11 @@ class PdfGeneratorImpl(
             } catch (_: Throwable) { }
         }
         addBytes(ARIMO_ASSET)
-        // Always keep the standard 14 available as a last-resort fallback: even
-        // if every asset+system add above fails, the PDF still renders ASCII.
-        provider.addStandardPdfFonts()
+        // No addStandardPdfFonts() here — the Base14 references (Helvetica /
+        // Times / Courier / Symbol / ZapfDingbats) are never embedded in the
+        // PDF, which breaks PDF/A-3's "embedded fonts shall define all glyphs
+        // referenced for rendering" rule. Every remaining source below hands
+        // iText real .ttf/.otf bytes so the subset lands in the file.
         fileManager.listSystemFontFiles().forEach { path ->
             try { provider.addFont(path) } catch (_: Throwable) { }
         }
@@ -1312,17 +1313,17 @@ class PdfGeneratorImpl(
     // Lazily-loaded PdfFont used only for measuring price-row widths. Kept as
     // a nullable cache field so we don't re-parse the TTF for every PDF; the
     // PdfGeneratorImpl instance is per-generation anyway, so no cross-thread
-    // concern. Falls back to the Base14 sans if the asset is missing —
-    // measurement will underestimate exotic glyphs but PRICES_LABEL_AMOUNT_GAP
-    // has enough slack for that to still look correct.
+    // concern. Loads Arimo bytes directly rather than going through the
+    // FontProvider — measurement runs before the Document exists so there's
+    // no PDF context to attach a resource to, and using a Base14 fallback
+    // here would still register a non-embedded font in the doc via the
+    // measured Paragraph's font stack (breaks PDF/A-3).
     private var pricesMeasurementFont: PdfFont? = null
     private fun loadPricesMeasurementFont(): PdfFont {
         pricesMeasurementFont?.let { return it }
-        val font = try {
-            fileManager.loadAssetBytes(ARIMO_ASSET)?.let { bytes ->
-                PdfFontFactory.createFont(FontProgramFactory.createFont(bytes), PdfEncodings.IDENTITY_H)
-            }
-        } catch (_: Throwable) { null } ?: PdfFontFactory.createFont(StandardFonts.HELVETICA)
+        val bytes = fileManager.loadAssetBytes(ARIMO_ASSET)
+            ?: error("Arimo asset missing — required for price-row measurement")
+        val font = PdfFontFactory.createFont(FontProgramFactory.createFont(bytes), PdfEncodings.IDENTITY_H)
         pricesMeasurementFont = font
         return font
     }
