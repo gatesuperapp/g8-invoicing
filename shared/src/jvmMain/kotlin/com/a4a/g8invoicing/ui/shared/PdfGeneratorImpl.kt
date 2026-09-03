@@ -492,6 +492,10 @@ class PdfGeneratorImpl(
             fileManager.saveToFinalLocation(finalTempPath, finalFileName)
 
         } catch (e: Exception) {
+            // Loud logging: silent catch was hiding the actual PDF/A close
+            // failure behind the app modal — the user only saw a truncated
+            // "this parser doesn't support..." message with no stack trace.
+            System.err.println("[PdfGenerator] addPageNumbering failed: ${e::class.qualifiedName}: ${e.message}")
             e.printStackTrace()
         }
 
@@ -543,15 +547,25 @@ class PdfGeneratorImpl(
         info.creator = "g8"
         info.producer = "g8 (iText)"
 
-        try {
-            val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
-            appendFacturXProperties(xmpMeta)
-            appendFacturXExtensionSchema(xmpMeta)
-            pdfDoc.setXmpMetadata(xmpMeta)
-        } catch (_: Throwable) {
-            // XMP is a nice-to-have. The AF entry alone is enough for most
-            // e-invoicing platforms to locate the payload.
-        }
+        // TEMP DIAGNOSTIC: XMP writing intentionally disabled to isolate
+        // whether the "This parser doesn't support specification 'Unknown'
+        // version 0.0" error at export time comes from our XMP construction
+        // (setProperty / appendArrayItem hits some JAXP path on Android) or
+        // from the PdfADocument's own close-time checker. If the export
+        // still fails with this diff in place, the issue is upstream —
+        // most likely PdfADocument reading back the XMP it wrote during
+        // updateXmpMetadata(), which goes through parseFromBuffer and
+        // triggers Android's SAX parser bug.
+        // TODO(pdfa-3): re-enable once we know which side is failing.
+        // try {
+        //     val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
+        //     appendFacturXProperties(xmpMeta)
+        //     appendFacturXExtensionSchema(xmpMeta)
+        //     pdfDoc.setXmpMetadata(xmpMeta)
+        // } catch (t: Throwable) {
+        //     System.err.println("[PdfGenerator] attachFacturXPayload XMP failure: ${t::class.qualifiedName}: ${t.message}")
+        //     t.printStackTrace()
+        // }
     }
 
     private fun appendFacturXProperties(xmpMeta: XMPMeta) {
