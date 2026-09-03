@@ -92,6 +92,18 @@ class ActivatedModulesRepository(
     }
 
     /**
+     * Clears the "wizard seen" flag so the 1.9 migration wizard fires again
+     * on the next MainCompose boot. Called exclusively from the restore flow
+     * when a pre-1.9 backup gets applied on a device that had already
+     * completed the wizard on the previous DB — that stale flag would
+     * otherwise leave the restored issuers/clients/products/docs unassigned
+     * to a company and skip the reassignment UI.
+     */
+    fun resetMigration19Seen() {
+        settings.putBoolean(KEY_ONBOARDING_1_9_SEEN, false)
+    }
+
+    /**
      * Nuke both the current activation and the ever-activated history. Only for
      * account-delete flows — logout must NOT call this, otherwise ex-premium users
      * lose menu access to their existing documents.

@@ -186,6 +186,7 @@ fun Account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     // Optional hint from the nav arg (?section=my_companies) — when set to a
@@ -334,6 +335,21 @@ fun Account(
                         },
                     ) {
                         Text(stringResource(Res.string.about_download_database))
+                    }
+
+                    // Secondary CTA under the download button — opens the
+                    // restore flow (SAF picker → validation → kill process →
+                    // Application.onCreate applies the swap on next launch).
+                    // TODO(i18n): "Restaurer" hardcoded; extract via the
+                    // translations branch (e.g. `account_restore_database`).
+                    TextButton(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = onRestoreDatabase,
+                    ) {
+                        Text(
+                            text = "Restaurer",
+                            color = ColorVioletLink,
+                        )
                     }
                 }
 

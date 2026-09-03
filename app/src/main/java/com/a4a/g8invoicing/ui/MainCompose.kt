@@ -16,6 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import app.cash.sqldelight.db.SqlDriver
+import com.a4a.g8invoicing.data.RestoreManager
+import org.koin.compose.koinInject
 import g8invoicing.ClientOrIssuerQueries
 import g8invoicing.DeliveryNoteQueries
 import g8invoicing.InvoiceQueries
@@ -51,6 +54,7 @@ import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.screens.AuthMessageDialog
 import com.a4a.g8invoicing.ui.screens.DatabaseEmailDialog
 import com.a4a.g8invoicing.ui.screens.DatabaseExportDialog
+import com.a4a.g8invoicing.ui.screens.DatabaseRestoreFlow
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.screens.exportDatabaseToDownloads
@@ -95,6 +99,7 @@ fun MainCompose(
     val invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject()
     val productDataSource: ProductLocalDataSourceInterface = koinInject()
     val modulesRepo: ActivatedModulesRepository = koinInject()
+    val sqlDriver: SqlDriver = koinInject()
 
     // Initialize locale and version tracking on first composition. The done
     // flag gates the popup-firing LaunchedEffect below — without it, a fresh
@@ -114,8 +119,24 @@ fun MainCompose(
     // installs mark the flag straight after FirstLaunchIssuerNameDialog
     // completes so the wizard never surfaces there.
     var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
+
+    // Restore flow — activated from Account > Sauvegarde. Rendered outside
+    // NavGraph so its dialogs stack on top of every screen the user may be
+    // on when they trigger the restore.
+    var showRestoreFlow by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
+
+        // If a restore just landed a pre-current backup, clear the "wizard
+        // seen" flag before we hit the migration-check block below. Without
+        // this the restored issuers/clients/products stay unassigned to a
+        // company (the 1.9 wizard would otherwise be silently skipped by
+        // the stale flag from the previous session).
+        if (RestoreManager.consumeMigrationWizardResetIfAny(context)) {
+            modulesRepo.resetMigration19Seen()
+        }
+
         // Snapshot the "returning user" signal BEFORE initializeVersionTracking
         // runs — on a fresh install it seeds LAST_SEEN_VERSION itself, which
         // would then look identical to a real upgrade if we read it later.
@@ -241,7 +262,7 @@ fun MainCompose(
                 },
                 exportDatabase = {
                     try {
-                        val file = exportDatabaseToDownloads(context)
+                        val file = exportDatabaseToDownloads(context, sqlDriver)
                         ExportResult.Success(file.absolutePath)
                     } catch (e: Exception) {
                         ExportResult.Error(e.message ?: "Unknown error")
@@ -529,7 +550,7 @@ fun MainCompose(
                     },
                     onExportDatabase = {
                         try {
-                            val file = exportDatabaseToDownloads(context)
+                            val file = exportDatabaseToDownloads(context, sqlDriver)
                             ExportResult.Success(file.absolutePath)
                         } catch (e: Exception) {
                             ExportResult.Error(e.message ?: "Unknown error")
@@ -540,6 +561,7 @@ fun MainCompose(
                             sendDatabaseByEmail(context, File(filePath))
                         }
                     },
+                    onRestoreDatabase = { showRestoreFlow = true },
                     onComposeEmail = { address, subject, body ->
                         val intent = Intent(Intent.ACTION_SENDTO).apply {
                             data = Uri.parse("mailto:")
@@ -555,6 +577,15 @@ fun MainCompose(
             }
         }
     }
+
+    // Restore flow overlay — must sit outside NavGraph so its intermediate
+    // "Terminer" AlertDialog survives any navigation the user triggers between
+    // tapping "restaurer" and confirming. Killing the process from this
+    // callback nukes any half-composed screen anyway.
+    DatabaseRestoreFlow(
+        active = showRestoreFlow,
+        onDismiss = { showRestoreFlow = false },
+    )
 
     // First-launch onboarding overlay. Rendered AFTER G8InvoicingTheme so it
     // stacks on top of NavGraph — the composable is no longer a Dialog (see

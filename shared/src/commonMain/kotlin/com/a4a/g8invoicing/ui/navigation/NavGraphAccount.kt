@@ -20,6 +20,7 @@ fun NavGraphBuilder.account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
 ) {
     composable(
         // Optional ?section=... lets callers force-expand a CollapsibleSection
@@ -54,6 +55,7 @@ fun NavGraphBuilder.account(
             onShareContent = onShareContent,
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
+            onRestoreDatabase = onRestoreDatabase,
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
             expandSection = section,

@@ -38,6 +38,7 @@ fun NavGraph(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
     onComposeEmail: (String, String, String) -> Unit = { _, _, _ -> },
 ) {
     val handleCategoryClick: (Category) -> Unit = { category ->
@@ -70,6 +71,7 @@ fun NavGraph(
             onShareContent = onShareContent,
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
+            onRestoreDatabase = onRestoreDatabase,
         )
 
         // gStore (premium modules showcase, no commercial CTA)
