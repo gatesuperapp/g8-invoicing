@@ -161,13 +161,20 @@ class PdfGeneratorImpl(
     fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String {
         strings = effectiveStrings(document, defaultStrings)
 
-        val tempFileName = "${sanitizeForFileName(document.documentNumber.text).ifBlank { "document" }}_facturx_temp.pdf"
         val finalFileName = buildFacturXFinalFileName(document)
-        val tempFilePath = fileManager.getTempFilePath(tempFileName)
+        val finalTempPath = fileManager.getTempFilePath(finalFileName)
+        File(finalTempPath).delete()
 
-        File(tempFilePath).delete()
-
-        val writer = PdfWriter(tempFilePath)
+        // Single-pass write: matches the working facturx-android POC.
+        // The previous two-pass approach (initial + PdfADocument(reader,
+        // writer) stamping to add page numbers) crashed on Android at
+        // "This parser doesn't support specification 'Unknown' version 0.0"
+        // — the stamping constructor reads the source XMP back through
+        // JAXP's DocumentBuilder, and Android's SAX layer refuses one of
+        // the safety features iText tries to set. Doing page numbering +
+        // AF attachment inside the initial Document.close() bypasses the
+        // stamping mode entirely.
+        val writer = PdfWriter(finalTempPath)
         val pdfDocument = PdfADocument(writer, PdfAConformance.PDF_A_3B, sRGBOutputIntent())
 
         val doc = Document(pdfDocument, PageSize.A4)
@@ -175,13 +182,39 @@ class PdfGeneratorImpl(
         doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
         doc.setFontSize(9.5F)
 
-        buildPdfContent(doc, document)
+        try {
+            buildPdfContent(doc, document)
 
-        doc.close()
-        writer.close()
-        pdfDocument.close()
+            // Page numbering runs after buildPdfContent so numberOfPages is
+            // final. showTextAligned writes onto existing pages without
+            // needing a stamping reopen.
+            val totalPages = pdfDocument.numberOfPages
+            if (totalPages > 1) {
+                for (i in 1..totalPages) {
+                    val prefix = if (i == 1) "" else "${getDocumentTypeName(document.documentType, strings)} ${document.documentNumber.text} - "
+                    doc.showTextAligned(
+                        Paragraph("$prefix$i/$totalPages"),
+                        570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f,
+                    )
+                }
+            }
 
-        return addPageNumbering(document, tempFileName, finalFileName, xmlBytes)
+            attachFacturXPayload(pdfDocument, xmlBytes, document)
+        } catch (t: Throwable) {
+            System.err.println("[PdfGenerator] generateFacturX failure before close: ${t::class.qualifiedName}: ${t.message}")
+            t.printStackTrace()
+        }
+
+        try {
+            doc.close()
+            pdfDocument.close()
+        } catch (t: Throwable) {
+            System.err.println("[PdfGenerator] generateFacturX close failure: ${t::class.qualifiedName}: ${t.message}")
+            t.printStackTrace()
+        }
+
+        fileManager.saveToFinalLocation(finalTempPath, finalFileName)
+        return finalFileName
     }
 
     // sRGB IEC61966-2.1 as the PDF/A-3 output intent. Constructed fresh per
