@@ -1021,7 +1021,7 @@ Une erreur s'est produite :
     <string name="gstore_module_font_title">Polices</string>
     <string name="gstore_module_font_desc">Changer la police de tes documents.</string>
     <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
-    <string name="action_font_label">Police</string>
+    <string name="action_font_label">Style</string>
     <string name="action_font_description">Choisir la police du document</string>
     <string name="font_picker_title">Police du document</string>
     <string name="export_error_premium_font_message">Ton document utilise une police premium mais tu n'es pas membre premium.</string>

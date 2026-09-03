@@ -96,7 +96,10 @@ fun DocumentBottomSheetFont(
         )
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            // Left inset of 4dp so each row's inner 16dp padding lines up with
+            // the 20dp horizontal padding of the sheet title above → font names
+            // sit on the same vertical rail as "Polices".
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             items(DocumentFont.entries) { font ->

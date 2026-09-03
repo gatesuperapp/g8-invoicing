@@ -935,11 +935,11 @@ private fun DocumentAddEditBottomBar(
     DocumentBottomBar(
         actions = buildList {
             add(actionTextElements(onClickElements))
-            add(actionItems(onClickItems))
             // Only surfaced when the Font module is activated in gStore —
             // the DocumentAddEdit callsite gates this via
-            // MODULE_FONT ∈ activatedModules.
+            // MODULE_FONT ∈ activatedModules. Sits between Texte and Produits.
             onClickFont?.let { add(actionFont(it)) }
+            add(actionItems(onClickItems))
         }.toTypedArray()
     )
 }

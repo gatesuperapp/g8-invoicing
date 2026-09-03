@@ -73,7 +73,7 @@ fun DocumentBottomBarView(
                             action.icon?.let {
                                 Icon(
                                     it,
-                                    modifier = Modifier.size(24.dp),
+                                    modifier = Modifier.size(action.iconSizeDp.dp),
                                     tint = ColorButtonBar,
                                     contentDescription = action.description
                                 )

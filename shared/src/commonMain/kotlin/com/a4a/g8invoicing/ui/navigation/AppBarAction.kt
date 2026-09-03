@@ -47,6 +47,10 @@ data class AppBarAction(
     val icon: ImageVector? = null,
     val iconColor: Color? = null,
     val iconBorder: Color? = null,
+    // Optional override for the icon's rendered size. Defaults to the shared
+    // 24dp in DocumentBottomBar. Set per-action when a glyph reads visually
+    // heavier at the default size (e.g. the wand+stars needs a nudge down).
+    val iconSizeDp: Int = 24,
     val label: String? = null,
     val description: String = "",
     val tag: DocumentTag? = null,
@@ -352,6 +356,9 @@ fun actionStyle(onClick: () -> Unit) =
 fun actionFont(onClick: () -> Unit) =
     AppBarAction(
         icon = Icons.Outlined.AutoFixHigh,
+        // Wand+stars glyph reads slightly heavier than the other bar icons at
+        // 24dp — pull it down ~10% so the row stays visually balanced.
+        iconSizeDp = 22,
         label = stringResource(Res.string.action_font_label),
         description = stringResource(Res.string.action_font_description),
         isSecondary = false,
