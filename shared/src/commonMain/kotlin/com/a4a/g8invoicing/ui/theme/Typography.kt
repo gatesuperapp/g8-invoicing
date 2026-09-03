@@ -21,8 +21,7 @@ fun getUiFontBold(): FontFamily = FontFamily(Font(Res.font.dmsansmedium))
 
 // PDF / preview font resolution goes through LocalDocumentFont (see
 // AppFonts.kt) so every textForDocuments* style below auto-picks the font
-// the user chose for the current document. The proprietary Helvetica bundle
-// has been retired in favour of Noto Sans as the free default.
+// the user chose for the current document.
 @Composable
 fun getPdfFont(): FontFamily = LocalDocumentFont.current.regularFamily()
 

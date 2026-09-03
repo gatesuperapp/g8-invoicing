@@ -94,8 +94,8 @@ expect class PdfFileManager() {
     fun openOrShare(filePath: String)
 
     /**
-     * Load raw bytes for a bundled asset (e.g. embedded helvetica.ttf). Returns
-     * null when the asset isn't available on the current platform.
+     * Load raw bytes for a bundled asset (e.g. the embedded default typeface).
+     * Returns null when the asset isn't available on the current platform.
      */
     fun loadAssetBytes(assetName: String): ByteArray?
 

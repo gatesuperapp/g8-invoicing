@@ -42,10 +42,8 @@ enum class DocumentFont(
     val displayName: String,
     val isPremium: Boolean,
 ) {
-    // Arimo — Google/Ascender metric-compatible Helvetica clone, OFL. New
-    // default because it matches the shape most users expect from a
-    // "generic sans" invoice font (previously Helvetica, retired for
-    // licensing reasons).
+    // Arimo — Google/Ascender OFL sans-serif. Default free typeface: variable
+    // font covering Regular + Bold via wght axis, broad Latin coverage.
     ARIMO("arimo", "Arimo", isPremium = false),
     NOTO_SANS("noto_sans", "Noto Sans", isPremium = false),
     NOTO_SERIF("noto_serif", "Noto Serif", isPremium = false),

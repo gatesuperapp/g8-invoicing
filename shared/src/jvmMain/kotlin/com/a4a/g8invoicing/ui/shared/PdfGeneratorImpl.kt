@@ -69,9 +69,14 @@ class PdfGeneratorImpl(
     private val defaultStrings: PdfStrings = defaultStrings
     private companion object {
         // Primary family name. The FontProvider matches the embedded
-        // helvetica.ttf / helveticabold.ttf; unknown-glyph runs fall through
-        // to whichever registered font covers them.
-        const val FONT_FAMILY = "Helvetica"
+        // arimo.ttf; unknown-glyph runs fall through to whichever registered
+        // font covers them.
+        const val FONT_FAMILY = "Arimo"
+        // Bundled classpath / assets path for the embedded default typeface.
+        // Compose Multiplatform packages composeResources/font/*.ttf into the
+        // Android assets tree at this exact path, so context.assets.open() and
+        // JVM ClassLoader.getResourceAsStream() both resolve it uniformly.
+        const val ARIMO_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/arimo.ttf"
 
         // Right edge of the totals block, in points from the start of the
         // paragraph. Amounts right-align there; the label's right edge is
@@ -81,7 +86,7 @@ class PdfGeneratorImpl(
         // Breathing room between the ":" at the end of the label and the
         // first digit of the amount. Compose preview looks tight at ~4px but
         // the PDF needs more because per-glyph width measurement of a few
-        // currency symbols missing from helvetica.ttf (₪ ₼ ₽ ₾) is estimated,
+        // currency symbols missing from arimo.ttf (₪ ₼ ₽ ₾) is estimated,
         // not exact — the buffer absorbs any under-estimation.
         const val PRICES_LABEL_AMOUNT_GAP = 12f
     }
@@ -227,13 +232,13 @@ class PdfGeneratorImpl(
     }
 
     /**
-     * Font stack for the whole PDF. The primary family is Helvetica (embedded
-     * from assets to get access to symbols like ₹ that WinAnsi lacks). We then
-     * pile every readable system font on top so iText's FontSelector can
-     * character-by-character fall back to whichever font covers each glyph —
-     * this is what makes exotic currency symbols (৳ ֏ ₽ د.إ …) and any
-     * user-typed content (CJK names, emoji in a footer) render instead of
-     * disappearing.
+     * Font stack for the whole PDF. The primary family is Arimo (embedded
+     * from composeResources — variable font covering Regular + Bold via the
+     * wght axis). We then pile every readable system font on top so iText's
+     * FontSelector can character-by-character fall back to whichever font
+     * covers each glyph — this is what makes exotic currency symbols
+     * (৳ ֏ ₽ د.إ …) and any user-typed content (CJK names, emoji in a
+     * footer) render instead of disappearing.
      *
      * Registration order doesn't matter: FontSelector picks by family+coverage,
      * not order. We silently swallow per-font failures because a few system
@@ -247,8 +252,7 @@ class PdfGeneratorImpl(
                 fileManager.loadAssetBytes(name)?.let { provider.addFont(it) }
             } catch (_: Throwable) { }
         }
-        addBytes("helvetica.ttf")
-        addBytes("helveticabold.ttf")
+        addBytes(ARIMO_ASSET)
         // Always keep the standard 14 available as a last-resort fallback: even
         // if every asset+system add above fails, the PDF still renders ASCII.
         provider.addStandardPdfFonts()
@@ -398,8 +402,8 @@ class PdfGeneratorImpl(
     ): String {
         // No local fontRegular here anymore — the doc opened below sets
         // `fontProvider = buildFontProvider()` so every Paragraph resolves its
-        // font through the provider (needed for currency glyphs that WinAnsi
-        // Helvetica doesn't cover).
+        // font through the provider (needed for currency glyphs the primary
+        // Arimo doesn't cover).
 
         val tempFilePath = fileManager.getTempFilePath(tempFileName)
         val finalTempPath = fileManager.getTempFilePath(finalFileName)
@@ -860,7 +864,7 @@ class PdfGeneratorImpl(
         // Single-line-box layout: each row is one Paragraph whose label and
         // amount sit at their own right-aligned tab stops. One line box per row
         // means one shared baseline, which matters when iText grabs a fallback
-        // font for a currency glyph the primary Helvetica doesn't cover.
+        // font for a currency glyph the primary Arimo doesn't cover.
         data class Line(val label: String, val amount: String, val bold: Boolean)
         val lines = buildList {
             add(Line(
@@ -891,12 +895,10 @@ class PdfGeneratorImpl(
         }
 
         // Measure the widest amount so the label's right-align tab lands just
-        // before it. Uses the embedded helvetica.ttf (covers €, £, ₹, ₺, ₩,
-        // ₴, ₸ and everything Latin) rather than StandardFonts.HELVETICA
-        // (Base14, WinAnsi encoded, has none of the currency-symbol block).
-        // For the four glyphs even our embedded font misses (₪ ₼ ₽ ₾),
-        // per-char measurement returns 0 → we substitute a generous 1em
-        // estimate so those rare cases don't collapse the gap.
+        // before it. Uses the embedded arimo.ttf — covers €, £, ₹, ₺, ₩, ₴, ₸
+        // and everything Latin. For the four glyphs even our embedded font
+        // misses (₪ ₼ ₽ ₾), per-char measurement returns 0 → we substitute a
+        // generous 1em estimate so those rare cases don't collapse the gap.
         val measurementFont = loadPricesMeasurementFont()
         val maxAmountWidth = lines.maxOf { measurePriceWidth(it.amount, measurementFont, fontSize) }
         val labelRight = PRICES_AMOUNT_RIGHT - maxAmountWidth - PRICES_LABEL_AMOUNT_GAP
@@ -1170,14 +1172,14 @@ class PdfGeneratorImpl(
     // Lazily-loaded PdfFont used only for measuring price-row widths. Kept as
     // a nullable cache field so we don't re-parse the TTF for every PDF; the
     // PdfGeneratorImpl instance is per-generation anyway, so no cross-thread
-    // concern. Falls back to the Base14 Helvetica if the asset is missing —
+    // concern. Falls back to the Base14 sans if the asset is missing —
     // measurement will underestimate exotic glyphs but PRICES_LABEL_AMOUNT_GAP
     // has enough slack for that to still look correct.
     private var pricesMeasurementFont: PdfFont? = null
     private fun loadPricesMeasurementFont(): PdfFont {
         pricesMeasurementFont?.let { return it }
         val font = try {
-            fileManager.loadAssetBytes("helvetica.ttf")?.let { bytes ->
+            fileManager.loadAssetBytes(ARIMO_ASSET)?.let { bytes ->
                 PdfFontFactory.createFont(FontProgramFactory.createFont(bytes), PdfEncodings.IDENTITY_H)
             }
         } catch (_: Throwable) { null } ?: PdfFontFactory.createFont(StandardFonts.HELVETICA)
