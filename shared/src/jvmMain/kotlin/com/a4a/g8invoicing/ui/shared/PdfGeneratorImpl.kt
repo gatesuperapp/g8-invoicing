@@ -28,7 +28,10 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.filespec.PdfFileSpec
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.xmp.XMPConst
+import com.itextpdf.kernel.xmp.XMPMeta
 import com.itextpdf.kernel.xmp.XMPMetaFactory
+import com.itextpdf.kernel.xmp.options.PropertyOptions
 import com.itextpdf.pdfa.PdfADocument
 import java.io.ByteArrayInputStream
 import com.itextpdf.layout.Document
@@ -555,45 +558,115 @@ class PdfGeneratorImpl(
         )
         pdfDoc.addAssociatedFile("factur-x.xml", fileSpec)
 
-        // DocumentInfo dictionary — some readers (Acrobat, Foxit) prefer it
-        // over the XMP for the visible title/author fields.
+        // DocumentInfo dictionary — set title + author only. Don't set creator
+        // or producer here: iText overwrites Info.Producer at close ("… ;
+        // modified using iText® Core 9.5.0 (AGPL) …") which would then not
+        // match whatever we'd have put in xmp:Producer, and veraPDF rule
+        // 6.7.3 checks Info/XMP equivalence. Letting iText be the single
+        // author of Producer + Creator avoids the mismatch entirely.
         val docTypeLabel = getDocumentTypeName(document.documentType, strings)
         val title = "$docTypeLabel ${document.documentNumber.text}"
         val author = document.documentIssuer?.name?.text?.takeIf { it.isNotBlank() } ?: "g8"
         val info = pdfDoc.documentInfo
         info.title = title
         info.author = author
-        info.creator = "g8"
-        info.producer = "g8 (iText)"
 
-        // XMP — same shape as the working facturx-android POC: a handful of
-        // setProperty calls, no pdfaExtension:schemas hand-crafting. The
-        // extension schema block was retired: our earlier attempts to build
-        // it via the XMPMeta struct API were both brittle and prone to
-        // trigger Android's SAX-parser crash at close time. veraPDF may
-        // warn about the fx: namespace not being formally declared, but
-        // Chorus Pro and other Factur-X consumers key off the properties
-        // themselves (not the schema declaration), and PdfADocument doesn't
-        // refuse the file.
+        // XMP — carefully typed to match the PDF/A registered forms:
+        //   dc:title      → lang alt (rdf:Alt keyed by xml:lang)
+        //   dc:creator    → seq propername (rdf:Seq of strings)
+        //   pdfaid:part   → "3"     ← would be dropped if we replaced iText's
+        //   pdfaid:conf   → "B"       XMP with an empty XMPMeta, hence the
+        //                             pdfDoc.xmpMetadata pull below.
+        // fx: properties get their own extension schema block so the pdfa
+        // checker knows they're legal (rule 6.7.9 fails without it).
         try {
             val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
-            val dcNs = "http://purl.org/dc/elements/1.1/"
-            val xmpNs = "http://ns.adobe.com/xap/1.0/"
-            val pdfNs = "http://ns.adobe.com/pdf/1.3/"
+
+            // dc:title — lang alt required by PDF/A rule 6.7.9.
+            val dcNs = XMPConst.NS_DC
+            xmpMeta.deleteProperty(dcNs, "title")
+            xmpMeta.setLocalizedText(dcNs, "title", XMPConst.X_DEFAULT, XMPConst.X_DEFAULT, title)
+
+            // dc:creator — seq of proper names.
+            xmpMeta.deleteProperty(dcNs, "creator")
+            xmpMeta.appendArrayItem(
+                dcNs, "creator",
+                PropertyOptions().setArrayOrdered(true),
+                author, null,
+            )
+
+            // pdfaid:part / conformance — PdfADocument sets these on the XMP
+            // it emits at close, but we're replacing that XMP with our own
+            // instance and would clobber them otherwise. Set them explicitly.
+            val pdfaidNs = XMPConst.NS_PDFA_ID
+            xmpMeta.setProperty(pdfaidNs, "part", "3")
+            xmpMeta.setProperty(pdfaidNs, "conformance", "B")
+
+            // fx: properties — the four Factur-X consumer keys.
             val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
             try { XMPMetaFactory.getSchemaRegistry().registerNamespace(fxNs, "fx") } catch (_: Exception) {}
-            xmpMeta.setProperty(dcNs, "title", title)
-            xmpMeta.setProperty(dcNs, "creator", author)
-            xmpMeta.setProperty(xmpNs, "CreateDate", java.time.OffsetDateTime.now().toString())
-            xmpMeta.setProperty(pdfNs, "Producer", "g8 (iText)")
             xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
             xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
             xmpMeta.setProperty(fxNs, "Version", "1.0")
             xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
+
+            appendFacturXExtensionSchema(xmpMeta)
+
             pdfDoc.setXmpMetadata(xmpMeta)
         } catch (t: Throwable) {
             System.err.println("[PdfGenerator] attachFacturXPayload XMP failure: ${t::class.qualifiedName}: ${t.message}")
             t.printStackTrace()
+        }
+    }
+
+    /**
+     * Declare the fx: namespace as a PDF/A extension schema so veraPDF
+     * accepts the fx:* properties (rule 6.7.9 otherwise fails with "property
+     * is not defined in any schema"). Structure: a Bag of Structs; each
+     * Struct has schema / namespaceURI / prefix strings plus an ordered Seq
+     * of property description Structs.
+     */
+    private fun appendFacturXExtensionSchema(xmpMeta: XMPMeta) {
+        val extNs = "http://www.aiim.org/pdfa/ns/extension/"
+        val schemaNs = "http://www.aiim.org/pdfa/ns/schema#"
+        val propertyNs = "http://www.aiim.org/pdfa/ns/property#"
+        val registry = XMPMetaFactory.getSchemaRegistry()
+        registry.registerNamespace(extNs, "pdfaExtension")
+        registry.registerNamespace(schemaNs, "pdfaSchema")
+        registry.registerNamespace(propertyNs, "pdfaProperty")
+
+        // Wipe any previous fx schema entry so re-runs don't stack multiple
+        // rdf:Bag items pointing at the same namespace.
+        try { xmpMeta.deleteProperty(extNs, "schemas") } catch (_: Exception) {}
+
+        val schemasBagOptions = PropertyOptions().setArray(true)
+        val schemaStructOptions = PropertyOptions().apply { isStruct = true }
+        xmpMeta.appendArrayItem(extNs, "schemas", schemasBagOptions, null, schemaStructOptions)
+        val schemaPath = "pdfaExtension:schemas[1]"
+
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "schema",
+            "Factur-X PDFA Extension Schema")
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "namespaceURI",
+            "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#")
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "prefix", "fx")
+
+        val properties = listOf(
+            Triple("DocumentType", "Text", "Factur-X document type (INVOICE)"),
+            Triple("DocumentFileName", "Text", "Name of the embedded Factur-X XML file"),
+            Triple("Version", "Text", "Version of the Factur-X profile"),
+            Triple("ConformanceLevel", "Text",
+                "Factur-X conformance level (MINIMUM, BASIC, EN 16931, EXTENDED)"),
+        )
+        val propBagPath = "$schemaPath/pdfaSchema:property"
+        val propBagOptions = PropertyOptions().setArrayOrdered(true)
+        val propStructOptions = PropertyOptions().apply { isStruct = true }
+        properties.forEachIndexed { index, (name, type, description) ->
+            xmpMeta.appendArrayItem(extNs, propBagPath, propBagOptions, null, propStructOptions)
+            val propPath = "$propBagPath[${index + 1}]"
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "name", name)
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "valueType", type)
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "category", "external")
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "description", description)
         }
     }
 
