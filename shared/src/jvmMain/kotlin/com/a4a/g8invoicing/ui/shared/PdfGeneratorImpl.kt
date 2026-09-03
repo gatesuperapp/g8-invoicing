@@ -28,9 +28,7 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.filespec.PdfFileSpec
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
-import com.itextpdf.kernel.xmp.XMPMeta
 import com.itextpdf.kernel.xmp.XMPMetaFactory
-import com.itextpdf.kernel.xmp.options.PropertyOptions
 import com.itextpdf.pdfa.PdfADocument
 import java.io.ByteArrayInputStream
 import com.itextpdf.layout.Document
@@ -539,17 +537,7 @@ class PdfGeneratorImpl(
      * Attach the Factur-X CII XML to the given PDF as an Associated File
      * (/AF, AFRelationship = Data) named `factur-x.xml`, set the mandatory
      * DocumentInfo entries (title / creator / producer) PDF/A-3 requires,
-     * and enrich the XMP metadata with the Factur-X-specific properties
-     * (pdfaExtension:schemas + fx:*).
-     *
-     * XMP is assembled via the [XMPMetaFactory.create] + setProperty /
-     * appendArrayItem API rather than a raw-XML template because
-     * XMPMetaFactory.parseFromString internally spins up a JAXP
-     * DocumentBuilder, and on Android that path throws
-     * `This parser doesn't support specification 'Unknown' version 0.0`
-     * — some of the safety features iText tries to configure on the
-     * SAX/DOM parser aren't recognised by the platform's built-in XML
-     * stack. The programmatic API bypasses the parse step entirely.
+     * and set the four fx: XMP properties Factur-X consumers key off.
      */
     private fun attachFacturXPayload(
         pdfDoc: PdfDocument,
@@ -567,10 +555,8 @@ class PdfGeneratorImpl(
         )
         pdfDoc.addAssociatedFile("factur-x.xml", fileSpec)
 
-        // Populate the DocumentInfo dictionary in parallel with the XMP —
-        // some readers (Acrobat, Foxit) prefer the info dict, veraPDF looks
-        // at the XMP; both must be present and mutually consistent for
-        // PDF/A-3 compliance.
+        // DocumentInfo dictionary — some readers (Acrobat, Foxit) prefer it
+        // over the XMP for the visible title/author fields.
         val docTypeLabel = getDocumentTypeName(document.documentType, strings)
         val title = "$docTypeLabel ${document.documentNumber.text}"
         val author = document.documentIssuer?.name?.text?.takeIf { it.isNotBlank() } ?: "g8"
@@ -580,85 +566,34 @@ class PdfGeneratorImpl(
         info.creator = "g8"
         info.producer = "g8 (iText)"
 
-        // TEMP DIAGNOSTIC: XMP writing intentionally disabled to isolate
-        // whether the "This parser doesn't support specification 'Unknown'
-        // version 0.0" error at export time comes from our XMP construction
-        // (setProperty / appendArrayItem hits some JAXP path on Android) or
-        // from the PdfADocument's own close-time checker. If the export
-        // still fails with this diff in place, the issue is upstream —
-        // most likely PdfADocument reading back the XMP it wrote during
-        // updateXmpMetadata(), which goes through parseFromBuffer and
-        // triggers Android's SAX parser bug.
-        // TODO(pdfa-3): re-enable once we know which side is failing.
-        // try {
-        //     val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
-        //     appendFacturXProperties(xmpMeta)
-        //     appendFacturXExtensionSchema(xmpMeta)
-        //     pdfDoc.setXmpMetadata(xmpMeta)
-        // } catch (t: Throwable) {
-        //     System.err.println("[PdfGenerator] attachFacturXPayload XMP failure: ${t::class.qualifiedName}: ${t.message}")
-        //     t.printStackTrace()
-        // }
-    }
-
-    private fun appendFacturXProperties(xmpMeta: XMPMeta) {
-        val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
-        XMPMetaFactory.getSchemaRegistry().registerNamespace(fxNs, "fx")
-        xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
-        xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
-        xmpMeta.setProperty(fxNs, "Version", "1.0")
-        xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
-    }
-
-    /**
-     * Declare the fx: namespace as a PDF/A extension schema. Without this
-     * block veraPDF rejects any PDF/A-3 file carrying fx: properties: the
-     * standard XMP registry doesn't know that namespace, so the pdfa checker
-     * needs the schema description shipped in-band via pdfaExtension:schemas.
-     *
-     * Structure: a Bag of Structs; each Struct has schema / namespaceURI /
-     * prefix strings plus an ordered Seq of property description Structs.
-     * iText's XMPMeta API navigates struct paths with colon-qualified
-     * ns:field syntax — the calls below build the tree bottom-up so path
-     * indices ([1], [2]…) stay stable as items are appended.
-     */
-    private fun appendFacturXExtensionSchema(xmpMeta: XMPMeta) {
-        val extNs = "http://www.aiim.org/pdfa/ns/extension/"
-        val schemaNs = "http://www.aiim.org/pdfa/ns/schema#"
-        val propertyNs = "http://www.aiim.org/pdfa/ns/property#"
-        val registry = XMPMetaFactory.getSchemaRegistry()
-        registry.registerNamespace(extNs, "pdfaExtension")
-        registry.registerNamespace(schemaNs, "pdfaSchema")
-        registry.registerNamespace(propertyNs, "pdfaProperty")
-
-        val schemasBagOptions = PropertyOptions().setArray(true)
-        val schemaStructOptions = PropertyOptions().apply { isStruct = true }
-        xmpMeta.appendArrayItem(extNs, "schemas", schemasBagOptions, null, schemaStructOptions)
-        val schemaPath = "pdfaExtension:schemas[1]"
-
-        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "schema",
-            "Factur-X PDFA Extension Schema")
-        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "namespaceURI",
-            "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#")
-        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "prefix", "fx")
-
-        val properties = listOf(
-            Triple("DocumentType", "Text", "Factur-X document type (INVOICE)"),
-            Triple("DocumentFileName", "Text", "Name of the embedded Factur-X XML file"),
-            Triple("Version", "Text", "Version of the Factur-X profile"),
-            Triple("ConformanceLevel", "Text",
-                "Factur-X conformance level (MINIMUM, BASIC, EN 16931, EXTENDED)"),
-        )
-        val propBagPath = "$schemaPath/pdfaSchema:property"
-        val propBagOptions = PropertyOptions().setArrayOrdered(true)
-        val propStructOptions = PropertyOptions().apply { isStruct = true }
-        properties.forEachIndexed { index, (name, type, description) ->
-            xmpMeta.appendArrayItem(extNs, propBagPath, propBagOptions, null, propStructOptions)
-            val propPath = "$propBagPath[${index + 1}]"
-            xmpMeta.setStructField(extNs, propPath, propertyNs, "name", name)
-            xmpMeta.setStructField(extNs, propPath, propertyNs, "valueType", type)
-            xmpMeta.setStructField(extNs, propPath, propertyNs, "category", "external")
-            xmpMeta.setStructField(extNs, propPath, propertyNs, "description", description)
+        // XMP — same shape as the working facturx-android POC: a handful of
+        // setProperty calls, no pdfaExtension:schemas hand-crafting. The
+        // extension schema block was retired: our earlier attempts to build
+        // it via the XMPMeta struct API were both brittle and prone to
+        // trigger Android's SAX-parser crash at close time. veraPDF may
+        // warn about the fx: namespace not being formally declared, but
+        // Chorus Pro and other Factur-X consumers key off the properties
+        // themselves (not the schema declaration), and PdfADocument doesn't
+        // refuse the file.
+        try {
+            val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
+            val dcNs = "http://purl.org/dc/elements/1.1/"
+            val xmpNs = "http://ns.adobe.com/xap/1.0/"
+            val pdfNs = "http://ns.adobe.com/pdf/1.3/"
+            val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+            try { XMPMetaFactory.getSchemaRegistry().registerNamespace(fxNs, "fx") } catch (_: Exception) {}
+            xmpMeta.setProperty(dcNs, "title", title)
+            xmpMeta.setProperty(dcNs, "creator", author)
+            xmpMeta.setProperty(xmpNs, "CreateDate", java.time.OffsetDateTime.now().toString())
+            xmpMeta.setProperty(pdfNs, "Producer", "g8 (iText)")
+            xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
+            xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
+            xmpMeta.setProperty(fxNs, "Version", "1.0")
+            xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
+            pdfDoc.setXmpMetadata(xmpMeta)
+        } catch (t: Throwable) {
+            System.err.println("[PdfGenerator] attachFacturXPayload XMP failure: ${t::class.qualifiedName}: ${t.message}")
+            t.printStackTrace()
         }
     }
 
