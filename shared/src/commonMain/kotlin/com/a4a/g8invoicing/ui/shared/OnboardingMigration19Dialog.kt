@@ -122,6 +122,10 @@ import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_cta
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_hint
 import com.a4a.g8invoicing.shared.resources.onboarding_19_new_fields_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_search_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_search_title
+import com.a4a.g8invoicing.shared.resources.onboarding_19_tags_body
+import com.a4a.g8invoicing.shared.resources.onboarding_19_tags_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_clients_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_clients_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_orphans_cta
@@ -185,11 +189,12 @@ class Migration19Actions(
 /**
  * 1.9 migration wizard — shown once when upgrading from 1.8.x. Two
  * branches share a common welcome/tail:
- *  - Single-issuer: Welcome → BankDetails → NewFieldsRecap → Final
+ *  - Single-issuer: Welcome → BankDetails → NewFieldsRecap → Search →
+ *                   Tags → EInvoice → Final
  *  - Multi-issuer:  Welcome → Cleanup → AttachIntro → (per issuer:
  *                   AttachClients → AttachProducts → BankDetails) →
- *                   OrphansClients → OrphansProducts → NewFieldsRecap
- *                   → Final
+ *                   OrphansClients → OrphansProducts → NewFieldsRecap →
+ *                   Search → Tags → EInvoice → Final
  *
  * Non-dismissable: the wizard must be completed once. Any orphan-slide
  * is skipped when there's nothing to sort.
@@ -377,6 +382,14 @@ fun OnboardingMigration19Dialog(
     }
 
     fun goForwardFromNewFieldsRecap() {
+        step = Step19.Search
+    }
+
+    fun goForwardFromSearch() {
+        step = Step19.Tags
+    }
+
+    fun goForwardFromTags() {
         step = Step19.EInvoice
     }
 
@@ -705,6 +718,8 @@ fun OnboardingMigration19Dialog(
                             onNext = { goForwardFromConfirm() },
                         )
                         Step19.NewFieldsRecap -> NewFieldsRecapStep19(onNext = { goForwardFromNewFieldsRecap() })
+                        Step19.Search -> SearchStep19(onNext = { goForwardFromSearch() })
+                        Step19.Tags -> TagsStep19(onNext = { goForwardFromTags() })
                         Step19.EInvoice -> EInvoiceStep19(onNext = { goForwardFromEInvoice() })
                         Step19.Final -> FinalStep19(onDone = commit)
                     }
@@ -785,6 +800,10 @@ private enum class Step19 {
     OrphansProducts,
     Confirm,
     NewFieldsRecap,
+    // Two "what's new" announcement slides slotted between the field recap
+    // and the e-invoice pitch: cross-tab search bar + BL/quote tagging.
+    Search,
+    Tags,
     EInvoice,
     Final,
 }
@@ -826,7 +845,9 @@ private fun previousStep19(
     // controls inside the step are the escape hatch for wrong assignments.
     Step19.Confirm -> Step19.Confirm
     Step19.NewFieldsRecap -> if (isMulti) Step19.Confirm else Step19.BankDetails
-    Step19.EInvoice -> Step19.NewFieldsRecap
+    Step19.Search -> Step19.NewFieldsRecap
+    Step19.Tags -> Step19.Search
+    Step19.EInvoice -> Step19.Tags
     Step19.Final -> Step19.EInvoice
 }
 
@@ -1317,6 +1338,50 @@ private fun NewFieldsRecapStep19(onNext: () -> Unit) {
         )
         Spacer(Modifier.height(32.dp))
         PrimaryCta19(text = stringResource(Res.string.onboarding_19_new_fields_cta), onClick = onNext)
+    }
+}
+
+@Composable
+private fun SearchStep19(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        EmojiSlot("🔍") // 🔍
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_19_search_title))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_search_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(32.dp))
+        PrimaryCta19(text = stringResource(Res.string.onboarding_next), onClick = onNext)
+    }
+}
+
+@Composable
+private fun TagsStep19(onNext: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        EmojiSlot("🏷️") // 🏷️
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_19_tags_title))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_19_tags_body),
+            style = MaterialTheme.typography.textBody,
+            textAlign = TextAlign.Start,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(32.dp))
+        PrimaryCta19(text = stringResource(Res.string.onboarding_next), onClick = onNext)
     }
 }
 

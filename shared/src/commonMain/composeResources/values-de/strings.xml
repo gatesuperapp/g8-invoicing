@@ -892,6 +892,10 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_new_fields_body">Ich habe auch folgende Felder in die Rechnungen aufgenommen:\n\n• **Zahlungsart**\n• **Zahlungsbedingungen**\n• **USt-Befreiungsgrund** (für Kleinunternehmen)</string>
     <string name="onboarding_19_new_fields_hint">Wenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
     <string name="onboarding_19_new_fields_cta">Weiter</string>
+    <string name="onboarding_19_search_title">Suche</string>
+    <string name="onboarding_19_search_body">Eine Suchleiste ist jetzt für Kunden, Produkte und alle Dokumente verfügbar (Suche nach Kundenname oder Belegnummer).</string>
+    <string name="onboarding_19_tags_title">Tags für Lieferscheine und Angebote</string>
+    <string name="onboarding_19_tags_body">Du kannst deinen Lieferscheinen und Angeboten jetzt einen Status vergeben (Entwurf, Gesendet, Storniert). Der Status „In Rechnung gestellt" wird automatisch gesetzt, wenn du in eine Rechnung umwandelst.\n\nAktiviere diese Premium-Module im 𝕘Store.</string>
     <string name="onboarding_19_einvoice_title">Elektronische Rechnungen</string>
     <string name="onboarding_19_einvoice_intro">Der Export elektronischer Rechnungen ist jetzt verfügbar!</string>
     <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module ZUGFeRD, CII XML. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch.</string>

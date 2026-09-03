@@ -887,6 +887,10 @@
     <string name="onboarding_19_new_fields_body">I also added these fields on invoices:\n\n• **payment means**\n• **payment terms**\n• **VAT exemption reason** (for businesses in the VAT-exempt regime)</string>
     <string name="onboarding_19_new_fields_hint">If you had this info in the footer text, feel free to copy-paste it into the matching fields.</string>
     <string name="onboarding_19_new_fields_cta">Next</string>
+    <string name="onboarding_19_search_title">Search</string>
+    <string name="onboarding_19_search_body">A search bar is now available for Clients, Products, and every document (search by client name or document number).</string>
+    <string name="onboarding_19_tags_title">Delivery-note &amp; quote tags</string>
+    <string name="onboarding_19_tags_body">You can now tag your delivery notes and quotes (draft, sent, cancelled). The "invoiced" status is set automatically when you convert to an invoice.\n\nTurn these premium modules on in the 𝕘Store.</string>
     <string name="onboarding_19_einvoice_title">Electronic invoicing</string>
     <string name="onboarding_19_einvoice_intro">Electronic invoice export is now available!</string>
     <string name="onboarding_19_einvoice_body">In the gStore, turn on the Factur-X, CII XML modules. You'll be able to upload these invoices straight to your registered platform.</string>

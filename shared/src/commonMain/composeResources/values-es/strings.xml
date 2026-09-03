@@ -894,6 +894,10 @@ Une erreur s'est produite :
     <string name="onboarding_19_new_fields_body">También he añadido los siguientes campos a las facturas:\n\n• **medio de pago**\n• **condiciones de pago**\n• **exención de IVA** (para empresas en régimen de franquicia)</string>
     <string name="onboarding_19_new_fields_hint">Si ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
     <string name="onboarding_19_new_fields_cta">Siguiente</string>
+    <string name="onboarding_19_search_title">Búsqueda</string>
+    <string name="onboarding_19_search_body">Ahora hay una barra de búsqueda para Clientes, Productos y todos los documentos (busca por nombre del cliente o número de documento).</string>
+    <string name="onboarding_19_tags_title">Etiquetas albaranes y presupuestos</string>
+    <string name="onboarding_19_tags_body">Ahora puedes marcar tus albaranes y presupuestos (borrador, enviado, cancelado). El estado «facturado» se asigna automáticamente al convertirlos en factura.\n\nActiva estos módulos premium en el 𝕘Store.</string>
     <string name="onboarding_19_einvoice_title">Facturación electrónica</string>
     <string name="onboarding_19_einvoice_intro">¡La exportación de facturas electrónicas ya está disponible!</string>
     <string name="onboarding_19_einvoice_body">En el gStore, activa los módulos Factur-X, XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada.</string>
