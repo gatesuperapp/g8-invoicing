@@ -52,11 +52,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.first_launch_completion_title
 import com.a4a.g8invoicing.shared.resources.first_launch_gstore_intro
 import com.a4a.g8invoicing.shared.resources.first_launch_gstore_premium
 import com.a4a.g8invoicing.shared.resources.first_launch_issuer_default_name
@@ -128,52 +125,67 @@ fun FirstLaunchIssuerNameDialog(
         }
     }
 
-    Dialog(
-        onDismissRequest = { /* non-dismissable */ },
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-        ),
+    // Fullscreen overlay composed above AppContent (see App.kt). Not a
+    // Dialog — Compose UI Dialog on Android hardcodes a dim/scrim behind
+    // the window and doesn't expose it via DialogProperties. On the
+    // Completion slide we want the confetti to burst against the actual
+    // app view underneath, not a translucent-grey scrim, so we render as
+    // a plain Box that participates in the app's own composition tree.
+    // Back press + stray taps are absorbed by the handlers below so
+    // AppContent stays inert while the wizard is up.
+    PlatformBackHandler(enabled = true) { /* non-dismissable */ }
+    val outerInteraction = remember { MutableInteractionSource() }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            // Swallow every unhandled tap so nothing leaks to the
+            // AppContent underneath while the wizard is up (buttons
+            // inside the wizard keep their own clickable — inner
+            // clickables win).
+            .clickable(
+                interactionSource = outerInteraction,
+                indication = null,
+            ) { /* absorb */ }
+            // Completion slide drops the white surface so the confetti
+            // reads against the app view underneath instead of a flat
+            // white — the "moment lifts" beat.
+            .background(
+                if (step == Step.Completion) Color.Transparent
+                else AppColors.surface,
+            ),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(AppColors.surface),
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Top bar — a discreet "Précédent" text button. Hidden on the
-                // first slide (nothing to go back to) and on the completion
-                // slide (the wizard is already committing).
-                TopBar(
-                    canGoBack = step != Step.Welcome && step != Step.Completion,
-                    onBack = { step = previousStep(step) },
-                )
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    when (step) {
-                        Step.Welcome -> WelcomeStep(onNext = { step = Step.Liberty })
-                        Step.Liberty -> LibertyStep(onNext = { step = Step.Gstore })
-                        Step.Gstore -> GstoreStep(onNext = { step = Step.Settings })
-                        Step.Settings -> SettingsStep(
-                            name = name,
-                            onNameChange = { name = it },
-                            placeholder = namePlaceholder,
-                            country = country,
-                            onOpenPicker = { showCountryPicker = true },
-                            onSubmit = { step = Step.Completion },
-                            onSkip = {
-                                name = TextFieldValue(text = "", selection = TextRange(0))
-                                country = defaultCountry
-                                step = Step.Completion
-                            },
-                        )
-                        Step.Completion -> CompletionStep(onDone = finishOnboarding)
-                    }
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Top bar — a discreet "Précédent" text button. Hidden on the
+            // first slide (nothing to go back to) and on the completion
+            // slide (the wizard is already committing).
+            TopBar(
+                canGoBack = step != Step.Welcome && step != Step.Completion,
+                onBack = { step = previousStep(step) },
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                when (step) {
+                    Step.Welcome -> WelcomeStep(onNext = { step = Step.Liberty })
+                    Step.Liberty -> LibertyStep(onNext = { step = Step.Gstore })
+                    Step.Gstore -> GstoreStep(onNext = { step = Step.Settings })
+                    Step.Settings -> SettingsStep(
+                        name = name,
+                        onNameChange = { name = it },
+                        placeholder = namePlaceholder,
+                        country = country,
+                        onOpenPicker = { showCountryPicker = true },
+                        onSubmit = { step = Step.Completion },
+                        onSkip = {
+                            name = TextFieldValue(text = "", selection = TextRange(0))
+                            country = defaultCountry
+                            step = Step.Completion
+                        },
+                    )
+                    Step.Completion -> CompletionStep(onDone = finishOnboarding)
                 }
             }
         }
@@ -236,7 +248,7 @@ private fun WelcomeStep(onNext: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp)) }
+        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp), initialDelayMs = 1000L) }
         Spacer(Modifier.height(28.dp))
         StepTitle(stringResource(Res.string.first_launch_welcome_title))
         Spacer(Modifier.height(20.dp))
@@ -259,7 +271,7 @@ private fun LibertyStep(onNext: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp)) }
+        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp), initialDelayMs = 1000L) }
         Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(Res.string.first_launch_liberty_body1),
@@ -290,7 +302,7 @@ private fun GstoreStep(onNext: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp)) }
+        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp), initialDelayMs = 1000L) }
         Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(Res.string.first_launch_gstore_intro),
@@ -424,7 +436,7 @@ private fun CompactTextField(
 
 @Composable
 private fun CompletionStep(onDone: () -> Unit) {
-    // 2 s confetti burst then a 700 ms fade before the parent pops the
+    // 3 s confetti burst then a 700 ms fade before the parent pops the
     // dialog. Tapping anywhere on the slide fast-forwards to the fade so
     // an eager user isn't held hostage by the celebration.
     var fadingOut by remember { mutableStateOf(false) }
@@ -434,7 +446,7 @@ private fun CompletionStep(onDone: () -> Unit) {
         label = "completionFade",
     )
     LaunchedEffect(Unit) {
-        delay(2000L)
+        delay(3000L)
         fadingOut = true
         delay(700L)
         onDone()
@@ -452,16 +464,7 @@ private fun CompletionStep(onDone: () -> Unit) {
                 indication = null,
             ) { if (!fadingOut) fadingOut = true },
     ) {
-        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 2000)
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            StepTitle(stringResource(Res.string.first_launch_completion_title))
-        }
+        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 3000)
     }
 }
 

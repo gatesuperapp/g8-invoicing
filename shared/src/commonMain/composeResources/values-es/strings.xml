@@ -292,7 +292,6 @@
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
     <string name="first_launch_issuer_skip">Más tarde</string>
     <string name="first_launch_issuer_default_name">Mi empresa</string>
-    <string name="first_launch_completion_title">¡Feliz facturación!</string>
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>

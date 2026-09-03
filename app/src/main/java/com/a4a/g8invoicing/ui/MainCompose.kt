@@ -190,30 +190,9 @@ fun MainCompose(
         versionTrackingDone = true
     }
 
-    if (needsFirstLaunchIssuer) {
-        FirstLaunchIssuerNameDialog(
-            onSubmit = { enteredName, enteredCountry ->
-                val issuer = ClientOrIssuerState(
-                    type = ClientOrIssuerType.ISSUER,
-                    name = TextFieldValue(enteredName),
-                    addresses = listOf(
-                        com.a4a.g8invoicing.ui.states.AddressState(
-                            countryCode = enteredCountry,
-                        )
-                    ),
-                )
-                val newId = clientOrIssuerDataSource.createNewAndReturnId(issuer)
-                // setCurrent (not initIfMissing) so a stale Settings entry
-                // from a previous session — Settings survives a DB wipe —
-                // doesn't leave currentCompanyId pointing at a now-nonexistent
-                // issuer.
-                newId?.let { currentCompanyRepository.setCurrent(it) }
-                // Fresh installs never see the 1.9 migration wizard.
-                modulesRepo.markMigration19Seen()
-                needsFirstLaunchIssuer = false
-            }
-        )
-    }
+    // Note: [FirstLaunchIssuerNameDialog] used to be composed here; it now
+    // renders after G8InvoicingTheme so it stacks on top of NavGraph. See
+    // the block below the theme call.
 
     migration19Context?.let { ctx ->
         OnboardingMigration19Dialog(
@@ -575,5 +554,34 @@ fun MainCompose(
                 )
             }
         }
+    }
+
+    // First-launch onboarding overlay. Rendered AFTER G8InvoicingTheme so it
+    // stacks on top of NavGraph — the composable is no longer a Dialog (see
+    // FirstLaunchIssuerNameDialog for the rationale), so composition order
+    // now determines Z-order.
+    if (needsFirstLaunchIssuer) {
+        FirstLaunchIssuerNameDialog(
+            onSubmit = { enteredName, enteredCountry ->
+                val issuer = ClientOrIssuerState(
+                    type = ClientOrIssuerType.ISSUER,
+                    name = TextFieldValue(enteredName),
+                    addresses = listOf(
+                        com.a4a.g8invoicing.ui.states.AddressState(
+                            countryCode = enteredCountry,
+                        )
+                    ),
+                )
+                val newId = clientOrIssuerDataSource.createNewAndReturnId(issuer)
+                // setCurrent (not initIfMissing) so a stale Settings entry
+                // from a previous session — Settings survives a DB wipe —
+                // doesn't leave currentCompanyId pointing at a now-nonexistent
+                // issuer.
+                newId?.let { currentCompanyRepository.setCurrent(it) }
+                // Fresh installs never see the 1.9 migration wizard.
+                modulesRepo.markMigration19Seen()
+                needsFirstLaunchIssuer = false
+            }
+        )
     }
 }

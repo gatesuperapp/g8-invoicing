@@ -551,7 +551,6 @@
     <string name="first_launch_issuer_placeholder">Ferme des Trois Chênes</string>
     <string name="first_launch_issuer_skip">Plus tard</string>
     <string name="first_launch_issuer_default_name">Mon entreprise</string>
-    <string name="first_launch_completion_title">À tout de suite</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
