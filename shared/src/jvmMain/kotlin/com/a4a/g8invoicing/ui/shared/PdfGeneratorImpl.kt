@@ -28,7 +28,9 @@ import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.kernel.pdf.filespec.PdfFileSpec
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.xmp.XMPMeta
 import com.itextpdf.kernel.xmp.XMPMetaFactory
+import com.itextpdf.kernel.xmp.options.PropertyOptions
 import com.itextpdf.pdfa.PdfADocument
 import java.io.ByteArrayInputStream
 import com.itextpdf.layout.Document
@@ -499,15 +501,18 @@ class PdfGeneratorImpl(
     /**
      * Attach the Factur-X CII XML to the given PDF as an Associated File
      * (/AF, AFRelationship = Data) named `factur-x.xml`, set the mandatory
-     * DocumentInfo entries (title/creator/producer) that PDF/A-3 requires,
-     * and overwrite the XMP packet with a Factur-X-aware template so the
-     * pdfaExtension:schemas array is present alongside pdfaid and the four
-     * fx: properties consumers key off.
+     * DocumentInfo entries (title / creator / producer) PDF/A-3 requires,
+     * and enrich the XMP metadata with the Factur-X-specific properties
+     * (pdfaExtension:schemas + fx:*).
      *
-     * The raw-XMP approach is deliberate: iText's XMPMeta API for building
-     * pdfaExtension:schemas is brittle (nested Bag/Seq of Structs) and the
-     * subtle wrong-format failures only surface at veraPDF validation time.
-     * A hand-authored template stays predictable across iText versions.
+     * XMP is assembled via the [XMPMetaFactory.create] + setProperty /
+     * appendArrayItem API rather than a raw-XML template because
+     * XMPMetaFactory.parseFromString internally spins up a JAXP
+     * DocumentBuilder, and on Android that path throws
+     * `This parser doesn't support specification 'Unknown' version 0.0`
+     * — some of the safety features iText tries to configure on the
+     * SAX/DOM parser aren't recognised by the platform's built-in XML
+     * stack. The programmatic API bypasses the parse step entirely.
      */
     private fun attachFacturXPayload(
         pdfDoc: PdfDocument,
@@ -539,8 +544,9 @@ class PdfGeneratorImpl(
         info.producer = "g8 (iText)"
 
         try {
-            val xmpXml = buildFacturXXmpPacket(title = title, creator = author)
-            val xmpMeta = XMPMetaFactory.parseFromString(xmpXml)
+            val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
+            appendFacturXProperties(xmpMeta)
+            appendFacturXExtensionSchema(xmpMeta)
             pdfDoc.setXmpMetadata(xmpMeta)
         } catch (_: Throwable) {
             // XMP is a nice-to-have. The AF entry alone is enough for most
@@ -548,95 +554,67 @@ class PdfGeneratorImpl(
         }
     }
 
-    /**
-     * Render a valid PDF/A-3B + Factur-X XMP packet as XML.
-     *
-     * Layout: single rdf:Description carrying pdfaid, dc, xmp, pdf, fx, and
-     * the pdfaExtension:schemas declaration for the fx namespace. Dates are
-     * emitted in ISO-8601 with a Z suffix (UTC) — the format PDF/A validators
-     * expect.
-     */
-    private fun buildFacturXXmpPacket(title: String, creator: String): String {
-        val safeTitle = xmlEscape(title)
-        val safeCreator = xmlEscape(creator)
-        val now = java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC)
-            .withNano(0)
-            .format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-        return """<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
-<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="g8">
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    <rdf:Description rdf:about=""
-        xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/"
-        xmlns:dc="http://purl.org/dc/elements/1.1/"
-        xmlns:xmp="http://ns.adobe.com/xap/1.0/"
-        xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
-        xmlns:fx="urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
-        xmlns:pdfaExtension="http://www.aiim.org/pdfa/ns/extension/"
-        xmlns:pdfaSchema="http://www.aiim.org/pdfa/ns/schema#"
-        xmlns:pdfaProperty="http://www.aiim.org/pdfa/ns/property#">
-      <pdfaid:part>3</pdfaid:part>
-      <pdfaid:conformance>B</pdfaid:conformance>
-      <dc:title><rdf:Alt><rdf:li xml:lang="x-default">$safeTitle</rdf:li></rdf:Alt></dc:title>
-      <dc:creator><rdf:Seq><rdf:li>$safeCreator</rdf:li></rdf:Seq></dc:creator>
-      <dc:description><rdf:Alt><rdf:li xml:lang="x-default">Factur-X invoice</rdf:li></rdf:Alt></dc:description>
-      <xmp:CreatorTool>g8</xmp:CreatorTool>
-      <xmp:CreateDate>$now</xmp:CreateDate>
-      <xmp:ModifyDate>$now</xmp:ModifyDate>
-      <xmp:MetadataDate>$now</xmp:MetadataDate>
-      <pdf:Producer>g8 (iText)</pdf:Producer>
-      <fx:DocumentType>INVOICE</fx:DocumentType>
-      <fx:DocumentFileName>factur-x.xml</fx:DocumentFileName>
-      <fx:Version>1.0</fx:Version>
-      <fx:ConformanceLevel>EXTENDED</fx:ConformanceLevel>
-      <pdfaExtension:schemas>
-        <rdf:Bag>
-          <rdf:li rdf:parseType="Resource">
-            <pdfaSchema:schema>Factur-X PDFA Extension Schema</pdfaSchema:schema>
-            <pdfaSchema:namespaceURI>urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#</pdfaSchema:namespaceURI>
-            <pdfaSchema:prefix>fx</pdfaSchema:prefix>
-            <pdfaSchema:property>
-              <rdf:Seq>
-                <rdf:li rdf:parseType="Resource">
-                  <pdfaProperty:name>DocumentType</pdfaProperty:name>
-                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
-                  <pdfaProperty:category>external</pdfaProperty:category>
-                  <pdfaProperty:description>Factur-X document type (INVOICE)</pdfaProperty:description>
-                </rdf:li>
-                <rdf:li rdf:parseType="Resource">
-                  <pdfaProperty:name>DocumentFileName</pdfaProperty:name>
-                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
-                  <pdfaProperty:category>external</pdfaProperty:category>
-                  <pdfaProperty:description>Name of the embedded Factur-X XML file</pdfaProperty:description>
-                </rdf:li>
-                <rdf:li rdf:parseType="Resource">
-                  <pdfaProperty:name>Version</pdfaProperty:name>
-                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
-                  <pdfaProperty:category>external</pdfaProperty:category>
-                  <pdfaProperty:description>Version of the Factur-X profile</pdfaProperty:description>
-                </rdf:li>
-                <rdf:li rdf:parseType="Resource">
-                  <pdfaProperty:name>ConformanceLevel</pdfaProperty:name>
-                  <pdfaProperty:valueType>Text</pdfaProperty:valueType>
-                  <pdfaProperty:category>external</pdfaProperty:category>
-                  <pdfaProperty:description>Factur-X conformance level (MINIMUM, BASIC, EN 16931, EXTENDED)</pdfaProperty:description>
-                </rdf:li>
-              </rdf:Seq>
-            </pdfaSchema:property>
-          </rdf:li>
-        </rdf:Bag>
-      </pdfaExtension:schemas>
-    </rdf:Description>
-  </rdf:RDF>
-</x:xmpmeta>
-<?xpacket end="w"?>"""
+    private fun appendFacturXProperties(xmpMeta: XMPMeta) {
+        val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+        XMPMetaFactory.getSchemaRegistry().registerNamespace(fxNs, "fx")
+        xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
+        xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
+        xmpMeta.setProperty(fxNs, "Version", "1.0")
+        xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
     }
 
-    private fun xmlEscape(text: String): String =
-        text.replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace("\"", "&quot;")
-            .replace("'", "&apos;")
+    /**
+     * Declare the fx: namespace as a PDF/A extension schema. Without this
+     * block veraPDF rejects any PDF/A-3 file carrying fx: properties: the
+     * standard XMP registry doesn't know that namespace, so the pdfa checker
+     * needs the schema description shipped in-band via pdfaExtension:schemas.
+     *
+     * Structure: a Bag of Structs; each Struct has schema / namespaceURI /
+     * prefix strings plus an ordered Seq of property description Structs.
+     * iText's XMPMeta API navigates struct paths with colon-qualified
+     * ns:field syntax — the calls below build the tree bottom-up so path
+     * indices ([1], [2]…) stay stable as items are appended.
+     */
+    private fun appendFacturXExtensionSchema(xmpMeta: XMPMeta) {
+        val extNs = "http://www.aiim.org/pdfa/ns/extension/"
+        val schemaNs = "http://www.aiim.org/pdfa/ns/schema#"
+        val propertyNs = "http://www.aiim.org/pdfa/ns/property#"
+        val registry = XMPMetaFactory.getSchemaRegistry()
+        registry.registerNamespace(extNs, "pdfaExtension")
+        registry.registerNamespace(schemaNs, "pdfaSchema")
+        registry.registerNamespace(propertyNs, "pdfaProperty")
+
+        val schemasBagOptions = PropertyOptions().setArray(true)
+        val schemaStructOptions = PropertyOptions().apply { isStruct = true }
+        xmpMeta.appendArrayItem(extNs, "schemas", schemasBagOptions, null, schemaStructOptions)
+        val schemaPath = "pdfaExtension:schemas[1]"
+
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "schema",
+            "Factur-X PDFA Extension Schema")
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "namespaceURI",
+            "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#")
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "prefix", "fx")
+
+        val properties = listOf(
+            Triple("DocumentType", "Text", "Factur-X document type (INVOICE)"),
+            Triple("DocumentFileName", "Text", "Name of the embedded Factur-X XML file"),
+            Triple("Version", "Text", "Version of the Factur-X profile"),
+            Triple("ConformanceLevel", "Text",
+                "Factur-X conformance level (MINIMUM, BASIC, EN 16931, EXTENDED)"),
+        )
+        val propBagPath = "$schemaPath/pdfaSchema:property"
+        val propBagOptions = PropertyOptions().setArrayOrdered(true)
+        val propStructOptions = PropertyOptions().apply { isStruct = true }
+        properties.forEachIndexed { index, (name, type, description) ->
+            xmpMeta.appendArrayItem(extNs, propBagPath, propBagOptions, null, propStructOptions)
+            val propPath = "$propBagPath[${index + 1}]"
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "name", name)
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "valueType", type)
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "category", "external")
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "description", description)
+        }
+    }
+
 
     private fun createLogoAndTitleTable(
         logoPath: String,
