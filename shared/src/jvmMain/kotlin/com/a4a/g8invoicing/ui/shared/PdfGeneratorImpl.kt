@@ -80,6 +80,12 @@ class PdfGeneratorImpl(
         // Android assets tree at this exact path, so context.assets.open() and
         // JVM ClassLoader.getResourceAsStream() both resolve it uniformly.
         const val ARIMO_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/arimo.ttf"
+        // Noto Sans regular + bold — bundled for the picker, promoted to
+        // PDF font provider so an Arimo miss lands on an embedded Noto glyph
+        // instead of falling all the way to a system font (Android's built-
+        // in system fonts vary wildly per device / OEM).
+        const val NOTO_SANS_REGULAR_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/notosansregular.ttf"
+        const val NOTO_SANS_BOLD_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/notosansbold.ttf"
         // sRGB IEC61966-2.1 ICC v2 profile (extracted from the JVM's built-in
         // ColorSpace.CS_sRGB) — required as the OutputIntent for PDF/A-3
         // conformance so validators like veraPDF have an unambiguous colour
@@ -276,6 +282,12 @@ class PdfGeneratorImpl(
             } catch (_: Throwable) { }
         }
         addBytes(ARIMO_ASSET)
+        // Bundled Noto Sans as embedded fallback before we walk the system
+        // font tree — Arimo covers Latin + a handful of currency symbols,
+        // Noto's "no tofu" mandate fills in Greek / Cyrillic / most European
+        // extensions with glyphs iText will actually subset+embed.
+        addBytes(NOTO_SANS_REGULAR_ASSET)
+        addBytes(NOTO_SANS_BOLD_ASSET)
         // No addStandardPdfFonts() here — the Base14 references (Helvetica /
         // Times / Courier / Symbol / ZapfDingbats) are never embedded in the
         // PDF, which breaks PDF/A-3's "embedded fonts shall define all glyphs
