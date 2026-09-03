@@ -282,20 +282,26 @@ class PdfGeneratorImpl(
             } catch (_: Throwable) { }
         }
         addBytes(ARIMO_ASSET)
-        // Bundled Noto Sans as embedded fallback before we walk the system
-        // font tree — Arimo covers Latin + a handful of currency symbols,
-        // Noto's "no tofu" mandate fills in Greek / Cyrillic / most European
-        // extensions with glyphs iText will actually subset+embed.
+        // Bundled Noto Sans — Arimo covers Latin + a handful of currency
+        // symbols, Noto's "no tofu" mandate fills in Greek / Cyrillic / most
+        // European extensions with glyphs iText will subset + embed.
         addBytes(NOTO_SANS_REGULAR_ASSET)
         addBytes(NOTO_SANS_BOLD_ASSET)
-        // No addStandardPdfFonts() here — the Base14 references (Helvetica /
-        // Times / Courier / Symbol / ZapfDingbats) are never embedded in the
-        // PDF, which breaks PDF/A-3's "embedded fonts shall define all glyphs
-        // referenced for rendering" rule. Every remaining source below hands
-        // iText real .ttf/.otf bytes so the subset lands in the file.
-        fileManager.listSystemFontFiles().forEach { path ->
-            try { provider.addFont(path) } catch (_: Throwable) { }
-        }
+        // System fonts are deliberately NOT added to the provider. Two
+        // reasons:
+        //  1. PDF/A-3 §6.3.4 demands every rendered glyph come from an
+        //     embedded font. Android's system font tree varies by OEM and
+        //     ships fonts with fsType restrictions (Roboto flavours,
+        //     manufacturer variants) that iText cannot always embed;
+        //     iText then either skips embedding silently (breaks veraPDF)
+        //     or throws at PdfADocument close.
+        //  2. addStandardPdfFonts() — the Base14 Helvetica / Times etc.
+        //     references — is off-limits for the same rule (Base14 fonts
+        //     are name references, never embedded).
+        // Content outside Arimo + Noto Sans coverage (CJK, RTL scripts,
+        // some emoji) will render as .notdef rather than fall through to
+        // a non-conformant fallback. Trade-off accepted: an invoice is
+        // Latin/Greek/Cyrillic in 99% of cases.
         return provider
     }
 
