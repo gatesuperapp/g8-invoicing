@@ -89,6 +89,13 @@ SET number = :number,
 WHERE
     credit_note_id = :credit_note_id;
 
+updateVatExemptionText:
+UPDATE CreditNote
+SET vat_exemption_text = :vat_exemption_text,
+    updated_at =: updated_at
+WHERE
+    credit_note_id = :credit_note_id;
+
 delete:
 DELETE FROM CreditNote
 WHERE credit_note_id = :id;

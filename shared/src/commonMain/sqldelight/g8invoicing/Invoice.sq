@@ -180,6 +180,13 @@ SET hide_linked_source_headers = :hide_linked_source_headers,
 WHERE
     invoice_id = :invoice_id;
 
+updateVatExemptionText:
+UPDATE Invoice
+SET vat_exemption_text = :vat_exemption_text,
+    updated_at =: updated_at
+WHERE
+    invoice_id = :invoice_id;
+
 updateNumber:
 UPDATE Invoice
 SET number = :number

@@ -130,6 +130,10 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                     } else if (!updated.taxWithholdingEnabled && hadRetentions) {
                                         creditNoteViewModel.clearRetentionsInDb()
                                     }
+                                    val hadExemptionText = creditNoteViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                                    if (updated.vatExempt && !hadExemptionText) {
+                                        creditNoteViewModel.seedDefaultVatExemptionTextInDb(updated)
+                                    }
                                     creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
                                     creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
                                 }
@@ -390,6 +394,8 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                 val hadRetentions = creditNoteViewModel.documentUiState.value.retentions.isNotEmpty()
                                 val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
                                 val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
+                                val hadExemptionText = creditNoteViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                                val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
@@ -397,6 +403,9 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                     creditNoteViewModel.clearRetentionsInDb()
                                 } else if (turnedOnRetention) {
                                     creditNoteViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
+                                if (needsExemptionSeed) {
+                                    creditNoteViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
                                 }
                                 creditNoteViewModel.reloadDocument()
                                 showDocumentForm = false

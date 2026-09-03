@@ -113,6 +113,16 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    // Same idea for BT-120: when EDIT_ISSUER flips vatExempt ON and the doc
+    // has no wording yet, drop the country-based legal citation straight to
+    // DB so it appears after reloadDocument.
+    suspend fun seedDefaultVatExemptionTextInDb(issuer: ClientOrIssuerState) {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        val country = issuer.addresses?.firstOrNull()?.countryCode
+        val default = com.a4a.g8invoicing.data.models.defaultVatExemptionText(country) ?: return
+        documentDataSource.updateVatExemptionText(id, default)
+    }
+
     private suspend fun createNewInvoiceInVM(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {

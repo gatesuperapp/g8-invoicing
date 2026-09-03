@@ -876,6 +876,22 @@ class InvoiceLocalDataSource(
         }
     }
 
+    // Dedicated write so the seed-on-EDIT_ISSUER path (see
+    // InvoiceAddEditViewModel.seedDefaultVatExemptionTextInDb) can persist
+    // before reloadDocument reads the row back into state.
+    override suspend fun updateVatExemptionText(invoiceId: Long, text: String?) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                invoiceQueries.updateVatExemptionText(
+                    invoice_id = invoiceId,
+                    vat_exemption_text = text?.trim()?.takeIf { it.isNotEmpty() },
+                    updated_at = DateUtils.getCurrentTimestamp(),
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     override suspend fun deleteAllRetentions(invoiceId: Long) {
         withContext(DispatcherProvider.IO) {
             try {

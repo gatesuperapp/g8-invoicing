@@ -151,6 +151,10 @@ fun NavGraphBuilder.invoiceAddEdit(
                                     } else if (!updated.taxWithholdingEnabled && hadRetentions) {
                                         invoiceViewModel.clearRetentionsInDb()
                                     }
+                                    val hadExemptionText = invoiceViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                                    if (updated.vatExempt && !hadExemptionText) {
+                                        invoiceViewModel.seedDefaultVatExemptionTextInDb(updated)
+                                    }
                                     invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
                                     invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
                                 }
@@ -420,6 +424,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
                                 val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
                                 val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
+                                val hadExemptionText = invoiceViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                                val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
@@ -427,6 +433,9 @@ fun NavGraphBuilder.invoiceAddEdit(
                                     invoiceViewModel.clearRetentionsInDb()
                                 } else if (turnedOnRetention) {
                                     invoiceViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
+                                if (needsExemptionSeed) {
+                                    invoiceViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
                                 }
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false

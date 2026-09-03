@@ -477,6 +477,21 @@ class CreditNoteLocalDataSource(
         }
     }
 
+    // Mirror of InvoiceLocalDataSource.updateVatExemptionText for the credit-note
+    // EDIT_ISSUER seed path.
+    override suspend fun updateVatExemptionText(creditNoteId: Long, text: String?) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                creditNoteQueries.updateVatExemptionText(
+                    credit_note_id = creditNoteId,
+                    vat_exemption_text = text?.trim()?.takeIf { it.isNotEmpty() },
+                    updated_at = DateUtils.getCurrentTimestamp(),
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     override suspend fun duplicate(documents: List<CreditNoteState>) {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
