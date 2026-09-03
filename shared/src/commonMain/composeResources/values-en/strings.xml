@@ -351,9 +351,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr/en</string>
     <string name="about_website_tail">!</string>
-    <string name="about_title_community">Community</string>
-    <string name="about_community_text">Come and discuss your needs, ideas and share on the</string>
-    <string name="about_community_cta">community forum.</string>
+    <string name="about_title_community">What's new</string>
+    <string name="about_community_text">Check out each version's new features and product news on the</string>
+    <string name="about_community_cta">g8 forum.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Support</string>
     <string name="about_assistance_intro">You can write to us at any time to report a bug, suggest a feature, or ask for help.</string>
@@ -412,8 +412,8 @@
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
-    <string name="invoice_advice_legal_1">Tap the "Create" button at the bottom of the screen to create a new invoice.</string>
-    <string name="invoice_advice_legal_2">All the documents you create are saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="invoice_advice_legal_1">Tap «Menu» &gt; gStore to enable the features you prefer. Tap «Create» to make your first invoice…</string>
+    <string name="invoice_advice_legal_2">Every document you create is saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡</string>
 
     <string name="invoice_advice_legal_3">mandatory information for a compliant invoice. To make your life easier, I've summarised everything here: \n</string>
@@ -898,7 +898,7 @@
     <!-- Font picker (Fonts module) -->
     <string name="gstore_module_font_title">Fonts</string>
     <string name="gstore_module_font_desc">Change the font of your documents.</string>
-    <string name="gstore_module_font_detail">Turn this module on to unlock more fonts for your documents. Some are free, others are reserved for premium members.\n\nAvailable fonts: Noto Sans (free), Noto Serif (free), Cabin, Source Sans, Lato, Inter, Spectral, Onest and IBM Plex Sans.</string>
+    <string name="gstore_module_font_detail">Turn this module on to unlock more fonts for your documents. Some are free, others are reserved for premium members.\n\nAvailable fonts: Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest and IBM Plex Sans.</string>
     <string name="action_font_label">Font</string>
     <string name="action_font_description">Choose the document font</string>
     <string name="font_picker_title">Document font</string>

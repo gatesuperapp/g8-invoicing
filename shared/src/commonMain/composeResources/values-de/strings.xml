@@ -184,7 +184,7 @@
     <string name="issuer_logo_remove">Logo entfernen</string>
     <string name="issuer_logo_error_title">Fehler</string>
     <string name="issuer_logo_error_dismiss">OK</string>
-    <string name="client_add_address">'+ Adresse hinzufügen'</string>
+    <string name="client_add_address">+ Adresse hinzufügen</string>
     <string name="client_delete_address">Adresse löschen</string>
     <string name="client_or_issuer_section_bank">Bankverbindung</string>
     <string name="issuer_bank_add">+ Konto hinzufügen</string>
@@ -352,9 +352,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr/en</string>
     <string name="about_website_tail">!</string>
-    <string name="about_title_community">Community</string>
-    <string name="about_community_text">Kommt vorbei, um eure Wünsche und Ideen zu besprechen und sich über</string>
-    <string name="about_community_cta">das Forum der Community auszutauschen.</string>
+    <string name="about_title_community">Neuigkeiten</string>
+    <string name="about_community_text">Entdecke die Neuerungen jeder Version sowie Produkt-News im</string>
+    <string name="about_community_cta">g8-Forum.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Hilfe</string>
     <string name="about_assistance_intro">Du kannst uns jederzeit schreiben, um einen Fehler zu melden, eine Funktion vorzuschlagen oder um Hilfe zu bitten.</string>
@@ -413,7 +413,7 @@
     <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Tippe auf den Button „Erstellen" unten auf dem Bildschirm, um eine neue Rechnung zu erstellen.</string>
+    <string name="invoice_advice_legal_1">Tippe auf «Menü» &gt; gStore, um die gewünschten Funktionen zu aktivieren. Tippe auf «Erstellen», um deine erste Rechnung anzulegen…</string>
     <string name="invoice_advice_legal_2">Alle Dokumente, die du erstellst, werden automatisch im Hintergrund gespeichert. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡</string>
 
@@ -633,16 +633,16 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_multi_entreprise_detail">Aktiviere dieses Modul, wenn du unter mehreren Unternehmen abrechnest (verschiedene Handelsregisternummern, getrennte Tätigkeiten…).\n\nDu kannst weitere Unternehmen unter „Mein Konto" hinzufügen und im Menü zwischen ihnen wechseln.\n\nDeine Kunden, Produkte, Nummernkreise und Bankdaten werden pro Unternehmen getrennt geführt.</string>
     <string name="gstore_module_cii_title">CII-XML-Export</string>
     <string name="gstore_module_cii_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
-    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen im Format Cross Industry Invoice (CII) zu exportieren — einer international anerkannten Norm für elektronische Rechnungen.\n\nDie XML-Daten sind für Software lesbar, insbesondere für E-Invoicing-Plattformen.\n\nIm Unterschied zu Factur-X enthält CII kein PDF.</string>
-    <string name="gstore_module_facturx_title">Factur-X-Export</string>
+    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen im Format Cross Industry Invoice (CII) zu exportieren — einer international anerkannten Norm für elektronische Rechnungen.\n\nDie XML-Daten sind für Software lesbar, insbesondere für E-Invoicing-Plattformen.\n\nIm Unterschied zu ZUGFeRD enthält CII kein PDF.</string>
+    <string name="gstore_module_facturx_title">ZUGFeRD-Export</string>
     <string name="gstore_module_facturx_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
-    <string name="gstore_module_facturx_detail">Aktiviere dieses Modul, um deine Rechnungen im Format Factur-X zu exportieren — einer deutsch-französischen Norm für elektronische Rechnungen.\n\nDie erzeugte Datei ist ein gewöhnliches PDF mit einer maschinenlesbaren XML-Datei daneben.\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln und gleichzeitig ein lesbares PDF für den Kunden bereitzustellen.</string>
+    <string name="gstore_module_facturx_detail">Aktiviere dieses Modul, um deine Rechnungen im Format ZUGFeRD zu exportieren — einer deutsch-französischen Norm für elektronische Rechnungen.\n\nDie erzeugte Datei ist ein gewöhnliches PDF mit einer maschinenlesbaren XML-Datei daneben.\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln und gleichzeitig ein lesbares PDF für den Kunden bereitzustellen.</string>
     <string name="export_cii_button">Als CII exportieren</string>
     <string name="export_chooser_title">Exportformat</string>
-    <string name="export_chooser_description">Für ein E-Invoicing-kompatibles Format CII oder Factur-X verwenden.</string>
+    <string name="export_chooser_description">Für ein E-Invoicing-kompatibles Format CII oder ZUGFeRD verwenden.</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
-    <string name="export_chooser_facturx">Factur-X</string>
+    <string name="export_chooser_facturx">ZUGFeRD</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
     <string name="export_vat_exempt_conflict_message">Dein Unternehmen nutzt die Kleinunternehmerregelung, aber einige Produkte weisen einen Mehrwertsteuersatz auf. Bitte entferne diesen, um die Rechnung exportieren zu können.</string>
     <string name="cii_validation_title">Hoppla</string>
@@ -893,7 +893,7 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_new_fields_cta">Weiter</string>
     <string name="onboarding_19_einvoice_title">Elektronische Rechnungen</string>
     <string name="onboarding_19_einvoice_intro">Der Export elektronischer Rechnungen ist jetzt verfügbar!</string>
-    <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module Factur-X, CII XML. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch.</string>
+    <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module ZUGFeRD, CII XML. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch.</string>
     <string name="onboarding_19_einvoice_sub">Du kannst Premium-Mitglied werden — abonniere auf unserer Website 🌟</string>
     <string name="onboarding_19_einvoice_cta">Weiter</string>
     <string name="onboarding_19_final_title">Alles klar, du bist startklar!</string>
@@ -903,7 +903,7 @@ Es ist ein Fehler aufgetreten :
     <!-- Font picker (Modul Schriftarten) -->
     <string name="gstore_module_font_title">Schriftarten</string>
     <string name="gstore_module_font_desc">Ändere die Schriftart deiner Dokumente.</string>
-    <string name="gstore_module_font_detail">Aktiviere dieses Modul, um weitere Schriftarten für deine Dokumente freizuschalten. Einige sind kostenlos, andere sind Premium-Mitgliedern vorbehalten.\n\nVerfügbare Schriftarten: Noto Sans (kostenlos), Noto Serif (kostenlos), Cabin, Source Sans, Lato, Inter, Spectral, Onest und IBM Plex Sans.</string>
+    <string name="gstore_module_font_detail">Aktiviere dieses Modul, um weitere Schriftarten für deine Dokumente freizuschalten. Einige sind kostenlos, andere sind Premium-Mitgliedern vorbehalten.\n\nVerfügbare Schriftarten: Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest und IBM Plex Sans.</string>
     <string name="action_font_label">Schrift</string>
     <string name="action_font_description">Dokumentschriftart wählen</string>
     <string name="font_picker_title">Dokumentschriftart</string>

@@ -757,8 +757,8 @@
 
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi, je te guide …</string>
-    <string name="invoice_advice_legal_1">Clique sur le bouton « Créer » en bas de l'écran pour créer une nouvelle facture.</string>
-    <string name="invoice_advice_legal_2">Tous les documents s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="invoice_advice_legal_1">Clique sur «Menu» &gt; gStore pour activer les fonctionnalités que tu préfères. Clique sur «Créer» pour créer ta première facture…</string>
+    <string name="invoice_advice_legal_2">Tous les documents que tu crées s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
 
     <!-- Held for the upcoming onboarding screen — moved out of the Invoice-tab
          petit-rhino popup in 1.9 (was invoice_advice_legal_1 before the trim). -->
@@ -1019,7 +1019,7 @@ Une erreur s'est produite :
     <!-- Font picker (module Polices) -->
     <string name="gstore_module_font_title">Polices</string>
     <string name="gstore_module_font_desc">Changer la police de tes documents.</string>
-    <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans (gratuite), Noto Serif (gratuite), Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
+    <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
     <string name="action_font_label">Police</string>
     <string name="action_font_description">Choisir la police du document</string>
     <string name="font_picker_title">Police du document</string>

@@ -353,9 +353,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr</string>
     <string name="about_website_tail"> !</string>
-    <string name="about_title_community">Comunidad</string>
-    <string name="about_community_text">Ven a hablar de tus necesidades, ideas e intercambia en el</string>
-    <string name="about_community_cta">Foro de la comunidad.</string>
+    <string name="about_title_community">Novedades</string>
+    <string name="about_community_text">Consulta las novedades de cada versión y las noticias del producto en el</string>
+    <string name="about_community_cta">foro de g8.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Soporte</string>
     <string name="about_assistance_intro">Puedes escribirnos en cualquier momento para informar de un error, proponer una funcionalidad o pedir ayuda.</string>
@@ -414,7 +414,7 @@
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
-    <string name="invoice_advice_legal_1">Toca el botón «Crear» en la parte inferior de la pantalla para crear una nueva factura.</string>
+    <string name="invoice_advice_legal_1">Toca «Menú» &gt; gStore para activar las funciones que prefieras. Toca «Crear» para hacer tu primera factura…</string>
     <string name="invoice_advice_legal_2">Todos los documentos que creas se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡</string>
 
@@ -905,7 +905,7 @@ Une erreur s'est produite :
     <!-- Font picker (módulo Fuentes) -->
     <string name="gstore_module_font_title">Fuentes</string>
     <string name="gstore_module_font_desc">Cambia la fuente de tus documentos.</string>
-    <string name="gstore_module_font_detail">Activa este módulo para desbloquear más fuentes para tus documentos. Algunas son gratuitas, otras están reservadas a los miembros premium.\n\nFuentes disponibles: Noto Sans (gratuita), Noto Serif (gratuita), Cabin, Source Sans, Lato, Inter, Spectral, Onest e IBM Plex Sans.</string>
+    <string name="gstore_module_font_detail">Activa este módulo para desbloquear más fuentes para tus documentos. Algunas son gratuitas, otras están reservadas a los miembros premium.\n\nFuentes disponibles: Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest e IBM Plex Sans.</string>
     <string name="action_font_label">Fuente</string>
     <string name="action_font_description">Elegir la fuente del documento</string>
     <string name="font_picker_title">Fuente del documento</string>
