@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -40,6 +41,7 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
+import com.a4a.g8invoicing.ui.screens.shared.filterByQuery
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.AlertDialogInvoiceCreated
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
@@ -83,6 +85,17 @@ fun QuoteList(
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
+    // Search state — lives at the screen level so the query survives item
+    // taps + list recompositions but resets when leaving the tab.
+    var searchExpanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+
+    // System back closes the search bar first if it's open.
+    PlatformBackHandler(enabled = searchExpanded) {
+        searchQuery = TextFieldValue("")
+        searchExpanded = false
+    }
+
     // System back clears selection before navigating.
     PlatformBackHandler(enabled = selectedItems.isNotEmpty()) {
         resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
@@ -102,7 +115,12 @@ fun QuoteList(
                         onClickBack()
                     }
                 },
-                isCancelCtaDisplayed = false
+                isCancelCtaDisplayed = false,
+                searchEnabled = selectedItems.isEmpty(),
+                searchExpanded = searchExpanded,
+                searchQuery = searchQuery,
+                onSearchToggle = { searchExpanded = !searchExpanded },
+                onSearchQueryChange = { searchQuery = it },
             )
         },
         bottomBar = {
@@ -154,11 +172,16 @@ fun QuoteList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+                val filteredDocuments = remember(documentsUiState.quoteStates, searchQuery.text) {
+                    documentsUiState.quoteStates.filterByQuery(searchQuery.text)
+                }
+                val hasActiveQuery = searchQuery.text.isNotBlank()
+
                 Column {
                     // No need to have pull to refresh because it's a flow,
                     // thus the list is updated when anything changes in db
                     DocumentListContent(
-                        documents = documentsUiState.quoteStates,
+                        documents = filteredDocuments,
                         onItemClick = onClickListItem,
                         addDocumentToSelectedList = {
                             selectedItems.add(it as QuoteState)
@@ -175,7 +198,9 @@ fun QuoteList(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    if (documentsUiState.quoteStates.size == 1)
+                    // Skip the convert hint while searching (single-result queries
+                    // would trigger it out of context).
+                    if (documentsUiState.quoteStates.size == 1 && !hasActiveQuery)
                         DisplayBatHelperAdvice()
                 }
             }

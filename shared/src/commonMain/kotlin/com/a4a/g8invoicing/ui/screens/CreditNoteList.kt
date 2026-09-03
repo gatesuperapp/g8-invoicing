@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.appbar_credit_notes
@@ -19,6 +22,7 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
+import com.a4a.g8invoicing.ui.screens.shared.filterByQuery
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
@@ -57,6 +61,17 @@ fun CreditNoteList(
     // Add background when bottom menu expanded
     val isDimActive = remember { mutableStateOf(false) }
 
+    // Search state — lives at the screen level so the query survives item
+    // taps + list recompositions but resets when leaving the tab.
+    var searchExpanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+
+    // System back closes the search bar first if it's open.
+    PlatformBackHandler(enabled = searchExpanded) {
+        searchQuery = TextFieldValue("")
+        searchExpanded = false
+    }
+
     // System back clears selection before navigating.
     PlatformBackHandler(enabled = selectedItems.isNotEmpty()) {
         resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
@@ -76,7 +91,12 @@ fun CreditNoteList(
                         onClickBack()
                     }
                 },
-                isCancelCtaDisplayed = false
+                isCancelCtaDisplayed = false,
+                searchEnabled = selectedItems.isEmpty(),
+                searchExpanded = searchExpanded,
+                searchQuery = searchQuery,
+                onSearchToggle = { searchExpanded = !searchExpanded },
+                onSearchQueryChange = { searchQuery = it },
             )
         },
         bottomBar = {
@@ -122,10 +142,13 @@ fun CreditNoteList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+                val filteredDocuments = remember(documentsUiState.documentStates, searchQuery.text) {
+                    documentsUiState.documentStates.filterByQuery(searchQuery.text)
+                }
                 // No need to have pull to refresh because it's a flow,
                 // thus the list is updated when anything changes in db
                 DocumentListContent(
-                    documents = documentsUiState.documentStates,
+                    documents = filteredDocuments,
                     onItemClick = onClickListItem,
                     addDocumentToSelectedList = {
                         selectedItems.add(it as CreditNoteState)

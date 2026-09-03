@@ -31,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -50,6 +51,7 @@ import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
+import com.a4a.g8invoicing.ui.screens.shared.filterByQuery
 import com.a4a.g8invoicing.shared.resources.corrected_invoice_created_button
 import com.a4a.g8invoicing.shared.resources.corrected_invoice_created_title
 import com.a4a.g8invoicing.shared.resources.credit_note_created_button
@@ -108,6 +110,11 @@ fun InvoiceList(
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
 
+    // Search state — lives at the screen level so the query survives item
+    // taps + list recompositions but resets when leaving the tab.
+    var searchExpanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+
     // Alert dialogs
     val openDeleteAlertDialog = remember { mutableStateOf(false) }
 
@@ -132,6 +139,12 @@ fun InvoiceList(
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
         )
+    }
+
+    // System back closes the search bar first if it's open.
+    PlatformBackHandler(enabled = searchExpanded) {
+        searchQuery = TextFieldValue("")
+        searchExpanded = false
     }
 
     // When items are selected, intercept system back to clear the selection
@@ -175,7 +188,12 @@ fun InvoiceList(
                     }
                 },
                 isCancelCtaDisplayed = false,
-                appBarActions = topBarActions
+                appBarActions = topBarActions,
+                searchEnabled = selectedItems.isEmpty(),
+                searchExpanded = searchExpanded,
+                searchQuery = searchQuery,
+                onSearchToggle = { searchExpanded = !searchExpanded },
+                onSearchQueryChange = { searchQuery = it },
             )
         },
         bottomBar = {
@@ -235,6 +253,11 @@ fun InvoiceList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+                val filteredDocuments = remember(documentsUiState.documentStates, searchQuery.text) {
+                    documentsUiState.documentStates.filterByQuery(searchQuery.text)
+                }
+                val hasActiveQuery = searchQuery.text.isNotBlank()
+
                 // Délai pour éviter le flash de l'animation pendant le chargement
                 var showEmptyState by remember { mutableStateOf(false) }
                 LaunchedEffect(documentsUiState.documentStates.isEmpty()) {
@@ -251,7 +274,7 @@ fun InvoiceList(
                 } else if (documentsUiState.documentStates.isNotEmpty()) {
                     Column {
                         DocumentListContent(
-                            documents = documentsUiState.documentStates,
+                            documents = filteredDocuments,
                             onItemClick = onClickListItem,
                             addDocumentToSelectedList = {
                                 selectedItems.add(it as InvoiceState)
@@ -267,7 +290,10 @@ fun InvoiceList(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        if (documentsUiState.documentStates.size == 1)
+                        // Hide the discover-menu hint while the user is searching —
+                        // the list can naturally shrink to 1 result and the hint
+                        // would be irrelevant noise.
+                        if (documentsUiState.documentStates.size == 1 && !hasActiveQuery)
                             DisplayBatHelperMenuAdvice()
                     }
                 }
