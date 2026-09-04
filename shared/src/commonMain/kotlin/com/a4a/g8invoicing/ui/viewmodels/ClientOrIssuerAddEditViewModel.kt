@@ -169,12 +169,17 @@ class ClientOrIssuerAddEditViewModel(
     }
 
     fun clearClientOrIssuerUiState(type: ClientOrIssuerType) {
+        // Explicit .type on the reset — a bare ClientOrIssuerState() defaults
+        // .type to null, and the auto-classification bumps (typing a first
+        // name flips clientType to INDIVIDUAL, typing a SIREN flips it to
+        // PROFESSIONAL) key off .type == CLIENT / DOCUMENT_CLIENT. A null
+        // .type silently disables both.
         if (type == ClientOrIssuerType.DOCUMENT_CLIENT) {
-            _clientUiState.value = ClientOrIssuerState()
-            _documentClientUiState.value = ClientOrIssuerState()
+            _clientUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.CLIENT)
+            _documentClientUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT)
         } else {
-            _issuerUiState.value = ClientOrIssuerState()
-            _documentIssuerUiState.value = ClientOrIssuerState()
+            _issuerUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.ISSUER)
+            _documentIssuerUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER)
         }
     }
 
@@ -1161,7 +1166,7 @@ class ClientOrIssuerAddEditViewModel(
             ClientOrIssuerType.CLIENT -> _clientUiState.value.errors.clear()
             ClientOrIssuerType.ISSUER -> _issuerUiState.value.errors.clear()
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
-                _documentClientUiState.value = ClientOrIssuerState()
+                _documentClientUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT)
                 _documentClientUiState.value.errors.clear()
             }
             ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value.errors.clear()

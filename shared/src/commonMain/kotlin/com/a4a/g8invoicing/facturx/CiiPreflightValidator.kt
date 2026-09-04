@@ -36,10 +36,7 @@ sealed class CiiValidationIssue {
     object ClientTypeUnspecified : CiiValidationIssue()
     object ClientSiren : CiiValidationIssue()
 
-    /** Client SIREN present but not exactly 9 digits. Fires regardless of
-     *  clientType — a stray value on an INDIVIDUAL still ends up printed on
-     *  the PDF but dropped from the XML, and that PDF/XML delta is what
-     *  causes the downstream inconsistency the guard is meant to catch. */
+    /** Business client's SIREN present but not exactly 9 digits. */
     object ClientSirenFormat : CiiValidationIssue()
 
     /** Client VAT number present but bad format for the client's country
@@ -135,7 +132,18 @@ object CiiPreflightValidator {
                 null -> issues += CiiValidationIssue.ClientTypeUnspecified
                 ClientType.PROFESSIONAL -> {
                     val clientSiren = client.companyId1Number?.text?.trim().orEmpty()
-                    if (clientSiren.isBlank()) issues += CiiValidationIssue.ClientSiren
+                    if (clientSiren.isBlank()) {
+                        issues += CiiValidationIssue.ClientSiren
+                    } else if (!isValidSiren(clientSiren)) {
+                        issues += CiiValidationIssue.ClientSirenFormat
+                    }
+                    val clientVat = client.companyId2Number?.text?.trim().orEmpty()
+                    if (clientVat.isNotBlank()) {
+                        val clientCountry = client.addresses?.firstOrNull()?.countryCode
+                        if (!isValidEuVatNumber(clientCountry, clientVat)) {
+                            issues += CiiValidationIssue.ClientVatFormat
+                        }
+                    }
                 }
                 ClientType.INDIVIDUAL -> {
                     // Particulier — no SIREN by definition, so BT-49 falls
@@ -147,25 +155,6 @@ object CiiPreflightValidator {
                     }
                 }
             }
-
-            // Format checks run whenever the field is populated, regardless
-            // of clientType — a bogus SIREN typed on an INDIVIDUAL still
-            // lands on the PDF but gets dropped from the XML, and we want
-            // that discrepancy caught at the Oups modal, not silently.
-            val clientSirenRaw = client.companyId1Number?.text?.trim().orEmpty()
-            if (clientSirenRaw.isNotBlank() && !isValidSiren(clientSirenRaw)) {
-                issues += CiiValidationIssue.ClientSirenFormat
-            }
-            if (client.clientType == ClientType.PROFESSIONAL) {
-                val clientVat = client.companyId2Number?.text?.trim().orEmpty()
-                if (clientVat.isNotBlank()) {
-                    val clientCountry = client.addresses?.firstOrNull()?.countryCode
-                    if (!isValidEuVatNumber(clientCountry, clientVat)) {
-                        issues += CiiValidationIssue.ClientVatFormat
-                    }
-                }
-            }
-
             if (!hasCompletePostalAddress(client)) issues += CiiValidationIssue.ClientAddress
         }
 
