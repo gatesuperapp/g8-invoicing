@@ -649,12 +649,14 @@
     <string name="cii_validation_issuer_siren">Issuer company ID (SIREN / SIRET / VAT reg.)</string>
     <string name="cii_validation_issuer_siren_format">Issuer SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
     <string name="cii_validation_issuer_vat">Issuer VAT number</string>
+    <string name="cii_validation_issuer_vat_format">The issuer VAT number doesn't match the format for the selected country</string>
     <string name="cii_validation_issuer_address">Complete issuer address (street, ZIP, city)</string>
     <string name="cii_validation_client_missing">Add a client</string>
     <string name="cii_validation_client_name">Client name</string>
     <string name="cii_validation_client_type">Specify whether the client is a business or individual</string>
     <string name="cii_validation_client_siren">Client company ID (business client)</string>
     <string name="cii_validation_client_siren_format">Client SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
+    <string name="cii_validation_client_vat_format">The client VAT number doesn't match the format for the selected country</string>
     <string name="cii_validation_client_email">Add an email to the client (electronic address required for an individual client)</string>
     <string name="cii_validation_client_address">Complete client address (street, ZIP, city)</string>
     <string name="cii_validation_products_empty">Add at least one product to the invoice</string>

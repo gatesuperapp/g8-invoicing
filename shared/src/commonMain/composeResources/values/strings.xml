@@ -615,12 +615,14 @@
     <string name="cii_validation_issuer_siren">SIREN / SIRET de l'émetteur</string>
     <string name="cii_validation_issuer_siren_format">Le SIREN de l'émetteur doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
     <string name="cii_validation_issuer_vat">Numéro de TVA de l'émetteur</string>
+    <string name="cii_validation_issuer_vat_format">Le numéro de TVA de l'émetteur n'est pas au bon format pour le pays sélectionné</string>
     <string name="cii_validation_issuer_address">Adresse complète de l'émetteur (rue, code postal, ville)</string>
     <string name="cii_validation_client_missing">Ajouter un client</string>
     <string name="cii_validation_client_name">Nom du client</string>
     <string name="cii_validation_client_type">Préciser si le client est un professionnel ou un particulier</string>
     <string name="cii_validation_client_siren">SIREN / SIRET du client (client professionnel)</string>
     <string name="cii_validation_client_siren_format">Le SIREN du client doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
+    <string name="cii_validation_client_vat_format">Le numéro de TVA du client n'est pas au bon format pour le pays sélectionné</string>
     <string name="cii_validation_client_email">Ajouter un email au client (adresse électronique nécessaire pour un client particulier)</string>
     <string name="cii_validation_client_address">Adresse complète du client (rue, code postal, ville)</string>
     <string name="cii_validation_products_empty">Ajouter au moins un produit à la facture</string>

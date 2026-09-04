@@ -122,6 +122,8 @@ import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_name
 import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_siren
 import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_siren_format
 import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_vat
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_vat_format
+import com.a4a.g8invoicing.shared.resources.cii_validation_client_vat_format
 import com.a4a.g8invoicing.shared.resources.cii_validation_line_name
 import com.a4a.g8invoicing.shared.resources.cii_validation_line_price
 import com.a4a.g8invoicing.shared.resources.cii_validation_line_tax_rate
@@ -1039,12 +1041,14 @@ private fun CiiValidationIssue.resolveMessage(): String = when (this) {
     CiiValidationIssue.IssuerSiren -> stringResource(Res.string.cii_validation_issuer_siren)
     CiiValidationIssue.IssuerSirenFormat -> stringResource(Res.string.cii_validation_issuer_siren_format)
     CiiValidationIssue.IssuerVat -> stringResource(Res.string.cii_validation_issuer_vat)
+    CiiValidationIssue.IssuerVatFormat -> stringResource(Res.string.cii_validation_issuer_vat_format)
     CiiValidationIssue.IssuerAddress -> stringResource(Res.string.cii_validation_issuer_address)
     CiiValidationIssue.ClientMissing -> stringResource(Res.string.cii_validation_client_missing)
     CiiValidationIssue.ClientName -> stringResource(Res.string.cii_validation_client_name)
     CiiValidationIssue.ClientTypeUnspecified -> stringResource(Res.string.cii_validation_client_type)
     CiiValidationIssue.ClientSiren -> stringResource(Res.string.cii_validation_client_siren)
     CiiValidationIssue.ClientSirenFormat -> stringResource(Res.string.cii_validation_client_siren_format)
+    CiiValidationIssue.ClientVatFormat -> stringResource(Res.string.cii_validation_client_vat_format)
     CiiValidationIssue.ClientEmail -> stringResource(Res.string.cii_validation_client_email)
     CiiValidationIssue.ClientAddress -> stringResource(Res.string.cii_validation_client_address)
     CiiValidationIssue.ProductsEmpty -> stringResource(Res.string.cii_validation_products_empty)
