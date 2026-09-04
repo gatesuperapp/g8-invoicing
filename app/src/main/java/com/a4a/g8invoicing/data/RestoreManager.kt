@@ -47,6 +47,19 @@ object RestoreManager {
     // 1.9-wizard "seen" flag so migration paths re-run against the restored
     // rows (issuer/client/product assignment). See MainCompose LaunchedEffect.
     private const val MIGRATION_WIZARD_RESET_FILE = "restore_needs_wizard.txt"
+    // Sentinel file written when the applied backup came from a schema
+    // predating 5.sqm (schema version < 6, i.e. pre-1.8, before country_code
+    // columns landed on the address tables). MainCompose consumes it at boot
+    // to clear HAS_SEEN_ONBOARDING_1_8 so the 1.8 wizard re-fires and asks
+    // the "clients tous dans le même pays ?" question against the restored
+    // clients that have no country_code populated.
+    private const val ONBOARDING_1_8_RESET_FILE = "restore_needs_onboarding_1_8.txt"
+
+    // Schema version at which the 1.8 country_code columns were added
+    // (5.sqm — Factur-X 1.8 fields). Backups older than this need the 1.8
+    // onboarding to re-fire so the user can bulk-assign a country to
+    // clients that came in without one.
+    private const val SCHEMA_VERSION_1_8 = 6L
 
     // Cap the accepted zip at 200 MB — a full backup with logos should sit
     // well under this. Blocks zip-bomb style inputs before we ever unpack.
@@ -138,18 +151,19 @@ object RestoreManager {
         // to Database.Schema.version, so PRAGMA user_version would already
         // read the current one and we couldn't tell "was pre-1.9" apart from
         // "was already 1.9".
-        val backupWasPreCurrent: Boolean = try {
-            val incomingVersion = if (looksLikeRawSqlite(pending)) {
+        val incomingVersion: Long = try {
+            if (looksLikeRawSqlite(pending)) {
                 readUserVersion(pending)
             } else {
                 val tempDb = extractDbFromZip(pending, context.cacheDir)
                 if (tempDb == null) 0L
                 else try { readUserVersion(tempDb) } finally { tempDb.delete() }
             }
-            incomingVersion < Database.Schema.version
         } catch (_: Exception) {
-            false
+            0L
         }
+        val backupWasPreCurrent: Boolean = incomingVersion in 1 until Database.Schema.version
+        val backupWasPre18: Boolean = incomingVersion in 1 until SCHEMA_VERSION_1_8
 
         try {
             dbParent?.mkdirs()
@@ -184,6 +198,9 @@ object RestoreManager {
             if (backupWasPreCurrent) {
                 File(context.filesDir, MIGRATION_WIZARD_RESET_FILE).writeText("1")
             }
+            if (backupWasPre18) {
+                File(context.filesDir, ONBOARDING_1_8_RESET_FILE).writeText("1")
+            }
 
             Log.i(TAG, "Restore applied successfully")
         } catch (e: Exception) {
@@ -211,6 +228,20 @@ object RestoreManager {
      */
     fun consumeMigrationWizardResetIfAny(context: Context): Boolean {
         val f = File(context.filesDir, MIGRATION_WIZARD_RESET_FILE)
+        if (!f.exists()) return false
+        f.delete()
+        return true
+    }
+
+    /**
+     * True exactly once per restored pre-1.8 backup. MainCompose reads this at
+     * boot to clear HAS_SEEN_ONBOARDING_1_8 so the 1.8 wizard re-fires — the
+     * restored clients have no country_code (columns didn't exist yet in the
+     * source schema) and the wizard's "clients tous dans le même pays ?" step
+     * is the bulk fixup path.
+     */
+    fun consumeOnboarding18ResetIfAny(context: Context): Boolean {
+        val f = File(context.filesDir, ONBOARDING_1_8_RESET_FILE)
         if (!f.exists()) return false
         f.delete()
         return true

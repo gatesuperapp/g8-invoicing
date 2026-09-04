@@ -29,10 +29,12 @@ import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.PrefKeys
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.data.dataStore
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.data.models.PersonType
+import com.a4a.g8invoicing.data.resetOnboarding18Seen
 import com.a4a.g8invoicing.data.setSeenEInvoiceIntro
 import com.a4a.g8invoicing.data.setSeenOnboarding18
 import com.a4a.g8invoicing.data.setSeenWhatsNew
@@ -98,6 +100,7 @@ fun MainCompose(
     val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
     val invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject()
     val productDataSource: ProductLocalDataSourceInterface = koinInject()
+    val productTaxDataSource: ProductTaxLocalDataSourceInterface = koinInject()
     val modulesRepo: ActivatedModulesRepository = koinInject()
     val sqlDriver: SqlDriver = koinInject()
 
@@ -135,6 +138,13 @@ fun MainCompose(
         // the stale flag from the previous session).
         if (RestoreManager.consumeMigrationWizardResetIfAny(context)) {
             modulesRepo.resetMigration19Seen()
+        }
+        // Pre-1.8 backup restored: re-fire the 1.8 wizard so its
+        // "clients tous dans le même pays ?" step can bulk-assign a country
+        // to the restored clients (their country_code column didn't exist in
+        // the source schema and comes back null after the swap).
+        if (RestoreManager.consumeOnboarding18ResetIfAny(context)) {
+            resetOnboarding18Seen(context)
         }
 
         // Snapshot the "returning user" signal BEFORE initializeVersionTracking
@@ -215,7 +225,34 @@ fun MainCompose(
     // renders after G8InvoicingTheme so it stacks on top of NavGraph. See
     // the block below the theme call.
 
-    migration19Context?.let { ctx ->
+    // What's New + Onboarding dialog state — declared here (before the 1.9
+    // migration render) so the 1.9 dialog can gate itself on the 1.8 wizard
+    // flag. Both wizards are surfaced by the same LaunchedEffect below;
+    // ordering guarantees: 1.8 wizard fires first when both are pending, then
+    // the 1.9 attribution wizard uses the country_code the 1.8 flow filled.
+    // `initial = null` so the LaunchedEffect can distinguish "DataStore hasn't
+    // emitted yet" from "flag is legitimately false" — see the LaunchedEffect
+    // below for the race the null guard prevents.
+    val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = null)
+    val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = null)
+    val shouldShowEInvoice by shouldShowEInvoiceIntro(context).collectAsState(initial = null)
+    var showWhatsNew by remember { mutableStateOf(false) }
+    var showOnboarding by remember { mutableStateOf(false) }
+    var showEInvoiceIntro by remember { mutableStateOf(false) }
+    // Backup reminder: shown once when the user has >3 rows in any main table.
+    // Suppressed while onboarding / what's new are pending to avoid stacking
+    // modals at cold start.
+    var showBackupDialog by remember { mutableStateOf(false) }
+    var backupExportedFile by remember { mutableStateOf<File?>(null) }
+
+    // The 1.8 onboarding must run BEFORE the 1.9 attribution wizard when both
+    // are pending — the 1.8 wizard's "clients tous dans le même pays ?" step
+    // populates client country_code data that the 1.9 attribution flow reuses
+    // for pre-fill. `shouldShowOnboarding == null` means DataStore hasn't
+    // emitted yet; treat as "possibly true" to avoid a one-frame flash of the
+    // 1.9 wizard on cold start.
+    val onboarding18Pending = shouldShowOnboarding != false || showOnboarding
+    if (!onboarding18Pending) migration19Context?.let { ctx ->
         OnboardingMigration19Dialog(
             context = ctx,
             actions = Migration19Actions(
@@ -298,24 +335,6 @@ fun MainCompose(
         )
     }
 
-    // What's New + Onboarding dialog state. The 1.8 onboarding takes priority
-    // over the generic What's New — the onboarding's welcome screen already
-    // mentions the Devis feature, so showing both would be redundant.
-    // `initial = null` so the LaunchedEffect can distinguish "DataStore hasn't
-    // emitted yet" from "flag is legitimately false" — see the LaunchedEffect
-    // below for the race the null guard prevents.
-    val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = null)
-    val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = null)
-    val shouldShowEInvoice by shouldShowEInvoiceIntro(context).collectAsState(initial = null)
-    var showWhatsNew by remember { mutableStateOf(false) }
-    var showOnboarding by remember { mutableStateOf(false) }
-    var showEInvoiceIntro by remember { mutableStateOf(false) }
-    // Backup reminder: shown once when the user has >3 rows in any main table.
-    // Suppressed while onboarding / what's new are pending to avoid stacking
-    // modals at cold start.
-    var showBackupDialog by remember { mutableStateOf(false) }
-    var backupExportedFile by remember { mutableStateOf<File?>(null) }
-
     LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, versionTrackingDone, migration19Context) {
         // Wait until every DataStore flag has emitted its real value —
         // guarding against the initial=null race that used to flip
@@ -324,16 +343,17 @@ fun MainCompose(
         // shouldShowEInvoice is read after HAS_SEEN_EINVOICE_INTRO has been
         // flipped for fresh installs.
         if (!versionTrackingDone) return@LaunchedEffect
-        // Migration19 wizard is the definitive "welcome to 1.9" experience.
-        // Skip every other popup while it's pending — otherwise a 1.8.2 → 1.9
-        // upgrader gets stacked with "Bienvenue 1.8", What's New and the
-        // e-invoice intro on top of the wizard.
-        if (migration19Context != null) return@LaunchedEffect
         val whatsNew = shouldShow ?: return@LaunchedEffect
         val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
         val eInvoice = shouldShowEInvoice ?: return@LaunchedEffect
+        // 1.8 onboarding is allowed to surface even while migration19 is
+        // pending — the two run in sequence (1.8 → 1.9), gated by
+        // `onboarding18Pending` at the render site. What's New / e-invoice /
+        // backup nag stay suppressed until 1.9 clears so we don't stack four
+        // modals on top of the migration wizard.
+        val migration19Pending = migration19Context != null
         showOnboarding = onboarding
-        showWhatsNew = whatsNew && !onboarding
+        showWhatsNew = whatsNew && !onboarding && !migration19Pending
         // 1.8.1 e-invoice popup: only when the device is set to country=FR.
         // Country (not language) — the e-invoice obligation follows where the
         // phone is used, not which UI language the user picked. Reads a
@@ -344,11 +364,11 @@ fun MainCompose(
         // onboarding wizard is pending. Mark SEEN=true immediately per product
         // decision.
         val systemCountry = com.a4a.g8invoicing.SystemRegionSnapshot.formatCountry
-        if (eInvoice && !onboarding && systemCountry == "FR") {
+        if (eInvoice && !onboarding && !migration19Pending && systemCountry == "FR") {
             showEInvoiceIntro = true
             setSeenEInvoiceIntro(context)
         }
-        if (!whatsNew && !onboarding && !showEInvoiceIntro) {
+        if (!whatsNew && !onboarding && !migration19Pending && !showEInvoiceIntro) {
             showBackupDialog = shouldShowBackupPopupNow(
                 context,
                 invoiceQueries,
@@ -609,6 +629,12 @@ fun MainCompose(
                 // doesn't leave currentCompanyId pointing at a now-nonexistent
                 // issuer.
                 newId?.let { currentCompanyRepository.setCurrent(it) }
+                // Replace the FR-flavoured 5.5/10/20 defaults baked into
+                // TaxRate.sq with the shortlist for the picked country when
+                // we have one on file. No-op if the user's country isn't in
+                // the curated map or if the table has been touched before
+                // (fresh-install path guarantees the latter is false).
+                productTaxDataSource.seedDefaultsForCountryIfPristine(enteredCountry)
                 // Fresh installs never see the 1.9 migration wizard.
                 modulesRepo.markMigration19Seen()
                 needsFirstLaunchIssuer = false

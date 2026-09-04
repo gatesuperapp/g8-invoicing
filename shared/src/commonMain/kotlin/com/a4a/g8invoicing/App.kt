@@ -20,6 +20,7 @@ import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.models.PersonType
@@ -48,6 +49,7 @@ fun App(
     clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject(),
     invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject(),
     productDataSource: ProductLocalDataSourceInterface = koinInject(),
+    productTaxDataSource: ProductTaxLocalDataSourceInterface = koinInject(),
     modulesRepo: ActivatedModulesRepository = koinInject(),
 ) {
     // Boot-time initialization: locale + current-entreprise hydration.
@@ -123,6 +125,10 @@ fun App(
                 // doesn't leave currentCompanyId pointing at a now-nonexistent
                 // issuer.
                 newId?.let { currentCompanyRepository.setCurrent(it) }
+                // Replace the FR-flavoured 5.5/10/20 defaults baked into
+                // TaxRate.sq with the shortlist for the picked country when
+                // we have one on file. No-op otherwise (fallback = keep FR).
+                productTaxDataSource.seedDefaultsForCountryIfPristine(enteredCountry)
                 // Fresh installs never see the 1.9 migration wizard — mark it
                 // as done so we don't ambush them on their second boot.
                 modulesRepo.markMigration19Seen()

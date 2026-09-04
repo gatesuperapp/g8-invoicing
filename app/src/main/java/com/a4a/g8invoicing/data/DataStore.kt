@@ -140,6 +140,16 @@ suspend fun setSeenOnboarding18(context: Context) {
     }
 }
 
+// Flip HAS_SEEN_ONBOARDING_1_8 back to false so the wizard re-fires on the
+// next boot. Called from MainCompose when RestoreManager reports a restore
+// from a pre-1.8 backup — the restored clients have no country_code and the
+// wizard's "clients tous dans le même pays ?" step is how we bulk-fix them.
+suspend fun resetOnboarding18Seen(context: Context) {
+    context.dataStore.edit { prefs ->
+        prefs[PrefKeys.HAS_SEEN_ONBOARDING_1_8] = false
+    }
+}
+
 // Backup reminder popup — surfaced once when the user has accumulated
 // enough real data (>3 rows in any of the main tables) and hasn't seen the
 // nudge yet. Broken since the KMP migration (f9996022cb2) moved InvoiceList
