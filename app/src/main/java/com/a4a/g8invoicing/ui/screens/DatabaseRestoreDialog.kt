@@ -39,26 +39,26 @@ import java.io.File
 // touch values*/strings.xml directly.
 private object RestoreCopy {
     const val CONFIRM_TITLE = "Restaurer une sauvegarde"
-    const val CONFIRM_BODY_INTRO = "Si vous souhaitez restaurer vos données à partir d'une sauvegarde de votre base de données g8, vous pouvez continuer.\n\n"
+    const val CONFIRM_BODY_INTRO = "Si tu souhaites restaurer tes données à partir d'une sauvegarde de ta base de données g8, tu peux continuer.\n\n"
     const val CONFIRM_BODY_WARNING_PREFIX = "⚠️ Attention"
     const val CONFIRM_BODY_WARNING_MID = ", la restauration va "
     const val CONFIRM_BODY_WARNING_EMPHASIS = "écraser"
-    const val CONFIRM_BODY_WARNING_SUFFIX = " toutes les données qui sont actuellement dans l'application.\n\nL'application se fermera, relancez-la pour finaliser."
+    const val CONFIRM_BODY_WARNING_SUFFIX = " toutes les données qui sont actuellement dans l'application.\n\nL'application se fermera, relance-la pour finaliser."
     const val CONFIRM_YES = "Je suis sûr·e de moi"
     const val CONFIRM_NO = "Annuler"
 
     const val PICK_TITLE = "Sélectionner un fichier"
-    const val PICK_BODY = "Sélectionnez votre fichier .zip (ou .db si votre sauvegarde date d'avant la version 1.9)."
+    const val PICK_BODY = "Sélectionne ton fichier .zip (ou .db si ta sauvegarde date d'avant la version 1.9)."
     const val PICK_UPLOAD = "Choisir un fichier"
 
     const val VALIDATING = "Vérification de la sauvegarde…"
 
     const val ERROR_TITLE = "Restauration impossible"
-    const val ERROR_DOWNGRADE = "Cette sauvegarde vient d'une version plus récente de g8. Mettez à jour l'application avant de la restaurer."
+    const val ERROR_DOWNGRADE = "Cette sauvegarde vient d'une version plus récente de g8. Mets à jour l'application avant de la restaurer."
     const val OK = "OK"
 
     const val READY_TITLE = "✅  Sauvegarde chargée"
-    const val READY_BODY = "Appuyez sur Terminer pour fermer l'application. Relancez-la ensuite pour finaliser la restauration."
+    const val READY_BODY = "Appuie sur Terminer pour fermer l'application. Relance-la ensuite pour finaliser la restauration."
     const val READY_CONFIRM = "Terminer"
 }
 
