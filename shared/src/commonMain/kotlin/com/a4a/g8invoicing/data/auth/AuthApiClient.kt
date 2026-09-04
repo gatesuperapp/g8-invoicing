@@ -32,8 +32,19 @@ class AuthApiClient(
                 MagicLinkResult.Error(tryParseError(response))
             }
         } catch (e: Exception) {
-            MagicLinkResult.Error(e.message ?: "Network error")
+            if (isNetworkUnavailable(e)) MagicLinkResult.Offline
+            else MagicLinkResult.Error(e.message ?: "Network error")
         }
+    }
+
+    // Match the exception by simple class name so we don't have to pin to a specific
+    // Ktor engine's exception hierarchy — OkHttp (Android) and CIO (JVM/Desktop) wrap
+    // network failures differently but the simple names line up.
+    private fun isNetworkUnavailable(e: Throwable): Boolean {
+        val name = e::class.simpleName ?: ""
+        if (name in NETWORK_EXCEPTION_NAMES) return true
+        val cause = e.cause
+        return cause != null && cause !== e && isNetworkUnavailable(cause)
     }
 
     /**
@@ -208,9 +219,22 @@ data class PortalSessionResponse(val url: String)
 @Serializable
 data class ErrorBody(val message: String)
 
+private val NETWORK_EXCEPTION_NAMES = setOf(
+    "UnresolvedAddressException",
+    "UnknownHostException",
+    "HttpRequestTimeoutException",
+    "ConnectTimeoutException",
+    "SocketTimeoutException",
+    "ConnectException",
+    "NoRouteToHostException",
+    "PortUnreachableException",
+    "IOException",
+)
+
 // Result types
 sealed class MagicLinkResult {
     data object Success : MagicLinkResult()
+    data object Offline : MagicLinkResult()
     data class Error(val message: String) : MagicLinkResult()
 }
 

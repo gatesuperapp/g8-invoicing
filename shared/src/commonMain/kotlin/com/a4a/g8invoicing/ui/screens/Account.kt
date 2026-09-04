@@ -550,30 +550,47 @@ fun Account(
 @Composable
 fun AuthMessageDialog(
     messagePrefix: String,
-    contactEmail: String,
+    contactEmail: String?,
     uriHandler: androidx.compose.ui.platform.UriHandler,
     onDismiss: () -> Unit,
+    showOhNoHeader: Boolean = false,
 ) {
     val annotatedString = buildAnnotatedString {
         append(messagePrefix)
-        pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
-        withStyle(style = SpanStyle(color = ColorVioletLink)) {
-            append(contactEmail)
+        if (contactEmail != null) {
+            pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
+            withStyle(style = SpanStyle(color = ColorVioletLink)) {
+                append(contactEmail)
+            }
+            pop()
         }
-        pop()
     }
     AlertDialog(
         onDismissRequest = onDismiss,
         text = {
-            ClickableText(
-                text = annotatedString,
-                style = MaterialTheme.typography.bodyLarge,
-                onClick = { offset ->
-                    annotatedString
-                        .getStringAnnotations(tag = "email", start = offset, end = offset)
-                        .firstOrNull()?.let { uriHandler.openUri(it.item) }
+            Column {
+                if (showOhNoHeader) {
+                    // Same "oh no" + kaomoji block as the export error dialog
+                    // (alert_dialog_error) — kept at the modal's body text size so
+                    // it stays consistent across the app.
+                    Text(
+                        text = OH_NO_HEADER,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-            )
+                ClickableText(
+                    text = annotatedString,
+                    style = MaterialTheme.typography.bodyLarge,
+                    onClick = { offset ->
+                        annotatedString
+                            .getStringAnnotations(tag = "email", start = offset, end = offset)
+                            .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                    }
+                )
+            }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
@@ -582,6 +599,13 @@ fun AuthMessageDialog(
         },
     )
 }
+
+// TODO(i18n): move these to strings.xml via the `translations` branch post-1.9.
+// Kept as Kotlin constants for now so release/1.9 doesn't have to round-trip through
+// Weblate for shipping.
+private const val OH_NO_HEADER = "𝕠𝕙 𝕟𝕠\n((˃ᯅ˂)ノ)"
+private const val OFFLINE_MESSAGE_FR =
+    "Tu sembles hors-ligne.. ou ta connexion internet (Wi-Fi ou données mobile) est instable."
 
 @Composable
 private fun ColumnScope.LoggedOutContent(
@@ -632,10 +656,18 @@ private fun ColumnScope.LoggedOutContent(
                 unfocusedLabelColor = Color.Black,
                 cursorColor = ColorVioletLight,
             ),
-            supportingText = if (showInvalidEmailError) {
-                { Text(stringResource(Res.string.account_auth_invalid_email)) }
-            } else null,
             modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    // Rendered outside the OutlinedTextField (instead of via supportingText)
+    // so the error text sits flush with the field's left edge — Material3's
+    // default supportingText adds a 16.dp start padding we don't want.
+    if (showInvalidEmailError) {
+        Text(
+            text = stringResource(Res.string.account_auth_invalid_email),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp),
         )
     }
 
@@ -673,12 +705,15 @@ private fun ColumnScope.LoggedOutContent(
     }
 
     val contactEmail = stringResource(Res.string.about_contact_email)
+    val serverErrorPrefix = stringResource(Res.string.account_auth_error)
     if (uiState.errorMessage != null) {
+        val isOffline = uiState.errorMessage == "magic_link_offline"
         AuthMessageDialog(
-            messagePrefix = stringResource(Res.string.account_auth_error),
-            contactEmail = contactEmail,
+            messagePrefix = if (isOffline) OFFLINE_MESSAGE_FR else serverErrorPrefix,
+            contactEmail = if (isOffline) null else contactEmail,
             uriHandler = uriHandler,
             onDismiss = onClearError,
+            showOhNoHeader = true,
         )
     }
     if (uiState.successMessage != null) {
