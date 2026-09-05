@@ -105,6 +105,8 @@
     <string name="payment_means_48">Card</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Cash</string>
+    <string name="payment_means_paypal">PayPal</string>
+    <string name="payment_means_stripe">Stripe</string>
     <string name="payment_means_other">Other</string>
     <string name="document_footer">Footer</string>
     <string name="document_default_reference">XFGDTSF</string>
@@ -186,7 +188,11 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Add an address</string>
     <string name="client_delete_address">Delete address</string>
+    <string name="client_or_issuer_section_addresses">Address</string>
+    <string name="client_or_issuer_section_identification">Identification</string>
     <string name="client_or_issuer_section_bank">Bank details</string>
+    <string name="client_or_issuer_section_notes">Notes</string>
+    <string name="client_or_issuer_section_backup">Backup</string>
     <string name="issuer_bank_add">+ Add an account</string>
     <string name="issuer_bank_label">Label</string>
     <string name="issuer_bank_label_input">Business account</string>
@@ -287,6 +293,10 @@
     <string name="first_launch_liberty_body2">The app works offline, the account is optional and your data isn't shared with third parties ♡</string>
     <string name="first_launch_gstore_intro">Some features are enabled on demand from the 𝕘Store tab: quotes, DNs, e-invoicing exports and more.</string>
     <string name="first_launch_gstore_premium">Some modules are reserved for premium members 🌟. You can become a premium member on the g8 website.</string>
+    <string name="first_launch_settings_intro">Before I hand things over, I need 2 pieces of info to set up your interface:</string>
+    <string name="first_launch_settings_name_label">Your business name</string>
+    <string name="first_launch_settings_country_label">Country</string>
+    <string name="first_launch_settings_cta">Let's go</string>
     <string name="first_launch_issuer_placeholder">Business name</string>
     <string name="first_launch_issuer_skip">Later</string>
     <string name="first_launch_issuer_default_name">My business</string>

@@ -105,6 +105,8 @@
     <string name="payment_means_48">Tarjeta</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Efectivo</string>
+    <string name="payment_means_paypal">PayPal</string>
+    <string name="payment_means_stripe">Stripe</string>
     <string name="payment_means_other">Otro</string>
     <string name="document_footer">Pie de pagina</string>
     <string name="document_default_reference">XFGDTSF</string>
@@ -188,7 +190,11 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Añadir una dirección</string>
     <string name="client_delete_address">Eliminar dirección</string>
+    <string name="client_or_issuer_section_addresses">Dirección</string>
+    <string name="client_or_issuer_section_identification">Identificación</string>
     <string name="client_or_issuer_section_bank">Datos bancarios</string>
+    <string name="client_or_issuer_section_notes">Notas</string>
+    <string name="client_or_issuer_section_backup">Copia de seguridad</string>
     <string name="issuer_bank_add">+ Añadir una cuenta</string>
     <string name="issuer_bank_label">Etiqueta</string>
     <string name="issuer_bank_label_input">Cuenta profesional</string>
@@ -290,6 +296,10 @@
     <string name="first_launch_liberty_body2">La app funciona sin conexión, la cuenta es opcional y tus datos no se comparten con terceros ♡</string>
     <string name="first_launch_gstore_intro">Algunas funciones se activan a demanda desde la pestaña 𝕘Store: presupuestos, albaranes, exportación a formatos de facturación electrónica y +.</string>
     <string name="first_launch_gstore_premium">Algunos módulos están reservados a los miembros premium 🌟. Puedes hacerte miembro premium en la web de g8.</string>
+    <string name="first_launch_settings_intro">Antes de dejarte, necesito 2 datos para configurar la interfaz:</string>
+    <string name="first_launch_settings_name_label">Nombre de tu empresa</string>
+    <string name="first_launch_settings_country_label">País</string>
+    <string name="first_launch_settings_cta">¡Vamos!</string>
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
     <string name="first_launch_issuer_skip">Más tarde</string>
     <string name="first_launch_issuer_default_name">Mi empresa</string>

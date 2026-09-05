@@ -105,6 +105,8 @@
     <string name="payment_means_48">Karte</string>
     <string name="payment_means_58">SEPA</string>
     <string name="payment_means_10">Bargeld</string>
+    <string name="payment_means_paypal">PayPal</string>
+    <string name="payment_means_stripe">Stripe</string>
     <string name="payment_means_other">Andere</string>
     <string name="document_footer">Fußzeile</string>
     <string name="document_default_reference">XFGDTSF</string>
@@ -187,7 +189,11 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Adresse hinzufügen</string>
     <string name="client_delete_address">Adresse löschen</string>
+    <string name="client_or_issuer_section_addresses">Adresse</string>
+    <string name="client_or_issuer_section_identification">Identifikation</string>
     <string name="client_or_issuer_section_bank">Bankverbindung</string>
+    <string name="client_or_issuer_section_notes">Notizen</string>
+    <string name="client_or_issuer_section_backup">Sicherung</string>
     <string name="issuer_bank_add">+ Konto hinzufügen</string>
     <string name="issuer_bank_label">Bezeichnung</string>
     <string name="issuer_bank_label_input">Geschäftskonto</string>
@@ -288,6 +294,10 @@
     <string name="first_launch_liberty_body2">Die App funktioniert offline, das Konto ist optional und deine Daten werden nicht an Dritte weitergegeben ♡</string>
     <string name="first_launch_gstore_intro">Bestimmte Funktionen aktivierst du bei Bedarf im 𝕘Store-Tab: Angebote, Lieferscheine, Export in E-Invoicing-Formaten und mehr.</string>
     <string name="first_launch_gstore_premium">Einige Module sind Premium-Mitgliedern vorbehalten 🌟. Du kannst auf der g8-Website Premium-Mitglied werden.</string>
+    <string name="first_launch_settings_intro">Bevor ich dir das Feld überlasse, brauche ich 2 Angaben, um die Oberfläche einzurichten:</string>
+    <string name="first_launch_settings_name_label">Name deines Unternehmens</string>
+    <string name="first_launch_settings_country_label">Land</string>
+    <string name="first_launch_settings_cta">Los geht's</string>
     <string name="first_launch_issuer_placeholder">Name des Unternehmens</string>
     <string name="first_launch_issuer_skip">Später</string>
     <string name="first_launch_issuer_default_name">Mein Unternehmen</string>
