@@ -111,6 +111,13 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        // Fires when the user tries to save an issuer edit with the sync-to-
+        // master switch OFF AND they've modified banks. Banks are a master-
+        // owned resource — nothing to persist them doc-side, so we prompt to
+        // force-sync (whole fiche syncs, banks included) or cancel and let
+        // the user reconsider. See TaskCreate #12.
+        var showBankChangesModal by remember { mutableStateOf(false) }
+        var pendingForceSyncSave by remember { mutableStateOf<(() -> Unit)?>(null) }
         // Whether the pending dialog was triggered by the edit-link flow (open
         // the form after the user's choice) or by the refresh-from-master icon
         // (don't open the form — refresh is a standalone action).
@@ -450,24 +457,51 @@ fun NavGraphBuilder.invoiceAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                                val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
-                                val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
-                                val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
-                                val hadExemptionText = invoiceViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
-                                val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
+                                val originalBanks = invoiceViewModel.documentUiState.value
+                                    .documentIssuer?.banks.orEmpty()
+                                val banksChanged = !banksSemanticallyEqual(
+                                    originalBanks,
+                                    documentIssuerUiState.banks,
                                 )
-                                if (turnedOffRetention) {
-                                    invoiceViewModel.clearRetentionsInDb()
-                                } else if (turnedOnRetention) {
-                                    invoiceViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                // doIssuerSave captures everything the save needs so both
+                                // the direct path and the modal's confirm path can call
+                                // the same closure with the effective syncToMaster value.
+                                // reloadDocumentAwait (suspending) — not the fire-and-
+                                // forget reloadDocument — so document.documentIssuer.banks
+                                // is guaranteed fresh before the sheet closes; without
+                                // the await, tapping the issuer picker again immediately
+                                // after save reads a stale banks list.
+                                val doIssuerSave: suspend (Boolean) -> Unit = { effectiveSync ->
+                                    val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
+                                    val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
+                                    val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
+                                    val hadExemptionText = invoiceViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                                    val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = effectiveSync
+                                    )
+                                    if (turnedOffRetention) {
+                                        invoiceViewModel.clearRetentionsInDb()
+                                    } else if (turnedOnRetention) {
+                                        invoiceViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                    }
+                                    if (needsExemptionSeed) {
+                                        invoiceViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
+                                    }
+                                    invoiceViewModel.reloadDocumentAwait()
+                                    showDocumentForm = false
                                 }
-                                if (needsExemptionSeed) {
-                                    invoiceViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
+                                if (!syncToMaster && banksChanged) {
+                                    // Stash the confirm action for the modal to invoke
+                                    // with syncToMaster forced ON — banks can't persist
+                                    // without hitting the master IssuerBank table.
+                                    pendingForceSyncSave = {
+                                        scope.launch { doIssuerSave(true) }
+                                    }
+                                    showBankChangesModal = true
+                                } else {
+                                    doIssuerSave(syncToMaster)
                                 }
-                                invoiceViewModel.reloadDocument()
-                                showDocumentForm = false
                             } else {
                                 errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
@@ -549,7 +583,62 @@ fun NavGraphBuilder.invoiceAddEdit(
         )
 
         FormValidationDialogHost(errorDialog)
+
+        if (showBankChangesModal) {
+            AlertDialog(
+                onDismissRequest = {
+                    showBankChangesModal = false
+                    pendingForceSyncSave = null
+                },
+                title = { Text("Modification des comptes bancaires") },
+                text = {
+                    Text(
+                        "Tu as modifié les comptes bancaires. Pour les enregistrer, la fiche entreprise doit être mise à jour. Confirmer ?"
+                    )
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        val action = pendingForceSyncSave
+                        showBankChangesModal = false
+                        pendingForceSyncSave = null
+                        action?.invoke()
+                    }) {
+                        Text("Mettre à jour", style = MaterialTheme.typography.textCta)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showBankChangesModal = false
+                        pendingForceSyncSave = null
+                    }) {
+                        Text(
+                            "Annuler",
+                            color = com.a4a.g8invoicing.ui.theme.ColorVioletLink,
+                            style = MaterialTheme.typography.textCta,
+                        )
+                    }
+                },
+            )
+        }
     }
+}
+
+// True when two bank lists carry the same payload (identifier / bic / label /
+// country) in the same order. Ignores DB ids and sort_order — those aren't
+// user-visible edits.
+private fun banksSemanticallyEqual(
+    a: List<com.a4a.g8invoicing.ui.states.IssuerBankState>,
+    b: List<com.a4a.g8invoicing.ui.states.IssuerBankState>,
+): Boolean {
+    if (a.size != b.size) return false
+    a.forEachIndexed { i, left ->
+        val right = b[i]
+        if (left.identifier.text.trim() != right.identifier.text.trim()) return false
+        if (left.bic.text.trim() != right.bic.text.trim()) return false
+        if ((left.label?.text?.trim().orEmpty()) != (right.label?.text?.trim().orEmpty())) return false
+        if ((left.countryCode?.trim().orEmpty()) != (right.countryCode?.trim().orEmpty())) return false
+    }
+    return true
 }
 
 suspend fun createNewClientOrIssuer(

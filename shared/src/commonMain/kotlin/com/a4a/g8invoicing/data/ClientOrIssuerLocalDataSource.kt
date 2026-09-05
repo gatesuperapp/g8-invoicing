@@ -688,6 +688,10 @@ class ClientOrIssuerLocalDataSource(
                 // propagation of name/phone/company-id/address fields. Empty
                 // list = state wasn't hydrated (older code paths, race
                 // conditions) → keep master intact rather than wipe.
+                // NB: the UI enforces the invariant "no bank edits with switch
+                // OFF" via a confirmation modal (see NavGraphInvoiceAddEdit),
+                // so reaching this path with switch OFF + bank changes only
+                // happens when the user has already accepted the force-sync.
                 val isIssuerEdit = documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
                     documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
                 if (isIssuerEdit && documentClientOrIssuer.banks.isNotEmpty()) {

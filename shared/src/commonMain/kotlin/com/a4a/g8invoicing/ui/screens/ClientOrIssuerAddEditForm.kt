@@ -983,7 +983,7 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, topPadding: 
  * only at save time (see ClientOrIssuerLocalDataSource.saveIssuerBanks) so the
  * user can leave a placeholder open while editing.
  *
- * Cap at 2 for the moment (user's rule); the model supports N.
+ * Cap at 4 (user's rule); the model supports N.
  */
 @Composable
 private fun IssuerBanksSection(
@@ -1021,8 +1021,8 @@ private fun IssuerBanksSection(
             )
         }
 
-        // Capped at 2 per the current spec.
-        if (display.size < 2) {
+        // Capped at 4 per the current spec.
+        if (display.size < 4) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,

@@ -108,12 +108,19 @@ fun DocumentBottomSheetForm(
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
     // Sync-to-master checkbox lives here so it persists across in-sheet navigations
     // (tax selection, full-screen text) but resets when the sheet mounts a different
-    // client / issuer / product snapshot.
+    // client / issuer / product snapshot. Default ON for client / issuer edits
+    // (matches the expectation that changes flow back to the master fiche);
+    // stays OFF for product edits — a per-doc price/quantity tweak shouldn't
+    // silently overwrite the catalog price by default.
+    val defaultSyncToMaster = typeOfCreation?.toString()?.let { name ->
+        name.contains(ClientOrIssuerType.CLIENT.name) ||
+            name.contains(ClientOrIssuerType.ISSUER.name)
+    } == true
     var syncToMasterChecked by remember(
         documentClientUiState.id,
         documentIssuerUiState.id,
         documentProduct.id,
-    ) { mutableStateOf(false) }
+    ) { mutableStateOf(defaultSyncToMaster) }
     // State to determine if a text field (name or description) should be shown in full screen
     val fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
     // State to hold the text being edited in the full-screen text editor
