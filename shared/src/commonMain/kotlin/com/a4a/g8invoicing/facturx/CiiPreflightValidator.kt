@@ -188,7 +188,7 @@ object CiiPreflightValidator {
      * Oups warning so the user fixes the value or renames the label.
      * Empty slots and clean matches are silent.
      */
-    private inline fun collectLabelMismatches(
+    private fun collectLabelMismatches(
         party: ClientOrIssuerState,
         onMismatch: (fieldLabel: String, expectedFormat: String) -> Unit,
     ) {
@@ -198,13 +198,30 @@ object CiiPreflightValidator {
             party.companyId2Label?.text to party.companyId2Number?.text,
             party.companyId3Label?.text to party.companyId3Number?.text,
         )
-        slots.forEach { (label, value) ->
-            val result = classifyCompanyId(label, value, country)
+        slots.forEachIndexed { index, (label, value) ->
+            // A FR issuer that has never renamed the label sub-field shows
+            // the resource default ("N° SIRET" / "N° TVA" / "N° RCS") in the
+            // UI while the state's label stays null. Without this fallback
+            // the classifier's label-first branch would skip, regex-fallback
+            // would silently drop garbage input, and the export would sneak
+            // through — matching the "4 letters in the SIRET field, no
+            // warning" bug. Only wired for FR (the country whose default
+            // labels we hardcode); other countries continue to rely on the
+            // regex fallback with their own patterns.
+            val effectiveLabel = label?.takeIf { it.isNotBlank() }
+                ?: DEFAULT_FR_SLOT_HINTS.getOrNull(index)?.takeIf { country == "FR" }
+            val result = classifyCompanyId(effectiveLabel, value, country)
             if (result is CompanyIdClassification.LabelMismatch) {
                 onMismatch(result.fieldLabel, result.expected.expectedFormat)
             }
         }
     }
+
+    /** Default keyword for each of the 3 company-id slots on a FR issuer —
+     *  matches the resource text shown in the form when the user hasn't
+     *  renamed the field. Used as a fallback hint by [collectLabelMismatches]
+     *  so untouched-label slots still fire LabelMismatch on garbage input. */
+    private val DEFAULT_FR_SLOT_HINTS: List<String> = listOf("SIRET", "TVA", "RCS")
 
     private fun hasCompletePostalAddress(party: ClientOrIssuerState): Boolean {
         val address = party.addresses?.firstOrNull() ?: return false
