@@ -122,6 +122,10 @@ fun MainCompose(
     // installs mark the flag straight after FirstLaunchIssuerNameDialog
     // completes so the wizard never surfaces there.
     var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
+    // Populated alongside migration19Context so the wizard knows whether to
+    // show its ported client-country step. True when the user has never seen
+    // the 1.8 wizard (pre-1.8 upgrade or restore); false when 1.8 already ran.
+    var showClientCountryStepInMigration19 by remember { mutableStateOf(false) }
 
     // Restore flow — activated from Account > Sauvegarde. Rendered outside
     // NavGraph so its dialogs stack on top of every screen the user may be
@@ -208,12 +212,21 @@ fun MainCompose(
                     // a copy in Downloads/, but this one guarantees a pre-wizard
                     // file exists in the app's internal dir even if they skip it.
                     snapshotDatabaseInternally(context, "before_1_9_migration")
+                    // Read the 1.8-seen flag BEFORE we flip it below. True when
+                    // the user actually ran the 1.8 wizard back in the day
+                    // (client country_code was already asked) — in that case
+                    // the enhanced 1.9 wizard hides its ported client-country
+                    // step. False when the user is upgrading straight from
+                    // < 1.8 or restoring a pre-1.8 backup → 1.9 absorbs the
+                    // client-country question.
+                    val alreadyRanPre19 = bootPrefs[PrefKeys.HAS_SEEN_ONBOARDING_1_8] ?: false
                     migration19Context = Migration19Context(
                         issuers = issuers,
                         clients = clients,
                         products = products,
                         footersByIssuer = footersByIssuer,
                     )
+                    showClientCountryStepInMigration19 = !alreadyRanPre19
                     // 1.8 wizard is deprecated — its country-fill / attach flow
                     // now lives inside the enhanced 1.9 wizard (see the mono-
                     // issuer silent attach + client-country steps there). Mark
@@ -304,6 +317,9 @@ fun MainCompose(
                         issuer.copy(addresses = listOf(updatedAddress) + otherAddresses)
                     )
                 },
+                setClientCountry = { countryCode ->
+                    clientOrIssuerDataSource.setCountryForClientsWithoutCountry(countryCode)
+                },
                 exportDatabase = {
                     try {
                         val file = exportDatabaseToDownloads(context, sqlDriver)
@@ -338,6 +354,7 @@ fun MainCompose(
                     }
                 },
             ),
+            showClientCountryStep = showClientCountryStepInMigration19,
             onDismiss = { migration19Context = null },
         )
     }

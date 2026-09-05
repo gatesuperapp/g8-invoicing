@@ -86,6 +86,12 @@ import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_clients_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_title
+import com.a4a.g8invoicing.shared.resources.onboarding_client_country_intro_body
+import com.a4a.g8invoicing.shared.resources.onboarding_client_country_intro_no
+import com.a4a.g8invoicing.shared.resources.onboarding_client_country_intro_title
+import com.a4a.g8invoicing.shared.resources.onboarding_client_country_intro_yes
+import com.a4a.g8invoicing.shared.resources.onboarding_client_country_picker_pick
+import com.a4a.g8invoicing.shared.resources.onboarding_client_country_picker_subtitle
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_cta
 import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_confirm_cta
@@ -177,6 +183,10 @@ class Migration19Actions(
     val saveIssuerBank: suspend (issuer: ClientOrIssuerState, iban: String, bic: String) -> Unit,
     val updateIssuerName: suspend (issuer: ClientOrIssuerState, newName: String) -> Unit,
     val updateIssuerCountry: suspend (issuer: ClientOrIssuerState, countryCode: String) -> Unit,
+    // Bulk-fill the country_code on every client that has none. Used by the
+    // ClientCountryPicker step (ported from the retired 1.8 wizard) when
+    // the user answers "yes, all my clients are in the same country".
+    val setClientCountry: suspend (countryCode: String) -> Unit,
     // Database export + email plumbing for the Backup step. Same pair the
     // 1.8 OnboardingDialog uses on its Privacy step — the wizard exports
     // locally then optionally offers to send the file by email, so the
@@ -203,6 +213,16 @@ class Migration19Actions(
 fun OnboardingMigration19Dialog(
     context: Migration19Context,
     actions: Migration19Actions,
+    // Whether to insert the ported-from-1.8 client-country step
+    // ("Are your clients mostly in the same country?" + picker). True when
+    // the user is landing on 1.9 without ever having seen the 1.8 wizard
+    // (fresh upgrade from < 1.8, or restore of a < 1.8 backup) — in that
+    // case the client country_code has never been asked, so the 1.9 wizard
+    // absorbs the step. False when the 1.8 wizard already ran once
+    // (HAS_SEEN_ONBOARDING_1_8 pref was true when this wizard was
+    // scheduled) — that user already made the country choice and we don't
+    // re-ask.
+    showClientCountryStep: Boolean,
     onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -223,6 +243,18 @@ fun OnboardingMigration19Dialog(
 
     var step by remember { mutableStateOf(Step19.Welcome) }
     var submitting by remember { mutableStateOf(false) }
+
+    // Ported from the 1.8 wizard. `clientCountrySame == null` means "user
+    // hasn't answered yet"; the "no" answer skips the picker and moves on
+    // without changing anything. The picker's country is buffered until
+    // commit@ so a back-nav on the picker doesn't leave a partial write.
+    var clientCountrySame by remember { mutableStateOf<Boolean?>(null) }
+    var clientCountry by remember { mutableStateOf<String?>(null) }
+    // Effective gate for both step transitions and the commit-time write:
+    // asking the question only makes sense when the wizard was told to
+    // (upgrade from < 1.8) AND there's actually a client to fill a country
+    // on.
+    val shouldAskClientCountry = showClientCountryStep && context.clients.isNotEmpty()
 
     val isMulti: Boolean = remainingIssuers.size > 1
 
@@ -308,12 +340,24 @@ fun OnboardingMigration19Dialog(
         step = Step19.Backup
     }
 
-    fun goForwardFromBackup() {
+    // Post-country-fill fork — shared by every transition that has just
+    // finished settling the issuers' own country. Inserts the client-country
+    // question if the wizard was told to (pre-1.8 upgrade / restore) and
+    // there's actually a client to fill; otherwise routes directly into the
+    // attribution branch.
+    fun goToAttributionOrClientCountry() {
         step = when {
-            issuersNeedingCountryFix.isNotEmpty() -> Step19.FixCountry
-            needsIssuerBootstrap -> Step19.IssuerName
+            shouldAskClientCountry -> Step19.ClientCountryQuestion
             isMulti -> Step19.Cleanup
             else -> Step19.BankDetails
+        }
+    }
+
+    fun goForwardFromBackup() {
+        when {
+            issuersNeedingCountryFix.isNotEmpty() -> step = Step19.FixCountry
+            needsIssuerBootstrap -> step = Step19.IssuerName
+            else -> goToAttributionOrClientCountry()
         }
     }
 
@@ -324,11 +368,8 @@ fun OnboardingMigration19Dialog(
         if (fixCountryIdx + 1 < issuersNeedingCountryFix.size) {
             fixCountryIdx += 1
         } else {
-            step = when {
-                needsIssuerBootstrap -> Step19.IssuerName
-                isMulti -> Step19.Cleanup
-                else -> Step19.BankDetails
-            }
+            if (needsIssuerBootstrap) step = Step19.IssuerName
+            else goToAttributionOrClientCountry()
         }
     }
 
@@ -337,7 +378,20 @@ fun OnboardingMigration19Dialog(
     }
 
     fun goForwardFromIssuerCountry() {
-        step = Step19.BankDetails
+        // needsIssuerBootstrap flow: after the bootstrap issuer's country is
+        // set, we still owe the client-country question (if applicable) and
+        // then the attribution branch — same fork as the post-Backup path.
+        goToAttributionOrClientCountry()
+    }
+
+    fun goForwardFromClientCountryQuestion() {
+        step = if (clientCountrySame == true) Step19.ClientCountryPicker
+        else if (isMulti) Step19.Cleanup
+        else Step19.BankDetails
+    }
+
+    fun goForwardFromClientCountryPicker() {
+        step = if (isMulti) Step19.Cleanup else Step19.BankDetails
     }
 
     fun goForwardFromCleanup() {
@@ -437,6 +491,14 @@ fun OnboardingMigration19Dialog(
             bankByIssuer.forEach { (issuerId, ibanBic) ->
                 val issuer = remainingIssuers.firstOrNull { it.id?.toLong() == issuerId } ?: return@forEach
                 actions.saveIssuerBank(issuer, ibanBic.first, ibanBic.second)
+            }
+            // Bulk country fill for orphan clients — fires only when the
+            // user answered "yes" on ClientCountryQuestion and picked a
+            // code. "No" (mixed countries) leaves everything as-is.
+            if (clientCountrySame == true) {
+                clientCountry?.takeIf { it.isNotBlank() }?.let { code ->
+                    actions.setClientCountry(code)
+                }
             }
             actions.markSeen()
             onDismiss()
@@ -571,6 +633,19 @@ fun OnboardingMigration19Dialog(
                                 },
                             )
                         }
+                        Step19.ClientCountryQuestion -> ClientCountryQuestionStep19(
+                            onAnswer = { same ->
+                                clientCountrySame = same
+                                goForwardFromClientCountryQuestion()
+                            },
+                        )
+                        Step19.ClientCountryPicker -> ClientCountryPickerStep19(
+                            currentCountry = clientCountry,
+                            onPick = { code ->
+                                clientCountry = code
+                                goForwardFromClientCountryPicker()
+                            },
+                        )
                         Step19.Cleanup -> CleanupStep19(
                             issuers = remainingIssuers,
                             onDelete = { issuer ->
@@ -811,6 +886,12 @@ private enum class Step19 {
     FixCountry,
     IssuerName,
     IssuerCountry,
+    // Ported from the retired 1.8 wizard — only shown when
+    // showClientCountryStep = true (i.e. user has never seen the 1.8
+    // wizard's country-question). "Yes → same country for all" opens the
+    // picker; "no → mixed" skips both and moves on without touching clients.
+    ClientCountryQuestion,
+    ClientCountryPicker,
     Cleanup,
     AttachIntro,
     AttachClients,
@@ -842,6 +923,13 @@ private fun previousStep19(
     Step19.FixCountry -> Step19.FixCountry
     Step19.IssuerName -> Step19.Backup
     Step19.IssuerCountry -> Step19.IssuerName
+    // Client-country back-nav: Question rewinds to whatever landed us there
+    // (Backup, FixCountry, IssuerCountry), and Picker rewinds to Question so
+    // the user can flip their answer. Kept coarse — mid-flow back navs are
+    // rare here and the extra state to remember the exact origin isn't worth
+    // the branching.
+    Step19.ClientCountryQuestion -> Step19.Backup
+    Step19.ClientCountryPicker -> Step19.ClientCountryQuestion
     Step19.Cleanup -> Step19.Backup
     Step19.AttachIntro -> Step19.Cleanup
     Step19.AttachClients -> {
@@ -2011,4 +2099,100 @@ private fun PrimaryCta19(
         ),
         contentPadding = PaddingValues(horizontal = 32.dp, vertical = 8.dp),
     ) { Text(text) }
+}
+
+// ----------------------------------------------------------------------------
+// Ported from the retired 1.8 wizard. Two steps that only render when the
+// showClientCountryStep param is true — i.e. a user upgrading from pre-1.8
+// (fresh upgrade path or restore of a pre-1.8 backup) who has clients but
+// never got the "same country for all?" question in 1.8.
+// ----------------------------------------------------------------------------
+
+@Composable
+private fun ClientCountryQuestionStep19(onAnswer: (Boolean) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        EmojiSlot("👥")
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_client_country_intro_title))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_client_country_intro_body),
+            style = MaterialTheme.typography.textBody.copy(color = AppColors.textSecondary),
+            lineHeight = 22.sp,
+        )
+        Spacer(Modifier.height(32.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            PrimaryCta19(
+                text = stringResource(Res.string.onboarding_client_country_intro_yes),
+                onClick = { onAnswer(true) },
+            )
+            Spacer(Modifier.height(12.dp))
+            TextButton(
+                onClick = { onAnswer(false) },
+                colors = ButtonDefaults.textButtonColors(contentColor = AppColors.textLink),
+            ) { Text(stringResource(Res.string.onboarding_client_country_intro_no)) }
+        }
+    }
+}
+
+@Composable
+private fun ClientCountryPickerStep19(
+    currentCountry: String?,
+    onPick: (String) -> Unit,
+) {
+    var picked by remember(currentCountry) {
+        mutableStateOf(currentCountry ?: CountryCodes.pickDefaultForNewAddress(null))
+    }
+    var pickerOpen by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.Start,
+    ) {
+        EmojiSlot("🌍")
+        Spacer(Modifier.height(24.dp))
+        StepTitle(stringResource(Res.string.onboarding_client_country_picker_subtitle))
+        Spacer(Modifier.height(24.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color(0xFFF5F2F8))
+                .border(BorderStroke(1.dp, Color(0xFFE4DEED)), RoundedCornerShape(10.dp))
+                .clickable { pickerOpen = true }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = CountryCodes.displayNameOf(picked),
+                style = MaterialTheme.typography.textBody.copy(color = AppColors.textPrimary),
+                modifier = Modifier.weight(1f),
+            )
+            Icon(
+                imageVector = Icons.Filled.ArrowDropDown,
+                contentDescription = null,
+                tint = AppColors.accent,
+            )
+        }
+        Spacer(Modifier.height(32.dp))
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            PrimaryCta19(
+                text = stringResource(Res.string.onboarding_client_country_picker_pick),
+                enabled = picked.isNotBlank(),
+                onClick = { onPick(picked) },
+            )
+        }
+    }
+    if (pickerOpen) {
+        CountryPicker(
+            currentCode = picked,
+            onSelect = { code -> picked = code; pickerOpen = false },
+            onDismiss = { pickerOpen = false },
+        )
+    }
 }
