@@ -146,16 +146,28 @@ class ActivatedModulesRepository(
 
     private fun loadFromCache(): Set<String> {
         val raw = settings.getStringOrNull(KEY_ACTIVATED)
-        val cached = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+        var cached = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
         // One-shot seed of default-on modules on first launch after this migration.
         // Existing users had no MODULE_DELIVERY_NOTE in their set but were seeing the BL
         // category unconditionally — we inject it so the category doesn't disappear from
         // their menu when the module gate goes live.
         if (settings.getStringOrNull(KEY_DEFAULTS_SEEDED) == null) {
-            val seeded = cached + DEFAULT_ACTIVATED_MODULES
-            settings.putString(KEY_ACTIVATED, seeded.joinToString(","))
+            cached = cached + DEFAULT_ACTIVATED_MODULES
+            settings.putString(KEY_ACTIVATED, cached.joinToString(","))
             settings.putString(KEY_DEFAULTS_SEEDED, "1")
-            return seeded
+        }
+        // Per-module one-shot: additive re-seed used when a new "default-on"
+        // module ships after the initial DEFAULTS_SEEDED run. Kept separate
+        // from KEY_DEFAULTS_SEEDED so bumping this doesn't accidentally
+        // re-activate MODULE_DELIVERY_NOTE for users who had explicitly
+        // turned it off. Fires once per install; the user can toggle FONT
+        // off afterwards and their choice will stick.
+        if (settings.getStringOrNull(KEY_FONT_DEFAULT_SEEDED) == null) {
+            if (MODULE_FONT !in cached) {
+                cached = cached + MODULE_FONT
+                settings.putString(KEY_ACTIVATED, cached.joinToString(","))
+            }
+            settings.putString(KEY_FONT_DEFAULT_SEEDED, "1")
         }
         return cached
     }
@@ -259,6 +271,7 @@ class ActivatedModulesRepository(
 
         private const val KEY_ACTIVATED = "gstore_activated_modules_v1"
         private const val KEY_DEFAULTS_SEEDED = "gstore_defaults_seeded_v1"
+        private const val KEY_FONT_DEFAULT_SEEDED = "gstore_font_default_seeded_v1"
         private const val KEY_QUOTE_TRIAL_COUNT = "gstore_quote_trial_count_v1"
         private const val KEY_EVER_ACTIVATED = "gstore_ever_activated_modules_v1"
         private const val KEY_EVER_ACTIVATED_SEEDED = "gstore_ever_activated_seeded_v1"
