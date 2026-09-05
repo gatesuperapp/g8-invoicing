@@ -8,6 +8,7 @@ import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.data.util.calculatePriceWithTax
 import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.LinkedDocType
 import com.a4a.g8invoicing.ui.states.ProductPrice
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -453,6 +454,7 @@ fun Product.transformIntoEditableProduct(
 fun DocumentProduct.transformIntoEditableDocumentProduct(
     linkedDate: String? = null,
     linkedDocNumber: String? = null,
+    linkedDocType: LinkedDocType? = null,
     sortOrder: Int?
 ): DocumentProductState {
     return DocumentProductState(
@@ -473,6 +475,7 @@ fun DocumentProduct.transformIntoEditableDocumentProduct(
         productId = this.product_id?.toInt(),
         linkedDate = linkedDate,
         linkedDocNumber = linkedDocNumber,
+        linkedDocType = linkedDocType,
         sortOrder = sortOrder
     )
 }

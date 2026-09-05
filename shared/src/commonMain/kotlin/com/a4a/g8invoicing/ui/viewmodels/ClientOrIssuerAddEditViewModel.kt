@@ -285,6 +285,64 @@ class ClientOrIssuerAddEditViewModel(
                     )
             }
         }
+        // Real-time inline check on the company-id "label empty + value
+        // filled" rule: re-run whenever a company_id label OR value
+        // sub-field changes, so the red-under-row error appears as soon as
+        // the user clears a label (matches the email-on-focus-loss UX).
+        if (isCompanyIdSubField(pageElement)) {
+            refreshCompanyIdLabelErrors(type)
+        }
+    }
+
+    private fun isCompanyIdSubField(element: ScreenElement): Boolean = element in setOf(
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
+    )
+
+    /**
+     * Strip any existing company-id label errors from the state's errors list
+     * and re-add fresh ones based on the current slot values. Called on every
+     * keystroke in a company_id sub-field so inline red-under-row appears /
+     * disappears in real time. The full save-time [validateInputs] still runs
+     * the same check plus everything else.
+     */
+    private fun refreshCompanyIdLabelErrors(type: ClientOrIssuerType) {
+        val isDocument = type == ClientOrIssuerType.DOCUMENT_CLIENT ||
+            type == ClientOrIssuerType.DOCUMENT_ISSUER
+        val idElements = if (isDocument) setOf(
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1,
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2,
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3,
+        ) else setOf(
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1,
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2,
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3,
+        )
+        val state = when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+        }
+        val refreshed: MutableList<Pair<ScreenElement, String?>> =
+            state.errors.filterNot { it.first in idElements }.toMutableList()
+        validateCompanyIdLabels(state, refreshed, isDocument)
+        when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value = state.copy(errors = refreshed)
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value = state.copy(errors = refreshed)
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value = state.copy(errors = refreshed)
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value = state.copy(errors = refreshed)
+        }
     }
 
     fun removeAddressFromClientOrIssuerState(type: ClientOrIssuerType) {
@@ -1086,18 +1144,32 @@ class ClientOrIssuerAddEditViewModel(
     }
 
     fun validateInputs(type: ClientOrIssuerType): Boolean {
-        // Check if there's an invalid pending email
+        val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
+
+        // Un-committed pending-email input (typed but not yet added via
+        // enter/focus-loss) fails validation with `_pendingEmailIsValid=false`.
+        // The FormInputCreatorEmailList already shows its own inline red
+        // message via a local state, but we ALSO mirror the error into the
+        // state.errors list so the pre-save recap modal picks it up alongside
+        // any other issue. Uses EMAIL_1 as a stand-in ScreenElement — the
+        // modal only reads the message text, and EMAIL_1 always exists.
         if (!_pendingEmailIsValid) {
-            return false
+            val emailElement = when (type) {
+                ClientOrIssuerType.CLIENT, ClientOrIssuerType.ISSUER ->
+                    ScreenElement.CLIENT_OR_ISSUER_EMAIL_1
+                ClientOrIssuerType.DOCUMENT_CLIENT, ClientOrIssuerType.DOCUMENT_ISSUER ->
+                    ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1
+            }
+            listOfErrors.add(Pair(emailElement, FormInputsValidator.VALIDATION_EMAIL_INVALID))
         }
 
-        val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
         when (type) {
             ClientOrIssuerType.CLIENT -> {
                 FormInputsValidator.validateName(_clientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_clientUiState.value.emails, listOfErrors, isDocument = false)
+                validateCompanyIdLabels(_clientUiState.value, listOfErrors, isDocument = false)
                 val trimmedEmails = trimEmails(_clientUiState.value.emails)
                 _clientUiState.value = _clientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
@@ -1107,6 +1179,7 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_issuerUiState.value.emails, listOfErrors, isDocument = false)
+                validateCompanyIdLabels(_issuerUiState.value, listOfErrors, isDocument = false)
                 val trimmedEmails = trimEmails(_issuerUiState.value.emails)
                 _issuerUiState.value = _issuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
@@ -1116,6 +1189,7 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_documentClientUiState.value.emails, listOfErrors, isDocument = true)
+                validateCompanyIdLabels(_documentClientUiState.value, listOfErrors, isDocument = true)
                 val trimmedEmails = trimEmails(_documentClientUiState.value.emails)
                 _documentClientUiState.value = _documentClientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
@@ -1125,11 +1199,55 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_documentIssuerUiState.value.emails, listOfErrors, isDocument = true)
+                validateCompanyIdLabels(_documentIssuerUiState.value, listOfErrors, isDocument = true)
                 val trimmedEmails = trimEmails(_documentIssuerUiState.value.emails)
                 _documentIssuerUiState.value = _documentIssuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
             }
         }
-        return listOfErrors.isEmpty()
+        // Fail-save if either the committed-fields check produced errors OR
+        // the pending-email flag is invalid (its error was already merged into
+        // listOfErrors above, but we still need to block save).
+        return _pendingEmailIsValid && listOfErrors.isEmpty()
+    }
+
+    /**
+     * Fire an inline "libellé manquant" error under each company-id LABEL
+     * slot where the matching VALUE slot is filled but the label itself is
+     * empty. Both empty = unused slot, silent. See
+     * [FormInputsValidator.validateCompanyIdLabelForFilledValue].
+     */
+    private fun validateCompanyIdLabels(
+        state: ClientOrIssuerState,
+        listOfErrors: MutableList<Pair<ScreenElement, String?>>,
+        isDocument: Boolean,
+    ) {
+        // ScreenElement is the FormInput aggregate (…_IDENTIFICATION1, no
+        // _LABEL suffix) — that's what FormUI matches on for its per-row
+        // errorMessage lookup. The error text sits under the whole ident
+        // row rather than pinpointing the label sub-field, which reads
+        // clearly enough since the row visually groups label + number.
+        val slots = listOf(
+            Triple(
+                state.companyId1Label?.text, state.companyId1Number?.text,
+                if (isDocument) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1
+                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1,
+            ),
+            Triple(
+                state.companyId2Label?.text, state.companyId2Number?.text,
+                if (isDocument) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
+                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2,
+            ),
+            Triple(
+                state.companyId3Label?.text, state.companyId3Number?.text,
+                if (isDocument) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3
+                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3,
+            ),
+        )
+        slots.forEach { (label, value, element) ->
+            FormInputsValidator.validateCompanyIdLabelForFilledValue(label, value)?.let { err ->
+                listOfErrors.add(Pair(element, err))
+            }
+        }
     }
 
     private fun validateEmails(

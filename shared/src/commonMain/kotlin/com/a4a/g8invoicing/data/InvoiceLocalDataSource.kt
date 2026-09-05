@@ -28,6 +28,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.EmailState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.LinkedDocType
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -137,26 +138,51 @@ class InvoiceLocalDataSource(
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
+            // Language guard for every reused text field. Chip IDs and the
+            // "Autre" boolean below aren't localised text, so they carry over
+            // regardless — only the payment_means_label prose (custom prefix
+            // in front of the chip list) and the payment_bank_label prose
+            // (bank-details label) need to match the app locale to avoid
+            // French wording landing on a doc the user is now generating in
+            // English. Payment terms rely on the same guard.
+            val currentAppLocale = AppLocaleHolder.languageCode
+            val reuseSameLanguage = reuse?.format_locale == currentAppLocale
+            val reusableWithLang = reuse.takeIf { reuseSameLanguage }
+
             val reusedSelections = reuse?.payment_means_selections
                 ?.split(",")
                 ?.map { it.trim() }
                 ?.filter { it.isNotEmpty() }
                 ?.toSet()
                 ?.takeIf { it.isNotEmpty() }
-            val reusedSegments = reuse?.payment_means_label?.let {
+            val reusedSegments = reusableWithLang?.payment_means_label?.let {
                 com.a4a.g8invoicing.data.models.parsePaymentLabel(it)
             }?.takeIf { it.isNotEmpty() }
-            val reusedBankSegments = reuse?.payment_bank_label?.let {
-                com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
+            // Bank label: reuse under the same language guard as the rest, then
+            // adapt tokens to the current bank's country class. Freezes on the
+            // new doc's DocumentClientOrIssuer will pick the master's first
+            // bank (see saveDocumentClientOrIssuerInDbAndLink) — so the
+            // "current country" for the adapter is that first bank's country.
+            val currentBankCountry = existingIssuer?.banks?.firstOrNull()?.countryCode
+            val reusedBankSegments = reusableWithLang?.payment_bank_label?.let {
+                val parsed = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
+                com.a4a.g8invoicing.data.models.adaptPaymentBankSegmentsForCountry(
+                    segments = parsed,
+                    previousCountry = reusableWithLang.payment_bank_country,
+                    currentCountry = currentBankCountry,
+                )
             }?.takeIf { it.isNotEmpty() }
             // 3-way payment terms — each field is seeded independently from
             // the last invoice's corresponding column (so a user who only
             // customised "pénalités de retard" keeps the other two on their
-            // localised defaults instead of getting blanks).
-            val reusedRecoveryFees = reuse?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
-            val reusedLateFees = reuse?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
-            val reusedDiscount = reuse?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+            // localised defaults instead of getting blanks). Language guard
+            // above; a user who switched from FR to EN gets fresh EN defaults
+            // instead of their old French wording.
+            val reusedRecoveryFees = reusableWithLang?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+            val reusedLateFees = reusableWithLang?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+            val reusedDiscount = reusableWithLang?.payment_terms_discount?.takeIf { it.isNotEmpty() }
             val lastTerms = getLastInvoicePaymentTerms()
+                ?.takeIf { it.format_locale == currentAppLocale }
 
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
@@ -205,25 +231,15 @@ class InvoiceLocalDataSource(
                 // yet — keeps original_company_id NOT NULL for numbering.
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
-                // BT-120 seed. Preference order:
-                //   1. the wording the user set on the previous invoice for
-                //      this master issuer (per-issuer reuse — they'll rarely
-                //      re-word between two consecutive invoices, and losing
-                //      their custom wording on every "New invoice" is jarring),
-                //   2. the country-based legal default (only when we know a
-                //      correct citation for the issuer's country).
-                // Foreign issuers with no reuse and no default get null → the
-                // export guard blocks Factur-X until the user fills the field
-                // via the text menu.
-                vatExemptionText = existingIssuer
-                    ?.takeIf { it.vatExempt }
-                    ?.let {
-                        reuse?.vat_exemption_text?.trim()?.takeIf { s -> s.isNotEmpty() }
-                            ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                                it.addresses?.firstOrNull()?.countryCode
-                            )
-                    }
-                    ?.let { TextFieldValue(it) },
+                // BT-120 seed via the shared helper — reuses the previous
+                // invoice's wording when the master's country hasn't changed,
+                // otherwise resolves the country-based citation (national /
+                // EU art. 284 / generic non-registered).
+                vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                    issuer = existingIssuer,
+                    previousVatText = reuse?.vat_exemption_text,
+                    previousIssuerCountry = reuse?.issuer_country_code,
+                ),
                 retentions = reusedRetentions,
                 // Reuse the last invoice's picked typeface so users don't
                 // have to re-pick on every new doc. Null (no invoices yet)
@@ -347,22 +363,31 @@ class InvoiceLocalDataSource(
 
     /**
      * Seed the 3 payment-terms fields for a brand-new invoice: last-invoice
-     * value if non-empty, else the localised default. Called by createNew()
-     * and by the convertX toInvoice flows.
+     * value if non-empty AND written in the same app language, else the
+     * localised default. Called by convertDeliveryNotesToInvoice /
+     * convertQuotesToInvoice — createNew has its own per-issuer variant.
+     *
+     * Language guard: previously-frozen terms are only carried over when the
+     * previous doc's format_locale matches the current app language. If the
+     * user has since switched language, we let getString() serve the
+     * defaults in the new language instead of showing a stale FR wording on
+     * an EN invoice.
      */
     private suspend fun seedPaymentTermsForNewInvoice(): Triple<TextFieldValue, TextFieldValue, TextFieldValue> {
         val last = getLastInvoicePaymentTerms()
+        val sameLanguage = last?.format_locale == AppLocaleHolder.languageCode
+        val reusable = last.takeIf { sameLanguage }
         return Triple(
             TextFieldValue(
-                last?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+                reusable?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
                     ?: getString(Res.string.payment_terms_recovery_fees_default)
             ),
             TextFieldValue(
-                last?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+                reusable?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
                     ?: getString(Res.string.payment_terms_late_fees_default)
             ),
             TextFieldValue(
-                last?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+                reusable?.payment_terms_discount?.takeIf { it.isNotEmpty() }
                     ?: getString(Res.string.payment_terms_discount_default)
             ),
         )
@@ -482,21 +507,25 @@ class InvoiceLocalDataSource(
                         .executeAsOneOrNull() // DB call
                     val linkedDate: String?
                     val linkedDocNumber: String?
+                    val linkedDocType: LinkedDocType?
                     if (dnInfo != null) {
                         linkedDate = dnInfo.delivery_date
                         linkedDocNumber = dnInfo.delivery_note_number
+                        linkedDocType = LinkedDocType.DELIVERY_NOTE
                     } else {
                         val qInfo = linkInvoiceDocumentProductToQuoteQueries
                             .getInfoLinkedToDocumentProduct(it.document_product_id)
                             .executeAsOneOrNull() // DB call
                         linkedDate = qInfo?.delivery_date
                         linkedDocNumber = qInfo?.quote_number
+                        linkedDocType = qInfo?.let { LinkedDocType.QUOTE }
                     }
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()// DB call
                         .transformIntoEditableDocumentProduct(
                             linkedDate,
                             linkedDocNumber,
+                            linkedDocType,
                             sortOrder = it.sort_order?.toInt() // Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
@@ -587,10 +616,11 @@ class InvoiceLocalDataSource(
         val issuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
         // Reuse the previous invoice's BT-120 wording for this master issuer
         // (see createNew for the full rationale on why per-issuer reuse beats
-        // re-seeding the country default on every new doc).
-        val reusedVatExemptionText = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+        // re-seeding the country default on every new doc). Full row so the
+        // helper can check issuer_country_code before carrying the text over.
+        val reuse = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
             invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
-                .executeAsOneOrNull()?.vat_exemption_text
+                .executeAsOneOrNull()
         }
         // Same seed rule as createNew (reuse → country defaults).
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
@@ -645,15 +675,11 @@ class InvoiceLocalDataSource(
                     paymentTermsLateFees = seededTerms.second,
                     paymentTermsDiscount = seededTerms.third,
                     originalCompanyId = newCompanyId,
-                    vatExemptionText = issuer
-                        ?.takeIf { it.vatExempt }
-                        ?.let {
-                            reusedVatExemptionText?.trim()?.takeIf { s -> s.isNotEmpty() }
-                                ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                                    it.addresses?.firstOrNull()?.countryCode
-                                )
-                        }
-                        ?.let { TextFieldValue(it) },
+                    vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                        issuer = issuer,
+                        previousVatText = reuse?.vat_exemption_text,
+                        previousIssuerCountry = reuse?.issuer_country_code,
+                    ),
                     retentions = reusedRetentions,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
@@ -702,9 +728,9 @@ class InvoiceLocalDataSource(
         val quoteRetentions = quotes.firstOrNull { it.retentions.isNotEmpty() }
             ?.retentions
             ?.map { it.copy(id = null) }
-        val reusedVatExemptionText = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+        val reuse = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
             invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
-                .executeAsOneOrNull()?.vat_exemption_text
+                .executeAsOneOrNull()
         }
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
             if (issuer?.taxWithholdingEnabled == true) {
@@ -758,15 +784,11 @@ class InvoiceLocalDataSource(
                     paymentTermsLateFees = seededTerms.second,
                     paymentTermsDiscount = seededTerms.third,
                     originalCompanyId = newCompanyId,
-                    vatExemptionText = issuer
-                        ?.takeIf { it.vatExempt }
-                        ?.let {
-                            reusedVatExemptionText?.trim()?.takeIf { s -> s.isNotEmpty() }
-                                ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                                    it.addresses?.firstOrNull()?.countryCode
-                                )
-                        }
-                        ?.let { TextFieldValue(it) },
+                    vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                        issuer = issuer,
+                        previousVatText = reuse?.vat_exemption_text,
+                        previousIssuerCountry = reuse?.issuer_country_code,
+                    ),
                     retentions = reusedRetentions,
                 )
                 saveInfoInInvoiceTable(newInvoiceState)

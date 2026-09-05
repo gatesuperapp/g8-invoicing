@@ -23,7 +23,24 @@ object FormInputsValidator {
 
     // TODO: Move to Compose Resources when refactoring to error types
     private const val VALIDATION_NAME_REQUIRED = "Le nom est obligatoire"
-    private const val VALIDATION_EMAIL_INVALID = "L'e-mail n'est pas valide"
+    const val VALIDATION_EMAIL_INVALID = "L'e-mail n'est pas valide"
+    private const val VALIDATION_COMPANY_ID_LABEL_MISSING =
+        "Le libellé de ce n° d'identification doit être rempli."
+
+    /**
+     * Consolidated version of [VALIDATION_COMPANY_ID_LABEL_MISSING] surfaced in
+     * the pre-save error modal (see [FormValidationErrorDialog]): several slots
+     * with a missing label collapse to a single line. Kept as a distinct
+     * constant so the modal-side substitution is a table lookup with no fuzzy
+     * matching on wording.
+     */
+    const val VALIDATION_COMPANY_ID_LABEL_MISSING_MODAL =
+        "Un des libellés de numéro d'identification n'est pas rempli."
+
+    /** Modal-side rewrites of inline messages that need aggregation. */
+    val MODAL_MESSAGE_OVERRIDES: Map<String, String> = mapOf(
+        VALIDATION_COMPANY_ID_LABEL_MISSING to VALIDATION_COMPANY_ID_LABEL_MISSING_MODAL,
+    )
 
     fun validateName(input: String?): String? {
         return if(input.isNullOrEmpty())
@@ -36,6 +53,21 @@ object FormInputsValidator {
         return if(!trimmed.isNullOrEmpty() && !isEmailFormatValid(trimmed))
             VALIDATION_EMAIL_INVALID
         else null
+    }
+
+    /**
+     * Fires when the user typed something in a company-id VALUE slot but
+     * actively cleared the matching LABEL slot. Both slots empty is fine
+     * (unused slot), and a null label means the user never touched the field
+     * — the default resource text ("N° SIRET" etc.) is visible in place of a
+     * placeholder, so we treat it as filled and stay silent.
+     */
+    fun validateCompanyIdLabelForFilledValue(label: String?, value: String?): String? {
+        val hasValue = !value.isNullOrBlank()
+        // null → never touched → default resource label is displayed → OK
+        // ""   → actively cleared → truly empty → not OK
+        val labelExplicitlyEmpty = label != null && label.isBlank()
+        return if (hasValue && labelExplicitlyEmpty) VALIDATION_COMPANY_ID_LABEL_MISSING else null
     }
 
     /**

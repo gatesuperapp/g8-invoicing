@@ -218,25 +218,32 @@ fun DocumentBottomSheetForm(
 
                     // Check if there's a pending email to validate
                     val pendingEmail = pendingEmailState.value.trim()
+                    val clientOrIssuerType = when {
+                        typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> ClientOrIssuerType.DOCUMENT_CLIENT
+                        typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> ClientOrIssuerType.DOCUMENT_ISSUER
+                        else -> null
+                    }
                     if (pendingEmail.isNotEmpty()) {
-                        // Validate the pending email
                         val validationError = FormInputsValidator.validateEmail(pendingEmail)
                         if (validationError != null) {
-                            // Invalid email - show error and don't proceed
+                            // Invalid pending email: show inline red locally
+                            // AND flip _pendingEmailIsValid in the ViewModel so
+                            // the parent NavGraph's validateInputs() picks it
+                            // up on the next call (right after onClickDone),
+                            // which surfaces the pre-save recap modal. We fall
+                            // through instead of returning early so the modal
+                            // fires — validateInputs will refuse the save.
                             emailValidationError = validationError
-                            return@DocumentBottomSheetHeader
+                            clientOrIssuerType?.let { onPendingEmailValidationResult(it, false) }
+                        } else {
+                            // Valid email - add it first
+                            clientOrIssuerType?.let { onAddEmail(it, pendingEmail) }
+                            // Clear the pending email state
+                            pendingEmailState.value = ""
                         }
-                        // Valid email - add it first
-                        val clientOrIssuerType = when {
-                            typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> ClientOrIssuerType.DOCUMENT_CLIENT
-                            typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> ClientOrIssuerType.DOCUMENT_ISSUER
-                            else -> null
-                        }
-                        clientOrIssuerType?.let { onAddEmail(it, pendingEmail) }
-                        // Clear the pending email state
-                        pendingEmailState.value = ""
                     }
-                    // Proceed with saving
+                    // Proceed with saving (parent NavGraph re-runs validation
+                    // and either saves or shows the FormValidationDialogHost).
                     onClickDone(syncToMasterChecked)
                 }, // Main "Done" action for the form
                 onClickDoneFullScreen = { // "Done" action for the full-screen text editor

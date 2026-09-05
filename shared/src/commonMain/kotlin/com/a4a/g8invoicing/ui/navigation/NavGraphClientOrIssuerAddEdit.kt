@@ -12,6 +12,8 @@ import androidx.navigation.navArgument
 import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.screens.ClientAddEdit
+import com.a4a.g8invoicing.ui.shared.FormValidationDialogHost
+import com.a4a.g8invoicing.ui.shared.rememberFormValidationDialogState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -51,6 +53,11 @@ fun NavGraphBuilder.clientAddEdit(
         val focusManager = LocalFocusManager.current
         val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
+
+        // Pre-save error recap modal — populated from ClientOrIssuerState.errors
+        // right after a failed validateInputs(). Displayed on top of the form;
+        // the inline red-under-field errors keep firing in parallel.
+        val errorDialog = rememberFormValidationDialogState()
 
         // Skip the flash between "VM's initial empty ClientOrIssuerState" and
         // the row fetched from DB by fetchFromLocalDb. Without this the form
@@ -96,6 +103,12 @@ fun NavGraphBuilder.clientAddEdit(
                             goToPreviousScreen()
                         }
                     } else {
+                        // Read fresh state (post-validateInputs mutation) — the
+                        // `by`-delegated currentState is a compose snapshot and
+                        // won't have updated inside this coroutine yet.
+                        val freshState = if (isIssuer) viewModel.issuerUiState.value
+                        else viewModel.clientUiState.value
+                        errorDialog.showFrom(freshState.errors)
                         scrollState.animateScrollTo(0)
                     }
                 }
@@ -117,5 +130,7 @@ fun NavGraphBuilder.clientAddEdit(
                 viewModel.setPendingEmailValidationResult(isValid)
             }
         )
+
+        FormValidationDialogHost(errorDialog)
     }
 }

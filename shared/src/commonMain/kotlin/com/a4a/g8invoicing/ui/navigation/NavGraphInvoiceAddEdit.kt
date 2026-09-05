@@ -31,8 +31,10 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.FormValidationDialogHost
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.rememberFormValidationDialogState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
@@ -61,6 +63,8 @@ fun NavGraphBuilder.invoiceAddEdit(
         )
     ) { backStackEntry ->
         val scope = rememberCoroutineScope()
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val itemId = backStackEntry.arguments?.getString("itemId")
 
         val invoiceViewModel: InvoiceAddEditViewModel = koinViewModel(
@@ -93,6 +97,11 @@ fun NavGraphBuilder.invoiceAddEdit(
         }
 
         var showDocumentForm by remember { mutableStateOf(false) }
+
+        // Pre-save error recap modal for the client/issuer sub-form hosted
+        // in the bottom sheet. Populated with the fresh state.errors when
+        // validateInputs returns false; dismissed via its own confirm button.
+        val errorDialog = rememberFormValidationDialogState()
 
         // When the bottom-sheet form is open, system back closes it instead
         // of popping back to the doc list.
@@ -387,6 +396,15 @@ fun NavGraphBuilder.invoiceAddEdit(
             },
             onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
+                    // Mirror the standalone-form flow: clear focus + hide the
+                    // keyboard before validating so the email field's
+                    // onFocusChanged fires — that's how tryAddEmail commits a
+                    // pending value and sets _pendingEmailIsValid. Without
+                    // this, a user who types an invalid email and clicks
+                    // Valider without leaving the field would sneak past
+                    // validation entirely.
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
@@ -399,6 +417,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 invoiceViewModel.saveDocumentClientOrIssuerInUiState(documentClientUiState)
                                 invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
@@ -409,6 +429,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 )
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -422,6 +444,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 invoiceViewModel.saveDocumentClientOrIssuerInUiState(documentIssuerUiState)
                                 invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
@@ -444,6 +468,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 }
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
@@ -521,6 +547,8 @@ fun NavGraphBuilder.invoiceAddEdit(
                 invoiceViewModel.setDocumentFont(font.id)
             },
         )
+
+        FormValidationDialogHost(errorDialog)
     }
 }
 

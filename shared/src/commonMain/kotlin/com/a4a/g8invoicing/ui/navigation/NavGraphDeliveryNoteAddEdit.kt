@@ -31,8 +31,10 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.FormValidationDialogHost
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.rememberFormValidationDialogState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
@@ -61,6 +63,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         )
     ) { backStackEntry ->
         val scope = rememberCoroutineScope()
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val itemId = backStackEntry.arguments?.getString("itemId")
 
         val deliveryNoteViewModel: DeliveryNoteAddEditViewModel = koinViewModel(
@@ -91,6 +95,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         }
 
         var showDocumentForm by remember { mutableStateOf(false) }
+        val errorDialog = rememberFormValidationDialogState()
 
         // When the bottom-sheet form is open, system back closes it instead
         // of popping back to the doc list.
@@ -352,6 +357,12 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
+                    // Focus clear + keyboard hide before validate — commits
+                    // any pending email so validateInputs sees the invalid
+                    // value. See standalone NavGraphClientOrIssuerAddEdit
+                    // for the same pattern.
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
@@ -364,6 +375,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(documentClientUiState)
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
@@ -373,6 +386,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 deliveryNoteViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -386,6 +401,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(documentIssuerUiState)
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
@@ -395,6 +412,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 deliveryNoteViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
@@ -462,5 +481,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                 deliveryNoteViewModel.setDocumentFont(font.id)
             },
         )
+
+        FormValidationDialogHost(errorDialog)
     }
 }

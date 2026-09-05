@@ -12,6 +12,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.states.LinkedDocType
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import kotlinx.datetime.LocalDate
@@ -129,14 +130,14 @@ object CiiXmlBuilder {
     private fun StringBuilder.appendExchangedDocument(invoice: InvoiceState) {
         val typeCode = invoice.typeCode()
         append("  <rsm:ExchangedDocument>\n")
-        append("    <ram:ID>${esc(invoice.documentNumber.text)}</ram:ID>\n")
+        append("    <ram:ID>${escT(invoice.documentNumber.text)}</ram:ID>\n")
         append("    <ram:TypeCode>$typeCode</ram:TypeCode>\n")
         append("    <ram:IssueDateTime>\n")
         append("      <udt:DateTimeString format=\"102\">${formatDate102(invoice.documentDate)}</udt:DateTimeString>\n")
         append("    </ram:IssueDateTime>\n")
         invoice.freeField?.text?.takeIf { it.isNotBlank() }?.let { note ->
             append("    <ram:IncludedNote>\n")
-            append("      <ram:Content>${esc(note)}</ram:Content>\n")
+            append("      <ram:Content>${escT(note)}</ram:Content>\n")
             append("    </ram:IncludedNote>\n")
         }
         // FR national Schematron (BR-FR-05) requires three legal-mention
@@ -154,7 +155,7 @@ object CiiXmlBuilder {
         )
         subjectMap.forEach { (subjectCode, content) ->
             append("    <ram:IncludedNote>\n")
-            append("      <ram:Content>${esc(content)}</ram:Content>\n")
+            append("      <ram:Content>${escT(content)}</ram:Content>\n")
             append("      <ram:SubjectCode>$subjectCode</ram:SubjectCode>\n")
             append("    </ram:IncludedNote>\n")
         }
@@ -205,30 +206,53 @@ object CiiXmlBuilder {
         append("        <ram:LineID>$lineIndex</ram:LineID>\n")
         append("      </ram:AssociatedDocumentLineDocument>\n")
         append("      <ram:SpecifiedTradeProduct>\n")
-        append("        <ram:Name>${esc(product.name.text)}</ram:Name>\n")
+        append("        <ram:Name>${escT(product.name.text)}</ram:Name>\n")
         product.description?.text?.takeIf { it.isNotBlank() }?.let {
-            append("        <ram:Description>${esc(it)}</ram:Description>\n")
+            append("        <ram:Description>${escT(it)}</ram:Description>\n")
         }
         append("      </ram:SpecifiedTradeProduct>\n")
+
+        // Line-level source-doc reference. Placement depends on the source:
+        //   * DELIVERY_NOTE → SpecifiedLineTradeDelivery ­/ DeliveryNoteReferencedDocument
+        //     (BT-X-116 per-line pattern used for multi-BL invoices, since the
+        //     header-level cardinality caps at 0..1).
+        //   * QUOTE → SpecifiedLineTradeAgreement / AdditionalReferencedDocument
+        //     with TypeCode 1001 (UN/CEFACT 1153 = "Reference number of quotation").
+        //     Extended profile only exposes QuotationReferencedDocument at header
+        //     level, so line-level quotes ride on the generic AdditionalReferenced-
+        //     Document envelope.
+        // A legacy row with linkedDocNumber but linkedDocType == null (fetched
+        // before the type field existed) is treated as a delivery-note ref to
+        // preserve the pre-refactor behaviour.
+        val linkedRef = product.linkedDocNumber?.trim()?.takeIf { it.isNotBlank() }
+        val linkedDate = product.linkedDate?.trim()?.takeIf { it.isNotBlank() }
+        val isQuoteLink = product.linkedDocType == LinkedDocType.QUOTE
+        val isDeliveryLink = linkedRef != null && !isQuoteLink
+
         append("      <ram:SpecifiedLineTradeAgreement>\n")
+        if (linkedRef != null && isQuoteLink) {
+            append("        <ram:AdditionalReferencedDocument>\n")
+            append("          <ram:IssuerAssignedID>${escT(linkedRef)}</ram:IssuerAssignedID>\n")
+            append("          <ram:TypeCode>1001</ram:TypeCode>\n")
+            if (linkedDate != null) {
+                append("          <ram:FormattedIssueDateTime>\n")
+                append("            <qdt:DateTimeString format=\"102\">${formatDate102(linkedDate)}</qdt:DateTimeString>\n")
+                append("          </ram:FormattedIssueDateTime>\n")
+            }
+            append("        </ram:AdditionalReferencedDocument>\n")
+        }
         append("        <ram:NetPriceProductTradePrice>\n")
         append("          <ram:ChargeAmount>${formatAmount(netUnitPrice)}</ram:ChargeAmount>\n")
         append("        </ram:NetPriceProductTradePrice>\n")
         append("      </ram:SpecifiedLineTradeAgreement>\n")
         append("      <ram:SpecifiedLineTradeDelivery>\n")
         append("        <ram:BilledQuantity unitCode=\"$unitCode\">${formatQty(qty)}</ram:BilledQuantity>\n")
-        // BT-X-116 per-line delivery-note reference (Extended profile).
-        // Header-level cardinality is 0..1 in the CII schema, so multi-BL
-        // has to be attributed line-by-line. Each product ligne carries its
-        // source BL number via linkedDocNumber (populated when the invoice
-        // was built from delivery notes) — we surface it here so a reader
-        // can trace each line back to the exact bon de livraison.
-        product.linkedDocNumber?.trim()?.takeIf { it.isNotBlank() }?.let { ref ->
+        if (linkedRef != null && isDeliveryLink) {
             append("        <ram:DeliveryNoteReferencedDocument>\n")
-            append("          <ram:IssuerAssignedID>${esc(ref)}</ram:IssuerAssignedID>\n")
-            product.linkedDate?.trim()?.takeIf { it.isNotBlank() }?.let { date ->
+            append("          <ram:IssuerAssignedID>${escT(linkedRef)}</ram:IssuerAssignedID>\n")
+            if (linkedDate != null) {
                 append("          <ram:FormattedIssueDateTime>\n")
-                append("            <qdt:DateTimeString format=\"102\">${formatDate102(date)}</qdt:DateTimeString>\n")
+                append("            <qdt:DateTimeString format=\"102\">${formatDate102(linkedDate)}</qdt:DateTimeString>\n")
                 append("          </ram:FormattedIssueDateTime>\n")
             }
             append("        </ram:DeliveryNoteReferencedDocument>\n")
@@ -264,7 +288,7 @@ object CiiXmlBuilder {
         if (buyer != null) appendParty("BuyerTradeParty", buyer, indent = 6)
         buyerOrderRef?.takeIf { it.isNotBlank() }?.let {
             append("      <ram:BuyerOrderReferencedDocument>\n")
-            append("        <ram:IssuerAssignedID>${esc(it)}</ram:IssuerAssignedID>\n")
+            append("        <ram:IssuerAssignedID>${escT(it)}</ram:IssuerAssignedID>\n")
             append("      </ram:BuyerOrderReferencedDocument>\n")
         }
         append("    </ram:ApplicableHeaderTradeAgreement>\n")
@@ -281,119 +305,117 @@ object CiiXmlBuilder {
             party.firstName?.text?.trim()?.ifEmpty { null },
         ).joinToString(" ")
         val partyCountry = party.primaryCountry()
-        // BT-30 (SpecifiedLegalOrganization/ID) is emitted under schemeID
-        // "0002" (INSEE SIREN). BR-FR-10 + BR-FR-32 require exactly 9
-        // digits under that scheme, so if the user entered a SIRET (14
-        // digits — SIREN + 5-digit NIC) we extract the leading SIREN
-        // portion. User's data stays intact in companyId1Number for
-        // display; only the XML emit is normalised. Skipped entirely for
-        // a party with no companyId1Number (typically a B2C particulier).
-        val siren = extractSiren(party.companyId1Number?.text)
         val email = party.emails
             ?.firstOrNull()
             ?.email?.text?.trim()
             ?.takeIf { it.isNotBlank() }
 
+        // Classify all 3 free-label company_id slots via label-first +
+        // regex. See CompanyIdMapping.kt for the algorithm. We keep only
+        // Match results here; LabelMismatch → skipped from XML (the pre-
+        // flight validator surfaces the warning). We take the first match
+        // per CII target so the schema-order emission below is trivial.
+        val slots = listOf(
+            party.companyId1Label?.text to party.companyId1Number?.text,
+            party.companyId2Label?.text to party.companyId2Number?.text,
+            party.companyId3Label?.text to party.companyId3Number?.text,
+        )
+        val matches = slots
+            .map { (label, value) -> classifyCompanyId(label, value, partyCountry) }
+            .filterIsInstance<CompanyIdClassification.Match>()
+        val legalOrgMatch = matches.firstOrNull { it.kind.target == CiiTarget.LegalOrg }
+        val vatMatch = matches.firstOrNull { it.kind.target == CiiTarget.VatRegistration }
+        val fiscalMatch = matches.firstOrNull { it.kind.target == CiiTarget.FiscalRegistration }
+
+        // BR-CO-26 fallback: at least one of BT-29 / BT-30 / BT-31 must be
+        // present so the receiver can identify the party. If classification
+        // didn't produce BT-30/31/32, emit BT-29 (SellerTradeParty/ID with
+        // no schemeID) using whatever the user typed in the first non-empty
+        // slot — better a free-text identifier than none at all.
+        val bt29Fallback: String? = if (legalOrgMatch == null && vatMatch == null && fiscalMatch == null) {
+            slots.firstNotNullOfOrNull { (_, v) -> v?.trim()?.takeIf { it.isNotBlank() } }
+        } else null
+
         append("$pad<ram:$tag>\n")
-        append("$pad  <ram:Name>${esc(fullName)}</ram:Name>\n")
-        if (siren != null) {
+        // BT-29 (bare <ram:ID>) MUST come before <ram:Name> per the CII
+        // SellerTradeParty content model. Only emitted as a BR-CO-26 fallback.
+        if (bt29Fallback != null) {
+            append("$pad  <ram:ID>${escT(bt29Fallback)}</ram:ID>\n")
+        }
+        append("$pad  <ram:Name>${escT(fullName)}</ram:Name>\n")
+        if (legalOrgMatch != null) {
             append("$pad  <ram:SpecifiedLegalOrganization>\n")
-            append("$pad    <ram:ID schemeID=\"0002\">${esc(siren)}</ram:ID>\n")
+            append("$pad    <ram:ID schemeID=\"${legalOrgMatch.kind.schemeId}\">${escT(legalOrgMatch.normalizedValue)}</ram:ID>\n")
             append("$pad  </ram:SpecifiedLegalOrganization>\n")
         }
         party.addresses?.firstOrNull()?.let { appendAddress(it, indent + 2) }
         // BT-34 (seller) / BT-49 (buyer) electronic address for e-invoice
         // routing. FR national profile (BR-FR-13 / BR-FR-12) makes it
         // mandatory. Peppol EAS mapping we support:
-        //   * schemeID "0002" (INSEE SIREN) — business parties. Chorus
-        //     Pro / PPF route on this in France.
-        //   * schemeID "EM" (email) — the natural electronic address for
-        //     a particulier client, or a business without a SIREN. Not
-        //     PPF-routable but perfectly valid CII / EN 16931 for direct
-        //     delivery through any other channel.
-        // When neither is available the pre-flight validator surfaces
-        // "add an email" (INDIVIDUAL) or "SIREN missing" (PROFESSIONAL),
-        // so the block is genuinely skipped only when the user has
-        // explicitly acknowledged a stripped-down invoice.
+        //   * schemeID "0002" (INSEE SIREN) — routable via Chorus Pro / PPF
+        //     for a French business with a SIRET, SIREN or RCS mention.
+        //   * schemeID "EM" (email) — natural electronic address for a
+        //     particulier client, or a business without a French SIREN.
+        // A non-FR legal reg (KVK, BCE, …) doesn't route through the FR
+        // PPF, so we fall back to email even when SpecifiedLegalOrganization
+        // was emitted with a foreign schemeID. Both SIRET (14) and SIREN (9)
+        // classify here — we always emit the SIREN portion (first 9 digits)
+        // on URIID because that's what the FR annuaire routes on.
+        val urnSiren = legalOrgMatch?.let { m ->
+            when (m.kind) {
+                CompanyIdKind.SIRET -> m.normalizedValue.take(9)
+                CompanyIdKind.SIREN -> m.normalizedValue
+                else -> null
+            }
+        }
         when {
-            siren != null -> {
+            urnSiren != null -> {
                 append("$pad  <ram:URIUniversalCommunication>\n")
-                append("$pad    <ram:URIID schemeID=\"0002\">${esc(siren)}</ram:URIID>\n")
+                append("$pad    <ram:URIID schemeID=\"0002\">${escT(urnSiren)}</ram:URIID>\n")
                 append("$pad  </ram:URIUniversalCommunication>\n")
             }
             email != null -> {
                 append("$pad  <ram:URIUniversalCommunication>\n")
-                append("$pad    <ram:URIID schemeID=\"EM\">${esc(email)}</ram:URIID>\n")
+                append("$pad    <ram:URIID schemeID=\"EM\">${escT(email)}</ram:URIID>\n")
                 append("$pad  </ram:URIUniversalCommunication>\n")
             }
         }
-        // VAT ID goes under SpecifiedTaxRegistration with schemeID="VA"
-        // (VAT). We consume companyId2 by convention (FR default label is
-        // "TVA intracom") — if the user renamed the labels the semantic
-        // stays right: it's still the "second tax identifier" slot.
-        // BR-CO-09: the value must carry an ISO 3166-1 alpha-2 country
-        // prefix (FR12345678900). We only auto-prepend when the raw value
-        // isn't already prefixed with a valid 2-letter code, so a user who
-        // typed the full VAT stays intact.
-        party.companyId2Number?.text?.trim()?.takeIf { it.isNotBlank() }?.let { rawVat ->
-            val prefixed = normalizeVatId(rawVat, partyCountry)
+        // BT-31 (VAT). BR-CO-09 requires an ISO 3166-1 alpha-2 country
+        // prefix on the identifier value — [prefixEuVatIfMissing] adds it
+        // when the user typed only the digits.
+        if (vatMatch != null) {
+            val prefixed = prefixEuVatIfMissing(vatMatch.normalizedValue, partyCountry)
             append("$pad  <ram:SpecifiedTaxRegistration>\n")
-            append("$pad    <ram:ID schemeID=\"VA\">${esc(prefixed)}</ram:ID>\n")
+            append("$pad    <ram:ID schemeID=\"VA\">${escT(prefixed)}</ram:ID>\n")
+            append("$pad  </ram:SpecifiedTaxRegistration>\n")
+        }
+        // BT-32 (fiscal registration outside the EU VAT system) — schemeID="FC".
+        // Carries local tax ids like US EIN, AR CUIT, BR CNPJ, MX RFC, etc.
+        if (fiscalMatch != null) {
+            append("$pad  <ram:SpecifiedTaxRegistration>\n")
+            append("$pad    <ram:ID schemeID=\"FC\">${escT(fiscalMatch.normalizedValue)}</ram:ID>\n")
             append("$pad  </ram:SpecifiedTaxRegistration>\n")
         }
         append("$pad</ram:$tag>\n")
-    }
-
-    /**
-     * Peel the SIREN out of whatever the user typed in companyId1Number.
-     * Strips separators (spaces, dots, dashes) — a "123 456 789" entry
-     * becomes "123456789". Then:
-     *   • exactly 9 digits → return as-is (canonical SIREN)
-     *   • exactly 14 digits → return the leading 9 (SIRET without NIC)
-     *   • anything else → null (validator will surface the SIREN issue)
-     */
-    private fun extractSiren(raw: String?): String? {
-        val digits = raw?.trim()?.filter { it.isDigit() } ?: return null
-        return when (digits.length) {
-            9 -> digits
-            14 -> digits.substring(0, 9)
-            else -> null
-        }
-    }
-
-    /**
-     * BR-CO-09 requires the VAT identifier to start with an ISO 3166-1
-     * alpha-2 country code. If the user typed "12345678900", we prepend
-     * their party's country ("FR" fallback); if they typed "FR12345678900"
-     * or "EL12345…", we keep it as-is. Whitespace + non-alphanumeric noise
-     * is stripped either way.
-     */
-    private fun normalizeVatId(raw: String, partyCountry: String?): String {
-        val cleaned = raw.filter { it.isLetterOrDigit() }
-        if (cleaned.isEmpty()) return raw
-        val first = cleaned.substring(0, minOf(2, cleaned.length))
-        val startsWithCountry = first.length == 2 && first.all { it.isLetter() }
-        return if (startsWithCountry) cleaned.uppercase()
-        else (partyCountry ?: "FR") + cleaned.uppercase()
     }
 
     private fun StringBuilder.appendAddress(address: AddressState, indent: Int) {
         val pad = " ".repeat(indent)
         append("$pad<ram:PostalTradeAddress>\n")
         address.zipCode?.text?.takeIf { it.isNotBlank() }?.let {
-            append("$pad  <ram:PostcodeCode>${esc(it)}</ram:PostcodeCode>\n")
+            append("$pad  <ram:PostcodeCode>${escT(it)}</ram:PostcodeCode>\n")
         }
         address.addressLine1?.text?.takeIf { it.isNotBlank() }?.let {
-            append("$pad  <ram:LineOne>${esc(it)}</ram:LineOne>\n")
+            append("$pad  <ram:LineOne>${escT(it)}</ram:LineOne>\n")
         }
         address.addressLine2?.text?.takeIf { it.isNotBlank() }?.let {
-            append("$pad  <ram:LineTwo>${esc(it)}</ram:LineTwo>\n")
+            append("$pad  <ram:LineTwo>${escT(it)}</ram:LineTwo>\n")
         }
         address.city?.text?.takeIf { it.isNotBlank() }?.let {
-            append("$pad  <ram:CityName>${esc(it)}</ram:CityName>\n")
+            append("$pad  <ram:CityName>${escT(it)}</ram:CityName>\n")
         }
         address.countryCode?.trim()?.takeIf { it.isNotBlank() }?.let {
-            append("$pad  <ram:CountryID>${esc(it.uppercase())}</ram:CountryID>\n")
+            append("$pad  <ram:CountryID>${escT(it.uppercase())}</ram:CountryID>\n")
         }
         append("$pad</ram:PostalTradeAddress>\n")
     }
@@ -404,20 +426,35 @@ object CiiXmlBuilder {
     // Delivery (see appendLine) — that's the Extended-profile pattern
     // for multi-BL invoices, since the header-level references have
     // cardinality 0..1 in the CII schema. At the header level we only
-    // carry BT-72 (actual delivery date), defaulted to the issue date,
-    // so the element isn't empty (PEPPOL-EN16931-R008).
+    // carry BT-72 (actual delivery date), and only when the invoice
+    // actually traces to a delivery event (i.e. at least one product
+    // carries a DELIVERY_NOTE-typed source-doc link). Quote-only or
+    // hand-crafted invoices skip BT-72 entirely — the whole
+    // ActualDeliverySupplyChainEvent block is omitted, and the schema
+    // requires ApplicableHeaderTradeDelivery to be present but allows
+    // it to be empty.
     // -----------------------------------------------------------------
 
     private fun StringBuilder.appendHeaderTradeDelivery(
         products: List<DocumentProductState>,
         invoice: InvoiceState,
     ) {
+        // Treat a legacy row (linkedDocNumber present but linkedDocType
+        // null — cached before the type field existed) as a delivery-note
+        // link so we don't strip BT-72 on invoices that legitimately came
+        // from a BL before the refactor.
+        val hasDeliveryLink = products.any {
+            it.linkedDocType == LinkedDocType.DELIVERY_NOTE ||
+                (it.linkedDocNumber?.isNotBlank() == true && it.linkedDocType == null)
+        }
         append("    <ram:ApplicableHeaderTradeDelivery>\n")
-        append("      <ram:ActualDeliverySupplyChainEvent>\n")
-        append("        <ram:OccurrenceDateTime>\n")
-        append("          <udt:DateTimeString format=\"102\">${formatDate102(invoice.documentDate)}</udt:DateTimeString>\n")
-        append("        </ram:OccurrenceDateTime>\n")
-        append("      </ram:ActualDeliverySupplyChainEvent>\n")
+        if (hasDeliveryLink) {
+            append("      <ram:ActualDeliverySupplyChainEvent>\n")
+            append("        <ram:OccurrenceDateTime>\n")
+            append("          <udt:DateTimeString format=\"102\">${formatDate102(invoice.documentDate)}</udt:DateTimeString>\n")
+            append("        </ram:OccurrenceDateTime>\n")
+            append("      </ram:ActualDeliverySupplyChainEvent>\n")
+        }
         append("    </ram:ApplicableHeaderTradeDelivery>\n")
     }
 
@@ -440,8 +477,8 @@ object CiiXmlBuilder {
         // BT-83 — the payment reference the payer should quote. Defaults
         // to the invoice number: universal fallback that lets an ISO
         // 20022 SEPA payment be reconciled without extra config.
-        append("      <ram:PaymentReference>${esc(invoice.documentNumber.text)}</ram:PaymentReference>\n")
-        append("      <ram:InvoiceCurrencyCode>${esc(currency)}</ram:InvoiceCurrencyCode>\n")
+        append("      <ram:PaymentReference>${escT(invoice.documentNumber.text)}</ram:PaymentReference>\n")
+        append("      <ram:InvoiceCurrencyCode>${escT(currency)}</ram:InvoiceCurrencyCode>\n")
 
         appendPaymentMeans(invoice, issuer, paymentMeansLabels, bankInfoText)
         appendDocLevelTax(invoice, products)
@@ -462,26 +499,24 @@ object CiiXmlBuilder {
         val codes = unCefactCodesForExport(invoice.paymentMeansSelections)
         val iban = issuer?.paymentIban?.text?.trim()?.takeIf { it.isNotBlank() }
         val bic = issuer?.paymentBic?.text?.trim()?.takeIf { it.isNotBlank() }
-        // CII-SR-467: every SpecifiedTradeSettlementPaymentMeans block must
-        // share the same TypeCode. That mirrors the EN 16931 semantic BG-16
-        // 0..1 cardinality — one payment METHOD per invoice, even though
-        // several account blocks are legal (multi-IBAN for the same
-        // method). If the user has picked several chips, we fall back to
-        // code 1 ("Instrument not defined") and put the localised list of
-        // accepted methods in BT-82 Information so a CII-only reader still
-        // sees the intent.
-        val effectiveCode: Int = codes.singleOrNull() ?: 1
-        val attachIban = iban != null && effectiveCode in IBAN_CARRYING_CODES
-        // BT-82 Information — free-text payment instructions. We merge two
-        // things the user can edit on the PDF into a single block, since
-        // CII allows only one Information child per SpecifiedTrade­Settlement­
-        // PaymentMeans (0..1):
-        //   1. the accepted-methods list (flattened paymentMeansSegments)
-        //   2. the bank-details prose (flattened paymentBankSegments —
-        //      passed in pre-flattened by the caller since it needs
-        //      locale-resolved IBAN/BIC labels).
-        // Empty lines get stripped so a doc with only one of the two still
-        // renders cleanly.
+
+        // The CII schema allows several SpecifiedTradeSettlementPaymentMeans
+        // blocks (0..n) in the Extended profile — one per accepted method,
+        // each with its own TypeCode. The IBAN + BIC structured block only
+        // hangs off the transfer-type codes (30 / 58) so a Stripe-only or
+        // cash-only invoice doesn't leak the seller's IBAN into a mode
+        // where it has no place (per spec §6, item 9 of the CII audit).
+        val bankTogglingModePresent = codes.any { it in IBAN_CARRYING_CODES }
+
+        // BT-82 Information — free-text payment instructions. Emitted on
+        // the FIRST block only (deduplication) and only when it carries
+        // content that isn't already structured elsewhere in the XML. The
+        // old "flattened list of accepted methods" is dropped since the
+        // per-code TypeCode blocks now convey that natively.
+        //
+        // We keep the user-typed bank prose (e.g. beneficiary name, agency,
+        // custom mention) which lives in bankInfoText and has no structured
+        // counterpart in CII beyond the IBAN/BIC we already emit.
         val meansText = paymentMeansLabels
             ?.let { flattenPaymentLabel(invoice.paymentMeansSegments, it) }
             ?.trim()
@@ -489,26 +524,31 @@ object CiiXmlBuilder {
         val bankText = bankInfoText?.trim()?.takeIf { it.isNotEmpty() }
         val information = listOfNotNull(meansText, bankText).joinToString("\n").ifEmpty { null }
 
-        append("      <ram:SpecifiedTradeSettlementPaymentMeans>\n")
-        // UN/CEFACT 4461 codelist expects the integer value without zero
-        // padding — "1" not "01". FX-SCH-A-001008 rejects the padded form
-        // because the enumeration in FACTUR-X_EXTENDED_codedb.xml lists
-        // codes as bare integers.
-        append("        <ram:TypeCode>$effectiveCode</ram:TypeCode>\n")
-        if (information != null) {
-            append("        <ram:Information>${esc(information)}</ram:Information>\n")
-        }
-        if (attachIban) {
-            append("        <ram:PayeePartyCreditorFinancialAccount>\n")
-            append("          <ram:IBANID>${esc(iban!!)}</ram:IBANID>\n")
-            append("        </ram:PayeePartyCreditorFinancialAccount>\n")
-            if (bic != null) {
-                append("        <ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
-                append("          <ram:BICID>${esc(bic)}</ram:BICID>\n")
-                append("        </ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
+        codes.forEachIndexed { index, code ->
+            val emitIban = iban != null && bankTogglingModePresent && code in IBAN_CARRYING_CODES
+            val emitInformation = index == 0 && information != null
+
+            append("      <ram:SpecifiedTradeSettlementPaymentMeans>\n")
+            // UN/CEFACT 4461 codelist expects the integer value without zero
+            // padding — "1" not "01". FX-SCH-A-001008 rejects the padded form
+            // because the enumeration in FACTUR-X_EXTENDED_codedb.xml lists
+            // codes as bare integers.
+            append("        <ram:TypeCode>$code</ram:TypeCode>\n")
+            if (emitInformation) {
+                append("        <ram:Information>${escT(information)}</ram:Information>\n")
             }
+            if (emitIban) {
+                append("        <ram:PayeePartyCreditorFinancialAccount>\n")
+                append("          <ram:IBANID>${escT(iban!!)}</ram:IBANID>\n")
+                append("        </ram:PayeePartyCreditorFinancialAccount>\n")
+                if (bic != null) {
+                    append("        <ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
+                    append("          <ram:BICID>${escT(bic)}</ram:BICID>\n")
+                    append("        </ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
+                }
+            }
+            append("      </ram:SpecifiedTradeSettlementPaymentMeans>\n")
         }
-        append("      </ram:SpecifiedTradeSettlementPaymentMeans>\n")
     }
 
     /**
@@ -598,13 +638,13 @@ object CiiXmlBuilder {
             // CII schema order: ExemptionReason (BT-120) after TypeCode,
             // before BasisAmount.
             if (reason.text != null) {
-                append("        <ram:ExemptionReason>${esc(reason.text)}</ram:ExemptionReason>\n")
+                append("        <ram:ExemptionReason>${escT(reason.text)}</ram:ExemptionReason>\n")
             }
             append("        <ram:BasisAmount>${formatAmount(row.basis)}</ram:BasisAmount>\n")
             append("        <ram:CategoryCode>${row.category.name}</ram:CategoryCode>\n")
             // ExemptionReasonCode (BT-121) after CategoryCode, before Rate.
             if (reason.code != null) {
-                append("        <ram:ExemptionReasonCode>${esc(reason.code)}</ram:ExemptionReasonCode>\n")
+                append("        <ram:ExemptionReasonCode>${escT(reason.code)}</ram:ExemptionReasonCode>\n")
             }
             append("        <ram:RateApplicablePercent>${formatRateBd(row.rate)}</ram:RateApplicablePercent>\n")
             append("      </ram:ApplicableTradeTax>\n")
@@ -655,7 +695,7 @@ object CiiXmlBuilder {
         if (description.isEmpty() && dueDate.isEmpty()) return
         append("      <ram:SpecifiedTradePaymentTerms>\n")
         if (description.isNotEmpty()) {
-            append("        <ram:Description>${esc(description)}</ram:Description>\n")
+            append("        <ram:Description>${escT(description)}</ram:Description>\n")
         }
         if (dueDate.isNotEmpty()) {
             append("        <ram:DueDateDateTime>\n")
@@ -685,7 +725,7 @@ object CiiXmlBuilder {
         append("      <ram:SpecifiedTradeSettlementHeaderMonetarySummation>\n")
         append("        <ram:LineTotalAmount>${formatAmount(netTotal)}</ram:LineTotalAmount>\n")
         append("        <ram:TaxBasisTotalAmount>${formatAmount(taxBasisTotal)}</ram:TaxBasisTotalAmount>\n")
-        append("        <ram:TaxTotalAmount currencyID=\"${esc(currency)}\">${formatAmount(taxTotal)}</ram:TaxTotalAmount>\n")
+        append("        <ram:TaxTotalAmount currencyID=\"${escT(currency)}\">${formatAmount(taxTotal)}</ram:TaxTotalAmount>\n")
         append("        <ram:GrandTotalAmount>${formatAmount(grandTotal)}</ram:GrandTotalAmount>\n")
         append("        <ram:DuePayableAmount>${formatAmount(grandTotal)}</ram:DuePayableAmount>\n")
         append("      </ram:SpecifiedTradeSettlementHeaderMonetarySummation>\n")
@@ -702,6 +742,14 @@ object CiiXmlBuilder {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&apos;")
+
+    /**
+     * Trim + escape. Default helper for every text node whose content
+     * comes from user input — kills leading/trailing whitespace before
+     * the value hits the XML so a stray " reffffff " typed in the UI
+     * doesn't leak as-is into the exported document.
+     */
+    private fun escT(s: String?): String = esc(s?.trim().orEmpty())
 
     /**
      * Convert the app's "dd/MM/yyyy" storage format to UN/EDIFACT format

@@ -290,7 +290,11 @@ fun RowWithLabelAndInput(
                 keyboardOption = imeAction,
                 formActions = formActions,
                 focusRequester = focusRequester,
-                errorMessage = errorMessage,
+                // Editable-label subfield never carries the row error — the
+                // message renders once under the value subfield below. Keeps
+                // the company-id "libellé manquant" from being duplicated
+                // above and below the row.
+                errorMessage = null,
                 isEditableLabel = true
             )
         }

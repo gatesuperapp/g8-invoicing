@@ -22,6 +22,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.LinkedDocType
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -107,22 +108,22 @@ class CreditNoteLocalDataSource(
                 formatLocale = AppLocaleHolder.languageCode,
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
-                vatExemptionText = existingIssuer
-                    ?.takeIf { it.vatExempt }
-                    ?.let {
-                        // Reuse the previous invoice's BT-120 wording for this
-                        // master issuer (per-issuer reuse — mirrors InvoiceDS).
-                        val reused = existingIssuer.originalClientOrIssuerId?.toLong()
-                            ?.let { masterId ->
-                                invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
-                                    .executeAsOneOrNull()?.vat_exemption_text
-                            }
-                            ?.trim()?.takeIf { s -> s.isNotEmpty() }
-                        reused ?: com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                            it.addresses?.firstOrNull()?.countryCode
-                        )
+                vatExemptionText = existingIssuer?.originalClientOrIssuerId?.toLong()
+                    ?.let { masterId ->
+                        invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                            .executeAsOneOrNull()
                     }
-                    ?.let { TextFieldValue(it) },
+                    .let { reuse ->
+                        // Shared helper — reuses the previous invoice's wording
+                        // when the master's country hasn't changed, otherwise
+                        // resolves the country-based citation. Returns null for
+                        // non-vat-exempt issuers, which mirrors the old logic.
+                        com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                            issuer = existingIssuer,
+                            previousVatText = reuse?.vat_exemption_text,
+                            previousIssuerCountry = reuse?.issuer_country_code,
+                        )
+                    },
                 retentions = reusedRetentions,
             )
 
@@ -324,9 +325,10 @@ class CreditNoteLocalDataSource(
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()
                         .transformIntoEditableDocumentProduct(
-                            additionalInfo?.delivery_note_date,
-                            additionalInfo?.delivery_note_number,
-                            it.sort_order?.toInt() // << Passer le sort_order de la table de liaison
+                            linkedDate = additionalInfo?.delivery_note_date,
+                            linkedDocNumber = additionalInfo?.delivery_note_number,
+                            linkedDocType = additionalInfo?.let { LinkedDocType.DELIVERY_NOTE },
+                            sortOrder = it.sort_order?.toInt() // << Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
             } else null
@@ -414,13 +416,16 @@ class CreditNoteLocalDataSource(
                         // Carry the source invoice's exemption text if the user
                         // set it there — cheaper than re-deriving from the issuer,
                         // and preserves any wording override done on the invoice.
+                        // Fallback to the shared resolver (national → EU art. 284
+                        // → generic). No previous-doc country to compare against
+                        // in this branch: the invoice's own frozen exemption text
+                        // is already the "reuse" path above.
                         vatExemptionText = invoices.firstOrNull { it.vatExemptionText != null }?.vatExemptionText
-                            ?: issuerFromSource
-                                ?.takeIf { it.vatExempt }
-                                ?.let { com.a4a.g8invoicing.data.models.defaultVatExemptionText(
-                                    it.addresses?.firstOrNull()?.countryCode
-                                ) }
-                                ?.let { TextFieldValue(it) },
+                            ?: com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                                issuer = issuerFromSource,
+                                previousVatText = null,
+                                previousIssuerCountry = null,
+                            ),
                     )
                 )
                 val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
