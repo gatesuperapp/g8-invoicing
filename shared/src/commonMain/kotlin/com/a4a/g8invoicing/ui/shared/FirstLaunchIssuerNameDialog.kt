@@ -216,12 +216,13 @@ private fun previousStep(step: Step): Step = when (step) {
 private fun TopBar(canGoBack: Boolean, onBack: () -> Unit) {
     // Fixed-height slot so the content below sits at the same vertical
     // position on every slide, whether the back button is visible or not.
-    // Extra top + left inset so the button doesn't hug the corner.
+    // Extra top inset (50dp) pushes the button clear of the status bar /
+    // notch on tall devices so it doesn't feel glued to the top edge.
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .padding(top = 16.dp, start = 16.dp),
+            .height(100.dp)
+            .padding(top = 50.dp, start = 16.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         if (canGoBack) {
