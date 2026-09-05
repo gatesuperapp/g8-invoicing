@@ -21,7 +21,7 @@
     <string name="document_payment_means_default_label">Accepted payment means:</string>
     <string name="document_payment_means_hide_list_a11y">Hide the payment means list</string>
     <string name="document_payment_means_show_list_a11y">Show the payment means list</string>
-    <string name="document_payment_means_show_switch">Show accepted payment means on the invoice</string>
+    <string name="document_payment_means_show_switch">Show accepted payment means on the document</string>
     <string name="document_payment_means_edit_prefix">Edit text</string>
     <!-- Document labels -->
     <string name="invoice_number">Invoice No.</string>
@@ -669,7 +669,7 @@
     <string name="cii_validation_line_name">Line %1$d: missing product name</string>
     <string name="cii_validation_line_price">Line %1$d: missing unit price</string>
     <string name="cii_validation_line_tax_rate">Line %1$d: missing VAT rate</string>
-    <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s %% is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s % is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Payment due date</string>
     <string name="cii_validation_vat_exemption_text">VAT exemption reason (fill in the text menu)</string>
 

@@ -6,7 +6,6 @@ import com.a4a.g8invoicing.shared.resources.payment_means_10
 import com.a4a.g8invoicing.shared.resources.payment_means_30
 import com.a4a.g8invoicing.shared.resources.payment_means_42
 import com.a4a.g8invoicing.shared.resources.payment_means_48
-import com.a4a.g8invoicing.shared.resources.payment_means_58
 import com.a4a.g8invoicing.shared.resources.payment_means_other
 import com.a4a.g8invoicing.shared.resources.payment_means_paypal
 import com.a4a.g8invoicing.shared.resources.payment_means_stripe
@@ -38,7 +37,9 @@ enum class PaymentMeans(
     TRANSFER(30, Res.string.payment_means_30, "payment_means_30"),
     CHEQUE(42, Res.string.payment_means_42, "payment_means_42"),
     CARD(48, Res.string.payment_means_48, "payment_means_48"),
-    SEPA(58, Res.string.payment_means_58, "payment_means_58"),
+    // SEPA direct debit (was code 58 mislabeled "Prélèvement SEPA") retired
+    // per product decision — the SEPA direct-debit flow requires a signed
+    // mandate we don't manage. Use TRANSFER for SEPA credit transfer.
     CASH(10, Res.string.payment_means_10, "payment_means_10"),
     PAYPAL(68, Res.string.payment_means_paypal, "payment_means_paypal", preserveCase = true),
     STRIPE(68, Res.string.payment_means_stripe, "payment_means_stripe", preserveCase = true),
@@ -50,7 +51,7 @@ enum class PaymentMeans(
     companion object {
         /** Order shown in the picker + used to build the comma-joined display. */
         val UI_ORDER: List<PaymentMeans> = listOf(
-            TRANSFER, CHEQUE, CARD, SEPA, CASH, PAYPAL, STRIPE, OTHER,
+            TRANSFER, CHEQUE, CARD, CASH, PAYPAL, STRIPE, OTHER,
         )
 
         /** Chip identities that actually render as tokens on the invoice.

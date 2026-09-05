@@ -21,7 +21,7 @@
     <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel:</string>
     <string name="document_payment_means_hide_list_a11y">Zahlungsmittel-Liste ausblenden</string>
     <string name="document_payment_means_show_list_a11y">Zahlungsmittel-Liste anzeigen</string>
-    <string name="document_payment_means_show_switch">Akzeptierte Zahlungsmittel auf der Rechnung anzeigen</string>
+    <string name="document_payment_means_show_switch">Akzeptierte Zahlungsmittel auf dem Dokument anzeigen</string>
     <string name="document_payment_means_edit_prefix">Text bearbeiten</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
@@ -674,7 +674,7 @@ Es ist ein Fehler aufgetreten :
     <string name="cii_validation_line_name">Zeile %1$d: fehlender Produktname</string>
     <string name="cii_validation_line_price">Zeile %1$d: fehlender Einzelpreis</string>
     <string name="cii_validation_line_tax_rate">Zeile %1$d: fehlender USt-Satz</string>
-    <string name="cii_validation_line_tax_rate_invalid">Zeile %1$d: USt-Satz %2$s %% ist in Frankreich nicht zulässig (erlaubte Werte: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_line_tax_rate_invalid">Zeile %1$d: USt-Satz %2$s % ist in Frankreich nicht zulässig (erlaubte Werte: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fälligkeitsdatum</string>
     <string name="cii_validation_vat_exemption_text">Grund der Steuerbefreiung (im Textmenü ausfüllen)</string>
 

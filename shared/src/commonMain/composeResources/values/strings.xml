@@ -46,7 +46,7 @@
     <!-- Row label paired with the show/hide switch below the chips inside the
          payment-means picker. When the switch is on, the payment-means block is
          rendered on the invoice/credit-note preview + PDF. -->
-    <string name="document_payment_means_show_switch">Afficher les modes de paiement acceptés sur la facture</string>
+    <string name="document_payment_means_show_switch">Afficher les modes de paiement acceptés sur le document</string>
     <!-- Underlined link below the show/hide switch — opens a text modal where
          the user can rewrite the label prefix. The joined mode list keeps auto-
          appending after whatever the user types. -->
@@ -625,7 +625,7 @@
     <string name="cii_validation_line_name">Ligne %1$d : nom du produit manquant</string>
     <string name="cii_validation_line_price">Ligne %1$d : prix unitaire manquant</string>
     <string name="cii_validation_line_tax_rate">Ligne %1$d : taux de TVA manquant</string>
-    <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s %% non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s % non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Date d'échéance de paiement</string>
     <string name="cii_validation_vat_exemption_text">Mention d'exonération de TVA (à renseigner dans le menu texte)</string>
 
