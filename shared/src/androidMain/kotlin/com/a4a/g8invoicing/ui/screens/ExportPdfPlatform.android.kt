@@ -95,6 +95,7 @@ import com.a4a.g8invoicing.shared.resources.total_with_tax
 import com.a4a.g8invoicing.shared.resources.total_without_tax
 import com.a4a.g8invoicing.shared.resources.vat
 import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
+import com.a4a.g8invoicing.ui.shared.PdfExportErrorDialog
 import com.a4a.g8invoicing.ui.shared.AndroidPdfContext
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.PdfFileManager
@@ -239,17 +240,15 @@ actual fun ExportPdfPlatform(
 
     // Error dialog
     if (openErrorDialog.value) {
-        AlertDialogErrorOrInfo(
-            onDismissRequest = {
+        // Friendly "oh no" recap over the raw iText / permission stack trace —
+        // errorMessage becomes a tappable mailto: link that pre-fills a bug
+        // report to contact@the-gate.fr so users don't have to copy-paste.
+        PdfExportErrorDialog(
+            errorText = errorMessage,
+            onDismiss = {
                 openErrorDialog.value = false
                 onDismissRequest()
             },
-            onConfirmation = {
-                openErrorDialog.value = false
-                onDismissRequest()
-            },
-            message = strAlertError + errorMessage,
-            confirmationText = strAlertErrorConfirm
         )
     }
 

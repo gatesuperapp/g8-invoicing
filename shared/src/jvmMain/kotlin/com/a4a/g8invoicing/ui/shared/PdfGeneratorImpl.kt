@@ -4,6 +4,7 @@ import com.a4a.g8invoicing.data.AppLocaleHolder
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.a4a.g8invoicing.facturx.FacturXTextSanitizer
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -166,6 +167,15 @@ class PdfGeneratorImpl(
         val finalTempPath = fileManager.getTempFilePath(finalFileName)
         File(finalTempPath).delete()
 
+        // Strip glyphs that Arimo + Noto Sans can't render (emojis, CJK, exotic
+        // symbols). Standard PDF export tolerates missing glyphs by painting
+        // .notdef; PDF/A-3B doesn't and iText throws PdfAConformanceException
+        // mid-render, leaving a partial file. Sanitiser mutates the state in
+        // place then restores originals in the finally, so the UI never sees
+        // the stripped text.
+        val sanitizer = FacturXTextSanitizer(fileManager::loadAssetBytes)
+        val restoreState = sanitizer.applyToDocumentInPlace(document)
+
         // Single-pass write: matches the working facturx-android POC.
         // The previous two-pass approach (initial + PdfADocument(reader,
         // writer) stamping to add page numbers) crashed on Android at
@@ -183,6 +193,7 @@ class PdfGeneratorImpl(
         doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
         doc.setFontSize(9.5F)
 
+        var failure: Throwable? = null
         try {
             buildPdfContent(doc, document)
 
@@ -202,6 +213,7 @@ class PdfGeneratorImpl(
 
             attachFacturXPayload(pdfDocument, xmlBytes, document)
         } catch (t: Throwable) {
+            failure = t
             System.err.println("[PdfGenerator] generateFacturX failure before close: ${t::class.qualifiedName}: ${t.message}")
             t.printStackTrace()
         }
@@ -210,8 +222,19 @@ class PdfGeneratorImpl(
             doc.close()
             pdfDocument.close()
         } catch (t: Throwable) {
+            if (failure == null) failure = t
             System.err.println("[PdfGenerator] generateFacturX close failure: ${t::class.qualifiedName}: ${t.message}")
             t.printStackTrace()
+        }
+
+        restoreState()
+
+        if (failure != null) {
+            // Drop the partial temp file — before, we'd save it via MediaStore
+            // and hand back finalFileName as if the export succeeded. Users then
+            // ended up with a 15-byte "%PDF-1.7" file that no viewer could open.
+            File(finalTempPath).delete()
+            throw failure
         }
 
         fileManager.saveToFinalLocation(finalTempPath, finalFileName)
