@@ -189,6 +189,56 @@ fun defaultPaymentBankSegments(): List<PaymentBankSegment> = listOf(
     PaymentBankSegment.BicToken,
 )
 
+/**
+ * Adapt a list of segments carried over from a previous invoice to the current
+ * frozen bank's country class. Called on createNew() after passing the language
+ * guard, so we know the free-text portions are still relevant — only the
+ * IBAN/BIC token composition needs to reflect the new bank structure.
+ *
+ *   • IBAN-country → non-IBAN country (Autriche non-IBAN example): the new
+ *     bank has no BIC, so [BicToken] is dropped along with any purely
+ *     whitespace Free segments it left dangling. [IbanToken] stays — it swaps
+ *     its label from "IBAN" to "N° de compte" at render time via the current
+ *     doc's payment_country.
+ *   • non-IBAN → IBAN: append `Free("\n") + BicToken` at the end unless a
+ *     BicToken is already present (the previous doc's list could legitimately
+ *     have one if the user removed the previous bank without editing the
+ *     label).
+ *   • Same class or unknown countries: identity — the tokens are self-adapting
+ *     at render.
+ */
+fun adaptPaymentBankSegmentsForCountry(
+    segments: List<PaymentBankSegment>,
+    previousCountry: String?,
+    currentCountry: String?,
+): List<PaymentBankSegment> {
+    if (segments.isEmpty()) return segments
+    val previousIsIban = CountryCodes.isIbanCountry(previousCountry)
+    val currentIsIban = CountryCodes.isIbanCountry(currentCountry)
+    if (previousIsIban == currentIsIban) return segments
+    return if (previousIsIban && !currentIsIban) {
+        // Drop BicToken + dangling whitespace-only Free separators around it.
+        val withoutBic = segments.filter { it !is PaymentBankSegment.BicToken }
+        val trimmed = mutableListOf<PaymentBankSegment>()
+        withoutBic.forEachIndexed { i, seg ->
+            val prev = withoutBic.getOrNull(i - 1)
+            val next = withoutBic.getOrNull(i + 1)
+            val danglingSep = seg is PaymentBankSegment.Free && seg.text.isBlank() &&
+                (prev == null || next == null)
+            if (!danglingSep) trimmed.add(seg)
+        }
+        mergeAdjacentFree(trimmed)
+    } else {
+        // non-IBAN → IBAN: add BIC token if absent.
+        if (segments.any { it is PaymentBankSegment.BicToken }) return segments
+        val appended = segments.toMutableList().apply {
+            add(PaymentBankSegment.Free("\n"))
+            add(PaymentBankSegment.BicToken)
+        }
+        mergeAdjacentFree(appended)
+    }
+}
+
 private fun mergeAdjacentFree(segments: List<PaymentBankSegment>): List<PaymentBankSegment> {
     val out = mutableListOf<PaymentBankSegment>()
     for (seg in segments) {

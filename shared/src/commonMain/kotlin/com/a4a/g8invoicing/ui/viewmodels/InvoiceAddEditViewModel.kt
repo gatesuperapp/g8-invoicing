@@ -87,6 +87,23 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    /**
+     * Suspend variant of [reloadDocument] — awaits the refetch before returning.
+     * Callers that need to guarantee state.documentIssuer.banks (or any other
+     * hydrated field) is fresh before continuing MUST use this variant, not the
+     * fire-and-forget [reloadDocument]. The typical case: an EDIT_ISSUER save
+     * mutates the master IssuerBank rows, closes the sheet, and the user
+     * immediately taps back into the issuer — without the await the picker
+     * reads a stale documentIssuer.banks copy from before the reload landed.
+     */
+    suspend fun reloadDocumentAwait() {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        try {
+            documentDataSource.fetch(id)?.let { _documentUiState.value = it }
+        } catch (_: Exception) {
+        }
+    }
+
     // Called by the NavGraph when EDIT_ISSUER turns off the tax-withholding
     // switch: the direct-to-DB update path doesn't go through
     // saveDocumentClientOrIssuerInUiState, so the retention wipe must be
@@ -119,7 +136,7 @@ class InvoiceAddEditViewModel(
     suspend fun seedDefaultVatExemptionTextInDb(issuer: ClientOrIssuerState) {
         val id = _documentUiState.value.documentId?.toLong() ?: return
         val country = issuer.addresses?.firstOrNull()?.countryCode
-        val default = com.a4a.g8invoicing.data.models.defaultVatExemptionText(country) ?: return
+        val default = com.a4a.g8invoicing.data.models.resolveVatExemptionText(country) ?: return
         documentDataSource.updateVatExemptionText(id, default)
     }
 
@@ -137,6 +154,12 @@ class InvoiceAddEditViewModel(
     }
 
     fun updateUiState(screenElement: ScreenElement, value: Any) {
+        // Snapshot the previous frozen bank country BEFORE the state mutation
+        // so the label adapter can compare against the new bank's country.
+        val previousBankCountry = if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
+            _documentUiState.value.documentIssuer?.paymentCountry
+        } else null
+
         _documentUiState.value =
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
         // Side effect: freezing a new bank on the doc doesn't go through the
@@ -145,6 +168,27 @@ class InvoiceAddEditViewModel(
         if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
             val bank = value as? com.a4a.g8invoicing.ui.states.IssuerBankState ?: return
             val docIssuerId = _documentUiState.value.documentIssuer?.id?.toLong() ?: return
+
+            // Adapt payment_bank_label tokens when the country class flipped
+            // (IBAN ↔ non-IBAN). BicToken gets added on the new bank when the
+            // previous one had no BIC, and stripped when switching to a
+            // non-IBAN account. No-op inside the same class — tokens already
+            // self-hydrate at render time via payment_country. Autosave picks
+            // up the state change and persists payment_bank_label on Invoice.
+            val currentSegments = _documentUiState.value.paymentBankSegments
+            if (currentSegments.isNotEmpty()) {
+                val adaptedSegments = com.a4a.g8invoicing.data.models.adaptPaymentBankSegmentsForCountry(
+                    segments = currentSegments,
+                    previousCountry = previousBankCountry,
+                    currentCountry = bank.countryCode,
+                )
+                if (adaptedSegments != currentSegments) {
+                    _documentUiState.value = _documentUiState.value.copy(
+                        paymentBankSegments = adaptedSegments,
+                    )
+                }
+            }
+
             viewModelScope.launch {
                 clientOrIssuerDataSource.updateDocumentClientOrIssuerPaymentBank(
                     documentClientOrIssuerId = docIssuerId,

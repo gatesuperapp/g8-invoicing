@@ -152,8 +152,12 @@ LIMIT 1;
 -- each one from the most recent non-empty value (per-field, so if the user
 -- has only ever customised the "pénalités de retard" one, the other two
 -- fall back to their default rather than getting an empty seed).
+-- Also pulls format_locale so the caller can gate the reuse: payment_terms_*
+-- are only carried over from a doc written in the current app language;
+-- otherwise the caller falls back to the localised default string.
 getLastInsertedInvoicePaymentTerms:
-SELECT payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount
+SELECT payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount,
+       format_locale
 FROM Invoice
 ORDER BY invoice_id DESC
 LIMIT 1;
@@ -161,11 +165,31 @@ LIMIT 1;
 -- Most recent invoice attached to a specific master issuer, so a new invoice
 -- for the same company seeds its payment terms/means/bank labels + chip
 -- selections from the last one — reused text is per-issuer, not global.
+-- Three extra columns for the caller's gating logic:
+--   • format_locale — reuse payment_terms_* / payment_means_label /
+--     payment_bank_label only when it matches the current app language.
+--   • issuer_country_code — reuse vat_exemption_text only when the frozen
+--     previous-doc issuer country matches the current issuer country (else
+--     the master's country changed between docs and the old mention is now
+--     stale). Sub-select because DocumentClientOrIssuer has no direct
+--     country column — it lives on the joined address row (1:N link, first
+--     address wins).
+--   • payment_bank_country — country of the frozen bank on the previous
+--     doc. Reused so the label adapter can swap IBAN/BIC tokens for a
+--     "N° de compte" arrangement (or vice-versa) when the bank's country
+--     class changed between docs.
 getLastInvoicePaymentReuseForIssuer:
 SELECT i.payment_terms_recovery_fees, i.payment_terms_late_fees, i.payment_terms_discount,
        i.payment_means_selections,
        i.payment_means_label, i.payment_means_other_checked, i.payment_bank_label,
-       i.vat_exemption_text
+       i.vat_exemption_text,
+       i.format_locale,
+       (SELECT a.country_code
+        FROM LinkDocumentClientOrIssuerToAddress la
+        JOIN DocumentClientOrIssuerAddress a ON a.id = la.address_id
+        WHERE la.document_client_or_issuer_id = dci.id
+        LIMIT 1) AS issuer_country_code,
+       dci.payment_country AS payment_bank_country
 FROM Invoice i
 JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
 JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id

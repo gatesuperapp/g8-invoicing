@@ -111,7 +111,7 @@ class CreditNoteAddEditViewModel(
     suspend fun seedDefaultVatExemptionTextInDb(issuer: ClientOrIssuerState) {
         val id = _documentUiState.value.documentId?.toLong() ?: return
         val country = issuer.addresses?.firstOrNull()?.countryCode
-        val default = com.a4a.g8invoicing.data.models.defaultVatExemptionText(country) ?: return
+        val default = com.a4a.g8invoicing.data.models.resolveVatExemptionText(country) ?: return
         documentDataSource.updateVatExemptionText(id, default)
     }
 
