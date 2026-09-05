@@ -682,6 +682,14 @@ Une erreur s'est produite :
     <string name="document_vat_exemption_modal_title">Motivo de exención del IVA</string>
     <string name="document_vat_exemption_placeholder">Indica la referencia legal aplicable a tu empresa</string>
 
+    <!-- Default VAT-exempt mentions — see values/strings.xml for design notes.
+         National mentions kept in native language across all locales. -->
+    <string name="vat_exempt_FR">TVA non applicable, art. 293 B du CGI</string>
+    <string name="vat_exempt_DE">Kleinunternehmer, § 19 UStG</string>
+    <string name="vat_exempt_IT">Operazione in franchigia da IVA — regime forfettario (L. 190/2014, art. 1 c. 54-89)</string>
+    <string name="vat_exempt_fallback_eu">IVA exento — régimen especial de pequeñas empresas (artículo 284 de la Directiva 2006/112/CE)</string>
+    <string name="vat_exempt_fallback_generic">No sujeto al IVA</string>
+
     <!-- Country picker (address form) -->
     <string name="client_country">País</string>
     <string name="country_picker_search">Buscar un país</string>
