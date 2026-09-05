@@ -16,6 +16,24 @@ CREATE TABLE Quote (
   original_company_id INTEGER,
   -- DocumentFont.id — null = Noto Sans default. See Invoice.font_family.
   font_family TEXT,
+  -- Payment blocks — parity with Invoice (see Invoice.sq for the full doc
+  -- on each column). Mirroring them on Quote so the client can see how
+  -- they're expected to pay before signing the devis, and so the quote-
+  -- to-invoice conversion copies the fields across straight.
+  payment_means_selections TEXT,
+  payment_means_label TEXT,
+  payment_means_hidden INTEGER NOT NULL DEFAULT 0,
+  payment_means_other_checked INTEGER NOT NULL DEFAULT 0,
+  payment_terms_recovery_fees TEXT,
+  payment_terms_late_fees TEXT,
+  payment_terms_discount TEXT,
+  payment_bank_hidden INTEGER NOT NULL DEFAULT 0,
+  payment_bank_label TEXT,
+  -- BT-120 VAT exemption reason — same semantics as Invoice.vat_exemption_text.
+  -- Surfaced on the devis preview when the issuer is in the franchise en
+  -- base regime, so the client sees the same legal mention as on the
+  -- eventual invoice.
+  vat_exemption_text TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -62,8 +80,8 @@ SELECT quote_id
 FROM Quote;
 
 save:
-INSERT INTO Quote (quote_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, font_family)
-VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Quote (quote_id, number, delivery_date, reference, free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, font_family, payment_means_selections, payment_means_label, payment_means_hidden, payment_means_other_checked, payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount, payment_bank_hidden, payment_bank_label, vat_exemption_text)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Quote
@@ -74,6 +92,16 @@ SET number = :number,
     currency =: currency,
     footer  =: footer,
     font_family = :font_family,
+    payment_means_selections = :payment_means_selections,
+    payment_means_label = :payment_means_label,
+    payment_means_hidden = :payment_means_hidden,
+    payment_means_other_checked = :payment_means_other_checked,
+    payment_terms_recovery_fees = :payment_terms_recovery_fees,
+    payment_terms_late_fees = :payment_terms_late_fees,
+    payment_terms_discount = :payment_terms_discount,
+    payment_bank_hidden = :payment_bank_hidden,
+    payment_bank_label = :payment_bank_label,
+    vat_exemption_text = :vat_exemption_text,
     updated_at =: updated_at
 WHERE
     quote_id = :quote_id;
@@ -93,6 +121,46 @@ SELECT footer
 FROM Quote
 ORDER BY quote_id DESC
 LIMIT 1;
+
+-- Feed createNew()'s per-field seed of the 3 payment-terms fields — same
+-- semantics as Invoice.getLastInsertedInvoicePaymentTerms. format_locale
+-- is used by the caller to gate reuse (only carry over from a doc written
+-- in the current app language).
+getLastInsertedQuotePaymentTerms:
+SELECT payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount,
+       format_locale
+FROM Quote
+ORDER BY quote_id DESC
+LIMIT 1;
+
+-- Most recent quote attached to a specific master issuer, so a new quote
+-- for the same company seeds its payment terms/means/bank labels + chip
+-- selections from the last one — mirror of getLastInvoicePaymentReuseForIssuer.
+getLastQuotePaymentReuseForIssuer:
+SELECT q.payment_terms_recovery_fees, q.payment_terms_late_fees, q.payment_terms_discount,
+       q.payment_means_selections,
+       q.payment_means_label, q.payment_means_other_checked, q.payment_bank_label,
+       q.vat_exemption_text,
+       q.format_locale,
+       (SELECT a.country_code
+        FROM LinkDocumentClientOrIssuerToAddress la
+        JOIN DocumentClientOrIssuerAddress a ON a.id = la.address_id
+        WHERE la.document_client_or_issuer_id = dci.id
+        LIMIT 1) AS issuer_country_code,
+       dci.payment_country AS payment_bank_country
+FROM Quote q
+JOIN LinkQuoteToDocumentClientOrIssuer l ON l.quote_id = q.quote_id
+JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+ORDER BY q.quote_id DESC
+LIMIT 1;
+
+updateVatExemptionText:
+UPDATE Quote
+SET vat_exemption_text = :vat_exemption_text,
+    updated_at =: updated_at
+WHERE
+    quote_id = :quote_id;
 
 countAll:
 SELECT COUNT(*) FROM Quote;

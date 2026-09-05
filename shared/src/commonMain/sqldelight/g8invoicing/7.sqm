@@ -197,6 +197,32 @@ ALTER TABLE DocumentClientOrIssuer ADD COLUMN client_type TEXT;
 --    legal citation, so the user must fill it before exporting.
 ALTER TABLE Invoice ADD COLUMN vat_exemption_text TEXT;
 ALTER TABLE CreditNote ADD COLUMN vat_exemption_text TEXT;
+ALTER TABLE Quote ADD COLUMN vat_exemption_text TEXT;
+
+-- 7.5) Payment blocks on Quote — mirror of blocks 2/3/4 above for Invoice.
+--     A devis is a commercial proposal that the client will sign, and it
+--     needs the same payment-means / bank / terms information as the final
+--     invoice so the client can see how they're expected to pay before
+--     committing. Structure and semantics identical to the Invoice columns:
+--       * payment_means_selections / _label / _hidden / _other_checked
+--         — same chip persistence + editable prefix + eye toggle + "Autre"
+--         flag as invoices.
+--       * payment_terms_recovery_fees / _late_fees / _discount
+--         — same 3 subject-coded mentions (PMT / PMD / AAB). Not legally
+--         required on a devis but keeping them makes the quote-to-invoice
+--         conversion trivial: same columns copy across without special
+--         handling.
+--       * payment_bank_hidden / _label
+--         — same "coordonnées bancaires" visibility toggle + editable label.
+ALTER TABLE Quote ADD COLUMN payment_means_selections TEXT;
+ALTER TABLE Quote ADD COLUMN payment_means_label TEXT;
+ALTER TABLE Quote ADD COLUMN payment_means_hidden INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE Quote ADD COLUMN payment_means_other_checked INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE Quote ADD COLUMN payment_terms_recovery_fees TEXT;
+ALTER TABLE Quote ADD COLUMN payment_terms_late_fees TEXT;
+ALTER TABLE Quote ADD COLUMN payment_terms_discount TEXT;
+ALTER TABLE Quote ADD COLUMN payment_bank_hidden INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE Quote ADD COLUMN payment_bank_label TEXT;
 
 -- 8) Document font (release 1.9). Per-doc so each invoice/quote/BL/avoir
 --    can freeze its own typeface, and old docs keep rendering with whatever
