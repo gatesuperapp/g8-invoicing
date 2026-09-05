@@ -689,9 +689,9 @@ Es ist ein Fehler aufgetreten :
 
     <!-- Default VAT-exempt mentions — see values/strings.xml for design notes.
          National mentions kept in native language across all locales. -->
-    <string name="vat_exempt_FR">TVA non applicable, art. 293 B du CGI</string>
+    <string name="vat_exempt_FR">Mehrwertsteuer nicht anwendbar, Art. 293 B CGI</string>
     <string name="vat_exempt_DE">Kleinunternehmer, § 19 UStG</string>
-    <string name="vat_exempt_IT">Operazione in franchigia da IVA — regime forfettario (L. 190/2014, art. 1 c. 54-89)</string>
+    <string name="vat_exempt_IT">Umsatzsteuerfreier Vorgang — Pauschalregelung (Gesetz 190/2014, Art. 1 §§ 54-89)</string>
     <string name="vat_exempt_fallback_eu">Umsatzsteuerfrei — Sonderregelung für Kleinunternehmen (Art. 284 der Richtlinie 2006/112/EG)</string>
     <string name="vat_exempt_fallback_generic">Nicht umsatzsteuerpflichtig</string>
 
