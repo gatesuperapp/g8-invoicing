@@ -421,6 +421,63 @@ fun updateQuoteUiState(
             doc = doc.copy(footerText = value as TextFieldValue)
         }
 
+        // Payment blocks — parity with InvoiceAddEditViewModel. Same
+        // ScreenElement identifiers are dispatched via the shared
+        // DocumentBottomSheetTextElements / picker branches, and the
+        // shared VM contract routes the update event to whichever VM
+        // owns the current doc type.
+        ScreenElement.DOCUMENT_PAYMENT_MEANS_LABEL -> {
+            @Suppress("UNCHECKED_CAST")
+            val newSegments = value as List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>
+            doc = doc.copy(
+                paymentMeansSegments = newSegments,
+                paymentMeansSelections = com.a4a.g8invoicing.data.models
+                    .chipIdsFromSegments(newSegments)
+                    .takeIf { it.isNotEmpty() },
+            )
+        }
+        ScreenElement.DOCUMENT_PAYMENT_MEANS_HIDDEN -> {
+            doc = doc.copy(paymentMeansHidden = value as Boolean)
+        }
+        ScreenElement.DOCUMENT_PAYMENT_MEANS_OTHER -> {
+            doc = doc.copy(paymentMeansOtherChecked = value as Boolean)
+        }
+        ScreenElement.DOCUMENT_PAYMENT_BANK_HIDDEN -> {
+            doc = doc.copy(paymentBankHidden = value as Boolean)
+        }
+        ScreenElement.DOCUMENT_PAYMENT_BANK_LABEL -> {
+            @Suppress("UNCHECKED_CAST")
+            doc = doc.copy(
+                paymentBankSegments = value as List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
+            )
+        }
+        ScreenElement.DOCUMENT_ISSUER_BANK_PICKED -> {
+            val bank = value as com.a4a.g8invoicing.ui.states.IssuerBankState
+            doc.documentIssuer?.let { currentIssuer ->
+                doc = doc.copy(
+                    documentIssuer = currentIssuer.copy(
+                        paymentIban = bank.identifier.text.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentBic = bank.bic.text.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentCountry = bank.countryCode?.takeIf { it.isNotEmpty() },
+                    )
+                )
+            }
+        }
+        ScreenElement.DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES -> {
+            doc = doc.copy(paymentTermsRecoveryFees = value as TextFieldValue)
+        }
+        ScreenElement.DOCUMENT_PAYMENT_TERMS_LATE_FEES -> {
+            doc = doc.copy(paymentTermsLateFees = value as TextFieldValue)
+        }
+        ScreenElement.DOCUMENT_PAYMENT_TERMS_DISCOUNT -> {
+            doc = doc.copy(paymentTermsDiscount = value as TextFieldValue)
+        }
+        ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+            doc = doc.copy(vatExemptionText = (value as TextFieldValue))
+        }
+
         else -> {}
     }
     return doc

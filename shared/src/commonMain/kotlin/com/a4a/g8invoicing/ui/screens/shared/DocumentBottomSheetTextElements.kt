@@ -182,8 +182,21 @@ fun DocumentBottomSheetTextElements(
                             bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
                             bankCountry = document.documentIssuer?.paymentCountry,
                         )
-                        // Avoir dropped: the payment picker isn't reachable
-                        // on a credit note anymore (row removed from the form).
+                        is com.a4a.g8invoicing.ui.states.QuoteState -> PaymentPickerParams(
+                            segments = document.paymentMeansSegments,
+                            hidden = document.paymentMeansHidden,
+                            masterIssuerId = document.documentIssuer?.originalClientOrIssuerId?.toLong(),
+                            selectedIban = document.documentIssuer?.paymentIban?.text,
+                            bankHidden = document.paymentBankHidden,
+                            hasIssuer = document.documentIssuer != null,
+                            otherChecked = document.paymentMeansOtherChecked,
+                            bankSegments = document.paymentBankSegments,
+                            bankIban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty(),
+                            bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
+                            bankCountry = document.documentIssuer?.paymentCountry,
+                        )
+                        // Avoir + BL: the payment picker isn't reachable
+                        // on these doc types (row removed from the form).
                         else -> PaymentPickerParams(
                             segments = emptyList(),
                             hidden = false,
@@ -198,6 +211,11 @@ fun DocumentBottomSheetTextElements(
                     // PaymentTermsPickerParams to seed each sub-editor.
                     ScreenElement.DOCUMENT_PAYMENT_TERMS -> when (document) {
                         is InvoiceState -> PaymentTermsPickerParams(
+                            recoveryFees = document.paymentTermsRecoveryFees,
+                            lateFees = document.paymentTermsLateFees,
+                            discount = document.paymentTermsDiscount,
+                        )
+                        is com.a4a.g8invoicing.ui.states.QuoteState -> PaymentTermsPickerParams(
                             recoveryFees = document.paymentTermsRecoveryFees,
                             lateFees = document.paymentTermsLateFees,
                             discount = document.paymentTermsDiscount,

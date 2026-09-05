@@ -24,6 +24,7 @@ import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.a4a.g8invoicing.ui.states.QuoteState
 import com.a4a.g8invoicing.ui.theme.textForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsBold
 import org.jetbrains.compose.resources.stringResource
@@ -49,19 +50,31 @@ fun DocumentBasicTemplateFooter(
     // existing docs. null/blank = no watermark on this doc.
     val watermark = document.watermarkText?.takeIf { it.isNotBlank() }
 
-    // Payment section (means + IBAN/BIC + terms) applies to INVOICES ONLY.
-    // A quote is a commercial proposal (no payment context); an avoir
-    // reverses the flow (seller owes buyer, no payment for the buyer to
-    // make). Bailing out on non-invoice types keeps the grey Paiement box
-    // off the PDF for those docs.
-    val invoice = document as? InvoiceState
-    val paymentMeansSegments = invoice?.paymentMeansSegments.orEmpty()
-    val paymentMeansHidden = invoice?.paymentMeansHidden ?: true
-    val paymentBankHidden = invoice?.paymentBankHidden ?: true
-    val iban = if (invoice != null) {
+    // Payment section (means + IBAN/BIC + terms) applies to INVOICES + QUOTES.
+    // A devis is a commercial proposal the client will sign, so it needs
+    // the same payment context (how to pay, terms) as the eventual invoice.
+    // An avoir reverses the flow (seller owes buyer, no payment for the
+    // buyer to make) — kept off. BLs likewise skip the block.
+    val payingDoc: DocumentState? = (document as? InvoiceState) ?: (document as? QuoteState)
+    val paymentMeansSegments = when (payingDoc) {
+        is InvoiceState -> payingDoc.paymentMeansSegments
+        is QuoteState -> payingDoc.paymentMeansSegments
+        else -> emptyList()
+    }
+    val paymentMeansHidden = when (payingDoc) {
+        is InvoiceState -> payingDoc.paymentMeansHidden
+        is QuoteState -> payingDoc.paymentMeansHidden
+        else -> true
+    }
+    val paymentBankHidden = when (payingDoc) {
+        is InvoiceState -> payingDoc.paymentBankHidden
+        is QuoteState -> payingDoc.paymentBankHidden
+        else -> true
+    }
+    val iban = if (payingDoc != null) {
         document.documentIssuer?.paymentIban?.text?.trim().orEmpty()
     } else ""
-    val bic = if (invoice != null) {
+    val bic = if (payingDoc != null) {
         document.documentIssuer?.paymentBic?.text?.trim().orEmpty()
     } else ""
 
@@ -78,8 +91,11 @@ fun DocumentBasicTemplateFooter(
             document.documentIssuer?.paymentCountry
         ) || document.documentIssuer?.paymentCountry == null
     ) "IBAN" else stringResource(Res.string.issuer_bank_identifier_generic)
-    val bankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> =
-        invoice?.paymentBankSegments.orEmpty()
+    val bankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = when (payingDoc) {
+        is InvoiceState -> payingDoc.paymentBankSegments
+        is QuoteState -> payingDoc.paymentBankSegments
+        else -> emptyList()
+    }
     val effectiveBankSegments = bankSegments.ifEmpty {
         com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
     }
@@ -94,12 +110,18 @@ fun DocumentBasicTemplateFooter(
     // BT-20 = concat of the 3 subject-coded fields (PMT/PMD/AAB), rendered
     // as one flowing paragraph — sentences joined with a single space, no
     // newlines, so the block matches the PDF and stays visually tight.
-    val paymentTerms = (document as? InvoiceState)?.let { inv ->
-        listOf(
-            inv.paymentTermsRecoveryFees.text.trim(),
-            inv.paymentTermsLateFees.text.trim(),
-            inv.paymentTermsDiscount.text.trim(),
+    val paymentTerms = when (payingDoc) {
+        is InvoiceState -> listOf(
+            payingDoc.paymentTermsRecoveryFees.text.trim(),
+            payingDoc.paymentTermsLateFees.text.trim(),
+            payingDoc.paymentTermsDiscount.text.trim(),
         ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
+        is QuoteState -> listOf(
+            payingDoc.paymentTermsRecoveryFees.text.trim(),
+            payingDoc.paymentTermsLateFees.text.trim(),
+            payingDoc.paymentTermsDiscount.text.trim(),
+        ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
+        else -> null
     }
     val footerText = document.footerText.text.takeIf { it.isNotBlank() }
     // BT-120 legal mention — only surfaced when the issuer is in franchise

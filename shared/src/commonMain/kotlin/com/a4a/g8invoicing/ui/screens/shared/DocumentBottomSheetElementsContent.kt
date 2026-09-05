@@ -110,14 +110,15 @@ fun DocumentBottomSheetElementsContent(
                 )
             )
     }
-    // BT-120 VAT exemption reason — surfaced only on invoices + avoirs (the
-    // only doc types whose PDF renders a tax mention), and only when the
-    // issuer is in franchise en base. Devis + BL don't carry a VAT-exempt
-    // reason: a quote is a proposal (no fiscal event), a BL isn't a taxable
-    // document. Above payment means so a fresh reader spots the mention
-    // before the payment block.
+    // BT-120 VAT exemption reason — surfaced on invoices + avoirs + devis
+    // when the issuer is in franchise en base. Devis added in the payment-
+    // parity refactor: the client sees the same legal mention on the quote
+    // that they'll see on the eventual invoice. BLs still skip it (not a
+    // taxable document). Above payment means so a fresh reader spots the
+    // mention before the payment block.
     val hasTaxContext = document is InvoiceState ||
-        document is com.a4a.g8invoicing.ui.states.CreditNoteState
+        document is com.a4a.g8invoicing.ui.states.CreditNoteState ||
+        document is com.a4a.g8invoicing.ui.states.QuoteState
     if (hasTaxContext && document.documentIssuer?.vatExempt == true) {
         val exemptionPreview = document.vatExemptionText?.text.orEmpty()
         inputList.add(
@@ -132,10 +133,17 @@ fun DocumentBottomSheetElementsContent(
             )
         )
     }
-    // Payment means (BT-81) — invoice only. Avoir dropped: an avoir has no
-    // payment context (seller owes buyer). Devis + BL never had it.
-    if (document is InvoiceState) {
-        val joined = joinPaymentMeansLabels(document.paymentMeansSelections)
+    // Payment means (BT-81) — invoice + devis. Avoir dropped: an avoir has
+    // no payment context (seller owes buyer). BL: not a payment doc.
+    val payingDoc: com.a4a.g8invoicing.ui.states.DocumentState? =
+        (document as? InvoiceState) ?: (document as? com.a4a.g8invoicing.ui.states.QuoteState)
+    if (payingDoc != null) {
+        val selections = when (payingDoc) {
+            is InvoiceState -> payingDoc.paymentMeansSelections
+            is com.a4a.g8invoicing.ui.states.QuoteState -> payingDoc.paymentMeansSelections
+            else -> null
+        }
+        val joined = joinPaymentMeansLabels(selections)
         inputList.add(
             FormInput(
                 label = stringResource(Res.string.document_payment_means),
@@ -148,15 +156,20 @@ fun DocumentBottomSheetElementsContent(
             )
         )
     }
-    if (document is InvoiceState) {
+    if (payingDoc != null) {
         // Preview shows only the "pénalités de retard" mention truncated —
         // that's the field that historically fit the row width. The 3
         // sub-mentions are visible once the user taps and opens the picker.
+        val lateFeesPreview = when (payingDoc) {
+            is InvoiceState -> payingDoc.paymentTermsLateFees.text
+            is com.a4a.g8invoicing.ui.states.QuoteState -> payingDoc.paymentTermsLateFees.text
+            else -> ""
+        }
         inputList.add(
             FormInput(
                 label = stringResource(Res.string.document_payment_terms),
                 inputType = ForwardElement(
-                    text = document.paymentTermsLateFees.text.ifEmpty { " - " },
+                    text = lateFeesPreview.ifEmpty { " - " },
                     displayArrow = false,
                     maxLines = 2,
                 ),
