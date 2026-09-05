@@ -30,4 +30,22 @@ data class QuoteState(
     // carry — otherwise the client-facing total on the quote wouldn't match
     // the eventual facture for a retention-eligible issuer.
     var retentions: List<RetentionState> = emptyList(),
+    // Payment fields — parity with InvoiceState (see there for the full doc
+    // on each one). A devis carries the same payment context as the future
+    // invoice: the client needs to see how they're expected to pay before
+    // signing, and the quote-to-invoice conversion copies the fields
+    // straight across.
+    var paymentMeansSelections: Set<String>? = null,
+    var paymentMeansOtherChecked: Boolean = false,
+    var paymentMeansSegments: List<com.a4a.g8invoicing.data.models.PaymentLabelSegment> = emptyList(),
+    var paymentMeansHidden: Boolean = false,
+    var paymentBankHidden: Boolean = false,
+    var paymentBankSegments: List<com.a4a.g8invoicing.data.models.PaymentBankSegment> = emptyList(),
+    var paymentTermsRecoveryFees: TextFieldValue = TextFieldValue(),
+    var paymentTermsLateFees: TextFieldValue = TextFieldValue(),
+    var paymentTermsDiscount: TextFieldValue = TextFieldValue(),
+    // BT-120 VAT exemption reason — same semantics as InvoiceState. Set
+    // when the issuer is in franchise en base so the mention appears
+    // under the totals block on the devis preview + PDF.
+    override var vatExemptionText: TextFieldValue? = null,
 ) : DocumentState()

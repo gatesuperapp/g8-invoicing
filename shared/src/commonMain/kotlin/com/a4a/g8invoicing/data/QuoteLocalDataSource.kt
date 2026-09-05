@@ -115,6 +115,40 @@ class QuoteLocalDataSource(
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
                 retentions = reusedRetentions,
+                // Payment defaults — parity with InvoiceLocalDataSource. Keeps
+                // the seed logic simple for now: default chip trio + localised
+                // default terms + editable prefix. No per-issuer / per-locale
+                // reuse-from-previous-quote (see InvoiceLocalDataSource for
+                // the fuller logic — port later if the reuse becomes a felt
+                // gap).
+                paymentMeansSelections = setOf(
+                    com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                    com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                    com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                ),
+                paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                    getString(Res.string.document_payment_means_default_label)
+                ),
+                paymentTermsRecoveryFees = TextFieldValue(
+                    getString(Res.string.payment_terms_recovery_fees_default)
+                ),
+                paymentTermsLateFees = TextFieldValue(
+                    getString(Res.string.payment_terms_late_fees_default)
+                ),
+                paymentTermsDiscount = TextFieldValue(
+                    getString(Res.string.payment_terms_discount_default)
+                ),
+                // BT-120 seeded from the issuer's country via the shared
+                // resolver (same helper the Invoice / CreditNote paths use).
+                // Returns null for countries with no reliable auto-fill so
+                // the user has to type it before export — same UX as on
+                // invoices. Not reused-from-previous-quote for now (see the
+                // note on the payment fields above).
+                vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                    issuer = existingIssuer,
+                    previousVatText = null,
+                    previousIssuerCountry = null,
+                ),
             )
 
             saveInfoInDocumentTable(newQuoteState)
@@ -319,6 +353,21 @@ class QuoteLocalDataSource(
                 originalCompanyId = it.original_company_id,
                 fontFamily = it.font_family,
                 retentions = retentions,
+                paymentMeansSelections = it.payment_means_selections
+                    ?.split(",")
+                    ?.map { code -> code.trim() }
+                    ?.filter { code -> code.isNotEmpty() }
+                    ?.toSet()
+                    ?.takeIf { set -> set.isNotEmpty() },
+                paymentMeansOtherChecked = it.payment_means_other_checked != 0L,
+                paymentMeansSegments = com.a4a.g8invoicing.data.models.parsePaymentLabel(it.payment_means_label),
+                paymentMeansHidden = it.payment_means_hidden != 0L,
+                paymentBankHidden = it.payment_bank_hidden != 0L,
+                paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it.payment_bank_label),
+                paymentTermsRecoveryFees = TextFieldValue(text = it.payment_terms_recovery_fees ?: ""),
+                paymentTermsLateFees = TextFieldValue(text = it.payment_terms_late_fees ?: ""),
+                paymentTermsDiscount = TextFieldValue(text = it.payment_terms_discount ?: ""),
+                vatExemptionText = it.vat_exemption_text?.let { TextFieldValue(text = it) },
             )
         }
     }
@@ -337,6 +386,16 @@ class QuoteLocalDataSource(
                     currency = document.currency.text,
                     footer = document.footerText.text,
                     font_family = document.fontFamily,
+                    payment_means_selections = document.paymentMeansSelections?.joinToString(","),
+                    payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
+                    payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
+                    payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
+                    payment_terms_recovery_fees = document.paymentTermsRecoveryFees.text,
+                    payment_terms_late_fees = document.paymentTermsLateFees.text,
+                    payment_terms_discount = document.paymentTermsDiscount.text,
+                    payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
+                    payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                    vat_exemption_text = document.vatExemptionText?.text,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 document.documentId?.toLong()?.let { id ->
@@ -673,6 +732,16 @@ class QuoteLocalDataSource(
                 format_locale = document.formatLocale,
                 original_company_id = document.originalCompanyId,
                 font_family = document.fontFamily,
+                payment_means_selections = document.paymentMeansSelections?.joinToString(","),
+                payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
+                payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
+                payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
+                payment_terms_recovery_fees = document.paymentTermsRecoveryFees.text,
+                payment_terms_late_fees = document.paymentTermsLateFees.text,
+                payment_terms_discount = document.paymentTermsDiscount.text,
+                payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
+                payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                vat_exemption_text = document.vatExemptionText?.text,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
