@@ -19,6 +19,7 @@ import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -85,6 +86,7 @@ import com.a4a.g8invoicing.ui.navigation.actionItems
 import com.a4a.g8invoicing.ui.navigation.actionTextElements
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.drawScrollThumb
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.DocumentState
@@ -992,6 +994,22 @@ private fun OupsDialog(
     // compose lazily.
     val ciiMessages: List<String> = ciiIssues.map { issue -> issue.resolveMessage() }
 
+    // Total dialog height ≤ 50 % of the window. AlertDialog auto-sizes to
+    // content, so we cap the scrollable body's max height by subtracting
+    // the fixed chrome (title + confirm button + vertical paddings ≈ 180 dp)
+    // from the 50 %-of-window budget. Content shorter than the cap keeps
+    // the dialog compact; longer content clips at the cap and scrolls.
+    // LocalWindowInfo.containerSize is in px — convert to dp via density.
+    // Falls back to 300.dp if the window hasn't reported a size yet.
+    val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val maxBodyHeightDp = with(density) {
+        val heightPx = windowInfo.containerSize.height
+        if (heightPx > 0) ((heightPx * 0.5f).toDp() - 180.dp).coerceAtLeast(120.dp)
+        else 300.dp
+    }
+    val scrollState = rememberScrollState()
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -999,8 +1017,17 @@ private fun OupsDialog(
         text = {
             // Scrollable so the modal stays usable on short devices when
             // all three blockers fire at once (🪄 + 💸 + a long list of
-            // missing Facturx fields easily overflows).
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            // missing Facturx fields easily overflows). Thin thumb on
+            // the right edge shows up only when content actually
+            // overflows — makes the scroll affordance discoverable
+            // without dominating the layout.
+            Column(
+                modifier = Modifier
+                    .heightIn(max = maxBodyHeightDp)
+                    .verticalScroll(scrollState)
+                    .drawScrollThumb(scrollState)
+                    .padding(end = 12.dp),
+            ) {
                 if (showFont) {
                     Text("🪄  $fontLine")
                     if (showVat || ciiMessages.isNotEmpty()) {
