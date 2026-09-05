@@ -380,7 +380,7 @@
     <string name="about_title_backup">Datensicherung</string>
     <string name="about_backup_text">Denkt daran eure Datenbank regelmäßig herunterzuladen, um sie wiederherzustellen, sollte das Telefon mal verloren gegangen sein.</string>
     <string name="about_download_database">💎 Speichern 💎</string>
-    <string name="account_backup_dialog_title">Sicherung heruntergeladen</string>
+    <string name="account_backup_dialog_title">✅ Sicherung heruntergeladen</string>
     <string name="account_backup_dialog_message">Ihre Datenbank wurde im Downloads-Ordner gespeichert. Möchten Sie sie auch per E-Mail senden?</string>
     <string name="account_backup_dialog_yes">Ja, per E-Mail senden</string>
     <string name="account_backup_dialog_no">Nein, das war's</string>

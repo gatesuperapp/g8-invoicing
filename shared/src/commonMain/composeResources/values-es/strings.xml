@@ -381,7 +381,7 @@
     <string name="about_title_backup">Copia de seguridad</string>
     <string name="about_backup_text">Acuérdate de descargar tu base de datos regularmente, para restaurarla en caso de pérdida del teléfono.</string>
     <string name="about_download_database">💎 Guardar 💎</string>
-    <string name="account_backup_dialog_title">Copia de seguridad descargada</string>
+    <string name="account_backup_dialog_title">✅ Copia de seguridad descargada</string>
     <string name="account_backup_dialog_message">Tu base de datos se ha guardado en la carpeta Descargas. ¿También quieres enviarla por correo?</string>
     <string name="account_backup_dialog_yes">Sí, enviar por correo</string>
     <string name="account_backup_dialog_no">No, es todo</string>

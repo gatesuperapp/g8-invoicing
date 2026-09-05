@@ -718,7 +718,7 @@
     <string name="about_title_backup">Sauvegarde</string>
     <string name="about_backup_text">Pense à télécharger ta base de données régulièrement, pour la restaurer en cas de perte de ton téléphone.</string>
     <string name="about_download_database">💎 Sauvegarder 💎</string>
-    <string name="account_backup_dialog_title">Sauvegarde téléchargée</string>
+    <string name="account_backup_dialog_title">✅ Sauvegarde téléchargée</string>
     <string name="account_backup_dialog_message">Ta base de données a été enregistrée dans le dossier Téléchargements. Veux-tu également l'envoyer par e-mail ?</string>
     <string name="account_backup_dialog_yes">Oui, envoyer par e-mail</string>
     <string name="account_backup_dialog_no">Non, c'est tout</string>
