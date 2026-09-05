@@ -263,6 +263,26 @@ fun OnboardingMigration19Dialog(
     }
     var fixCountryIdx by remember { mutableStateOf(0) }
 
+    // Mono-issuer: silently attach every client + product to the single
+    // issuer at wizard entry so nothing stays orphaned in the DB. The
+    // multi-issuer branch collects assignments through the Cleanup /
+    // AttachClients / AttachProducts screens instead — this pass is a no-op
+    // there. Skipped when the auto-seeded "Mon entreprise" is still in play
+    // (needsIssuerBootstrap) since that user's data is empty by definition.
+    // Idempotent for users who already ran a previous 1.9 migration —
+    // re-attaching to the same issuer is a plain UPDATE.
+    LaunchedEffect(Unit) {
+        if (!isMulti && remainingIssuers.size == 1 && !needsIssuerBootstrap) {
+            val singleIssuerId = remainingIssuers.first().id?.toLong()
+            if (singleIssuerId != null) {
+                val clientIds = context.clients.mapNotNull { it.id?.toLong() }
+                val productIds = context.products.mapNotNull { it.id?.toLong() }
+                if (clientIds.isNotEmpty()) actions.attachClients(clientIds, singleIssuerId)
+                if (productIds.isNotEmpty()) actions.attachProducts(productIds, singleIssuerId)
+            }
+        }
+    }
+
     // Database backup flow state — driven from the Backup step's
     // "Sauvegarder ma base de données" CTA. Same pattern as
     // OnboardingDialog: export → optional email dialog. Kept inside the

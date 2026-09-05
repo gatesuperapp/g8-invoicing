@@ -139,13 +139,12 @@ fun MainCompose(
         if (RestoreManager.consumeMigrationWizardResetIfAny(context)) {
             modulesRepo.resetMigration19Seen()
         }
-        // Pre-1.8 backup restored: re-fire the 1.8 wizard so its
-        // "clients tous dans le même pays ?" step can bulk-assign a country
-        // to the restored clients (their country_code column didn't exist in
-        // the source schema and comes back null after the swap).
-        if (RestoreManager.consumeOnboarding18ResetIfAny(context)) {
-            resetOnboarding18Seen(context)
-        }
+        // Pre-1.8 backup restored: consume the sentinel to clean the file up
+        // but do NOT reset the "1.8 seen" pref anymore. The 1.8 wizard was
+        // retired — its client-country step (and the auto-attach it enabled)
+        // now live in the enhanced 1.9 wizard, which is re-fired by the
+        // migration-wizard sentinel above.
+        RestoreManager.consumeOnboarding18ResetIfAny(context)
 
         // Snapshot the "returning user" signal BEFORE initializeVersionTracking
         // runs — on a fresh install it seeds LAST_SEEN_VERSION itself, which
@@ -215,6 +214,14 @@ fun MainCompose(
                         products = products,
                         footersByIssuer = footersByIssuer,
                     )
+                    // 1.8 wizard is deprecated — its country-fill / attach flow
+                    // now lives inside the enhanced 1.9 wizard (see the mono-
+                    // issuer silent attach + client-country steps there). Mark
+                    // 1.8 seen so its dialog doesn't gate the 1.9 dialog off
+                    // the screen (see the onboarding18Pending guard below).
+                    // A user upgrading from 1.8 already has this flag = true
+                    // so this is a no-op for them.
+                    setSeenOnboarding18(context)
                 }
             }
         }
