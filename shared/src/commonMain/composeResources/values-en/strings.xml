@@ -379,7 +379,7 @@
     <string name="about_title_backup">Backup</string>
     <string name="about_backup_text">Remember to download your database regularly, so you can restore it if you lose your phone.</string>
     <string name="about_download_database">💎 Save 💎</string>
-    <string name="account_backup_dialog_title">Backup downloaded</string>
+    <string name="account_backup_dialog_title">✅ Backup downloaded</string>
     <string name="account_backup_dialog_message">Your database has been saved to the Downloads folder. Do you also want to send it by email?</string>
     <string name="account_backup_dialog_yes">Yes, send by email</string>
     <string name="account_backup_dialog_no">No, that's all</string>
