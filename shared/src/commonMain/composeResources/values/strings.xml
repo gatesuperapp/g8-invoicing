@@ -641,13 +641,15 @@
     <!-- Default VAT-exempt mentions, keyed on the issuer's country (the legal
          regime lives with the issuer's jurisdiction, not the invoice's display
          language). Resolver walks: national key → EU fallback (art. 284) →
-         generic non-registered fallback. National mentions are kept in the
-         country's native language across ALL locales (§ 19 UStG stays German
-         even on an EN invoice — it's a legal citation, not prose). Only the
-         two fallback keys get proper translations per language. -->
+         generic non-registered fallback. Convention: legal reference stays
+         verbatim (§, art., L. …) — an auditor spots the citation regardless
+         of the surrounding prose — but the descriptive text around it gets
+         translated to the reader's language so the mention stays legible on
+         cross-locale invoices (a FR-language invoice from a DE issuer shows
+         "Petite entreprise, § 19 UStG"). -->
     <string name="vat_exempt_FR">TVA non applicable, art. 293 B du CGI</string>
-    <string name="vat_exempt_DE">Kleinunternehmer, § 19 UStG</string>
-    <string name="vat_exempt_IT">Operazione in franchigia da IVA — regime forfettario (L. 190/2014, art. 1 c. 54-89)</string>
+    <string name="vat_exempt_DE">Petite entreprise, § 19 UStG</string>
+    <string name="vat_exempt_IT">Opération en franchise de TVA — régime forfaitaire (L. 190/2014, art. 1 c. 54-89)</string>
     <string name="vat_exempt_fallback_eu">TVA non applicable — régime particulier des petites entreprises (art. 284 de la directive 2006/112/CE)</string>
     <string name="vat_exempt_fallback_generic">Non assujetti à la TVA</string>
 
