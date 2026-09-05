@@ -646,6 +646,15 @@
     <string name="document_vat_exemption_modal_title">VAT exemption reason</string>
     <string name="document_vat_exemption_placeholder">Enter the legal citation applicable to your business</string>
 
+    <!-- Default VAT-exempt mentions — see values/strings.xml for design notes.
+         National mentions are kept in the country's native language across all
+         locales; only the two fallbacks get proper translations. -->
+    <string name="vat_exempt_FR">TVA non applicable, art. 293 B du CGI</string>
+    <string name="vat_exempt_DE">Kleinunternehmer, § 19 UStG</string>
+    <string name="vat_exempt_IT">Operazione in franchigia da IVA — regime forfettario (L. 190/2014, art. 1 c. 54-89)</string>
+    <string name="vat_exempt_fallback_eu">VAT exempt — special scheme for small enterprises (Article 284 of Directive 2006/112/EC)</string>
+    <string name="vat_exempt_fallback_generic">Not registered for VAT</string>
+
     <!-- Country picker (address form) -->
     <string name="client_country">Country</string>
     <string name="country_picker_search">Search a country</string>

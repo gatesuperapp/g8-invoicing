@@ -618,6 +618,19 @@
     <string name="document_vat_exemption_modal_title">Mention d'exonération de TVA</string>
     <string name="document_vat_exemption_placeholder">Ex : TVA non applicable, art. 293 B du CGI</string>
 
+    <!-- Default VAT-exempt mentions, keyed on the issuer's country (the legal
+         regime lives with the issuer's jurisdiction, not the invoice's display
+         language). Resolver walks: national key → EU fallback (art. 284) →
+         generic non-registered fallback. National mentions are kept in the
+         country's native language across ALL locales (§ 19 UStG stays German
+         even on an EN invoice — it's a legal citation, not prose). Only the
+         two fallback keys get proper translations per language. -->
+    <string name="vat_exempt_FR">TVA non applicable, art. 293 B du CGI</string>
+    <string name="vat_exempt_DE">Kleinunternehmer, § 19 UStG</string>
+    <string name="vat_exempt_IT">Operazione in franchigia da IVA — regime forfettario (L. 190/2014, art. 1 c. 54-89)</string>
+    <string name="vat_exempt_fallback_eu">TVA non applicable — régime particulier des petites entreprises (art. 284 de la directive 2006/112/CE)</string>
+    <string name="vat_exempt_fallback_generic">Non assujetti à la TVA</string>
+
     <!-- Account Screen -->
     <string name="account_share_content">J'utilise l'appli 𝕘𝟠 pour créer mes bons de livraison et factures en un rien de temps ! En plus c'est un logiciel libre et engagé. Tu veux tester ? C'est gratuit et dispo sur le Play Store : https://play.google.com/store/apps/details?id=com.a4a.g8invoicing ou sur F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
