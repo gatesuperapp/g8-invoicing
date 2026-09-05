@@ -191,8 +191,10 @@ fun App(
                     )
                 },
                 sendDatabaseByEmail = { /* no-op */ },
+                setClientCountry = { /* no-op on Desktop/iOS shell */ },
                 markSeen = { modulesRepo.markMigration19Seen() },
             ),
+            showClientCountryStep = false,
             onDismiss = { migration19Context = null },
         )
     }

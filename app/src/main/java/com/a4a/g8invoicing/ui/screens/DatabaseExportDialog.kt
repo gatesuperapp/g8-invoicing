@@ -3,9 +3,8 @@ package com.a4a.g8invoicing.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import com.a4a.g8invoicing.ui.shared.AppConfirmDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,13 +56,33 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
 
     var exportMessage by remember { mutableStateOf<String?>(null) }
 
-    AlertDialog(
-        onDismissRequest = {
-            viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
-            onDismiss()
+    // Annotated body (bold intro span, error tail after export attempt)
+    // plugged via bodyContent — plain body= only handles single-style strings.
+    val markSeenAndDismiss: () -> Unit = {
+        viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
+        onDismiss()
+    }
+    AppConfirmDialog(
+        title = stringResource(Res.string.database_export_dialog_title),
+        confirmText = stringResource(Res.string.database_export_dialog_confirm),
+        cancelText = stringResource(Res.string.database_export_dialog_dismiss),
+        onConfirm = {
+            val file = try {
+                exportDatabaseToDownloads(context, sqlDriver)
+            } catch (e: Exception) {
+                scope.launch {
+                    exportMessage = getString(
+                        Res.string.database_export_dialog_error,
+                        e.message ?: ""
+                    )
+                }
+                return@AppConfirmDialog
+            }
+            markSeenAndDismiss()
+            onResult(file)
         },
-        title = { Text(stringResource(Res.string.database_export_dialog_title)) },
-        text = {
+        onDismiss = markSeenAndDismiss,
+        bodyContent = {
             Text(
                 buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
@@ -78,34 +97,6 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
                 }
             )
         },
-        confirmButton = {
-            TextButton(onClick = {
-                val file = try {
-                    exportDatabaseToDownloads(context, sqlDriver)
-                } catch (e: Exception) {
-                    scope.launch {
-                        exportMessage = getString(
-                            Res.string.database_export_dialog_error,
-                            e.message ?: ""
-                        )
-                    }
-                    return@TextButton
-                }
-                viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
-                onDismiss()
-                onResult(file)
-            }) {
-                Text(stringResource(Res.string.database_export_dialog_confirm), color = ColorVioletLink)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = {
-                viewModel.viewModelScope.launch { setSeenDbExportPopup(context.applicationContext) }
-                onDismiss()
-            }) {
-                Text(stringResource(Res.string.database_export_dialog_dismiss), color = ColorVioletLink)
-            }
-        }
     )
 }
 
@@ -113,23 +104,16 @@ fun DatabaseExportDialog(context: Context, onDismiss: () -> Unit, onResult: (Fil
 fun DatabaseEmailDialog(context: Context, onDismiss: () -> Unit, file: File) {
     val scope = rememberCoroutineScope()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.database_email_dialog_title)) },
-        text = { Text(stringResource(Res.string.database_email_dialog_text)) },
-        confirmButton = {
-            TextButton(onClick = {
-                onDismiss()
-                scope.launch { sendDatabaseByEmail(context, file) }
-            }) {
-                Text(stringResource(Res.string.yes), color = ColorVioletLink)
-            }
+    AppConfirmDialog(
+        title = stringResource(Res.string.database_email_dialog_title),
+        body = stringResource(Res.string.database_email_dialog_text),
+        confirmText = stringResource(Res.string.yes),
+        cancelText = stringResource(Res.string.no),
+        onConfirm = {
+            onDismiss()
+            scope.launch { sendDatabaseByEmail(context, file) }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(Res.string.no), color = ColorVioletLink)
-            }
-        }
+        onDismiss = onDismiss,
     )
 }
 

@@ -108,30 +108,11 @@ fun InfoTooltipButton(
     }
 
     if (open) {
-        AlertDialog(
-            onDismissRequest = closeAndDismiss,
-            title = { Text(title) },
-            text = {
-                Text(
-                    text = content,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            },
-            textContentColor = Color.Black,
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    Button(onClick = closeAndDismiss) {
-                        Text(
-                            text = stringResource(Res.string.info_tooltip_ok),
-                            style = MaterialTheme.typography.textCta,
-                        )
-                    }
-                }
-            },
-            modifier = Modifier.padding(16.dp),
+        AppInfoDialog(
+            title = title,
+            body = content,
+            confirmText = stringResource(Res.string.info_tooltip_ok),
+            onDismiss = closeAndDismiss,
         )
     }
 }

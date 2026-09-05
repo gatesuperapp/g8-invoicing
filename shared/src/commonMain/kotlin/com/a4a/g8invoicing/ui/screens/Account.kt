@@ -409,32 +409,18 @@ fun Account(
         }
 
         if (showDeleteAccountDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteAccountDialog = false },
-                title = { Text(stringResource(Res.string.account_delete_dialog_title)) },
-                text = { Text(stringResource(Res.string.account_delete_dialog_message)) },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteAccountDialog = false
-                            showDeletionResult = true
-                            viewModel.deleteAccount()
-                        },
-                    ) {
-                        Text(
-                            stringResource(Res.string.account_delete_dialog_confirm),
-                            color = ColorRedLate,
-                        )
-                    }
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = stringResource(Res.string.account_delete_dialog_title),
+                body = stringResource(Res.string.account_delete_dialog_message),
+                confirmText = stringResource(Res.string.account_delete_dialog_confirm),
+                cancelText = stringResource(Res.string.account_delete_dialog_cancel),
+                destructive = true,
+                onConfirm = {
+                    showDeleteAccountDialog = false
+                    showDeletionResult = true
+                    viewModel.deleteAccount()
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteAccountDialog = false }) {
-                        Text(
-                            stringResource(Res.string.account_delete_dialog_cancel),
-                            color = ColorVioletLink,
-                        )
-                    }
-                },
+                onDismiss = { showDeleteAccountDialog = false },
             )
         }
 
@@ -506,42 +492,24 @@ fun Account(
         }
 
         if (showSendDatabaseByEmailDialog && exportedFilePath != null) {
-            AlertDialog(
-                onDismissRequest = { showSendDatabaseByEmailDialog = false },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = null,
-                        tint = Color(0xFF4CAF50),
-                    )
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = stringResource(Res.string.account_backup_dialog_title),
+                body = stringResource(Res.string.account_backup_dialog_message),
+                confirmText = stringResource(Res.string.account_backup_dialog_yes),
+                cancelText = stringResource(Res.string.account_backup_dialog_no),
+                onConfirm = {
+                    showSendDatabaseByEmailDialog = false
+                    exportedFilePath?.let { onSendDatabaseByEmail(it) }
                 },
-                title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
-                text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showSendDatabaseByEmailDialog = false
-                        exportedFilePath?.let { onSendDatabaseByEmail(it) }
-                    }) {
-                        Text(stringResource(Res.string.account_backup_dialog_yes), color = ColorVioletLink)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showSendDatabaseByEmailDialog = false }) {
-                        Text(stringResource(Res.string.account_backup_dialog_no), color = ColorVioletLink)
-                    }
-                }
+                onDismiss = { showSendDatabaseByEmailDialog = false },
             )
         }
 
         if (showExportErrorDialog) {
-            AlertDialog(
-                onDismissRequest = { showExportErrorDialog = false },
-                text = { Text(exportErrorMessage ?: "") },
-                confirmButton = {
-                    TextButton(onClick = { showExportErrorDialog = false }) {
-                        Text(stringResource(Res.string.ok), color = ColorVioletLink)
-                    }
-                }
+            com.a4a.g8invoicing.ui.shared.AppInfoDialog(
+                body = exportErrorMessage ?: "",
+                confirmText = stringResource(Res.string.ok),
+                onDismiss = { showExportErrorDialog = false },
             )
         }
     }
@@ -1048,20 +1016,11 @@ private fun MyCompaniesSection(
     }
 
     if (deleteBlocked) {
-        // Same AlertDialog shape as the export-blocker "Oups" modal in
-        // DocumentAddEdit — neutral white card, black body, single confirm
-        // button. The bespoke violet card this used to render broke the
-        // dialog family for no product reason.
-        AlertDialog(
-            onDismissRequest = { deleteBlocked = false },
-            title = { Text(stringResource(Res.string.entreprise_delete_blocked_title)) },
-            text = { Text(stringResource(Res.string.entreprise_delete_blocked_message)) },
-            textContentColor = Color.Black,
-            confirmButton = {
-                Button(onClick = { deleteBlocked = false }) {
-                    Text(stringResource(Res.string.ok))
-                }
-            },
+        com.a4a.g8invoicing.ui.shared.AppInfoDialog(
+            title = stringResource(Res.string.entreprise_delete_blocked_title),
+            body = stringResource(Res.string.entreprise_delete_blocked_message),
+            confirmText = stringResource(Res.string.ok),
+            onDismiss = { deleteBlocked = false },
         )
     }
 

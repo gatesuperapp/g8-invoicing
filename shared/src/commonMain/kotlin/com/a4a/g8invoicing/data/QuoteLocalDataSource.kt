@@ -8,6 +8,10 @@ import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.document_payment_means_default_label
+import com.a4a.g8invoicing.shared.resources.payment_terms_discount_default
+import com.a4a.g8invoicing.shared.resources.payment_terms_late_fees_default
+import com.a4a.g8invoicing.shared.resources.payment_terms_recovery_fees_default
 import com.a4a.g8invoicing.shared.resources.quote_default_footer
 import com.a4a.g8invoicing.shared.resources.quote_default_number
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default

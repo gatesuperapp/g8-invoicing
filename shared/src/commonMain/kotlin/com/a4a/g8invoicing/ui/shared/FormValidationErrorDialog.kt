@@ -3,10 +3,6 @@ package com.a4a.g8invoicing.ui.shared
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.cii_validation_confirm
@@ -43,21 +38,16 @@ fun FormValidationErrorDialog(
         .map { FormInputsValidator.MODAL_MESSAGE_OVERRIDES[it] ?: it }
         .distinct()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.form_validation_dialog_title)) },
-        textContentColor = Color.Black,
-        text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+    AppInfoDialog(
+        title = stringResource(Res.string.form_validation_dialog_title),
+        confirmText = stringResource(Res.string.cii_validation_confirm),
+        onDismiss = onDismiss,
+        bodyContent = {
+            Column {
                 displayed.forEach { line ->
                     Text("• $line")
                     Spacer(Modifier.height(4.dp))
                 }
-            }
-        },
-        confirmButton = {
-            Button(onClick = onDismiss) {
-                Text(stringResource(Res.string.cii_validation_confirm))
             }
         },
     )

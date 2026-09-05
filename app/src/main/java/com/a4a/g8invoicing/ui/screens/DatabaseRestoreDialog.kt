@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.RestoreManager
+import com.a4a.g8invoicing.ui.shared.AppConfirmDialog
+import com.a4a.g8invoicing.ui.shared.AppInfoDialog
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -136,10 +138,15 @@ fun DatabaseRestoreFlow(
 
 @Composable
 private fun ConfirmationDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        title = { Text(RestoreCopy.CONFIRM_TITLE) },
-        text = {
+    // Annotated body (bold "Attention" + "écraser" spans) plugged via
+    // bodyContent — plain body= only handles single-style strings.
+    AppConfirmDialog(
+        title = RestoreCopy.CONFIRM_TITLE,
+        confirmText = RestoreCopy.CONFIRM_YES,
+        cancelText = RestoreCopy.CONFIRM_NO,
+        onConfirm = onConfirm,
+        onDismiss = onCancel,
+        bodyContent = {
             Text(
                 buildAnnotatedString {
                     append(RestoreCopy.CONFIRM_BODY_INTRO)
@@ -154,40 +161,26 @@ private fun ConfirmationDialog(onConfirm: () -> Unit, onCancel: () -> Unit) {
                 }
             )
         },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(RestoreCopy.CONFIRM_YES, color = ColorVioletLink)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCancel) {
-                Text(RestoreCopy.CONFIRM_NO, color = ColorVioletLink)
-            }
-        },
     )
 }
 
 @Composable
 private fun PickFileDialog(onPick: () -> Unit, onCancel: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onCancel,
-        title = { Text(RestoreCopy.PICK_TITLE) },
-        text = { Text(RestoreCopy.PICK_BODY) },
-        confirmButton = {
-            TextButton(onClick = onPick) {
-                Text(RestoreCopy.PICK_UPLOAD, color = ColorVioletLink)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCancel) {
-                Text(RestoreCopy.CONFIRM_NO, color = ColorVioletLink)
-            }
-        },
+    AppConfirmDialog(
+        title = RestoreCopy.PICK_TITLE,
+        body = RestoreCopy.PICK_BODY,
+        confirmText = RestoreCopy.PICK_UPLOAD,
+        cancelText = RestoreCopy.CONFIRM_NO,
+        onConfirm = onPick,
+        onDismiss = onCancel,
     )
 }
 
 @Composable
 private fun ValidatingDialog() {
+    // No-button loader — doesn't map onto AppInfoDialog / AppConfirmDialog
+    // (both mandate a CTA). Kept as raw AlertDialog for that reason. Same
+    // exception as Account.kt's deletion-in-progress loader.
     AlertDialog(
         onDismissRequest = { /* not dismissable during validation */ },
         title = null,
@@ -204,31 +197,25 @@ private fun ValidatingDialog() {
 
 @Composable
 private fun ErrorDialog(message: String, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(RestoreCopy.ERROR_TITLE) },
-        text = { Text(message) },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(RestoreCopy.OK, color = ColorVioletLink)
-            }
-        },
+    AppInfoDialog(
+        title = RestoreCopy.ERROR_TITLE,
+        body = message,
+        confirmText = RestoreCopy.OK,
+        onDismiss = onDismiss,
     )
 }
 
 @Composable
 private fun ReadyDialog(onConfirm: () -> Unit) {
-    AlertDialog(
-        // Non-dismissable so the user can't accidentally lose the staging
-        // file by tapping outside without triggering the actual restore.
-        onDismissRequest = {},
-        title = { Text(RestoreCopy.READY_TITLE) },
-        text = { Text(RestoreCopy.READY_BODY) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(RestoreCopy.READY_CONFIRM, color = ColorVioletLink)
-            }
-        },
+    // Non-dismissable — the user shouldn't be able to swipe past the "kill
+    // the app to finalise" step. AppInfoDialog's onDismiss doubles as the
+    // confirm callback so a scrim tap still fires the kill path (same
+    // behaviour as tapping "Terminer" explicitly).
+    AppInfoDialog(
+        title = RestoreCopy.READY_TITLE,
+        body = RestoreCopy.READY_BODY,
+        confirmText = RestoreCopy.READY_CONFIRM,
+        onDismiss = onConfirm,
     )
 }
 

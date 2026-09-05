@@ -120,15 +120,11 @@ fun LogoPickerComponent(
 
     // Error dialog
     if (errorMessage != null) {
-        AlertDialog(
-            onDismissRequest = { errorMessage = null },
-            title = { Text(errorTitle) },
-            text = { Text(errorMessage!!) },
-            confirmButton = {
-                TextButton(onClick = { errorMessage = null }) {
-                    Text(errorDismissText, color = Color.Black)
-                }
-            }
+        AppInfoDialog(
+            title = errorTitle,
+            body = errorMessage!!,
+            confirmText = errorDismissText,
+            onDismiss = { errorMessage = null },
         )
     }
 
