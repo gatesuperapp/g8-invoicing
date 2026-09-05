@@ -135,13 +135,15 @@ class DeliveryNoteLocalDataSource(
                     ?.let {
                         it.transformIntoEditableDeliveryNote(
                             fetchDocumentProducts(it.delivery_note_id),
-                            fetchClientAndIssuer(
-                                it.delivery_note_id,
-                                linkDeliveryNoteToDocumentClientOrIssuerQueries,
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries,
-                                documentClientOrIssuerEmailQueries
+                            hydrateBanksOnDocIssuer(
+                                fetchClientAndIssuer(
+                                    it.delivery_note_id,
+                                    linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                                    linkDocumentClientOrIssuerToAddressQueries,
+                                    documentClientOrIssuerQueries,
+                                    documentClientOrIssuerAddressQueries,
+                                    documentClientOrIssuerEmailQueries
+                                )
                             ),
                             fetchTag(it.delivery_note_id)
                         )
@@ -151,6 +153,24 @@ class DeliveryNoteLocalDataSource(
                 null
             }
         }
+    }
+
+    // See InvoiceLocalDataSource.hydrateBanksOnDocIssuer. The document-side
+    // ClientOrIssuer snapshot only carries the doc-frozen columns; the
+    // (potentially multiple) IssuerBank rows live on the master issuer and
+    // need to be hydrated here so the bottom-sheet "Éditer émetteur" form
+    // shows the IBAN/BIC section pre-filled instead of empty.
+    private suspend fun hydrateBanksOnDocIssuer(
+        states: List<com.a4a.g8invoicing.ui.states.ClientOrIssuerState>?,
+    ): List<com.a4a.g8invoicing.ui.states.ClientOrIssuerState>? = states?.map { state ->
+        if (state.type == ClientOrIssuerType.DOCUMENT_ISSUER &&
+            state.originalClientOrIssuerId != null
+        ) {
+            state.copy(
+                banks = clientOrIssuerDataSource
+                    .getIssuerBanks(state.originalClientOrIssuerId!!.toLong())
+            )
+        } else state
     }
 
     // --- fetchAll (returning Flow) ---
