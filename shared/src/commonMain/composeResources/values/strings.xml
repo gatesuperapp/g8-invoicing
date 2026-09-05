@@ -93,9 +93,9 @@
     <string name="product_price_with_tax">TTC</string>
 
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nSi tu as déjà envoyé la facture, il n'est pas légal de la supprimer :</string>
-    <string name="alert_dialog_delete_invoice_2">En savoir plus\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nDans tous les cas, la suppression est irréversible.</string>
+    <string name="alert_dialog_delete_invoice_1">Es-tu sûr·e ? \n\nDans certains pays, il n'est pas légal de supprimer une facture déjà envoyée.\n\nDans tous les cas, la suppression est irréversible.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Es-tu sûr·e ? Cette action est irréversible.</string>
     <string name="alert_dialog_delete_confirm">Oui, supprimer</string>
@@ -182,6 +182,7 @@
     <string name="product_tax">TVA</string>
     <string name="tax_rate_screen_title">Taux de TVA</string>
     <string name="tax_rate_add_rate">+ Ajouter un taux</string>
+    <string name="tax_rate_edit_dialog_title">Éditer taux TVA</string>
     <string name="product_price">Prix</string>
     <string name="product_price_input">3</string>
     <string name="product_price_default">Prix par défaut</string>
@@ -536,12 +537,21 @@
     <string name="drawer_gstore">𝕘Store</string>
     <string name="drawer_my_company">Mon entreprise</string>
 
-    <!-- First-launch onboarding: ask for company name -->
-    <string name="first_launch_issuer_title">Quel est le nom de ton entreprise ?</string>
-    <string name="first_launch_issuer_placeholder">Nom de l'entreprise</string>
-    <string name="first_launch_issuer_cta">Commencer</string>
-    <string name="first_launch_issuer_next">Continuer</string>
-    <string name="first_launch_issuer_country_title">Dans quel pays est ton entreprise ?</string>
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">Bienvenue sur 𝕘𝟠 aka The Gate</string>
+    <string name="first_launch_welcome_amigo">Je suis Petit Rhino, ton nouvel amigo</string>
+    <string name="first_launch_next">Suivant</string>
+    <string name="first_launch_liberty_body1">Je t'aide à tout gérer depuis ton téléphone : factures, bons de livraison, clients, produits… et à convertir des documents en facture !</string>
+    <string name="first_launch_liberty_body2">L'application fonctionne hors ligne, le compte est facultatif et tes données ne sont pas partagées à des tiers ♡</string>
+    <string name="first_launch_gstore_intro">Certaines fonctionnalités s'activent à la demande depuis l'onglet 𝕘Store : devis, BL, export aux formats de la facturation électronique et +.</string>
+    <string name="first_launch_gstore_premium">L'appli reste ainsi légère et personnalisable.</string>
+    <string name="first_launch_settings_intro">Avant de te laisser la main, il me faut 2 infos pour paramétrer l'interface :</string>
+    <string name="first_launch_settings_name_label">Nom de ton entreprise</string>
+    <string name="first_launch_settings_country_label">Pays</string>
+    <string name="first_launch_settings_cta">C'est parti</string>
+    <string name="first_launch_issuer_placeholder">Ferme des Trois Chênes</string>
+    <string name="first_launch_issuer_skip">Plus tard</string>
+    <string name="first_launch_issuer_default_name">Mon entreprise</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
@@ -553,11 +563,9 @@
     <string name="gstore_footer_premium">Gère ton compte sur </string>
     <string name="gstore_module_orders_title">Bon de commande</string>
     <string name="gstore_module_orders_desc">Gère les commandes de tes clients</string>
-    <string name="gstore_module_facturx_title">Factur-X</string>
-    <string name="gstore_module_facturx_desc">Facturation électronique</string>
     <string name="gstore_module_watermark_title">Mention g8</string>
     <string name="gstore_module_watermark_desc">Retirer la mention g8 de tes documents</string>
-    <string name="gstore_module_watermark_detail">Active ce module pour supprimer la mention « Fait avec g8, application mobile de facturation » de tes factures, bons de livraison et avoirs.</string>
+    <string name="gstore_module_watermark_detail">Le filigrane « Fait avec g8, application mobile de facturation » est affiché par défaut dans les documents. Il permet de soutenir le projet en le faisant connaître :) Tu peux cependant le retirer en activant ce module.</string>
     <string name="invoice_watermark_default">Fait avec g8 (www.the-gate.fr), application mobile de facturation</string>
     <string name="gstore_module_payments_title">Paiements</string>
     <string name="gstore_module_payments_desc">Enregistre CB, chèques, espèces</string>
@@ -565,7 +573,7 @@
     <string name="gstore_module_themes_desc">Couleurs et designs en plus</string>
     <string name="gstore_module_quote_title">Devis illimités</string>
     <string name="gstore_module_quote_desc">Créer des devis et les convertir en factures</string>
-    <string name="gstore_module_quote_detail">Active ce module pour créer des devis, les envoyer à tes client·es, et les convertir en facture une fois acceptés. Le numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
+    <string name="gstore_module_quote_detail">Active ce module pour créer des devis, les envoyer à tes client·es, et les convertir en facture une fois acceptés.\n\nLe numéro de devis sera indiqué dans la facture correspondante pour la traçabilité comptable.</string>
     <string name="gstore_module_quote_trial_title">Devis découverte</string>
     <string name="gstore_module_quote_trial_desc">5 devis gratuits pour découvrir la fonctionnalité</string>
     <string name="gstore_module_quote_trial_detail">Activer ce module permet d'obtenir 5 devis gratuits pour tester la fonctionnalité et voir si elle te convient. Il faudra ensuite devenir membre premium pour avoir les devis en illimité.</string>
@@ -574,20 +582,30 @@
     <string name="gstore_quote_trial_exhausted_cta">D'accord</string>
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
-    <string name="gstore_module_delivery_note_detail">Active ce module pour créer des bons de livraison, les envoyer à tes client·es et les convertir en facture une fois acceptés. Le numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable. Tu peux grouper plusieurs bons de livraison en une seule facture.</string>
+    <string name="gstore_module_delivery_note_detail">Active ce module pour créer des bons de livraison, les envoyer à tes client·es et les convertir en facture une fois acceptés.\n\nLe numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\nTu peux convertir un bon de livraison en facture, et grouper plusieurs BLs en une seule facture.</string>
+    <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
+    <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises</string>
+    <string name="gstore_module_multi_entreprise_detail">Active ce module si tu factures sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nTu pourras ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nTes clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
     <!-- CII XML export gStore module — same structured data as Factur-X but
          delivered as a raw XML file, for international platforms that don't
          accept the Factur-X PDF/A-3 container yet. Independent of client
          type (works for a Particulier client too). -->
     <string name="gstore_module_cii_title">Export CII XML</string>
-    <string name="gstore_module_cii_desc">Exporter les données structurées de la facture en XML CII</string>
-    <string name="gstore_module_cii_detail">Active ce module pour exporter chaque facture au format CII XML (norme européenne EN 16931, profil Extended). Utile pour transmettre tes factures aux plateformes de facturation électronique à l'international qui n'acceptent pas encore le format Factur-X. Le fichier généré peut être ouvert par tout logiciel comptable compatible EN 16931.</string>
+    <string name="gstore_module_cii_desc">Exporter les factures dans un format socle de facturation électronique</string>
+    <string name="gstore_module_cii_detail">Active ce module pour pouvoir exporter tes factures au format Cross Industry Invoice (CII), une norme de facturation électronique reconnue à l'international.\n\nSes données XML sont lisibles par des logiciels, notamment des plateformes de facturation électronique.\n\nIl ne contient pas de PDF contrairement au format Factur-X.</string>
+    <!-- Factur-X (PDF/A-3 hybrid) export gStore module — visual PDF + CII XML
+         embedded as `factur-x.xml` (/AF, AFRelationship=Data). Same pre-launch
+         free treatment as MODULE_CII_XML_EXPORT. -->
+    <string name="gstore_module_facturx_title">Export Factur-X</string>
+    <string name="gstore_module_facturx_desc">Exporter les factures dans un format socle de facturation électronique</string>
+    <string name="gstore_module_facturx_detail">Active ce module pour pouvoir exporter tes factures au format Factur-X, une norme de facturation électronique franco-allemande.\n\nLe fichier généré est un PDF classique adossé à un fichier XML lisible par les machines.\n\nUtile pour transmettre tes factures aux plateformes de facturation électronique tout en gardant un PDF lisible pour le client.</string>
     <string name="export_cii_button">Exporter en CII</string>
     <string name="export_chooser_title">Format d'export</string>
+    <string name="export_chooser_description">Pour un format compatible facturation électronique, utilise CII ou Factur-X.</string>
     <string name="export_chooser_pdf">PDF</string>
     <string name="export_chooser_cii">CII XML</string>
+    <string name="export_chooser_facturx">Factur-X</string>
     <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
-    <string name="export_vat_exempt_conflict_title">Franchise de TVA</string>
     <string name="export_vat_exempt_conflict_message">Ton entreprise est en franchise de TVA mais tu as ajouté de la TVA à certains produits. Retire-la pour pouvoir exporter ta facture.</string>
     <string name="cii_validation_title">Oups</string>
     <string name="cii_validation_intro">Pour créer une facture électronique valide, complète les champs suivants :</string>
@@ -597,12 +615,14 @@
     <string name="cii_validation_issuer_siren">SIREN / SIRET de l'émetteur</string>
     <string name="cii_validation_issuer_siren_format">Le SIREN de l'émetteur doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
     <string name="cii_validation_issuer_vat">Numéro de TVA de l'émetteur</string>
+    <string name="cii_validation_issuer_vat_format">Le numéro de TVA de l'émetteur n'est pas au bon format pour le pays sélectionné</string>
     <string name="cii_validation_issuer_address">Adresse complète de l'émetteur (rue, code postal, ville)</string>
     <string name="cii_validation_client_missing">Ajouter un client</string>
     <string name="cii_validation_client_name">Nom du client</string>
     <string name="cii_validation_client_type">Préciser si le client est un professionnel ou un particulier</string>
     <string name="cii_validation_client_siren">SIREN / SIRET du client (client professionnel)</string>
     <string name="cii_validation_client_siren_format">Le SIREN du client doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
+    <string name="cii_validation_client_vat_format">Le numéro de TVA du client n'est pas au bon format pour le pays sélectionné</string>
     <string name="cii_validation_client_email">Ajouter un email au client (adresse électronique nécessaire pour un client particulier)</string>
     <string name="cii_validation_client_address">Adresse complète du client (rue, code postal, ville)</string>
     <string name="cii_validation_products_empty">Ajouter au moins un produit à la facture</string>
@@ -679,9 +699,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr</string>
     <string name="about_website_tail"> !</string>
-    <string name="about_title_community">Communauté</string>
-    <string name="about_community_text">Viens discuter de tes besoins, tes idées et échanger sur le</string>
-    <string name="about_community_cta">forum de la communauté.</string>
+    <string name="about_title_community">Nouveautés</string>
+    <string name="about_community_text">Consulte les nouveautés de chaque version ainsi que les actualités du produit sur le</string>
+    <string name="about_community_cta">forum de g8.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Assistance</string>
     <string name="about_assistance_intro">Tu peux nous écrire à tout moment pour signaler un bug, proposer une fonctionnalité ou demander de l'aide.</string>
@@ -713,6 +733,13 @@
     <string name="account_legal_privacy_label">politique de confidentialité</string>
     <string name="about_share_text_2">Partage-la à tes ami·es !</string>
     <string name="about_share_button">Partager</string>
+    <!-- Licences section: code (GPL-3.0) + polices embarquées (OFL 1.1). Le
+         corps NOTICE-polices.md + OFL-1.1.txt est chargé depuis
+         composeResources/files/licenses/ à l'ouverture de la section. -->
+    <string name="about_title_licenses">Licences</string>
+    <string name="about_licenses_code_line">Le code de l'application est sous licence GPL-3.0.</string>
+    <string name="about_licenses_code_url">https://github.com/gatesuperapp/g8-invoicing</string>
+    <string name="about_licenses_ofl_heading">SIL Open Font License 1.1</string>
     <string name="about_title_version">Version de l'application</string>
 
     <!-- Language Selection -->
@@ -745,9 +772,9 @@
     <string name="quote_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
     <!-- Invoice List Advice -->
-    <string name="invoice_advice_legal_help">Clique sur moi …!</string>
-    <string name="invoice_advice_legal_1">Clique sur le bouton « Créer » en bas de l'écran pour créer une nouvelle facture.</string>
-    <string name="invoice_advice_legal_2">Tous les documents que tu crées, ainsi que toutes tes modifications, s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="invoice_advice_legal_help">Clique sur moi, je te guide …</string>
+    <string name="invoice_advice_legal_1">Clique sur «Menu» &gt; gStore pour activer les fonctionnalités que tu préfères. Clique sur «Créer» pour créer ta première facture…</string>
+    <string name="invoice_advice_legal_2">Tous les documents que tu crées s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
 
     <!-- Held for the upcoming onboarding screen — moved out of the Invoice-tab
          petit-rhino popup in 1.9 (was invoice_advice_legal_1 before the trim). -->
@@ -870,7 +897,7 @@ Une erreur s'est produite :
     <string name="onboarding_cleanup_delete_confirm_no">Annuler</string>
 
     <!-- Per-issuer country picker (after cleanup, before VAT) -->
-    <string name="onboarding_issuer_country_subtitle">Dans quel pays est basée %1$s ?</string>
+    <string name="onboarding_issuer_country_subtitle">Dans quel pays ton entreprise est-elle établie ?</string>
     <string name="onboarding_issuer_country_pick">Choisir un pays</string>
 
     <!-- Per-issuer VAT (3 options) -->
@@ -939,17 +966,97 @@ Une erreur s'est produite :
     <string name="onboarding_thanks_title">C'est parfait !</string>
     <string name="onboarding_thanks_body">Merci de ta confiance. À bientôt !</string>
     <string name="onboarding_thanks_cta">Terminer</string>
+
     <!-- Multi-entreprise: guard when the user tries to delete an issuer that still owns data. -->
     <string name="entreprise_delete_blocked_title">Suppression impossible</string>
     <string name="entreprise_delete_blocked_message">Ton entreprise contient des clients, produits ou documents rattachés. Si tu souhaites la supprimer, il faut d'abord supprimer ces derniers.</string>
 
+
+    <!-- ===================================================================
+         1.9 migration wizard — shown once when upgrading from 1.8.x.
+         Guides the user through the new e-invoicing fields (bank details,
+         per-issuer client/product attach) before revealing the CII/Factur-X
+         export modules at the end.
+         =================================================================== -->
+    <string name="onboarding_19_welcome_title">Bienvenue sur la version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Sauvegardons d'abord</string>
+    <string name="onboarding_19_backup_body">Avant qu'on démarre, je te conseille de sauvegarder ta base de données au cas où.</string>
+    <string name="onboarding_19_backup_cta">Sauvegarder</string>
+    <string name="onboarding_19_confirm_title">C'est tout bon ?</string>
+    <string name="onboarding_19_confirm_body">Vérifie les rattachements avant qu'on les enregistre. Tu peux retirer un client ou un produit avec la croix.</string>
+    <string name="onboarding_19_confirm_cta">Confirmer</string>
+    <string name="onboarding_19_confirm_no_clients">Aucun client rattaché.</string>
+    <string name="onboarding_19_confirm_no_products">Aucun produit rattaché.</string>
+    <string name="onboarding_19_confirm_section_clients">Clients</string>
+    <string name="onboarding_19_confirm_section_products">Produits</string>
+    <string name="onboarding_19_welcome_body">Cette version apporte des nouveautés attendues.. mais d'abord, j'ai besoin de toi pour configurer les derniers champs ajoutés.</string>
+    <string name="onboarding_19_welcome_cta">C'est parti</string>
+
+    <!-- Multi-issuer cleanup + attach flow -->
+    <string name="onboarding_19_cleanup_title">Il semble que tu gères %1$d entreprises</string>
+    <string name="onboarding_19_cleanup_body">Est-ce bien le cas ? Sinon, supprime les entreprises inutilisées. Pas d'inquiétude, les documents ne seront pas impactés.</string>
+    <string name="onboarding_19_cleanup_cta">Continuer</string>
+    <string name="onboarding_19_attach_intro_body">Nous allons rattacher les clients et produits à tes entreprises. Cela te permettra de basculer d'une entreprise à l'autre et d'avoir une numérotation spécifique pour tes documents.</string>
+    <string name="onboarding_19_attach_intro_cta">C'est parti</string>
+    <string name="onboarding_19_attach_step_title">Entreprise %1$d : %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Sélectionne les clients qui correspondent à cette entreprise.</string>
+    <string name="onboarding_19_attach_products_body">Sélectionne les produits qui correspondent à cette entreprise.</string>
+    <string name="onboarding_19_attach_cta">Rattacher à %1$s</string>
+
+    <!-- Bank details slide (always shown, once per issuer) -->
+    <string name="onboarding_19_bank_title">Coordonnées bancaires</string>
+    <string name="onboarding_19_bank_title_with_issuer">Entreprise %1$d : %2$s — Coordonnées bancaires</string>
+    <string name="onboarding_19_bank_body">Il existe désormais un champ dédié pour les coordonnées bancaires, au niveau de l'entreprise (émetteur).</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">J'ai retrouvé ces informations dans tes factures et je les ai préremplies. Modifie-les si besoin.</string>
+    <string name="onboarding_19_bank_not_found_hint">Je n'ai pas trouvé ces informations dans le pied de page de tes factures. Tu peux les remplir maintenant ou plus tard au niveau de ton entreprise.</string>
+    <string name="onboarding_19_bank_cta">Suivant</string>
+
+    <!-- Orphan clients/products left over after the per-issuer selection -->
+    <string name="onboarding_19_orphans_clients_title">Encore quelques clients à ranger</string>
+    <string name="onboarding_19_orphans_clients_body">Ces clients ne sont rattachés à aucune entreprise. Choisis pour chacun.</string>
+    <string name="onboarding_19_orphans_products_title">Encore quelques produits à ranger</string>
+    <string name="onboarding_19_orphans_products_body">Ces produits ne sont rattachés à aucune entreprise. Choisis pour chacun.</string>
+    <string name="onboarding_19_orphans_cta">Continuer</string>
+
+    <!-- New-fields recap + final annoucement -->
+    <string name="onboarding_19_new_fields_title">Autres champs ajoutés</string>
+    <string name="onboarding_19_new_fields_body">J'ai aussi ajouté dans les factures les champs suivants :\n\n• **mode de paiement**\n• **termes de paiement**\n• **exonération de TVA** (pour les entreprises en franchise)</string>
+    <string name="onboarding_19_new_fields_hint">Si tu avais mis ces informations dans le pied de page, tu peux faire des copier-coller dans les champs adéquats.</string>
+    <string name="onboarding_19_new_fields_cta">Suivant</string>
+    <string name="onboarding_19_search_title">Recherche</string>
+    <string name="onboarding_19_search_body">Une barre de recherche est désormais disponible pour les Clients, Produits, et tous les documents (recherche par nom client ou n° de document).</string>
+    <string name="onboarding_19_tags_title">Tags BLs et devis</string>
+    <string name="onboarding_19_tags_body">Tu peux désormais marquer tes BLs et devis (brouillon, envoyé, annulé). Le statut « facturé » est attribué automatiquement quand tu convertis en facture.\n\nActive ces modules premium dans le 𝕘Store.</string>
+    <string name="onboarding_19_einvoice_title">Facturation électronique</string>
+    <string name="onboarding_19_einvoice_intro">L'export des factures électroniques est désormais disponible !</string>
+    <string name="onboarding_19_einvoice_body">Dans le gStore, active les modules Factur-X, XML CII. Tu pourras importer ces factures directement dans ta plateforme agréée.</string>
+    <string name="onboarding_19_einvoice_sub">Tu peux devenir membre premium en t'abonnant depuis le site internet 🌟</string>
+    <string name="onboarding_19_einvoice_cta">Suivant</string>
+    <string name="onboarding_19_final_title">𝕖𝕟𝕛𝕠𝕪</string>
+
     <!-- Font picker (module Polices) -->
     <string name="gstore_module_font_title">Polices</string>
     <string name="gstore_module_font_desc">Changer la police de tes documents.</string>
-    <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans (gratuite), Noto Serif (gratuite), Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
-    <string name="action_font_label">Police</string>
+    <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
+    <string name="action_font_label">Style</string>
     <string name="action_font_description">Choisir la police du document</string>
     <string name="font_picker_title">Police du document</string>
-    <string name="export_error_premium_font_title">Police premium</string>
     <string name="export_error_premium_font_message">Ton document utilise une police premium mais tu n'es pas membre premium.</string>
+
+    <!-- Tags BL / Devis (masculin) + statut « Facturé » -->
+    <string name="appbar_tag_sent_masc">Envoyé</string>
+    <string name="appbar_tag_cancelled_masc">Annulé</string>
+    <string name="appbar_tag_invoiced">Facturé</string>
+
+    <!-- gStore: Marquer les BLs -->
+    <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut à tes bons de livraison</string>
+    <string name="gstore_module_delivery_note_tagging_detail">Active ce module pour ajouter un statut à tes bons de livraison : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un bon de livraison est converti en facture, mais tu peux le modifier à tout moment.</string>
+
+    <!-- gStore: Marquer les Devis -->
+    <string name="gstore_module_quote_tagging_title">Marquer les devis</string>
+    <string name="gstore_module_quote_tagging_desc">Ajouter un statut à tes devis</string>
+    <string name="gstore_module_quote_tagging_detail">Active ce module pour ajouter un statut à tes devis : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un devis est converti en facture, mais tu peux le modifier à tout moment.</string>
 </resources>
