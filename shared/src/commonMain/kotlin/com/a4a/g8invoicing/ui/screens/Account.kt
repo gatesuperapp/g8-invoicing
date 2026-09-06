@@ -127,6 +127,10 @@ import com.a4a.g8invoicing.shared.resources.account_manage_subscription
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription_url
 import com.a4a.g8invoicing.shared.resources.account_cancellation_date
 import com.a4a.g8invoicing.shared.resources.account_renewal_date
+import com.a4a.g8invoicing.shared.resources.account_status_canceled_body
+import com.a4a.g8invoicing.shared.resources.account_status_canceled_title
+import com.a4a.g8invoicing.shared.resources.account_status_payment_failed_body
+import com.a4a.g8invoicing.shared.resources.account_status_payment_failed_title
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fab
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fly
 import com.a4a.g8invoicing.shared.resources.about_backup_text
@@ -759,13 +763,9 @@ private fun LoggedInContent(
         "past_due", "unpaid", "incomplete" -> {
             // CTA reuses account_manage_subscription — Apple/Play forbid external links to
             // *sell* a subscription; managing an existing one via Stripe Portal is allowed.
-            // TODO(strings): move the FR literals to composeResources/values/strings.xml
-            // on the `translations` branch. Suggested keys:
-            //   account_status_payment_failed_title = "Paiement en échec"
-            //   account_status_payment_failed_body  = "On n'a pas pu prélever ta carte. Mets à jour ton moyen de paiement pour garder tes fonctions premium."
             SubscriptionAlertBadge(
-                title = "Paiement en échec",
-                body = "On n'a pas pu prélever ta carte. Mets à jour ton moyen de paiement pour garder tes fonctions premium.",
+                title = stringResource(Res.string.account_status_payment_failed_title),
+                body = stringResource(Res.string.account_status_payment_failed_body),
                 ctaLabel = stringResource(Res.string.account_manage_subscription),
                 onCtaClick = { onOpenManageSubscription(manageFallbackUrl) },
             )
@@ -773,13 +773,9 @@ private fun LoggedInContent(
         }
 
         "canceled" -> {
-            // TODO(strings): move the FR literals to composeResources/values/strings.xml
-            // on the `translations` branch. Suggested keys:
-            //   account_status_canceled_title = "Abonnement expiré"
-            //   account_status_canceled_body  = "Ton abonnement premium est terminé. Gère ton abonnement pour retrouver l'accès aux fonctions premium."
             SubscriptionAlertBadge(
-                title = "Abonnement expiré",
-                body = "Ton abonnement premium est terminé. Gère ton abonnement pour retrouver l'accès aux fonctions premium.",
+                title = stringResource(Res.string.account_status_canceled_title),
+                body = stringResource(Res.string.account_status_canceled_body),
                 ctaLabel = stringResource(Res.string.account_manage_subscription),
                 onCtaClick = { onOpenManageSubscription(manageFallbackUrl) },
             )
