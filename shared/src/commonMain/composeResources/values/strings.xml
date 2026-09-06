@@ -586,6 +586,7 @@
     <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
     <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises</string>
     <string name="gstore_module_multi_entreprise_detail">Active ce module si tu factures sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nTu pourras ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nTes clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
+    <string name="gstore_module_multi_entreprise_deactivate_blocked">Tu ne peux pas désactiver ce module tant que tu as plus d'une entreprise. Supprime les entreprises en trop dans « Mon compte » puis reviens ici.</string>
     <!-- CII XML export gStore module — same structured data as Factur-X but
          delivered as a raw XML file, for international platforms that don't
          accept the Factur-X PDF/A-3 container yet. Independent of client
