@@ -25,3 +25,11 @@ actual fun setAppLocale(languageCode: String?) {
 actual fun getSystemLocaleCode(): String = Locale.getDefault().language.ifEmpty { "en" }
 
 actual fun getSystemCountryCode(): String = Locale.getDefault().country.uppercase()
+
+actual fun getLocalizedCountryName(code: String, languageCode: String): String? {
+    // Same JVM Locale trick as the Android actual — see there for the null-
+    // normalisation rationale.
+    val target = Locale.forLanguageTag(languageCode.ifBlank { "en" })
+    val name = Locale("", code.uppercase()).getDisplayCountry(target)
+    return name.takeIf { it.isNotBlank() && !it.equals(code, ignoreCase = true) }
+}

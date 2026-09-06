@@ -58,13 +58,15 @@ fun CountryPicker(
     onDismiss: () -> Unit,
     dataSource: ClientOrIssuerLocalDataSourceInterface = koinInject(),
 ) {
-    val allEntries: List<CountryEntry> = remember {
-        // Flat alphabetical list by French display name — g8 users distribute worldwide
-        // so no upfront bias toward a curated shortlist. Search filter below covers both
-        // ISO code and name.
-        CountryCodes.ALL.entries
-            .map { CountryEntry(code = it.key, name = it.value) }
-            .sortedBy { it.name }
+    // Recompute when the app language changes so the picker re-renders in
+    // the new language. Was reading the frozen FR names from CountryCodes.ALL
+    // directly — the display now delegates to CountryCodes.displayNameOf which
+    // hits the platform's localised country-name table.
+    val appLanguage = com.a4a.g8invoicing.data.AppLocaleHolder.languageCode
+    val allEntries: List<CountryEntry> = remember(appLanguage) {
+        CountryCodes.ALL.keys
+            .map { code -> CountryEntry(code = code, name = CountryCodes.displayNameOf(code)) }
+            .sortedBy { it.name.lowercase() }
     }
 
     var recentCodes by remember { mutableStateOf<List<String>>(emptyList()) }

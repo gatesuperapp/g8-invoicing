@@ -1,5 +1,7 @@
 package com.a4a.g8invoicing.data.models
 
+import com.a4a.g8invoicing.data.AppLocaleHolder
+import com.a4a.g8invoicing.getLocalizedCountryName
 import com.a4a.g8invoicing.getSystemCountryCode
 
 /**
@@ -118,10 +120,21 @@ object CountryCodes {
         return "FR"
     }
 
-    /** Nom affiché pour un code (fallback = le code lui-même s'il n'est pas connu). */
+    /**
+     * Localised display name for a country code, following the app's
+     * current language (fr / en / de / es / …). Cascade:
+     *   1. Platform ICU / NSLocale lookup — covers every ISO code Apple/JVM
+     *      knows in the target locale.
+     *   2. Curated FR map fallback — for exotic codes the platform doesn't
+     *      have or when the app language layer is momentarily empty.
+     *   3. Raw uppercase code — never returns blank for a non-blank input.
+     */
     fun displayNameOf(code: String?): String {
         if (code.isNullOrBlank()) return ""
-        return ALL[code.uppercase()] ?: code.uppercase()
+        val upper = code.uppercase()
+        val language = AppLocaleHolder.languageCode.ifBlank { "en" }
+        val localised = getLocalizedCountryName(upper, language)
+        return localised ?: ALL[upper] ?: upper
     }
 
     /**
