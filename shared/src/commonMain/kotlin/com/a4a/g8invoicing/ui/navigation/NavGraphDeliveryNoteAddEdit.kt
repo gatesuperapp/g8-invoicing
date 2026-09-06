@@ -381,8 +381,12 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                // See NavGraphInvoiceAddEdit — fresh StateFlow
+                                // read to catch cleanFieldsForClientType mutations.
+                                val freshClient = clientOrIssuerAddEditViewModel
+                                    .documentClientUiState.value
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, freshClient, syncToMaster = syncToMaster
                                 )
                                 deliveryNoteViewModel.reloadDocument()
                                 showDocumentForm = false

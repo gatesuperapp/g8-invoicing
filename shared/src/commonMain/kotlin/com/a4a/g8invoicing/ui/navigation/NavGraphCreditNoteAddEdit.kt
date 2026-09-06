@@ -387,8 +387,14 @@ fun NavGraphBuilder.creditNoteAddEdit(
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                // See NavGraphInvoiceAddEdit — read the fresh
+                                // StateFlow value rather than the collectAsState
+                                // snapshot to catch the cleanFieldsForClientType
+                                // mutation triggered by validateInputs.
+                                val freshClient = clientOrIssuerAddEditViewModel
+                                    .documentClientUiState.value
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, freshClient, syncToMaster = syncToMaster
                                 )
                                 creditNoteViewModel.reloadDocument()
                                 showDocumentForm = false

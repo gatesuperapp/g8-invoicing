@@ -389,8 +389,20 @@ fun NavGraphBuilder.invoiceAddEdit(
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                // Re-read from the ViewModel's StateFlow directly
+                                // instead of relying on the collectAsState delegate:
+                                // validateInputs() above just mutated
+                                // _documentClientUiState.value via
+                                // cleanFieldsForClientType(), and the Compose snapshot
+                                // exposed by `documentClientUiState` may not have
+                                // caught up in this same synchronous block. The
+                                // stale snapshot was silently dropping the just-
+                                // picked clientType (Professionnel / Particulier)
+                                // on save.
+                                val freshClient = clientOrIssuerAddEditViewModel
+                                    .documentClientUiState.value
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, freshClient, syncToMaster = syncToMaster
                                 )
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false
