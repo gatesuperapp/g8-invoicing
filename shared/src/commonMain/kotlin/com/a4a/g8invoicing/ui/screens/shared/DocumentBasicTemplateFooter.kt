@@ -243,12 +243,17 @@ fun DocumentBasicTemplateFooter(
             paymentTerms == null
         val topBandSpacer = when {
             hasPaymentHeader -> 12.dp
-            isStandaloneDueDateOnly -> 6.dp
+            isStandaloneDueDateOnly -> 2.dp
             else -> 20.dp
         }
         if (paymentTerms != null || footerText != null || watermark != null) {
             Spacer(Modifier.height(topBandSpacer))
-            if (hasPaymentHeader) {
+            // Skip the separator in the standalone-due-date case even
+            // though hasPaymentHeader is still true — the tight 6dp gap
+            // above already reads as a plain interline continuation, no
+            // divider needed. Matches master's pre-1.8 look on invoices
+            // with only the due-date line visible above the footer.
+            if (hasPaymentHeader && !isStandaloneDueDateOnly) {
                 HorizontalDivider(color = SeparatorColor, thickness = 0.5.dp)
                 Spacer(Modifier.height(8.dp))
             }

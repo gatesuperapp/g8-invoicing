@@ -514,7 +514,7 @@ class PdfGeneratorImpl(
             if (isStandaloneDueDateOnly) {
                 if (footerText != null) doc.add(
                     createFooter(footerText, fontSize, precededByTerms = false)
-                        .setMarginTop(6f)
+                        .setMarginTop(2f)
                 )
                 if (watermarkText != null) doc.add(createWatermark(watermarkText))
             } else {
