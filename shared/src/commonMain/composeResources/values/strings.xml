@@ -628,7 +628,7 @@
     <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s % non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Date d'échéance de paiement</string>
     <string name="cii_validation_vat_exemption_text">Mention d'exonération de TVA (à renseigner dans le menu texte)</string>
-    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">Une ou plusieurs lignes de la facture ont un taux de TVA, mais l'émetteur n'a pas de numéro de TVA. Ajoute un n° de TVA à l'émetteur — sans ça la facture sera rejetée à la réception.</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">L'émetteur n'a pas de numéro de TVA. Ajoute un n° de TVA à l'émetteur — sans ça la facture sera rejetée à la réception. Si tu es en franchise de TVA, active l'option dans ton entreprise.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">Exonération de TVA</string>

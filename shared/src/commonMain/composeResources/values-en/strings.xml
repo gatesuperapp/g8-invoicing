@@ -675,7 +675,7 @@
     <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s % is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Payment due date</string>
     <string name="cii_validation_vat_exemption_text">VAT exemption reason (fill in the text menu)</string>
-    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">One or more invoice lines carry a VAT rate, but the issuer has no VAT number. Add a VAT number to the issuer — otherwise the invoice will be rejected on receipt.</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">The issuer has no VAT number. Add a VAT number to the issuer — otherwise the invoice will be rejected on receipt. If you're VAT-exempt, turn on the option on your company.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">VAT exemption</string>

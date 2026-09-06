@@ -685,7 +685,7 @@ Une erreur s'est produite :
     <string name="cii_validation_line_tax_rate_invalid">Línea %1$d: el tipo de IVA %2$s % no está permitido en Francia (valores aceptados: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fecha de vencimiento del pago</string>
     <string name="cii_validation_vat_exemption_text">Motivo de exención del IVA (indícalo en el menú de textos)</string>
-    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">Una o varias líneas de la factura llevan un tipo de IVA, pero el emisor no tiene número de IVA. Añade un número de IVA al emisor — de lo contrario la factura será rechazada en recepción.</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">El emisor no tiene número de IVA. Añade un número de IVA al emisor — de lo contrario la factura será rechazada en recepción. Si estás en régimen de exención, activa la opción en tu empresa.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">Exención de IVA</string>

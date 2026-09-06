@@ -3,7 +3,6 @@ package com.a4a.g8invoicing.facturx
 import com.a4a.g8invoicing.data.models.ClientType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.InvoiceState
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 /**
  * Pre-flight check for the mandatory fields an EN 16931 CII XML export
@@ -188,17 +187,17 @@ object CiiPreflightValidator {
             issues += CiiValidationIssue.VatExemptionTextMissing
         }
 
-        // BR-S-02: an invoice with a Standard-rated line (BT-151 = "S") MUST
-        // carry a seller BT-31 (VAT) OR BT-32 (fiscal id, incl. FR SIRET
-        // under schemeID="FC" when the issuer is on franchise en base). A
-        // Standard-rated line only appears when the issuer isn't vatExempt
-        // AND the line's taxRate > 0. If either target classifies from the
-        // 3 company_id slots, we're good; otherwise Chorus Pro / veraPDF
-        // reject the export, so block it here.
-        val hasStandardRatedLine = issuer?.vatExempt != true && products.any { p ->
-            (p.taxRate ?: BigDecimal.ZERO) > BigDecimal.ZERO
-        }
-        if (hasStandardRatedLine && issuer != null) {
+        // BR-S-02 (Standard rated) + BR-Z-02 (Zero rated) + BR-AE-02
+        // (Reverse charge) all pin the same requirement: a non-exempt
+        // seller with any tax-bearing line MUST carry a BT-31 (VAT) or
+        // BT-32 (fiscal id, incl. FR SIRET under schemeID="FC" for
+        // franchise en base). Was gated on `taxRate > 0` — that covered S
+        // but let Z (rate == 0) and reverse-charge lines through, and
+        // Chorus Pro / veraPDF rejected them downstream with BR-Z-02.
+        // Fire whenever the issuer isn't vatExempt AND the doc has at
+        // least one product line, regardless of the rate value.
+        val requiresIssuerTaxId = issuer?.vatExempt != true && products.isNotEmpty()
+        if (requiresIssuerTaxId && issuer != null) {
             val country = issuer.addresses?.firstOrNull()?.countryCode
                 ?.trim()?.uppercase()?.ifEmpty { null }
             val slots = listOf(
