@@ -80,6 +80,18 @@ class QuoteLocalDataSource(
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
+        // Per-issuer reuse: pull payment_means / payment_bank / selections from
+        // the most recent quote for the same master issuer, so a new quote
+        // inherits whatever the user last set on THIS company. Mirror of
+        // InvoiceLocalDataSource.createNew — see the rationale + language guard
+        // notes there. Null when no prior quote matches → falls back to
+        // defaults. Retentions have their own query below because the schema
+        // is a separate table.
+        val reuse = existingIssuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            quoteQueries.getLastQuotePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
+
         // Reuse retentions from the most recent quote for this master issuer;
         // fall back to country defaults. Mirrors the invoice / credit-note
         // seed path so a devis for a retention-eligible issuer (MX, ES…)
@@ -104,6 +116,39 @@ class QuoteLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             val todayFormatted = DateUtils.getCurrentDateFormatted()
 
+            // Language guard for every reused text field. Chip IDs and the
+            // "Autre" boolean carry over regardless — only the label prose
+            // (payment_means_label prefix + payment_bank_label) needs to
+            // match the app locale, otherwise a user who switched from FR
+            // to EN would land French wording on a doc they're now writing
+            // in English. Mirror of InvoiceLocalDataSource.
+            val currentAppLocale = AppLocaleHolder.languageCode
+            val reuseSameLanguage = reuse?.format_locale == currentAppLocale
+            val reusableWithLang = reuse.takeIf { reuseSameLanguage }
+
+            val reusedSelections = reuse?.payment_means_selections
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                ?.takeIf { it.isNotEmpty() }
+            val reusedSegments = reusableWithLang?.payment_means_label?.let {
+                com.a4a.g8invoicing.data.models.parsePaymentLabel(it)
+            }?.takeIf { it.isNotEmpty() }
+            // Bank label: reuse under the same language guard, then adapt
+            // tokens to the current bank's country class (IBAN vs domestic
+            // account number). "Current country" = the master issuer's first
+            // bank, which is what the doc-side snapshot will freeze onto.
+            val currentBankCountry = existingIssuer?.banks?.firstOrNull()?.countryCode
+            val reusedBankSegments = reusableWithLang?.payment_bank_label?.let {
+                val parsed = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
+                com.a4a.g8invoicing.data.models.adaptPaymentBankSegmentsForCountry(
+                    segments = parsed,
+                    previousCountry = reusableWithLang.payment_bank_country,
+                    currentCountry = currentBankCountry,
+                )
+            }?.takeIf { it.isNotEmpty() }
+
             val newQuoteState = QuoteState(
                 documentNumber = TextFieldValue(getLastDocumentNumber(currentCompanyId)?.let {
                     incrementDocumentNumber(it)
@@ -119,20 +164,22 @@ class QuoteLocalDataSource(
                 originalCompanyId = currentCompanyId
                     ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
                 retentions = reusedRetentions,
-                // Payment defaults — parity with InvoiceLocalDataSource. Keeps
-                // the seed logic simple for now: default chip trio + localised
-                // default terms + editable prefix. No per-issuer / per-locale
-                // reuse-from-previous-quote (see InvoiceLocalDataSource for
-                // the fuller logic — port later if the reuse becomes a felt
-                // gap).
-                paymentMeansSelections = setOf(
+                paymentMeansSelections = reusedSelections ?: setOf(
                     com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
                     com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
                     com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
                 ),
-                paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
-                    getString(Res.string.document_payment_means_default_label)
-                ),
+                paymentMeansOtherChecked = (reuse?.payment_means_other_checked ?: 0L) != 0L,
+                paymentMeansSegments = reusedSegments
+                    ?: com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                paymentBankSegments = reusedBankSegments ?: emptyList(),
+                // Payment-terms rows aren't surfaced on Quote anymore (see
+                // DocumentBottomSheetElementsContent — invoice-only entry).
+                // Kept populated with localised defaults so the DB columns
+                // aren't null; harmless dead data until / unless the feature
+                // is restored on devis.
                 paymentTermsRecoveryFees = TextFieldValue(
                     getString(Res.string.payment_terms_recovery_fees_default)
                 ),
@@ -144,14 +191,13 @@ class QuoteLocalDataSource(
                 ),
                 // BT-120 seeded from the issuer's country via the shared
                 // resolver (same helper the Invoice / CreditNote paths use).
-                // Returns null for countries with no reliable auto-fill so
-                // the user has to type it before export — same UX as on
-                // invoices. Not reused-from-previous-quote for now (see the
-                // note on the payment fields above).
+                // Now also passes previousVatText / previousIssuerCountry
+                // from the last-quote reuse row, so an issuer's second
+                // devis keeps whatever wording the user typed on the first.
                 vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
                     issuer = existingIssuer,
-                    previousVatText = null,
-                    previousIssuerCountry = null,
+                    previousVatText = reuse?.vat_exemption_text,
+                    previousIssuerCountry = reuse?.issuer_country_code,
                 ),
             )
 
