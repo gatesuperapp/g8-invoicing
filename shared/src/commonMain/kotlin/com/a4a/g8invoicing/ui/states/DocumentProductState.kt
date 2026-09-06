@@ -33,8 +33,8 @@ data class DocumentProductState(
 
 /**
  * Origin of a `DocumentProductState.linkedDocNumber`. Drives per-line
- * CII emission (`DeliveryNoteReferencedDocument` vs `AdditionalReferenced­
- * Document` with TypeCode 1001 for a quote), so the receiver knows what
- * type of source doc the invoice line traces back to.
+ * CII emission (`DeliveryNoteReferencedDocument` vs `AdditionalReferencedDocument`
+ * with TypeCode 130 for a quote), so the receiver knows what type of
+ * source doc the invoice line traces back to.
  */
 enum class LinkedDocType { DELIVERY_NOTE, QUOTE }

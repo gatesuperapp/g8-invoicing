@@ -224,20 +224,18 @@ object CiiXmlBuilder {
         append("      </ram:SpecifiedTradeProduct>\n")
 
         // Line-level source-doc reference. Placement depends on the source:
-        //   * DELIVERY_NOTE → SpecifiedLineTradeDelivery ­/ DeliveryNoteReferencedDocument
+        //   * DELIVERY_NOTE → SpecifiedLineTradeDelivery / DeliveryNoteReferencedDocument
         //     (BT-X-116 per-line pattern used for multi-BL invoices, since the
         //     header-level cardinality caps at 0..1).
         //   * QUOTE → SpecifiedLineTradeAgreement / AdditionalReferencedDocument
-        //     with TypeCode 310 ("Offer / quotation" per UN/CEFACT 1001 doc-name
-        //     code list). Historically emitted as "1001" — that's the code list
-        //     number itself, not a value inside it, so downstream validators
-        //     rejected the reference as unrecognised.
-        //     Extended profile only exposes QuotationReferencedDocument at header
-        //     level, so line-level quotes ride on the generic AdditionalReferenced-
-        //     Document envelope.
+        //     with TypeCode 130 ("Invoice data sheet"). Factur-X Extended
+        //     code list 18 only accepts 50 / 130 / 916 for that slot — the
+        //     UN/CEFACT 1001 code 310 ("Offer / quotation") is not in the
+        //     subset, so we fall back to the EN 16931 BT-128 pattern.
+        //     Semantics that this is specifically a quote reference are lost
+        //     at the XML level (only the IssuerAssignedID identifies it).
         // A legacy row with linkedDocNumber but linkedDocType == null (fetched
-        // before the type field existed) is treated as a delivery-note ref to
-        // preserve the pre-refactor behaviour.
+        // before the type field existed) is treated as a delivery-note ref.
         val linkedRef = product.linkedDocNumber?.trim()?.takeIf { it.isNotBlank() }
         val linkedDate = product.linkedDate?.trim()?.takeIf { it.isNotBlank() }
         val isQuoteLink = product.linkedDocType == LinkedDocType.QUOTE
@@ -247,7 +245,7 @@ object CiiXmlBuilder {
         if (linkedRef != null && isQuoteLink) {
             append("        <ram:AdditionalReferencedDocument>\n")
             append("          <ram:IssuerAssignedID>${escT(linkedRef)}</ram:IssuerAssignedID>\n")
-            append("          <ram:TypeCode>310</ram:TypeCode>\n")
+            append("          <ram:TypeCode>130</ram:TypeCode>\n")
             if (linkedDate != null) {
                 append("          <ram:FormattedIssueDateTime>\n")
                 append("            <qdt:DateTimeString format=\"102\">${formatDate102(linkedDate)}</qdt:DateTimeString>\n")
@@ -524,14 +522,6 @@ object CiiXmlBuilder {
         products: List<DocumentProductState>,
         invoice: InvoiceState,
     ) {
-        // Treat a legacy row (linkedDocNumber present but linkedDocType
-        // null — cached before the type field existed) as a delivery-note
-        // link so we don't strip BT-72 on invoices that legitimately came
-        // from a BL before the refactor.
-        val hasDeliveryLink = products.any {
-            it.linkedDocType == LinkedDocType.DELIVERY_NOTE ||
-                (it.linkedDocNumber?.isNotBlank() == true && it.linkedDocType == null)
-        }
         // ShipToTradeParty (BG-13). Only when the buyer carries an address
         // whose label was tagged DELIVERY by classifyAddresses. Content is
         // buyer-name + delivery PostalTradeAddress — the CII schema requires
@@ -552,13 +542,19 @@ object CiiXmlBuilder {
             appendAddress(addr, indent = 8)
             append("      </ram:ShipToTradeParty>\n")
         }
-        if (hasDeliveryLink) {
-            append("      <ram:ActualDeliverySupplyChainEvent>\n")
-            append("        <ram:OccurrenceDateTime>\n")
-            append("          <udt:DateTimeString format=\"102\">${formatDate102(invoice.documentDate)}</udt:DateTimeString>\n")
-            append("        </ram:OccurrenceDateTime>\n")
-            append("      </ram:ActualDeliverySupplyChainEvent>\n")
-        }
+        // Always emit ActualDeliverySupplyChainEvent — PEPPOL-EN16931-R008
+        // fires on any empty element, and the CII schema requires
+        // ApplicableHeaderTradeDelivery to be present with at least one
+        // child. For invoices with no explicit delivery date (quote-only,
+        // hand-crafted) we fall back to the invoice date; downstream BT-72
+        // consumers treat that as the pragmatic "goods considered delivered
+        // as of the invoice issue date" which is the normal accounting
+        // convention when no delivery note traces back to the invoice.
+        append("      <ram:ActualDeliverySupplyChainEvent>\n")
+        append("        <ram:OccurrenceDateTime>\n")
+        append("          <udt:DateTimeString format=\"102\">${formatDate102(invoice.documentDate)}</udt:DateTimeString>\n")
+        append("        </ram:OccurrenceDateTime>\n")
+        append("      </ram:ActualDeliverySupplyChainEvent>\n")
         append("    </ram:ApplicableHeaderTradeDelivery>\n")
     }
 

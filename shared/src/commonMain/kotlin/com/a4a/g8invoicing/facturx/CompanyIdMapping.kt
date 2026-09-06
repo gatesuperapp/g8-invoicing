@@ -70,16 +70,18 @@ enum class CompanyIdKind(
     val toXml: (String) -> String = { it },
 ) {
     // ------- BT-30 (registre légal) — codes ISO 6523 -------
-    // Two distinct schemeIDs per ISO 6523 ICD: 0002 = INSEE SIREN (9 chiffres),
-    // 0009 = SIRET-CODE (14 chiffres). Historically we shipped both under
-    // 0002, which validates as "value doesn't match declared scheme" for
-    // SIRET (14 digits announced under the 9-digit SIREN registry). The
-    // URI routing at BT-34/49 always uses the 9-digit SIREN portion under
-    // schemeID 0002 — see CiiXmlBuilder.appendParty.
+    // The FR Factur-X national profile (BR-FR-10 / BR-FR-32) pins BT-30 =
+    // SIREN = exactly 9 digits under schemeID "0002" (INSEE SIREN). SIRET
+    // (14 digits, schemeID "0009") is not a valid BT-30 value on that
+    // profile — Chorus Pro / veraPDF reject it with "SIREN empty / must be
+    // 9 digits". So we announce SIRET as 0002 and truncate at emit time to
+    // its 9-digit SIREN prefix (the last 5 digits are the establishment
+    // code, kept on the visible PDF but dropped from the CII XML).
     SIRET(
-        CiiTarget.LegalOrg, "0009", "SIRET", "14 chiffres",
+        CiiTarget.LegalOrg, "0002", "SIRET", "14 chiffres",
         preClean = digitsOnly,
         pattern = Regex("""^\d{14}$"""),
+        toXml = { it.take(9) },
     ),
     SIREN(
         CiiTarget.LegalOrg, "0002", "SIREN", "9 chiffres",
