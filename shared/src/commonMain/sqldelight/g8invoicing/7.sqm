@@ -172,6 +172,112 @@ UPDATE Quote
     LIMIT 1
   );
 
+-- 5-bis) Fallback backfill. Docs whose linked DocumentClientOrIssuer row
+--        was orphaned, missing, or had a NULL original_client_id (pre-1.5
+--        databases where the doc-side snapshot wasn't yet tied back to a
+--        master issuer) would stay at original_company_id = NULL after the
+--        smart backfill above. The doc-list queries filter by company id
+--        exclusively, so those rows silently vanish from the invoice /
+--        quote / BL / avoir lists — data-loss symptom on 1.2-era upgrades.
+--
+--        Two-tier fallback per doc:
+--          1. Look up the frozen doc-side issuer NAME (from the linked
+--             DocumentClientOrIssuer) and match it against existing master
+--             ClientOrIssuer names. If a match, attach to that master —
+--             preserves the multi-entreprise split for users who had
+--             several issuers pre-1.9.
+--          2. If no name-match (issuer renamed, doc snapshot lost, etc.),
+--             attach to the first available master (same fallback clients
+--             and products used earlier in this migration). User can
+--             reassign afterwards from the multi-entreprise picker.
+UPDATE Invoice
+  SET original_company_id = COALESCE(
+    (SELECT ci.id
+     FROM ClientOrIssuer ci
+     WHERE ci.type = 'issuer'
+       AND ci.name = (
+         SELECT dci.name
+         FROM DocumentClientOrIssuer dci
+         JOIN LinkInvoiceToDocumentClientOrIssuer link
+           ON link.document_client_or_issuer_id = dci.id
+         WHERE link.invoice_id = Invoice.invoice_id
+           AND dci.type = 'issuer'
+         LIMIT 1
+       )
+     LIMIT 1),
+    (SELECT id FROM ClientOrIssuer
+     WHERE type = 'issuer'
+     ORDER BY updated_at DESC
+     LIMIT 1)
+  )
+  WHERE original_company_id IS NULL;
+
+UPDATE DeliveryNote
+  SET original_company_id = COALESCE(
+    (SELECT ci.id
+     FROM ClientOrIssuer ci
+     WHERE ci.type = 'issuer'
+       AND ci.name = (
+         SELECT dci.name
+         FROM DocumentClientOrIssuer dci
+         JOIN LinkDeliveryNoteToDocumentClientOrIssuer link
+           ON link.document_client_or_issuer_id = dci.id
+         WHERE link.delivery_note_id = DeliveryNote.delivery_note_id
+           AND dci.type = 'issuer'
+         LIMIT 1
+       )
+     LIMIT 1),
+    (SELECT id FROM ClientOrIssuer
+     WHERE type = 'issuer'
+     ORDER BY updated_at DESC
+     LIMIT 1)
+  )
+  WHERE original_company_id IS NULL;
+
+UPDATE CreditNote
+  SET original_company_id = COALESCE(
+    (SELECT ci.id
+     FROM ClientOrIssuer ci
+     WHERE ci.type = 'issuer'
+       AND ci.name = (
+         SELECT dci.name
+         FROM DocumentClientOrIssuer dci
+         JOIN LinkCreditNoteToDocumentClientOrIssuer link
+           ON link.document_client_or_issuer_id = dci.id
+         WHERE link.credit_note_id = CreditNote.credit_note_id
+           AND dci.type = 'issuer'
+         LIMIT 1
+       )
+     LIMIT 1),
+    (SELECT id FROM ClientOrIssuer
+     WHERE type = 'issuer'
+     ORDER BY updated_at DESC
+     LIMIT 1)
+  )
+  WHERE original_company_id IS NULL;
+
+UPDATE Quote
+  SET original_company_id = COALESCE(
+    (SELECT ci.id
+     FROM ClientOrIssuer ci
+     WHERE ci.type = 'issuer'
+       AND ci.name = (
+         SELECT dci.name
+         FROM DocumentClientOrIssuer dci
+         JOIN LinkQuoteToDocumentClientOrIssuer link
+           ON link.document_client_or_issuer_id = dci.id
+         WHERE link.quote_id = Quote.quote_id
+           AND dci.type = 'issuer'
+         LIMIT 1
+       )
+     LIMIT 1),
+    (SELECT id FROM ClientOrIssuer
+     WHERE type = 'issuer'
+     ORDER BY updated_at DESC
+     LIMIT 1)
+  )
+  WHERE original_company_id IS NULL;
+
 -- 6) Type de client — Particulier / Professionnel / non renseigné. Sert de
 --    gate à l'export Factur-X (professionnel = e-invoicing, particulier =
 --    PDF simple). Pré-rempli automatiquement à PROFESSIONAL côté UI quand
