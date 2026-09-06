@@ -193,7 +193,8 @@ fun DeliveryNoteList(
                                 selectedMode.value = false
                             }
                         },
-                        keyToResetCheckboxes = keyToResetCheckboxes.value
+                        keyToResetCheckboxes = keyToResetCheckboxes.value,
+                        tagsEnabled = isTagPickerEnabled,
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))

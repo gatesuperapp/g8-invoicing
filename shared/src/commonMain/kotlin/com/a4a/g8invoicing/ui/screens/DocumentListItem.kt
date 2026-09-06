@@ -54,13 +54,23 @@ fun DocumentListItem(
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckbox: Boolean,
+    tagsEnabled: Boolean = true,
 ) {
     // Get the action based on document tag - computed in composable context.
     // BL / Devis share the same enum as invoices but use the masculine label
     // variants ("Envoyé" / "Annulé") and INVOICED (green) instead of the
     // invoice-only PAID / LATE / REMINDED palette.
+    //
+    // [tagsEnabled] is false when the caller's gStore tagging module is off
+    // (MODULE_QUOTE_TAGGING / MODULE_DELIVERY_NOTE_TAGGING) — in that case we
+    // fall straight to the neutral UNDEFINED action (white pill + grey border,
+    // no coloured chip) regardless of the doc's stored tag. Tags saved from
+    // a previous activation stay in the DB but don't render, so re-activating
+    // the module later brings them back untouched.
     val isInvoice = document is InvoiceState
-    val action = when (document.documentTag) {
+    val action = if (!tagsEnabled) {
+        actionTagUndefined()
+    } else when (document.documentTag) {
         DocumentTag.DRAFT -> actionTagDraft()
         DocumentTag.SENT -> if (isInvoice) actionTagSent() else actionTagSentMasc()
         DocumentTag.PAID -> actionTagPaid()
@@ -127,9 +137,13 @@ fun DocumentListItem(
             // actionTagCancelled() so the tag dropdown / bottom bar keep their
             // pale-yellow chip semantics elsewhere. Same treatment for BL /
             // Devis: a cancelled source doc should read as clearly de-emphasised.
-            val isCancelled = document.documentTag == DocumentTag.CANCELLED
+            // Skipped entirely when tagsEnabled=false so a stored CANCELLED
+            // tag from a previous module activation doesn't grey out the row.
+            val isCancelled = tagsEnabled && document.documentTag == DocumentTag.CANCELLED
 
-            val statusColor: Color = when (document.documentTag) {
+            val statusColor: Color = if (!tagsEnabled) {
+                AppColors.textPrimary
+            } else when (document.documentTag) {
                 DocumentTag.PAID -> AppColors.statusPaid
                 // BL / Devis final state: green like PAID so the row reads as
                 // "closed / invoiced" at a glance.
@@ -163,10 +177,13 @@ fun DocumentListItem(
                     checkedState = checkedState.value,
                     // Border is only shown when the fill is white — either
                     // because the doc is cancelled (yellow chip forced to
-                    // white on the row) or the tag is undefined (very old
-                    // docs pre-tagging module). Coloured chips (blue, green,
-                    // grey draft…) already contrast on the surface.
+                    // white on the row), the tag is undefined (very old
+                    // docs pre-tagging module), or the gStore tagging
+                    // module is off (we force actionTagUndefined regardless
+                    // of the stored tag — without the border it would
+                    // disappear against the white row background).
                     displayBorder = isCancelled ||
+                        !tagsEnabled ||
                         document.documentTag == DocumentTag.UNDEFINED,
                 )
             }
@@ -263,6 +280,9 @@ fun DocumentListItem(
                     daysUntilDue != null && daysUntilDue < 0
                 ) -daysUntilDue else null
                 val labelText = when {
+                    // Module off — no status label under the price even if
+                    // the doc carries a stored tag.
+                    !tagsEnabled -> null
                     overdueDays != null -> stringResource(
                         countdownStringFor(-overdueDays),
                         overdueDays,

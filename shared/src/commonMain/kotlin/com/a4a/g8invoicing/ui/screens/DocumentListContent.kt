@@ -25,6 +25,10 @@ fun DocumentListContent(
     addDocumentToSelectedList: (DocumentState) -> Unit = {},
     removeDocumentFromSelectedList: (DocumentState) -> Unit = {},
     keyToResetCheckboxes: Boolean,
+    // false = the doc-type-specific gStore tagging module is off, hide
+    // pastilles + status labels on every row. Defaults to true so invoice
+    // and credit-note lists (no gStore gate) keep rendering tags.
+    tagsEnabled: Boolean = true,
 ) {
     // Skip transient documents that haven't been persisted yet (documentId == null)
     // so the `key` lambda below never crashes on `!!`. Second-precision timestamps
@@ -85,6 +89,7 @@ fun DocumentListContent(
             ) { document ->
                 DocumentListItem(
                     document = document,
+                    tagsEnabled = tagsEnabled,
                     onItemClick = {
                         document.documentId?.let {
                             onItemClick(it)
