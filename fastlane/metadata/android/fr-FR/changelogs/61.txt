@@ -1,9 +1,0 @@
-v1.9
-
-- Multi-entreprise : gère plusieurs SIRET dans la même appli, numérotation par entreprise
-- Export Factur-X et CII XML (facturation électronique)
-- Coordonnées bancaires (IBAN/BIC), modes de paiement, termes de paiement, mention franchise TVA
-- Polices personnalisables pour tes documents
-- Marquer les BLs et les devis avec un statut
-- Sauvegarde et restauration de ta base de données
-- Nombreuses corrections et améliorations UX

@@ -1,0 +1,10 @@
+v1.9
+
+- Export Factur-X/ZUGFeRD et CII XML (facturation électronique)
+- Polices personnalisables pour tes documents
+- Marquer les BLs et les devis avec un statut
+- Verrouiller les factures
+- Nouveaux champs : coordonnées bancaires (IBAN/BIC), modes de paiement, termes de paiement, mention franchise TVA
+- Multi-entreprise : menu dédié, numérotation par entreprise
+- Bouton de restauration de ta base de données
+- Nombreuses corrections et améliorations UX

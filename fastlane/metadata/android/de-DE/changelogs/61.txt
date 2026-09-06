@@ -1,9 +1,0 @@
-v1.9
-
-- Mehrere Unternehmen: mehrere USt-IdNr. in einer App, unternehmensspezifische Nummerierung
-- ZUGFeRD- und CII-XML-Export (elektronische Rechnungsstellung)
-- Bankverbindung (IBAN/BIC), Zahlungsarten, Zahlungsbedingungen, Hinweis Kleinunternehmerregelung
-- Anpassbare Schriftarten für deine Dokumente
-- Statustags für Lieferscheine und Angebote
-- Sicherung und Wiederherstellung der Datenbank
-- Viele Fehlerbehebungen und UX-Verbesserungen

@@ -1,9 +1,0 @@
-v1.9
-
-- Multi-business: manage several company IDs in one app, per-company numbering
-- Factur-X and CII XML export (electronic invoicing)
-- Bank details (IBAN/BIC), payment methods, payment terms, VAT exemption mention
-- Customisable fonts for your documents
-- Tag delivery notes and quotes with a status
-- Database backup and restore
-- Many bug fixes and UX polish
