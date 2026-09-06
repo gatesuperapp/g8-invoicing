@@ -56,7 +56,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
-import com.a4a.g8invoicing.data.auth.isPremium
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
@@ -227,14 +226,12 @@ fun GStore(
         viewModel.refreshSubscription()
     }
     // Reactive premium check — recomposes when /v1/account lands after screen open.
-    // Delegate to the shared SubscriptionState.isPremium() extension so we
-    // accept the full PREMIUM_STATUSES set ("active" | "trialing" |
-    // "past_due"), matching SubscriptionRepository.isPremium(). Was hardcoded
-    // to "active" only, which locked the switch for users on Stripe trial or
-    // grace period even though the backend considered them premium.
     val subscriptionState by viewModel.subscriptionState.collectAsState()
     val isPremium = remember(subscriptionState) {
-        subscriptionState.isPremium()
+        (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->
+            s.status == "active" &&
+                (s.currentPeriodEndMs ?: 0L) > kotlin.time.Clock.System.now().toEpochMilliseconds()
+        } ?: false
     }
     val isDimActive = remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
