@@ -214,9 +214,12 @@ fun DocumentBasicTemplateFooter(
         // separator only shows when there's a payment section (grey box or
         // standalone due-date line) above it — on avoirs / quotes / delivery
         // notes the payment section is suppressed, so the divider would sit
-        // under empty space.
-        val hasPaymentHeader = showPaymentSection ||
-            (invoiceDueDate != null && paymentBlockTitle != null)
+        // under empty space. Legacy docs (pre-1.8, showCurrencyAndAutoTaxColumn
+        // = false) never carried the separator either — a re-render of an old
+        // invoice must stay pixel-identical, so we suppress the line there too.
+        val hasPaymentHeader = document.showCurrencyAndAutoTaxColumn &&
+            (showPaymentSection ||
+                (invoiceDueDate != null && paymentBlockTitle != null))
         if (paymentTerms != null || footerText != null || watermark != null) {
             Spacer(Modifier.height(if (hasPaymentHeader) 12.dp else 20.dp))
             if (hasPaymentHeader) {
