@@ -132,9 +132,18 @@ fun CategorySidebar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
+    // 30dp wider when MULTI_ENTREPRISE is on so the entreprise picker's
+    // caret + expanded name row have breathing room without truncating.
+    // The mono-entreprise sidebar shows just the doc-type list and can
+    // stay compact.
+    val sidebarWidth = if (ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activatedModules) {
+        250.dp
+    } else {
+        220.dp
+    }
     Surface(
         modifier = modifier
-            .width(220.dp)
+            .width(sidebarWidth)
             .fillMaxHeight(),
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 4.dp,
