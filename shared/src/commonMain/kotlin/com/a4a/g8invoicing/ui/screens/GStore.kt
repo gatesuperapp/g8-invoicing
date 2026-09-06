@@ -56,6 +56,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.isPremium
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
@@ -155,19 +156,15 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_cii_desc,
         detailRes = Res.string.gstore_module_cii_detail,
         icon = Icons.Outlined.Code,
-        isFree = true,
     ),
     // Factur-X hybrid PDF: visual PDF invoice + embedded CII XML
-    // (factur-x.xml, AFRelationship=Data). Same free treatment as CII
-    // XML for pre-launch, will move behind the premium gate before
-    // general rollout.
+    // (factur-x.xml, AFRelationship=Alternative). Premium-only.
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_FACTURX_EXPORT,
         titleRes = Res.string.gstore_module_facturx_title,
         descRes = Res.string.gstore_module_facturx_desc,
         detailRes = Res.string.gstore_module_facturx_detail,
         icon = Icons.Outlined.Code,
-        isFree = true,
     ),
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
@@ -191,7 +188,6 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_delivery_note_tagging_desc,
         detailRes = Res.string.gstore_module_delivery_note_tagging_detail,
         icon = Icons.Outlined.Sell,
-        isFree = true,
     ),
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_QUOTE_TAGGING,
@@ -199,7 +195,6 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_quote_tagging_desc,
         detailRes = Res.string.gstore_module_quote_tagging_detail,
         icon = Icons.Outlined.Sell,
-        isFree = true,
     ),
     // Pinned last per product ordering — feature-y modules read first, then
     // watermark, then multi-entreprise (which reshapes the whole app menu).
@@ -232,12 +227,14 @@ fun GStore(
         viewModel.refreshSubscription()
     }
     // Reactive premium check — recomposes when /v1/account lands after screen open.
+    // Delegate to the shared SubscriptionState.isPremium() extension so we
+    // accept the full PREMIUM_STATUSES set ("active" | "trialing" |
+    // "past_due"), matching SubscriptionRepository.isPremium(). Was hardcoded
+    // to "active" only, which locked the switch for users on Stripe trial or
+    // grace period even though the backend considered them premium.
     val subscriptionState by viewModel.subscriptionState.collectAsState()
     val isPremium = remember(subscriptionState) {
-        (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->
-            s.status == "active" &&
-                (s.currentPeriodEndMs ?: 0L) > kotlin.time.Clock.System.now().toEpochMilliseconds()
-        } ?: false
+        subscriptionState.isPremium()
     }
     val isDimActive = remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current

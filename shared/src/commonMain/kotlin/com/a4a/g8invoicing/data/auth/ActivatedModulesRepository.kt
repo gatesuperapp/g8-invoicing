@@ -255,13 +255,9 @@ class ActivatedModulesRepository(
         val FREE_MODULES = setOf(
             MODULE_QUOTE_TRIAL,
             MODULE_DELIVERY_NOTE,
-            MODULE_CII_XML_EXPORT,
-            MODULE_FACTURX_EXPORT,
             MODULE_WATERMARK_REMOVAL,
             MODULE_MULTI_ENTREPRISE,
             MODULE_FONT,
-            MODULE_DELIVERY_NOTE_TAGGING,
-            MODULE_QUOTE_TAGGING,
         )
 
         // Modules seeded into the activated set the first time the app boots after this
