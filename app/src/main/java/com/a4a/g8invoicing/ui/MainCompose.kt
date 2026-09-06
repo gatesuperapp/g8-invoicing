@@ -126,6 +126,11 @@ fun MainCompose(
     // show its ported client-country step. True when the user has never seen
     // the 1.8 wizard (pre-1.8 upgrade or restore); false when 1.8 already ran.
     var showClientCountryStepInMigration19 by remember { mutableStateOf(false) }
+    // True when the wizard is firing because a restore just landed a backup
+    // (not a plain version upgrade). Drives the per-issuer data check inside
+    // the wizard instead of the version-based gate, since a restored backup
+    // file has no reliable "source app version" metadata.
+    var migration19FiredByRestore by remember { mutableStateOf(false) }
 
     // Restore flow — activated from Account > Sauvegarde. Rendered outside
     // NavGraph so its dialogs stack on top of every screen the user may be
@@ -142,6 +147,11 @@ fun MainCompose(
         // the stale flag from the previous session).
         if (RestoreManager.consumeMigrationWizardResetIfAny(context)) {
             modulesRepo.resetMigration19Seen()
+            // Remember the restore trigger so the wizard swaps its version-
+            // gated slides (country fix, ClientCountryPicker) for per-issuer
+            // / per-client data checks. See the migration19FiredByRestore
+            // wiring passed to OnboardingMigration19Dialog below.
+            migration19FiredByRestore = true
         }
         // Pre-1.8 backup restored: consume the sentinel to clean the file up
         // but do NOT reset the "1.8 seen" pref anymore. The 1.8 wizard was
@@ -159,11 +169,23 @@ fun MainCompose(
         initializeVersionTracking(context)
         val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
         if (lastIssuerId == null) {
-            if (isReturningUser) {
-                // Existing user with a wiped or never-populated issuer table.
-                // Would only happen if migration 7.sqm's "Mon entreprise" seed
-                // was skipped for some reason. Repair silently — don't hit an
-                // upgrader with the fresh-install welcome wizard.
+            // A fully-empty DB (no issuers AND no clients AND no products)
+            // routes to the fresh-install welcome — matches the user's rule:
+            // "if the database is completely empty, show the first-install
+            // onboarding, not the migration wizard". Applies to both real
+            // fresh installs and returning users who cleared their data
+            // (App Info → Clear storage, or a Restore that landed empty).
+            val hasAnyClient = clientOrIssuerDataSource
+                .fetchAll(PersonType.CLIENT).first().isNotEmpty()
+            val hasAnyProduct = productDataSource.fetchAllProducts().first().isNotEmpty()
+            val dbIsFullyEmpty = !hasAnyClient && !hasAnyProduct
+            if (isReturningUser && !dbIsFullyEmpty) {
+                // Existing user with orphan clients/products but a wiped
+                // issuer table. Would only happen if migration 7.sqm's
+                // "Mon entreprise" seed was skipped for some reason. Repair
+                // silently — don't hit an upgrader with the fresh-install
+                // welcome wizard, and don't drop their orphan data on the
+                // floor by re-routing to first-install.
                 val defaultCountry = CountryCodes.pickDefaultForNewAddress(null)
                 val seededIssuer = ClientOrIssuerState(
                     type = ClientOrIssuerType.ISSUER,
@@ -200,9 +222,18 @@ fun MainCompose(
                 if (issuers.isEmpty()) {
                     modulesRepo.markMigration19Seen()
                 } else {
+                    // Unscoped fetches — the wizard MUST see every client and
+                    // product regardless of which company the boot-time
+                    // initIfMissing landed on. Was routing through the
+                    // current-company-scoped Flow, which silently returned
+                    // empty when migration 7's backfill (ORDER BY updated_at)
+                    // and getLastInsertedIssuerId (ORDER BY id) picked
+                    // different issuers on a pre-1.8 restore — the wizard
+                    // then had nothing to attribute and the data landed
+                    // randomly on the fallback issuer.
                     val clients = clientOrIssuerDataSource
-                        .fetchAll(PersonType.CLIENT).first()
-                    val products = productDataSource.fetchAllProducts().first()
+                        .fetchAllUnscoped(PersonType.CLIENT)
+                    val products = productDataSource.fetchAllProductsUnscoped()
                     val footersByIssuer = issuers.mapNotNull { issuer ->
                         val id = issuer.id?.toLong() ?: return@mapNotNull null
                         id to invoiceDataSource.getRecentFootersForCompany(id)
@@ -363,9 +394,21 @@ fun MainCompose(
                     if (ctx.issuers.size > 1) {
                         modulesRepo.forceActivate(ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE)
                     }
+                    // Pin the current-company pointer onto one of the user's
+                    // real issuers (the first one). The pre-restore Settings
+                    // value can outlive the DB swap and point at an id that
+                    // no longer exists in the restored dataset, which shows
+                    // up as the menu landing on the wrong (or seeded default
+                    // "Mon entreprise") entreprise. Re-anchoring here after
+                    // every wizard run — restore or plain upgrade — keeps
+                    // the boot always positioned on a valid issuer.
+                    ctx.issuers.firstOrNull()?.id?.toLong()?.let {
+                        currentCompanyRepository.setCurrent(it)
+                    }
                 },
             ),
             showClientCountryStep = showClientCountryStepInMigration19,
+            isRestore = migration19FiredByRestore,
             onDismiss = { migration19Context = null },
         )
     }

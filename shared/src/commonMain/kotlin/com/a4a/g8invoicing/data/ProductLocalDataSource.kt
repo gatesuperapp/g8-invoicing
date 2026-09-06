@@ -39,6 +39,14 @@ class ProductLocalDataSource(
         }
     }
 
+    override suspend fun fetchAllProductsUnscoped(): List<ProductState> {
+        return withContext(DispatcherProvider.IO) {
+            productQueries.getAllProducts()
+                .executeAsList()
+                .map { it.transformIntoEditableProduct(taxQueries, productPriceQueries) }
+        }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAllProducts(): Flow<List<ProductState>> {
         // Scoped to the entreprise courante — re-emits when the user switches

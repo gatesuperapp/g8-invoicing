@@ -104,6 +104,19 @@ class ClientOrIssuerLocalDataSource(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun fetchAllUnscoped(type: PersonType): List<ClientOrIssuerState> {
+        return withContext(DispatcherProvider.IO) {
+            clientOrIssuerQueries.getAll(type.name.lowercase())
+                .executeAsList()
+                .map {
+                    it.transformIntoEditable(
+                        addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
+                        emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                    ).copy(banks = fetchIssuerBanks(it.id))
+                }
+        }
+    }
+
     override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>> {
         // Clients are scoped to the entreprise courante; issuers ARE the
         // entreprises, so the issuer list stays unfiltered.

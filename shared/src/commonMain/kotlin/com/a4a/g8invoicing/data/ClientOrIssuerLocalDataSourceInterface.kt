@@ -13,6 +13,19 @@ import kotlinx.coroutines.flow.Flow
 interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState?
     fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>>
+
+    /**
+     * Unscoped fetch — returns ALL clients / issuers regardless of the
+     * current-company filter that [fetchAll] applies. Used by the 1.9
+     * migration wizard where we need the whole dataset to attribute
+     * clients across issuers: the current-company filter would otherwise
+     * miss clients that migration 7's backfill attached to a different
+     * issuer than the one initIfMissing picked as the boot default (SQL
+     * ORDER BY updated_at vs id can disagree, leaving the wizard with an
+     * empty client / product list — the exact "wizard found no items but
+     * they weren't lost" symptom).
+     */
+    suspend fun fetchAllUnscoped(type: PersonType): List<ClientOrIssuerState>
     suspend fun createNew(clientOrIssuer: ClientOrIssuerState): Boolean
     suspend fun createNewAndReturnId(clientOrIssuer: ClientOrIssuerState): Long?
     suspend fun duplicateClients(clientsOrIssuers: List<ClientOrIssuerState>)

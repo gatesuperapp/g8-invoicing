@@ -15,6 +15,12 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 interface ProductLocalDataSourceInterface {
     suspend fun fetchProduct(id: Long): ProductState?
     fun fetchAllProducts(): Flow<List<ProductState>>
+
+    /** Unscoped fetch — returns ALL products regardless of the current-
+     *  company filter that [fetchAllProducts] applies. See the twin
+     *  ClientOrIssuerLocalDataSource.fetchAllUnscoped for the rationale
+     *  (migration wizard needs the whole dataset). */
+    suspend fun fetchAllProductsUnscoped(): List<ProductState>
     /** Insert a new Product row (+ its default price row). Returns the row id of
      * the created Product, or null if the insert failed. Callers building a
      * DocumentProduct in the same flow need the id to backfill

@@ -52,6 +52,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,6 +86,8 @@ import com.a4a.g8invoicing.shared.resources.account_backup_dialog_no
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_title
 import com.a4a.g8invoicing.shared.resources.account_backup_dialog_yes
 import com.a4a.g8invoicing.shared.resources.ok
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
 import com.a4a.g8invoicing.shared.resources.onboarding_19_attach_clients_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_backup_title
@@ -209,6 +214,41 @@ class Migration19Actions(
  * Non-dismissable: the wizard must be completed once. Any orphan-slide
  * is skipped when there's nothing to sort.
  */
+
+// Flattens Map<Long, Long> to a List<Long> (k1, v1, k2, v2, ...) so
+// rememberSaveable can persist the client/product → issuer assignment
+// maps across configuration changes and savedInstanceState kicks. The
+// wizard is non-dismissable so a rotation is the only realistic reason
+// state would drop mid-flow; without this saver the user's per-issuer
+// picks would silently reset. Bundle-friendly primitive type.
+private val MapLongLongSaver: Saver<Map<Long, Long>, Any> =
+    listSaver<Map<Long, Long>, Long>(
+        save = { map: Map<Long, Long> ->
+            map.flatMap { (k, v) -> listOf(k, v) }
+        },
+        restore = { flat: List<Long> ->
+            flat.chunked(2).associate { pair -> pair[0] to pair[1] }
+        },
+    )
+
+// Same rationale as MapLongLongSaver, but for the IBAN + BIC pair keyed
+// by issuer id. Flattened as (idAsString, iban, bic, idAsString, iban,
+// bic, ...) into a homogeneous List<String> so the platform Bundle can
+// carry it.
+private val BankByIssuerSaver: Saver<Map<Long, Pair<String, String>>, Any> =
+    listSaver<Map<Long, Pair<String, String>>, String>(
+        save = { map: Map<Long, Pair<String, String>> ->
+            map.flatMap { (id, ibanBic) ->
+                listOf(id.toString(), ibanBic.first, ibanBic.second)
+            }
+        },
+        restore = { flat: List<String> ->
+            flat.chunked(3).associate { triplet ->
+                triplet[0].toLong() to (triplet[1] to triplet[2])
+            }
+        },
+    )
+
 @Composable
 fun OnboardingMigration19Dialog(
     context: Migration19Context,
@@ -223,6 +263,13 @@ fun OnboardingMigration19Dialog(
     // scheduled) — that user already made the country choice and we don't
     // re-ask.
     showClientCountryStep: Boolean,
+    // True when the wizard is firing because a Restore just landed a backup
+    // (as opposed to a plain version upgrade). Restore has no reliable
+    // "which app version did this backup come from" metadata, so version-
+    // based gates (like showClientCountryStep) can't be trusted; fall back
+    // to per-issuer data checks instead — fire the country step only for
+    // issuers that actually lack a country_code in the restored DB.
+    isRestore: Boolean = false,
     onDismiss: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -234,12 +281,24 @@ fun OnboardingMigration19Dialog(
     var currentIssuerIdx by remember { mutableStateOf(0) }
 
     // client id → issuer id and product id → issuer id, built up as the user
-    // walks the per-issuer loop and the orphan slides.
-    var clientAssignments by remember { mutableStateOf<Map<Long, Long>>(emptyMap()) }
-    var productAssignments by remember { mutableStateOf<Map<Long, Long>>(emptyMap()) }
+    // walks the per-issuer loop and the orphan slides. Saveable so a
+    // configuration change / recreate (rotation, dark-mode swap,
+    // savedInstanceState kick) mid-attribution doesn't wipe the
+    // per-issuer picks and force the user to redo them — the wizard is
+    // non-dismissable so the only exit vector otherwise is a full
+    // process kill, which still resets state (and that's fine, no DB
+    // writes happen until Final CTA).
+    var clientAssignments by rememberSaveable(stateSaver = MapLongLongSaver) {
+        mutableStateOf<Map<Long, Long>>(emptyMap())
+    }
+    var productAssignments by rememberSaveable(stateSaver = MapLongLongSaver) {
+        mutableStateOf<Map<Long, Long>>(emptyMap())
+    }
 
     // IBAN + BIC per issuer, seeded from footers on first entry.
-    var bankByIssuer by remember { mutableStateOf<Map<Long, Pair<String, String>>>(emptyMap()) }
+    var bankByIssuer by rememberSaveable(stateSaver = BankByIssuerSaver) {
+        mutableStateOf<Map<Long, Pair<String, String>>>(emptyMap())
+    }
 
     var step by remember { mutableStateOf(Step19.Welcome) }
     var submitting by remember { mutableStateOf(false) }
@@ -286,11 +345,21 @@ fun OnboardingMigration19Dialog(
     // Bootstrap's single seeded issuer is excluded — it walks the fuller
     // name+country prompt via IssuerName / IssuerCountry instead.
     // Frozen at wizard open for the same reason as needsIssuerBootstrap.
-    val issuersNeedingCountryFix = remember(context.issuers) {
-        if (needsIssuerBootstrap) emptyList()
-        else context.issuers.filter { issuer ->
-            val address = issuer.addresses?.firstOrNull()
-            address?.countryCode.isNullOrBlank()
+    val issuersNeedingCountryFix = remember(context.issuers, showClientCountryStep, isRestore) {
+        // Version-gated on upgrade (showClientCountryStep = LAST_SEEN_VERSION
+        // < 1.8) so a 1.8→1.9 user with country set — or a 1.8→1.9 user
+        // whose country happens to be blank in the DB — never re-hits the
+        // step. Restore has no version metadata (backup file doesn't carry
+        // the source app version), so we can't trust the gate there and
+        // fall back to a per-issuer data check: fire only for issuers that
+        // still have no country in the restored DB.
+        when {
+            needsIssuerBootstrap -> emptyList()
+            !isRestore && !showClientCountryStep -> emptyList()
+            else -> context.issuers.filter { issuer ->
+                val addresses = issuer.addresses.orEmpty()
+                addresses.isEmpty() || addresses.all { it.countryCode.isNullOrBlank() }
+            }
         }
     }
     var fixCountryIdx by remember { mutableStateOf(0) }
@@ -1085,6 +1154,10 @@ private fun CleanupStep19(
         }
         Spacer(Modifier.height(24.dp))
         PrimaryCta19(text = stringResource(Res.string.onboarding_19_cleanup_cta), onClick = onNext)
+        // Match AttachStep19 / OrphansStep19 — 50dp cushion so the CTA
+        // doesn't end up flush with the gesture / system bar on shorter
+        // devices with a minimal navigation-bar inset.
+        Spacer(Modifier.height(50.dp))
     }
     pendingDetails?.let { issuer ->
         IssuerDetailsDialog19(issuer = issuer, onDismiss = { pendingDetails = null })
@@ -1216,6 +1289,10 @@ private fun AttachStep19(
             text = stringResource(Res.string.onboarding_19_attach_cta, issuerName),
             onClick = { onConfirm(selectedIds.toList()) },
         )
+        // 50dp of breathing room under the "Rattacher à…" CTA — on some
+        // devices with a shallow system-bar inset the button was landing
+        // pixel-close to the gesture-bar area, which made it look unclickable.
+        Spacer(Modifier.height(50.dp))
     }
 }
 
@@ -1272,23 +1349,37 @@ private fun BankDetailsStep19(
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(24.dp))
-        FieldLabel19(stringResource(Res.string.onboarding_19_bank_iban_label))
+        // Swap the IBAN / BIC labels for "N° de compte" (no BIC field) when
+        // the issuer's country isn't in the IBAN/SEPA zone (US, ZA, GB post-
+        // Brexit, …). Matches the payment-picker sheet in
+        // DocumentBottomSheetElementsAfterSlide which does the same lookup.
+        val issuerCountry = issuer.addresses?.firstOrNull()?.countryCode
+        val isIbanCountry = com.a4a.g8invoicing.data.models.CountryCodes
+            .isIbanCountry(issuerCountry) || issuerCountry == null
+        val identifierLabel = if (isIbanCountry) {
+            stringResource(Res.string.issuer_bank_identifier_iban)
+        } else {
+            stringResource(Res.string.issuer_bank_identifier_generic)
+        }
+        FieldLabel19(identifierLabel)
         Spacer(Modifier.height(6.dp))
         CompactTextField19(
             value = iban,
             onValueChange = { iban = it },
-            placeholder = "FR76 …",
-            imeAction = ImeAction.Next,
+            placeholder = if (isIbanCountry) "FR76 …" else "",
+            imeAction = if (isIbanCountry) ImeAction.Next else ImeAction.Done,
         )
-        Spacer(Modifier.height(16.dp))
-        FieldLabel19(stringResource(Res.string.onboarding_19_bank_bic_label))
-        Spacer(Modifier.height(6.dp))
-        CompactTextField19(
-            value = bic,
-            onValueChange = { bic = it },
-            placeholder = "BNPAFRPP",
-            imeAction = ImeAction.Done,
-        )
+        if (isIbanCountry) {
+            Spacer(Modifier.height(16.dp))
+            FieldLabel19(stringResource(Res.string.onboarding_19_bank_bic_label))
+            Spacer(Modifier.height(6.dp))
+            CompactTextField19(
+                value = bic,
+                onValueChange = { bic = it },
+                placeholder = "BNPAFRPP",
+                imeAction = ImeAction.Done,
+            )
+        }
         Spacer(Modifier.height(32.dp))
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             PrimaryCta19(
@@ -1410,6 +1501,10 @@ private fun OrphansStep19(
             enabled = allAssigned,
             onClick = onNext,
         )
+        // Same 50dp cushion as the AttachStep19 CTA above — the orphans
+        // slide has the same risk of the button landing tight against the
+        // system-bar / gesture area on short screens.
+        Spacer(Modifier.height(50.dp))
     }
 }
 
@@ -1812,6 +1907,9 @@ private fun ConfirmStep19(
             text = stringResource(Res.string.onboarding_19_confirm_cta),
             onClick = onNext,
         )
+        // Bottom breathing room so the CTA doesn't kiss the sheet edge on
+        // devices where the scroll bottoms out exactly on the button.
+        Spacer(Modifier.height(32.dp))
     }
 }
 
@@ -1929,8 +2027,8 @@ private fun IssuerCountryStep19(
         EmojiSlot("🌍")
         Spacer(Modifier.height(24.dp))
         StepTitle(
-            if (issuerName != null) "$issuerName — Dans quel pays est-elle établie ?"
-            else "Dans quel pays est-elle établie ?"
+            if (issuerName != null) "$issuerName — Dans quel pays cette entreprise est-elle établie ?"
+            else "Dans quel pays cette entreprise est-elle établie ?"
         )
         Spacer(Modifier.height(24.dp))
         FieldLabel19("Pays")
