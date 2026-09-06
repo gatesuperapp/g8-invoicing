@@ -212,21 +212,32 @@ fun MainCompose(
                     // a copy in Downloads/, but this one guarantees a pre-wizard
                     // file exists in the app's internal dir even if they skip it.
                     snapshotDatabaseInternally(context, "before_1_9_migration")
-                    // Read the 1.8-seen flag BEFORE we flip it below. True when
-                    // the user actually ran the 1.8 wizard back in the day
-                    // (client country_code was already asked) — in that case
-                    // the enhanced 1.9 wizard hides its ported client-country
-                    // step. False when the user is upgrading straight from
-                    // < 1.8 or restoring a pre-1.8 backup → 1.9 absorbs the
-                    // client-country question.
-                    val alreadyRanPre19 = bootPrefs[PrefKeys.HAS_SEEN_ONBOARDING_1_8] ?: false
+                    // Show the ported ClientCountryPicker step only for users
+                    // upgrading from a build strictly older than 1.8 —
+                    // 1.8+ already asked the country question in its own
+                    // wizard. Read LAST_SEEN_VERSION (set by What's New the
+                    // last time the user saw the app on a previous release)
+                    // rather than HAS_SEEN_ONBOARDING_1_8, which stays false
+                    // if the user dismissed/skipped the 1.8 wizard and would
+                    // then falsely re-ask the country. Fresh installs skip
+                    // the migration wizard entirely a few lines above (empty
+                    // issuers) so a null LAST_SEEN_VERSION here means a
+                    // legacy pre-tracking install → treat as pre-1.8.
+                    val lastSeen = bootPrefs[PrefKeys.LAST_SEEN_VERSION]
+                    val cameFromPre18 = run {
+                        if (lastSeen == null) return@run true
+                        val parts = lastSeen.split(".")
+                        val major = parts.getOrNull(0)?.toIntOrNull() ?: 0
+                        val minor = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                        major < 1 || (major == 1 && minor < 8)
+                    }
                     migration19Context = Migration19Context(
                         issuers = issuers,
                         clients = clients,
                         products = products,
                         footersByIssuer = footersByIssuer,
                     )
-                    showClientCountryStepInMigration19 = !alreadyRanPre19
+                    showClientCountryStepInMigration19 = cameFromPre18
                     // 1.8 wizard is deprecated — its country-fill / attach flow
                     // now lives inside the enhanced 1.9 wizard (see the mono-
                     // issuer silent attach + client-country steps there). Mark
