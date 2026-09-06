@@ -50,4 +50,8 @@ interface QuoteLocalDataSourceInterface {
     suspend fun deleteAllRetentions(quoteId: Long)
     suspend fun saveRetentions(quoteId: Long, retentions: List<RetentionState>)
 
+    // BT-120 seed on EDIT_ISSUER vatExempt flip — mirrors Invoice /
+    // CreditNote so a devis whose issuer just went from taxed to franchise
+    // gets the country default persisted before the subsequent reload.
+    suspend fun updateVatExemptionText(quoteId: Long, text: String?)
 }

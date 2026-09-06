@@ -104,6 +104,19 @@ class QuoteAddEditViewModel(
         }
     }
 
+    // See InvoiceAddEditViewModel.seedDefaultVatExemptionTextInDb — same
+    // rule on Devis: when EDIT_ISSUER flips vatExempt ON and the doc has
+    // no wording yet, drop the country-based citation to DB so it appears
+    // after reloadDocument. Countries with no reliable auto-fill return
+    // null from the resolver — same UX as invoices (user then has to type
+    // the mention manually via the text menu).
+    suspend fun seedDefaultVatExemptionTextInDb(issuer: ClientOrIssuerState) {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        val country = issuer.addresses?.firstOrNull()?.countryCode
+        val default = com.a4a.g8invoicing.data.models.resolveVatExemptionText(country) ?: return
+        documentDataSource.updateVatExemptionText(id, default)
+    }
+
     // Retention CRUD. Mirrors the invoice/creditnote hooks — every mutation
     // refreshes documentTotalPrices so the totals block updates in the same
     // frame; the autoSave debounce then persists to DB.

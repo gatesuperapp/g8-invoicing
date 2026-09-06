@@ -475,6 +475,23 @@ class QuoteLocalDataSource(
         }
     }
 
+    // Dedicated write so the seed-on-EDIT_ISSUER path (see
+    // QuoteAddEditViewModel.seedDefaultVatExemptionTextInDb) can persist
+    // before reloadDocument reads the row back into state. Mirror of
+    // InvoiceLocalDataSource.updateVatExemptionText.
+    override suspend fun updateVatExemptionText(quoteId: Long, text: String?) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                quoteQueries.updateVatExemptionText(
+                    quote_id = quoteId,
+                    vat_exemption_text = text?.trim()?.takeIf { it.isNotEmpty() },
+                    updated_at = DateUtils.getCurrentTimestamp(),
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     // Wipe + re-insert on save; N is tiny (1-3 rows) so per-row diffing isn't
     // worth the bookkeeping. Mirrors InvoiceLocalDataSource.saveRetentionsForInvoice.
     private fun saveRetentionsForQuote(

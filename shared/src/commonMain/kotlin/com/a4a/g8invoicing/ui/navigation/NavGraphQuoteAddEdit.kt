@@ -143,6 +143,11 @@ fun NavGraphBuilder.quoteAddEdit(
                                     } else if (!updated.taxWithholdingEnabled && hadRetentions) {
                                         quoteViewModel.clearRetentionsInDb()
                                     }
+                                    val hadExemptionText = quoteViewModel.quoteUiState.value
+                                        .vatExemptionText?.text?.isNotBlank() == true
+                                    if (updated.vatExempt && !hadExemptionText) {
+                                        quoteViewModel.seedDefaultVatExemptionTextInDb(updated)
+                                    }
                                     quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
                                     quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
                                 }
@@ -420,6 +425,9 @@ fun NavGraphBuilder.quoteAddEdit(
                                 val hadRetentions = quoteViewModel.quoteUiState.value.retentions.isNotEmpty()
                                 val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
                                 val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
+                                val hadExemptionText = quoteViewModel.quoteUiState.value
+                                    .vatExemptionText?.text?.isNotBlank() == true
+                                val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
@@ -427,6 +435,9 @@ fun NavGraphBuilder.quoteAddEdit(
                                     quoteViewModel.clearRetentionsInDb()
                                 } else if (turnedOnRetention) {
                                     quoteViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
+                                if (needsExemptionSeed) {
+                                    quoteViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
                                 }
                                 quoteViewModel.reloadDocument()
                                 showDocumentForm = false
