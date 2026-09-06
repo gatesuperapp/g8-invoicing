@@ -36,6 +36,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.isPremium
+import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
@@ -79,6 +81,7 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_deactivate_blocked
 import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_title
@@ -106,6 +109,8 @@ import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textTiny
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlinx.coroutines.flow.first
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 private data class GStoreModule(
@@ -240,8 +245,39 @@ fun GStore(
     val premiumOnlyMessage = stringResource(Res.string.gstore_premium_only_message)
     val onPremiumHint: () -> Unit = { showPremiumHint = true }
 
+    // Guard the multi-entreprise toggle: turning it OFF while more than one
+    // issuer exists in the DB would strand the extras (menu picker gone,
+    // sidebar collapsed). Fetch the current issuer count on screen open;
+    // deactivation attempts route to the blocking dialog below instead of
+    // the plain toggle path.
+    val clientOrIssuerDataSource: com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface =
+        koinInject()
+    var issuerCount by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        issuerCount = clientOrIssuerDataSource
+            .fetchAll(PersonType.ISSUER)
+            .first()
+            .size
+    }
+    var showMultiEntrepriseBlockedDialog by remember { mutableStateOf(false) }
+
     // Tapping a card opens a fullscreen detail dialog for that module. Null = no dialog.
     var selectedModule: GStoreModule? by remember { mutableStateOf(null) }
+
+    // Route every module toggle here so the multi-entreprise guard sits in
+    // one place. Deactivation-with-multiple-issuers → dialog; everything
+    // else falls through to the VM's toggle path (which itself gates on
+    // FREE_MODULES / premium).
+    val onModuleToggle: (String) -> Unit = { moduleId ->
+        val isDeactivating = moduleId in activated
+        if (moduleId == ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE &&
+            isDeactivating && issuerCount > 1
+        ) {
+            showMultiEntrepriseBlockedDialog = true
+        } else {
+            viewModel.toggleModule(moduleId)
+        }
+    }
 
     ScaffoldWithDimmedOverlay(
         isDimmed = isDimActive.value,
@@ -296,7 +332,7 @@ fun GStore(
                     isPremium = isPremium,
                     isFree = module.isFree,
                     isActivated = module.id in activated,
-                    onToggle = { viewModel.toggleModule(module.id) },
+                    onToggle = { onModuleToggle(module.id) },
                     onPremiumHint = onPremiumHint,
                     onClick = { selectedModule = module },
                 )
@@ -330,7 +366,7 @@ fun GStore(
             isPremium = isPremium,
             isFree = module.isFree,
             isActivated = module.id in activated,
-            onToggle = { viewModel.toggleModule(module.id) },
+            onToggle = { onModuleToggle(module.id) },
             onPremiumHint = onPremiumHint,
             onDismiss = { selectedModule = null },
         )
@@ -340,6 +376,19 @@ fun GStore(
         PremiumHintDialog(
             message = premiumOnlyMessage,
             onDismiss = { showPremiumHint = false },
+        )
+    }
+
+    if (showMultiEntrepriseBlockedDialog) {
+        // Reuse PremiumHintDialog's compact centered look — matches the
+        // existing "you tapped a locked switch" vocabulary the user
+        // already recognises from the premium gate. Explains the rule
+        // in one line without pretending to offer an override.
+        PremiumHintDialog(
+            message = stringResource(
+                Res.string.gstore_module_multi_entreprise_deactivate_blocked
+            ),
+            onDismiss = { showMultiEntrepriseBlockedDialog = false },
         )
     }
 }
