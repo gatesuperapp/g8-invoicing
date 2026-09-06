@@ -265,13 +265,13 @@ fun MainCompose(
     var showBackupDialog by remember { mutableStateOf(false) }
     var backupExportedFile by remember { mutableStateOf<File?>(null) }
 
-    // The 1.8 onboarding must run BEFORE the 1.9 attribution wizard when both
-    // are pending — the 1.8 wizard's "clients tous dans le même pays ?" step
-    // populates client country_code data that the 1.9 attribution flow reuses
-    // for pre-fill. `shouldShowOnboarding == null` means DataStore hasn't
-    // emitted yet; treat as "possibly true" to avoid a one-frame flash of the
-    // 1.9 wizard on cold start.
-    val onboarding18Pending = shouldShowOnboarding != false || showOnboarding
+    // 1.8 wizard is retired — the 1.9 migration wizard now absorbs the
+    // ClientCountryPicker step it used to own (see OnboardingMigration19Dialog).
+    // A user upgrading from any pre-1.9 build lands straight on the 1.9 flow
+    // regardless of whether they'd previously seen the 1.8 wizard. Kept as a
+    // named constant (rather than inlined `false`) so search-and-read still
+    // surfaces the historical gating logic.
+    val onboarding18Pending = false
     if (!onboarding18Pending) migration19Context?.let { ctx ->
         OnboardingMigration19Dialog(
             context = ctx,
@@ -376,8 +376,15 @@ fun MainCompose(
         // backup nag stay suppressed until 1.9 clears so we don't stack four
         // modals on top of the migration wizard.
         val migration19Pending = migration19Context != null
-        showOnboarding = onboarding
-        showWhatsNew = whatsNew && !onboarding && !migration19Pending
+        // 1.8 wizard retired — never surface it. If the DataStore flag still
+        // reads "unseen" (upgrade from a pre-1.9 build, or a fresh install
+        // that hasn't yet been marked), mark it seen so the boot check doesn't
+        // resolve to true again next launch. The 1.9 migration wizard's own
+        // markSeen block also does this, but it fires only after the user
+        // completes 1.9 — this catches users who defer / dismiss 1.9.
+        if (onboarding) setSeenOnboarding18(context)
+        showOnboarding = false
+        showWhatsNew = whatsNew && !migration19Pending
         // 1.8.1 e-invoice popup: only when the device is set to country=FR.
         // Country (not language) — the e-invoice obligation follows where the
         // phone is used, not which UI language the user picked. Reads a
@@ -388,11 +395,11 @@ fun MainCompose(
         // onboarding wizard is pending. Mark SEEN=true immediately per product
         // decision.
         val systemCountry = com.a4a.g8invoicing.SystemRegionSnapshot.formatCountry
-        if (eInvoice && !onboarding && !migration19Pending && systemCountry == "FR") {
+        if (eInvoice && !migration19Pending && systemCountry == "FR") {
             showEInvoiceIntro = true
             setSeenEInvoiceIntro(context)
         }
-        if (!whatsNew && !onboarding && !migration19Pending && !showEInvoiceIntro) {
+        if (!whatsNew && !migration19Pending && !showEInvoiceIntro) {
             showBackupDialog = shouldShowBackupPopupNow(
                 context,
                 invoiceQueries,
