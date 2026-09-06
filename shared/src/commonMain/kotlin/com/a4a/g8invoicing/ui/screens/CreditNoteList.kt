@@ -160,7 +160,13 @@ fun CreditNoteList(
                             selectedMode.value = false
                         }
                     },
-                    keyToResetCheckboxes = keyToResetCheckboxes.value
+                    keyToResetCheckboxes = keyToResetCheckboxes.value,
+                    // Credit notes ship no gStore tagging module and no
+                    // draft/sent workflow — every row shows the neutral
+                    // undefined pill (white + grey border) with no status
+                    // label under the price. Matches the "module off"
+                    // treatment used by Quote / DeliveryNote.
+                    tagsEnabled = false,
                 )
             }
         }
