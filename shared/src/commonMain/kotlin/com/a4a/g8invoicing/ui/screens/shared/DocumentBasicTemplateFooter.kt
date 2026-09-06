@@ -233,8 +233,21 @@ fun DocumentBasicTemplateFooter(
         val hasPaymentHeader = document.showCurrencyAndAutoTaxColumn &&
             (showPaymentSection ||
                 (invoiceDueDate != null && paymentBlockTitle != null))
+        // Standalone due-date line with no grey box + no payment-terms prose:
+        // fall back to the tight ~6dp gap master used to sit the footer
+        // directly under the due date (barely more than a normal interline).
+        // The 20dp default only applies when the payment box or terms above
+        // introduce a real visual break the reader needs to cross.
+        val isStandaloneDueDateOnly = !showPaymentSection &&
+            invoiceDueDate != null && paymentBlockTitle != null &&
+            paymentTerms == null
+        val topBandSpacer = when {
+            hasPaymentHeader -> 12.dp
+            isStandaloneDueDateOnly -> 6.dp
+            else -> 20.dp
+        }
         if (paymentTerms != null || footerText != null || watermark != null) {
-            Spacer(Modifier.height(if (hasPaymentHeader) 12.dp else 20.dp))
+            Spacer(Modifier.height(topBandSpacer))
             if (hasPaymentHeader) {
                 HorizontalDivider(color = SeparatorColor, thickness = 0.5.dp)
                 Spacer(Modifier.height(8.dp))

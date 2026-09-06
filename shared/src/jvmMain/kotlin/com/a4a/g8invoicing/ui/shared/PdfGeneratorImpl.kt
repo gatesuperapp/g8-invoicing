@@ -502,10 +502,27 @@ class PdfGeneratorImpl(
         val footerText = document.footerText.text.trim().takeIf { it.isNotEmpty() }
         val watermarkText = document.watermarkText?.takeIf { it.isNotBlank() }
         if (paymentTerms != null || footerText != null || watermarkText != null) {
-            doc.add(createSeparator(topMargin = 20f))
-            if (paymentTerms != null) doc.add(createPaymentTermsBlock(paymentTerms, fontSize))
-            if (footerText != null) doc.add(createFooter(footerText, fontSize, paymentTerms != null))
-            if (watermarkText != null) doc.add(createWatermark(watermarkText))
+            // When only the standalone due-date line sits above (no grey box,
+            // no payment-terms prose), sit the footer directly under it at
+            // ~6pt — matches master's tight interline. The separator + wide
+            // 20pt margin only fires when there's a real payment section
+            // above that needs a visual break.
+            val isStandaloneDueDateOnly = !showPaymentBox &&
+                document is InvoiceState &&
+                !document.dueDate.substringBefore(" ").isBlank() &&
+                paymentTerms == null
+            if (isStandaloneDueDateOnly) {
+                if (footerText != null) doc.add(
+                    createFooter(footerText, fontSize, precededByTerms = false)
+                        .setMarginTop(6f)
+                )
+                if (watermarkText != null) doc.add(createWatermark(watermarkText))
+            } else {
+                doc.add(createSeparator(topMargin = 20f))
+                if (paymentTerms != null) doc.add(createPaymentTermsBlock(paymentTerms, fontSize))
+                if (footerText != null) doc.add(createFooter(footerText, fontSize, paymentTerms != null))
+                if (watermarkText != null) doc.add(createWatermark(watermarkText))
+            }
         }
 
         // "Paid" stamp — absolute-positioned via setFixedPosition inside

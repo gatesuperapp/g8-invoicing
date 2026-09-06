@@ -33,7 +33,7 @@
     <string name="document_reference">Reference</string>
     <string name="document_reference_label">Reference: </string>
     <string name="addressed_to">Addressed to</string>
-    <string name="invoice_pdf_due_date">Payment due by </string>
+    <string name="invoice_pdf_due_date">Payment due date: </string>
     <string name="document_payment_section_title">Payment</string>
     <string name="invoice_paid">Paid ✔</string>
     <string name="pdf_currency_notice">Currency: %1$s</string>
