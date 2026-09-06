@@ -149,7 +149,17 @@ fun NavGraphBuilder.quoteAddEdit(
                                         quoteViewModel.seedDefaultVatExemptionTextInDb(updated)
                                     }
                                     quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // Persist via UPDATE (id-preserving) — see
+                                    // NavGraphInvoiceAddEdit for the full story.
+                                    // syncToMaster=false so the follow-up form
+                                    // validate doesn't bump the master and leave
+                                    // originalVersion out of sync.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    quoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -213,7 +223,13 @@ fun NavGraphBuilder.quoteAddEdit(
                                 )
                                 if (updated != null) {
                                     quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // See the issuer path above.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_CLIENT,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    quoteViewModel.reloadDocument()
                                 }
                             }
                         }

@@ -164,7 +164,22 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 invoiceViewModel.seedDefaultVatExemptionTextInDb(updated)
                             }
                             invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                            // Persist via UPDATE (id-preserving) instead of the
+                            // delete + reinsert saveDocumentClientOrIssuerInLocalDb
+                            // does. That destructive path was invalidating the
+                            // doc-issuer id, which then caused the subsequent
+                            // form-validate → sync-to-master → updateOriginalVersion
+                            // to miss its target row: master.version bumped by +1,
+                            // doc.originalVersion stayed behind, the mismatch
+                            // dialog re-fired on next open. syncToMaster=false
+                            // here because we're syncing master DOWN to the doc,
+                            // not the other way round.
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_ISSUER,
+                                updated,
+                                syncToMaster = false,
+                            )
+                            invoiceViewModel.reloadDocument()
                         }
                     }
                 },
@@ -213,7 +228,16 @@ fun NavGraphBuilder.invoiceAddEdit(
                         )
                         if (updated != null) {
                             invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                            invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                            // See the issuer path above — UPDATE (id-preserving)
+                            // instead of delete + reinsert, and syncToMaster=false
+                            // so the follow-up form validate doesn't bump the
+                            // master and desynchronise originalVersion.
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_CLIENT,
+                                updated,
+                                syncToMaster = false,
+                            )
+                            invoiceViewModel.reloadDocument()
                         }
                     }
                 },

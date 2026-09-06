@@ -134,7 +134,14 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 if (updated != null) {
                                     deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // Persist via UPDATE (id-preserving) — see
+                                    // NavGraphInvoiceAddEdit for the full story.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    deliveryNoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -198,7 +205,13 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 if (updated != null) {
                                     deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // See the issuer path above.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_CLIENT,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    deliveryNoteViewModel.reloadDocument()
                                 }
                             }
                         }

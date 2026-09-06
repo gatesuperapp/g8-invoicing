@@ -140,7 +140,14 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                         creditNoteViewModel.seedDefaultVatExemptionTextInDb(updated)
                                     }
                                     creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // Persist via UPDATE (id-preserving) — see
+                                    // NavGraphInvoiceAddEdit for the full story.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    creditNoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -204,7 +211,13 @@ fun NavGraphBuilder.creditNoteAddEdit(
                                 )
                                 if (updated != null) {
                                     creditNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    creditNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // See the issuer path above.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_CLIENT,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    creditNoteViewModel.reloadDocument()
                                 }
                             }
                         }
