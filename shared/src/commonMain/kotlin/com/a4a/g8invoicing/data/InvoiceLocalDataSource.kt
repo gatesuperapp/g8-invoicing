@@ -769,6 +769,10 @@ class InvoiceLocalDataSource(
                         quotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
                             ?: currencyManager.currentCurrency
                     ),
+                    // Flag the new invoice as post-1.8 layout so the footer
+                    // renders the payment/due-date band + hairline separator.
+                    // Missing default = legacy (false) which suppressed both.
+                    showCurrencyAndAutoTaxColumn = true,
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)),
                     watermarkText = frozenWatermark,
                     labelsSnapshot = frozenLabels,
