@@ -1,28 +1,31 @@
-Créez vos devis et bons de livraison en quelques secondes, puis convertissez-les en facture en un clic.
+Facturez en 10 secondes & convertissez vos devis et bons de livraison en factures !
 
 ▸ Devis, BL → Facture
-Transformez un devis, regroupez des bons de livraison,
-ou créez directement une facture. Aucune ressaisie.
+Transformez des devis ou des bons de livraison en facture,
+ou créez directement une facture. Évitez la ressaisie.
 
-▸ Tous vos documents
-Factures, devis, bons de livraison, avoirs, factures rectificatives.
-Exportez en PDF, Factur-X ou CII-XML : les formats socles de la  facturation électronique, importables dans votre plateforme agréée ou logiciel de comptabilité.
+▸ Factures pros, format électronique
+Créez des factures professionnelles. Exportez en PDF ou Factur-X ou CII-XML :
+des formats normés, standards de la  facturation électronique.
+
+▸ Gestion avancée
+Visualisez en un instant les factures en retard, et relancez en un clic.
+Marquez vos factures avec des tags, ajoutez un tampon "Payé". Générez des avoirs et factures rectificatives.
 
 ▸ Adaptée à votre métier
 Prix en HT ou TTC au choix, calcul automatique. N'importe quelle unité
 (kg, heure, pièce, botte...). Plusieurs prix possibles par produit selon le·la
 client·e. Gestion de plusieurs entreprises. TVA personnalisable.
 
-▸ À votre image
-Logo, libellés, descriptions, moyens de paiement,
-conditions de vente, pied de page, références.
+▸ Personnalisation
+Ajoutez votre logo, écrivez vos descriptions, moyens de paiement, conditions de vente, pied de page ou références.
+Modifiez la police des documents pour avoir votre style.
 
 ▸ Partage
-Envoi par email, SMS, messagerie instantanée. Impression possible.
-Tampon « Payé ». Relance en un clic,
+Envoyez par email, SMS, messagerie instantanée, QuickShare... ou imprimez !
 
-▸ Pas d'usine à gaz !
-Activez ou désactivez les fonctionnalités selon vos besoins, pour garder une appli simple et efficace.
+▸ Pas d'usine à gaz
+Activez ou désactivez les fonctionnalités selon vos besoins, pour garder une appli sobre et efficace.
 
 ━━━━━━━━━━━━━━━━━━
 
@@ -31,15 +34,15 @@ Factures, bons de livraison, avoirs, clients et produits en illimité.
 5 devis. Multi-entreprises.
 
 🌟 PREMIUM
-Devis illimités • Export Factur-X et CII
+Devis illimités. Export Factur-X et CII.
 
 ━━━━━━━━━━━━━━━━━━
 
-Logiciel libre et open source. Vos données restent sur votre appareil.
+Conçue pour les producteur·ices, micro-entrepreneur·euses, artisan·es, freelances, et toute petite entreprise.
+
+🦇Logiciel libre et open source. Vos données restent sur votre appareil.
 Zéro pub • Zéro traceur • Pas de partage à des tiers
 
-Le compte n'est nécessaire que pour l'abonnement.
-
-Conçue pour les producteur·ices, micro-entrepreneur·euses, artisan·es, freelances, et toute petite entreprise.
+Le compte n'est nécessaire que pour l'abonnement premium.
 
 Une question, une idée, un besoin ? Il y a toujours une assistance en contactant Aude sur contact@the-gate.fr
