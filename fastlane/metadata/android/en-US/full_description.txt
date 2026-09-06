@@ -17,6 +17,7 @@ customer. Multi-business support. Custom VAT rates.
 
 ▸ Personalisation
 Add your logo, write your descriptions, payment methods, terms of sale, footer or references.
+Change the font of your documents to match your style.
 
 ▸ Sharing
 Send by email, SMS, instant messaging, QuickShare... or print!

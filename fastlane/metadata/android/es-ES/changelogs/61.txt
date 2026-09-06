@@ -1,0 +1,9 @@
+v1.9
+
+- Multiempresa: gestiona varios NIF en la misma app, numeración por empresa
+- Exportación Factur-X y CII XML (facturación electrónica)
+- Datos bancarios (IBAN/BIC), medios de pago, condiciones de pago, mención exención de IVA
+- Tipografías personalizables para tus documentos
+- Etiqueta albaranes y presupuestos con un estado
+- Copia de seguridad y restauración de la base de datos
+- Numerosas correcciones y mejoras de UX

@@ -17,6 +17,7 @@ cliente. Gestión de varias empresas. IVA personalizable.
 
 ▸ Personalización
 Añade tu logo, escribe tus descripciones, medios de pago, condiciones de venta, pie de página o referencias.
+Cambia la tipografía de tus documentos para reflejar tu estilo.
 
 ▸ Compartir
 Envía por email, SMS, mensajería instantánea, QuickShare... ¡o imprime!
