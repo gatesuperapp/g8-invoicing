@@ -3,6 +3,7 @@ package com.a4a.g8invoicing.facturx
 import com.a4a.g8invoicing.data.models.ClientType
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
 /**
  * Pre-flight check for the mandatory fields an EN 16931 CII XML export
@@ -62,7 +63,6 @@ sealed class CiiValidationIssue {
     /** [lineNumber] is 1-based for display. */
     data class LineName(val lineNumber: Int) : CiiValidationIssue()
     data class LinePrice(val lineNumber: Int) : CiiValidationIssue()
-    data class LineTaxRate(val lineNumber: Int) : CiiValidationIssue()
 
     /**
      * VAT rate not in the FR-allowed set (BR-FR-16). Only fired when the
@@ -82,6 +82,17 @@ sealed class CiiValidationIssue {
      * text menu.
      */
     object VatExemptionTextMissing : CiiValidationIssue()
+
+    /**
+     * BR-S-02 blocker: at least one product line carries a positive VAT
+     * rate (→ tax category S "Standard rated") but the issuer has NO
+     * classified BT-31 (EU VAT) NOR BT-32 (fiscal id, incl. FR SIRET/SIREN
+     * routed via schemeID="FC" when the issuer is on franchise en base).
+     * Chorus Pro / veraPDF reject the export with a dedicated error. Fires
+     * before the export so the user gets a clear "add a VAT number to the
+     * issuer" message in the Oups modal.
+     */
+    object IssuerVatIdMissingForStandardRatedLine : CiiValidationIssue()
 }
 
 object CiiPreflightValidator {
@@ -152,14 +163,13 @@ object CiiPreflightValidator {
                 val lineNumber = index + 1
                 if (product.name.text.isBlank()) issues += CiiValidationIssue.LineName(lineNumber)
                 if (product.priceWithoutTax == null) issues += CiiValidationIssue.LinePrice(lineNumber)
-                // Tax rate is only skippable when the issuer is on
-                // franchise en base — that maps to category E across every
-                // line. Otherwise each line must carry an explicit rate so
-                // TaxCategoryResolver has something to work with.
+                // A null rate is treated as 0 % (same convention the builder
+                // uses at emit time — `product.taxRate ?: BigDecimal.ZERO`).
+                // So only fire the FR "rate not in the accepted set" warning
+                // when the user *typed* a rate that doesn't fit. Missing =
+                // 0 % = valid.
                 val rate = product.taxRate
-                if (rate == null && issuer?.vatExempt != true) {
-                    issues += CiiValidationIssue.LineTaxRate(lineNumber)
-                } else if (rate != null && issuerCountry == "FR") {
+                if (rate != null && issuerCountry == "FR") {
                     val display = normalizeRateForCompare(rate.toPlainString())
                     if (display !in FR_ALLOWED_VAT_RATES) {
                         issues += CiiValidationIssue.LineTaxRateInvalid(lineNumber, display)
@@ -176,6 +186,56 @@ object CiiPreflightValidator {
         if (issuer?.vatExempt == true &&
             invoice.vatExemptionText?.text?.trim().isNullOrEmpty()) {
             issues += CiiValidationIssue.VatExemptionTextMissing
+        }
+
+        // BR-S-02: an invoice with a Standard-rated line (BT-151 = "S") MUST
+        // carry a seller BT-31 (VAT) OR BT-32 (fiscal id, incl. FR SIRET
+        // under schemeID="FC" when the issuer is on franchise en base). A
+        // Standard-rated line only appears when the issuer isn't vatExempt
+        // AND the line's taxRate > 0. If either target classifies from the
+        // 3 company_id slots, we're good; otherwise Chorus Pro / veraPDF
+        // reject the export, so block it here.
+        val hasStandardRatedLine = issuer?.vatExempt != true && products.any { p ->
+            (p.taxRate ?: BigDecimal.ZERO) > BigDecimal.ZERO
+        }
+        if (hasStandardRatedLine && issuer != null) {
+            val country = issuer.addresses?.firstOrNull()?.countryCode
+                ?.trim()?.uppercase()?.ifEmpty { null }
+            val slots = listOf(
+                issuer.companyId1Label?.text to issuer.companyId1Number?.text,
+                issuer.companyId2Label?.text to issuer.companyId2Number?.text,
+                issuer.companyId3Label?.text to issuer.companyId3Number?.text,
+            )
+            val hasVatOrFiscalId = slots.mapIndexed { index, (label, value) ->
+                // Match the fallback used in collectLabelMismatches: FR
+                // default label PER SLOT (index 0=SIRET, 1=TVA, 2=RCS) when
+                // the user hasn't renamed. Feeding a hardcoded "SIRET" to
+                // the TVA slot would make its value fail the SIRET regex
+                // and classify as LabelMismatch instead of a VAT Match —
+                // the exact false-positive that shipped as the earlier bug.
+                val effectiveLabel = label?.takeIf { it.isNotBlank() }
+                    ?: DEFAULT_FR_SLOT_HINTS.getOrNull(index)?.takeIf { country == "FR" }
+                Triple(effectiveLabel, value, classifyCompanyId(effectiveLabel, value, country))
+            }.any { (effectiveLabel, value, result) ->
+                val validMatch = result is CompanyIdClassification.Match && (
+                    result.kind.target == CiiTarget.VatRegistration ||
+                        result.kind.target == CiiTarget.FiscalRegistration
+                    )
+                // Also count a slot the user has clearly *aimed* at BT-31/32
+                // even when the value is wrong-format (LabelMismatch): the
+                // dedicated LabelMismatch warning already tells them to fix
+                // the value, so piling BR-S-02 on top adds noise. Recognised
+                // via the label keyword (vat / tva / ust / iva / btw for BT-31;
+                // ein / cuit / rfc / … for BT-32) — same lookup the classifier
+                // uses when it emits the LabelMismatch verdict.
+                val userAimedAtTaxId = !value.isNullOrBlank() &&
+                    !effectiveLabel.isNullOrBlank() &&
+                    isVatOrFiscalKeyword(effectiveLabel)
+                validMatch || userAimedAtTaxId
+            }
+            if (!hasVatOrFiscalId) {
+                issues += CiiValidationIssue.IssuerVatIdMissingForStandardRatedLine
+            }
         }
 
         return issues
@@ -212,7 +272,17 @@ object CiiPreflightValidator {
                 ?: DEFAULT_FR_SLOT_HINTS.getOrNull(index)?.takeIf { country == "FR" }
             val result = classifyCompanyId(effectiveLabel, value, country)
             if (result is CompanyIdClassification.LabelMismatch) {
-                onMismatch(result.fieldLabel, result.expected.expectedFormat)
+                // Prefer the per-country hint for EU VAT — the generic
+                // "code pays ISO + 8 à 12 caractères" is technically correct
+                // but leaves the user guessing how many digits their own
+                // country expects. FR → "FR + 11 caractères", DE → "DE + 9
+                // chiffres", etc.
+                val hint = if (result.expected == CompanyIdKind.EU_VAT) {
+                    euVatFormatHintForCountry(country)
+                } else {
+                    result.expected.expectedFormat
+                }
+                onMismatch(result.fieldLabel, hint)
             }
         }
     }
@@ -222,6 +292,26 @@ object CiiPreflightValidator {
      *  renamed the field. Used as a fallback hint by [collectLabelMismatches]
      *  so untouched-label slots still fire LabelMismatch on garbage input. */
     private val DEFAULT_FR_SLOT_HINTS: List<String> = listOf("SIRET", "TVA", "RCS")
+
+    /** Keywords a slot label can carry to signal the user meant a BT-31
+     *  (VAT) or BT-32 (non-EU fiscal id) slot. Kept in sync with the
+     *  LABEL_KEYWORDS list in CompanyIdMapping — checked lowercase + accent-
+     *  stripped via a simple `contains`. Used by the BR-S-02 check so a
+     *  wrong-format value in a VAT-labelled slot doesn't stack a duplicate
+     *  "issuer has no VAT number" warning on top of the LabelMismatch one
+     *  that already tells the user to fix the value. */
+    private val VAT_OR_FISCAL_LABEL_KEYWORDS = listOf(
+        // BT-31 (VAT)
+        "tva", "vat", "ust", "iva", "btw",
+        // BT-32 (non-EU fiscal)
+        "ein", "cuit", "cuil", "cnpj", "rfc", "rut", "nit", "ruc",
+        "rnc", "cedula", "vkn", "gstin",
+    )
+
+    private fun isVatOrFiscalKeyword(label: String): Boolean {
+        val normalized = label.trim().lowercase()
+        return VAT_OR_FISCAL_LABEL_KEYWORDS.any { it in normalized }
+    }
 
     private fun hasCompletePostalAddress(party: ClientOrIssuerState): Boolean {
         val address = party.addresses?.firstOrNull() ?: return false

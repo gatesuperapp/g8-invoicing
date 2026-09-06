@@ -673,10 +673,10 @@ Es ist ein Fehler aufgetreten :
     <string name="cii_validation_products_empty">Mindestens ein Produkt zur Rechnung hinzufügen</string>
     <string name="cii_validation_line_name">Zeile %1$d: fehlender Produktname</string>
     <string name="cii_validation_line_price">Zeile %1$d: fehlender Einzelpreis</string>
-    <string name="cii_validation_line_tax_rate">Zeile %1$d: fehlender USt-Satz</string>
     <string name="cii_validation_line_tax_rate_invalid">Zeile %1$d: USt-Satz %2$s % ist in Frankreich nicht zulässig (erlaubte Werte: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fälligkeitsdatum</string>
     <string name="cii_validation_vat_exemption_text">Grund der Steuerbefreiung (im Textmenü ausfüllen)</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">Eine oder mehrere Rechnungszeilen tragen einen USt-Satz, aber der Aussteller hat keine USt-IdNr. Füge dem Aussteller eine USt-IdNr. hinzu — sonst wird die Rechnung beim Empfang abgelehnt.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">Steuerbefreiung</string>

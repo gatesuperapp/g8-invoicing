@@ -121,9 +121,9 @@ import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_address
 import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_company_id_label_mismatch
 import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_missing
 import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_name
+import com.a4a.g8invoicing.shared.resources.cii_validation_issuer_vat_id_missing_for_std_rated
 import com.a4a.g8invoicing.shared.resources.cii_validation_line_name
 import com.a4a.g8invoicing.shared.resources.cii_validation_line_price
-import com.a4a.g8invoicing.shared.resources.cii_validation_line_tax_rate
 import com.a4a.g8invoicing.shared.resources.cii_validation_line_tax_rate_invalid
 import com.a4a.g8invoicing.shared.resources.cii_validation_products_empty
 import com.a4a.g8invoicing.shared.resources.cii_validation_title
@@ -1079,10 +1079,11 @@ private fun CiiValidationIssue.resolveMessage(): String = when (this) {
     CiiValidationIssue.ProductsEmpty -> stringResource(Res.string.cii_validation_products_empty)
     is CiiValidationIssue.LineName -> stringResource(Res.string.cii_validation_line_name, lineNumber)
     is CiiValidationIssue.LinePrice -> stringResource(Res.string.cii_validation_line_price, lineNumber)
-    is CiiValidationIssue.LineTaxRate -> stringResource(Res.string.cii_validation_line_tax_rate, lineNumber)
     is CiiValidationIssue.LineTaxRateInvalid -> stringResource(Res.string.cii_validation_line_tax_rate_invalid, lineNumber, rate)
     CiiValidationIssue.InvoiceDueDate -> stringResource(Res.string.cii_validation_due_date)
     CiiValidationIssue.VatExemptionTextMissing -> stringResource(Res.string.cii_validation_vat_exemption_text)
+    CiiValidationIssue.IssuerVatIdMissingForStandardRatedLine ->
+        stringResource(Res.string.cii_validation_issuer_vat_id_missing_for_std_rated)
 }
 
 enum class BottomSheetType {
