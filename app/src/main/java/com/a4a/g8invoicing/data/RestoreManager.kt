@@ -260,6 +260,14 @@ object RestoreManager {
     }
 
     private fun looksLikeRawSqlite(file: File): Boolean {
+        // Per https://www.sqlite.org/fileformat.html the SQLite magic
+        // header at bytes 0-15 is "SQLite format 3\000" — 15 ASCII chars
+        // followed by a NULL byte, NOT a trailing space. Comparing against
+        // "SQLite format 3 " (space) silently failed for every real .db
+        // and dropped the caller into the zip-extraction path, which then
+        // exploded with "zip END header not found" when a bare .db was
+        // restored. Match only the 15-char prefix so both the historical
+        // NULL terminator and any future header variant are accepted.
         return try {
             val input = file.inputStream()
             try {
@@ -268,7 +276,7 @@ object RestoreManager {
                 if (read < 16) {
                     false
                 } else {
-                    String(header, Charsets.US_ASCII) == "SQLite format 3 "
+                    String(header, 0, 15, Charsets.US_ASCII) == "SQLite format 3"
                 }
             } finally {
                 input.close()

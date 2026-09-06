@@ -7,9 +7,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,9 +26,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.RestoreManager
@@ -197,12 +205,111 @@ private fun ValidatingDialog() {
 
 @Composable
 private fun ErrorDialog(message: String, onDismiss: () -> Unit) {
-    AppInfoDialog(
-        title = RestoreCopy.ERROR_TITLE,
-        body = message,
-        confirmText = RestoreCopy.OK,
-        onDismiss = onDismiss,
+    // Same "oh no" pattern as PdfExportErrorDialog: friendly header + short
+    // human message + the raw error rendered as a clickable purple link
+    // that opens the mail client with a pre-filled contact@the-gate.fr
+    // draft. Users routinely hit obscure zip / SQLite errors here (backup
+    // truncated, wrong format, storage race) so a one-tap "email the
+    // support the exact stack" makes triage vastly easier than expecting
+    // them to screenshot + type an intro.
+    val uriHandler = LocalUriHandler.current
+    val displayError = message.ifBlank { "(pas de message d'erreur)" }
+    val mailtoUrl = buildMailtoUrl(
+        address = RESTORE_CONTACT_EMAIL,
+        subject = RESTORE_EMAIL_SUBJECT,
+        body = RESTORE_EMAIL_BODY_INTRO + displayError,
     )
+    val annotated = buildAnnotatedString {
+        pushStringAnnotation(tag = "mailto", annotation = mailtoUrl)
+        withStyle(
+            SpanStyle(
+                color = ColorVioletLink,
+                textDecoration = TextDecoration.Underline,
+            ),
+        ) {
+            append(displayError)
+        }
+        pop()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(RestoreCopy.ERROR_TITLE) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                Text(
+                    text = RESTORE_OH_NO_HEADER,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = RESTORE_FRIENDLY_MESSAGE,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(12.dp))
+                ClickableText(
+                    text = annotated,
+                    style = MaterialTheme.typography.bodySmall,
+                    onClick = { offset ->
+                        annotated
+                            .getStringAnnotations(tag = "mailto", start = offset, end = offset)
+                            .firstOrNull()
+                            ?.let { uriHandler.openUri(it.item) }
+                    },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(RestoreCopy.OK, color = ColorVioletLink)
+            }
+        },
+    )
+}
+
+// TODO(i18n): promote to strings.xml on the translations branch post-1.9.
+// Same interim-const convention as PdfExportErrorDialog + AppConfirmDialog
+// bodies elsewhere in this file.
+private const val RESTORE_OH_NO_HEADER = "𝕠𝕙 𝕟𝕠\n((˃ᯅ˂)ノ)"
+private const val RESTORE_CONTACT_EMAIL = "contact@the-gate.fr"
+private const val RESTORE_EMAIL_SUBJECT = "[g8] Erreur de restauration de sauvegarde"
+private const val RESTORE_EMAIL_BODY_INTRO =
+    "Bonjour,\n\nJ'ai eu l'erreur suivante en essayant de restaurer une sauvegarde :\n\n"
+private const val RESTORE_FRIENDLY_MESSAGE =
+    "La sauvegarde n'a pas pu être chargée. Vérifie que c'est bien un fichier .zip ou .db exporté depuis g8, ou clique sur l'erreur pour contacter le support :"
+
+/**
+ * Mirror of PdfExportErrorDialog.buildMailtoUrl / percentEncode — kept
+ * inline here to avoid the app-module → shared-module leak that a call
+ * to the shared version would introduce.
+ */
+private fun buildMailtoUrl(address: String, subject: String, body: String): String =
+    "mailto:$address?subject=${percentEncodeMailto(subject)}&body=${percentEncodeMailto(body)}"
+
+private fun percentEncodeMailto(input: String): String {
+    val sb = StringBuilder(input.length)
+    for (byte in input.encodeToByteArray()) {
+        val b = byte.toInt() and 0xFF
+        val unreserved = (b in 0x30..0x39) ||
+            (b in 0x41..0x5A) ||
+            (b in 0x61..0x7A) ||
+            b == 0x2D || b == 0x2E || b == 0x5F || b == 0x7E
+        if (unreserved) {
+            sb.append(b.toChar())
+        } else {
+            sb.append('%')
+            val hex = b.toString(16).uppercase()
+            if (hex.length == 1) sb.append('0')
+            sb.append(hex)
+        }
+    }
+    return sb.toString()
 }
 
 @Composable
