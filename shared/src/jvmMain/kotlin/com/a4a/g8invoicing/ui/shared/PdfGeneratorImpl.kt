@@ -926,8 +926,13 @@ class PdfGeneratorImpl(
             .setPaddingBottom(5f)
 
         if (displayAllInfo) {
-            clientOrIssuer?.firstName?.text?.let { nameAndAddress.add(Text("$it ")) }
-            clientOrIssuer?.name?.text?.let { nameAndAddress.add(Text("$it\n")) }
+            // Issuer + client name (and firstName for particuliers) render
+            // bold — matches the preview which uses textForDocumentsBold on
+            // the name line. Applied at the Text-token level, not on the
+            // Paragraph, so the following address lines stay in regular
+            // weight even though they sit inside the same Paragraph.
+            clientOrIssuer?.firstName?.text?.let { nameAndAddress.add(Text("$it ").pdfBold()) }
+            clientOrIssuer?.name?.text?.let { nameAndAddress.add(Text("$it\n").pdfBold()) }
         }
         result.add(nameAndAddress)
 
