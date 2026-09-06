@@ -279,10 +279,12 @@ fun GStore(
         // The trial "Devis découverte" card is hidden for premium users — they
         // already have unlimited quotes via MODULE_QUOTE, so surfacing a "5 free"
         // tile alongside the paid one would be confusing.
-        val visibleModules = remember(isPremium) {
-            if (isPremium) MODULES.filter { it.id != ActivatedModulesRepository.MODULE_QUOTE_TRIAL }
-            else MODULES
-        }
+        // Show every module regardless of subscription. A premium user with
+        // MODULE_QUOTE_TRIAL previously activated (from before they upgraded)
+        // needs the tile to stay in the gStore so they can turn it off — the
+        // trial counter otherwise keeps ticking under the hood next to their
+        // paid MODULE_QUOTE, and the tile disappearing left no way to reach it.
+        val visibleModules = MODULES
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(
