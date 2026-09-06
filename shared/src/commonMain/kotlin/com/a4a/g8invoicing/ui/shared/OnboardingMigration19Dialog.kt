@@ -828,13 +828,9 @@ fun OnboardingMigration19Dialog(
     if (showSendByEmailDialog && exportedFilePath != null) {
         AlertDialog(
             onDismissRequest = { showSendByEmailDialog = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    tint = Color(0xFF4CAF50),
-                )
-            },
+            // No AlertDialog `icon` — account_backup_dialog_title already
+            // opens with a ✅ emoji, so the Material check-circle would render
+            // a second green tick right above the title.
             title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
             text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
             confirmButton = {
