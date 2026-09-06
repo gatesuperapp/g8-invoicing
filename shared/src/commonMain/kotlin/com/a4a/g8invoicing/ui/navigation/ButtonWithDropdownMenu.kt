@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.theme.AppColors
 
 /**
@@ -71,7 +72,13 @@ fun ButtonWithDropdownMenu(
                             item.onClick()
                     },
                     leadingIcon = {
-                        item.icon?.let {
+                        // LOCKED reuses the emoji cadenas that the list row's
+                        // pill also renders — the default coloured-circle path
+                        // would draw a white pill on a white surface here (no
+                        // iconBorder support in DropdownMenuItem's icon slot).
+                        if (item.tag == DocumentTag.LOCKED) {
+                            Text(text = "🔒", fontSize = 14.sp)
+                        } else item.icon?.let {
                             Icon(
                                 it,
                                 modifier = Modifier.size(iconSize),

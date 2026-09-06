@@ -1047,6 +1047,10 @@ Une erreur s'est produite :
     <string name="appbar_tag_sent_masc">Envoyé</string>
     <string name="appbar_tag_cancelled_masc">Annulé</string>
     <string name="appbar_tag_invoiced">Facturé</string>
+    <!-- Statut "Verrouillée" (factures uniquement) — la pastille rend
+         l'emoji cadenas 🔒 dans la liste et DocumentAddEdit masque la
+         bottom bar (texte / style / ligne) quand le doc porte ce tag. -->
+    <string name="appbar_tag_locked">Verrouillée</string>
 
     <!-- gStore: Marquer les BLs -->
     <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>

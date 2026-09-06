@@ -930,6 +930,7 @@
     <string name="appbar_tag_sent_masc">Sent</string>
     <string name="appbar_tag_cancelled_masc">Cancelled</string>
     <string name="appbar_tag_invoiced">Invoiced</string>
+    <string name="appbar_tag_locked">Locked</string>
 
     <!-- gStore: Tag delivery notes -->
     <string name="gstore_module_delivery_note_tagging_title">Tag delivery notes</string>

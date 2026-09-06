@@ -934,6 +934,7 @@ Es ist ein Fehler aufgetreten :
     <string name="appbar_tag_sent_masc">Gesendet</string>
     <string name="appbar_tag_cancelled_masc">Storniert</string>
     <string name="appbar_tag_invoiced">In Rechnung gestellt</string>
+    <string name="appbar_tag_locked">Gesperrt</string>
 
     <!-- gStore: Lieferscheine markieren -->
     <string name="gstore_module_delivery_note_tagging_title">Lieferscheine markieren</string>

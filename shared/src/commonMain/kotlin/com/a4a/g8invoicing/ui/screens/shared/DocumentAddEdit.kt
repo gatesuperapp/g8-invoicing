@@ -386,19 +386,22 @@ fun DocumentAddEdit(
                 )
             },
             bottomBar = {
+                // "Verrouillée" docs freeze in place: the bar shell stays
+                // visible so the preview layout doesn't shift under the
+                // user, but every clickable action is stripped — no way to
+                // add/change items or text from within DocumentAddEdit.
+                // Tag toggle-off (via bulk-select > Marquer > un autre tag)
+                // re-enables edits.
+                val isLocked = document.documentTag ==
+                    com.a4a.g8invoicing.ui.navigation.DocumentTag.LOCKED
                 DocumentAddEditBottomBar(
-                    onClickElements = {
-                        currentSheet = BottomSheetType.ELEMENTS
-                    },
-                    onClickItems = {
-                        currentSheet = BottomSheetType.ITEMS
-                    },
-                    onClickStyle = {
-                        onShowMessage(comingSoonMessage)
-                    },
+                    onClickElements = { currentSheet = BottomSheetType.ELEMENTS },
+                    onClickItems = { currentSheet = BottomSheetType.ITEMS },
+                    onClickStyle = { onShowMessage(comingSoonMessage) },
                     onClickFont = if (fontModuleOn) {
                         { currentSheet = BottomSheetType.FONT }
                     } else null,
+                    hideActions = isLocked,
                 )
             }
         ) { innerPadding ->
@@ -930,9 +933,12 @@ private fun DocumentAddEditBottomBar(
     onClickStyle: () -> Unit,
     onClickSavePayment: () -> Unit = {},
     onClickFont: (() -> Unit)? = null,
+    // "Verrouillée" docs render the bar shell (keeps the preview
+    // proportions) but strip every action button.
+    hideActions: Boolean = false,
 ) {
     DocumentBottomBar(
-        actions = buildList {
+        actions = if (hideActions) emptyArray() else buildList {
             add(actionTextElements(onClickElements))
             // Only surfaced when the Font module is activated in gStore —
             // the DocumentAddEdit callsite gates this via

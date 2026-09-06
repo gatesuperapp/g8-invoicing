@@ -309,6 +309,22 @@ fun actionTagInvoiced() =
         onClick = {}
     )
 
+// Invoice-only "verrouillée" tag. Icon field carries a neutral placeholder
+// (the caller special-cases DocumentTag.LOCKED to render a 🔒 emoji Text at
+// the pill's size instead of the coloured circle); iconColor stays surface
+// so the fallback rendering doesn't paint a coloured dot over the emoji.
+@Composable
+fun actionTagLocked() =
+    AppBarAction(
+        tag = DocumentTag.LOCKED,
+        icon = Icons.Filled.Circle,
+        iconColor = Color.White,
+        iconBorder = ColorGreyDraft,
+        description = stringResource(Res.string.appbar_tag_locked),
+        label = stringResource(Res.string.appbar_tag_locked),
+        onClick = {}
+    )
+
 @Composable
 fun actionSendReminder(onClick: () -> Unit) =
     AppBarAction(

@@ -112,6 +112,7 @@ fun BottomBarActionView(
                                         actionTagLate(),
                                         actionTagReminded(),
                                         actionTagCancelled(),
+                                        actionTagLocked(),
                                     ),
                                     iconSize = 16.dp,
                                     onClickTag = {

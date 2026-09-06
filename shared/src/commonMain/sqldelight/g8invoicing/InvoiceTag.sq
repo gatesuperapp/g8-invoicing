@@ -9,7 +9,9 @@ VALUES (1, 'DRAFT'),
 (3, 'PAID'),
 (4, 'LATE'),
 (5, 'REMINDED'),
-(6, 'CANCELLED');
+(6, 'CANCELLED'),
+-- User-set "verrouillée" tag added in 1.9. See DocumentTag enum.
+(7, 'LOCKED');
 
 getTagId:
 SELECT invoice_tag_id

@@ -308,3 +308,13 @@ CREATE TABLE QuoteRetention (
         REFERENCES Quote(quote_id)
         ON DELETE CASCADE
 );
+
+-- 12) Ajout du tag "Verrouillée" (release 1.9). Les factures verrouillées
+--     masquent la bottom bar (texte / style / ligne) dans DocumentAddEdit
+--     et affichent une pastille emoji cadenas dans la liste. Seed direct
+--     dans la table de référence InvoiceTag — le seed de la classe
+--     InvoiceTag.sq inclut aussi cette ligne pour les installations
+--     fresh. INSERT OR IGNORE au cas où la row existerait déjà (un fresh
+--     install sur la nouvelle DB seed via InvoiceTag.sq avant cette
+--     migration, mais l'IGNORE couvre cet ordre-là).
+INSERT OR IGNORE INTO InvoiceTag (invoice_tag_id, name) VALUES (7, 'LOCKED');

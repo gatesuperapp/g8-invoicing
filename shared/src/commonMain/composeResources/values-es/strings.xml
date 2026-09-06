@@ -936,6 +936,7 @@ Une erreur s'est produite :
     <string name="appbar_tag_sent_masc">Enviado</string>
     <string name="appbar_tag_cancelled_masc">Cancelado</string>
     <string name="appbar_tag_invoiced">Facturado</string>
+    <string name="appbar_tag_locked">Bloqueada</string>
 
     <!-- gStore: Etiquetar albaranes -->
     <string name="gstore_module_delivery_note_tagging_title">Etiquetar albaranes</string>
