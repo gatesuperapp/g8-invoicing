@@ -339,6 +339,10 @@
     <string name="account_renewal_date">Renovación el %1$s</string>
     <string name="account_cancellation_date">Cancelado — termina el %1$s</string>
     <string name="account_manage_subscription">Gestionar mi suscripción</string>
+    <string name="account_status_payment_failed_title">Pago rechazado</string>
+    <string name="account_status_payment_failed_body">No hemos podido cargar tu tarjeta. Actualiza tu método de pago para mantener tus funciones premium.</string>
+    <string name="account_status_canceled_title">Suscripción finalizada</string>
+    <string name="account_status_canceled_body">Tu suscripción premium ha finalizado. Gestiona tu suscripción para recuperar el acceso a las funciones premium.</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">Mis empresas</string>

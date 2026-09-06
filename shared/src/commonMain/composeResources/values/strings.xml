@@ -672,6 +672,10 @@
     <string name="account_cancellation_date">Annulé — se termine le %1$s</string>
     <string name="account_manage_subscription">Gérer mon abonnement</string>
     <string name="account_manage_subscription_url" translatable="false">https://billing.stripe.com/p/login/9AQ5oe5mr7tT7m0bII</string>
+    <string name="account_status_payment_failed_title">Paiement en échec</string>
+    <string name="account_status_payment_failed_body">On n'a pas pu prélever ta carte. Mets à jour ton moyen de paiement pour garder tes fonctions premium.</string>
+    <string name="account_status_canceled_title">Abonnement expiré</string>
+    <string name="account_status_canceled_body">Ton abonnement premium est terminé. Gère ton abonnement pour retrouver l'accès aux fonctions premium.</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr</string>
     <string name="account_my_companies">Mes entreprises</string>

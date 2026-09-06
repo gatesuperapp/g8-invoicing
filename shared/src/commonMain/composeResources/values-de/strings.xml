@@ -338,6 +338,10 @@
     <string name="account_renewal_date">Verlängert am %1$s</string>
     <string name="account_cancellation_date">Gekündigt — endet am %1$s</string>
     <string name="account_manage_subscription">Abonnement verwalten</string>
+    <string name="account_status_payment_failed_title">Zahlung fehlgeschlagen</string>
+    <string name="account_status_payment_failed_body">Wir konnten deine Karte nicht belasten. Aktualisiere deine Zahlungsmethode, um deine Premium-Funktionen zu behalten.</string>
+    <string name="account_status_canceled_title">Abonnement beendet</string>
+    <string name="account_status_canceled_body">Dein Premium-Abo ist beendet. Verwalte dein Abo, um wieder Zugriff auf die Premium-Funktionen zu erhalten.</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">Meine Unternehmen</string>
