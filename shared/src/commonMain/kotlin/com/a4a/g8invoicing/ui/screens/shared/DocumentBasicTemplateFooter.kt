@@ -110,18 +110,17 @@ fun DocumentBasicTemplateFooter(
     // BT-20 = concat of the 3 subject-coded fields (PMT/PMD/AAB), rendered
     // as one flowing paragraph — sentences joined with a single space, no
     // newlines, so the block matches the PDF and stays visually tight.
-    val paymentTerms = when (payingDoc) {
-        is InvoiceState -> listOf(
-            payingDoc.paymentTermsRecoveryFees.text.trim(),
-            payingDoc.paymentTermsLateFees.text.trim(),
-            payingDoc.paymentTermsDiscount.text.trim(),
+    // Invoice-only: the 3 legal mentions attach to the payment obligation
+    // itself, not to the offer. Devis renders bank / payment means but
+    // never the recovery-fees / late-fees / discount block — matches the
+    // PDF renderer (createPaymentTermsBlock is likewise Invoice-only).
+    // Legacy Quotes that had these fields populated stop rendering them.
+    val paymentTerms = (payingDoc as? InvoiceState)?.let { inv ->
+        listOf(
+            inv.paymentTermsRecoveryFees.text.trim(),
+            inv.paymentTermsLateFees.text.trim(),
+            inv.paymentTermsDiscount.text.trim(),
         ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
-        is QuoteState -> listOf(
-            payingDoc.paymentTermsRecoveryFees.text.trim(),
-            payingDoc.paymentTermsLateFees.text.trim(),
-            payingDoc.paymentTermsDiscount.text.trim(),
-        ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
-        else -> null
     }
     val footerText = document.footerText.text.takeIf { it.isNotBlank() }
     // BT-120 legal mention — only surfaced when the issuer is in franchise

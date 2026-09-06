@@ -156,20 +156,19 @@ fun DocumentBottomSheetElementsContent(
             )
         )
     }
-    if (payingDoc != null) {
+    // Payment terms — invoice only. Devis dropped: the 3 legal mentions
+    // (recovery fees / late fees / discount) belong on the invoice itself
+    // per art. L441-10 CdC; putting them on a quote confuses the reader
+    // about which document actually triggers the payment obligation.
+    if (document is InvoiceState) {
         // Preview shows only the "pénalités de retard" mention truncated —
         // that's the field that historically fit the row width. The 3
         // sub-mentions are visible once the user taps and opens the picker.
-        val lateFeesPreview = when (payingDoc) {
-            is InvoiceState -> payingDoc.paymentTermsLateFees.text
-            is com.a4a.g8invoicing.ui.states.QuoteState -> payingDoc.paymentTermsLateFees.text
-            else -> ""
-        }
         inputList.add(
             FormInput(
                 label = stringResource(Res.string.document_payment_terms),
                 inputType = ForwardElement(
-                    text = lateFeesPreview.ifEmpty { " - " },
+                    text = document.paymentTermsLateFees.text.ifEmpty { " - " },
                     displayArrow = false,
                     maxLines = 2,
                 ),
