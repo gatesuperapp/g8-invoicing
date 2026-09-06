@@ -469,6 +469,21 @@ class PdfGeneratorImpl(
         val showPaymentBox = paymentMeansStr != null || bankStr != null
         if (showPaymentBox) {
             doc.add(createPaymentBox(document, paymentMeansStr, bankStr, fontSize))
+        } else if (document is InvoiceState &&
+            !document.dueDate.substringBefore(" ").isBlank()) {
+            // Both payment means and bank are hidden but the invoice still
+            // carries a due date — surface it on its own bold line so the
+            // client can see when the invoice needs to be paid. Centered
+            // (as a standalone reminder, matches the preview footer's
+            // standalone branch) rather than left-aligned like the grey-box
+            // header would be.
+            doc.add(
+                Paragraph(paymentBoxTitle(document))
+                    .pdfBold()
+                    .setFontSize(fontSize)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(12f)
+            )
         }
 
         // Bottom band under a hairline: terms → footer text → watermark. The

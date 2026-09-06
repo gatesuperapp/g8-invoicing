@@ -209,11 +209,16 @@ fun DocumentBasicTemplateFooter(
             }
         } else if (invoiceDueDate != null && paymentBlockTitle != null) {
             // Both payment means and bank are hidden but this is still an
-            // invoice with a due date — surface it on plain background so the
-            // client can see when the invoice needs to be paid.
+            // invoice with a due date — surface it on a plain, centered
+            // line so the client can see when the invoice needs to be paid.
+            // Centering (rather than the left-alignment used inside the grey
+            // box) anchors the line as a standalone reminder rather than a
+            // would-be header of the missing payment block.
             Spacer(Modifier.height(12.dp))
             Text(
                 text = paymentBlockTitle,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.textForDocumentsBold,
             )
         }
