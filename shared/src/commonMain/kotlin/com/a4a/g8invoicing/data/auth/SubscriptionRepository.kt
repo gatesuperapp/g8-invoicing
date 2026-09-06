@@ -24,12 +24,9 @@ import kotlinx.serialization.json.Json
  * shared-prefs instance). Subscription status itself isn't sensitive, but reusing
  * the same store keeps the auth-related state colocated.
  *
- * Premium = subscription.status in {active, trialing, past_due} AND currentPeriodEnd > now.
- * past_due is intentionally kept as premium: Stripe retries a failed payment for
- * ~3 weeks (Smart Retries) before flipping to unpaid/canceled. Cutting premium on the
- * first failed charge would burn users whose card expired while on holiday.
- * currentPeriodEnd remains the hard cutoff — once the paid period ends and Stripe
- * hasn't renewed, isPremium goes false regardless of status.
+ * Premium = subscription.status == "active". Stripe is the source of truth: the status
+ * flips to past_due / unpaid / canceled the moment the subscription is no longer paid,
+ * so a live "active" is a valid entitlement without any further date check.
  */
 class SubscriptionRepository(
     private val authRepository: AuthRepository,
@@ -96,9 +93,7 @@ class SubscriptionRepository(
 
     fun isPremium(): Boolean {
         val s = _state.value as? SubscriptionState.Known ?: return false
-        if (s.status !in PREMIUM_STATUSES) return false
-        val end = s.currentPeriodEndMs ?: return false
-        return end > clock.now().toEpochMilliseconds()
+        return s.status == "active"
     }
 
     fun clear() {
@@ -119,9 +114,8 @@ class SubscriptionRepository(
 
     private fun tryParseInstant(iso: String): Long? {
         // Backend sends LocalDateTime.toString() (no timezone, e.g. "2027-06-13T20:38:50.123").
-        // Old code only handled full ISO Instant (with Z); that silently failed and made
-        // isPremium evaluate to false even for active subs. Try Instant first (for any future
-        // upgrade to timezone-aware serialization), then LocalDateTime assuming UTC.
+        // Try Instant first (in case backend later switches to timezone-aware serialization),
+        // then LocalDateTime assuming UTC.
         runCatching { return Instant.parse(iso).toEpochMilliseconds() }
         return runCatching {
             LocalDateTime.parse(iso).toInstant(TimeZone.UTC).toEpochMilliseconds()
@@ -132,21 +126,16 @@ class SubscriptionRepository(
         private const val KEY_CACHE = "subscription_cache_v1"
         private const val FRESH_WINDOW_MS = 6L * 60L * 60L * 1000L          // 6 hours
         private const val STALE_WINDOW_MS = 7L * 24L * 60L * 60L * 1000L    // 7 days
-        internal val PREMIUM_STATUSES = setOf("active", "trialing", "past_due")
     }
 }
 
 /**
  * Same semantics as [SubscriptionRepository.isPremium] but derivable from a state
  * snapshot — handy for Composables that only observe [SubscriptionRepository.state].
- * Requires a clock so callers can inject a test clock; production callers pass
- * [kotlin.time.Clock.System].
  */
-fun SubscriptionState.isPremium(clock: kotlin.time.Clock = kotlin.time.Clock.System): Boolean {
+fun SubscriptionState.isPremium(): Boolean {
     val s = this as? SubscriptionState.Known ?: return false
-    if (s.status !in SubscriptionRepository.PREMIUM_STATUSES) return false
-    val end = s.currentPeriodEndMs ?: return false
-    return end > clock.now().toEpochMilliseconds()
+    return s.status == "active"
 }
 
 sealed class SubscriptionState {

@@ -56,6 +56,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.isPremium
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
@@ -220,19 +221,13 @@ fun GStore(
 ) {
     val activated by viewModel.activatedState.collectAsState()
     // Refresh /v1/account on every screen resume so the switch state reflects the latest
-    // backend truth (e.g. after a subscription change in the Stripe Portal, or to
-    // correct a stale cache entry persisted before the date-parser fix).
+    // backend truth (e.g. after a subscription change in the Stripe Portal).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refreshSubscription()
     }
     // Reactive premium check — recomposes when /v1/account lands after screen open.
     val subscriptionState by viewModel.subscriptionState.collectAsState()
-    val isPremium = remember(subscriptionState) {
-        (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->
-            s.status == "active" &&
-                (s.currentPeriodEndMs ?: 0L) > kotlin.time.Clock.System.now().toEpochMilliseconds()
-        } ?: false
-    }
+    val isPremium = remember(subscriptionState) { subscriptionState.isPremium() }
     val isDimActive = remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val websiteUrl = stringResource(Res.string.account_website_url)

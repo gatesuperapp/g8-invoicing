@@ -28,9 +28,9 @@ class GStoreViewModel(
     }
 
     /**
-     * Force-refresh subscription state from /v1/account. Called on screen resume so that
-     * a stale cached entry (e.g. one persisted with a null currentPeriodEndMs due to
-     * the old parser bug) gets corrected without requiring a trip via the Account screen.
+     * Force-refresh subscription state from /v1/account. Called on screen resume so the
+     * switch state reflects the latest backend truth without waiting for the 6h cache to
+     * expire.
      */
     fun refreshSubscription() {
         viewModelScope.launch {

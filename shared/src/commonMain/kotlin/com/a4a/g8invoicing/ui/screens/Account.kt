@@ -158,6 +158,7 @@ import com.a4a.g8invoicing.ui.navigation.Screen
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
+import com.a4a.g8invoicing.ui.theme.ColorOrange
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -707,46 +708,85 @@ private fun LoggedInContent(
         Spacer(modifier = Modifier.height(12.dp))
     }
 
-    // Premium status. The "manage" link points to Stripe Customer Portal — managing an
-    // existing subscription is explicitly allowed by Play Store and Apple (the rule only
-    // forbids *selling* via external link).
+    // Subscription section. Stripe status is the source of truth:
+    // - "active"                                → premium badge + renewal/cancellation date + portal link
+    // - "past_due" / "unpaid" / "incomplete"    → payment-failure card + update-card CTA (Stripe Portal)
+    // - "canceled"                              → expired card + resubscribe CTA (Stripe Portal)
+    // - null / anything else                    → nothing (never subscribed, or unknown/offline state)
+    // Managing an existing subscription via Stripe Portal is explicitly allowed by Play
+    // Store and Apple; only *selling* through an external link is forbidden.
     val known = subscriptionState as? SubscriptionState.Known
-    val premiumStatusRes: StringResource? = when {
-        known?.status != "active" -> null
-        known.product == "fly" -> Res.string.account_status_premium_fly
-        known.product == "fab" -> Res.string.account_status_premium_fab
-        else -> null
-    }
+    val manageFallbackUrl = stringResource(Res.string.account_manage_subscription_url)
 
-    if (premiumStatusRes != null) {
-        PremiumBadge(label = stringResource(premiumStatusRes))
-        Spacer(modifier = Modifier.height(8.dp))
-
-        known?.currentPeriodEndMs?.let { ms ->
-            val dateLabel = formatRenewalDate(ms)
-            val text = if (known.cancelAtPeriodEnd) {
-                stringResource(Res.string.account_cancellation_date, dateLabel)
-            } else {
-                stringResource(Res.string.account_renewal_date, dateLabel)
+    when (known?.status) {
+        "active" -> {
+            val premiumStatusRes: StringResource? = when (known.product) {
+                "fly" -> Res.string.account_status_premium_fly
+                "fab" -> Res.string.account_status_premium_fab
+                else -> null
             }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.textSecondary,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            if (premiumStatusRes != null) {
+                PremiumBadge(label = stringResource(premiumStatusRes))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                known.currentPeriodEndMs?.let { ms ->
+                    val dateLabel = formatRenewalDate(ms)
+                    val text = if (known.cancelAtPeriodEnd) {
+                        stringResource(Res.string.account_cancellation_date, dateLabel)
+                    } else {
+                        stringResource(Res.string.account_renewal_date, dateLabel)
+                    }
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.textSecondary,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                val manageLabel = stringResource(Res.string.account_manage_subscription)
+                Text(
+                    modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
+                    text = manageLabel,
+                    style = MaterialTheme.typography.textSecondary.copy(
+                        color = ColorVioletLight,
+                        textDecoration = TextDecoration.Underline,
+                    ),
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
 
-        val manageLabel = stringResource(Res.string.account_manage_subscription)
-        val manageFallbackUrl = stringResource(Res.string.account_manage_subscription_url)
-        Text(
-            modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
-            text = manageLabel,
-            style = MaterialTheme.typography.textSecondary.copy(
-                color = ColorVioletLight,
-                textDecoration = TextDecoration.Underline,
-            ),
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        "past_due", "unpaid", "incomplete" -> {
+            // CTA reuses account_manage_subscription — Apple/Play forbid external links to
+            // *sell* a subscription; managing an existing one via Stripe Portal is allowed.
+            // TODO(strings): move the FR literals to composeResources/values/strings.xml
+            // on the `translations` branch. Suggested keys:
+            //   account_status_payment_failed_title = "Paiement en échec"
+            //   account_status_payment_failed_body  = "On n'a pas pu prélever ta carte. Mets à jour ton moyen de paiement pour garder tes fonctions premium."
+            SubscriptionAlertBadge(
+                title = "Paiement en échec",
+                body = "On n'a pas pu prélever ta carte. Mets à jour ton moyen de paiement pour garder tes fonctions premium.",
+                ctaLabel = stringResource(Res.string.account_manage_subscription),
+                onCtaClick = { onOpenManageSubscription(manageFallbackUrl) },
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        "canceled" -> {
+            // TODO(strings): move the FR literals to composeResources/values/strings.xml
+            // on the `translations` branch. Suggested keys:
+            //   account_status_canceled_title = "Abonnement expiré"
+            //   account_status_canceled_body  = "Ton abonnement premium est terminé. Gère ton abonnement pour retrouver l'accès aux fonctions premium."
+            SubscriptionAlertBadge(
+                title = "Abonnement expiré",
+                body = "Ton abonnement premium est terminé. Gère ton abonnement pour retrouver l'accès aux fonctions premium.",
+                ctaLabel = stringResource(Res.string.account_manage_subscription),
+                onCtaClick = { onOpenManageSubscription(manageFallbackUrl) },
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        else -> Unit
     }
 
     // Confirm logout for premium users. Losing premium at logout is a real functional
@@ -814,6 +854,53 @@ private fun PremiumBadge(label: String) {
         Text(
             text = label,
             color = ColorVioletLight,
+        )
+    }
+}
+
+// Card shown when the subscription is in a bad state (past_due, unpaid, incomplete,
+// canceled). Same rounded-container language as PremiumBadge, tinted orange to signal
+// "action needed". The CTA opens the Stripe Customer Portal so the user can update
+// their card or restart their subscription.
+@Composable
+private fun SubscriptionAlertBadge(
+    title: String,
+    body: String,
+    ctaLabel: String,
+    onCtaClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = ColorOrange.copy(alpha = 0.10f),
+                shape = RoundedCornerShape(10.dp),
+            )
+            .border(
+                width = 1.dp,
+                color = ColorOrange.copy(alpha = 0.35f),
+                shape = RoundedCornerShape(10.dp),
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.textBodyBold,
+            color = ColorOrange,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.textSecondary,
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            modifier = Modifier.clickable { onCtaClick() },
+            text = ctaLabel,
+            style = MaterialTheme.typography.textSecondary.copy(
+                color = ColorVioletLight,
+                textDecoration = TextDecoration.Underline,
+            ),
         )
     }
 }

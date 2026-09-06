@@ -883,7 +883,6 @@ fun DocumentAddEdit(
                     isSheetExpanded = expandedByHandle,
                     onCollapseToHalf = { expandedByHandle = false },
                     selected = currentFont,
-                    isPremiumUser = isPremium,
                     onSelect = { picked ->
                         onFontSelect(picked)
                         dismissSheet()

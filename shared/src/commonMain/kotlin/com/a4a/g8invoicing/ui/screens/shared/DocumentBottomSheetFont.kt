@@ -49,8 +49,11 @@ import org.jetbrains.compose.resources.stringResource
  * button. Each row renders its own name in its own typeface so the label
  * doubles as a live preview.
  *
- * Premium rows still tap-through: the picker never gates selection, only the
- * export flow does (see the premium-font check in the export chooser).
+ * The PREMIUM pill sits on every premium font row regardless of the user's
+ * subscription — same treatment as the gStore module cards, where the pill
+ * is a label ("this font requires premium") not a state ("you don't have it").
+ * Selection is never gated here; only the export flow blocks a premium font
+ * for a non-premium user.
  */
 @Composable
 fun DocumentBottomSheetFont(
@@ -58,7 +61,6 @@ fun DocumentBottomSheetFont(
     isSheetExpanded: Boolean,
     onCollapseToHalf: () -> Unit,
     selected: DocumentFont,
-    isPremiumUser: Boolean,
     onSelect: (DocumentFont) -> Unit,
 ) {
     // Mirror of DocumentBottomSheetTextElements' collapseOnFullscreenScrollDown:
@@ -106,7 +108,7 @@ fun DocumentBottomSheetFont(
                 FontRow(
                     font = font,
                     isSelected = font == selected,
-                    showPremiumPill = font.isPremium && !isPremiumUser,
+                    showPremiumPill = font.isPremium,
                     onClick = { onSelect(font) },
                 )
             }
