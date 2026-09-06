@@ -1171,7 +1171,9 @@ class ClientOrIssuerAddEditViewModel(
                 validateEmails(_clientUiState.value.emails, listOfErrors, isDocument = false)
                 validateCompanyIdLabels(_clientUiState.value, listOfErrors, isDocument = false)
                 val trimmedEmails = trimEmails(_clientUiState.value.emails)
-                _clientUiState.value = _clientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _clientUiState.value = _clientUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
 
             ClientOrIssuerType.ISSUER -> {
@@ -1181,7 +1183,9 @@ class ClientOrIssuerAddEditViewModel(
                 validateEmails(_issuerUiState.value.emails, listOfErrors, isDocument = false)
                 validateCompanyIdLabels(_issuerUiState.value, listOfErrors, isDocument = false)
                 val trimmedEmails = trimEmails(_issuerUiState.value.emails)
-                _issuerUiState.value = _issuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _issuerUiState.value = _issuerUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
 
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
@@ -1191,7 +1195,9 @@ class ClientOrIssuerAddEditViewModel(
                 validateEmails(_documentClientUiState.value.emails, listOfErrors, isDocument = true)
                 validateCompanyIdLabels(_documentClientUiState.value, listOfErrors, isDocument = true)
                 val trimmedEmails = trimEmails(_documentClientUiState.value.emails)
-                _documentClientUiState.value = _documentClientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _documentClientUiState.value = _documentClientUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
 
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
@@ -1201,13 +1207,42 @@ class ClientOrIssuerAddEditViewModel(
                 validateEmails(_documentIssuerUiState.value.emails, listOfErrors, isDocument = true)
                 validateCompanyIdLabels(_documentIssuerUiState.value, listOfErrors, isDocument = true)
                 val trimmedEmails = trimEmails(_documentIssuerUiState.value.emails)
-                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _documentIssuerUiState.value = _documentIssuerUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
         }
         // Fail-save if either the committed-fields check produced errors OR
         // the pending-email flag is invalid (its error was already merged into
         // listOfErrors above, but we still need to block save).
         return _pendingEmailIsValid && listOfErrors.isEmpty()
+    }
+
+    /**
+     * Wipe type-mismatched fields at save time: a PROFESSIONAL client can't
+     * have a firstName (companies don't have one), an INDIVIDUAL can't have
+     * SIREN / TVA / RCS slots (they're issued to legal entities only).
+     *
+     * Fires only inside [validateInputs] — while the user is still editing we
+     * keep every field as-typed so someone who switches type by mistake, or
+     * who wants to peek at the other-type fields, isn't punished with a data
+     * wipe on each toggle. clientType == null (unclassified) stays untouched
+     * so the auto-classification code path in [updateClientOrIssuerUiState] /
+     * [updateDocumentClientOrIssuerUiState] retains the raw input to work
+     * from. Issuers carry a null clientType too and fall through untouched.
+     */
+    private fun ClientOrIssuerState.cleanFieldsForClientType(): ClientOrIssuerState {
+        return when (clientType) {
+            com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL ->
+                copy(firstName = null)
+            com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL ->
+                copy(
+                    companyId1Label = null, companyId1Number = null,
+                    companyId2Label = null, companyId2Number = null,
+                    companyId3Label = null, companyId3Number = null,
+                )
+            null -> this
+        }
     }
 
     /**
