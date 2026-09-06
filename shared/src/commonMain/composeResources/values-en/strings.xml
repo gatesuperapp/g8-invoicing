@@ -337,6 +337,10 @@
     <string name="account_renewal_date">Renews on %1$s</string>
     <string name="account_cancellation_date">Cancelled — ends on %1$s</string>
     <string name="account_manage_subscription">Manage subscription</string>
+    <string name="account_status_payment_failed_title">Payment failed</string>
+    <string name="account_status_payment_failed_body">We couldn't charge your card. Update your payment method to keep your premium features.</string>
+    <string name="account_status_canceled_title">Subscription ended</string>
+    <string name="account_status_canceled_body">Your premium subscription has ended. Manage your subscription to regain access to premium features.</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">My companies</string>
