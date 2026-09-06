@@ -135,7 +135,14 @@ class ClientOrIssuerAddEditViewModel(
                 companyId2Label = _documentClientUiState.value.companyId2Label,
                 companyId2Number = _documentClientUiState.value.companyId2Number,
                 companyId3Label = _documentClientUiState.value.companyId3Label,
-                companyId3Number = _documentClientUiState.value.companyId3Number
+                companyId3Number = _documentClientUiState.value.companyId3Number,
+                // Carry the auto-classification (INDIVIDUAL when a firstName
+                // was typed / PROFESSIONAL when a SIREN was) from the doc-side
+                // draft over to the master master row about to be inserted.
+                // Without this the master lands with clientType=null even
+                // though the form's radio visibly landed on Particulier /
+                // Professionnel while the user was editing.
+                clientType = _documentClientUiState.value.clientType,
             )
         } else {
             _issuerUiState.value = ClientOrIssuerState(
