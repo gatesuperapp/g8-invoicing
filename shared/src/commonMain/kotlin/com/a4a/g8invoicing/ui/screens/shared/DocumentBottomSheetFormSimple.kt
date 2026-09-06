@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -40,15 +41,18 @@ fun DocumentBottomSheetFormSimple(
     // Dismiss goes through swipe-down / system back press → onDismissRequest.
     showActions: Boolean = true,
 ) {
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
-    )
-
     // With Cancel/Save actions the user's edits are pending until they
     // explicitly confirm — shouldDismissOnClickOutside=false blocks the scrim
-    // so an accidental outside tap can't discard them. Back press still
-    // triggers onDismissRequest → onClickCancel, and swipe-down does the
-    // same by transitioning to Hidden. Auto-save sheets keep the default.
+    // AND confirmValueChange rejects the Hidden transition so a swipe-down
+    // can't quietly wipe the buffer either (same treatment as the product
+    // edit sheet in DocumentBottomSheetForm). Auto-save sheets (showActions
+    // false) keep the default swipe-to-dismiss.
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { newValue ->
+            !showActions || newValue != SheetValue.Hidden
+        },
+    )
     ModalBottomSheet(
         onDismissRequest = onClickCancel,
         sheetState = sheetState,
