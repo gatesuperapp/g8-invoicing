@@ -119,8 +119,20 @@ fun ClientOrIssuerListItem(
                     horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val clientName = clientOrIssuer.name.text +
-                        (clientOrIssuer.firstName?.let { " " + it.text } ?: "")
+                    // "Nom Prénom" — only append the first name when it's
+                    // actually filled in (was `firstName?.let { " " + it.text }`,
+                    // which appended a lone trailing space when the field was
+                    // present-but-empty and swallowed the prénom for clients
+                    // that had it set on unusual TextFieldValue instances).
+                    val firstNamePart = clientOrIssuer.firstName?.text?.trim()
+                        ?.takeIf { it.isNotEmpty() }
+                    val clientName = buildString {
+                        append(clientOrIssuer.name.text)
+                        if (firstNamePart != null) {
+                            append(' ')
+                            append(firstNamePart)
+                        }
+                    }
                     Text(
                         text = clientName,
                         style = MaterialTheme.typography.textBodyBold,
