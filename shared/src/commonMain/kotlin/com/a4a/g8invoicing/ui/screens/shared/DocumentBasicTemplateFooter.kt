@@ -79,8 +79,16 @@ fun DocumentBasicTemplateFooter(
     } else ""
 
     val paymentMeansDisplay: String? = if (!paymentMeansHidden && paymentMeansSegments.isNotEmpty()) {
+        // Chip label lookup — prefer the doc's frozen labelsSnapshot so a
+        // FR-created doc keeps "Virement" even after the app switches to EN.
+        // Legacy docs (pre-1.9) have no snapshot for the payment-means chips
+        // added post-migration, so fall back to stringResource(labelRes)
+        // (current app locale) instead of the empty string that used to
+        // leave the chip rendering blank in the preview — the PDF was fine
+        // because PdfStrings pre-resolves the same map via stringResource.
         val labelsByChip = com.a4a.g8invoicing.data.models.PaymentMeans.entries.associate {
-            it.chipId to (labels?.get(it.labelKey) ?: "")
+            val snapshotLabel = labels?.get(it.labelKey)?.takeIf { s -> s.isNotBlank() }
+            it.chipId to (snapshotLabel ?: stringResource(it.labelRes))
         }
         com.a4a.g8invoicing.data.models
             .flattenPaymentLabel(paymentMeansSegments, labelsByChip)
