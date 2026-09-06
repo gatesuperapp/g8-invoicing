@@ -582,9 +582,16 @@ class PdfGeneratorImpl(
 
     /**
      * Attach the Factur-X CII XML to the given PDF as an Associated File
-     * (/AF, AFRelationship = Data) named `factur-x.xml`, set the mandatory
-     * DocumentInfo entries (title / creator / producer) PDF/A-3 requires,
-     * and set the four fx: XMP properties Factur-X consumers key off.
+     * (/AF, AFRelationship = Alternative) named `factur-x.xml`, set the
+     * mandatory DocumentInfo entries (title / creator / producer) PDF/A-3
+     * requires, and set the four fx: XMP properties Factur-X consumers key
+     * off.
+     *
+     * AFRelationship = Alternative: Factur-X 1.0.06 onward mandates the
+     * "Alternative" relationship (the XML is an alternative representation
+     * of the visible PDF, not just supplementary data). Earlier drafts up to
+     * 1.0.05 accepted Data; current validators (Chorus Pro / veraPDF ZUGFeRD
+     * profile / Ferd_net) reject Data with a dedicated error.
      */
     private fun attachFacturXPayload(
         pdfDoc: PdfDocument,
@@ -598,7 +605,7 @@ class PdfGeneratorImpl(
             "factur-x.xml",
             PdfName("text/xml"),
             null,
-            PdfName("Data"),
+            PdfName("Alternative"),
         )
         pdfDoc.addAssociatedFile("factur-x.xml", fileSpec)
 

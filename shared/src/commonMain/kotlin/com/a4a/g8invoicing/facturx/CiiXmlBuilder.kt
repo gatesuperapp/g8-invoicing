@@ -140,6 +140,17 @@ object CiiXmlBuilder {
             append("      <ram:Content>${escT(note)}</ram:Content>\n")
             append("    </ram:IncludedNote>\n")
         }
+        // Footer prose — the user-typed sign-off / mention that renders under
+        // the payment block on the PDF. Emitted as BG-1 with SubjectCode
+        // "AAI" (General information) so downstream readers can display it
+        // as free text without confusing it with the SubjectCode-tagged
+        // legal mentions below (PMT / PMD / AAB).
+        invoice.footerText.text.trim().takeIf { it.isNotBlank() }?.let { note ->
+            append("    <ram:IncludedNote>\n")
+            append("      <ram:Content>${escT(note)}</ram:Content>\n")
+            append("      <ram:SubjectCode>AAI</ram:SubjectCode>\n")
+            append("    </ram:IncludedNote>\n")
+        }
         // FR national Schematron (BR-FR-05) requires three legal-mention
         // notes on every invoice, keyed by SubjectCode:
         //   PMT — frais de recouvrement (recovery fees)
@@ -217,7 +228,10 @@ object CiiXmlBuilder {
         //     (BT-X-116 per-line pattern used for multi-BL invoices, since the
         //     header-level cardinality caps at 0..1).
         //   * QUOTE → SpecifiedLineTradeAgreement / AdditionalReferencedDocument
-        //     with TypeCode 1001 (UN/CEFACT 1153 = "Reference number of quotation").
+        //     with TypeCode 310 ("Offer / quotation" per UN/CEFACT 1001 doc-name
+        //     code list). Historically emitted as "1001" — that's the code list
+        //     number itself, not a value inside it, so downstream validators
+        //     rejected the reference as unrecognised.
         //     Extended profile only exposes QuotationReferencedDocument at header
         //     level, so line-level quotes ride on the generic AdditionalReferenced-
         //     Document envelope.
@@ -233,7 +247,7 @@ object CiiXmlBuilder {
         if (linkedRef != null && isQuoteLink) {
             append("        <ram:AdditionalReferencedDocument>\n")
             append("          <ram:IssuerAssignedID>${escT(linkedRef)}</ram:IssuerAssignedID>\n")
-            append("          <ram:TypeCode>1001</ram:TypeCode>\n")
+            append("          <ram:TypeCode>310</ram:TypeCode>\n")
             if (linkedDate != null) {
                 append("          <ram:FormattedIssueDateTime>\n")
                 append("            <qdt:DateTimeString format=\"102\">${formatDate102(linkedDate)}</qdt:DateTimeString>\n")
@@ -305,10 +319,15 @@ object CiiXmlBuilder {
             party.firstName?.text?.trim()?.ifEmpty { null },
         ).joinToString(" ")
         val partyCountry = party.primaryCountry()
-        val email = party.emails
-            ?.firstOrNull()
-            ?.email?.text?.trim()
-            ?.takeIf { it.isNotBlank() }
+        // Emails collected as a list, not just the first — extra addresses go
+        // into their own URIUniversalCommunication blocks below so a party
+        // with 3 emails routes on the first and exposes the other 2 for the
+        // receiver's contact list. Empty entries stripped.
+        val emails = party.emails
+            .orEmpty()
+            .mapNotNull { it.email.text.trim().ifEmpty { null } }
+        val primaryEmail = emails.firstOrNull()
+        val phone = party.phone?.text?.trim()?.ifEmpty { null }
 
         // Classify all 3 free-label company_id slots via label-first +
         // regex. See CompanyIdMapping.kt for the algorithm. We keep only
@@ -323,7 +342,18 @@ object CiiXmlBuilder {
         val matches = slots
             .map { (label, value) -> classifyCompanyId(label, value, partyCountry) }
             .filterIsInstance<CompanyIdClassification.Match>()
-        val legalOrgMatch = matches.firstOrNull { it.kind.target == CiiTarget.LegalOrg }
+        // CII BT-30 only allows one SpecifiedLegalOrganization/ID. If the user
+        // filled BOTH a SIRET slot and a SIREN slot (both classify to LegalOrg
+        // with schemeID="0002"), pick SIRET — it carries the 5-digit
+        // establishment code on top of the 9-digit SIREN prefix, so we
+        // downgrade lossily on emit (see CompanyIdKind.SIRET.toXml). SIREN
+        // alone stays if there's no SIRET.
+        val legalOrgMatch = matches
+            .filter { it.kind.target == CiiTarget.LegalOrg }
+            .let { legal ->
+                legal.firstOrNull { it.kind == CompanyIdKind.SIRET }
+                    ?: legal.firstOrNull()
+            }
         val vatMatch = matches.firstOrNull { it.kind.target == CiiTarget.VatRegistration }
         val fiscalMatch = matches.firstOrNull { it.kind.target == CiiTarget.FiscalRegistration }
 
@@ -348,7 +378,35 @@ object CiiXmlBuilder {
             append("$pad    <ram:ID schemeID=\"${legalOrgMatch.kind.schemeId}\">${escT(legalOrgMatch.normalizedValue)}</ram:ID>\n")
             append("$pad  </ram:SpecifiedLegalOrganization>\n")
         }
-        party.addresses?.firstOrNull()?.let { appendAddress(it, indent + 2) }
+        // DefinedTradeContact (BG-6 for seller / BG-9 for buyer) — carries
+        // the party's phone + email as a contact channel distinct from the
+        // BT-34/49 electronic address (which is routing-only). Placed here
+        // per the CII SellerTradeParty content-model order (before
+        // PostalTradeAddress). Emitted whenever a phone OR an email is
+        // present so the receiver's contact panel has something to display,
+        // even when the primary electronic address slot below routes on the
+        // SIREN.
+        if (phone != null || primaryEmail != null) {
+            append("$pad  <ram:DefinedTradeContact>\n")
+            if (phone != null) {
+                append("$pad    <ram:TelephoneUniversalCommunication>\n")
+                append("$pad      <ram:CompleteNumber>${escT(phone)}</ram:CompleteNumber>\n")
+                append("$pad    </ram:TelephoneUniversalCommunication>\n")
+            }
+            if (primaryEmail != null) {
+                append("$pad    <ram:EmailURIUniversalCommunication>\n")
+                append("$pad      <ram:URIID>${escT(primaryEmail)}</ram:URIID>\n")
+                append("$pad    </ram:EmailURIUniversalCommunication>\n")
+            }
+            append("$pad  </ram:DefinedTradeContact>\n")
+        }
+        // Emit only the party's BASE / siège address on SellerTradeParty +
+        // BuyerTradeParty — delivery / billing addresses (identified via
+        // classifyAddresses) ride on their own ShipToTradeParty +
+        // InvoiceeTradeParty blocks (see appendHeaderTradeDelivery /
+        // appendHeaderTradeSettlement).
+        party.addresses?.let { classifyAddresses(it).base }
+            ?.let { appendAddress(it, indent + 2) }
         // BT-34 (seller) / BT-49 (buyer) electronic address for e-invoice
         // routing. FR national profile (BR-FR-13 / BR-FR-12) makes it
         // mandatory. Peppol EAS mapping we support:
@@ -361,6 +419,14 @@ object CiiXmlBuilder {
         // was emitted with a foreign schemeID. Both SIRET (14) and SIREN (9)
         // classify here — we always emit the SIREN portion (first 9 digits)
         // on URIID because that's what the FR annuaire routes on.
+        //
+        // BT-34/49 cardinality is 0..1 (FX-SCH-A-000439 / 000165 both cap
+        // URIUniversalCommunication at one occurrence per party). Emit a
+        // single routing address only. Extra emails already sit in
+        // DefinedTradeContact/EmailURIUniversalCommunication above, so no
+        // data is lost — the second and third emails are just no longer
+        // announced as routable Peppol addresses (they never routed to
+        // anything anyway; PPF only follows the primary EAS).
         val urnSiren = legalOrgMatch?.let { m ->
             when (m.kind) {
                 CompanyIdKind.SIRET -> m.normalizedValue.take(9)
@@ -374,9 +440,9 @@ object CiiXmlBuilder {
                 append("$pad    <ram:URIID schemeID=\"0002\">${escT(urnSiren)}</ram:URIID>\n")
                 append("$pad  </ram:URIUniversalCommunication>\n")
             }
-            email != null -> {
+            primaryEmail != null -> {
                 append("$pad  <ram:URIUniversalCommunication>\n")
-                append("$pad    <ram:URIID schemeID=\"EM\">${escT(email)}</ram:URIID>\n")
+                append("$pad    <ram:URIID schemeID=\"EM\">${escT(primaryEmail)}</ram:URIID>\n")
                 append("$pad  </ram:URIUniversalCommunication>\n")
             }
         }
@@ -395,6 +461,25 @@ object CiiXmlBuilder {
             append("$pad  <ram:SpecifiedTaxRegistration>\n")
             append("$pad    <ram:ID schemeID=\"FC\">${escT(fiscalMatch.normalizedValue)}</ram:ID>\n")
             append("$pad  </ram:SpecifiedTaxRegistration>\n")
+        }
+        // Franchise en base fallback: a FR issuer on the franchise regime
+        // has no BT-31 VAT number, but every rule that expects "some tax
+        // identifier on the seller" (BR-CO-26 + Chorus Pro's rejection when
+        // Category=E with no fiscal ID) still applies. Emit the SIRET (or
+        // SIREN) as BT-32 with schemeID="FC" — the only slot in CII that
+        // can carry a French fiscal id when there's no VAT number. Silent
+        // no-op for buyers (vatExempt is meaningful on issuer only), for
+        // non-FR issuers (no SIRET/SIREN slot to reuse), or when a real
+        // VAT match already covers the routing.
+        if (party.vatExempt && vatMatch == null && fiscalMatch == null) {
+            val siretOrSiren = matches.firstOrNull {
+                it.kind == CompanyIdKind.SIRET || it.kind == CompanyIdKind.SIREN
+            }
+            if (siretOrSiren != null) {
+                append("$pad  <ram:SpecifiedTaxRegistration>\n")
+                append("$pad    <ram:ID schemeID=\"FC\">${escT(siretOrSiren.normalizedValue)}</ram:ID>\n")
+                append("$pad  </ram:SpecifiedTaxRegistration>\n")
+            }
         }
         append("$pad</ram:$tag>\n")
     }
@@ -447,7 +532,26 @@ object CiiXmlBuilder {
             it.linkedDocType == LinkedDocType.DELIVERY_NOTE ||
                 (it.linkedDocNumber?.isNotBlank() == true && it.linkedDocType == null)
         }
+        // ShipToTradeParty (BG-13). Only when the buyer carries an address
+        // whose label was tagged DELIVERY by classifyAddresses. Content is
+        // buyer-name + delivery PostalTradeAddress — the CII schema requires
+        // Name to be present even when only the address differs from the
+        // primary BuyerTradeParty.
+        val deliveryAddress = invoice.documentClient?.addresses
+            ?.let { classifyAddresses(it).delivery }
         append("    <ram:ApplicableHeaderTradeDelivery>\n")
+        deliveryAddress?.let { addr ->
+            val buyerName = invoice.documentClient?.let { c ->
+                listOfNotNull(
+                    c.name.text.trim().ifEmpty { null },
+                    c.firstName?.text?.trim()?.ifEmpty { null },
+                ).joinToString(" ")
+            }.orEmpty()
+            append("      <ram:ShipToTradeParty>\n")
+            append("        <ram:Name>${escT(buyerName)}</ram:Name>\n")
+            appendAddress(addr, indent = 8)
+            append("      </ram:ShipToTradeParty>\n")
+        }
         if (hasDeliveryLink) {
             append("      <ram:ActualDeliverySupplyChainEvent>\n")
             append("        <ram:OccurrenceDateTime>\n")
@@ -480,6 +584,25 @@ object CiiXmlBuilder {
         append("      <ram:PaymentReference>${escT(invoice.documentNumber.text)}</ram:PaymentReference>\n")
         append("      <ram:InvoiceCurrencyCode>${escT(currency)}</ram:InvoiceCurrencyCode>\n")
 
+        // InvoiceeTradeParty (BG-10) — the party the invoice is legally
+        // addressed to when it differs from the BuyerTradeParty siège. We
+        // detect it by keyword on the buyer's address labels (see
+        // classifyAddresses); only emit when the user explicitly tagged one
+        // address as billing/facturation. Content is buyer-name + billing
+        // PostalTradeAddress, same shape as ShipToTradeParty.
+        buyer?.addresses?.let { classifyAddresses(it).billing }?.let { addr ->
+            val buyerName = buyer.let { c ->
+                listOfNotNull(
+                    c.name.text.trim().ifEmpty { null },
+                    c.firstName?.text?.trim()?.ifEmpty { null },
+                ).joinToString(" ")
+            }
+            append("      <ram:InvoiceeTradeParty>\n")
+            append("        <ram:Name>${escT(buyerName)}</ram:Name>\n")
+            appendAddress(addr, indent = 8)
+            append("      </ram:InvoiceeTradeParty>\n")
+        }
+
         appendPaymentMeans(invoice, issuer, paymentMeansLabels, bankInfoText)
         appendDocLevelTax(invoice, products)
         appendPaymentTerms(invoice)
@@ -500,23 +623,25 @@ object CiiXmlBuilder {
         val iban = issuer?.paymentIban?.text?.trim()?.takeIf { it.isNotBlank() }
         val bic = issuer?.paymentBic?.text?.trim()?.takeIf { it.isNotBlank() }
 
-        // The CII schema allows several SpecifiedTradeSettlementPaymentMeans
-        // blocks (0..n) in the Extended profile — one per accepted method,
-        // each with its own TypeCode. The IBAN + BIC structured block only
-        // hangs off the transfer-type codes (30 / 58) so a Stripe-only or
-        // cash-only invoice doesn't leak the seller's IBAN into a mode
-        // where it has no place (per spec §6, item 9 of the CII audit).
-        val bankTogglingModePresent = codes.any { it in IBAN_CARRYING_CODES }
-
-        // BT-82 Information — free-text payment instructions. Emitted on
-        // the FIRST block only (deduplication) and only when it carries
-        // content that isn't already structured elsewhere in the XML. The
-        // old "flattened list of accepted methods" is dropped since the
-        // per-code TypeCode blocks now convey that natively.
+        // CII-SR-467 caps a doc to a single unique TypeCode across every
+        // SpecifiedTradeSettlementPaymentMeans block. Extended profile
+        // schema allows 0..n but the semantic rule flattens it: pick ONE
+        // primary code, list the rest in the Information text so the
+        // human reader still sees all accepted modes.
         //
-        // We keep the user-typed bank prose (e.g. beneficiary name, agency,
-        // custom mention) which lives in bankInfoText and has no structured
-        // counterpart in CII beyond the IBAN/BIC we already emit.
+        // Priority ordering: TRANSFER first (30) since it carries IBAN+BIC
+        // routing info, then CHEQUE (20), CARD (48), CASH (10), online
+        // brokers PAYPAL/STRIPE (68). Empty selection → "1" (Instrument
+        // not defined) via unCefactCodesForExport's default.
+        val primaryCode = PRIMARY_CODE_PRIORITY.firstOrNull { it in codes }
+            ?: codes.first()
+        val emitIban = iban != null && primaryCode in IBAN_CARRYING_CODES
+
+        // BT-82 Information — free-text payment instructions. Now carries
+        // the flattened list of accepted modes ("Virement, chèque, espèces")
+        // + optional user-typed bank prose (beneficiary name, agency…) so
+        // the multi-mode information isn't lost when we collapse to one
+        // block per CII-SR-467.
         val meansText = paymentMeansLabels
             ?.let { flattenPaymentLabel(invoice.paymentMeansSegments, it) }
             ?.trim()
@@ -524,32 +649,33 @@ object CiiXmlBuilder {
         val bankText = bankInfoText?.trim()?.takeIf { it.isNotEmpty() }
         val information = listOfNotNull(meansText, bankText).joinToString("\n").ifEmpty { null }
 
-        codes.forEachIndexed { index, code ->
-            val emitIban = iban != null && bankTogglingModePresent && code in IBAN_CARRYING_CODES
-            val emitInformation = index == 0 && information != null
-
-            append("      <ram:SpecifiedTradeSettlementPaymentMeans>\n")
-            // UN/CEFACT 4461 codelist expects the integer value without zero
-            // padding — "1" not "01". FX-SCH-A-001008 rejects the padded form
-            // because the enumeration in FACTUR-X_EXTENDED_codedb.xml lists
-            // codes as bare integers.
-            append("        <ram:TypeCode>$code</ram:TypeCode>\n")
-            if (emitInformation) {
-                append("        <ram:Information>${escT(information)}</ram:Information>\n")
-            }
-            if (emitIban) {
-                append("        <ram:PayeePartyCreditorFinancialAccount>\n")
-                append("          <ram:IBANID>${escT(iban!!)}</ram:IBANID>\n")
-                append("        </ram:PayeePartyCreditorFinancialAccount>\n")
-                if (bic != null) {
-                    append("        <ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
-                    append("          <ram:BICID>${escT(bic)}</ram:BICID>\n")
-                    append("        </ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
-                }
-            }
-            append("      </ram:SpecifiedTradeSettlementPaymentMeans>\n")
+        append("      <ram:SpecifiedTradeSettlementPaymentMeans>\n")
+        // UN/CEFACT 4461 codelist expects the integer value without zero
+        // padding — "1" not "01". FX-SCH-A-001008 rejects the padded form
+        // because the enumeration in FACTUR-X_EXTENDED_codedb.xml lists
+        // codes as bare integers.
+        append("        <ram:TypeCode>$primaryCode</ram:TypeCode>\n")
+        if (information != null) {
+            append("        <ram:Information>${escT(information)}</ram:Information>\n")
         }
+        if (emitIban) {
+            append("        <ram:PayeePartyCreditorFinancialAccount>\n")
+            append("          <ram:IBANID>${escT(iban!!)}</ram:IBANID>\n")
+            append("        </ram:PayeePartyCreditorFinancialAccount>\n")
+            if (bic != null) {
+                append("        <ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
+                append("          <ram:BICID>${escT(bic)}</ram:BICID>\n")
+                append("        </ram:PayeeSpecifiedCreditorFinancialInstitution>\n")
+            }
+        }
+        append("      </ram:SpecifiedTradeSettlementPaymentMeans>\n")
     }
+
+    /** Priority order for picking the single BT-81 TypeCode when the user
+     *  selected multiple payment modes. Transfer first (carries IBAN/BIC),
+     *  then physical modes, then online brokers. The rest of the selection
+     *  travels as free-text in BT-82 Information. */
+    private val PRIMARY_CODE_PRIORITY: List<Int> = listOf(30, 20, 48, 10, 68)
 
     /**
      * Bucket key + rounded totals for one row of the doc-level tax
@@ -768,8 +894,18 @@ object CiiXmlBuilder {
     private fun formatAmount(bd: BigDecimal): String =
         bd.roundToTwo().toPlainString()
 
-    private fun formatQty(bd: BigDecimal): String =
-        bd.toPlainString().trimEnd('0').trimEnd('.').ifEmpty { "0" }
+    private fun formatQty(bd: BigDecimal): String {
+        // Only strip trailing zeros AFTER a decimal point (turn "1.500" into
+        // "1.5"). trimEnd('0') alone would eat integer trailing zeros too —
+        // qty=10 was emitting "1", qty=100 was "1", every multi-digit round
+        // quantity got silently dropped to a single digit in the CII XML.
+        val plain = bd.toPlainString()
+        return if (plain.contains('.')) {
+            plain.trimEnd('0').trimEnd('.').ifEmpty { "0" }
+        } else {
+            plain
+        }
+    }
 
     /**
      * VAT rate as plain decimal with trailing zeros trimmed ("20", "5.5",

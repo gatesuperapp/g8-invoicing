@@ -70,15 +70,14 @@ enum class CompanyIdKind(
     val toXml: (String) -> String = { it },
 ) {
     // ------- BT-30 (registre légal) — codes ISO 6523 -------
-    // schemeID "0002" (INSEE SIRENE) covers both SIREN (9 digits) and
-    // SIRET (14 digits) per Peppol BIS Billing 3.0 — we split the two
-    // into distinct kinds so the label check is strict per input length.
-    // A user with a "SIRET" labelled slot MUST type 14 digits; a "SIREN"
-    // labelled slot MUST type 9. Both emit under schemeID 0002 with the
-    // value as-typed. The URI routing (BT-34/49) always takes the SIREN
-    // portion — see CiiXmlBuilder.appendParty.
+    // Two distinct schemeIDs per ISO 6523 ICD: 0002 = INSEE SIREN (9 chiffres),
+    // 0009 = SIRET-CODE (14 chiffres). Historically we shipped both under
+    // 0002, which validates as "value doesn't match declared scheme" for
+    // SIRET (14 digits announced under the 9-digit SIREN registry). The
+    // URI routing at BT-34/49 always uses the 9-digit SIREN portion under
+    // schemeID 0002 — see CiiXmlBuilder.appendParty.
     SIRET(
-        CiiTarget.LegalOrg, "0002", "SIRET", "14 chiffres",
+        CiiTarget.LegalOrg, "0009", "SIRET", "14 chiffres",
         preClean = digitsOnly,
         pattern = Regex("""^\d{14}$"""),
     ),
@@ -264,6 +263,26 @@ sealed class CompanyIdClassification {
         val rawValue: String,
     ) : CompanyIdClassification()
 
+    /**
+     * Value matches a known kind's regex, but that kind isn't valid for the
+     * party's country (e.g. a 9-digit "SIREN" typed on a ZA-country issuer).
+     * Skipped from the XML — no valid schemeID we can attach to a foreign
+     * SIRET / SIREN under this country — so the pre-flight validator raises
+     * an informational warning and the export goes on with the value simply
+     * absent from the routing block.
+     *
+     * [suggestedCountry] is the country the classifier's fallback sweep
+     * associated with the matched kind (best-effort, may be null when the
+     * kind isn't country-scoped). Kept so the Oups message can hint at the
+     * mismatch when useful.
+     */
+    data class CountryMismatch(
+        val kind: CompanyIdKind,
+        val fieldLabel: String,
+        val rawValue: String,
+        val partyCountry: String?,
+    ) : CompanyIdClassification()
+
     /** Neither label nor content pattern gave us a mapping. */
     object Skip : CompanyIdClassification()
 }
@@ -436,6 +455,53 @@ private fun matchesForKind(kind: CompanyIdKind, value: String, country: String?)
 }
 
 /**
+ * Country-specific format hint used in the Oups modal when a VAT slot's
+ * value doesn't match the strict per-country pattern. Falls back to the
+ * generic EU_VAT.expectedFormat when the party's country isn't in the
+ * strict table (unknown / non-EU country → the broad "8-12 caractères"
+ * shape is the best we can say). Kept in French — same convention as
+ * [CompanyIdKind.expectedFormat]; migrated to strings.xml alongside the
+ * rest of the CII modal wording.
+ */
+internal fun euVatFormatHintForCountry(country: String?): String {
+    val code = country?.trim()?.uppercase()?.takeIf { it.isNotBlank() }
+        ?: return CompanyIdKind.EU_VAT.expectedFormat
+    return EU_VAT_FORMAT_HINTS[code] ?: CompanyIdKind.EU_VAT.expectedFormat
+}
+
+private val EU_VAT_FORMAT_HINTS: Map<String, String> = mapOf(
+    "AT" to "AT + U + 8 chiffres (ex. ATU12345678)",
+    "BE" to "BE + 10 chiffres commençant par 0 ou 1 (ex. BE0123456789)",
+    "BG" to "BG + 9 ou 10 chiffres",
+    "CY" to "CY + 8 chiffres + 1 lettre",
+    "CZ" to "CZ + 8, 9 ou 10 chiffres",
+    "DE" to "DE + 9 chiffres (ex. DE123456789)",
+    "DK" to "DK + 8 chiffres",
+    "EE" to "EE + 9 chiffres",
+    "EL" to "EL + 9 chiffres (Grèce)",
+    "GR" to "EL + 9 chiffres (Grèce)",
+    "ES" to "ES + 9 caractères alphanumériques (ex. ESX1234567X)",
+    "FI" to "FI + 8 chiffres",
+    "FR" to "FR + 2 caractères alphanumériques + 9 chiffres (ex. FR32123456789)",
+    "HR" to "HR + 11 chiffres",
+    "HU" to "HU + 8 chiffres",
+    "IE" to "IE + 8 ou 9 caractères (ex. IE1234567X ou IE1X23456X)",
+    "IT" to "IT + 11 chiffres",
+    "LT" to "LT + 9 ou 12 chiffres",
+    "LU" to "LU + 8 chiffres",
+    "LV" to "LV + 11 chiffres",
+    "MT" to "MT + 8 chiffres",
+    "NL" to "NL + 9 chiffres + B + 2 chiffres (ex. NL123456789B01)",
+    "PL" to "PL + 10 chiffres",
+    "PT" to "PT + 9 chiffres",
+    "RO" to "RO + 2 à 10 chiffres",
+    "SE" to "SE + 12 chiffres",
+    "SI" to "SI + 8 chiffres",
+    "SK" to "SK + 10 chiffres",
+    "XI" to "XI + 9 ou 12 chiffres (Irlande du Nord)",
+)
+
+/**
  * Normalise a label for keyword matching: lower-case, ASCII-fold the
  * common French accents, collapse whitespace. Kept minimal (no
  * java.text.Normalizer — not on iOS) since the keywords themselves are
@@ -499,12 +565,43 @@ fun classifyCompanyId(
         ?: if (country in EU_COUNTRIES) listOf(CompanyIdKind.EU_VAT) else emptyList()
 
     val match = candidates.firstOrNull { matchesForKind(it, rawValue, country) }
-    return if (match != null) {
-        CompanyIdClassification.Match(match, match.normalize(rawValue))
-    } else {
-        // Étage 3 — skip
-        CompanyIdClassification.Skip
+    if (match != null) {
+        return CompanyIdClassification.Match(match, match.normalize(rawValue))
     }
+
+    // Étage 2 bis — country mismatch. When no country-scoped kind matched,
+    // sweep every kind + every strict EU VAT pattern to detect a value that
+    // looks like a valid ID for a DIFFERENT country. Lets us warn "this
+    // looks like a SIREN but the party is in ZA" instead of silently
+    // dropping the value from the CII XML. Skipped when the party has no
+    // country set (we have no baseline to declare a mismatch).
+    if (country != null) {
+        val strayKind = CompanyIdKind.entries.firstOrNull { kind ->
+            // Country-specific EU VAT patterns override the broad EU_VAT
+            // regex — a "FR12345…" value on a DE issuer still hits the
+            // sweep here via the FR strict pattern below.
+            kind != CompanyIdKind.EU_VAT && kind.matches(rawValue)
+        } ?: strayEuVatCountry(rawValue)?.let { CompanyIdKind.EU_VAT }
+        if (strayKind != null) {
+            return CompanyIdClassification.CountryMismatch(
+                kind = strayKind,
+                fieldLabel = label?.trim().orEmpty(),
+                rawValue = rawValue,
+                partyCountry = country,
+            )
+        }
+    }
+
+    // Étage 3 — skip
+    return CompanyIdClassification.Skip
+}
+
+/** Returns the country whose strict EU VAT pattern accepts [rawValue], or
+ *  null when no country pattern matches. Used by the country-mismatch sweep
+ *  to catch a "FR…" value typed on a DE issuer or vice versa. */
+private fun strayEuVatCountry(rawValue: String): String? {
+    val cleaned = CompanyIdKind.EU_VAT.preClean(rawValue)
+    return EU_VAT_STRICT_PATTERNS.entries.firstOrNull { (_, regex) -> regex.matches(cleaned) }?.key
 }
 
 /**

@@ -35,7 +35,13 @@ enum class PaymentMeans(
     val preserveCase: Boolean = false,
 ) {
     TRANSFER(30, Res.string.payment_means_30, "payment_means_30"),
-    CHEQUE(42, Res.string.payment_means_42, "payment_means_42"),
+    // UN/CEFACT 4461 code 20 = "Cheque". Historically shipped as 42 which is
+    // "Payment to bank account" — validators (Chorus Pro / veraPDF) rejected
+    // the cheque line as a mislabelled bank transfer. Resource name /
+    // labelKey stay `payment_means_42` so the labelsSnapshot map on
+    // already-issued docs keeps resolving; only the code emitted in the CII
+    // XML changes.
+    CHEQUE(20, Res.string.payment_means_42, "payment_means_42"),
     CARD(48, Res.string.payment_means_48, "payment_means_48"),
     // SEPA direct debit (was code 58 mislabeled "Prélèvement SEPA") retired
     // per product decision — the SEPA direct-debit flow requires a signed
