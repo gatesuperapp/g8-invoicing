@@ -75,15 +75,17 @@ class PdfGeneratorImpl(
     private var strings: PdfStrings = defaultStrings
     private val defaultStrings: PdfStrings = defaultStrings
     private companion object {
-        // Primary family name. The FontProvider matches the embedded
-        // arimo.ttf; unknown-glyph runs fall through to whichever registered
-        // font covers them.
-        const val FONT_FAMILY = "Arimo"
-        // Bundled classpath / assets path for the embedded default typeface.
-        // Compose Multiplatform packages composeResources/font/*.ttf into the
-        // Android assets tree at this exact path, so context.assets.open() and
-        // JVM ClassLoader.getResourceAsStream() both resolve it uniformly.
-        const val ARIMO_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/arimo.ttf"
+        // Bundled classpath / assets paths kept only for the price-row width
+        // measurement font (see [loadPricesMeasurementFont]) — the main text
+        // stack now reads the doc's own picked font via [DocumentFont]. All
+        // variable-font families in the picker (Arimo, Inter, Onest) were
+        // pre-split into static Regular + Bold instances via fontTools.varLib
+        // because iText 9.x can't traverse the wght axis: a variable file
+        // registers as a single weight (usually 400) and any pdfBold() call
+        // then silently keeps painting Regular. Static faces let the
+        // FontProvider match FONT_WEIGHT=bold against a real 700-weight
+        // registration.
+        const val ARIMO_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/arimoregular.ttf"
         // Noto Sans regular + bold — bundled for the picker, promoted to
         // PDF font provider so an Arimo miss lands on an embedded Noto glyph
         // instead of falling all the way to a system font (Android's built-
@@ -131,9 +133,10 @@ class PdfGeneratorImpl(
         val writer = PdfWriter(tempFilePath)
         val pdfDocument = PdfDocument(writer)
 
+        val documentFont = com.a4a.g8invoicing.ui.theme.DocumentFont.fromId(document.fontFamily)
         val doc = Document(pdfDocument, PageSize.A4)
-        doc.fontProvider = buildFontProvider()
-        doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+        doc.fontProvider = buildFontProvider(documentFont)
+        doc.setProperty(Property.FONT, arrayOf(documentFont.pdfFamilyName))
         doc.setFontSize(9.5F)
 
         // Add content
@@ -188,9 +191,10 @@ class PdfGeneratorImpl(
         val writer = PdfWriter(finalTempPath)
         val pdfDocument = PdfADocument(writer, PdfAConformance.PDF_A_3B, sRGBOutputIntent())
 
+        val documentFont = com.a4a.g8invoicing.ui.theme.DocumentFont.fromId(document.fontFamily)
         val doc = Document(pdfDocument, PageSize.A4)
-        doc.fontProvider = buildFontProvider()
-        doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+        doc.fontProvider = buildFontProvider(documentFont)
+        doc.setProperty(Property.FONT, arrayOf(documentFont.pdfFamilyName))
         doc.setFontSize(9.5F)
 
         var failure: Throwable? = null
@@ -320,30 +324,31 @@ class PdfGeneratorImpl(
     }
 
     /**
-     * Font stack for the whole PDF. The primary family is Arimo (embedded
-     * from composeResources — variable font covering Regular + Bold via the
-     * wght axis). We then pile every readable system font on top so iText's
-     * FontSelector can character-by-character fall back to whichever font
-     * covers each glyph — this is what makes exotic currency symbols
-     * (৳ ֏ ₽ د.إ …) and any user-typed content (CJK names, emoji in a
-     * footer) render instead of disappearing.
+     * Font stack for the whole PDF. The primary family is the one the user
+     * picked in the doc's font menu ([DocumentFont]), registered as two
+     * static instances (Regular + Bold) so iText's FontProvider can match
+     * FONT_WEIGHT="bold" against a real 700-weight face. Noto Sans Regular
+     * + Bold are always added on top as a glyph-coverage fallback so
+     * exotic currency symbols / accents that the primary face doesn't cover
+     * still render instead of disappearing.
      *
      * Registration order doesn't matter: FontSelector picks by family+coverage,
-     * not order. We silently swallow per-font failures because a few system
-     * .ttc entries (colour emoji, some CJK collections) trip up iText's parser
-     * and one bad file must not sink the whole PDF.
+     * not order. We silently swallow per-font failures because a bad TTF must
+     * not sink the whole PDF.
      */
-    private fun buildFontProvider(): FontProvider {
+    private fun buildFontProvider(font: com.a4a.g8invoicing.ui.theme.DocumentFont): FontProvider {
         val provider = FontProvider()
         fun addBytes(name: String) {
             try {
                 fileManager.loadAssetBytes(name)?.let { provider.addFont(it) }
             } catch (_: Throwable) { }
         }
-        addBytes(ARIMO_ASSET)
-        // Bundled Noto Sans — Arimo covers Latin + a handful of currency
-        // symbols, Noto's "no tofu" mandate fills in Greek / Cyrillic / most
-        // European extensions with glyphs iText will subset + embed.
+        addBytes(font.pdfRegularAsset)
+        addBytes(font.pdfBoldAsset)
+        // Noto Sans fallback — non-primary faces (Cabin, Spectral, Onest…)
+        // don't carry every currency glyph / diacritic the user might type,
+        // and iText will otherwise render a .notdef box. Keeps the primary
+        // face for anything it covers and only reaches for Noto on misses.
         addBytes(NOTO_SANS_REGULAR_ASSET)
         addBytes(NOTO_SANS_BOLD_ASSET)
         // System fonts are deliberately NOT added to the provider. Two
@@ -522,9 +527,10 @@ class PdfGeneratorImpl(
             } else {
                 PdfDocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
             }
+            val documentFont = com.a4a.g8invoicing.ui.theme.DocumentFont.fromId(document.fontFamily)
             val doc = Document(pdfDoc)
-            doc.fontProvider = buildFontProvider()
-            doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+            doc.fontProvider = buildFontProvider(documentFont)
+            doc.setProperty(Property.FONT, arrayOf(documentFont.pdfFamilyName))
             val numberOfPages = pdfDoc.numberOfPages
 
             if (numberOfPages > 1) {

@@ -30,7 +30,7 @@ class FacturXTextSanitizer(
     private val loadFontBytes: (String) -> ByteArray?,
 ) {
     private val fontAssetPaths = listOf(
-        "composeResources/com.a4a.g8invoicing.shared.resources/font/arimo.ttf",
+        "composeResources/com.a4a.g8invoicing.shared.resources/font/arimoregular.ttf",
         "composeResources/com.a4a.g8invoicing.shared.resources/font/notosansregular.ttf",
         "composeResources/com.a4a.g8invoicing.shared.resources/font/notosansbold.ttf",
     )

@@ -41,19 +41,78 @@ enum class DocumentFont(
     val id: String,
     val displayName: String,
     val isPremium: Boolean,
+    // iText FontProvider driver — the family string in [pdfFamilyName] MUST
+    // match what OS/2 + name records in the two static TTFs actually report
+    // (checked with fontTools). iText picks Regular vs Bold by matching the
+    // family AND weight, so the two assets must share the family. Variable
+    // originals (Arimo / Inter / Onest) were split into static instances
+    // via fontTools.varLib because iText 9.x doesn't traverse the wght axis
+    // — a variable file registers as a single weight (usually 400) and any
+    // pdfBold() request silently keeps rendering Regular.
+    val pdfFamilyName: String,
+    val pdfRegularAsset: String,
+    val pdfBoldAsset: String,
 ) {
-    // Arimo — Google/Ascender OFL sans-serif. Default free typeface: variable
-    // font covering Regular + Bold via wght axis, broad Latin coverage.
-    ARIMO("arimo", "Arimo", isPremium = false),
-    NOTO_SANS("noto_sans", "Noto Sans", isPremium = false),
-    NOTO_SERIF("noto_serif", "Noto Serif", isPremium = false),
-    CABIN("cabin", "Cabin", isPremium = true),
-    SOURCE_SANS("source_sans", "Source Sans", isPremium = true),
-    LATO("lato", "Lato", isPremium = true),
-    INTER("inter", "Inter", isPremium = true),
-    SPECTRAL("spectral", "Spectral", isPremium = true),
-    ONEST("onest", "Onest", isPremium = true),
-    IBM_PLEX_SANS("ibm_plex_sans", "IBM Plex Sans", isPremium = true);
+    ARIMO(
+        id = "arimo", displayName = "Arimo", isPremium = false,
+        pdfFamilyName = "Arimo",
+        pdfRegularAsset = "$PDF_FONT_DIR/arimoregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/arimobold.ttf",
+    ),
+    NOTO_SANS(
+        id = "noto_sans", displayName = "Noto Sans", isPremium = false,
+        pdfFamilyName = "Noto Sans",
+        pdfRegularAsset = "$PDF_FONT_DIR/notosansregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/notosansbold.ttf",
+    ),
+    NOTO_SERIF(
+        id = "noto_serif", displayName = "Noto Serif", isPremium = false,
+        pdfFamilyName = "Noto Serif",
+        pdfRegularAsset = "$PDF_FONT_DIR/notoserifregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/notoserifbold.ttf",
+    ),
+    CABIN(
+        id = "cabin", displayName = "Cabin", isPremium = true,
+        pdfFamilyName = "Cabin",
+        pdfRegularAsset = "$PDF_FONT_DIR/cabinregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/cabinbold.ttf",
+    ),
+    SOURCE_SANS(
+        id = "source_sans", displayName = "Source Sans", isPremium = true,
+        pdfFamilyName = "Source Sans 3",
+        pdfRegularAsset = "$PDF_FONT_DIR/sourcesansregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/sourcesansbold.ttf",
+    ),
+    LATO(
+        id = "lato", displayName = "Lato", isPremium = true,
+        pdfFamilyName = "Lato",
+        pdfRegularAsset = "$PDF_FONT_DIR/latoregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/latobold.ttf",
+    ),
+    INTER(
+        id = "inter", displayName = "Inter", isPremium = true,
+        pdfFamilyName = "Inter",
+        pdfRegularAsset = "$PDF_FONT_DIR/interregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/interbold.ttf",
+    ),
+    SPECTRAL(
+        id = "spectral", displayName = "Spectral", isPremium = true,
+        pdfFamilyName = "Spectral",
+        pdfRegularAsset = "$PDF_FONT_DIR/spectralregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/spectralbold.ttf",
+    ),
+    ONEST(
+        id = "onest", displayName = "Onest", isPremium = true,
+        pdfFamilyName = "Onest",
+        pdfRegularAsset = "$PDF_FONT_DIR/onestregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/onestbold.ttf",
+    ),
+    IBM_PLEX_SANS(
+        id = "ibm_plex_sans", displayName = "IBM Plex Sans", isPremium = true,
+        pdfFamilyName = "IBM Plex Sans",
+        pdfRegularAsset = "$PDF_FONT_DIR/plexsansregular.ttf",
+        pdfBoldAsset = "$PDF_FONT_DIR/plexsansbold.ttf",
+    );
 
     companion object {
         /** Free default. Anything unknown / null / legacy resolves here. */
@@ -63,6 +122,12 @@ enum class DocumentFont(
             entries.firstOrNull { it.id == id } ?: Default
     }
 }
+
+// Compose-Multiplatform bundles composeResources/font/*.ttf into the Android
+// assets tree at this exact path; ClassLoader.getResourceAsStream resolves
+// the same path on JVM/Desktop.
+private const val PDF_FONT_DIR =
+    "composeResources/com.a4a.g8invoicing.shared.resources/font"
 
 /**
  * The currently-selected document font, provided at the preview / PDF root so
