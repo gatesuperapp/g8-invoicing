@@ -1001,8 +1001,26 @@ Une erreur s'est produite :
 
     <!-- Multi-issuer cleanup + attach flow -->
     <string name="onboarding_19_cleanup_title">Il semble que tu gères %1$d entreprises</string>
-    <string name="onboarding_19_cleanup_body">Est-ce bien le cas ? Sinon, supprime les entreprises inutilisées. Pas d'inquiétude, les documents ne seront pas impactés.</string>
+    <string name="onboarding_19_cleanup_body">Est-ce bien le cas ? Sinon, supprime les entreprises inutilisées.</string>
     <string name="onboarding_19_cleanup_cta">Continuer</string>
+    <string name="onboarding_19_cleanup_reassign_title">Cette entreprise a des documents</string>
+    <string name="onboarding_19_cleanup_reassign_message">%1$d document(s) sont rattachés à %2$s. À quelle entreprise souhaites-tu les réaffecter ?</string>
+    <string name="onboarding_19_cleanup_reassign_confirm">Réaffecter et supprimer</string>
+
+    <!-- 1.9 orphan rescue dialog: shown at app launch when documents are
+         attached to a company that no longer exists (deleted during the
+         cleanup step of the migration wizard, before the reassignment
+         picker existed). One card per orphan doc with a picker per doc. -->
+    <string name="orphan_rescue_title">Petit couac de migration</string>
+    <string name="orphan_rescue_message">%1$d document(s) ne sont rattachés à aucune entreprise. Rattache-les sinon ils resteront invisibles dans tes listes.</string>
+    <string name="orphan_rescue_card_client">Client :</string>
+    <string name="orphan_rescue_card_products">Produits :</string>
+    <string name="orphan_rescue_card_assign_to">Rattacher à :</string>
+    <string name="orphan_rescue_card_cta">Rattacher</string>
+    <string name="orphan_rescue_doc_type_invoice">Facture</string>
+    <string name="orphan_rescue_doc_type_delivery_note">Bon de livraison</string>
+    <string name="orphan_rescue_doc_type_credit_note">Avoir</string>
+    <string name="orphan_rescue_doc_type_quote">Devis</string>
     <string name="onboarding_19_attach_intro_body">Nous allons rattacher les clients et produits à tes entreprises. Cela te permettra de basculer d'une entreprise à l'autre et d'avoir une numérotation spécifique pour tes documents.</string>
     <string name="onboarding_19_attach_intro_cta">C'est parti</string>
     <string name="onboarding_19_attach_step_title">Entreprise %1$d : %2$s</string>
