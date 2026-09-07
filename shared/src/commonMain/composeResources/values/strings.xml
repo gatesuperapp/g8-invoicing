@@ -1005,7 +1005,7 @@ Une erreur s'est produite :
     <string name="onboarding_19_cleanup_cta">Continuer</string>
     <string name="onboarding_19_cleanup_reassign_title">Cette entreprise a des documents</string>
     <string name="onboarding_19_cleanup_reassign_message">%1$d document(s) sont rattachés à %2$s. À quelle entreprise souhaites-tu les réaffecter ?</string>
-    <string name="onboarding_19_cleanup_reassign_confirm">Réaffecter et supprimer</string>
+    <string name="onboarding_19_cleanup_reassign_confirm">Réaffecter et supprimer l'entreprise</string>
 
     <!-- 1.9 orphan rescue dialog: shown at app launch when documents are
          attached to a company that no longer exists (deleted during the
