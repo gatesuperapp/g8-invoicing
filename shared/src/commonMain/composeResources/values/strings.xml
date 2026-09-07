@@ -1011,8 +1011,8 @@ Une erreur s'est produite :
          attached to a company that no longer exists (deleted during the
          cleanup step of the migration wizard, before the reassignment
          picker existed). One card per orphan doc with a picker per doc. -->
-    <string name="orphan_rescue_title">Petit couac de migration</string>
-    <string name="orphan_rescue_message">%1$d document(s) ne sont rattachés à aucune entreprise. Rattache-les sinon ils resteront invisibles dans tes listes.</string>
+    <string name="orphan_rescue_title">Petit couac</string>
+    <string name="orphan_rescue_message">Pendant la montée en version précédente, %1$d document(s) n'ont pas été rattachés à une entreprise. Rattache-les sinon ils resteront invisibles dans tes listes.</string>
     <string name="orphan_rescue_card_client">Client :</string>
     <string name="orphan_rescue_card_products">Produits :</string>
     <string name="orphan_rescue_card_assign_to">Rattacher à :</string>
