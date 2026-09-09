@@ -1,0 +1,10 @@
+1.9.1 — Fehlerbehebung: Dokumente konnten ausgeblendet werden.
+
+v1.9
+- ZUGFeRD-/Factur-X- und CII-XML-Export (elektronische Rechnungsstellung)
+- Anpassbare Schriftarten für deine Dokumente
+- Statustags für Lieferscheine und Angebote
+- Rechnungen sperren
+- Neue Felder: Bankverbindung (IBAN/BIC), Zahlungsarten, Zahlungsbedingungen, Hinweis Kleinunternehmerregelung
+- Mehrere Unternehmen: eigenes Menü, unternehmensspezifische Nummerierung
+- Wiederherstellungs-Schaltfläche für die Datenbank

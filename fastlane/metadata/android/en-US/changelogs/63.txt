@@ -1,0 +1,10 @@
+1.9.1 — Fix for a bug that could hide documents.
+
+v1.9
+- Factur-X/ZUGFeRD and CII XML export (electronic invoicing)
+- Customisable fonts for your documents
+- Tag delivery notes and quotes with a status
+- Lock invoices
+- New fields: bank details (IBAN/BIC), payment methods, payment terms, VAT exemption mention
+- Multi-business: dedicated menu, per-company numbering
+- Database restore button

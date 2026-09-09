@@ -1,0 +1,10 @@
+1.9.1 — Corrección de un bug que podía ocultar documentos.
+
+v1.9
+- Exportación Factur-X/ZUGFeRD y CII XML (facturación electrónica)
+- Tipografías personalizables para tus documentos
+- Etiqueta albaranes y presupuestos con un estado
+- Bloquear facturas
+- Nuevos campos: datos bancarios (IBAN/BIC), medios de pago, condiciones de pago, mención exención de IVA
+- Multiempresa: menú dedicado, numeración por empresa
+- Botón de restauración de la base de datos
