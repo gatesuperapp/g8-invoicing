@@ -10,17 +10,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.compose.rememberNavController
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrentCompanyRepository
+import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.models.PersonType
@@ -31,9 +35,13 @@ import com.a4a.g8invoicing.ui.shared.FirstLaunchIssuerNameDialog
 import com.a4a.g8invoicing.ui.shared.Migration19Actions
 import com.a4a.g8invoicing.ui.shared.Migration19Context
 import com.a4a.g8invoicing.ui.shared.OnboardingMigration19Dialog
+import com.a4a.g8invoicing.ui.shared.OrphanRescueDialog
+import com.a4a.g8invoicing.ui.shared.OrphanRescueItem
+import com.a4a.g8invoicing.ui.shared.probeOrphanRescue
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 /**
@@ -48,6 +56,9 @@ fun App(
     currentCompanyRepository: CurrentCompanyRepository = koinInject(),
     clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject(),
     invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject(),
+    deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface = koinInject(),
+    creditNoteDataSource: CreditNoteLocalDataSourceInterface = koinInject(),
+    quoteDataSource: QuoteLocalDataSourceInterface = koinInject(),
     productDataSource: ProductLocalDataSourceInterface = koinInject(),
     productTaxDataSource: ProductTaxLocalDataSourceInterface = koinInject(),
     modulesRepo: ActivatedModulesRepository = koinInject(),
@@ -65,6 +76,28 @@ fun App(
     // FirstLaunchIssuerNameDialog completes, so a brand-new user never
     // sees "welcome to 1.9 upgrade" copy that doesn't apply to them.
     var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
+    // Orphan-rescue dialog state (safety net for docs whose
+    // original_company_id points at a deleted issuer — see
+    // OrphanRescueDialog KDoc). Null = probe not yet run OR nothing to
+    // fix; non-empty = show dialog. The probe re-runs any time the
+    // migration wizard closes.
+    var orphanRescueItems by remember { mutableStateOf<List<OrphanRescueItem>?>(null) }
+    var orphanRescueIssuers by remember { mutableStateOf<List<ClientOrIssuerState>>(emptyList()) }
+    val bootScope = rememberCoroutineScope()
+
+    suspend fun runOrphanProbe() {
+        probeOrphanRescue(
+            clientOrIssuerDataSource,
+            invoiceDataSource,
+            deliveryNoteDataSource,
+            creditNoteDataSource,
+            quoteDataSource,
+        )?.let { payload ->
+            orphanRescueIssuers = payload.candidates
+            orphanRescueItems = payload.items
+        }
+    }
+
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
         val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
@@ -78,6 +111,7 @@ fun App(
                     // No issuer to hang the wizard on — bail out silently
                     // and mark the flag so we don't retry every boot.
                     modulesRepo.markMigration19Seen()
+                    runOrphanProbe()
                 } else {
                     val clients = clientOrIssuerDataSource.fetchAll(PersonType.CLIENT).first()
                     val products = productDataSource.fetchAllProducts().first()
@@ -94,6 +128,8 @@ fun App(
                         footersByIssuer = footersByIssuer,
                     )
                 }
+            } else {
+                runOrphanProbe()
             }
         }
     }
@@ -141,8 +177,15 @@ fun App(
         OnboardingMigration19Dialog(
             context = ctx,
             actions = Migration19Actions(
-                deleteIssuer = { issuer ->
+                deleteIssuer = { issuer, reassignDocsTo ->
+                    val fromId = issuer.id?.toLong()
+                    if (fromId != null && reassignDocsTo != null) {
+                        clientOrIssuerDataSource.reassignDocumentsToCompany(fromId, reassignDocsTo)
+                    }
                     clientOrIssuerDataSource.deleteClientOrIssuer(issuer)
+                },
+                docsCountFor = { companyId ->
+                    clientOrIssuerDataSource.countDocumentsForCompany(companyId)
                 },
                 attachClients = { ids, issuerId ->
                     clientOrIssuerDataSource.bulkAttachToCompany(ids, issuerId)
@@ -195,10 +238,28 @@ fun App(
                 markSeen = { modulesRepo.markMigration19Seen() },
             ),
             showClientCountryStep = false,
-            onDismiss = { migration19Context = null },
+            onDismiss = {
+                migration19Context = null
+                // Wizard just closed — probe for orphans left behind by
+                // the cleanup step (docs whose issuer got deleted without
+                // reassignment in older wizard builds).
+                bootScope.launch { runOrphanProbe() }
+            },
+        )
+    }
+
+    orphanRescueItems?.takeIf { it.isNotEmpty() }?.let { items ->
+        OrphanRescueDialog(
+            initialItems = items,
+            candidates = orphanRescueIssuers,
+            onAssign = { item, companyId ->
+                clientOrIssuerDataSource.assignDocToCompany(item.type, item.id, companyId)
+            },
+            onAllResolved = { orphanRescueItems = null },
         )
     }
 }
+
 
 @Composable
 private fun AppContent(

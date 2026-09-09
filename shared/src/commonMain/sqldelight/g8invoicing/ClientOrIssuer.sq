@@ -167,3 +167,79 @@ SELECT (
 -- côté check pré-suppression.
 countClientsForCompany:
 SELECT COUNT(*) FROM ClientOrIssuer WHERE type = 'client' AND company_id = :company_id;
+
+-- Multi-entreprise. Réaffecte tous les documents d'une entreprise vers une
+-- autre en ne touchant qu'à original_company_id : le snapshot figé côté doc
+-- (DocumentClientOrIssuer + adresses + emails) reste intact, donc le PDF
+-- généré conserve exactement les coordonnées de l'entreprise émettrice
+-- d'origine. Seuls le filtrage par entreprise courante et la numérotation
+-- basculent sur la nouvelle. Utilisé quand l'user supprime une entreprise
+-- ayant émis des documents dans le wizard de cleanup 1.9.
+reassignInvoicesToCompany:
+UPDATE Invoice SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+reassignDeliveryNotesToCompany:
+UPDATE DeliveryNote SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+reassignCreditNotesToCompany:
+UPDATE CreditNote SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+reassignQuotesToCompany:
+UPDATE Quote SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+-- Orphan rescue (safety net for the 1.9 migration bug, where deleting an
+-- issuer in the cleanup wizard left its docs pointing at a company_id that
+-- no longer exists). Orphan = doc whose original_company_id is NULL or
+-- references a ClientOrIssuer row that got deleted / never existed. The
+-- launch-time check counts them across the 4 doc tables in one round-trip;
+-- the per-table id queries feed the rescue dialog.
+countOrphanDocs:
+SELECT (
+  (SELECT COUNT(*) FROM Invoice
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer')) +
+  (SELECT COUNT(*) FROM DeliveryNote
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer')) +
+  (SELECT COUNT(*) FROM CreditNote
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer')) +
+  (SELECT COUNT(*) FROM Quote
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer'))
+) AS total_count;
+
+getOrphanInvoiceIds:
+SELECT invoice_id FROM Invoice
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+getOrphanDeliveryNoteIds:
+SELECT delivery_note_id FROM DeliveryNote
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+getOrphanCreditNoteIds:
+SELECT credit_note_id FROM CreditNote
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+getOrphanQuoteIds:
+SELECT quote_id FROM Quote
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+-- Single-doc reassignment counterparts of reassign*ToCompany. Same
+-- semantic: rewrite only original_company_id, leave DocumentClientOrIssuer
+-- alone so the PDF stays visually identical.
+assignInvoiceToCompany:
+UPDATE Invoice SET original_company_id = :company_id WHERE invoice_id = :invoice_id;
+
+assignDeliveryNoteToCompany:
+UPDATE DeliveryNote SET original_company_id = :company_id WHERE delivery_note_id = :delivery_note_id;
+
+assignCreditNoteToCompany:
+UPDATE CreditNote SET original_company_id = :company_id WHERE credit_note_id = :credit_note_id;
+
+assignQuoteToCompany:
+UPDATE Quote SET original_company_id = :company_id WHERE quote_id = :quote_id;

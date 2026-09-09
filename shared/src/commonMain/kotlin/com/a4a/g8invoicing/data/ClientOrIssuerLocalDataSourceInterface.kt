@@ -114,4 +114,51 @@ interface ClientOrIssuerLocalDataSourceInterface {
      * non-zero → the caller shows an alert instead of firing delete.
      */
     suspend fun countAttachedForCompany(companyId: Long): Long
+
+    /**
+     * Total documents attached to [companyId] via `original_company_id`.
+     * Sums invoices + delivery notes + credit notes + quotes.
+     */
+    suspend fun countDocumentsForCompany(companyId: Long): Long
+
+    /**
+     * Move every document (invoice + delivery note + credit note + quote)
+     * from [fromCompanyId] to [toCompanyId] by rewriting only their
+     * `original_company_id`. The frozen DocumentClientOrIssuer snapshot is
+     * left untouched, so PDF rendering keeps the original issuer's
+     * coordinates — only listing filters and per-company numbering shift to
+     * the target company.
+     */
+    suspend fun reassignDocumentsToCompany(fromCompanyId: Long, toCompanyId: Long)
+
+    /**
+     * Total docs whose original_company_id is NULL or points at a
+     * ClientOrIssuer row that no longer exists. Called at every boot as a
+     * cheap probe — non-zero opens the orphan-rescue dialog.
+     */
+    suspend fun countOrphanDocs(): Long
+
+    /**
+     * Per-table ids of the orphan documents. Non-empty lists feed the
+     * rescue dialog; the caller fetches full doc previews on the side.
+     */
+    suspend fun getOrphanDocIds(): OrphanDocIds
+
+    /**
+     * Point a single doc at [companyId] (its new original_company_id).
+     * Unlike [reassignDocumentsToCompany] this operates on one doc row,
+     * used by the rescue dialog's per-card "Rattacher" action.
+     */
+    suspend fun assignDocToCompany(type: OrphanDocType, docId: Long, companyId: Long)
+}
+
+enum class OrphanDocType { INVOICE, DELIVERY_NOTE, CREDIT_NOTE, QUOTE }
+
+data class OrphanDocIds(
+    val invoice: List<Long>,
+    val deliveryNote: List<Long>,
+    val creditNote: List<Long>,
+    val quote: List<Long>,
+) {
+    val total: Int get() = invoice.size + deliveryNote.size + creditNote.size + quote.size
 }

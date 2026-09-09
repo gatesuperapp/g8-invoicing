@@ -44,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -122,6 +123,9 @@ import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_bank_title_with_issuer
 import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_cta
+import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_reassign_confirm
+import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_reassign_message
+import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_reassign_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_cleanup_title
 import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_body
 import com.a4a.g8invoicing.shared.resources.onboarding_19_einvoice_cta
@@ -182,7 +186,17 @@ data class Migration19Context(
  * caller can flush to the DB before we jump to the next step.
  */
 class Migration19Actions(
-    val deleteIssuer: suspend (ClientOrIssuerState) -> Unit,
+    // reassignDocsTo, when non-null, moves every document (invoice + BL +
+    // avoir + devis) whose original_company_id matches the deleted issuer
+    // over to the picked target *before* the master row is deleted. Keeps
+    // docs reachable from the target company's lists — the doc-side
+    // snapshot (client/issuer name+address+VAT on the PDF) stays frozen.
+    val deleteIssuer: suspend (issuer: ClientOrIssuerState, reassignDocsTo: Long?) -> Unit,
+    // Live count of documents attached to a company via original_company_id.
+    // Consulted at delete time to decide whether to show the reassignment
+    // picker; must re-query rather than cache since prior deletes in the
+    // same wizard session shift counts around.
+    val docsCountFor: suspend (companyId: Long) -> Long,
     val attachClients: suspend (clientIds: List<Long>, issuerId: Long) -> Unit,
     val attachProducts: suspend (productIds: List<Long>, issuerId: Long) -> Unit,
     val saveIssuerBank: suspend (issuer: ClientOrIssuerState, iban: String, bic: String) -> Unit,
@@ -717,9 +731,10 @@ fun OnboardingMigration19Dialog(
                         )
                         Step19.Cleanup -> CleanupStep19(
                             issuers = remainingIssuers,
-                            onDelete = { issuer ->
+                            docsCountFor = { companyId -> actions.docsCountFor(companyId) },
+                            onDelete = { issuer, reassignDocsTo ->
                                 scope.launch {
-                                    actions.deleteIssuer(issuer)
+                                    actions.deleteIssuer(issuer, reassignDocsTo)
                                     remainingIssuers = remainingIssuers.filter { it.id != issuer.id }
                                 }
                             },
@@ -1102,10 +1117,22 @@ private fun WelcomeStep19(onNext: () -> Unit) {
 @Composable
 private fun CleanupStep19(
     issuers: List<ClientOrIssuerState>,
-    onDelete: (ClientOrIssuerState) -> Unit,
+    docsCountFor: suspend (companyId: Long) -> Long,
+    // reassignDocsTo is null when the deleted issuer has no docs, or the id
+    // of the target company chosen by the user in the reassignment picker.
+    onDelete: (issuer: ClientOrIssuerState, reassignDocsTo: Long?) -> Unit,
     onNext: () -> Unit,
 ) {
-    var pendingDelete by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+    val scope = rememberCoroutineScope()
+    // Three-way delete flow:
+    //  1. Tap trash → resolve docs count for the picked issuer (suspend).
+    //  2a. 0 docs → simple confirm modal (existing UX).
+    //  2b. >0 docs → reassignment picker: list of the *other* remaining
+    //      issuers with a "Réaffecter et supprimer" CTA. Only original_company_id
+    //      is rewritten — the doc's frozen client/issuer snapshot stays intact
+    //      so the PDF output is unchanged.
+    var pendingSimpleDelete by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+    var pendingReassign by remember { mutableStateOf<Pair<ClientOrIssuerState, Long>?>(null) }
     var pendingDetails by remember { mutableStateOf<ClientOrIssuerState?>(null) }
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
@@ -1123,6 +1150,12 @@ private fun CleanupStep19(
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(20.dp))
+        // The trash icon disappears once only one entreprise remains: the
+        // reassignment picker (shown when the deleted issuer has docs)
+        // needs at least one other issuer to move them to. Also prevents
+        // ending the cleanup with zero issuers, which would leave the
+        // per-company AttachClients/AttachProducts loops without a target.
+        val canDelete = issuers.size > 1
         issuers.forEach { issuer ->
             Row(
                 modifier = Modifier
@@ -1142,12 +1175,28 @@ private fun CleanupStep19(
                     modifier = Modifier.weight(1f),
                     style = MaterialTheme.typography.textBody,
                 )
-                IconButton(onClick = { pendingDelete = issuer }) {
-                    Icon(
-                        imageVector = Icons.Outlined.DeleteOutline,
-                        contentDescription = null,
-                        tint = AppColors.iconSecondary,
-                    )
+                if (canDelete) {
+                    IconButton(onClick = {
+                        val id = issuer.id?.toLong()
+                        if (id == null) {
+                            pendingSimpleDelete = issuer
+                        } else {
+                            scope.launch {
+                                val count = docsCountFor(id)
+                                if (count > 0L) {
+                                    pendingReassign = issuer to count
+                                } else {
+                                    pendingSimpleDelete = issuer
+                                }
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.DeleteOutline,
+                            contentDescription = null,
+                            tint = AppColors.iconSecondary,
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(6.dp))
@@ -1162,22 +1211,103 @@ private fun CleanupStep19(
     pendingDetails?.let { issuer ->
         IssuerDetailsDialog19(issuer = issuer, onDismiss = { pendingDetails = null })
     }
-    pendingDelete?.let { toDelete ->
+    pendingSimpleDelete?.let { toDelete ->
         AlertDialog(
-            onDismissRequest = { pendingDelete = null },
+            onDismissRequest = { pendingSimpleDelete = null },
             title = { Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_title)) },
             confirmButton = {
-                Button(onClick = { onDelete(toDelete); pendingDelete = null }) {
+                Button(onClick = { onDelete(toDelete, null); pendingSimpleDelete = null }) {
                     Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_yes))
                 }
             },
             dismissButton = {
-                Button(onClick = { pendingDelete = null }) {
+                Button(onClick = { pendingSimpleDelete = null }) {
                     Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_no))
                 }
             },
         )
     }
+    pendingReassign?.let { (toDelete, docsCount) ->
+        val candidates = issuers.filter { it.id != toDelete.id && it.id != null }
+        if (candidates.isEmpty()) {
+            // No other company left to receive the docs — refuse the
+            // deletion silently. In practice the wizard shouldn't reach
+            // this state (Cleanup only fires when >1 issuer exists) but
+            // guard against races where a prior delete emptied the list.
+            pendingReassign = null
+        } else {
+            ReassignDocsDialog19(
+                deletedIssuerName = toDelete.name.text,
+                docsCount = docsCount,
+                candidates = candidates,
+                onConfirm = { targetId ->
+                    onDelete(toDelete, targetId)
+                    pendingReassign = null
+                },
+                onDismiss = { pendingReassign = null },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReassignDocsDialog19(
+    deletedIssuerName: String,
+    docsCount: Long,
+    candidates: List<ClientOrIssuerState>,
+    onConfirm: (targetCompanyId: Long) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var selectedId by remember { mutableStateOf(candidates.first().id!!.toLong()) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(Res.string.onboarding_19_cleanup_reassign_title))
+        },
+        text = {
+            Column {
+                Text(
+                    stringResource(
+                        Res.string.onboarding_19_cleanup_reassign_message,
+                        docsCount.toInt(),
+                        deletedIssuerName.ifBlank { "—" },
+                    ),
+                    style = MaterialTheme.typography.textBody,
+                )
+                Spacer(Modifier.height(12.dp))
+                candidates.forEach { issuer ->
+                    val id = issuer.id!!.toLong()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedId = id }
+                            .padding(vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(
+                            selected = selectedId == id,
+                            onClick = { selectedId = id },
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            issuer.name.text.ifBlank { "—" },
+                            style = MaterialTheme.typography.textBody,
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(selectedId) }) {
+                Text(stringResource(Res.string.onboarding_19_cleanup_reassign_confirm))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(Res.string.onboarding_cleanup_delete_confirm_no))
+            }
+        },
+    )
 }
 
 @Composable

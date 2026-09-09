@@ -867,6 +867,69 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
+    override suspend fun countDocumentsForCompany(companyId: Long): Long {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.countDocumentsForCompany(companyId).executeAsOne()
+            } catch (cause: Throwable) {
+                0L
+            }
+        }
+    }
+
+    override suspend fun reassignDocumentsToCompany(fromCompanyId: Long, toCompanyId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.transaction {
+                    clientOrIssuerQueries.reassignInvoicesToCompany(toCompanyId, fromCompanyId)
+                    clientOrIssuerQueries.reassignDeliveryNotesToCompany(toCompanyId, fromCompanyId)
+                    clientOrIssuerQueries.reassignCreditNotesToCompany(toCompanyId, fromCompanyId)
+                    clientOrIssuerQueries.reassignQuotesToCompany(toCompanyId, fromCompanyId)
+                }
+            } catch (cause: Throwable) {
+            }
+        }
+    }
+
+    override suspend fun countOrphanDocs(): Long {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.countOrphanDocs().executeAsOne()
+            } catch (cause: Throwable) {
+                0L
+            }
+        }
+    }
+
+    override suspend fun getOrphanDocIds(): OrphanDocIds {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                OrphanDocIds(
+                    invoice = clientOrIssuerQueries.getOrphanInvoiceIds().executeAsList(),
+                    deliveryNote = clientOrIssuerQueries.getOrphanDeliveryNoteIds().executeAsList(),
+                    creditNote = clientOrIssuerQueries.getOrphanCreditNoteIds().executeAsList(),
+                    quote = clientOrIssuerQueries.getOrphanQuoteIds().executeAsList(),
+                )
+            } catch (cause: Throwable) {
+                OrphanDocIds(emptyList(), emptyList(), emptyList(), emptyList())
+            }
+        }
+    }
+
+    override suspend fun assignDocToCompany(type: OrphanDocType, docId: Long, companyId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                when (type) {
+                    OrphanDocType.INVOICE -> clientOrIssuerQueries.assignInvoiceToCompany(companyId, docId)
+                    OrphanDocType.DELIVERY_NOTE -> clientOrIssuerQueries.assignDeliveryNoteToCompany(companyId, docId)
+                    OrphanDocType.CREDIT_NOTE -> clientOrIssuerQueries.assignCreditNoteToCompany(companyId, docId)
+                    OrphanDocType.QUOTE -> clientOrIssuerQueries.assignQuoteToCompany(companyId, docId)
+                }
+            } catch (cause: Throwable) {
+            }
+        }
+    }
+
     override suspend fun deleteDocumentClientOrIssuer(documentClientOrIssuer: ClientOrIssuerState) {
         return withContext(DispatcherProvider.IO) {
             try {

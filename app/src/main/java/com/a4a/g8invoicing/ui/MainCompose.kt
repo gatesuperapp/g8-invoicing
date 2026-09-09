@@ -24,12 +24,15 @@ import g8invoicing.DeliveryNoteQueries
 import g8invoicing.InvoiceQueries
 import g8invoicing.ProductQueries
 import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrentCompanyRepository
+import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.PrefKeys
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.dataStore
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.models.CountryCodes
@@ -66,6 +69,9 @@ import com.a4a.g8invoicing.ui.shared.FirstLaunchIssuerNameDialog
 import com.a4a.g8invoicing.ui.shared.Migration19Actions
 import com.a4a.g8invoicing.ui.shared.Migration19Context
 import com.a4a.g8invoicing.ui.shared.OnboardingMigration19Dialog
+import com.a4a.g8invoicing.ui.shared.OrphanRescueDialog
+import com.a4a.g8invoicing.ui.shared.OrphanRescueItem
+import com.a4a.g8invoicing.ui.shared.probeOrphanRescue
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
@@ -99,6 +105,9 @@ fun MainCompose(
     val currentCompanyRepository: CurrentCompanyRepository = koinInject()
     val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject()
     val invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject()
+    val deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface = koinInject()
+    val creditNoteDataSource: CreditNoteLocalDataSourceInterface = koinInject()
+    val quoteDataSource: QuoteLocalDataSourceInterface = koinInject()
     val productDataSource: ProductLocalDataSourceInterface = koinInject()
     val productTaxDataSource: ProductTaxLocalDataSourceInterface = koinInject()
     val modulesRepo: ActivatedModulesRepository = koinInject()
@@ -131,6 +140,24 @@ fun MainCompose(
     // the wizard instead of the version-based gate, since a restored backup
     // file has no reliable "source app version" metadata.
     var migration19FiredByRestore by remember { mutableStateOf(false) }
+    // Orphan-rescue dialog: fires post-wizard (or at boot if the wizard was
+    // already seen) when docs point at a deleted issuer — see
+    // OrphanRescueDialog KDoc.
+    var orphanRescueItems by remember { mutableStateOf<List<OrphanRescueItem>?>(null) }
+    var orphanRescueIssuers by remember { mutableStateOf<List<ClientOrIssuerState>>(emptyList()) }
+
+    suspend fun runOrphanProbe() {
+        probeOrphanRescue(
+            clientOrIssuerDataSource,
+            invoiceDataSource,
+            deliveryNoteDataSource,
+            creditNoteDataSource,
+            quoteDataSource,
+        )?.let { payload ->
+            orphanRescueIssuers = payload.candidates
+            orphanRescueItems = payload.items
+        }
+    }
 
     // Restore flow — activated from Account > Sauvegarde. Rendered outside
     // NavGraph so its dialogs stack on top of every screen the user may be
@@ -221,6 +248,7 @@ fun MainCompose(
                     .fetchAll(PersonType.ISSUER).first()
                 if (issuers.isEmpty()) {
                     modulesRepo.markMigration19Seen()
+                    runOrphanProbe()
                 } else {
                     // Unscoped fetches — the wizard MUST see every client and
                     // product regardless of which company the boot-time
@@ -278,6 +306,11 @@ fun MainCompose(
                     // so this is a no-op for them.
                     setSeenOnboarding18(context)
                 }
+            } else {
+                // Wizard already seen (upgrade from a buggy 1.9 → 1.9.1)
+                // — no wizard to show but still probe for orphans left
+                // behind by the previous cleanup step.
+                runOrphanProbe()
             }
         }
         versionTrackingDone = true
@@ -318,8 +351,15 @@ fun MainCompose(
         OnboardingMigration19Dialog(
             context = ctx,
             actions = Migration19Actions(
-                deleteIssuer = { issuer ->
+                deleteIssuer = { issuer, reassignDocsTo ->
+                    val fromId = issuer.id?.toLong()
+                    if (fromId != null && reassignDocsTo != null) {
+                        clientOrIssuerDataSource.reassignDocumentsToCompany(fromId, reassignDocsTo)
+                    }
                     clientOrIssuerDataSource.deleteClientOrIssuer(issuer)
+                },
+                docsCountFor = { companyId ->
+                    clientOrIssuerDataSource.countDocumentsForCompany(companyId)
                 },
                 attachClients = { ids, issuerId ->
                     clientOrIssuerDataSource.bulkAttachToCompany(ids, issuerId)
@@ -409,7 +449,23 @@ fun MainCompose(
             ),
             showClientCountryStep = showClientCountryStepInMigration19,
             isRestore = migration19FiredByRestore,
-            onDismiss = { migration19Context = null },
+            onDismiss = {
+                migration19Context = null
+                // Wizard just closed — probe for orphans left behind by
+                // any earlier buggy cleanup pass.
+                coroutineScope.launch { runOrphanProbe() }
+            },
+        )
+    }
+
+    orphanRescueItems?.takeIf { it.isNotEmpty() }?.let { items ->
+        OrphanRescueDialog(
+            initialItems = items,
+            candidates = orphanRescueIssuers,
+            onAssign = { item, companyId ->
+                clientOrIssuerDataSource.assignDocToCompany(item.type, item.id, companyId)
+            },
+            onAllResolved = { orphanRescueItems = null },
         )
     }
 
