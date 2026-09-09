@@ -16,6 +16,17 @@ CREATE TABLE ClientOrIssuer (
   version INTEGER DEFAULT 1,
   vat_exempt INTEGER DEFAULT 0,
   intra_eu_sales INTEGER DEFAULT 0,
+  -- Self-FK to a ClientOrIssuer type='issuer'. On a 'client' row: the master
+  -- issuer/entreprise this client is attached to. On an 'issuer' row: stays
+  -- NULL. Seeded by migration 7.sqm and by the client-side create path.
+  company_id INTEGER,
+  -- 'PROFESSIONAL' / 'INDIVIDUAL' / NULL. B2B vs B2C — gates the Factur-X
+  -- export (PROFESSIONAL → structured invoice, INDIVIDUAL → plain PDF).
+  -- Auto-set to PROFESSIONAL the first time a SIREN is entered.
+  client_type TEXT,
+  -- Master switch on the issuer that gates tax-withholding (retention) lines
+  -- auto-seeded on new documents (invoice + credit note). Mirrored on
+  -- DocumentClientOrIssuer for doc-side snapshot (same pattern as vat_exempt).
   tax_withholding_enabled INTEGER NOT NULL DEFAULT 0,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -53,8 +64,8 @@ FROM ClientOrIssuer
 WHERE instr(name, :name);
 
 save:
-INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, tax_withholding_enabled)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO ClientOrIssuer (id, type, first_name, name, phone, email, notes, company_id1_label, company_id1_number, company_id2_label, company_id2_number, company_id3_label, company_id3_number, logo_path, vat_exempt, intra_eu_sales, company_id, client_type, tax_withholding_enabled)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE ClientOrIssuer
@@ -73,6 +84,7 @@ SET type = :type,
     logo_path = :logo_path,
     vat_exempt = :vat_exempt,
     intra_eu_sales = :intra_eu_sales,
+    client_type = :client_type,
     tax_withholding_enabled = :tax_withholding_enabled,
     version = COALESCE(version, 0) + 1,
     updated_at = datetime('now', 'localtime')
@@ -81,6 +93,15 @@ WHERE
 
 delete:
 DELETE FROM ClientOrIssuer
+WHERE id = :id;
+
+-- 1.9 migration wizard: bulk-move a client (or set of clients) under a
+-- specific issuer/company. Bumps updated_at but NOT version — this is a
+-- one-shot bookkeeping move, not a user edit.
+updateCompanyId:
+UPDATE ClientOrIssuer
+SET company_id = :company_id,
+    updated_at = datetime('now', 'localtime')
 WHERE id = :id;
 
 getLastInsertedRowId:
@@ -113,3 +134,112 @@ FROM ClientOrIssuer
 WHERE type = 'issuer'
 ORDER BY id DESC
 LIMIT 1;
+
+-- Multi-entreprise (étape 2). Liste des entreprises pour peupler le menu
+-- « Mon entreprise ». Ordre : la dernière touchée en premier (mêmes
+-- sémantiques que getLastIssuer, mais toute la liste).
+getAllIssuers:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = 'issuer'
+ORDER BY updated_at DESC;
+
+-- Clients rattachés à une entreprise donnée. Utilisé par la liste Clients
+-- une fois filtrée par current_company_id.
+getAllClientsForCompany:
+SELECT *
+FROM ClientOrIssuer
+WHERE type = 'client' AND company_id = :company_id
+ORDER BY updated_at DESC;
+
+-- Compte le nombre total de documents (invoice + delivery note + credit
+-- note + quote) rattachés à une entreprise. Sert le check "impossible de
+-- supprimer votre entreprise avec des documents associés".
+countDocumentsForCompany:
+SELECT (
+  (SELECT COUNT(*) FROM Invoice WHERE original_company_id = :company_id) +
+  (SELECT COUNT(*) FROM DeliveryNote WHERE original_company_id = :company_id) +
+  (SELECT COUNT(*) FROM CreditNote WHERE original_company_id = :company_id) +
+  (SELECT COUNT(*) FROM Quote WHERE original_company_id = :company_id)
+) AS total_count;
+
+-- Clients rattachés à une entreprise. Même usage que countDocumentsForCompany
+-- côté check pré-suppression.
+countClientsForCompany:
+SELECT COUNT(*) FROM ClientOrIssuer WHERE type = 'client' AND company_id = :company_id;
+
+-- Multi-entreprise. Réaffecte tous les documents d'une entreprise vers une
+-- autre en ne touchant qu'à original_company_id : le snapshot figé côté doc
+-- (DocumentClientOrIssuer + adresses + emails) reste intact, donc le PDF
+-- généré conserve exactement les coordonnées de l'entreprise émettrice
+-- d'origine. Seuls le filtrage par entreprise courante et la numérotation
+-- basculent sur la nouvelle. Utilisé quand l'user supprime une entreprise
+-- ayant émis des documents dans le wizard de cleanup 1.9.
+reassignInvoicesToCompany:
+UPDATE Invoice SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+reassignDeliveryNotesToCompany:
+UPDATE DeliveryNote SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+reassignCreditNotesToCompany:
+UPDATE CreditNote SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+reassignQuotesToCompany:
+UPDATE Quote SET original_company_id = :to_company_id WHERE original_company_id = :from_company_id;
+
+-- Orphan rescue (safety net for the 1.9 migration bug, where deleting an
+-- issuer in the cleanup wizard left its docs pointing at a company_id that
+-- no longer exists). Orphan = doc whose original_company_id is NULL or
+-- references a ClientOrIssuer row that got deleted / never existed. The
+-- launch-time check counts them across the 4 doc tables in one round-trip;
+-- the per-table id queries feed the rescue dialog.
+countOrphanDocs:
+SELECT (
+  (SELECT COUNT(*) FROM Invoice
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer')) +
+  (SELECT COUNT(*) FROM DeliveryNote
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer')) +
+  (SELECT COUNT(*) FROM CreditNote
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer')) +
+  (SELECT COUNT(*) FROM Quote
+     WHERE original_company_id IS NULL
+        OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer'))
+) AS total_count;
+
+getOrphanInvoiceIds:
+SELECT invoice_id FROM Invoice
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+getOrphanDeliveryNoteIds:
+SELECT delivery_note_id FROM DeliveryNote
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+getOrphanCreditNoteIds:
+SELECT credit_note_id FROM CreditNote
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+getOrphanQuoteIds:
+SELECT quote_id FROM Quote
+WHERE original_company_id IS NULL
+   OR original_company_id NOT IN (SELECT id FROM ClientOrIssuer WHERE type = 'issuer');
+
+-- Single-doc reassignment counterparts of reassign*ToCompany. Same
+-- semantic: rewrite only original_company_id, leave DocumentClientOrIssuer
+-- alone so the PDF stays visually identical.
+assignInvoiceToCompany:
+UPDATE Invoice SET original_company_id = :company_id WHERE invoice_id = :invoice_id;
+
+assignDeliveryNoteToCompany:
+UPDATE DeliveryNote SET original_company_id = :company_id WHERE delivery_note_id = :delivery_note_id;
+
+assignCreditNoteToCompany:
+UPDATE CreditNote SET original_company_id = :company_id WHERE credit_note_id = :credit_note_id;
+
+assignQuoteToCompany:
+UPDATE Quote SET original_company_id = :company_id WHERE quote_id = :quote_id;

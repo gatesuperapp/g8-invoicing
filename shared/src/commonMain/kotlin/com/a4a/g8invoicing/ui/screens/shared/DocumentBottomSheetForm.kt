@@ -1,11 +1,19 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.a4a.g8invoicing.ui.theme.AppColors
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -40,8 +48,10 @@ import com.a4a.g8invoicing.shared.resources.document_modal_new_product
 import com.a4a.g8invoicing.shared.resources.document_modal_product_back
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
+import com.a4a.g8invoicing.shared.resources.tax_rate_edit_dialog_title
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
+import com.a4a.g8invoicing.ui.screens.ProductTaxRatesEditContent
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -63,12 +73,14 @@ fun DocumentBottomSheetForm(
     documentIssuerUiState: ClientOrIssuerState = ClientOrIssuerState(),
     documentProduct: DocumentProductState = DocumentProductState(),
     taxRates: List<BigDecimal>? = null,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>> = emptyList(),
     onClickCancel: () -> Unit, // Called when the bottom sheet is fully dismissed by cancel/back
     onClickDone: (syncToMaster: Boolean) -> Unit,   // Called when the main form is submitted
 
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit = {},
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit = {},
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit = { _, _ -> },
     onAddEmail: (ClientOrIssuerType, String) -> Unit = { _, _ -> },
@@ -96,12 +108,19 @@ fun DocumentBottomSheetForm(
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
     // Sync-to-master checkbox lives here so it persists across in-sheet navigations
     // (tax selection, full-screen text) but resets when the sheet mounts a different
-    // client / issuer / product snapshot.
+    // client / issuer / product snapshot. Default ON for client / issuer edits
+    // (matches the expectation that changes flow back to the master fiche);
+    // stays OFF for product edits — a per-doc price/quantity tweak shouldn't
+    // silently overwrite the catalog price by default.
+    val defaultSyncToMaster = typeOfCreation?.toString()?.let { name ->
+        name.contains(ClientOrIssuerType.CLIENT.name) ||
+            name.contains(ClientOrIssuerType.ISSUER.name)
+    } == true
     var syncToMasterChecked by remember(
         documentClientUiState.id,
         documentIssuerUiState.id,
         documentProduct.id,
-    ) { mutableStateOf(false) }
+    ) { mutableStateOf(defaultSyncToMaster) }
     // State to determine if a text field (name or description) should be shown in full screen
     val fullScreenElementToShow: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
     // State to hold the text being edited in the full-screen text editor
@@ -206,25 +225,32 @@ fun DocumentBottomSheetForm(
 
                     // Check if there's a pending email to validate
                     val pendingEmail = pendingEmailState.value.trim()
+                    val clientOrIssuerType = when {
+                        typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> ClientOrIssuerType.DOCUMENT_CLIENT
+                        typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> ClientOrIssuerType.DOCUMENT_ISSUER
+                        else -> null
+                    }
                     if (pendingEmail.isNotEmpty()) {
-                        // Validate the pending email
                         val validationError = FormInputsValidator.validateEmail(pendingEmail)
                         if (validationError != null) {
-                            // Invalid email - show error and don't proceed
+                            // Invalid pending email: show inline red locally
+                            // AND flip _pendingEmailIsValid in the ViewModel so
+                            // the parent NavGraph's validateInputs() picks it
+                            // up on the next call (right after onClickDone),
+                            // which surfaces the pre-save recap modal. We fall
+                            // through instead of returning early so the modal
+                            // fires — validateInputs will refuse the save.
                             emailValidationError = validationError
-                            return@DocumentBottomSheetHeader
+                            clientOrIssuerType?.let { onPendingEmailValidationResult(it, false) }
+                        } else {
+                            // Valid email - add it first
+                            clientOrIssuerType?.let { onAddEmail(it, pendingEmail) }
+                            // Clear the pending email state
+                            pendingEmailState.value = ""
                         }
-                        // Valid email - add it first
-                        val clientOrIssuerType = when {
-                            typeOfCreation.toString().contains(ClientOrIssuerType.CLIENT.name) -> ClientOrIssuerType.DOCUMENT_CLIENT
-                            typeOfCreation.toString().contains(ClientOrIssuerType.ISSUER.name) -> ClientOrIssuerType.DOCUMENT_ISSUER
-                            else -> null
-                        }
-                        clientOrIssuerType?.let { onAddEmail(it, pendingEmail) }
-                        // Clear the pending email state
-                        pendingEmailState.value = ""
                     }
-                    // Proceed with saving
+                    // Proceed with saving (parent NavGraph re-runs validation
+                    // and either saves or shows the FormValidationDialogHost).
                     onClickDone(syncToMasterChecked)
                 }, // Main "Done" action for the form
                 onClickDoneFullScreen = { // "Done" action for the full-screen text editor
@@ -243,6 +269,7 @@ fun DocumentBottomSheetForm(
                 documentIssuerUiState = documentIssuerUiState,
                 documentProduct = documentProduct,
                 taxRates = taxRates,
+                taxRatesWithIds = taxRatesWithIds,
                 isTaxSelectionVisible = isTaxSelectionVisible,
                 fullScreenElementCurrentlyShown = fullScreenElementToShow.value,
                 currentTaxRate = documentProduct.taxRate,
@@ -254,6 +281,7 @@ fun DocumentBottomSheetForm(
                     isTaxSelectionVisible = false // Hide tax selection after selection
                     onSelectTaxRate(selectedRate)
                 },
+                onSaveTaxRates = onSaveTaxRates,
                 onClickDeleteAddress = onClickDeleteAddress,
                 onClickDeleteEmail = onClickDeleteEmail,
                 onAddEmail = onAddEmail,
@@ -354,11 +382,12 @@ private fun DocumentBottomSheetHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                top = 50.dp, // Increased to avoid camera notch
-                end = 30.dp,
-                start = 30.dp
-            )
+            // Header spacing kept in sync with DocumentBottomSheetFormSimple
+            // (VAT-exemption / footer-editor sheets): shallower top, and
+            // Cancel/Save carry top=32 so they sit BELOW the title, not on
+            // its baseline. Prior top=50 came from a camera-notch worry that
+            // never materialised (ModalBottomSheet already inset-guards).
+            .padding(top = 30.dp, end = 30.dp, start = 30.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             // Cancel or Back button
@@ -366,7 +395,7 @@ private fun DocumentBottomSheetHeader(
                 style = MaterialTheme.typography.textCta,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(top = 20.dp) // Consistent padding
+                    .padding(top = 32.dp)
                     .clickable { onClickCancelOrBack() },
                 text = if (!isTaxSelectionVisible && fullScreenElementCurrentlyShown == null) {
                     cancelText
@@ -399,7 +428,7 @@ private fun DocumentBottomSheetHeader(
                 style = if (isDoneButtonEnabled) MaterialTheme.typography.textCta
                 else MaterialTheme.typography.textCtaDisabled,
                 modifier = Modifier
-                    .padding(top = 20.dp, bottom = 20.dp) // Consistent padding
+                    .padding(top = 32.dp, bottom = 20.dp)
                     .align(Alignment.TopEnd)
                     .clickable(enabled = isDoneButtonEnabled) {
                         if (fullScreenElementCurrentlyShown != null) {
@@ -429,6 +458,7 @@ private fun DocumentBottomSheetContent(
     documentIssuerUiState: ClientOrIssuerState,
     documentProduct: DocumentProductState,
     taxRates: List<BigDecimal>?,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>>,
     isTaxSelectionVisible: Boolean,
     fullScreenElementCurrentlyShown: ScreenElement?,
     currentTaxRate: BigDecimal?,
@@ -437,6 +467,7 @@ private fun DocumentBottomSheetContent(
     bottomFormOnValueChange: (ScreenElement, Any, ClientOrIssuerType?) -> Unit,
     bottomFormPlaceCursor: (ScreenElement, ClientOrIssuerType?) -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
     onClickDeleteEmail: (ClientOrIssuerType, Int) -> Unit,
     onAddEmail: (ClientOrIssuerType, String) -> Unit,
@@ -519,8 +550,10 @@ private fun DocumentBottomSheetContent(
                 // If tax selection is active, it takes precedence
                 DocumentBottomSheetTaxSelection(
                     taxRates = taxRates,
+                    taxRatesWithIds = taxRatesWithIds,
                     currentTaxRate = currentTaxRate,
-                    onSelectTaxRate = onSelectTaxRate
+                    onSelectTaxRate = onSelectTaxRate,
+                    onSaveTaxRates = onSaveTaxRates,
                 )
             } else if (fullScreenElementCurrentlyShown != null) {
                 // If not in tax selection, but in full-screen text mode
@@ -562,17 +595,92 @@ private fun DocumentBottomSheetContent(
 
 /**
  * Composable for the tax selection part of the bottom sheet.
+ *
+ * The settings-icon → edit-rates flow re-uses the same content composable as
+ * the full-screen Products>VAT screen, wrapped in a nested [ModalBottomSheet]
+ * that stacks over the current bottom sheet. Nested sheet keeps the visual
+ * language consistent with every other doc-scoped modal (client picker,
+ * font picker, payment-means picker) — an AlertDialog would break that pill
+ * consistency and forfeit the touch affordance for edge-swipe dismiss.
  */
 @Composable
 fun DocumentBottomSheetTaxSelection(
     taxRates: List<BigDecimal>?,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>>,
     currentTaxRate: BigDecimal?,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit,
 ) {
-    ProductTaxRatesContent( // Assuming this composable displays the list of tax rates
+    var showEditSheet by remember { mutableStateOf(false) }
+
+    ProductTaxRatesContent(
         taxRates = taxRates,
         currentTaxRate = currentTaxRate,
-        onSelectTaxRate = onSelectTaxRate, // Ensure prop name matches if different in ProductTaxRatesContent
-        isDisplayedInBottomSheet = true // Or any other relevant prop for styling/layout
+        onSelectTaxRate = onSelectTaxRate,
+        isDisplayedInBottomSheet = true,
+        onClickEditRates = { showEditSheet = true },
+    )
+
+    if (showEditSheet) {
+        TaxRateEditSheet(
+            taxRatesWithIds = taxRatesWithIds,
+            onDismiss = { showEditSheet = false },
+            onSave = { edited ->
+                onSaveTaxRates(edited)
+                showEditSheet = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun TaxRateEditSheet(
+    taxRatesWithIds: List<Pair<Long, BigDecimal>>,
+    onDismiss: () -> Unit,
+    onSave: (List<Pair<Long?, BigDecimal>>) -> Unit,
+) {
+    var editingRates by remember(taxRatesWithIds) {
+        mutableStateOf(taxRatesWithIds.map { Pair(it.first as Long?, it.second) })
+    }
+    DocumentBottomSheetFormSimple(
+        onClickCancel = onDismiss,
+        onClickDone = {
+            // Match ProductTaxRates screen: silently drop empty/zero rows.
+            onSave(editingRates.filter { it.second.signum() != 0 })
+        },
+        bottomSheetTitle = stringResource(Res.string.tax_rate_edit_dialog_title),
+        screenElement = ScreenElement.DOCUMENT_PRODUCT_TAX_RATE,
+        content = {
+            // Grey rail behind the white rate blocks, mirroring the
+            // Products>VAT full-screen edit view. Bottom padding (50) gives
+            // the sheet visual room to breathe below the last row.
+            // windowInsetsPadding(ime) pushes the currently-focused rate
+            // row above the keyboard without shifting the sheet.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AppColors.divider)
+                    .windowInsetsPadding(WindowInsets.ime)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 100.dp),
+            ) {
+                ProductTaxRatesEditContent(
+                    taxRates = editingRates,
+                    onUpdateRate = { index, newRate ->
+                        editingRates = editingRates.toMutableList().apply {
+                            this[index] = Pair(this[index].first, newRate)
+                        }
+                    },
+                    onAddRate = {
+                        editingRates = editingRates + Pair(null, BigDecimal.ZERO)
+                    },
+                    onDeleteRate = { index ->
+                        editingRates = editingRates.toMutableList().apply {
+                            removeAt(index)
+                        }
+                    },
+                )
+            }
+        },
     )
 }

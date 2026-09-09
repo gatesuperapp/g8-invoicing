@@ -38,3 +38,13 @@ actual fun setAppLocale(languageCode: String?) {
 actual fun getSystemLocaleCode(): String = java.util.Locale.getDefault().language.ifEmpty { "en" }
 
 actual fun getSystemCountryCode(): String = java.util.Locale.getDefault().country.uppercase()
+
+actual fun getLocalizedCountryName(code: String, languageCode: String): String? {
+    // java.util.Locale(country=code) → getDisplayCountry(targetLocale) → the
+    // country name rendered in that language. Returns "" (not null) for
+    // codes the platform doesn't know; normalise to null so the caller can
+    // fall back to its curated map.
+    val target = java.util.Locale.forLanguageTag(languageCode.ifBlank { "en" })
+    val name = java.util.Locale("", code.uppercase()).getDisplayCountry(target)
+    return name.takeIf { it.isNotBlank() && !it.equals(code, ignoreCase = true) }
+}

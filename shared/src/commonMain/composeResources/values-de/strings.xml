@@ -9,7 +9,20 @@
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Kopie</string>
     <!-- Document footer -->
-    <string name="document_default_footer">Skonto bei Vorauszahlung: kein \nVerzugsgebühr bei Zahlungsverzug: keine\n\n\n IBAN: DE71 1234 1234 1234 1234 00</string>
+    <string name="document_default_footer"></string>
+    <string name="document_default_payment_terms">Bei Zahlungsverzug werden Verzugszinsen zum gesetzlichen Zinssatz sowie eine pauschale Entschädigung von 40 € erhoben. Kein Skonto bei Vorauszahlung.</string>
+    <string name="document_payment_terms">Zahlungsbedingungen</string>
+    <string name="payment_terms_recovery_fees_label">Beitreibungskosten</string>
+    <string name="payment_terms_late_fees_label">Verzugszinsen</string>
+    <string name="payment_terms_discount_label">Skonto</string>
+    <string name="payment_terms_recovery_fees_default">Pauschale Entschädigung für Beitreibungskosten von 40 €.</string>
+    <string name="payment_terms_late_fees_default">Bei Zahlungsverzug werden Verzugszinsen zum EZB-Refinanzierungssatz zuzüglich 10 Punkten erhoben.</string>
+    <string name="payment_terms_discount_default">Kein Skonto bei Vorauszahlung.</string>
+    <string name="document_payment_means_default_label">Akzeptierte Zahlungsmittel:</string>
+    <string name="document_payment_means_hide_list_a11y">Zahlungsmittel-Liste ausblenden</string>
+    <string name="document_payment_means_show_list_a11y">Zahlungsmittel-Liste anzeigen</string>
+    <string name="document_payment_means_show_switch">Akzeptierte Zahlungsmittel auf dem Dokument anzeigen</string>
+    <string name="document_payment_means_edit_prefix">Text bearbeiten</string>
     <!-- Document labels -->
     <string name="invoice_number">Rechnung Nr.</string>
     <string name="delivery_note_number">Lieferschein Nr.</string>
@@ -21,6 +34,7 @@
     <string name="document_reference_label">Referenz: </string>
     <string name="addressed_to">Adressiert an</string>
     <string name="invoice_pdf_due_date">Fällig am </string>
+    <string name="document_payment_section_title">Zahlung</string>
     <string name="invoice_paid">Bezahlt ✔</string>
     <string name="pdf_currency_notice">Währung: %1$s</string>
 
@@ -44,9 +58,9 @@
     <string name="product_price_without_tax">Netto</string>
     <string name="product_price_with_tax">Brutto</string>
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">Bist du sicher? \n\nWenn du die Rechnung bereits verschickt hast, ist es illegal sie zu löschen:</string>
-    <string name="alert_dialog_delete_invoice_2">Mehr erfahren\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_invoice_1">Bist du sicher? \n\nIn einigen Ländern ist es nicht legal, eine bereits versendete Rechnung zu löschen.\n\nIn jedem Fall kann die Löschung nicht rückgängig gemacht werden.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/supprimer-ou-annuler-une-facture</string>
     <string name="alert_dialog_delete_general">Sind Sie sicher? Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="alert_dialog_delete_confirm">Ja, löschen</string>
@@ -59,8 +73,7 @@
     <string name="document_bottom_sheet_picker_empty_product">Keine Produkte gefunden.\nTippe auf +, um eines hinzuzufügen.</string>
     <string name="document_bottom_sheet_picker_recent">Zuletzt verwendet</string>
     <string name="document_bottom_sheet_picker_edit_link">Bearbeiten</string>
-    <string name="document_form_sync_client_to_master">Änderungen auch auf die Kundenkarte anwenden</string>
-    <string name="document_form_sync_issuer_to_master">Änderungen auch auf die Erstellerkarte anwenden</string>
+    <string name="document_form_sync_to_master">Änderungen auf die Firmenkarte anwenden</string>
     <string name="document_form_sync_product_to_master">Änderungen auch auf die Produktkarte anwenden</string>
     <string name="document_bottom_sheet_picker_title_client">Kunden</string>
     <string name="document_bottom_sheet_picker_title_issuer">Ersteller</string>
@@ -84,6 +97,17 @@
     <string name="document_issuer">Ersteller</string>
     <string name="document_client">Kunde</string>
     <string name="document_free_field">Freies Feld</string>
+    <string name="document_payment_means">Zahlungsmittel</string>
+    <string name="document_payment_means_picker_title">Zahlungsmittel</string>
+    <string name="pdf_payment_means_prefix">Akzeptierte Zahlungsmittel:</string>
+    <string name="payment_means_30">Überweisung</string>
+    <string name="payment_means_42">Scheck</string>
+    <string name="payment_means_48">Karte</string>
+    <string name="payment_means_58">SEPA</string>
+    <string name="payment_means_10">Bargeld</string>
+    <string name="payment_means_paypal">PayPal</string>
+    <string name="payment_means_stripe">Stripe</string>
+    <string name="payment_means_other">Andere</string>
     <string name="document_footer">Fußzeile</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Ausgestellt zu Rechnung %1$s</string>
@@ -112,6 +136,7 @@
     <string name="product_tax">MwSt.</string>
     <string name="tax_rate_screen_title">MwSt.-Satz</string>
     <string name="tax_rate_add_rate">+ Satz hinzufügen</string>
+    <string name="tax_rate_edit_dialog_title">MwSt.-Satz bearbeiten</string>
     <string name="product_price">Preis</string>
     <string name="product_price_input">3</string>
     <string name="product_price_default">Standard-Preis</string>
@@ -162,8 +187,25 @@
     <string name="issuer_logo_remove">Logo entfernen</string>
     <string name="issuer_logo_error_title">Fehler</string>
     <string name="issuer_logo_error_dismiss">OK</string>
-    <string name="client_add_address">'+ Adresse hinzufügen'</string>
+    <string name="client_add_address">+ Adresse hinzufügen</string>
     <string name="client_delete_address">Adresse löschen</string>
+    <string name="client_or_issuer_section_addresses">Adresse</string>
+    <string name="client_or_issuer_section_identification">Identifikation</string>
+    <string name="client_or_issuer_section_bank">Bankverbindung</string>
+    <string name="client_or_issuer_section_notes">Notizen</string>
+    <string name="client_or_issuer_section_backup">Sicherung</string>
+    <string name="issuer_bank_add">+ Konto hinzufügen</string>
+    <string name="issuer_bank_label">Bezeichnung</string>
+    <string name="issuer_bank_label_input">Geschäftskonto</string>
+    <string name="issuer_bank_delete_a11y">Dieses Bankkonto löschen</string>
+    <string name="issuer_bank_country">Land</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">Kontonr.</string>
+    <string name="document_payment_bank_show_switch">Bankverbindung des Unternehmens anzeigen</string>
+    <string name="document_payment_bank_edit_prefix">Text bearbeiten</string>
+    <string name="document_payment_bank_picker_title">Bankverbindung</string>
+    <string name="document_payment_bank_iban_empty">Fügen Sie Ihrem Unternehmen ein Bankkonto hinzu</string>
+    <string name="document_payment_bank_iban_empty_no_issuer">Fügen Sie Ihrer Rechnung einen Aussteller hinzu</string>
     <string name="client_selection_title">Kunden auswählen</string>
     <string name="client_selection_empty">Sie haben noch keine Kunden erstellt. Dies können Sie in der Kategorie "Kunden" tun.</string>
     <string name="client_selection_all_used">Alle Kunden sind bereits anderen Preisen zugeordnet.</string>
@@ -242,6 +284,23 @@
     <!-- Drawer / Categories -->
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mein Konto</string>
+    <string name="drawer_my_company">Mein Unternehmen</string>
+
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">Willkommen bei 𝕘𝟠 aka The Gate!</string>
+    <string name="first_launch_welcome_amigo">Ich bin Little Rhino, dein neuer Amigo ♡</string>
+    <string name="first_launch_next">Weiter</string>
+    <string name="first_launch_liberty_body1">Ich helfe dir, alles vom Handy aus zu verwalten: Rechnungen, Lieferscheine, Kunden, Produkte…</string>
+    <string name="first_launch_liberty_body2">Die App funktioniert offline, das Konto ist optional und deine Daten werden nicht an Dritte weitergegeben ♡</string>
+    <string name="first_launch_gstore_intro">Bestimmte Funktionen aktivierst du bei Bedarf im 𝕘Store-Tab: Angebote, Lieferscheine, Export in E-Invoicing-Formaten und mehr.</string>
+    <string name="first_launch_gstore_premium">Einige Module sind Premium-Mitgliedern vorbehalten 🌟. Du kannst auf der g8-Website Premium-Mitglied werden.</string>
+    <string name="first_launch_settings_intro">Bevor ich dir das Feld überlasse, brauche ich 2 Angaben, um die Oberfläche einzurichten:</string>
+    <string name="first_launch_settings_name_label">Name deines Unternehmens</string>
+    <string name="first_launch_settings_country_label">Land</string>
+    <string name="first_launch_settings_cta">Los geht's</string>
+    <string name="first_launch_issuer_placeholder">Name des Unternehmens</string>
+    <string name="first_launch_issuer_skip">Später</string>
+    <string name="first_launch_issuer_default_name">Mein Unternehmen</string>
     <!-- Account Screen -->
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich (https://play.google.com/store/apps/details?id=com.a4a.g8invoicing) sowie auf F-Droid: https://f-droid.org/de/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -265,11 +324,9 @@
     <string name="gstore_footer_premium">Verwalten Sie Ihr Konto auf </string>
     <string name="gstore_module_orders_title">Bestellungen</string>
     <string name="gstore_module_orders_desc">Verwalten Sie die Bestellungen Ihrer Kunden</string>
-    <string name="gstore_module_facturx_title">Factur-X</string>
-    <string name="gstore_module_facturx_desc">Elektronische Rechnungsstellung</string>
     <string name="gstore_module_watermark_title">g8-Hinweis</string>
     <string name="gstore_module_watermark_desc">Entfernen Sie den g8-Hinweis aus Ihren Dokumenten</string>
-    <string name="gstore_module_watermark_detail">Aktivieren Sie dieses Modul, um den Hinweis „Erstellt mit g8, mobile Rechnungs-App" aus Ihren Rechnungen, Lieferscheinen und Gutschriften zu entfernen.</string>
+    <string name="gstore_module_watermark_detail">Aktiviere dieses Modul, um das Wasserzeichen „Erstellt mit g8, mobile Rechnungs-App" aus deinen Dokumenten zu entfernen.</string>
     <string name="invoice_watermark_default">Erstellt mit g8 (www.the-gate.fr), mobile Rechnungs-App</string>
     <string name="gstore_module_payments_title">Zahlungen</string>
     <string name="gstore_module_payments_desc">Erfassen Sie Karten-, Scheck- und Barzahlungen</string>
@@ -281,10 +338,18 @@
     <string name="account_renewal_date">Verlängert am %1$s</string>
     <string name="account_cancellation_date">Gekündigt — endet am %1$s</string>
     <string name="account_manage_subscription">Abonnement verwalten</string>
+    <string name="account_status_payment_failed_title">Zahlung fehlgeschlagen</string>
+    <string name="account_status_payment_failed_body">Wir konnten deine Karte nicht belasten. Aktualisiere deine Zahlungsmethode, um deine Premium-Funktionen zu behalten.</string>
+    <string name="account_status_canceled_title">Abonnement beendet</string>
+    <string name="account_status_canceled_body">Dein Premium-Abo ist beendet. Verwalte dein Abo, um wieder Zugriff auf die Premium-Funktionen zu erhalten.</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">Meine Unternehmen</string>
     <string name="account_add_company">+ Unternehmen hinzufügen</string>
+    <string name="account_manage_companies">Meine Unternehmen verwalten</string>
+    <string name="account_manage_company">Mein Unternehmen verwalten</string>
+    <string name="client_type_individual">Privatperson</string>
+    <string name="client_type_professional">Geschäftskunde</string>
     <string name="account_section_advanced">Erweitert</string>
     <string name="account_delete_cta">Mein Konto löschen</string>
     <string name="account_delete_dialog_title">Konto endgültig löschen?</string>
@@ -302,9 +367,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr/en</string>
     <string name="about_website_tail">!</string>
-    <string name="about_title_community">Community</string>
-    <string name="about_community_text">Kommt vorbei, um eure Wünsche und Ideen zu besprechen und sich über</string>
-    <string name="about_community_cta">das Forum der Community auszutauschen.</string>
+    <string name="about_title_community">Neuigkeiten</string>
+    <string name="about_community_text">Entdecke die Neuerungen jeder Version sowie Produkt-News im</string>
+    <string name="about_community_cta">g8-Forum.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Hilfe</string>
     <string name="about_assistance_intro">Du kannst uns jederzeit schreiben, um einen Fehler zu melden, eine Funktion vorzuschlagen oder um Hilfe zu bitten.</string>
@@ -319,7 +384,7 @@
     <string name="about_title_backup">Datensicherung</string>
     <string name="about_backup_text">Denkt daran eure Datenbank regelmäßig herunterzuladen, um sie wiederherzustellen, sollte das Telefon mal verloren gegangen sein.</string>
     <string name="about_download_database">💎 Speichern 💎</string>
-    <string name="account_backup_dialog_title">Sicherung heruntergeladen</string>
+    <string name="account_backup_dialog_title">✅ Sicherung heruntergeladen</string>
     <string name="account_backup_dialog_message">Ihre Datenbank wurde im Downloads-Ordner gespeichert. Möchten Sie sie auch per E-Mail senden?</string>
     <string name="account_backup_dialog_yes">Ja, per E-Mail senden</string>
     <string name="account_backup_dialog_no">Nein, das war's</string>
@@ -336,6 +401,10 @@
     <string name="account_legal_privacy_label">Datenschutzerklärung</string>
     <string name="about_share_text_2">Teilen Sie sie mit Ihren Freund:innen!</string>
     <string name="about_share_button">Teilen</string>
+    <string name="about_title_licenses">Lizenzen</string>
+    <string name="about_licenses_code_line">Der Quellcode der App steht unter der Lizenz GPL-3.0.</string>
+    <string name="about_licenses_code_url">https://github.com/gatesuperapp/g8-invoicing</string>
+    <string name="about_licenses_ofl_heading">SIL Open Font License 1.1</string>
     <string name="about_title_version">Version der App</string>
     <!-- Language Selection -->
     <string name="about_title_language">Sprache</string>
@@ -359,8 +428,10 @@
     <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡ \n\n …</string>
-    <string name="invoice_advice_legal_2">Du bist gerade in der Kategorie Rechnungen.\n\n Bevor du eine Rechnung erstellst empfehle ich dir, dich über …</string>
+    <string name="invoice_advice_legal_1">Tippe auf «Menü» &gt; gStore, um die gewünschten Funktionen zu aktivieren. Tippe auf «Erstellen», um deine erste Rechnung anzulegen…</string>
+    <string name="invoice_advice_legal_2">Alle Dokumente, die du erstellst, werden automatisch im Hintergrund gespeichert. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="onboarding_intro_amigo">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡</string>
+
     <string name="invoice_advice_legal_3">die Pflichtangaben für eine gesetzeskonforme Rechnung zu informieren. Um dir das Leben zu erleichtern, habe ich hier alles zusammengefasst: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5">Zu einem anderen Thema… \n …</string>
@@ -434,14 +505,14 @@ Es ist ein Fehler aufgetreten :
     <string name="database_email_chooser">Datenbank per E-Mail senden</string>
 
     <!-- gStore Quote (unlimited + trial) -->
-    <string name="gstore_module_quote_title">Unbegrenzte Kostenvoranschläge</string>
-    <string name="gstore_module_quote_desc">Kostenvoranschläge erstellen und in Rechnungen umwandeln</string>
-    <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Kostenvoranschläge zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Kostenvoranschlagsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
-    <string name="gstore_module_quote_trial_title">Kostenvoranschläge entdecken</string>
-    <string name="gstore_module_quote_trial_desc">5 kostenlose Kostenvoranschläge</string>
-    <string name="gstore_module_quote_trial_detail">Wenn du dieses Modul aktivierst, erhältst du 5 kostenlose Kostenvoranschläge, um die Funktion auszuprobieren und zu sehen, ob sie dir zusagt. Danach musst du Premium-Mitglied werden, um unbegrenzt Kostenvoranschläge zu haben.</string>
+    <string name="gstore_module_quote_title">Unbegrenzte Angebote</string>
+    <string name="gstore_module_quote_desc">Angebote erstellen und in Rechnungen umwandeln</string>
+    <string name="gstore_module_quote_detail">Aktiviere dieses Modul, um Angebote zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln.\n\nDie Angebotsnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.</string>
+    <string name="gstore_module_quote_trial_title">Angebote entdecken</string>
+    <string name="gstore_module_quote_trial_desc">5 kostenlose Angebote</string>
+    <string name="gstore_module_quote_trial_detail">Wenn du dieses Modul aktivierst, erhältst du 5 kostenlose Angebote, um die Funktion auszuprobieren und zu sehen, ob sie dir zusagt. Danach musst du Premium-Mitglied werden, um unbegrenzt Angebote zu haben.</string>
     <string name="gstore_quote_trial_exhausted_title">Gratis-Kontingent aufgebraucht</string>
-    <string name="gstore_quote_trial_exhausted_body">Deine 5 kostenlosen Kostenvoranschläge sind aufgebraucht. Wenn du weiterhin Kostenvoranschläge nutzen möchtest, kannst du Premium-Mitglied werden.</string>
+    <string name="gstore_quote_trial_exhausted_body">Deine 5 kostenlosen Angebote sind aufgebraucht. Wenn du weiterhin Angebote nutzen möchtest, kannst du Premium-Mitglied werden.</string>
     <string name="gstore_quote_trial_exhausted_cta">OK</string>
 
     <!-- Onboarding 1.8 -->
@@ -453,10 +524,10 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_welcome_body">Willkommen bei Version\n1.8 - Rosa Canina</string>
     <string name="onboarding_welcome_cta">Entdecken</string>
 
-    <string name="onboarding_devis_title">Kostenvoranschläge</string>
-    <string name="onboarding_devis_body_bold">Kostenvoranschläge sind jetzt verfügbar</string>
-    <string name="onboarding_devis_body_after_bold"> 🥳\n\nUnd du kannst sie in Rechnungen umwandeln.\n\nDu kannst die Funktion ausprobieren (max. 5 Kostenvoranschläge) und danach Premium-Mitglied werden für unbegrenzte Kostenvoranschläge!</string>
-    <string name="onboarding_devis_cta_activate">Kostenvoranschläge aktivieren</string>
+    <string name="onboarding_devis_title">Angebote</string>
+    <string name="onboarding_devis_body_bold">Angebote sind jetzt verfügbar</string>
+    <string name="onboarding_devis_body_after_bold"> 🥳\n\nUnd du kannst sie in Rechnungen umwandeln.\n\nDu kannst die Funktion ausprobieren (max. 5 Angebote) und danach Premium-Mitglied werden für unbegrenzte Angebote!</string>
+    <string name="onboarding_devis_cta_activate">Angebote aktivieren</string>
     <string name="onboarding_devis_cta_later_gstore">Später im gStore</string>
     <string name="onboarding_devis_cta_no_devis">Cool, aber brauche ich nicht!</string>
 
@@ -560,18 +631,69 @@ Es ist ein Fehler aufgetreten :
     <string name="retention_show_a11y">Auf PDF anzeigen</string>
 
     <!-- Quote (Devis) -->
-    <string name="appbar_quotes">Kostenvoranschläge</string>
-    <string name="quote_number">Kostenvoranschlag Nr.</string>
+    <string name="appbar_quotes">Angebote</string>
+    <string name="quote_number">Angebot Nr.</string>
     <string name="quote_default_number">AN001</string>
     <string name="quote_default_footer">Gültigkeitsdauer des Angebots: 6 Monate\nAusführungsfrist: 6 Monate</string>
     <string name="quote_advice_convert">Diesen Move habe ich beim Hip-Hop gelernt, ziemlich stylisch, ich weiß. Muss ihn noch üben, ich bin noch nicht so schnell, mein Patagium bremst die Welle wohl ein wenig. Jedenfalls wollte ich dir sagen\n\n …   </string>
-    <string name="quote_advice_convert1">wenn du einen oder mehrere Kostenvoranschläge in eine Rechnung umwandeln möchtest, kannst du sie in der Liste per Lang-Tap auswählen (oder das ○ antippen)\n\n …   </string>
+    <string name="quote_advice_convert1">wenn du ein oder mehrere Angebote in eine Rechnung umwandeln möchtest, kannst du sie in der Liste per Lang-Tap auswählen (oder das ○ antippen)\n\n …   </string>
     <string name="quote_advice_convert2">und dann auf «In Rechnung» tippen. Sie erscheint oben im Reiter «Rechnungen» mit der fortlaufenden Nummer nach der vorherigen Rechnung.\n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
     <!-- gStore delivery-note module -->
     <string name="gstore_module_delivery_note_title">Lieferscheine</string>
     <string name="gstore_module_delivery_note_desc">Lieferscheine erstellen und in Rechnungen umwandeln</string>
-    <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln. Die Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit. Du kannst mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
+    <string name="gstore_module_delivery_note_detail">Aktiviere dieses Modul, um Lieferscheine zu erstellen, sie an deine Kund·innen zu senden und sie nach der Annahme in eine Rechnung umzuwandeln.\n\nDie Lieferscheinnummer erscheint auf der entsprechenden Rechnung für die buchhalterische Nachverfolgbarkeit.\n\nDu kannst einen Lieferschein in eine Rechnung umwandeln und mehrere Lieferscheine zu einer einzigen Rechnung zusammenfassen.</string>
+    <string name="gstore_module_multi_entreprise_title">Mehrere Unternehmen</string>
+    <string name="gstore_module_multi_entreprise_desc">Mehrere Unternehmen verwalten</string>
+    <string name="gstore_module_multi_entreprise_detail">Aktiviere dieses Modul, wenn du unter mehreren Unternehmen abrechnest (verschiedene Handelsregisternummern, getrennte Tätigkeiten…).\n\nDu kannst weitere Unternehmen unter „Mein Konto" hinzufügen und im Menü zwischen ihnen wechseln.\n\nDeine Kunden, Produkte, Nummernkreise und Bankdaten werden pro Unternehmen getrennt geführt.</string>
+    <string name="gstore_module_cii_title">CII-XML-Export</string>
+    <string name="gstore_module_cii_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
+    <string name="gstore_module_cii_detail">Aktiviere dieses Modul, um deine Rechnungen im Format Cross Industry Invoice (CII) zu exportieren — einer international anerkannten Norm für elektronische Rechnungen.\n\nDie XML-Daten sind für Software lesbar, insbesondere für E-Invoicing-Plattformen.\n\nIm Unterschied zu ZUGFeRD enthält CII kein PDF.</string>
+    <string name="gstore_module_facturx_title">ZUGFeRD-Export</string>
+    <string name="gstore_module_facturx_desc">Daten in einem Standard-E-Invoicing-Format exportieren</string>
+    <string name="gstore_module_facturx_detail">Aktiviere dieses Modul, um deine Rechnungen im Format ZUGFeRD zu exportieren — einer deutsch-französischen Norm für elektronische Rechnungen.\n\nDie erzeugte Datei ist ein gewöhnliches PDF mit einer maschinenlesbaren XML-Datei daneben.\n\nNützlich, um Rechnungen an E-Invoicing-Plattformen zu übermitteln und gleichzeitig ein lesbares PDF für den Kunden bereitzustellen.</string>
+    <string name="export_cii_button">Als CII exportieren</string>
+    <string name="export_chooser_title">Exportformat</string>
+    <string name="export_chooser_description">Für ein E-Invoicing-kompatibles Format CII oder ZUGFeRD verwenden.</string>
+    <string name="export_chooser_pdf">PDF</string>
+    <string name="export_chooser_cii">CII XML</string>
+    <string name="export_chooser_facturx">ZUGFeRD</string>
+    <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
+    <string name="export_vat_exempt_conflict_message">Dein Unternehmen nutzt die Kleinunternehmerregelung, aber einige Produkte weisen einen Mehrwertsteuersatz auf. Bitte entferne diesen, um die Rechnung exportieren zu können.</string>
+    <string name="cii_validation_title">Hoppla</string>
+    <string name="cii_validation_intro">Zum Erstellen einer gültigen elektronischen Rechnung müssen folgende Felder ausgefüllt werden:</string>
+    <string name="cii_validation_confirm">Verstanden</string>
+    <string name="cii_validation_issuer_missing">Aussteller hinzufügen</string>
+    <string name="cii_validation_issuer_name">Name des Ausstellers</string>
+    <string name="cii_validation_issuer_address">Vollständige Anschrift des Ausstellers (Straße, PLZ, Ort)</string>
+    <string name="cii_validation_client_missing">Kunden hinzufügen</string>
+    <string name="cii_validation_client_name">Name des Kunden</string>
+    <string name="cii_validation_client_type">Angabe, ob der Kunde ein Unternehmen oder eine Privatperson ist</string>
+    <string name="cii_validation_issuer_company_id_label_mismatch">Das Feld „%1$s" des Ausstellers enthält einen Wert im falschen Format (%2$s erwartet). Korrigiere den Wert oder benenne das Feld um.</string>
+    <string name="cii_validation_client_company_id_label_mismatch">Das Feld „%1$s" des Kunden enthält einen Wert im falschen Format (%2$s erwartet). Korrigiere den Wert oder benenne das Feld um.</string>
+    <string name="form_validation_dialog_title">Hoppla</string>
+    <string name="cii_validation_client_email">E-Mail-Adresse des Kunden hinzufügen (elektronische Adresse erforderlich für Privatkunden)</string>
+    <string name="cii_validation_client_address">Vollständige Anschrift des Kunden (Straße, PLZ, Ort)</string>
+    <string name="cii_validation_products_empty">Mindestens ein Produkt zur Rechnung hinzufügen</string>
+    <string name="cii_validation_line_name">Zeile %1$d: fehlender Produktname</string>
+    <string name="cii_validation_line_price">Zeile %1$d: fehlender Einzelpreis</string>
+    <string name="cii_validation_line_tax_rate_invalid">Zeile %1$d: USt-Satz %2$s % ist in Frankreich nicht zulässig (erlaubte Werte: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_due_date">Fälligkeitsdatum</string>
+    <string name="cii_validation_vat_exemption_text">Grund der Steuerbefreiung (im Textmenü ausfüllen)</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">Der Aussteller hat keine USt-IdNr. Füge dem Aussteller eine USt-IdNr. hinzu — sonst wird die Rechnung beim Empfang abgelehnt. Wenn du unter die Kleinunternehmerregelung fällst, aktiviere die Option in deinem Unternehmen.</string>
+
+    <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
+    <string name="document_vat_exemption_label">Steuerbefreiung</string>
+    <string name="document_vat_exemption_modal_title">Grund der Steuerbefreiung</string>
+    <string name="document_vat_exemption_placeholder">Bitte die für Ihr Unternehmen geltende gesetzliche Grundlage angeben</string>
+
+    <!-- Default VAT-exempt mentions — see values/strings.xml for design notes.
+         National mentions kept in native language across all locales. -->
+    <string name="vat_exempt_FR">Mehrwertsteuer nicht anwendbar, Art. 293 B CGI</string>
+    <string name="vat_exempt_DE">Kleinunternehmer, § 19 UStG</string>
+    <string name="vat_exempt_IT">Umsatzsteuerfreier Vorgang — Pauschalregelung (Gesetz 190/2014, Art. 1 §§ 54-89)</string>
+    <string name="vat_exempt_fallback_eu">Umsatzsteuerfrei — Sonderregelung für Kleinunternehmen (Art. 284 der Richtlinie 2006/112/EG)</string>
+    <string name="vat_exempt_fallback_generic">Nicht umsatzsteuerpflichtig</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">Land</string>
@@ -749,4 +871,82 @@ Es ist ein Fehler aufgetreten :
     <string name="unit_hea_name">Kopf</string>
     <string name="unit_hea_short">Kopf</string>
     <string name="unit_hea_keywords">kopf,kopfe,köpfe,vieh,tiere</string>
+
+    <!-- 1.9 migration wizard -->
+    <string name="onboarding_19_welcome_title">Willkommen zu Version 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Sichern wir zuerst</string>
+    <string name="onboarding_19_backup_body">Bevor wir loslegen, empfehle ich dir, deine Datenbank zur Sicherheit zu sichern.</string>
+    <string name="onboarding_19_backup_cta">Sichern</string>
+    <string name="onboarding_19_confirm_title">Alles korrekt?</string>
+    <string name="onboarding_19_confirm_body">Prüfe die Zuordnungen, bevor wir sie speichern. Mit dem Kreuz kannst du einen Kunden oder ein Produkt entfernen.</string>
+    <string name="onboarding_19_confirm_cta">Bestätigen</string>
+    <string name="onboarding_19_confirm_no_clients">Kein Kunde zugeordnet.</string>
+    <string name="onboarding_19_confirm_no_products">Kein Produkt zugeordnet.</string>
+    <string name="onboarding_19_confirm_section_clients">Kunden</string>
+    <string name="onboarding_19_confirm_section_products">Produkte</string>
+    <string name="onboarding_19_welcome_body">Diese Version schließt die standardisierten Felder ab. Wir richten sie gemeinsam ein.</string>
+    <string name="onboarding_19_welcome_cta">Los geht's</string>
+    <string name="onboarding_19_cleanup_title">Es sieht so aus, als hättest du %1$d Unternehmen</string>
+    <string name="onboarding_19_cleanup_body">Stimmt das? Sonst kannst du die ungenutzten löschen. Keine Sorge, deine Dokumente bleiben unberührt.</string>
+    <string name="onboarding_19_cleanup_cta">Weiter</string>
+    <string name="onboarding_19_attach_intro_body">Wir ordnen deine Kunden und Produkte den Unternehmen zu. So kannst du zwischen Unternehmen wechseln und pro Unternehmen eigene Nummernkreise nutzen.</string>
+    <string name="onboarding_19_attach_intro_cta">Los geht's</string>
+    <string name="onboarding_19_attach_step_title">Unternehmen %1$d: %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Wähle die Kunden aus, die zu diesem Unternehmen gehören.</string>
+    <string name="onboarding_19_attach_products_body">Wähle die Produkte aus, die zu diesem Unternehmen gehören.</string>
+    <string name="onboarding_19_attach_cta">Zu %1$s zuordnen</string>
+    <string name="onboarding_19_bank_title">Bankverbindung</string>
+    <string name="onboarding_19_bank_title_with_issuer">Unternehmen %1$d: %2$s — Bankverbindung</string>
+    <string name="onboarding_19_bank_body">Es gibt jetzt ein eigenes Feld für die Bankverbindung auf Unternehmensebene (Aussteller).</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">Ich habe die Angaben in deinen Rechnungen gefunden und ausgefüllt. Ändere sie bei Bedarf.</string>
+    <string name="onboarding_19_bank_not_found_hint">Ich konnte die Angaben in der Fußzeile deiner Rechnungen nicht finden. Trage sie jetzt oder später am Unternehmen ein.</string>
+    <string name="onboarding_19_bank_cta">Weiter</string>
+    <string name="onboarding_19_orphans_clients_title">Noch ein paar Kunden zu sortieren</string>
+    <string name="onboarding_19_orphans_clients_body">Diese Kunden sind noch keinem Unternehmen zugeordnet. Wähle jeweils eines aus.</string>
+    <string name="onboarding_19_orphans_products_title">Noch ein paar Produkte zu sortieren</string>
+    <string name="onboarding_19_orphans_products_body">Diese Produkte sind noch keinem Unternehmen zugeordnet. Wähle jeweils eines aus.</string>
+    <string name="onboarding_19_orphans_cta">Weiter</string>
+    <string name="onboarding_19_new_fields_title">Weitere hinzugefügte Felder</string>
+    <string name="onboarding_19_new_fields_body">Ich habe auch folgende Felder in die Rechnungen aufgenommen:\n\n• **Zahlungsart**\n• **Zahlungsbedingungen**\n• **USt-Befreiungsgrund** (für Kleinunternehmen)</string>
+    <string name="onboarding_19_new_fields_hint">Wenn du diese Angaben in der Fußzeile hattest, kannst du sie in die passenden Felder kopieren.</string>
+    <string name="onboarding_19_new_fields_cta">Weiter</string>
+    <string name="onboarding_19_search_title">Suche</string>
+    <string name="onboarding_19_search_body">Eine Suchleiste ist jetzt für Kunden, Produkte und alle Dokumente verfügbar (Suche nach Kundenname oder Belegnummer).</string>
+    <string name="onboarding_19_tags_title">Tags für Lieferscheine und Angebote</string>
+    <string name="onboarding_19_tags_body">Du kannst deinen Lieferscheinen und Angeboten jetzt einen Status vergeben (Entwurf, Gesendet, Storniert). Der Status „In Rechnung gestellt" wird automatisch gesetzt, wenn du in eine Rechnung umwandelst.\n\nAktiviere diese Premium-Module im 𝕘Store.</string>
+    <string name="onboarding_19_einvoice_title">Elektronische Rechnungen</string>
+    <string name="onboarding_19_einvoice_intro">Der Export elektronischer Rechnungen ist jetzt verfügbar!</string>
+    <string name="onboarding_19_einvoice_body">Aktiviere im gStore die Module ZUGFeRD, CII XML. Damit lädst du deine Rechnungen direkt auf deine registrierte Plattform hoch.</string>
+    <string name="onboarding_19_einvoice_sub">Du kannst Premium-Mitglied werden — abonniere auf unserer Website 🌟</string>
+    <string name="onboarding_19_einvoice_cta">Weiter</string>
+    <string name="onboarding_19_final_title">Alles klar, du bist startklar!</string>
+    <string name="entreprise_delete_blocked_title">Löschen nicht möglich</string>
+    <string name="entreprise_delete_blocked_message">Diesem Unternehmen sind noch Kunden, Produkte oder Dokumente zugeordnet. Um es zu löschen, entfernen Sie diese zuerst.</string>
+
+    <!-- Font picker (Modul Schriftarten) -->
+    <string name="gstore_module_font_title">Schriftarten</string>
+    <string name="gstore_module_font_desc">Ändere die Schriftart deiner Dokumente.</string>
+    <string name="gstore_module_font_detail">Aktiviere dieses Modul, um weitere Schriftarten für deine Dokumente freizuschalten. Einige sind kostenlos, andere sind Premium-Mitgliedern vorbehalten.\n\nVerfügbare Schriftarten: Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest und IBM Plex Sans.</string>
+    <string name="action_font_label">Schrift</string>
+    <string name="action_font_description">Dokumentschriftart wählen</string>
+    <string name="font_picker_title">Dokumentschriftart</string>
+    <string name="export_error_premium_font_message">Dein Dokument verwendet eine Premium-Schriftart, aber du bist kein Premium-Mitglied.</string>
+
+    <!-- Lieferschein- / Angebots-Status (im FR maskulin) + Status „In Rechnung gestellt“ -->
+    <string name="appbar_tag_sent_masc">Gesendet</string>
+    <string name="appbar_tag_cancelled_masc">Storniert</string>
+    <string name="appbar_tag_invoiced">In Rechnung gestellt</string>
+    <string name="appbar_tag_locked">Gesperrt</string>
+
+    <!-- gStore: Lieferscheine markieren -->
+    <string name="gstore_module_delivery_note_tagging_title">Lieferscheine markieren</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Deinen Lieferscheinen einen Status hinzufügen</string>
+    <string name="gstore_module_delivery_note_tagging_detail">Aktiviere dieses Modul, um deinen Lieferscheinen einen Status hinzuzufügen: Entwurf, Gesendet, Storniert oder In Rechnung gestellt.\n\nDer Status „In Rechnung gestellt“ wird automatisch gesetzt, wenn ein Lieferschein in eine Rechnung umgewandelt wird. Du kannst ihn jederzeit ändern.</string>
+
+    <!-- gStore: Angebote markieren -->
+    <string name="gstore_module_quote_tagging_title">Angebote markieren</string>
+    <string name="gstore_module_quote_tagging_desc">Deinen Angeboten einen Status hinzufügen</string>
+    <string name="gstore_module_quote_tagging_detail">Aktiviere dieses Modul, um deinen Angeboten einen Status hinzuzufügen: Entwurf, Gesendet, Storniert oder In Rechnung gestellt.\n\nDer Status „In Rechnung gestellt“ wird automatisch gesetzt, wenn ein Angebot in eine Rechnung umgewandelt wird. Du kannst ihn jederzeit ändern.</string>
 </resources>

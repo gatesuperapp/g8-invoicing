@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ShareCompat
 import androidx.core.content.ContextCompat
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
 import com.a4a.g8invoicing.shared.resources.addressed_to
 import com.a4a.g8invoicing.shared.resources.alert_dialog_error
 import com.a4a.g8invoicing.shared.resources.alert_dialog_error_confirm
@@ -80,6 +82,7 @@ import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.quote_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.document_payment_section_title
 import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.shared.resources.document_table_description
@@ -92,6 +95,7 @@ import com.a4a.g8invoicing.shared.resources.total_with_tax
 import com.a4a.g8invoicing.shared.resources.total_without_tax
 import com.a4a.g8invoicing.shared.resources.vat
 import com.a4a.g8invoicing.ui.shared.AlertDialogErrorOrInfo
+import com.a4a.g8invoicing.ui.shared.PdfExportErrorDialog
 import com.a4a.g8invoicing.ui.shared.AndroidPdfContext
 import com.a4a.g8invoicing.ui.shared.DocumentType
 import com.a4a.g8invoicing.ui.shared.PdfFileManager
@@ -115,6 +119,7 @@ enum class ExportStatus {
 actual fun ExportPdfPlatform(
     document: DocumentState,
     onDismissRequest: () -> Unit,
+    facturxXmlBytes: ByteArray?,
 ) {
     val context = LocalContext.current
     var exportStatus by remember { mutableStateOf(ExportStatus.WAITING_PERMISSION) }
@@ -154,6 +159,12 @@ actual fun ExportPdfPlatform(
         companyId3Label = stringResource(Res.string.company_identification3),
         otherLines = stringResource(Res.string.document_products_other_lines),
         currencyNoticeLabel = stringResource(Res.string.pdf_currency_notice),
+        paymentMeansLabels = com.a4a.g8invoicing.data.models.PaymentMeans.entries.associate {
+            it.chipId to stringResource(it.labelRes)
+        },
+        bankAccountIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban),
+        bankAccountGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic),
+        paymentSectionTitle = stringResource(Res.string.document_payment_section_title),
     )
 
     // Strings for UI
@@ -229,17 +240,15 @@ actual fun ExportPdfPlatform(
 
     // Error dialog
     if (openErrorDialog.value) {
-        AlertDialogErrorOrInfo(
-            onDismissRequest = {
+        // Friendly "oh no" recap over the raw iText / permission stack trace —
+        // errorMessage becomes a tappable mailto: link that pre-fills a bug
+        // report to contact@the-gate.fr so users don't have to copy-paste.
+        PdfExportErrorDialog(
+            errorText = errorMessage,
+            onDismiss = {
                 openErrorDialog.value = false
                 onDismissRequest()
             },
-            onConfirmation = {
-                openErrorDialog.value = false
-                onDismissRequest()
-            },
-            message = strAlertError + errorMessage,
-            confirmationText = strAlertErrorConfirm
         )
     }
 
@@ -306,7 +315,11 @@ actual fun ExportPdfPlatform(
                 launch(Dispatchers.Default) {
                     try {
                         val pdfGenerator = PdfGenerator(strings, fileManager)
-                        finalFileName = pdfGenerator.generatePdf(document)
+                        finalFileName = if (facturxXmlBytes != null) {
+                            pdfGenerator.generateFacturX(document, facturxXmlBytes)
+                        } else {
+                            pdfGenerator.generatePdf(document)
+                        }
                         exportStatus = ExportStatus.DONE
                     } catch (e: Exception) {
                         errorMessage = e.message ?: "Unknown error"

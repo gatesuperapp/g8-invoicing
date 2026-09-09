@@ -1,18 +1,46 @@
-𝕘𝟠 is an efficient, open-source invoicing app.
+Invoice in 10 seconds and convert your quotes and delivery notes into invoices!
 
-Features:
-- Create and manage invoices
-- Create delivery slips and convert them into invoices
-- Create quotes and convert them into invoices (premium option)
-- Create credit memos
-- Manage your customers and products
-- Custom prices per customer
-- Export documents as PDFs
-- No account required
+▸ Quote, DN → Invoice
+Turn quotes or delivery notes into an invoice, or create an invoice directly. No re-typing.
 
-Perfect for farmers, freelancers, small businesses, and anyone who needs to create professional invoices.
+▸ Pro invoices, electronic format
+Create professional invoices. Export as PDF, Factur-X or CII-XML: the standard formats for electronic invoicing. Import into your registered platform or accounting software.
 
-No ads • No trackers • Optional subscription
-Open-source software 🇫🇷
+▸ Advanced management
+See overdue invoices at a glance and send reminders in one tap.
+Tag your invoices, add a "Paid" stamp. Generate credit notes and corrective invoices.
 
-A great deal of effort has gone into developing this app to help you simplify your administrative tasks while protecting your privacy. If you have a question, a problem, or a request, support is always available—just contact Aude at contact@the-gate.fr
+▸ Fits your trade
+Prices excl. or incl. tax, your choice — automatic calculation. Any unit
+(kg, hour, piece, bunch...). Multiple prices per product depending on the
+customer. Multi-business support. Custom VAT rates.
+
+▸ Personalisation
+Add your logo, write your descriptions, payment methods, terms of sale, footer or references.
+Change the font of your documents to match your style.
+
+▸ Sharing
+Send by email, SMS, instant messaging, QuickShare... or print!
+
+▸ No bloat
+Turn features on or off to fit your needs and keep the app lean and effective.
+
+━━━━━━━━━━━━━━━━━━
+
+✨ FREE
+Unlimited invoices, delivery notes, credit notes, clients and products.
+5 quotes. Multi-business.
+
+🌟 PREMIUM
+Unlimited quotes. Factur-X and CII export.
+
+━━━━━━━━━━━━━━━━━━
+
+Designed for producers, self-employed workers, artisans, freelancers, and any small business.
+
+🦇 Free and open-source software. Your data stays on your device.
+Zero ads • Zero trackers • No sharing with third parties
+
+An account is only required for the premium subscription.
+
+A question, an idea, a need? There's always support — contact Aude at contact@the-gate.fr

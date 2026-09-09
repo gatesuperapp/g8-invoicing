@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.data
 
 import com.a4a.g8invoicing.Database
+import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import kotlinx.coroutines.withContext
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
@@ -56,5 +57,32 @@ class ProductTaxLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             productTaxQueries.deleteTaxRate(id)
         }
+    }
+
+    override suspend fun seedDefaultsForCountryIfPristine(countryCode: String) {
+        val countryRates = CountryCodes.defaultVatRatesForCountry(countryCode) ?: return
+        withContext(DispatcherProvider.IO) {
+            val current = productTaxQueries.getTaxRates().executeAsList().sorted()
+            // Global defaults hardcoded in TaxRate.sq — only wipe & re-seed if
+            // no row has ever been touched. Any deviation (rate added, existing
+            // rate edited, one deleted) means the user has taken over the table
+            // and we back off silently.
+            if (current != GLOBAL_DEFAULT_RATES) return@withContext
+            productTaxQueries.transaction {
+                GLOBAL_DEFAULT_RATES.indices.forEach { idx ->
+                    productTaxQueries.deleteTaxRate((idx + 1).toLong())
+                }
+                countryRates.forEachIndexed { idx, rate ->
+                    productTaxQueries.saveTaxRate(
+                        product_tax_id = (idx + 1).toLong(),
+                        amount = rate,
+                    )
+                }
+            }
+        }
+    }
+
+    private companion object {
+        val GLOBAL_DEFAULT_RATES = listOf(5.5, 10.0, 20.0)
     }
 }

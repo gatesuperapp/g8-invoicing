@@ -15,6 +15,7 @@ import com.a4a.g8invoicing.data.QuoteLocalDataSource
 import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.CurrencyManager
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
@@ -69,6 +70,9 @@ val appModule = module {
     // Currency Manager (singleton)
     single { CurrencyManager() }
 
+    // Which company (issuer master) the user is currently working under.
+    single { CurrentCompanyRepository() }
+
     // Unit code repository (localised names / short forms / search index)
     single { UnitCodeRepository() }
 
@@ -119,13 +123,17 @@ val appModule = module {
     single { SubscriptionRepository(get(), get(), get()) }
     single { ActivatedModulesRepository(get()) }
 
-    single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
-    single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
+    // Factur-X: CII XML file writer + share sheet (Android actual). Injected
+    // into whatever screen fires "Export CII".
+    single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
+
+    single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
+    single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
-    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get()) }
-    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get()) }
-    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get()) }
-    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get()) }
+    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
 
     single { get<Database>().invoiceQueries }
@@ -160,12 +168,12 @@ val appModule = module {
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
-        InvoiceAddEditViewModel(get(), get(), itemId)
+        InvoiceAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { CreditNoteListViewModel(get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
-        CreditNoteAddEditViewModel(get(), get(), itemId)
+        CreditNoteAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { GStoreViewModel(get(), get()) }

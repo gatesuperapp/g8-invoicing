@@ -1,19 +1,46 @@
-𝕘𝟠 es una aplicación de facturación eficaz y de código abierto.
+¡Factura en 10 segundos y convierte tus presupuestos y albaranes en facturas!
 
-Funcionalidades:
-- Crear y gestionar facturas
-- Crear albaranes y convertirlos en facturas
-- Crear presupuestos y convertirlos en facturas (opción premium)
-- Crear notas de crédito
-- Gestionar tus clientes y productos
-- Precios personalizados por cliente
-- Exportación de documentos a PDF
-- No es necesario crear una cuenta
+▸ Presupuesto, Albarán → Factura
+Transforma presupuestos o albaranes en una factura, o crea una factura directamente. Sin volver a escribir.
 
-Perfecta para agricultores y agricultoras, autónomos y autónomas, pequeñas empresas y todas aquellas personas que necesiten crear facturas profesionales.
+▸ Facturas profesionales, formato electrónico
+Crea facturas profesionales. Retenciones fiscales en la fuente (IRPF, ISR, ReteFuente…). Exporta en PDF, Factur-X o CII-XML: los formatos base de la facturación electrónica. Importa en tu plataforma acreditada o software de contabilidad.
 
-Sin publicidad • Sin rastreadores • Suscripción opcional
+▸ Gestión avanzada
+Visualiza al instante las facturas vencidas y envía recordatorios con un toque.
+Etiqueta tus facturas, añade un sello «Pagado». Genera notas de crédito y facturas rectificativas.
 
-Software libre 🇫🇷
+▸ Adaptada a tu oficio
+Precios sin o con IVA, tú eliges — cálculo automático. Cualquier unidad
+(kg, hora, pieza, manojo...). Varios precios por producto según el·la
+cliente. Gestión de varias empresas. IVA personalizable.
 
-Se ha dedicado mucho esfuerzo al desarrollo de esta aplicación, para ayudarte a simplificar los trámites administrativos y, al mismo tiempo, proteger tu privacidad. Si tienes alguna pregunta, problema o solicitud, siempre puedes ponerte en contacto con Aude en contact@the-gate.fr para recibir asistencia.
+▸ Personalización
+Añade tu logo, escribe tus descripciones, medios de pago, condiciones de venta, pie de página o referencias.
+Cambia la tipografía de tus documentos para reflejar tu estilo.
+
+▸ Compartir
+Envía por email, SMS, mensajería instantánea, QuickShare... ¡o imprime!
+
+▸ Sin complicaciones
+Activa o desactiva las funcionalidades según tus necesidades, para mantener una app sobria y eficaz.
+
+━━━━━━━━━━━━━━━━━━
+
+✨ GRATIS
+Facturas, albaranes, notas de crédito, clientes y productos ilimitados.
+5 presupuestos. Multiempresa.
+
+🌟 PREMIUM
+Presupuestos ilimitados. Exportación Factur-X y CII.
+
+━━━━━━━━━━━━━━━━━━
+
+Diseñada para productor·es·as, autónom·os·as, artesan·os·as, freelancers y toda pequeña empresa.
+
+🦇 Software libre y de código abierto. Tus datos permanecen en tu dispositivo.
+Cero anuncios • Cero rastreadores • Sin compartir con terceros
+
+La cuenta solo se requiere para la suscripción premium.
+
+¿Una pregunta, una idea, una necesidad? Siempre hay ayuda — contacta con Aude en contact@the-gate.fr

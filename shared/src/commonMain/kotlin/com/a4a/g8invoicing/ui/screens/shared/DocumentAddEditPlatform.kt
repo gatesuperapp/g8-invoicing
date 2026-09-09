@@ -26,6 +26,7 @@ expect fun DocumentAddEditPlatform(
     documentIssuerUiState: ClientOrIssuerState,
     documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>> = emptyList(),
     products: MutableList<ProductState>,
     onValueChange: (ScreenElement, Any) -> Unit,
     onSelectProduct: (ProductState, Int?) -> Unit,
@@ -42,6 +43,7 @@ expect fun DocumentAddEditPlatform(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit = {},
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
@@ -56,4 +58,5 @@ expect fun DocumentAddEditPlatform(
     onToggleHideLinkedSourceHeaders: (() -> Unit)? = null,
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit = { _, _ -> },
     onToggleRetentionHidden: (Int) -> Unit = {},
+    onFontSelect: (com.a4a.g8invoicing.ui.theme.DocumentFont) -> Unit = {},
 )

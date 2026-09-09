@@ -1,1 +1,1 @@
-facture, devis, bons livraison
+facture, devis, bon livraison

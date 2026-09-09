@@ -83,6 +83,7 @@ import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSection
+import com.a4a.g8invoicing.util.normalizeForSearch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -147,10 +148,13 @@ fun ClientOrIssuerPickerBottomSheet(
     val filteredAlphaSorted = remember(query.text, list, selectedMasterId) {
         val q = query.text.trim()
         val filtered = if (q.isEmpty()) list
-        else list.filter {
-            it.name.text.contains(q, ignoreCase = true) ||
-                (it.firstName?.text?.contains(q, ignoreCase = true) == true) ||
-                (it.emails?.any { e -> e.email.text.contains(q, ignoreCase = true) } == true)
+        else {
+            val nq = q.normalizeForSearch()
+            list.filter {
+                it.name.text.normalizeForSearch().contains(nq) ||
+                    (it.firstName?.text?.normalizeForSearch()?.contains(nq) == true) ||
+                    (it.emails?.any { e -> e.email.text.normalizeForSearch().contains(nq) } == true)
+            }
         }
         val withoutSelected = if (selectedMasterId == null) filtered
         else filtered.filter { it.id != selectedMasterId }
@@ -170,6 +174,13 @@ fun ClientOrIssuerPickerBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         contentWindowInsets = { WindowInsets(0) },
+        // Grey pill handle, matching the outer BottomSheetScaffold (SheetDragHandle).
+        // Overrides Material's default onSurfaceVariant which reads too dark on our surface.
+        dragHandle = {
+            androidx.compose.material3.BottomSheetDefaults.DragHandle(
+                color = Color(0xFFE0E0E0),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
@@ -190,8 +201,20 @@ fun ClientOrIssuerPickerBottomSheet(
                         onClick = { onClickEdit(currentSelected) },
                         onClickDelete = { onClickDeselect() },
                         onClickRefreshFromMaster = { onClickRefreshFromMaster(currentSelected) },
+                        // Issuers can't be removed from a doc — they're always
+                        // the doc's current company (managed in Mon compte >
+                        // Mes entreprises). Trash icon hidden.
+                        showDelete = !isIssuer,
                     )
                 }
+                return@Column
+            }
+
+            // For issuers with no selection (edge case — new docs always seed
+            // the current company as issuer), we don't show the picker list
+            // + '+' button either. Issuer management lives in Mon compte >
+            // Mes entreprises, not in the document flow.
+            if (isIssuer) {
                 return@Column
             }
 
@@ -270,7 +293,7 @@ fun ClientOrIssuerPickerBottomSheet(
                                     if (isIssuer) Res.string.document_bottom_sheet_picker_title_issuer
                                     else Res.string.document_bottom_sheet_picker_title_client
                                 ),
-                                style = MaterialTheme.typography.textScreenTitle,
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(start = 12.dp),
                             )
                             Spacer(Modifier.weight(1f))
@@ -433,6 +456,7 @@ private fun ClientOrIssuerPickerRow(
     onClick: () -> Unit,
     onClickDelete: () -> Unit,
     onClickRefreshFromMaster: () -> Unit,
+    showDelete: Boolean = true,
 ) {
     val displayName = entry.name.text +
         (entry.firstName?.text?.takeIf { it.isNotBlank() }?.let { " $it" } ?: "")
@@ -504,18 +528,20 @@ private fun ClientOrIssuerPickerRow(
                     )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .clickable { onClickDelete() },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Remove",
-                    modifier = Modifier.size(18.dp),
-                )
+            if (showDelete) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .clickable { onClickDelete() },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Remove",
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
             }
         }
     }

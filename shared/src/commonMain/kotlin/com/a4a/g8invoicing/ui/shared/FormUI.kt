@@ -42,6 +42,10 @@ fun FormUI(
     placeCursorAtTheEndOfText: (ScreenElement) -> Unit = {},
     errors: MutableList<Pair<ScreenElement, String?>>? = null,
     onClickExpandFullScreen: (ScreenElement) -> Unit = {}, // Used to expand product description field
+    // Extra content rendered inside the same Column as the inputs, right after
+    // the last one — with a Separator drawn between them so it visually reads
+    // as another row of the block. Used for the "Supprimer" affordance.
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     // handle focus
     val focusManager = LocalFocusManager.current
@@ -76,10 +80,10 @@ fun FormUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = 10.dp,
-                bottom = 8.dp
-            )
+            // No start padding here — separators inherit the outer Column's
+            // width and span edge-to-edge of the surface card. Rows push
+            // their own start=16dp inset for the labels.
+            .padding(bottom = 8.dp)
             .absorbAndDispatchTap("formui") { pos ->
                 val y = pos.y.toInt()
                 val exact = rowYRanges.firstOrNull { y in it.second..it.third }
@@ -129,9 +133,13 @@ fun FormUI(
                     rowYRanges.add(Triple(input.pageElement, top, bottom))
                 }
             }) {
+                // Last input still needs a separator below it when trailingContent
+                // will render right after, so the delete row reads as a real row.
+                val drawBottomSeparator = input != inputList.last() || trailingContent != null
                 PageElementCreator(
                     input = input,
                     isLastInput = input == inputList.last(),
+                    drawBottomSeparator = drawBottomSeparator,
                     imeAction = imeAction,
                     onClickForward = onClickForward,
                     onClickOpenClientSelection = onClickOpenClientSelection,
@@ -154,6 +162,7 @@ fun FormUI(
                 )
             }
         }
+        trailingContent?.invoke()
     }
 }
 
@@ -170,6 +179,7 @@ fun PageElementCreator(
     errorMessage: String?,
     onClickExpandFullScreen: () -> Unit, // Used to expand product description field
     clearFocusForAllRows: () -> Unit,
+    drawBottomSeparator: Boolean = !isLastInput,
 ) {
     Column {
         RowWithLabelAndInput(
@@ -185,7 +195,7 @@ fun PageElementCreator(
             clearFocusForAllRows = clearFocusForAllRows
         )
 
-        if (!isLastInput) {
+        if (drawBottomSeparator) {
             Separator()
         }
     }
@@ -229,11 +239,13 @@ fun RowWithLabelAndInput(
                 }
             )
             .fillMaxWidth()
+            // start=16 pushes the label inside; separator (rendered by the parent
+            // FormUI Column with no start padding) stays edge-to-edge.
             .padding(
                 start = 16.dp,
                 end = if (formInput.pageElement.name.startsWith("DOCUMENT_PRODUCT")) 0.dp else 16.dp,
                 top = 14.dp,
-                bottom = if (formInput.pageElement == ScreenElement.PRODUCT_OTHER_PRICE_CLIENTS) 4.dp else 14.dp
+                bottom = 14.dp,
             )
     ) {
         // Label
@@ -259,6 +271,7 @@ fun RowWithLabelAndInput(
                             content = formInput.labelInfoTooltip.content,
                             contentDescription = formInput.labelInfoTooltip.contentDescription,
                             persistenceKey = formInput.labelInfoTooltip.persistenceKey,
+                            glyph = formInput.labelInfoTooltip.glyph,
                         )
                     }
                 } else {
@@ -277,7 +290,11 @@ fun RowWithLabelAndInput(
                 keyboardOption = imeAction,
                 formActions = formActions,
                 focusRequester = focusRequester,
-                errorMessage = errorMessage,
+                // Editable-label subfield never carries the row error — the
+                // message renders once under the value subfield below. Keeps
+                // the company-id "libellé manquant" from being duplicated
+                // above and below the row.
+                errorMessage = null,
                 isEditableLabel = true
             )
         }
@@ -353,6 +370,9 @@ data class LabelInfoTooltip(
     // When non-null, the ⓘ disappears permanently after the user has read + dismissed
     // the modal (persisted via Settings). Same key = same one-time discoverability aid.
     val persistenceKey: String? = null,
+    // Icon inside the pastille. "?" (default) for one-off hints, "i" for reference
+    // info kept visible in permanence.
+    val glyph: String = "?",
 )
 
 class TextInput(
@@ -386,6 +406,11 @@ class ForwardElement(
     val text: String,
     val isMultiline: Boolean = true,
     val displayArrow: Boolean = true,
+    // Explicit line cap for the preview. Overrides the isMultiline fallback
+    // (1 line / 10 lines) when set — used for the text-menu rows that need
+    // exactly 2 lines with ellipsis (payment means / payment terms / VAT
+    // exemption).
+    val maxLines: Int? = null,
 )
 
 data class ListPicker(

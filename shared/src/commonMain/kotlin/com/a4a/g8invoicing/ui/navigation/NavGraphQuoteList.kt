@@ -32,6 +32,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.gstore_quote_trial_exhausted_body
 import com.a4a.g8invoicing.shared.resources.gstore_quote_trial_exhausted_cta
@@ -62,6 +63,9 @@ fun NavGraphBuilder.quoteList(
         val quotesUiState by viewModel.quotesUiState.collectAsState()
         val activatedModules = koinInject<ActivatedModulesRepository>()
         val subscriptionRepository = koinInject<SubscriptionRepository>()
+        val activatedState by activatedModules.state.collectAsState()
+        val isTagPickerEnabled =
+            ActivatedModulesRepository.MODULE_QUOTE_TAGGING in activatedState
 
         var isCategoriesMenuOpen by remember { mutableStateOf(false) }
         var lastBackPressTime by remember { mutableStateOf(0L) }
@@ -69,6 +73,11 @@ fun NavGraphBuilder.quoteList(
         // route — it dismisses when the user leaves the screen and doesn't need
         // to escape the route as a side-channel.
         var showTrialExhausted by remember { mutableStateOf(false) }
+        // Distinct modal for ex-premium users (was premium, activated MODULE_QUOTE,
+        // no longer premium). They keep read access to their quotes but lose the
+        // ability to create new ones — see the buildList in [CategorySidebar] which
+        // keeps the category visible via [ActivatedModulesRepository.everActivated].
+        var showExPremium by remember { mutableStateOf(false) }
 
         PlatformBackHandler {
             val currentTime = currentTimeMillis()
@@ -90,16 +99,20 @@ fun NavGraphBuilder.quoteList(
                 // batch when it wouldn't fit, rather than silently duplicating
                 // only some of the selection.
                 val premium = subscriptionRepository.isPremium()
-                if (!premium && activatedModules.wouldExhaustQuoteTrial(selected.size)) {
-                    showTrialExhausted = true
-                } else {
-                    if (!premium &&
-                        activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE_TRIAL) &&
-                        !activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE)
-                    ) {
+                val onTrial = activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE_TRIAL) &&
+                    !activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE)
+                when {
+                    premium -> viewModel.duplicateQuotes(selected)
+                    onTrial && activatedModules.wouldExhaustQuoteTrial(selected.size) ->
+                        showTrialExhausted = true
+                    onTrial -> {
                         activatedModules.incrementQuoteTrialCount(by = selected.size)
+                        viewModel.duplicateQuotes(selected)
                     }
-                    viewModel.duplicateQuotes(selected)
+                    // Not premium, not on trial — this is an ex-premium user whose
+                    // MODULE_QUOTE preference kept the category visible via
+                    // everActivated. Read-only mode: block creation, keep listing.
+                    else -> showExPremium = true
                 }
             },
             onClickConvert = viewModel::convertQuotes,
@@ -110,16 +123,18 @@ fun NavGraphBuilder.quoteList(
                 // a paid user who happens to also have the trial toggle from
                 // being blocked accidentally.
                 val premium = subscriptionRepository.isPremium()
-                if (!premium && activatedModules.isQuoteTrialExhausted()) {
-                    showTrialExhausted = true
-                } else {
-                    if (!premium &&
-                        activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE_TRIAL) &&
-                        !activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE)
-                    ) {
+                val onTrial = activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE_TRIAL) &&
+                    !activatedModules.isActive(ActivatedModulesRepository.MODULE_QUOTE)
+                when {
+                    premium -> onClickNew()
+                    onTrial && activatedModules.isQuoteTrialExhausted() ->
+                        showTrialExhausted = true
+                    onTrial -> {
                         activatedModules.incrementQuoteTrialCount()
+                        onClickNew()
                     }
-                    onClickNew()
+                    // Ex-premium: quotes stay listable but creation is blocked.
+                    else -> showExPremium = true
                 }
             },
             onClickCategory = onClickCategory,
@@ -130,6 +145,10 @@ fun NavGraphBuilder.quoteList(
                 onClickViewCreatedInvoice(invoiceId)
             },
             onDismissInvoiceCreatedDialog = viewModel::clearCreatedInvoiceId,
+            onClickTag = { selected, tag ->
+                viewModel.setTag(selected, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
+            },
+            isTagPickerEnabled = isTagPickerEnabled,
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
             showCategoryButton = showCategoryButton
@@ -137,6 +156,57 @@ fun NavGraphBuilder.quoteList(
 
         if (showTrialExhausted) {
             QuoteTrialExhaustedDialog(onDismiss = { showTrialExhausted = false })
+        }
+        if (showExPremium) {
+            QuoteExPremiumDialog(onDismiss = { showExPremium = false })
+        }
+    }
+}
+
+// TODO(strings): move the FR literals below to shared/src/commonMain/composeResources/values/strings.xml
+// on the `translations` branch. Suggested keys:
+//   gstore_quote_ex_premium_title = "Compte premium requis"
+//   gstore_quote_ex_premium_body  = "Vos devis existants restent accessibles et exportables. Pour créer ou dupliquer de nouveaux devis, il faut être membre premium."
+//   gstore_quote_ex_premium_cta   = "D'accord"
+// Then replace the hardcoded strings in [QuoteExPremiumDialog] with stringResource(Res.string.*).
+@Composable
+private fun QuoteExPremiumDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp)
+                .background(AppColors.surface, shape = RoundedCornerShape(14.dp))
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "Compte premium requis",
+                    style = MaterialTheme.typography.textBodyBold.copy(fontWeight = FontWeight.Bold),
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = "Vos devis existants restent accessibles et exportables. Pour créer ou dupliquer de nouveaux devis, il faut être membre premium.",
+                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                    lineHeight = 20.sp,
+                    textAlign = TextAlign.Center,
+                )
+                Spacer(Modifier.height(20.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onDismiss),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ColorVioletLink,
+                        contentColor = Color.White,
+                    ),
+                ) { Text("D'accord") }
+            }
         }
     }
 }

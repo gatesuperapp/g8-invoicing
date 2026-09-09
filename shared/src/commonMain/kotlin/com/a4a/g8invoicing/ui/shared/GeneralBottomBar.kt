@@ -14,6 +14,7 @@ import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionNew
 import com.a4a.g8invoicing.ui.navigation.actionSendReminder
 import com.a4a.g8invoicing.ui.navigation.actionTag
+import com.a4a.g8invoicing.ui.navigation.actionTagBLDevis
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 
 @Composable
@@ -33,6 +34,9 @@ fun GeneralBottomBar(
     onClickSendReminder: () -> Unit = {},
     isConvertible: Boolean = false,
     isInvoice: Boolean = false,
+    // BL/Devis-only. When true, adds the "Marquer" bottom-bar entry on the
+    // selection bar. Gated by the corresponding gStore module in the caller.
+    isTagPickerEnabled: Boolean = false,
     onChangeBackground: () -> Unit,
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
@@ -76,6 +80,14 @@ fun GeneralBottomBar(
                 actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
                 actionTag(),
                 actionSendReminder(onClickSendReminder)
+            )
+        } else if (isConvertible && isTagPickerEnabled) {
+            arrayOf(
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                actionConvert(onClickConvert),
+                actionTagBLDevis()
             )
         } else if (isConvertible) {
             arrayOf(

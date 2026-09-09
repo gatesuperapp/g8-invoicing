@@ -31,8 +31,10 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.FormValidationDialogHost
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.rememberFormValidationDialogState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
@@ -61,6 +63,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         )
     ) { backStackEntry ->
         val scope = rememberCoroutineScope()
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val itemId = backStackEntry.arguments?.getString("itemId")
 
         val deliveryNoteViewModel: DeliveryNoteAddEditViewModel = koinViewModel(
@@ -91,6 +95,7 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
         }
 
         var showDocumentForm by remember { mutableStateOf(false) }
+        val errorDialog = rememberFormValidationDialogState()
 
         // When the bottom-sheet form is open, system back closes it instead
         // of popping back to the doc list.
@@ -129,7 +134,14 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 if (updated != null) {
                                     deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // Persist via UPDATE (id-preserving) — see
+                                    // NavGraphInvoiceAddEdit for the full story.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    deliveryNoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -144,10 +156,20 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     Button(
                         onClick = {
                             val opensForm = pendingIssuerOpensForm
+                            val issuerToAck = pendingIssuerToEdit
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
                             pendingIssuerOpensForm = false
                             if (opensForm) showDocumentForm = true
+                            // Bump the doc snapshot's originalVersion to master so the
+                            // dialog stops re-firing on every reopen. Data stays frozen.
+                            issuerToAck?.let { issuer ->
+                                scope.launch {
+                                    clientOrIssuerAddEditViewModel
+                                        .acknowledgeMasterVersion(issuer)
+                                        ?.let { deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(it) }
+                                }
+                            }
                         }
                     ) {
                         Text(
@@ -183,7 +205,13 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 if (updated != null) {
                                     deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // See the issuer path above.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_CLIENT,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    deliveryNoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -198,10 +226,18 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                     Button(
                         onClick = {
                             val opensForm = pendingClientOpensForm
+                            val clientToAck = pendingClientToEdit
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
                             pendingClientOpensForm = false
                             if (opensForm) showDocumentForm = true
+                            clientToAck?.let { client ->
+                                scope.launch {
+                                    clientOrIssuerAddEditViewModel
+                                        .acknowledgeMasterVersion(client)
+                                        ?.let { deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(it) }
+                                }
+                            }
                         }
                     ) {
                         Text(
@@ -213,6 +249,10 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             )
         }
 
+        // Observe the counter so validating the doc-product tax edit dialog
+        // triggers a recomposition and the picker re-reads the fresh list.
+        val taxRatesRefreshCounter by productAddEditViewModel.taxRatesRefreshCounter.collectAsState()
+
         DocumentAddEditPlatform(
             navController = navController,
             document = deliveryNoteUiState,
@@ -222,7 +262,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
             documentProductUiState = documentProduct,
-            taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
+            taxRates = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesFromLocalDb() },
+            taxRatesWithIds = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesWithIdsFromLocalDb() },
             products = productListUiState.products.toMutableList(),
             onValueChange = { pageElement, value ->
                 deliveryNoteViewModel.updateUiState(pageElement, value)
@@ -329,6 +370,12 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             },
             onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
+                    // Focus clear + keyboard hide before validate — commits
+                    // any pending email so validateInputs sees the invalid
+                    // value. See standalone NavGraphClientOrIssuerAddEdit
+                    // for the same pattern.
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
@@ -341,15 +388,23 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(documentClientUiState)
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                // See NavGraphInvoiceAddEdit — fresh StateFlow
+                                // read to catch cleanFieldsForClientType mutations.
+                                val freshClient = clientOrIssuerAddEditViewModel
+                                    .documentClientUiState.value
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, freshClient, syncToMaster = syncToMaster
                                 )
                                 deliveryNoteViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -363,6 +418,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInUiState(documentIssuerUiState)
                                 deliveryNoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
@@ -372,6 +429,8 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
                                 )
                                 deliveryNoteViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
@@ -414,6 +473,9 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onSelectTaxRate = {
                 productAddEditViewModel.updateTaxRate(it, ProductType.DOCUMENT_PRODUCT)
             },
+            onSaveTaxRates = { rates ->
+                productAddEditViewModel.saveTaxRates(rates)
+            },
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = { showDocumentForm = it },
             onClickDeleteAddress = {
@@ -432,6 +494,11 @@ fun NavGraphBuilder.deliveryNoteAddEdit(
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent,
             showProductType = showProductType,
+            onFontSelect = { font ->
+                deliveryNoteViewModel.setDocumentFont(font.id)
+            },
         )
+
+        FormValidationDialogHost(errorDialog)
     }
 }

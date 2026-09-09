@@ -4,6 +4,7 @@ import com.a4a.g8invoicing.data.AppLocaleHolder
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.data.stripTrailingZeros
+import com.a4a.g8invoicing.facturx.FacturXTextSanitizer
 import com.a4a.g8invoicing.ui.screens.shared.getLinkedDeliveryNotes
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
@@ -13,18 +14,27 @@ import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.itextpdf.io.font.FontProgramFactory
 import com.itextpdf.io.font.PdfEncodings
-import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFont
 import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.geom.Rectangle
+import com.itextpdf.kernel.pdf.PdfAConformance
 import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfName
+import com.itextpdf.kernel.pdf.PdfOutputIntent
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.action.PdfAction
+import com.itextpdf.kernel.pdf.filespec.PdfFileSpec
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.xmp.XMPConst
+import com.itextpdf.kernel.xmp.XMPMeta
+import com.itextpdf.kernel.xmp.XMPMetaFactory
+import com.itextpdf.kernel.xmp.options.PropertyOptions
+import com.itextpdf.pdfa.PdfADocument
+import java.io.ByteArrayInputStream
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.borders.Border
 import com.itextpdf.layout.IPropertyContainer
@@ -65,10 +75,29 @@ class PdfGeneratorImpl(
     private var strings: PdfStrings = defaultStrings
     private val defaultStrings: PdfStrings = defaultStrings
     private companion object {
-        // Primary family name. The FontProvider matches the embedded
-        // helvetica.ttf / helveticabold.ttf; unknown-glyph runs fall through
-        // to whichever registered font covers them.
-        const val FONT_FAMILY = "Helvetica"
+        // Bundled classpath / assets paths kept only for the price-row width
+        // measurement font (see [loadPricesMeasurementFont]) — the main text
+        // stack now reads the doc's own picked font via [DocumentFont]. All
+        // variable-font families in the picker (Arimo, Inter, Onest) were
+        // pre-split into static Regular + Bold instances via fontTools.varLib
+        // because iText 9.x can't traverse the wght axis: a variable file
+        // registers as a single weight (usually 400) and any pdfBold() call
+        // then silently keeps painting Regular. Static faces let the
+        // FontProvider match FONT_WEIGHT=bold against a real 700-weight
+        // registration.
+        const val ARIMO_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/arimoregular.ttf"
+        // Noto Sans regular + bold — bundled for the picker, promoted to
+        // PDF font provider so an Arimo miss lands on an embedded Noto glyph
+        // instead of falling all the way to a system font (Android's built-
+        // in system fonts vary wildly per device / OEM).
+        const val NOTO_SANS_REGULAR_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/notosansregular.ttf"
+        const val NOTO_SANS_BOLD_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/font/notosansbold.ttf"
+        // sRGB IEC61966-2.1 ICC v2 profile (extracted from the JVM's built-in
+        // ColorSpace.CS_sRGB) — required as the OutputIntent for PDF/A-3
+        // conformance so validators like veraPDF have an unambiguous colour
+        // reference. Bundled under composeResources/files/color/ so both
+        // platforms resolve it via the same path.
+        const val SRGB_ICC_ASSET = "composeResources/com.a4a.g8invoicing.shared.resources/files/color/sRGB.icc"
 
         // Right edge of the totals block, in points from the start of the
         // paragraph. Amounts right-align there; the label's right edge is
@@ -78,7 +107,7 @@ class PdfGeneratorImpl(
         // Breathing room between the ":" at the end of the label and the
         // first digit of the amount. Compose preview looks tight at ~4px but
         // the PDF needs more because per-glyph width measurement of a few
-        // currency symbols missing from helvetica.ttf (₪ ₼ ₽ ₾) is estimated,
+        // currency symbols missing from arimo.ttf (₪ ₼ ₽ ₾) is estimated,
         // not exact — the buffer absorbs any under-estimation.
         const val PRICES_LABEL_AMOUNT_GAP = 12f
     }
@@ -104,9 +133,10 @@ class PdfGeneratorImpl(
         val writer = PdfWriter(tempFilePath)
         val pdfDocument = PdfDocument(writer)
 
+        val documentFont = com.a4a.g8invoicing.ui.theme.DocumentFont.fromId(document.fontFamily)
         val doc = Document(pdfDocument, PageSize.A4)
-        doc.fontProvider = buildFontProvider()
-        doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+        doc.fontProvider = buildFontProvider(documentFont)
+        doc.setProperty(Property.FONT, arrayOf(documentFont.pdfFamilyName))
         doc.setFontSize(9.5F)
 
         // Add content
@@ -118,6 +148,124 @@ class PdfGeneratorImpl(
 
         // Add page numbering
         return addPageNumbering(document, tempFileName, finalFileName)
+    }
+
+    /**
+     * Factur-X 1.0 (EN 16931) export as a PDF/A-3B document with the CII XML
+     * attached as an Associated File (AFRelationship=Data, filename
+     * `factur-x.xml`). The XMP metadata carries pdfaid:part=3 / conformance=B
+     * plus the Factur-X extension schema (fx:DocumentType / DocumentFileName
+     * / Version / ConformanceLevel) so veraPDF and downstream e-invoicing
+     * platforms both accept the file.
+     *
+     * PDF/A-3B requires: embedded fonts (Arimo covers Latin; the FontProvider
+     * subsets whichever glyph the FontSelector matches), a colour OutputIntent
+     * (sRGB ICC profile), no encryption, and mandatory metadata (dc:title,
+     * xmp:CreateDate, pdf:Producer — set below).
+     */
+    fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String {
+        strings = effectiveStrings(document, defaultStrings)
+
+        val finalFileName = buildFacturXFinalFileName(document)
+        val finalTempPath = fileManager.getTempFilePath(finalFileName)
+        File(finalTempPath).delete()
+
+        // Strip glyphs that Arimo + Noto Sans can't render (emojis, CJK, exotic
+        // symbols). Standard PDF export tolerates missing glyphs by painting
+        // .notdef; PDF/A-3B doesn't and iText throws PdfAConformanceException
+        // mid-render, leaving a partial file. Sanitiser mutates the state in
+        // place then restores originals in the finally, so the UI never sees
+        // the stripped text.
+        val sanitizer = FacturXTextSanitizer(fileManager::loadAssetBytes)
+        val restoreState = sanitizer.applyToDocumentInPlace(document)
+
+        // Single-pass write: matches the working facturx-android POC.
+        // The previous two-pass approach (initial + PdfADocument(reader,
+        // writer) stamping to add page numbers) crashed on Android at
+        // "This parser doesn't support specification 'Unknown' version 0.0"
+        // — the stamping constructor reads the source XMP back through
+        // JAXP's DocumentBuilder, and Android's SAX layer refuses one of
+        // the safety features iText tries to set. Doing page numbering +
+        // AF attachment inside the initial Document.close() bypasses the
+        // stamping mode entirely.
+        val writer = PdfWriter(finalTempPath)
+        val pdfDocument = PdfADocument(writer, PdfAConformance.PDF_A_3B, sRGBOutputIntent())
+
+        val documentFont = com.a4a.g8invoicing.ui.theme.DocumentFont.fromId(document.fontFamily)
+        val doc = Document(pdfDocument, PageSize.A4)
+        doc.fontProvider = buildFontProvider(documentFont)
+        doc.setProperty(Property.FONT, arrayOf(documentFont.pdfFamilyName))
+        doc.setFontSize(9.5F)
+
+        var failure: Throwable? = null
+        try {
+            buildPdfContent(doc, document)
+
+            // Page numbering runs after buildPdfContent so numberOfPages is
+            // final. showTextAligned writes onto existing pages without
+            // needing a stamping reopen.
+            val totalPages = pdfDocument.numberOfPages
+            if (totalPages > 1) {
+                for (i in 1..totalPages) {
+                    val prefix = if (i == 1) "" else "${getDocumentTypeName(document.documentType, strings)} ${document.documentNumber.text} - "
+                    doc.showTextAligned(
+                        Paragraph("$prefix$i/$totalPages"),
+                        570f, 34f, i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0f,
+                    )
+                }
+            }
+
+            attachFacturXPayload(pdfDocument, xmlBytes, document)
+        } catch (t: Throwable) {
+            failure = t
+            System.err.println("[PdfGenerator] generateFacturX failure before close: ${t::class.qualifiedName}: ${t.message}")
+            t.printStackTrace()
+        }
+
+        try {
+            doc.close()
+            pdfDocument.close()
+        } catch (t: Throwable) {
+            if (failure == null) failure = t
+            System.err.println("[PdfGenerator] generateFacturX close failure: ${t::class.qualifiedName}: ${t.message}")
+            t.printStackTrace()
+        }
+
+        restoreState()
+
+        if (failure != null) {
+            // Drop the partial temp file — before, we'd save it via MediaStore
+            // and hand back finalFileName as if the export succeeded. Users then
+            // ended up with a 15-byte "%PDF-1.7" file that no viewer could open.
+            File(finalTempPath).delete()
+            throw failure
+        }
+
+        fileManager.saveToFinalLocation(finalTempPath, finalFileName)
+        return finalFileName
+    }
+
+    // sRGB IEC61966-2.1 as the PDF/A-3 output intent. Constructed fresh per
+    // Factur-X export — iText consumes the InputStream inside PdfOutputIntent
+    // during PdfADocument construction, so a shared reusable instance would
+    // fail on the second export with a closed-stream error.
+    private fun sRGBOutputIntent(): PdfOutputIntent {
+        val iccBytes = fileManager.loadAssetBytes(SRGB_ICC_ASSET)
+            ?: error("sRGB ICC profile missing — required for PDF/A-3 output intent")
+        return PdfOutputIntent(
+            "sRGB IEC61966-2.1",
+            "",
+            "http://www.color.org",
+            "sRGB IEC61966-2.1",
+            ByteArrayInputStream(iccBytes),
+        )
+    }
+
+    private fun buildFacturXFinalFileName(document: DocumentState): String {
+        val docNumber = sanitizeForFileName(document.documentNumber.text).ifBlank { "document" }
+        val date = formatDateForFileName(document.documentDate)
+        val client = buildClientNameForFileName(document.documentClient)
+        return listOfNotNull(docNumber, date, client).joinToString("-") + "-facturx.pdf"
     }
 
     /**
@@ -176,34 +324,48 @@ class PdfGeneratorImpl(
     }
 
     /**
-     * Font stack for the whole PDF. The primary family is Helvetica (embedded
-     * from assets to get access to symbols like ₹ that WinAnsi lacks). We then
-     * pile every readable system font on top so iText's FontSelector can
-     * character-by-character fall back to whichever font covers each glyph —
-     * this is what makes exotic currency symbols (৳ ֏ ₽ د.إ …) and any
-     * user-typed content (CJK names, emoji in a footer) render instead of
-     * disappearing.
+     * Font stack for the whole PDF. The primary family is the one the user
+     * picked in the doc's font menu ([DocumentFont]), registered as two
+     * static instances (Regular + Bold) so iText's FontProvider can match
+     * FONT_WEIGHT="bold" against a real 700-weight face. Noto Sans Regular
+     * + Bold are always added on top as a glyph-coverage fallback so
+     * exotic currency symbols / accents that the primary face doesn't cover
+     * still render instead of disappearing.
      *
      * Registration order doesn't matter: FontSelector picks by family+coverage,
-     * not order. We silently swallow per-font failures because a few system
-     * .ttc entries (colour emoji, some CJK collections) trip up iText's parser
-     * and one bad file must not sink the whole PDF.
+     * not order. We silently swallow per-font failures because a bad TTF must
+     * not sink the whole PDF.
      */
-    private fun buildFontProvider(): FontProvider {
+    private fun buildFontProvider(font: com.a4a.g8invoicing.ui.theme.DocumentFont): FontProvider {
         val provider = FontProvider()
         fun addBytes(name: String) {
             try {
                 fileManager.loadAssetBytes(name)?.let { provider.addFont(it) }
             } catch (_: Throwable) { }
         }
-        addBytes("helvetica.ttf")
-        addBytes("helveticabold.ttf")
-        // Always keep the standard 14 available as a last-resort fallback: even
-        // if every asset+system add above fails, the PDF still renders ASCII.
-        provider.addStandardPdfFonts()
-        fileManager.listSystemFontFiles().forEach { path ->
-            try { provider.addFont(path) } catch (_: Throwable) { }
-        }
+        addBytes(font.pdfRegularAsset)
+        addBytes(font.pdfBoldAsset)
+        // Noto Sans fallback — non-primary faces (Cabin, Spectral, Onest…)
+        // don't carry every currency glyph / diacritic the user might type,
+        // and iText will otherwise render a .notdef box. Keeps the primary
+        // face for anything it covers and only reaches for Noto on misses.
+        addBytes(NOTO_SANS_REGULAR_ASSET)
+        addBytes(NOTO_SANS_BOLD_ASSET)
+        // System fonts are deliberately NOT added to the provider. Two
+        // reasons:
+        //  1. PDF/A-3 §6.3.4 demands every rendered glyph come from an
+        //     embedded font. Android's system font tree varies by OEM and
+        //     ships fonts with fsType restrictions (Roboto flavours,
+        //     manufacturer variants) that iText cannot always embed;
+        //     iText then either skips embedding silently (breaks veraPDF)
+        //     or throws at PdfADocument close.
+        //  2. addStandardPdfFonts() — the Base14 Helvetica / Times etc.
+        //     references — is off-limits for the same rule (Base14 fonts
+        //     are name references, never embedded).
+        // Content outside Arimo + Noto Sans coverage (CJK, RTL scripts,
+        // some emoji) will render as .notdef rather than fall through to
+        // a non-conformant fallback. Trade-off accepted: an invoice is
+        // Latin/Greek/Cyrillic in 99% of cases.
         return provider
     }
 
@@ -274,26 +436,93 @@ class PdfGeneratorImpl(
             doc.add(createPrices(it, fontSize, currencyCode, formatLocale))
         }
 
-        // On invoices, keep the footer close to the due date (as in the preview) and
-        // let createDueDate's own paddingTop provide the gap above. Non-invoice docs
-        // get the extra breathing room applied directly on the footer.
-        if (document is InvoiceState) {
-            if (showCurrencyNoticeLine) {
-                doc.add(createCurrencyNotice(currencyCodeForHeader))
-            }
-            doc.add(createDueDate(document.dueDate.substringBefore(" "), fontSize, trimTopPadding = showCurrencyNoticeLine))
-            doc.add(createFooter(document.footerText.text, fontSize))
-        } else {
-            if (showCurrencyNoticeLine) {
-                doc.add(createCurrencyNotice(currencyCodeForHeader))
-            }
-            doc.add(createFooter(document.footerText.text, fontSize).setMarginTop(24F))
+        if (showCurrencyNoticeLine) {
+            doc.add(createCurrencyNotice(currencyCodeForHeader))
         }
 
-        // g8 watermark — text is frozen on the document at creation (watermark_text column).
-        // null/blank → no watermark for this doc.
-        document.watermarkText?.takeIf { it.isNotBlank() }?.let { watermark ->
-            doc.add(createWatermark(watermark))
+        // BT-120 legal mention — mirrors DocumentBasicTemplateFooter: only
+        // rendered when the issuer is in franchise en base AND the user has
+        // typed a wording in the text menu. Right-aligned, small grey.
+        val vatExemptionMention = if (document.documentIssuer?.vatExempt == true) {
+            document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() }
+        } else null
+        if (vatExemptionMention != null) {
+            doc.add(
+                Paragraph(vatExemptionMention)
+                    .setFontSize(fontSize)
+                    .setFontColor(ColorConstants.DARK_GRAY)
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    // 4f matches the totals table's setPaddingRight(4f) —
+                    // the mention's right edge lands on the same vertical
+                    // as the € column of the totals block above.
+                    .setMarginRight(4f)
+                    .setMarginTop(10f)
+                    .setFixedLeading(10F)
+            )
+        }
+
+        // Grey box grouping "À régler avant le X" + payment means + IBAN/BIC.
+        // Same conditionals as the Compose preview: skip whole box if user
+        // hid both blocks OR neither is populated.
+        val paymentMeansStr = paymentMeansDisplayFor(document)
+        val bankStr = bankRenderedFor(document)
+        val showPaymentBox = paymentMeansStr != null || bankStr != null
+        if (showPaymentBox) {
+            doc.add(createPaymentBox(document, paymentMeansStr, bankStr, fontSize))
+        } else if (document is InvoiceState &&
+            !document.dueDate.substringBefore(" ").isBlank()) {
+            // Both payment means and bank are hidden but the invoice still
+            // carries a due date — surface it on its own bold line so the
+            // client can see when the invoice needs to be paid. Centered
+            // (as a standalone reminder, matches the preview footer's
+            // standalone branch) rather than left-aligned like the grey-box
+            // header would be.
+            doc.add(
+                Paragraph(paymentBoxTitle(document))
+                    .pdfBold()
+                    .setFontSize(fontSize)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(12f)
+            )
+        }
+
+        // Bottom band under a hairline: terms → footer text → watermark. The
+        // separator only draws when at least one of the three sits below it,
+        // matching the preview.
+        // BT-20 concat of the 3 subject-coded fields (PMT / PMD / AAB), joined
+        // with a single space so the 3 sentences read as one flowing paragraph
+        // rather than a stack of 3 lines. Empty fields drop.
+        val paymentTerms = (document as? InvoiceState)?.let { inv ->
+            listOf(
+                inv.paymentTermsRecoveryFees.text.trim(),
+                inv.paymentTermsLateFees.text.trim(),
+                inv.paymentTermsDiscount.text.trim(),
+            ).filter { it.isNotEmpty() }.joinToString(" ").takeIf { it.isNotEmpty() }
+        }
+        val footerText = document.footerText.text.trim().takeIf { it.isNotEmpty() }
+        val watermarkText = document.watermarkText?.takeIf { it.isNotBlank() }
+        if (paymentTerms != null || footerText != null || watermarkText != null) {
+            // When only the standalone due-date line sits above (no grey box,
+            // no payment-terms prose), sit the footer directly under it at
+            // ~6pt — matches master's tight interline. The separator + wide
+            // 20pt margin only fires when there's a real payment section
+            // above that needs a visual break.
+            val isStandaloneDueDateOnly = !showPaymentBox &&
+                document is InvoiceState &&
+                !document.dueDate.substringBefore(" ").isBlank() &&
+                paymentTerms == null
+            if (isStandaloneDueDateOnly) {
+                if (footerText != null) doc.add(
+                    createFooter(footerText, fontSize, precededByTerms = false)
+                        .setMarginTop(2f)
+                )
+                if (watermarkText != null) doc.add(createWatermark(watermarkText))
+            } else {
+                doc.add(createSeparator(topMargin = 20f))
+                if (paymentTerms != null) doc.add(createPaymentTermsBlock(paymentTerms, fontSize))
+                if (footerText != null) doc.add(createFooter(footerText, fontSize, paymentTerms != null))
+                if (watermarkText != null) doc.add(createWatermark(watermarkText))
+            }
         }
 
         // "Paid" stamp — absolute-positioned via setFixedPosition inside
@@ -304,11 +533,16 @@ class PdfGeneratorImpl(
         }
     }
 
-    private fun addPageNumbering(document: DocumentState, tempFileName: String, finalFileName: String): String {
+    private fun addPageNumbering(
+        document: DocumentState,
+        tempFileName: String,
+        finalFileName: String,
+        facturxXmlBytes: ByteArray? = null,
+    ): String {
         // No local fontRegular here anymore — the doc opened below sets
         // `fontProvider = buildFontProvider()` so every Paragraph resolves its
-        // font through the provider (needed for currency glyphs that WinAnsi
-        // Helvetica doesn't cover).
+        // font through the provider (needed for currency glyphs the primary
+        // Arimo doesn't cover).
 
         val tempFilePath = fileManager.getTempFilePath(tempFileName)
         val finalTempPath = fileManager.getTempFilePath(finalFileName)
@@ -316,10 +550,19 @@ class PdfGeneratorImpl(
         File(finalTempPath).delete()
 
         try {
-            val pdfDoc = PdfDocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
+            // Stamping mode: reopen the first-pass PDF and add page numbers.
+            // For Factur-X we also attach the CII XML + wire the PDF/A-3 XMP
+            // extension schema — using PdfADocument(reader, writer) preserves
+            // the pdfaid:part / conformance set on the initial write.
+            val pdfDoc = if (facturxXmlBytes != null) {
+                PdfADocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
+            } else {
+                PdfDocument(PdfReader(tempFilePath), PdfWriter(finalTempPath))
+            }
+            val documentFont = com.a4a.g8invoicing.ui.theme.DocumentFont.fromId(document.fontFamily)
             val doc = Document(pdfDoc)
-            doc.fontProvider = buildFontProvider()
-            doc.setProperty(Property.FONT, arrayOf(FONT_FAMILY))
+            doc.fontProvider = buildFontProvider(documentFont)
+            doc.setProperty(Property.FONT, arrayOf(documentFont.pdfFamilyName))
             val numberOfPages = pdfDoc.numberOfPages
 
             if (numberOfPages > 1) {
@@ -332,6 +575,10 @@ class PdfGeneratorImpl(
                 }
             }
 
+            if (facturxXmlBytes != null) {
+                attachFacturXPayload(pdfDoc, facturxXmlBytes, document)
+            }
+
             doc.close()
             pdfDoc.close()
             fileManager.deleteTempFile(tempFilePath)
@@ -340,11 +587,157 @@ class PdfGeneratorImpl(
             fileManager.saveToFinalLocation(finalTempPath, finalFileName)
 
         } catch (e: Exception) {
+            // Loud logging: silent catch was hiding the actual PDF/A close
+            // failure behind the app modal — the user only saw a truncated
+            // "this parser doesn't support..." message with no stack trace.
+            System.err.println("[PdfGenerator] addPageNumbering failed: ${e::class.qualifiedName}: ${e.message}")
             e.printStackTrace()
         }
 
         return finalFileName
     }
+
+    /**
+     * Attach the Factur-X CII XML to the given PDF as an Associated File
+     * (/AF, AFRelationship = Alternative) named `factur-x.xml`, set the
+     * mandatory DocumentInfo entries (title / creator / producer) PDF/A-3
+     * requires, and set the four fx: XMP properties Factur-X consumers key
+     * off.
+     *
+     * AFRelationship = Alternative: Factur-X 1.0.06 onward mandates the
+     * "Alternative" relationship (the XML is an alternative representation
+     * of the visible PDF, not just supplementary data). Earlier drafts up to
+     * 1.0.05 accepted Data; current validators (Chorus Pro / veraPDF ZUGFeRD
+     * profile / Ferd_net) reject Data with a dedicated error.
+     */
+    private fun attachFacturXPayload(
+        pdfDoc: PdfDocument,
+        xmlBytes: ByteArray,
+        document: DocumentState,
+    ) {
+        val fileSpec = PdfFileSpec.createEmbeddedFileSpec(
+            pdfDoc,
+            xmlBytes,
+            "Factur-X invoice",
+            "factur-x.xml",
+            PdfName("text/xml"),
+            null,
+            PdfName("Alternative"),
+        )
+        pdfDoc.addAssociatedFile("factur-x.xml", fileSpec)
+
+        // DocumentInfo dictionary — set title + author only. Don't set creator
+        // or producer here: iText overwrites Info.Producer at close ("… ;
+        // modified using iText® Core 9.5.0 (AGPL) …") which would then not
+        // match whatever we'd have put in xmp:Producer, and veraPDF rule
+        // 6.7.3 checks Info/XMP equivalence. Letting iText be the single
+        // author of Producer + Creator avoids the mismatch entirely.
+        val docTypeLabel = getDocumentTypeName(document.documentType, strings)
+        val title = "$docTypeLabel ${document.documentNumber.text}"
+        val author = document.documentIssuer?.name?.text?.takeIf { it.isNotBlank() } ?: "g8"
+        val info = pdfDoc.documentInfo
+        info.title = title
+        info.author = author
+
+        // XMP — carefully typed to match the PDF/A registered forms:
+        //   dc:title      → lang alt (rdf:Alt keyed by xml:lang)
+        //   dc:creator    → seq propername (rdf:Seq of strings)
+        //   pdfaid:part   → "3"     ← would be dropped if we replaced iText's
+        //   pdfaid:conf   → "B"       XMP with an empty XMPMeta, hence the
+        //                             pdfDoc.xmpMetadata pull below.
+        // fx: properties get their own extension schema block so the pdfa
+        // checker knows they're legal (rule 6.7.9 fails without it).
+        try {
+            val xmpMeta = pdfDoc.xmpMetadata ?: XMPMetaFactory.create()
+
+            // dc:title — lang alt required by PDF/A rule 6.7.9.
+            val dcNs = XMPConst.NS_DC
+            xmpMeta.deleteProperty(dcNs, "title")
+            xmpMeta.setLocalizedText(dcNs, "title", XMPConst.X_DEFAULT, XMPConst.X_DEFAULT, title)
+
+            // dc:creator — seq of proper names.
+            xmpMeta.deleteProperty(dcNs, "creator")
+            xmpMeta.appendArrayItem(
+                dcNs, "creator",
+                PropertyOptions().setArrayOrdered(true),
+                author, null,
+            )
+
+            // pdfaid:part / conformance — PdfADocument sets these on the XMP
+            // it emits at close, but we're replacing that XMP with our own
+            // instance and would clobber them otherwise. Set them explicitly.
+            val pdfaidNs = XMPConst.NS_PDFA_ID
+            xmpMeta.setProperty(pdfaidNs, "part", "3")
+            xmpMeta.setProperty(pdfaidNs, "conformance", "B")
+
+            // fx: properties — the four Factur-X consumer keys.
+            val fxNs = "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#"
+            try { XMPMetaFactory.getSchemaRegistry().registerNamespace(fxNs, "fx") } catch (_: Exception) {}
+            xmpMeta.setProperty(fxNs, "DocumentType", "INVOICE")
+            xmpMeta.setProperty(fxNs, "DocumentFileName", "factur-x.xml")
+            xmpMeta.setProperty(fxNs, "Version", "1.0")
+            xmpMeta.setProperty(fxNs, "ConformanceLevel", "EXTENDED")
+
+            appendFacturXExtensionSchema(xmpMeta)
+
+            pdfDoc.setXmpMetadata(xmpMeta)
+        } catch (t: Throwable) {
+            System.err.println("[PdfGenerator] attachFacturXPayload XMP failure: ${t::class.qualifiedName}: ${t.message}")
+            t.printStackTrace()
+        }
+    }
+
+    /**
+     * Declare the fx: namespace as a PDF/A extension schema so veraPDF
+     * accepts the fx:* properties (rule 6.7.9 otherwise fails with "property
+     * is not defined in any schema"). Structure: a Bag of Structs; each
+     * Struct has schema / namespaceURI / prefix strings plus an ordered Seq
+     * of property description Structs.
+     */
+    private fun appendFacturXExtensionSchema(xmpMeta: XMPMeta) {
+        val extNs = "http://www.aiim.org/pdfa/ns/extension/"
+        val schemaNs = "http://www.aiim.org/pdfa/ns/schema#"
+        val propertyNs = "http://www.aiim.org/pdfa/ns/property#"
+        val registry = XMPMetaFactory.getSchemaRegistry()
+        registry.registerNamespace(extNs, "pdfaExtension")
+        registry.registerNamespace(schemaNs, "pdfaSchema")
+        registry.registerNamespace(propertyNs, "pdfaProperty")
+
+        // Wipe any previous fx schema entry so re-runs don't stack multiple
+        // rdf:Bag items pointing at the same namespace.
+        try { xmpMeta.deleteProperty(extNs, "schemas") } catch (_: Exception) {}
+
+        val schemasBagOptions = PropertyOptions().setArray(true)
+        val schemaStructOptions = PropertyOptions().apply { isStruct = true }
+        xmpMeta.appendArrayItem(extNs, "schemas", schemasBagOptions, null, schemaStructOptions)
+        val schemaPath = "pdfaExtension:schemas[1]"
+
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "schema",
+            "Factur-X PDFA Extension Schema")
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "namespaceURI",
+            "urn:factur-x:pdfa:CrossIndustryDocument:invoice:1p0#")
+        xmpMeta.setStructField(extNs, schemaPath, schemaNs, "prefix", "fx")
+
+        val properties = listOf(
+            Triple("DocumentType", "Text", "Factur-X document type (INVOICE)"),
+            Triple("DocumentFileName", "Text", "Name of the embedded Factur-X XML file"),
+            Triple("Version", "Text", "Version of the Factur-X profile"),
+            Triple("ConformanceLevel", "Text",
+                "Factur-X conformance level (MINIMUM, BASIC, EN 16931, EXTENDED)"),
+        )
+        val propBagPath = "$schemaPath/pdfaSchema:property"
+        val propBagOptions = PropertyOptions().setArrayOrdered(true)
+        val propStructOptions = PropertyOptions().apply { isStruct = true }
+        properties.forEachIndexed { index, (name, type, description) ->
+            xmpMeta.appendArrayItem(extNs, propBagPath, propBagOptions, null, propStructOptions)
+            val propPath = "$propBagPath[${index + 1}]"
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "name", name)
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "valueType", type)
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "category", "external")
+            xmpMeta.setStructField(extNs, propPath, propertyNs, "description", description)
+        }
+    }
+
 
     private fun createLogoAndTitleTable(
         logoPath: String,
@@ -368,7 +761,7 @@ class PdfGeneratorImpl(
             Paragraph(title + " " + documentNumber)
                 .pdfBold()
                 .setFontSize(titleFontSize)
-                .setMarginBottom(-2F)
+                .setMarginBottom(-6F)
         )
 
         val dateLabel = strings.documentDate.trimEnd() + " "
@@ -409,7 +802,7 @@ class PdfGeneratorImpl(
         return Paragraph(title + " " + documentNumber)
             .pdfBold()
             .setFontSize(fontSize)
-            .setMarginBottom(-2F)
+            .setMarginBottom(-6F)
     }
 
     private fun createDate(date: String, fontSize: Float): Paragraph {
@@ -432,11 +825,12 @@ class PdfGeneratorImpl(
             "$labelPattern $currencyCode"
         }
         return Paragraph(text)
-            .setFontSize(9.5F)
-            .pdfBold()
-            .setTextAlignment(TextAlignment.CENTER)
-            .setFixedLeading(14F)
-            .setPaddingTop(12f)
+            .setFontSize(8F)
+            .setFontColor(ColorConstants.DARK_GRAY)
+            .setTextAlignment(TextAlignment.RIGHT)
+            .setFixedLeading(10F)
+            .setPaddingTop(5f)
+            .setPaddingRight(3f)
     }
 
     private fun createIssuerAndClientTable(
@@ -556,8 +950,13 @@ class PdfGeneratorImpl(
             .setPaddingBottom(5f)
 
         if (displayAllInfo) {
-            clientOrIssuer?.firstName?.text?.let { nameAndAddress.add(Text("$it ")) }
-            clientOrIssuer?.name?.text?.let { nameAndAddress.add(Text("$it\n")) }
+            // Issuer + client name (and firstName for particuliers) render
+            // bold — matches the preview which uses textForDocumentsBold on
+            // the name line. Applied at the Text-token level, not on the
+            // Paragraph, so the following address lines stay in regular
+            // weight even though they sit inside the same Paragraph.
+            clientOrIssuer?.firstName?.text?.let { nameAndAddress.add(Text("$it ").pdfBold()) }
+            clientOrIssuer?.name?.text?.let { nameAndAddress.add(Text("$it\n").pdfBold()) }
         }
         result.add(nameAndAddress)
 
@@ -730,7 +1129,7 @@ class PdfGeneratorImpl(
         // Single-line-box layout: each row is one Paragraph whose label and
         // amount sit at their own right-aligned tab stops. One line box per row
         // means one shared baseline, which matters when iText grabs a fallback
-        // font for a currency glyph the primary Helvetica doesn't cover.
+        // font for a currency glyph the primary Arimo doesn't cover.
         data class Line(val label: String, val amount: String, val bold: Boolean)
         val lines = buildList {
             add(Line(
@@ -761,12 +1160,10 @@ class PdfGeneratorImpl(
         }
 
         // Measure the widest amount so the label's right-align tab lands just
-        // before it. Uses the embedded helvetica.ttf (covers €, £, ₹, ₺, ₩,
-        // ₴, ₸ and everything Latin) rather than StandardFonts.HELVETICA
-        // (Base14, WinAnsi encoded, has none of the currency-symbol block).
-        // For the four glyphs even our embedded font misses (₪ ₼ ₽ ₾),
-        // per-char measurement returns 0 → we substitute a generous 1em
-        // estimate so those rare cases don't collapse the gap.
+        // before it. Uses the embedded arimo.ttf — covers €, £, ₹, ₺, ₩, ₴, ₸
+        // and everything Latin. For the four glyphs even our embedded font
+        // misses (₪ ₼ ₽ ₾), per-char measurement returns 0 → we substitute a
+        // generous 1em estimate so those rare cases don't collapse the gap.
         val measurementFont = loadPricesMeasurementFont()
         val maxAmountWidth = lines.maxOf { measurePriceWidth(it.amount, measurementFont, fontSize) }
         val labelRight = PRICES_AMOUNT_RIGHT - maxAmountWidth - PRICES_LABEL_AMOUNT_GAP
@@ -816,18 +1213,116 @@ class PdfGeneratorImpl(
         )
     }
 
-    private fun createDueDate(date: String, fontSize: Float, trimTopPadding: Boolean = false): Paragraph {
-        val dueDateLabel = strings.dueDate.trimEnd() + " "
-        return Paragraph("$dueDateLabel$date")
-            .setFixedLeading(16F)
-            // Drop the top gap when the currency notice already sits above:
-            // the notice provides the block spacing to the totals, dueDate
-            // just needs to hug it. Without this, the two lines end up
-            // ~24pt apart instead of ~2.
-            .setPaddingTop(if (trimTopPadding) 2f else 12f)
-            .setTextAlignment(TextAlignment.CENTER)
-            .pdfBold()
-            .setFontSize(fontSize)
+    /**
+     * "À régler avant le dd/mm/yyyy" (invoices with a due date) or the
+     * generic "Paiement" fallback (credit notes). Used as the header of the
+     * greyed payment box, so it just returns a String — the box owns the
+     * bold + font size.
+     */
+    private fun paymentBoxTitle(document: DocumentState): String {
+        val invoiceDate = (document as? InvoiceState)?.dueDate
+            ?.substringBefore(" ")
+            ?.takeIf { it.isNotBlank() }
+        return if (invoiceDate != null) {
+            strings.dueDate.trimEnd() + " " + invoiceDate
+        } else {
+            strings.paymentSectionTitle
+        }
+    }
+
+    /** BT-81 flatten. Invoice-only — avoir + devis + BL don't render this. */
+    private fun paymentMeansDisplayFor(document: DocumentState): String? {
+        val invoice = document as? InvoiceState ?: return null
+        if (invoice.paymentMeansHidden || invoice.paymentMeansSegments.isEmpty()) return null
+        return com.a4a.g8invoicing.data.models
+            .flattenPaymentLabel(invoice.paymentMeansSegments, strings.paymentMeansLabels)
+            .takeIf { it.isNotEmpty() }
+    }
+
+    /**
+     * BT-84/86 flatten. Invoice-only for the same reason as
+     * paymentMeansDisplayFor — a devis has no payment context, an avoir
+     * reverses the flow. Returns "IBAN : … \n BIC : …", null when both empty.
+     */
+    private fun bankRenderedFor(document: DocumentState): String? {
+        val invoice = document as? InvoiceState ?: return null
+        if (invoice.paymentBankHidden) return null
+        val issuer = invoice.documentIssuer
+        val iban = issuer?.paymentIban?.text?.trim().orEmpty()
+        val bic = issuer?.paymentBic?.text?.trim().orEmpty()
+        if (iban.isEmpty() && bic.isEmpty()) return null
+        val country = issuer?.paymentCountry
+        val identifierLabel = if (com.a4a.g8invoicing.data.models.CountryCodes.isIbanCountry(country)
+            || country == null
+        ) strings.bankAccountIbanLabel else strings.bankAccountGenericLabel
+        val effectiveSegments = invoice.paymentBankSegments.ifEmpty {
+            com.a4a.g8invoicing.data.models.defaultPaymentBankSegments()
+        }
+        return com.a4a.g8invoicing.data.models
+            .flattenPaymentBank(effectiveSegments, identifierLabel, iban, bic)
+            .takeIf { it.isNotEmpty() }
+    }
+
+    /**
+     * The grey rounded box below the totals — header line (due date or
+     * "Paiement") + means + IBAN/BIC. Built as a single-cell Table so the
+     * background paints under the whole content block, not per Paragraph.
+     * Table width is left unspecified so it hugs the widest inner line
+     * instead of stretching across the page.
+     */
+    private fun createPaymentBox(
+        document: DocumentState,
+        paymentMeansDisplay: String?,
+        bankRendered: String?,
+        fontSize: Float,
+    ): Table {
+        val cell = Cell()
+            .setBackgroundColor(com.itextpdf.kernel.colors.DeviceRgb(245, 245, 245))
+            .setBorder(Border.NO_BORDER)
+            .setPaddingTop(10f)
+            .setPaddingBottom(10f)
+            .setPaddingLeft(14f)
+            .setPaddingRight(14f)
+        cell.add(
+            Paragraph(paymentBoxTitle(document))
+                .setFontSize(fontSize)
+                .pdfBold()
+                .setFixedLeading(11F)
+                .setMarginBottom(4f)
+        )
+        val bodyLines = listOfNotNull(paymentMeansDisplay, bankRendered)
+            .joinToString("\n")
+        if (bodyLines.isNotEmpty()) {
+            cell.add(
+                Paragraph(bodyLines)
+                    .setFontSize(fontSize)
+                    // Match the issuer companyInfo Paragraph's setFixedLeading(12F)
+                    // so 'Mode de paiement accepté / IBAN / BIC' reads with the
+                    // same interline as SIREN / TVA above.
+                    .setFixedLeading(12F)
+            )
+        }
+        return Table(1)
+            .setBorder(Border.NO_BORDER)
+            .setMarginTop(12f)
+            .setHorizontalAlignment(HorizontalAlignment.LEFT)
+            .addCell(cell)
+    }
+
+    /** Hairline grey rule that groups the terms / footer / watermark trio. */
+    private fun createSeparator(topMargin: Float): Table {
+        return Table(1)
+            .useAllAvailableWidth()
+            .setBorder(Border.NO_BORDER)
+            .setMarginTop(topMargin)
+            .setMarginBottom(8f)
+            .addCell(
+                Cell()
+                    .setBorder(Border.NO_BORDER)
+                    .setBorderTop(SolidBorder(com.itextpdf.kernel.colors.DeviceRgb(224, 224, 224), 0.5f))
+                    .setPadding(0f)
+                    .setHeight(0.5f)
+            )
     }
 
     // Locale-aware "Paid" stamp. Resolve to the invoice's frozen formatLocale
@@ -858,15 +1353,30 @@ class PdfGeneratorImpl(
         }
     }
 
-    private fun createFooter(text: String, fontSize: Float): Paragraph {
+    /**
+     * User-typed free field rendered under the hairline. Small black centered
+     * to match the preview footer. [precededByTerms] adds a small top margin
+     * so it doesn't hug the terms above.
+     */
+    private fun createFooter(text: String, fontSize: Float, precededByTerms: Boolean): Paragraph {
         return Paragraph(text)
-            .setFontSize(fontSize)
-            // 10pt leading on a 9.5pt font is a tight ~1.05 ratio — matches
-            // the preview's tighter line-height so a user-typed blank line
-            // reads as one blank line, not two. The earlier 14pt inflated
-            // every line gap and blew up empty separators.
+            .setFontSize(fontSize - 1.5F)
             .setFixedLeading(10F)
             .setTextAlignment(TextAlignment.CENTER)
+            .setMarginTop(if (precededByTerms) 6f else 0f)
+    }
+
+    /**
+     * BT-20 payment terms description — free text. Sits under the hairline,
+     * left-aligned in muted grey (mention style). Non-null caller check
+     * ensures we don't render an empty paragraph.
+     */
+    private fun createPaymentTermsBlock(text: String, fontSize: Float): Paragraph {
+        return Paragraph(text)
+            .setFontSize(fontSize - 1.5F)
+            .setFontColor(ColorConstants.DARK_GRAY)
+            .setFixedLeading(9F)
+            .setTextAlignment(TextAlignment.LEFT)
     }
 
     private fun createWatermark(text: String): Paragraph {
@@ -927,17 +1437,17 @@ class PdfGeneratorImpl(
     // Lazily-loaded PdfFont used only for measuring price-row widths. Kept as
     // a nullable cache field so we don't re-parse the TTF for every PDF; the
     // PdfGeneratorImpl instance is per-generation anyway, so no cross-thread
-    // concern. Falls back to the Base14 Helvetica if the asset is missing —
-    // measurement will underestimate exotic glyphs but PRICES_LABEL_AMOUNT_GAP
-    // has enough slack for that to still look correct.
+    // concern. Loads Arimo bytes directly rather than going through the
+    // FontProvider — measurement runs before the Document exists so there's
+    // no PDF context to attach a resource to, and using a Base14 fallback
+    // here would still register a non-embedded font in the doc via the
+    // measured Paragraph's font stack (breaks PDF/A-3).
     private var pricesMeasurementFont: PdfFont? = null
     private fun loadPricesMeasurementFont(): PdfFont {
         pricesMeasurementFont?.let { return it }
-        val font = try {
-            fileManager.loadAssetBytes("helvetica.ttf")?.let { bytes ->
-                PdfFontFactory.createFont(FontProgramFactory.createFont(bytes), PdfEncodings.IDENTITY_H)
-            }
-        } catch (_: Throwable) { null } ?: PdfFontFactory.createFont(StandardFonts.HELVETICA)
+        val bytes = fileManager.loadAssetBytes(ARIMO_ASSET)
+            ?: error("Arimo asset missing — required for price-row measurement")
+        val font = PdfFontFactory.createFont(FontProgramFactory.createFont(bytes), PdfEncodings.IDENTITY_H)
         pricesMeasurementFont = font
         return font
     }
@@ -1002,6 +1512,19 @@ class PdfGeneratorImpl(
             companyId2Label = pick("company_identification2", defaults.companyId2Label),
             companyId3Label = pick("company_identification3", defaults.companyId3Label),
             currencyNoticeLabel = pick("pdf_currency_notice", defaults.currencyNoticeLabel),
+            paymentSectionTitle = pick("document_payment_section_title", defaults.paymentSectionTitle),
+            // Freeze the mode labels (BT-81) per-chip so a FR invoice keeps
+            // "Virement, chèque" after the user switches app to EN. Same
+            // snapshot → localeFallback → app-default cascade as every other
+            // field above. Chip identity (not UN/CEFACT code) because PayPal
+            // + Stripe share code 68. The prefix isn't handled here — it's
+            // the user's paymentMeansLabel on the doc state, not a static
+            // PdfStrings key.
+            paymentMeansLabels = defaults.paymentMeansLabels.mapValues { (chipId, default) ->
+                val labelKey = com.a4a.g8invoicing.data.models.PaymentMeans
+                    .fromChipId(chipId)?.labelKey ?: "payment_means_$chipId"
+                pick(labelKey, default)
+            },
         )
     }
 

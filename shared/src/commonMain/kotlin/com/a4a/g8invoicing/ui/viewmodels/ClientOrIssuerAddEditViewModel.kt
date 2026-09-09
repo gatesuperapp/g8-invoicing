@@ -135,7 +135,14 @@ class ClientOrIssuerAddEditViewModel(
                 companyId2Label = _documentClientUiState.value.companyId2Label,
                 companyId2Number = _documentClientUiState.value.companyId2Number,
                 companyId3Label = _documentClientUiState.value.companyId3Label,
-                companyId3Number = _documentClientUiState.value.companyId3Number
+                companyId3Number = _documentClientUiState.value.companyId3Number,
+                // Carry the auto-classification (INDIVIDUAL when a firstName
+                // was typed / PROFESSIONAL when a SIREN was) from the doc-side
+                // draft over to the master master row about to be inserted.
+                // Without this the master lands with clientType=null even
+                // though the form's radio visibly landed on Particulier /
+                // Professionnel while the user was editing.
+                clientType = _documentClientUiState.value.clientType,
             )
         } else {
             _issuerUiState.value = ClientOrIssuerState(
@@ -156,18 +163,30 @@ class ClientOrIssuerAddEditViewModel(
                 logoPath = _documentIssuerUiState.value.logoPath,
                 vatExempt = _documentIssuerUiState.value.vatExempt,
                 intraEuSales = _documentIssuerUiState.value.intraEuSales,
+                // Carry over the banks the user typed in the doc-embedded issuer
+                // form — createNewAndReturnId reads them from this state to seed
+                // the IssuerBank table for the new master. Without this the doc
+                // gets a frozen payment_iban seeded from the first bank but the
+                // master has zero linked accounts, so the payment-means picker
+                // dropdown shows the empty-state hint on the next open.
+                banks = _documentIssuerUiState.value.banks,
                 taxWithholdingEnabled = _documentIssuerUiState.value.taxWithholdingEnabled,
             )
         }
     }
 
     fun clearClientOrIssuerUiState(type: ClientOrIssuerType) {
+        // Explicit .type on the reset — a bare ClientOrIssuerState() defaults
+        // .type to null, and the auto-classification bumps (typing a first
+        // name flips clientType to INDIVIDUAL, typing a SIREN flips it to
+        // PROFESSIONAL) key off .type == CLIENT / DOCUMENT_CLIENT. A null
+        // .type silently disables both.
         if (type == ClientOrIssuerType.DOCUMENT_CLIENT) {
-            _clientUiState.value = ClientOrIssuerState()
-            _documentClientUiState.value = ClientOrIssuerState()
+            _clientUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.CLIENT)
+            _documentClientUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT)
         } else {
-            _issuerUiState.value = ClientOrIssuerState()
-            _documentIssuerUiState.value = ClientOrIssuerState()
+            _issuerUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.ISSUER)
+            _documentIssuerUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_ISSUER)
         }
     }
 
@@ -272,6 +291,64 @@ class ClientOrIssuerAddEditViewModel(
                         value
                     )
             }
+        }
+        // Real-time inline check on the company-id "label empty + value
+        // filled" rule: re-run whenever a company_id label OR value
+        // sub-field changes, so the red-under-row error appears as soon as
+        // the user clears a label (matches the email-on-focus-loss UX).
+        if (isCompanyIdSubField(pageElement)) {
+            refreshCompanyIdLabelErrors(type)
+        }
+    }
+
+    private fun isCompanyIdSubField(element: ScreenElement): Boolean = element in setOf(
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
+        ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL,
+        ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_VALUE,
+    )
+
+    /**
+     * Strip any existing company-id label errors from the state's errors list
+     * and re-add fresh ones based on the current slot values. Called on every
+     * keystroke in a company_id sub-field so inline red-under-row appears /
+     * disappears in real time. The full save-time [validateInputs] still runs
+     * the same check plus everything else.
+     */
+    private fun refreshCompanyIdLabelErrors(type: ClientOrIssuerType) {
+        val isDocument = type == ClientOrIssuerType.DOCUMENT_CLIENT ||
+            type == ClientOrIssuerType.DOCUMENT_ISSUER
+        val idElements = if (isDocument) setOf(
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1,
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2,
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3,
+        ) else setOf(
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1,
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2,
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3,
+        )
+        val state = when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value
+        }
+        val refreshed: MutableList<Pair<ScreenElement, String?>> =
+            state.errors.filterNot { it.first in idElements }.toMutableList()
+        validateCompanyIdLabels(state, refreshed, isDocument)
+        when (type) {
+            ClientOrIssuerType.CLIENT -> _clientUiState.value = state.copy(errors = refreshed)
+            ClientOrIssuerType.ISSUER -> _issuerUiState.value = state.copy(errors = refreshed)
+            ClientOrIssuerType.DOCUMENT_CLIENT -> _documentClientUiState.value = state.copy(errors = refreshed)
+            ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value = state.copy(errors = refreshed)
         }
     }
 
@@ -636,7 +713,24 @@ class ClientOrIssuerAddEditViewModel(
 
         when (element) {
             ScreenElement.CLIENT_OR_ISSUER_NAME -> person = person.copy(name = value as TextFieldValue)
-            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> person = person.copy(firstName = value as TextFieldValue)
+            ScreenElement.CLIENT_OR_ISSUER_FIRST_NAME -> {
+                val newFirstName = value as TextFieldValue
+                // Symmetric to the SIREN → PROFESSIONAL bump below: typing a
+                // first name on an unclassified client (clientType == null)
+                // flips the rail to Particulier so the user sees where they
+                // stand. Only touches an unset type — an explicit choice
+                // (Particulier or Professionnel) wins on subsequent edits.
+                val autoTypeBump = if (
+                    person.type == ClientOrIssuerType.CLIENT &&
+                    person.clientType == null &&
+                    newFirstName.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(firstName = newFirstName, clientType = autoTypeBump)
+            }
             ScreenElement.CLIENT_OR_ISSUER_PHONE -> person = person.copy(phone = value as TextFieldValue)
 
             ScreenElement.CLIENT_OR_ISSUER_EMAIL_1 -> {
@@ -755,7 +849,31 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.CLIENT_OR_ISSUER_NOTES -> person = person.copy(notes = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL -> person = person.copy(companyId1Label = value as TextFieldValue)
-            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> person = person.copy(companyId1Number = value as TextFieldValue)
+            ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> {
+                val newNumber = value as TextFieldValue
+                // Typing anything into a client's SIREN slot (companyId1 is
+                // SIREN in FR defaults, and even under other locale-specific
+                // labels it's still a business tax id) auto-flags the client
+                // as a professional the FIRST time — user override wins on
+                // subsequent edits (we only touch clientType when it's null).
+                val autoTypeBump = if (
+                    person.type == ClientOrIssuerType.CLIENT &&
+                    person.clientType == null &&
+                    newNumber.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(companyId1Number = newNumber, clientType = autoTypeBump)
+            }
+            ScreenElement.CLIENT_TYPE -> {
+                // Wrapped payload — the picker fires ClientTypeChoice(null)
+                // when the user re-taps the active chip to clear the choice.
+                person = person.copy(
+                    clientType = (value as com.a4a.g8invoicing.data.models.ClientTypeChoice).value
+                )
+            }
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL -> person = person.copy(companyId2Label = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person = person.copy(companyId2Number = value as TextFieldValue)
             ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person = person.copy(companyId3Label = value as TextFieldValue)
@@ -764,6 +882,13 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.ISSUER_LOGO -> {
                 val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
                 person = person.copy(logoPath = logoPath)
+            }
+
+            ScreenElement.ISSUER_BANKS -> {
+                @Suppress("UNCHECKED_CAST")
+                person = person.copy(
+                    banks = value as List<com.a4a.g8invoicing.ui.states.IssuerBankState>
+                )
             }
 
             ScreenElement.ISSUER_VAT_EXEMPT -> {
@@ -788,8 +913,19 @@ class ClientOrIssuerAddEditViewModel(
         addresses: List<AddressState>?,
         addressIndex: Int,
     ): List<AddressState> {
-        return if (addresses.isNullOrEmpty()) listOf(newAddress)
-        else addresses.slice(0 until addressIndex) + newAddress + addresses.slice(addressIndex + 1 until addresses.size)
+        // Bounds-safe rewrite of the old slice() version. The client form now
+        // lets the user tap "+ Ajouter une adresse" without filling slot 1
+        // first (the previousAddressIsFilled guard was dropped so the button
+        // stays discoverable), so typing into slot 2 or 3 while the state
+        // still holds a shorter list would blow slice() up with
+        // IndexOutOfBounds. Pad the gap with empty AddressStates instead;
+        // saveInfoInDocumentClientOrIssuerAddressTables / isAddressEmpty
+        // strip them on save, so nothing blank ever reaches the DB.
+        val existing = addresses ?: emptyList()
+        val before = existing.take(addressIndex)
+        val gap = List(maxOf(0, addressIndex - existing.size)) { AddressState() }
+        val after = existing.drop(addressIndex + 1)
+        return before + gap + newAddress + after
     }
 
     private fun getNewEmails(
@@ -817,7 +953,22 @@ class ClientOrIssuerAddEditViewModel(
 
         when (element) {
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME -> person = person.copy(name = value as TextFieldValue)
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> person = person.copy(firstName = value as TextFieldValue)
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_FIRST_NAME -> {
+                val newFirstName = value as TextFieldValue
+                // Same first-name → INDIVIDUAL auto-bump as the master client
+                // form; only fires the first time (null → INDIVIDUAL).
+                val autoTypeBump = if (
+                    (person.type == ClientOrIssuerType.CLIENT ||
+                        person.type == ClientOrIssuerType.DOCUMENT_CLIENT) &&
+                    person.clientType == null &&
+                    newFirstName.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(firstName = newFirstName, clientType = autoTypeBump)
+            }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_PHONE -> person = person.copy(phone = value as TextFieldValue)
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1 -> {
@@ -936,7 +1087,27 @@ class ClientOrIssuerAddEditViewModel(
 
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NOTES -> person = person.copy(notes = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_LABEL -> person = person.copy(companyId1Label = value as TextFieldValue)
-            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> person = person.copy(companyId1Number = value as TextFieldValue)
+            ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1_VALUE -> {
+                val newNumber = value as TextFieldValue
+                // Same SIREN → PROFESSIONAL auto-bump as the master client
+                // form; only fires the first time (null → PROFESSIONAL).
+                val autoTypeBump = if (
+                    (person.type == ClientOrIssuerType.CLIENT ||
+                        person.type == ClientOrIssuerType.DOCUMENT_CLIENT) &&
+                    person.clientType == null &&
+                    newNumber.text.isNotBlank()
+                ) {
+                    com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL
+                } else {
+                    person.clientType
+                }
+                person = person.copy(companyId1Number = newNumber, clientType = autoTypeBump)
+            }
+            ScreenElement.CLIENT_TYPE -> {
+                person = person.copy(
+                    clientType = (value as com.a4a.g8invoicing.data.models.ClientTypeChoice).value
+                )
+            }
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_LABEL -> person = person.copy(companyId2Label = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2_VALUE -> person = person.copy(companyId2Number = value as TextFieldValue)
             ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3_LABEL -> person = person.copy(companyId3Label = value as TextFieldValue)
@@ -945,6 +1116,21 @@ class ClientOrIssuerAddEditViewModel(
             ScreenElement.DOCUMENT_ISSUER_LOGO -> {
                 val logoPath = (value as? String)?.takeIf { it.isNotEmpty() }
                 person = person.copy(logoPath = logoPath)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_PAYMENT_IBAN -> {
+                person = person.copy(paymentIban = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_PAYMENT_BIC -> {
+                person = person.copy(paymentBic = value as TextFieldValue)
+            }
+
+            ScreenElement.ISSUER_BANKS -> {
+                @Suppress("UNCHECKED_CAST")
+                person = person.copy(
+                    banks = value as List<com.a4a.g8invoicing.ui.states.IssuerBankState>
+                )
             }
 
             ScreenElement.DOCUMENT_ISSUER_VAT_EXEMPT -> {
@@ -965,20 +1151,36 @@ class ClientOrIssuerAddEditViewModel(
     }
 
     fun validateInputs(type: ClientOrIssuerType): Boolean {
-        // Check if there's an invalid pending email
+        val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
+
+        // Un-committed pending-email input (typed but not yet added via
+        // enter/focus-loss) fails validation with `_pendingEmailIsValid=false`.
+        // The FormInputCreatorEmailList already shows its own inline red
+        // message via a local state, but we ALSO mirror the error into the
+        // state.errors list so the pre-save recap modal picks it up alongside
+        // any other issue. Uses EMAIL_1 as a stand-in ScreenElement — the
+        // modal only reads the message text, and EMAIL_1 always exists.
         if (!_pendingEmailIsValid) {
-            return false
+            val emailElement = when (type) {
+                ClientOrIssuerType.CLIENT, ClientOrIssuerType.ISSUER ->
+                    ScreenElement.CLIENT_OR_ISSUER_EMAIL_1
+                ClientOrIssuerType.DOCUMENT_CLIENT, ClientOrIssuerType.DOCUMENT_ISSUER ->
+                    ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_EMAIL_1
+            }
+            listOfErrors.add(Pair(emailElement, FormInputsValidator.VALIDATION_EMAIL_INVALID))
         }
 
-        val listOfErrors: MutableList<Pair<ScreenElement, String?>> = mutableListOf()
         when (type) {
             ClientOrIssuerType.CLIENT -> {
                 FormInputsValidator.validateName(_clientUiState.value.name.text)?.let {
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_clientUiState.value.emails, listOfErrors, isDocument = false)
+                validateCompanyIdLabels(_clientUiState.value, listOfErrors, isDocument = false)
                 val trimmedEmails = trimEmails(_clientUiState.value.emails)
-                _clientUiState.value = _clientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _clientUiState.value = _clientUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
 
             ClientOrIssuerType.ISSUER -> {
@@ -986,8 +1188,11 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_issuerUiState.value.emails, listOfErrors, isDocument = false)
+                validateCompanyIdLabels(_issuerUiState.value, listOfErrors, isDocument = false)
                 val trimmedEmails = trimEmails(_issuerUiState.value.emails)
-                _issuerUiState.value = _issuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _issuerUiState.value = _issuerUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
 
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
@@ -995,8 +1200,11 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_documentClientUiState.value.emails, listOfErrors, isDocument = true)
+                validateCompanyIdLabels(_documentClientUiState.value, listOfErrors, isDocument = true)
                 val trimmedEmails = trimEmails(_documentClientUiState.value.emails)
-                _documentClientUiState.value = _documentClientUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _documentClientUiState.value = _documentClientUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
 
             ClientOrIssuerType.DOCUMENT_ISSUER -> {
@@ -1004,11 +1212,84 @@ class ClientOrIssuerAddEditViewModel(
                     listOfErrors.add(Pair(ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_NAME, it))
                 }
                 validateEmails(_documentIssuerUiState.value.emails, listOfErrors, isDocument = true)
+                validateCompanyIdLabels(_documentIssuerUiState.value, listOfErrors, isDocument = true)
                 val trimmedEmails = trimEmails(_documentIssuerUiState.value.emails)
-                _documentIssuerUiState.value = _documentIssuerUiState.value.copy(emails = trimmedEmails, errors = listOfErrors)
+                _documentIssuerUiState.value = _documentIssuerUiState.value
+                    .copy(emails = trimmedEmails, errors = listOfErrors)
+                    .cleanFieldsForClientType()
             }
         }
-        return listOfErrors.isEmpty()
+        // Fail-save if either the committed-fields check produced errors OR
+        // the pending-email flag is invalid (its error was already merged into
+        // listOfErrors above, but we still need to block save).
+        return _pendingEmailIsValid && listOfErrors.isEmpty()
+    }
+
+    /**
+     * Wipe type-mismatched fields at save time: a PROFESSIONAL client can't
+     * have a firstName (companies don't have one), an INDIVIDUAL can't have
+     * SIREN / TVA / RCS slots (they're issued to legal entities only).
+     *
+     * Fires only inside [validateInputs] — while the user is still editing we
+     * keep every field as-typed so someone who switches type by mistake, or
+     * who wants to peek at the other-type fields, isn't punished with a data
+     * wipe on each toggle. clientType == null (unclassified) stays untouched
+     * so the auto-classification code path in [updateClientOrIssuerUiState] /
+     * [updateDocumentClientOrIssuerUiState] retains the raw input to work
+     * from. Issuers carry a null clientType too and fall through untouched.
+     */
+    private fun ClientOrIssuerState.cleanFieldsForClientType(): ClientOrIssuerState {
+        return when (clientType) {
+            com.a4a.g8invoicing.data.models.ClientType.PROFESSIONAL ->
+                copy(firstName = null)
+            com.a4a.g8invoicing.data.models.ClientType.INDIVIDUAL ->
+                copy(
+                    companyId1Label = null, companyId1Number = null,
+                    companyId2Label = null, companyId2Number = null,
+                    companyId3Label = null, companyId3Number = null,
+                )
+            null -> this
+        }
+    }
+
+    /**
+     * Fire an inline "libellé manquant" error under each company-id LABEL
+     * slot where the matching VALUE slot is filled but the label itself is
+     * empty. Both empty = unused slot, silent. See
+     * [FormInputsValidator.validateCompanyIdLabelForFilledValue].
+     */
+    private fun validateCompanyIdLabels(
+        state: ClientOrIssuerState,
+        listOfErrors: MutableList<Pair<ScreenElement, String?>>,
+        isDocument: Boolean,
+    ) {
+        // ScreenElement is the FormInput aggregate (…_IDENTIFICATION1, no
+        // _LABEL suffix) — that's what FormUI matches on for its per-row
+        // errorMessage lookup. The error text sits under the whole ident
+        // row rather than pinpointing the label sub-field, which reads
+        // clearly enough since the row visually groups label + number.
+        val slots = listOf(
+            Triple(
+                state.companyId1Label?.text, state.companyId1Number?.text,
+                if (isDocument) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION1
+                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION1,
+            ),
+            Triple(
+                state.companyId2Label?.text, state.companyId2Number?.text,
+                if (isDocument) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION2
+                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION2,
+            ),
+            Triple(
+                state.companyId3Label?.text, state.companyId3Number?.text,
+                if (isDocument) ScreenElement.DOCUMENT_CLIENT_OR_ISSUER_IDENTIFICATION3
+                else ScreenElement.CLIENT_OR_ISSUER_IDENTIFICATION3,
+            ),
+        )
+        slots.forEach { (label, value, element) ->
+            FormInputsValidator.validateCompanyIdLabelForFilledValue(label, value)?.let { err ->
+                listOfErrors.add(Pair(element, err))
+            }
+        }
     }
 
     private fun validateEmails(
@@ -1045,7 +1326,7 @@ class ClientOrIssuerAddEditViewModel(
             ClientOrIssuerType.CLIENT -> _clientUiState.value.errors.clear()
             ClientOrIssuerType.ISSUER -> _issuerUiState.value.errors.clear()
             ClientOrIssuerType.DOCUMENT_CLIENT -> {
-                _documentClientUiState.value = ClientOrIssuerState()
+                _documentClientUiState.value = ClientOrIssuerState(type = ClientOrIssuerType.DOCUMENT_CLIENT)
                 _documentClientUiState.value.errors.clear()
             }
             ClientOrIssuerType.DOCUMENT_ISSUER -> _documentIssuerUiState.value.errors.clear()
@@ -1053,7 +1334,8 @@ class ClientOrIssuerAddEditViewModel(
     }
 
     /**
-     * Checks if the master version has changed since the document was created.
+     * Checks if the master version has changed since the document was created
+     * (or since the user last acknowledged the drift via "Keep current").
      * Returns true if versions don't match (master was updated elsewhere).
      * For legacy documents without originalVersion, compares against master version > 1.
      */
@@ -1066,6 +1348,49 @@ class ClientOrIssuerAddEditViewModel(
             return masterVersion > 1
         }
         return documentVersion != masterVersion
+    }
+
+    /**
+     * "Keep current" flow: bump the doc snapshot's originalVersion to the
+     * master's current version so the mismatch dialog stops re-firing on every
+     * reopen. Data stays frozen (no field is refreshed) — we only record that
+     * the user has *seen* this master version and chosen to skip it.
+     *
+     * Persists the change to DB, refreshes the VM's internal editing state so
+     * a following EDIT_CLIENT/EDIT_ISSUER form save doesn't write the stale
+     * originalVersion back to DB, and returns a fresh state copy so the caller
+     * can push it into the invoice/quote/BL/avoir UiState (the check reads
+     * originalVersion from that state on the next open).
+     */
+    suspend fun acknowledgeMasterVersion(
+        documentClientOrIssuer: ClientOrIssuerState,
+    ): ClientOrIssuerState? {
+        val docId = documentClientOrIssuer.id?.toLong() ?: return null
+        val masterId = documentClientOrIssuer.originalClientOrIssuerId?.toLong() ?: return null
+        val newVersion = dataSource.acknowledgeDocumentClientOrIssuerVersion(docId, masterId)
+            ?: return null
+        val updated = documentClientOrIssuer.copy(originalVersion = newVersion)
+        // Sync the internal editing state so onClickDoneForm's
+        // updateClientOrIssuerInLocalDb picks up the acknowledged version.
+        // The edit-block flow seeds this state to the pre-ack snapshot right
+        // before the dialog fires — without this sync, closing the edit form
+        // would silently overwrite the DB write we just did.
+        when (documentClientOrIssuer.type) {
+            ClientOrIssuerType.DOCUMENT_CLIENT -> {
+                val current = _documentClientUiState.value
+                if (current.id == documentClientOrIssuer.id) {
+                    _documentClientUiState.value = current.copy(originalVersion = newVersion)
+                }
+            }
+            ClientOrIssuerType.DOCUMENT_ISSUER -> {
+                val current = _documentIssuerUiState.value
+                if (current.id == documentClientOrIssuer.id) {
+                    _documentIssuerUiState.value = current.copy(originalVersion = newVersion)
+                }
+            }
+            else -> {}
+        }
+        return updated
     }
 
     /**

@@ -1,0 +1,33 @@
+CREATE TABLE QuoteTag (
+  quote_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO QuoteTag (quote_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'CANCELLED'),
+(4, 'INVOICED');
+
+getTagId:
+SELECT quote_tag_id
+FROM QuoteTag
+WHERE name = :name;
+
+getTag:
+SELECT name
+FROM QuoteTag
+WHERE quote_tag_id = :quote_tag_id;
+
+getAllTags:
+SELECT *
+FROM QuoteTag;
+
+saveTag:
+INSERT
+INTO QuoteTag (quote_tag_id, name)
+VALUES (?, ?);
+
+deleteTagById:
+DELETE FROM QuoteTag
+WHERE quote_tag_id = :id;

@@ -66,10 +66,10 @@ fun DocumentBasicTemplateProductsTable(
     val quantityColumnWeight = .16f
     val unitColumnWeight = .23f
     val taxColumnWeight = .15f
-    val unitPriceColumnWeight = .23f
-    val totalPriceColumnWeight = .23f
+    val unitPriceColumnWeight = .25f
+    val totalPriceColumnWeight = .275f
     val descriptionColumnWeight =
-        (if (displayUnitColumn) .69f else .92f) +
+        (if (displayUnitColumn) .625f else .855f) +
         (if (displayTaxColumn) 0f else taxColumnWeight)
     val linkedNoteColumnWeight = 1f
 

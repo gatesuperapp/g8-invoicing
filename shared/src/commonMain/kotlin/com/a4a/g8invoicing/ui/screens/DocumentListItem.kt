@@ -6,9 +6,11 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,13 +27,18 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionTagCancelled
+import com.a4a.g8invoicing.ui.navigation.actionTagCancelledMasc
 import com.a4a.g8invoicing.ui.navigation.actionTagDraft
+import com.a4a.g8invoicing.ui.navigation.actionTagInvoiced
+import com.a4a.g8invoicing.ui.navigation.actionTagLocked
 import com.a4a.g8invoicing.ui.navigation.actionTagLate
 import com.a4a.g8invoicing.ui.navigation.actionTagPaid
 import com.a4a.g8invoicing.ui.navigation.actionTagReminded
 import com.a4a.g8invoicing.ui.navigation.actionTagSent
+import com.a4a.g8invoicing.ui.navigation.actionTagSentMasc
 import com.a4a.g8invoicing.ui.navigation.actionTagUndefined
 import com.a4a.g8invoicing.ui.shared.CheckboxFace
 import com.a4a.g8invoicing.ui.shared.DocumentType
@@ -51,17 +58,37 @@ fun DocumentListItem(
     onItemClick: () -> Unit = {},
     onItemCheckboxClick: (Boolean) -> Unit = {},
     keyToResetCheckbox: Boolean,
+    tagsEnabled: Boolean = true,
 ) {
-    // Get the action based on document tag - computed in composable context
-    val action = when (document.documentTag) {
+    // Get the action based on document tag - computed in composable context.
+    // BL / Devis share the same enum as invoices but use the masculine label
+    // variants ("Envoyé" / "Annulé") and INVOICED (green) instead of the
+    // invoice-only PAID / LATE / REMINDED palette.
+    //
+    // [tagsEnabled] is false when the caller's gStore tagging module is off
+    // (MODULE_QUOTE_TAGGING / MODULE_DELIVERY_NOTE_TAGGING) — in that case we
+    // fall straight to the neutral UNDEFINED action (white pill + grey border,
+    // no coloured chip) regardless of the doc's stored tag. Tags saved from
+    // a previous activation stay in the DB but don't render, so re-activating
+    // the module later brings them back untouched.
+    val isInvoice = document is InvoiceState
+    val action = if (!tagsEnabled) {
+        actionTagUndefined()
+    } else when (document.documentTag) {
         DocumentTag.DRAFT -> actionTagDraft()
-        DocumentTag.SENT -> actionTagSent()
+        DocumentTag.SENT -> if (isInvoice) actionTagSent() else actionTagSentMasc()
         DocumentTag.PAID -> actionTagPaid()
         DocumentTag.LATE -> actionTagLate()
         DocumentTag.REMINDED -> actionTagReminded()
-        DocumentTag.CANCELLED -> actionTagCancelled()
+        DocumentTag.CANCELLED -> if (isInvoice) actionTagCancelled() else actionTagCancelledMasc()
+        DocumentTag.INVOICED -> actionTagInvoiced()
+        DocumentTag.LOCKED -> actionTagLocked()
         else -> actionTagUndefined()
     }
+    // Emoji cadenas rendered in place of the coloured circle when the doc
+    // is LOCKED — same 16.dp box the FlippyCheckBox draws so the pill
+    // stays aligned with sibling rows.
+    val isLocked = tagsEnabled && document.documentTag == DocumentTag.LOCKED
     var isPressed = remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -113,16 +140,23 @@ fun DocumentListItem(
             verticalAlignment = CenterVertically,
         ) {
 
-            // Cancelled invoices are visually greyed out: white pill (not the
+            // Cancelled docs are visually greyed out: white pill (not the
             // yellow "cancelled" fill), primary text in a light muted grey,
             // price struck-through. The tag lookup still returns
             // actionTagCancelled() so the tag dropdown / bottom bar keep their
-            // pale-yellow chip semantics elsewhere.
-            val isCancelled = document is InvoiceState &&
-                document.documentTag == DocumentTag.CANCELLED
+            // pale-yellow chip semantics elsewhere. Same treatment for BL /
+            // Devis: a cancelled source doc should read as clearly de-emphasised.
+            // Skipped entirely when tagsEnabled=false so a stored CANCELLED
+            // tag from a previous module activation doesn't grey out the row.
+            val isCancelled = tagsEnabled && document.documentTag == DocumentTag.CANCELLED
 
-            val statusColor: Color = when (document.documentTag) {
+            val statusColor: Color = if (!tagsEnabled) {
+                AppColors.textPrimary
+            } else when (document.documentTag) {
                 DocumentTag.PAID -> AppColors.statusPaid
+                // BL / Devis final state: green like PAID so the row reads as
+                // "closed / invoiced" at a glance.
+                DocumentTag.INVOICED -> AppColors.statusPaid
                 DocumentTag.LATE -> AppColors.statusLate
                 else -> AppColors.textPrimary
             }
@@ -140,18 +174,55 @@ fun DocumentListItem(
             val daysUntilDue = invoice?.let { daysUntilDueDate(it.dueDate) }
 
             Column {
-                FlippyCheckBox(
-                    fillColorWhenSelectionOff = if (isCancelled) AppColors.surface else action.iconColor,
-                    backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.divider else AppColors.surface,
-                    onItemCheckboxClick = {
-                        checkedState.value = !checkedState.value
-                        onItemCheckboxClick(checkedState.value)
-                    },
-                    checkboxFace = if (checkedState.value) CheckboxFace.Front
-                    else CheckboxFace.Back,
-                    checkedState = checkedState.value,
-                    displayBorder = document.documentType != DocumentType.INVOICE || isCancelled,
-                )
+                if (isLocked) {
+                    // Emoji cadenas at ~pill footprint. Sized 20.dp instead
+                    // of the FlippyCheckBox's 16.dp because pictographic
+                    // glyphs render taller than the same-sp Latin font, so
+                    // 14sp needs a ~20dp box to breathe. Tap forwards to the
+                    // row's selection toggle but the ripple/hover is stripped
+                    // (interactionSource with indication=null) — the row
+                    // already fires its own ripple on tap, an extra one over
+                    // the tiny pill reads as noise.
+                    val lockInteractionSource = remember { MutableInteractionSource() }
+                    Box(
+                        modifier = Modifier
+                            .padding(12.dp)
+                            .padding(start = 4.dp)
+                            .size(20.dp)
+                            .clickable(
+                                interactionSource = lockInteractionSource,
+                                indication = null,
+                            ) {
+                                checkedState.value = !checkedState.value
+                                onItemCheckboxClick(checkedState.value)
+                            },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(text = "🔒", fontSize = 14.sp, lineHeight = 14.sp)
+                    }
+                } else {
+                    FlippyCheckBox(
+                        fillColorWhenSelectionOff = if (isCancelled) AppColors.surface else action.iconColor,
+                        backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.divider else AppColors.surface,
+                        onItemCheckboxClick = {
+                            checkedState.value = !checkedState.value
+                            onItemCheckboxClick(checkedState.value)
+                        },
+                        checkboxFace = if (checkedState.value) CheckboxFace.Front
+                        else CheckboxFace.Back,
+                        checkedState = checkedState.value,
+                        // Border is only shown when the fill is white — either
+                        // because the doc is cancelled (yellow chip forced to
+                        // white on the row), the tag is undefined (very old
+                        // docs pre-tagging module), or the gStore tagging
+                        // module is off (we force actionTagUndefined regardless
+                        // of the stored tag — without the border it would
+                        // disappear against the white row background).
+                        displayBorder = isCancelled ||
+                            !tagsEnabled ||
+                            document.documentTag == DocumentTag.UNDEFINED,
+                    )
+                }
             }
 
             Column(
@@ -234,32 +305,35 @@ fun DocumentListItem(
                         textDecoration = if (isCancelled) TextDecoration.LineThrough else null,
                     ),
                 )
-                if (document is InvoiceState) {
-                    // Status label under the price. For late invoices the
-                    // flat 'En retard' label swells to 'En retard de X jour(s)'
-                    // so the row surfaces exactly how overdue it is; the
-                    // colour still matches the price so paid/late read as one
-                    // green / one red signal.
-                    val overdueDays = if (document.documentTag == DocumentTag.LATE &&
-                        daysUntilDue != null && daysUntilDue < 0) -daysUntilDue else null
-                    val labelText = when {
-                        overdueDays != null -> stringResource(
-                            countdownStringFor(-overdueDays),
-                            overdueDays,
-                        )
-                        else -> action.label
-                    }
-                    labelText?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.textSecondary.copy(
-                                color = if (isCancelled) AppColors.textMuted else statusColor,
-                            ),
-                        )
-                    }
+                // Status label under the price. For late invoices the flat
+                // 'En retard' label swells to 'En retard de X jour(s)' so the
+                // row surfaces exactly how overdue it is; the colour still
+                // matches the price so paid/late read as one green / one red
+                // signal. BL / Devis share the same slot so users see the
+                // tag they picked ("Brouillon", "Envoyé", "Facturé"…) next
+                // to the chip.
+                val overdueDays = if (document is InvoiceState &&
+                    document.documentTag == DocumentTag.LATE &&
+                    daysUntilDue != null && daysUntilDue < 0
+                ) -daysUntilDue else null
+                val labelText = when {
+                    // Module off — no status label under the price even if
+                    // the doc carries a stored tag.
+                    !tagsEnabled -> null
+                    overdueDays != null -> stringResource(
+                        countdownStringFor(-overdueDays),
+                        overdueDays,
+                    )
+                    else -> action.label
                 }
-                // Non-invoice types: no second line on the right — the price
-                // sits alone and centres vertically with the left column.
+                labelText?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.textSecondary.copy(
+                            color = if (isCancelled) AppColors.textMuted else statusColor,
+                        ),
+                    )
+                }
             }
         }
     }

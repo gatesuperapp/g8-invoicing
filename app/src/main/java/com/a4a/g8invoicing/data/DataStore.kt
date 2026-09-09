@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore by preferencesDataStore("settings")
 
 // Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "1.8"
+const val CURRENT_APP_VERSION = "1.9"
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")
@@ -137,6 +137,16 @@ suspend fun setSeenOnboarding18(context: Context) {
         // LAST_SEEN_VERSION stayed at "1.7" and the standard WhatsNew popped
         // right after the user finished the wizard.
         prefs[PrefKeys.LAST_SEEN_VERSION] = CURRENT_APP_VERSION
+    }
+}
+
+// Flip HAS_SEEN_ONBOARDING_1_8 back to false so the wizard re-fires on the
+// next boot. Called from MainCompose when RestoreManager reports a restore
+// from a pre-1.8 backup — the restored clients have no country_code and the
+// wizard's "clients tous dans le même pays ?" step is how we bulk-fix them.
+suspend fun resetOnboarding18Seen(context: Context) {
+    context.dataStore.edit { prefs ->
+        prefs[PrefKeys.HAS_SEEN_ONBOARDING_1_8] = false
     }
 }
 

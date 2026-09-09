@@ -33,6 +33,7 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun convertQuotesToInvoice(quotes: List<com.a4a.g8invoicing.ui.states.QuoteState>): Long?
     suspend fun update(document: InvoiceState)
     suspend fun updateHideLinkedSourceHeaders(invoiceId: Long, hide: Boolean)
+    suspend fun updateVatExemptionText(invoiceId: Long, text: String?)
     suspend fun deleteAllRetentions(invoiceId: Long)
     suspend fun saveRetentions(invoiceId: Long, retentions: List<com.a4a.g8invoicing.ui.states.RetentionState>)
     suspend fun delete(documents: List<InvoiceState>)
@@ -40,4 +41,12 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun deleteTag(invoiceId: Long)
     suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+
+    /**
+     * Return the non-empty `footer` values of the [limit] most recent
+     * invoices belonging to [companyId]. Used by the 1.9 migration wizard
+     * to auto-detect an IBAN/BIC the user typed into free-form footers
+     * before the dedicated bank-details field existed.
+     */
+    suspend fun getRecentFootersForCompany(companyId: Long, limit: Int = 10): List<String>
 }

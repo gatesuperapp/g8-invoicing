@@ -1,6 +1,8 @@
 package com.a4a.g8invoicing.data
 
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
@@ -34,5 +36,10 @@ interface DeliveryNoteLocalDataSourceInterface {
     suspend fun update(document: DeliveryNoteState)
     suspend fun delete(documents: List<DeliveryNoteState>)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
+    suspend fun setTag(
+        documents: List<DeliveryNoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    )
 
 }

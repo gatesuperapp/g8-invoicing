@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.textSection
 import com.a4a.g8invoicing.data.AppLocaleHolder
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.models.UnitCode
@@ -98,7 +99,7 @@ fun UnitCodePicker(
     }
 
     val recent: List<UnitCode> = remember(recentCodes) {
-        recentCodes?.mapNotNull { UnitCode.findByCode(it) } ?: emptyList()
+        recentCodes?.mapNotNull { UnitCode.findByCode(it) }?.take(3) ?: emptyList()
     }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -188,9 +189,8 @@ fun UnitCodePicker(
 @Composable
 private fun SectionHeader(label: String) {
     Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.SemiBold,
+        text = label.uppercase(),
+        style = MaterialTheme.typography.textSection,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp, bottom = 4.dp),

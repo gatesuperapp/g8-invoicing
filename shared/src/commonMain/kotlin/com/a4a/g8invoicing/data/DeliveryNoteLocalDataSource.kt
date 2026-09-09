@@ -11,6 +11,9 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.delivery_note_default_number
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
+import com.a4a.g8invoicing.data.models.TagUpdateOrCreationCase
+import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
@@ -18,7 +21,9 @@ import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import g8invoicing.DeliveryNote
 import g8invoicing.DocumentClientOrIssuer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -26,7 +31,9 @@ class DeliveryNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : DeliveryNoteLocalDataSourceInterface {
     private val deliveryNoteQueries = db.deliveryNoteQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
@@ -39,22 +46,25 @@ class DeliveryNoteLocalDataSource(
     private val linkDeliveryNoteToDocumentClientOrIssuerQueries =
         db.linkDeliveryNoteToDocumentClientOrIssuerQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
+    private val deliveryNoteTagQueries = db.deliveryNoteTagQueries
+    private val linkDeliveryNoteToTagQueries = db.linkDeliveryNoteToTagQueries
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
-        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
-            null
-        } else {
-            getString(Res.string.invoice_watermark_default)
-        }
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) null
+        else getString(Res.string.invoice_watermark_default)
     }
 
     // --- createNew ---
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        // Récupérer l'émetteur depuis la table maître
-        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        // Résout l'entreprise courante (menu latéral). Fallback getLastIssuer()
+        // pour les installs sans Settings hydratée (sécurité post-migration).
+        val currentCompanyId = currentCompanyRepository.current
+        val existingIssuer = currentCompanyId
+            ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
+            ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
@@ -62,7 +72,7 @@ class DeliveryNoteLocalDataSource(
             val todayFormatted = DateUtils.getCurrentDateFormatted()
 
             val newDeliveryNoteState = DeliveryNoteState(
-                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                documentNumber = TextFieldValue(getLastDocumentNumber(currentCompanyId)?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.delivery_note_default_number)),
                 documentDate = todayFormatted,
@@ -73,6 +83,8 @@ class DeliveryNoteLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
+                originalCompanyId = currentCompanyId
+                    ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
             )
 
             saveInfoInDocumentTable(newDeliveryNoteState)
@@ -81,15 +93,22 @@ class DeliveryNoteLocalDataSource(
 
             newDeliveryNoteId?.let { id ->
                 saveInfoInOtherTables(id, newDeliveryNoteState)
+                saveTag(id, newDeliveryNoteState.documentTag)
             }
             newDeliveryNoteId
         }
     }
 
     // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---
-    private fun getLastDocumentNumber(): String? {
+    // companyId non-null → the new BL's number continues that entreprise's
+    // counter. Null falls back to the global counter (pre-migration safety).
+    private fun getLastDocumentNumber(companyId: Long?): String? {
         try {
-            return deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
+            return if (companyId != null) {
+                deliveryNoteQueries.getLastDeliveryNoteNumberForCompany(companyId).executeAsOneOrNull()?.number
+            } else {
+                deliveryNoteQueries.getLastDeliveryNoteNumber().executeAsOneOrNull()?.number
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -116,14 +135,17 @@ class DeliveryNoteLocalDataSource(
                     ?.let {
                         it.transformIntoEditableDeliveryNote(
                             fetchDocumentProducts(it.delivery_note_id),
-                            fetchClientAndIssuer(
-                                it.delivery_note_id,
-                                linkDeliveryNoteToDocumentClientOrIssuerQueries,
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries,
-                                documentClientOrIssuerEmailQueries
-                            )
+                            hydrateBanksOnDocIssuer(
+                                fetchClientAndIssuer(
+                                    it.delivery_note_id,
+                                    linkDeliveryNoteToDocumentClientOrIssuerQueries,
+                                    linkDocumentClientOrIssuerToAddressQueries,
+                                    documentClientOrIssuerQueries,
+                                    documentClientOrIssuerAddressQueries,
+                                    documentClientOrIssuerEmailQueries
+                                )
+                            ),
+                            fetchTag(it.delivery_note_id)
                         )
                     }
             } catch (e: Exception) {
@@ -133,17 +155,40 @@ class DeliveryNoteLocalDataSource(
         }
     }
 
+    // See InvoiceLocalDataSource.hydrateBanksOnDocIssuer. The document-side
+    // ClientOrIssuer snapshot only carries the doc-frozen columns; the
+    // (potentially multiple) IssuerBank rows live on the master issuer and
+    // need to be hydrated here so the bottom-sheet "Éditer émetteur" form
+    // shows the IBAN/BIC section pre-filled instead of empty.
+    private suspend fun hydrateBanksOnDocIssuer(
+        states: List<com.a4a.g8invoicing.ui.states.ClientOrIssuerState>?,
+    ): List<com.a4a.g8invoicing.ui.states.ClientOrIssuerState>? = states?.map { state ->
+        if (state.type == ClientOrIssuerType.DOCUMENT_ISSUER &&
+            state.originalClientOrIssuerId != null
+        ) {
+            state.copy(
+                banks = clientOrIssuerDataSource
+                    .getIssuerBanks(state.originalClientOrIssuerId!!.toLong())
+            )
+        } else state
+    }
+
     // --- fetchAll (returning Flow) ---
     // Flow construction
     // The .map block executes on the collector's context.
     // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
     // because internal fetch* helpers are synchronous DB calls.
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<DeliveryNoteState>>? {
         try {
-            return deliveryNoteQueries.getAll()
-                .asFlow()
-                .map {
-                    it.executeAsList()
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    deliveryNoteQueries.getAllForCompany(companyId)
+                } else {
+                    deliveryNoteQueries.getAll()
+                }
+                query.asFlow().map { rows ->
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.delivery_note_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -157,10 +202,12 @@ class DeliveryNoteLocalDataSource(
 
                             document.transformIntoEditableDeliveryNote(
                                 products,
-                                clientAndIssuer
+                                clientAndIssuer,
+                                fetchTag(document.delivery_note_id)
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -191,15 +238,35 @@ class DeliveryNoteLocalDataSource(
         return null
     }
 
+    // --- fetchTag ---
+    // Synchronous private helper, performs DB IO.
+    // Called from a Dispatchers.IO context.
+    private fun fetchTag(documentId: Long): DocumentTag? {
+        try {
+            val tagId = linkDeliveryNoteToTagQueries.getDeliveryNoteTag(documentId)
+                .executeAsOneOrNull()?.tag_id
+            tagId?.let {
+                deliveryNoteTagQueries.getTag(it).executeAsOneOrNull()?.let { tagName ->
+                    return enumValueOf<DocumentTag>(tagName)
+                }
+            }
+        } catch (e: Exception) {
+            //Log.e("DeliveryNoteDS", "Error fetchTag for documentId $documentId: ${e.message}")
+        }
+        return null
+    }
+
     // --- transformIntoEditableDeliveryNote ---
     // Pure transformation function, no IO, no suspend/withContext needed.
     private fun DeliveryNote.transformIntoEditableDeliveryNote(
         documentProducts: MutableList<DocumentProductState>? = null,
         documentClientAndIssuer: List<ClientOrIssuerState>? = null,
+        documentTag: DocumentTag? = null,
     ): DeliveryNoteState {
         this.let {
             return DeliveryNoteState(
                 documentId = it.delivery_note_id.toInt(),
+                documentTag = documentTag ?: DocumentTag.DRAFT,
                 documentNumber = TextFieldValue(text = it.number ?: ""),
                 documentDate = it.delivery_date ?: "",
                 reference = TextFieldValue(text = it.reference ?: ""),
@@ -215,6 +282,8 @@ class DeliveryNoteLocalDataSource(
                 labelsSnapshot = it.labels_snapshot,
                 showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
                 formatLocale = it.format_locale,
+                originalCompanyId = it.original_company_id,
+                fontFamily = it.font_family,
             )
         }
     }
@@ -232,6 +301,7 @@ class DeliveryNoteLocalDataSource(
                     free_field = document.freeField?.text,
                     currency = document.currency.text,
                     footer = document.footerText.text,
+                    font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
             } catch (e: Exception) {
@@ -248,7 +318,11 @@ class DeliveryNoteLocalDataSource(
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach { originalDocument ->
-                    val docNumber = getLastDocumentNumber()?.let {
+                    // Duplicate keeps the source's company (per-company counter);
+                    // fall back to current if the source predates the migration.
+                    val docCompanyId = originalDocument.originalCompanyId
+                        ?: currentCompanyRepository.current
+                    val docNumber = getLastDocumentNumber(docCompanyId)?.let {
                         incrementDocumentNumber(it)
                     } ?: getString(Res.string.delivery_note_default_number)
 
@@ -273,6 +347,7 @@ class DeliveryNoteLocalDataSource(
                             id,
                             duplicatedDocumentState
                         )
+                        saveTag(id, DocumentTag.DRAFT)
                     }
                 }
             } catch (e: Exception) {
@@ -321,8 +396,34 @@ class DeliveryNoteLocalDataSource(
             val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
             clientOrIssuerDataSource.createNew(masterIssuer)
             val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
-            // Lier au master
-            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+            // Seed doc-frozen payment_iban/payment_bic from the first bank
+            // (see InvoiceLocalDataSource for rationale).
+            val firstBank = documentClientOrIssuer.banks.firstOrNull()
+            val seededIban = firstBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededBic = firstBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededCountry = firstBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+            documentClientOrIssuer.copy(
+                originalClientOrIssuerId = masterId?.toInt(),
+                paymentIban = seededIban ?: documentClientOrIssuer.paymentIban,
+                paymentBic = seededBic ?: documentClientOrIssuer.paymentBic,
+                paymentCountry = seededCountry ?: documentClientOrIssuer.paymentCountry,
+            )
+        } else if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.paymentIban?.text.isNullOrEmpty() &&
+            documentClientOrIssuer.banks.isNotEmpty()
+        ) {
+            val firstBank = documentClientOrIssuer.banks.first()
+            documentClientOrIssuer.copy(
+                paymentIban = firstBank.identifier.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentBic = firstBank.bic.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentCountry = firstBank.countryCode?.trim()?.takeIf { it.isNotEmpty() },
+            )
         } else {
             documentClientOrIssuer
         }
@@ -389,6 +490,8 @@ class DeliveryNoteLocalDataSource(
                         linkDocumentClientOrIssuerToAddressQueries.delete(it.toLong())
                     }
 
+                    // Delete linked tag
+                    linkDeliveryNoteToTagQueries.delete(document.documentId!!.toLong())
 
                     // Delete the main document
                     deliveryNoteQueries.delete(id = document.documentId!!.toLong())
@@ -470,6 +573,8 @@ class DeliveryNoteLocalDataSource(
                 labels_snapshot = document.labelsSnapshot,
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
+                original_company_id = document.originalCompanyId,
+                font_family = document.fontFamily,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
@@ -532,6 +637,79 @@ class DeliveryNoteLocalDataSource(
                 // Log.e("InvoiceLocalDataSource", "Error updating document products order in DB: ${e.message}", e)
                 throw e // Relance pour que le ViewModel puisse la catcher si nécessaire
             }
+        }
+    }
+
+    // --- setTag ---
+    // Public entry-point called by the ViewModel when the user picks a tag
+    // in the bottom-bar picker, or by the auto-tag flow after a BL has been
+    // converted to an invoice.
+    override suspend fun setTag(
+        documents: List<DeliveryNoteState>,
+        tag: DocumentTag,
+        tagUpdateCase: TagUpdateOrCreationCase,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                documents.forEach { deliveryNote ->
+                    deliveryNote.documentId?.toLong()?.let { deliveryNoteId ->
+                        linkDocumentToDocumentTag(
+                            deliveryNoteId,
+                            newTag = tag,
+                            updateCase = tagUpdateCase,
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                //Log.e("DeliveryNoteDS", "Error setTag: ${e.message}")
+            }
+        }
+    }
+
+    // Upsert on delivery_note_id. Junction rows don't carry a unique
+    // constraint on delivery_note_id (only on the surrogate PK), so a naive
+    // INSERT OR REPLACE would just stack duplicate rows. Check-then-branch
+    // covers both the fresh-BL path and the pre-migration path where the
+    // BL predates the tagging module and has no junction row yet.
+    private suspend fun linkDocumentToDocumentTag(
+        documentId: Long,
+        newTag: DocumentTag,
+        @Suppress("UNUSED_PARAMETER") updateCase: TagUpdateOrCreationCase,
+    ) {
+        try {
+            withContext(DispatcherProvider.IO) {
+                val tagId = deliveryNoteTagQueries.getTagId(newTag.name)
+                    .executeAsOneOrNull() ?: return@withContext
+                val existing = linkDeliveryNoteToTagQueries
+                    .getDeliveryNoteTag(documentId).executeAsOneOrNull()
+                if (existing == null) {
+                    linkDeliveryNoteToTagQueries.saveDeliveryNoteTag(
+                        id = null,
+                        delivery_note_id = documentId,
+                        tag_id = tagId,
+                    )
+                } else {
+                    linkDeliveryNoteToTagQueries.updateDeliveryNoteTag(
+                        delivery_note_id = documentId,
+                        tag_id = tagId,
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            //Log.e("DeliveryNoteDS", "Error linkDocToDocTag: ${e.message}")
+        }
+    }
+
+    // Seeds the initial tag row on createNew / duplicate.
+    private suspend fun saveTag(documentId: Long, tag: DocumentTag) {
+        try {
+            linkDocumentToDocumentTag(
+                documentId = documentId,
+                newTag = tag,
+                updateCase = TagUpdateOrCreationCase.TAG_CREATION,
+            )
+        } catch (e: Exception) {
+            //Log.e("DeliveryNoteDS", "Error saveTag for documentId $documentId: ${e.message}")
         }
     }
 }

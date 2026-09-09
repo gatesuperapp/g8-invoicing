@@ -57,6 +57,12 @@ class AccountViewModel(
                         successMessage = "magic_link_sent" // resolved in UI via stringResource
                     )
                 }
+                is MagicLinkResult.Offline -> {
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        errorMessage = "magic_link_offline"
+                    )
+                }
                 is MagicLinkResult.Error -> {
                     uiState = uiState.copy(
                         isLoading = false,

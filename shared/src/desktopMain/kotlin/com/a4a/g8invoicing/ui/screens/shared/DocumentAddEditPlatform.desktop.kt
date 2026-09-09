@@ -21,6 +21,7 @@ actual fun DocumentAddEditPlatform(
     documentIssuerUiState: ClientOrIssuerState,
     documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>>,
     products: MutableList<ProductState>,
     onValueChange: (ScreenElement, Any) -> Unit,
     onSelectProduct: (ProductState, Int?) -> Unit,
@@ -37,6 +38,7 @@ actual fun DocumentAddEditPlatform(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
@@ -51,8 +53,13 @@ actual fun DocumentAddEditPlatform(
     onToggleHideLinkedSourceHeaders: (() -> Unit)?,
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit,
     onToggleRetentionHidden: (Int) -> Unit,
+    onFontSelect: (com.a4a.g8invoicing.ui.theme.DocumentFont) -> Unit,
 ) {
     // Desktop uses the desktop-specific UI with side panel
+    // onFontSelect is dropped on desktop for now — the font picker lives in
+    // the mobile bottom sheet; the desktop UI has no equivalent entry point
+    // yet, so the callback is ignored here (persistence still works via any
+    // future desktop entry that calls the VM's setDocumentFont directly).
     // hideLinkedSourceHeaders is only wired on Android; desktop's flat product
     // list has no source-header rows to hide, so the params are ignored here.
     // showProductType n'est pas encore relayé — pas de rendu Product.type côté desktop.

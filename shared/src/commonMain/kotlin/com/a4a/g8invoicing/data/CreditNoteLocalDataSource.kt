@@ -15,19 +15,23 @@ import com.a4a.g8invoicing.shared.resources.retention_default_label
 import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
 import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.screens.shared.DocumentLabels
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.LinkedDocType
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import g8invoicing.CreditNote
 import g8invoicing.CreditNoteRetention
 import g8invoicing.DocumentClientOrIssuer
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -35,10 +39,13 @@ class CreditNoteLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : CreditNoteLocalDataSourceInterface {
     private val creditNoteQueries = db.creditNoteQueries
     private val creditNoteRetentionQueries = db.creditNoteRetentionQueries
+    private val invoiceQueries = db.invoiceQueries
     private val invoiceRetentionQueries = db.invoiceRetentionQueries
     private val documentClientOrIssuerQueries = db.documentClientOrIssuerQueries
     private val documentClientOrIssuerAddressQueries = db.documentClientOrIssuerAddressQueries
@@ -54,15 +61,17 @@ class CreditNoteLocalDataSource(
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
-        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
-            null
-        } else {
-            getString(Res.string.invoice_watermark_default)
-        }
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) null
+        else getString(Res.string.invoice_watermark_default)
     }
 
     override suspend fun createNew(): Long? {
-        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        // Resolves the current entreprise (side menu). getLastIssuer() fallback
+        // for installs without a hydrated Settings entry (post-migration safety).
+        val currentCompanyId = currentCompanyRepository.current
+        val existingIssuer = currentCompanyId
+            ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
+            ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
@@ -85,7 +94,7 @@ class CreditNoteLocalDataSource(
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
             val creditNote = CreditNoteState(
-                documentNumber = TextFieldValue(getLastDocumentNumber()?.let {
+                documentNumber = TextFieldValue(getLastDocumentNumber(currentCompanyId)?.let {
                     incrementDocumentNumber(it)
                 } ?: getString(Res.string.credit_note_default_number)),
                 documentDate = todayFormatted,
@@ -97,6 +106,24 @@ class CreditNoteLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
+                originalCompanyId = currentCompanyId
+                    ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
+                vatExemptionText = existingIssuer?.originalClientOrIssuerId?.toLong()
+                    ?.let { masterId ->
+                        invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                            .executeAsOneOrNull()
+                    }
+                    .let { reuse ->
+                        // Shared helper — reuses the previous invoice's wording
+                        // when the master's country hasn't changed, otherwise
+                        // resolves the country-based citation. Returns null for
+                        // non-vat-exempt issuers, which mirrors the old logic.
+                        com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                            issuer = existingIssuer,
+                            previousVatText = reuse?.vat_exemption_text,
+                            previousIssuerCountry = reuse?.issuer_country_code,
+                        )
+                    },
                 retentions = reusedRetentions,
             )
 
@@ -193,9 +220,16 @@ class CreditNoteLocalDataSource(
         }
     }
 
-    private fun getLastDocumentNumber(): String? {
+    // companyId non-null → the new credit note's number continues that
+    // entreprise's counter. Null falls back to the global counter (pre-
+    // migration safety).
+    private fun getLastDocumentNumber(companyId: Long?): String? {
         try {
-            return creditNoteQueries.getLastCreditNoteNumber().executeAsOneOrNull()?.number
+            return if (companyId != null) {
+                creditNoteQueries.getLastCreditNoteNumberForCompany(companyId).executeAsOneOrNull()?.number
+            } else {
+                creditNoteQueries.getLastCreditNoteNumber().executeAsOneOrNull()?.number
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -210,13 +244,15 @@ class CreditNoteLocalDataSource(
                     ?.let {
                         it.transformIntoEditableCreditNote(
                             fetchDocumentProducts(it.credit_note_id),
-                            fetchClientAndIssuer(
-                                it.credit_note_id,
-                                linkCreditNoteToDocumentClientOrIssuerQueries,
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries,
-                                documentClientOrIssuerEmailQueries
+                            hydrateBanksOnDocIssuer(
+                                fetchClientAndIssuer(
+                                    it.credit_note_id,
+                                    linkCreditNoteToDocumentClientOrIssuerQueries,
+                                    linkDocumentClientOrIssuerToAddressQueries,
+                                    documentClientOrIssuerQueries,
+                                    documentClientOrIssuerAddressQueries,
+                                    documentClientOrIssuerEmailQueries
+                                )
                             )
                         )
                     }
@@ -227,12 +263,31 @@ class CreditNoteLocalDataSource(
         }
     }
 
+    // See InvoiceLocalDataSource.hydrateBanksOnDocIssuer.
+    private suspend fun hydrateBanksOnDocIssuer(
+        states: List<com.a4a.g8invoicing.ui.states.ClientOrIssuerState>?,
+    ): List<com.a4a.g8invoicing.ui.states.ClientOrIssuerState>? = states?.map { state ->
+        if (state.type == ClientOrIssuerType.DOCUMENT_ISSUER &&
+            state.originalClientOrIssuerId != null
+        ) {
+            state.copy(
+                banks = clientOrIssuerDataSource
+                    .getIssuerBanks(state.originalClientOrIssuerId!!.toLong())
+            )
+        } else state
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<CreditNoteState>>? {
         try {
-            return creditNoteQueries.getAll()
-                .asFlow()
-                .map {
-                    it.executeAsList()
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    creditNoteQueries.getAllForCompany(companyId)
+                } else {
+                    creditNoteQueries.getAll()
+                }
+                query.asFlow().map { rows ->
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.credit_note_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -250,6 +305,7 @@ class CreditNoteLocalDataSource(
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -269,9 +325,10 @@ class CreditNoteLocalDataSource(
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()
                         .transformIntoEditableDocumentProduct(
-                            additionalInfo?.delivery_note_date,
-                            additionalInfo?.delivery_note_number,
-                            it.sort_order?.toInt() // << Passer le sort_order de la table de liaison
+                            linkedDate = additionalInfo?.delivery_note_date,
+                            linkedDocNumber = additionalInfo?.delivery_note_number,
+                            linkedDocType = additionalInfo?.let { LinkedDocType.DELIVERY_NOTE },
+                            sortOrder = it.sort_order?.toInt() // << Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
             } else null
@@ -307,6 +364,9 @@ class CreditNoteLocalDataSource(
                 labelsSnapshot = it.labels_snapshot,
                 showCurrencyAndAutoTaxColumn = it.show_currency_and_auto_tax_column != 0L,
                 formatLocale = it.format_locale,
+                originalCompanyId = it.original_company_id,
+                vatExemptionText = it.vat_exemption_text?.let { TextFieldValue(text = it) },
+                fontFamily = it.font_family,
                 retentions = fetchRetentions(it.credit_note_id),
             )
         }
@@ -322,12 +382,15 @@ class CreditNoteLocalDataSource(
             sourceNumbers.size == 1 -> getString(Res.string.credit_note_reference_from_invoice, sourceNumbers.single())
             else -> getString(Res.string.credit_note_reference_from_invoices, sourceNumbers.joinToString(", "))
         }
+        val newCompanyId = currentCompanyRepository.current
+            ?: invoices.firstOrNull()?.originalCompanyId
         return withContext(DispatcherProvider.IO) {
-            val docNumber = getLastDocumentNumber()?.let {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.credit_note_default_number)
 
             try {
+                val issuerFromSource = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer
                 saveInfoInCreditNoteTable(
                     CreditNoteState(
                         documentNumber = TextFieldValue(docNumber),
@@ -335,7 +398,7 @@ class CreditNoteLocalDataSource(
                         reference = referenceText?.let { TextFieldValue(it) }
                             ?: invoices.firstOrNull { it.reference != null }?.reference,
                         freeField = invoices.firstOrNull { it.freeField != null }?.freeField,
-                        documentIssuer = invoices.firstOrNull { it.documentIssuer != null }?.documentIssuer,
+                        documentIssuer = issuerFromSource,
                         documentClient = invoices.firstOrNull { it.documentClient != null }?.documentClient,
                         currency = TextFieldValue(
                             invoices.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
@@ -346,6 +409,23 @@ class CreditNoteLocalDataSource(
                         labelsSnapshot = frozenLabels,
                         showCurrencyAndAutoTaxColumn = true,
                         formatLocale = AppLocaleHolder.languageCode,
+                        // No payment fields on the credit note — the source invoice's
+                        // payment means / bank are intentionally NOT carried over
+                        // (avoir reverses the flow, no payment for the buyer to make).
+                        originalCompanyId = newCompanyId,
+                        // Carry the source invoice's exemption text if the user
+                        // set it there — cheaper than re-deriving from the issuer,
+                        // and preserves any wording override done on the invoice.
+                        // Fallback to the shared resolver (national → EU art. 284
+                        // → generic). No previous-doc country to compare against
+                        // in this branch: the invoice's own frozen exemption text
+                        // is already the "reuse" path above.
+                        vatExemptionText = invoices.firstOrNull { it.vatExemptionText != null }?.vatExemptionText
+                            ?: com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                                issuer = issuerFromSource,
+                                previousVatText = null,
+                                previousIssuerCountry = null,
+                            ),
                     )
                 )
                 val newId = creditNoteQueries.getLastInsertedRowId().executeAsOneOrNull()
@@ -371,6 +451,8 @@ class CreditNoteLocalDataSource(
                     currency = document.currency.text,
                     due_date = document.dueDate,
                     footer = document.footerText.text,
+                    vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                    font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 document.documentId?.toLong()?.let { id ->
@@ -400,13 +482,32 @@ class CreditNoteLocalDataSource(
         }
     }
 
+    // Mirror of InvoiceLocalDataSource.updateVatExemptionText for the credit-note
+    // EDIT_ISSUER seed path.
+    override suspend fun updateVatExemptionText(creditNoteId: Long, text: String?) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                creditNoteQueries.updateVatExemptionText(
+                    credit_note_id = creditNoteId,
+                    vat_exemption_text = text?.trim()?.takeIf { it.isNotEmpty() },
+                    updated_at = DateUtils.getCurrentTimestamp(),
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     override suspend fun duplicate(documents: List<CreditNoteState>) {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
         withContext(DispatcherProvider.IO) {
             try {
                 documents.forEach {
-                    val docNumber = getLastDocumentNumber()?.let {
+                    // Duplicate keeps the source's company (per-company counter);
+                    // fall back to current if the source predates the migration.
+                    val docCompanyId = it.originalCompanyId
+                        ?: currentCompanyRepository.current
+                    val docNumber = getLastDocumentNumber(docCompanyId)?.let {
                         incrementDocumentNumber(it)
                     } ?: getString(Res.string.credit_note_default_number)
                     val creditNote = it
@@ -469,8 +570,34 @@ class CreditNoteLocalDataSource(
             val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
             clientOrIssuerDataSource.createNew(masterIssuer)
             val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
-            // Lier au master
-            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+            // Seed doc-frozen payment_iban/payment_bic from the first bank
+            // (see InvoiceLocalDataSource for rationale).
+            val firstBank = documentClientOrIssuer.banks.firstOrNull()
+            val seededIban = firstBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededBic = firstBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededCountry = firstBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+            documentClientOrIssuer.copy(
+                originalClientOrIssuerId = masterId?.toInt(),
+                paymentIban = seededIban ?: documentClientOrIssuer.paymentIban,
+                paymentBic = seededBic ?: documentClientOrIssuer.paymentBic,
+                paymentCountry = seededCountry ?: documentClientOrIssuer.paymentCountry,
+            )
+        } else if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.paymentIban?.text.isNullOrEmpty() &&
+            documentClientOrIssuer.banks.isNotEmpty()
+        ) {
+            val firstBank = documentClientOrIssuer.banks.first()
+            documentClientOrIssuer.copy(
+                paymentIban = firstBank.identifier.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentBic = firstBank.bic.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentCountry = firstBank.countryCode?.trim()?.takeIf { it.isNotEmpty() },
+            )
         } else {
             documentClientOrIssuer
         }
@@ -614,6 +741,9 @@ class CreditNoteLocalDataSource(
                 labels_snapshot = document.labelsSnapshot,
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
+                original_company_id = document.originalCompanyId,
+                vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                font_family = document.fontFamily,
             )
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")

@@ -6,6 +6,10 @@ CREATE TABLE Product (
   unit_code TEXT,
   type TEXT,
   product_tax_id INTEGER,
+  -- Self-FK vers ClientOrIssuer.id filtré type='issuer'. Le produit est
+  -- rattaché à l'entreprise depuis laquelle il a été créé. Backfill par la
+  -- migration 6 sur l'issuer implicite le plus récent.
+  company_id INTEGER,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
@@ -25,8 +29,8 @@ SELECT *
 FROM Product;
 
 saveProduct:
-INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type, company_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 updateProduct:
 UPDATE Product
@@ -41,6 +45,13 @@ WHERE
 
 deleteProduct:
 DELETE FROM Product
+WHERE id = :id;
+
+-- 1.9 migration wizard: bulk-move a product under a specific
+-- issuer/company. Mirrors ClientOrIssuer.updateCompanyId.
+updateProductCompanyId:
+UPDATE Product
+SET company_id = :company_id
 WHERE id = :id;
 
 clearTaxRateFromProducts:
@@ -79,3 +90,14 @@ updateAllTypes:
 UPDATE Product
 SET type = :new_type,
     updated_at = datetime('now', 'localtime');
+
+-- Multi-entreprise (étape 2). Produits rattachés à une entreprise donnée.
+-- Utilisé par la liste Produits une fois filtrée par current_company_id.
+getAllProductsForCompany:
+SELECT *
+FROM Product
+WHERE company_id = :company_id;
+
+-- Pré-check de suppression d'entreprise : compte les produits rattachés.
+countProductsForCompany:
+SELECT COUNT(*) FROM Product WHERE company_id = :company_id;

@@ -13,6 +13,10 @@ import com.a4a.g8invoicing.shared.resources.document_default_reference
 import com.a4a.g8invoicing.shared.resources.document_free_field
 import com.a4a.g8invoicing.shared.resources.document_due_date
 import com.a4a.g8invoicing.shared.resources.document_footer
+import com.a4a.g8invoicing.shared.resources.document_payment_means
+import com.a4a.g8invoicing.shared.resources.document_payment_terms
+import com.a4a.g8invoicing.shared.resources.document_vat_exemption_label
+import com.a4a.g8invoicing.data.models.joinPaymentMeansLabels
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
@@ -105,6 +109,72 @@ fun DocumentBottomSheetElementsContent(
                     pageElement = ScreenElement.DOCUMENT_DUE_DATE
                 )
             )
+    }
+    // BT-120 VAT exemption reason — surfaced on invoices + avoirs + devis
+    // when the issuer is in franchise en base. Devis added in the payment-
+    // parity refactor: the client sees the same legal mention on the quote
+    // that they'll see on the eventual invoice. BLs still skip it (not a
+    // taxable document). Above payment means so a fresh reader spots the
+    // mention before the payment block.
+    val hasTaxContext = document is InvoiceState ||
+        document is com.a4a.g8invoicing.ui.states.CreditNoteState ||
+        document is com.a4a.g8invoicing.ui.states.QuoteState
+    if (hasTaxContext && document.documentIssuer?.vatExempt == true) {
+        val exemptionPreview = document.vatExemptionText?.text.orEmpty()
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_vat_exemption_label),
+                inputType = ForwardElement(
+                    text = exemptionPreview.ifEmpty { " - " },
+                    displayArrow = false,
+                    maxLines = 2,
+                ),
+                pageElement = ScreenElement.DOCUMENT_VAT_EXEMPTION,
+            )
+        )
+    }
+    // Payment means (BT-81) — invoice + devis. Avoir dropped: an avoir has
+    // no payment context (seller owes buyer). BL: not a payment doc.
+    val payingDoc: com.a4a.g8invoicing.ui.states.DocumentState? =
+        (document as? InvoiceState) ?: (document as? com.a4a.g8invoicing.ui.states.QuoteState)
+    if (payingDoc != null) {
+        val selections = when (payingDoc) {
+            is InvoiceState -> payingDoc.paymentMeansSelections
+            is com.a4a.g8invoicing.ui.states.QuoteState -> payingDoc.paymentMeansSelections
+            else -> null
+        }
+        val joined = joinPaymentMeansLabels(selections)
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_payment_means),
+                inputType = ForwardElement(
+                    text = joined.ifEmpty { " - " },
+                    displayArrow = false,
+                    maxLines = 2,
+                ),
+                pageElement = ScreenElement.DOCUMENT_PAYMENT_MEANS,
+            )
+        )
+    }
+    // Payment terms — invoice only. Devis dropped: the 3 legal mentions
+    // (recovery fees / late fees / discount) belong on the invoice itself
+    // per art. L441-10 CdC; putting them on a quote confuses the reader
+    // about which document actually triggers the payment obligation.
+    if (document is InvoiceState) {
+        // Preview shows only the "pénalités de retard" mention truncated —
+        // that's the field that historically fit the row width. The 3
+        // sub-mentions are visible once the user taps and opens the picker.
+        inputList.add(
+            FormInput(
+                label = stringResource(Res.string.document_payment_terms),
+                inputType = ForwardElement(
+                    text = document.paymentTermsLateFees.text.ifEmpty { " - " },
+                    displayArrow = false,
+                    maxLines = 2,
+                ),
+                pageElement = ScreenElement.DOCUMENT_PAYMENT_TERMS,
+            )
+        )
     }
     inputList.add(
         FormInput(

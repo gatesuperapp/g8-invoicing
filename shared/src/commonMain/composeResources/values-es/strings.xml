@@ -9,7 +9,20 @@
     <!-- Product -->
     <string name="product_duplicate_suffix"> - Copiar</string>
     <!-- Document footer -->
-    <string name="document_default_footer">Descuento por pago anticipado: ninguno\nTasa de penalización por retraso en el pago: ninguna\n\n\nIBAN: ES76 1234 1234 1234 1234 1234</string>
+    <string name="document_default_footer"></string>
+    <string name="document_default_payment_terms">En caso de retraso en el pago, se aplicará una penalización al tipo legal vigente, más una indemnización a tanto alzado de 40 €. Sin descuento por pago anticipado.</string>
+    <string name="document_payment_terms">Términos de pago</string>
+    <string name="payment_terms_recovery_fees_label">Gastos de recobro</string>
+    <string name="payment_terms_late_fees_label">Penalizaciones por demora</string>
+    <string name="payment_terms_discount_label">Descuento por pronto pago</string>
+    <string name="payment_terms_recovery_fees_default">Indemnización a tanto alzado por gastos de recobro de 40 €.</string>
+    <string name="payment_terms_late_fees_default">En caso de retraso en el pago, se aplicará una penalización al tipo de refinanciación del BCE más 10 puntos.</string>
+    <string name="payment_terms_discount_default">Sin descuento por pago anticipado.</string>
+    <string name="document_payment_means_default_label">Medios de pago aceptados:</string>
+    <string name="document_payment_means_hide_list_a11y">Ocultar la lista de medios de pago</string>
+    <string name="document_payment_means_show_list_a11y">Mostrar la lista de medios de pago</string>
+    <string name="document_payment_means_show_switch">Mostrar los medios de pago aceptados en el documento</string>
+    <string name="document_payment_means_edit_prefix">Editar el texto</string>
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
     <string name="delivery_note_number">Nota de entrega Nº</string>
@@ -21,6 +34,7 @@
     <string name="document_reference_label">Referencia: </string>
     <string name="addressed_to">Dirigido a</string>
     <string name="invoice_pdf_due_date">Fecha límite de pago: </string>
+    <string name="document_payment_section_title">Pago</string>
     <string name="invoice_paid">Pagado ✔</string>
     <string name="pdf_currency_notice">Moneda: %1$s</string>
 
@@ -44,9 +58,9 @@
     <string name="product_price_without_tax">s/IVA</string>
     <string name="product_price_with_tax">c/IVA</string>
     <!-- Alert Dialog Strings -->
-    <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nSi ya has enviado la factura, no es legal eliminarla:</string>
-    <string name="alert_dialog_delete_invoice_2">Más información\n</string>
-    <string name="alert_dialog_delete_invoice_3">\nEn cualquier caso, la eliminación es irreversible.</string>
+    <string name="alert_dialog_delete_invoice_1">¿Estás seguro? \n\nEn algunos países, no es legal eliminar una factura que ya se ha enviado.\n\nEn cualquier caso, la eliminación es irreversible.</string>
+    <string name="alert_dialog_delete_invoice_2"></string>
+    <string name="alert_dialog_delete_invoice_3"></string>
     <string name="alert_dialog_delete_url">https://www.the-gate.fr/es</string>
     <string name="alert_dialog_delete_general">¿Estás seguro? Esta acción es irreversible.</string>
     <string name="alert_dialog_delete_confirm">Sí, eliminar</string>
@@ -59,8 +73,7 @@
     <string name="document_bottom_sheet_picker_empty_product">Ningún producto encontrado.\nToca + para añadir uno.</string>
     <string name="document_bottom_sheet_picker_recent">Recientes</string>
     <string name="document_bottom_sheet_picker_edit_link">Editar</string>
-    <string name="document_form_sync_client_to_master">Aplicar también los cambios a la ficha del cliente</string>
-    <string name="document_form_sync_issuer_to_master">Aplicar también los cambios a la ficha del emisor</string>
+    <string name="document_form_sync_to_master">Aplicar los cambios a la ficha de la empresa</string>
     <string name="document_form_sync_product_to_master">Aplicar también los cambios a la ficha del producto</string>
     <string name="document_bottom_sheet_picker_title_client">Clientes</string>
     <string name="document_bottom_sheet_picker_title_issuer">Emisores</string>
@@ -84,6 +97,17 @@
     <string name="document_issuer">Emisor</string>
     <string name="document_client">Cliente</string>
     <string name="document_free_field">Campo libre</string>
+    <string name="document_payment_means">Medios de pago</string>
+    <string name="document_payment_means_picker_title">Medios de pago</string>
+    <string name="pdf_payment_means_prefix">Medios de pago aceptados:</string>
+    <string name="payment_means_30">Transferencia</string>
+    <string name="payment_means_42">Cheque</string>
+    <string name="payment_means_48">Tarjeta</string>
+    <string name="payment_means_58">SEPA</string>
+    <string name="payment_means_10">Efectivo</string>
+    <string name="payment_means_paypal">PayPal</string>
+    <string name="payment_means_stripe">Stripe</string>
+    <string name="payment_means_other">Otro</string>
     <string name="document_footer">Pie de pagina</string>
     <string name="document_default_reference">XFGDTSF</string>
     <string name="credit_note_reference_from_invoice">Emitida a partir de la factura %1$s</string>
@@ -111,6 +135,7 @@
     <string name="product_tax">Impuesto</string>
     <string name="tax_rate_screen_title">Tasa de IVA</string>
     <string name="tax_rate_add_rate">+ Añadir una tasa</string>
+    <string name="tax_rate_edit_dialog_title">Editar tipo de IVA</string>
     <string name="product_price">Precio</string>
     <string name="product_price_input">3</string>
     <string name="product_price_default">Precio por defecto</string>
@@ -165,6 +190,23 @@
     <string name="issuer_logo_error_dismiss">OK</string>
     <string name="client_add_address">+ Añadir una dirección</string>
     <string name="client_delete_address">Eliminar dirección</string>
+    <string name="client_or_issuer_section_addresses">Dirección</string>
+    <string name="client_or_issuer_section_identification">Identificación</string>
+    <string name="client_or_issuer_section_bank">Datos bancarios</string>
+    <string name="client_or_issuer_section_notes">Notas</string>
+    <string name="client_or_issuer_section_backup">Copia de seguridad</string>
+    <string name="issuer_bank_add">+ Añadir una cuenta</string>
+    <string name="issuer_bank_label">Etiqueta</string>
+    <string name="issuer_bank_label_input">Cuenta profesional</string>
+    <string name="issuer_bank_delete_a11y">Eliminar esta cuenta bancaria</string>
+    <string name="issuer_bank_country">País</string>
+    <string name="issuer_bank_identifier_iban">IBAN</string>
+    <string name="issuer_bank_identifier_generic">Nº de cuenta</string>
+    <string name="document_payment_bank_show_switch">Mostrar los datos bancarios de la empresa</string>
+    <string name="document_payment_bank_edit_prefix">Editar el texto</string>
+    <string name="document_payment_bank_picker_title">Datos bancarios</string>
+    <string name="document_payment_bank_iban_empty">Añade una cuenta bancaria a tu empresa</string>
+    <string name="document_payment_bank_iban_empty_no_issuer">Añade un emisor a tu factura</string>
     <string name="client_selection_title">Seleccionar los clientes</string>
     <string name="client_selection_empty">Todavía no has creado ningún cliente. Puedes hacerlo desde la categoría "Clientes".</string>
     <string name="client_selection_all_used">Todos los clientes ya están asignados a otros precios.</string>
@@ -244,6 +286,23 @@
     <string name="drawer_g8">Info</string>
     <string name="drawer_my_account">Mi cuenta</string>
     <string name="drawer_gstore">𝕘Store</string>
+    <string name="drawer_my_company">Mi empresa</string>
+
+    <!-- First-launch onboarding: 5-slide wizard shown when no issuer exists in DB -->
+    <string name="first_launch_welcome_title">¡Bienvenido·a a 𝕘𝟠 aka The Gate!</string>
+    <string name="first_launch_welcome_amigo">Soy Petit Rhino, tu nuevo amigo ♡</string>
+    <string name="first_launch_next">Siguiente</string>
+    <string name="first_launch_liberty_body1">Te ayudo a gestionar todo desde tu móvil: facturas, albaranes, clientes, productos…</string>
+    <string name="first_launch_liberty_body2">La app funciona sin conexión, la cuenta es opcional y tus datos no se comparten con terceros ♡</string>
+    <string name="first_launch_gstore_intro">Algunas funciones se activan a demanda desde la pestaña 𝕘Store: presupuestos, albaranes, exportación a formatos de facturación electrónica y +.</string>
+    <string name="first_launch_gstore_premium">Algunos módulos están reservados a los miembros premium 🌟. Puedes hacerte miembro premium en la web de g8.</string>
+    <string name="first_launch_settings_intro">Antes de dejarte, necesito 2 datos para configurar la interfaz:</string>
+    <string name="first_launch_settings_name_label">Nombre de tu empresa</string>
+    <string name="first_launch_settings_country_label">País</string>
+    <string name="first_launch_settings_cta">¡Vamos!</string>
+    <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
+    <string name="first_launch_issuer_skip">Más tarde</string>
+    <string name="first_launch_issuer_default_name">Mi empresa</string>
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
@@ -254,11 +313,9 @@
     <string name="gstore_footer_premium">Gestiona tu cuenta en </string>
     <string name="gstore_module_orders_title">Pedido</string>
     <string name="gstore_module_orders_desc">Gestiona los pedidos de tus clientes</string>
-    <string name="gstore_module_facturx_title">Factur-X</string>
-    <string name="gstore_module_facturx_desc">Facturación electrónica</string>
     <string name="gstore_module_watermark_title">Mención g8</string>
     <string name="gstore_module_watermark_desc">Retira la mención g8 de tus documentos</string>
-    <string name="gstore_module_watermark_detail">Activa este módulo para eliminar la mención « Hecho con g8, aplicación móvil de facturación » de tus facturas, albaranes y notas de crédito.</string>
+    <string name="gstore_module_watermark_detail">Activa este módulo para eliminar la marca de agua «Hecho con g8, aplicación móvil de facturación» de tus documentos.</string>
     <string name="invoice_watermark_default">Hecho con g8 (www.the-gate.fr), aplicación móvil de facturación</string>
     <string name="gstore_module_payments_title">Pagos</string>
     <string name="gstore_module_payments_desc">Registra tarjetas, cheques, efectivo</string>
@@ -282,10 +339,18 @@
     <string name="account_renewal_date">Renovación el %1$s</string>
     <string name="account_cancellation_date">Cancelado — termina el %1$s</string>
     <string name="account_manage_subscription">Gestionar mi suscripción</string>
+    <string name="account_status_payment_failed_title">Pago rechazado</string>
+    <string name="account_status_payment_failed_body">No hemos podido cargar tu tarjeta. Actualiza tu método de pago para mantener tus funciones premium.</string>
+    <string name="account_status_canceled_title">Suscripción finalizada</string>
+    <string name="account_status_canceled_body">Tu suscripción premium ha finalizado. Gestiona tu suscripción para recuperar el acceso a las funciones premium.</string>
     <string name="account_website_label">the-gate.fr</string>
     <string name="account_website_url">https://the-gate.fr/en</string>
     <string name="account_my_companies">Mis empresas</string>
     <string name="account_add_company">+ Añadir una empresa</string>
+    <string name="account_manage_companies">Gestionar mis empresas</string>
+    <string name="account_manage_company">Gestionar mi empresa</string>
+    <string name="client_type_individual">Particular</string>
+    <string name="client_type_professional">Profesional</string>
     <string name="account_section_advanced">Avanzado</string>
     <string name="account_delete_cta">Eliminar mi cuenta</string>
     <string name="account_delete_dialog_title">¿Eliminar definitivamente tu cuenta?</string>
@@ -303,9 +368,9 @@
     <string name="about_website_cta">www.the-gate.fr</string>
     <string name="about_website_link">https://www.the-gate.fr</string>
     <string name="about_website_tail"> !</string>
-    <string name="about_title_community">Comunidad</string>
-    <string name="about_community_text">Ven a hablar de tus necesidades, ideas e intercambia en el</string>
-    <string name="about_community_cta">Foro de la comunidad.</string>
+    <string name="about_title_community">Novedades</string>
+    <string name="about_community_text">Consulta las novedades de cada versión y las noticias del producto en el</string>
+    <string name="about_community_cta">foro de g8.</string>
     <string name="about_community_link">https://forum.the-gate.fr/</string>
     <string name="about_title_assistance">Soporte</string>
     <string name="about_assistance_intro">Puedes escribirnos en cualquier momento para informar de un error, proponer una funcionalidad o pedir ayuda.</string>
@@ -320,7 +385,7 @@
     <string name="about_title_backup">Copia de seguridad</string>
     <string name="about_backup_text">Acuérdate de descargar tu base de datos regularmente, para restaurarla en caso de pérdida del teléfono.</string>
     <string name="about_download_database">💎 Guardar 💎</string>
-    <string name="account_backup_dialog_title">Copia de seguridad descargada</string>
+    <string name="account_backup_dialog_title">✅ Copia de seguridad descargada</string>
     <string name="account_backup_dialog_message">Tu base de datos se ha guardado en la carpeta Descargas. ¿También quieres enviarla por correo?</string>
     <string name="account_backup_dialog_yes">Sí, enviar por correo</string>
     <string name="account_backup_dialog_no">No, es todo</string>
@@ -337,6 +402,10 @@
     <string name="account_legal_privacy_label">política de privacidad</string>
     <string name="about_share_text_2">¡Compártela con tus amigos!</string>
     <string name="about_share_button">Compartir</string>
+    <string name="about_title_licenses">Licencias</string>
+    <string name="about_licenses_code_line">El código de la aplicación está bajo licencia GPL-3.0.</string>
+    <string name="about_licenses_code_url">https://github.com/gatesuperapp/g8-invoicing</string>
+    <string name="about_licenses_ofl_heading">SIL Open Font License 1.1</string>
     <string name="about_title_version">Versión de la aplicación</string>
     <!-- Language Selection -->
     <string name="about_title_language">Idioma</string>
@@ -360,8 +429,10 @@
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
-    <string name="invoice_advice_legal_1">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡ \n\n …   </string>
-    <string name="invoice_advice_legal_2">Estás en la categoría «Facturas».\n\n Antes de crear una factura, te aconsejo que revises las …   </string>
+    <string name="invoice_advice_legal_1">Toca «Menú» &gt; gStore para activar las funciones que prefieras. Toca «Crear» para hacer tu primera factura…</string>
+    <string name="invoice_advice_legal_2">Todos los documentos que creas se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
+    <string name="onboarding_intro_amigo">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡</string>
+
     <string name="invoice_advice_legal_3">menciones obligatorias para una factura conforme. Para facilitarte la vida lo he resumido todo aquí: \n</string>
     <string name="invoice_advice_legal_4">the-gate.fr</string>
     <string name="invoice_advice_legal_5"> \n\n Sobre otro tema… \n …   </string>
@@ -441,7 +512,7 @@ Une erreur s'est produite :
     <!-- gStore Quote (unlimited + trial) -->
     <string name="gstore_module_quote_title">Presupuestos ilimitados</string>
     <string name="gstore_module_quote_desc">Crear presupuestos y convertirlos en facturas</string>
-    <string name="gstore_module_quote_detail">Activa este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados. El número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
+    <string name="gstore_module_quote_detail">Activa este módulo para crear presupuestos, enviárselos a tus clientes y convertirlos en factura una vez aceptados.\n\nEl número de presupuesto aparecerá en la factura correspondiente para la trazabilidad contable.</string>
     <string name="gstore_module_quote_trial_title">Descubre los presupuestos</string>
     <string name="gstore_module_quote_trial_desc">5 presupuestos gratis para probar la función</string>
     <string name="gstore_module_quote_trial_detail">Activar este módulo permite obtener 5 presupuestos gratis para probar la función y ver si te conviene. Después habrá que hacerse miembro premium para tener presupuestos ilimitados.</string>
@@ -576,7 +647,58 @@ Une erreur s'est produite :
     <!-- gStore delivery-note module -->
     <string name="gstore_module_delivery_note_title">Albaranes</string>
     <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
-    <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados. El número de albarán se indicará en la factura correspondiente para la trazabilidad contable. Puedes agrupar varios albaranes en una sola factura.</string>
+    <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados.\n\nEl número de albarán se indicará en la factura correspondiente para la trazabilidad contable.\n\nPuedes convertir un albarán en factura y agrupar varios albaranes en una sola factura.</string>
+    <string name="gstore_module_multi_entreprise_title">Multiempresa</string>
+    <string name="gstore_module_multi_entreprise_desc">Gestionar varias empresas</string>
+    <string name="gstore_module_multi_entreprise_detail">Activa este módulo si facturas bajo varias empresas (distintos NIF/CIF, actividades separadas…).\n\nPodrás añadir más empresas desde «Mi cuenta» y cambiar entre ellas desde el menú.\n\nTus clientes, productos, numeración y datos bancarios se mantendrán separados por empresa.</string>
+    <string name="gstore_module_cii_title">Exportar XML CII</string>
+    <string name="gstore_module_cii_desc">Exportar los datos en un formato base de facturación electrónica</string>
+    <string name="gstore_module_cii_detail">Activa este módulo para exportar tus facturas en formato Cross Industry Invoice (CII), una norma de facturación electrónica reconocida a nivel internacional.\n\nSus datos XML son legibles por software, en particular por plataformas de facturación electrónica.\n\nA diferencia de Factur-X, no incluye un PDF.</string>
+    <string name="gstore_module_facturx_title">Exportar Factur-X</string>
+    <string name="gstore_module_facturx_desc">Exportar los datos en un formato base de facturación electrónica</string>
+    <string name="gstore_module_facturx_detail">Activa este módulo para exportar tus facturas en formato Factur-X, una norma franco-alemana de facturación electrónica.\n\nEl archivo generado es un PDF normal acompañado de un archivo XML legible por máquinas.\n\nÚtil para enviar tus facturas a plataformas de facturación electrónica manteniendo un PDF legible para el cliente.</string>
+    <string name="export_cii_button">Exportar como CII</string>
+    <string name="export_chooser_title">Formato de exportación</string>
+    <string name="export_chooser_description">Para un formato compatible con la facturación electrónica, usa CII o Factur-X.</string>
+    <string name="export_chooser_pdf">PDF</string>
+    <string name="export_chooser_cii">CII XML</string>
+    <string name="export_chooser_facturx">Factur-X</string>
+    <!-- Export guard: issuer in VAT-exempt regime but products carry VAT rates -->
+    <string name="export_vat_exempt_conflict_message">Tu empresa está en régimen de franquicia de IVA, pero algunos productos tienen un tipo de IVA. Bórralo antes de exportar tu factura.</string>
+    <string name="cii_validation_title">Ups</string>
+    <string name="cii_validation_intro">Para crear una factura electrónica válida, completa los siguientes campos:</string>
+    <string name="cii_validation_confirm">Entendido</string>
+    <string name="cii_validation_issuer_missing">Añadir un emisor</string>
+    <string name="cii_validation_issuer_name">Nombre del emisor</string>
+    <string name="cii_validation_issuer_address">Dirección completa del emisor (calle, C.P., ciudad)</string>
+    <string name="cii_validation_client_missing">Añadir un cliente</string>
+    <string name="cii_validation_client_name">Nombre del cliente</string>
+    <string name="cii_validation_client_type">Indicar si el cliente es empresa o particular</string>
+    <string name="cii_validation_issuer_company_id_label_mismatch">El campo « %1$s » del emisor contiene un valor con el formato incorrecto (%2$s esperado). Corrige el valor o renombra el campo.</string>
+    <string name="cii_validation_client_company_id_label_mismatch">El campo « %1$s » del cliente contiene un valor con el formato incorrecto (%2$s esperado). Corrige el valor o renombra el campo.</string>
+    <string name="form_validation_dialog_title">Vaya</string>
+    <string name="cii_validation_client_email">Añadir un email al cliente (dirección electrónica necesaria para un cliente particular)</string>
+    <string name="cii_validation_client_address">Dirección completa del cliente (calle, C.P., ciudad)</string>
+    <string name="cii_validation_products_empty">Añadir al menos un producto a la factura</string>
+    <string name="cii_validation_line_name">Línea %1$d: falta el nombre del producto</string>
+    <string name="cii_validation_line_price">Línea %1$d: falta el precio unitario</string>
+    <string name="cii_validation_line_tax_rate_invalid">Línea %1$d: el tipo de IVA %2$s % no está permitido en Francia (valores aceptados: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_due_date">Fecha de vencimiento del pago</string>
+    <string name="cii_validation_vat_exemption_text">Motivo de exención del IVA (indícalo en el menú de textos)</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">El emisor no tiene número de IVA. Añade un número de IVA al emisor — de lo contrario la factura será rechazada en recepción. Si estás en régimen de exención, activa la opción en tu empresa.</string>
+
+    <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
+    <string name="document_vat_exemption_label">Exención de IVA</string>
+    <string name="document_vat_exemption_modal_title">Motivo de exención del IVA</string>
+    <string name="document_vat_exemption_placeholder">Indica la referencia legal aplicable a tu empresa</string>
+
+    <!-- Default VAT-exempt mentions — see values/strings.xml for design notes.
+         National mentions kept in native language across all locales. -->
+    <string name="vat_exempt_FR">IVA no aplicable, art. 293 B del CGI francés</string>
+    <string name="vat_exempt_DE">Pequeña empresa, § 19 UStG</string>
+    <string name="vat_exempt_IT">Operación exenta de IVA — régimen forfetario (Ley 190/2014, art. 1 §§ 54-89)</string>
+    <string name="vat_exempt_fallback_eu">IVA exento — régimen especial de pequeñas empresas (artículo 284 de la Directiva 2006/112/CE)</string>
+    <string name="vat_exempt_fallback_generic">No sujeto al IVA</string>
 
     <!-- Country picker (address form) -->
     <string name="client_country">País</string>
@@ -751,4 +873,82 @@ Une erreur s'est produite :
     <string name="unit_hea_name">cabeza</string>
     <string name="unit_hea_short">cabeza</string>
     <string name="unit_hea_keywords">cabeza,cabezas,ganado,animales</string>
+
+    <!-- 1.9 migration wizard -->
+    <string name="onboarding_19_welcome_title">Bienvenido·a a la versión 1.9 — Tilia cordata</string>
+    <string name="onboarding_19_backup_title">Primero, una copia de seguridad</string>
+    <string name="onboarding_19_backup_body">Antes de empezar, te aconsejo guardar una copia de seguridad por si acaso.</string>
+    <string name="onboarding_19_backup_cta">Guardar</string>
+    <string name="onboarding_19_confirm_title">¿Todo correcto?</string>
+    <string name="onboarding_19_confirm_body">Revisa las asignaciones antes de guardarlas. Con la cruz puedes quitar un cliente o un producto.</string>
+    <string name="onboarding_19_confirm_cta">Confirmar</string>
+    <string name="onboarding_19_confirm_no_clients">Sin cliente asignado.</string>
+    <string name="onboarding_19_confirm_no_products">Sin producto asignado.</string>
+    <string name="onboarding_19_confirm_section_clients">Clientes</string>
+    <string name="onboarding_19_confirm_section_products">Productos</string>
+    <string name="onboarding_19_welcome_body">Esta versión termina de implantar los campos normalizados. Vamos a configurarlos juntos.</string>
+    <string name="onboarding_19_welcome_cta">Adelante</string>
+    <string name="onboarding_19_cleanup_title">Parece que gestionas %1$d empresas</string>
+    <string name="onboarding_19_cleanup_body">¿Es así? Si no, elimina las que no uses. Tranquilo·a, tus documentos no se verán afectados.</string>
+    <string name="onboarding_19_cleanup_cta">Continuar</string>
+    <string name="onboarding_19_attach_intro_body">Vamos a vincular tus clientes y productos a tus empresas. Así podrás cambiar entre empresas y tener una numeración específica por empresa.</string>
+    <string name="onboarding_19_attach_intro_cta">Adelante</string>
+    <string name="onboarding_19_attach_step_title">Empresa %1$d: %2$s</string>
+    <string name="onboarding_19_attach_clients_body">Selecciona los clientes que corresponden a esta empresa.</string>
+    <string name="onboarding_19_attach_products_body">Selecciona los productos que corresponden a esta empresa.</string>
+    <string name="onboarding_19_attach_cta">Vincular a %1$s</string>
+    <string name="onboarding_19_bank_title">Datos bancarios</string>
+    <string name="onboarding_19_bank_title_with_issuer">Empresa %1$d: %2$s — Datos bancarios</string>
+    <string name="onboarding_19_bank_body">Ahora hay un campo dedicado para los datos bancarios, a nivel de empresa (emisor).</string>
+    <string name="onboarding_19_bank_iban_label">IBAN</string>
+    <string name="onboarding_19_bank_bic_label">BIC</string>
+    <string name="onboarding_19_bank_prefilled_hint">He encontrado esta información en tus facturas y la he rellenado. Modifícala si hace falta.</string>
+    <string name="onboarding_19_bank_not_found_hint">No he encontrado esta información en el pie de página de tus facturas. Puedes rellenarla ahora o más tarde a nivel de empresa.</string>
+    <string name="onboarding_19_bank_cta">Siguiente</string>
+    <string name="onboarding_19_orphans_clients_title">Aún quedan algunos clientes por organizar</string>
+    <string name="onboarding_19_orphans_clients_body">Estos clientes no están vinculados a ninguna empresa. Elige una para cada uno.</string>
+    <string name="onboarding_19_orphans_products_title">Aún quedan algunos productos por organizar</string>
+    <string name="onboarding_19_orphans_products_body">Estos productos no están vinculados a ninguna empresa. Elige una para cada uno.</string>
+    <string name="onboarding_19_orphans_cta">Continuar</string>
+    <string name="onboarding_19_new_fields_title">Otros campos añadidos</string>
+    <string name="onboarding_19_new_fields_body">También he añadido los siguientes campos a las facturas:\n\n• **medio de pago**\n• **condiciones de pago**\n• **exención de IVA** (para empresas en régimen de franquicia)</string>
+    <string name="onboarding_19_new_fields_hint">Si ya tenías esta información en el pie de página, puedes copiarla y pegarla en los campos correspondientes.</string>
+    <string name="onboarding_19_new_fields_cta">Siguiente</string>
+    <string name="onboarding_19_search_title">Búsqueda</string>
+    <string name="onboarding_19_search_body">Ahora hay una barra de búsqueda para Clientes, Productos y todos los documentos (busca por nombre del cliente o número de documento).</string>
+    <string name="onboarding_19_tags_title">Etiquetas albaranes y presupuestos</string>
+    <string name="onboarding_19_tags_body">Ahora puedes marcar tus albaranes y presupuestos (borrador, enviado, cancelado). El estado «facturado» se asigna automáticamente al convertirlos en factura.\n\nActiva estos módulos premium en el 𝕘Store.</string>
+    <string name="onboarding_19_einvoice_title">Facturación electrónica</string>
+    <string name="onboarding_19_einvoice_intro">¡La exportación de facturas electrónicas ya está disponible!</string>
+    <string name="onboarding_19_einvoice_body">En el gStore, activa los módulos Factur-X, XML CII. Podrás importar esas facturas directamente en tu plataforma acreditada.</string>
+    <string name="onboarding_19_einvoice_sub">Puedes hacerte miembro premium suscribiéndote en nuestra web 🌟</string>
+    <string name="onboarding_19_einvoice_cta">Siguiente</string>
+    <string name="onboarding_19_final_title">¡Listo, todo está en orden!</string>
+    <string name="entreprise_delete_blocked_title">Eliminación imposible</string>
+    <string name="entreprise_delete_blocked_message">Esta empresa aún tiene clientes, productos o documentos asociados. Para eliminarla, elimine primero esos elementos.</string>
+
+    <!-- Font picker (módulo Fuentes) -->
+    <string name="gstore_module_font_title">Fuentes</string>
+    <string name="gstore_module_font_desc">Cambia la fuente de tus documentos.</string>
+    <string name="gstore_module_font_detail">Activa este módulo para desbloquear más fuentes para tus documentos. Algunas son gratuitas, otras están reservadas a los miembros premium.\n\nFuentes disponibles: Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest e IBM Plex Sans.</string>
+    <string name="action_font_label">Fuente</string>
+    <string name="action_font_description">Elegir la fuente del documento</string>
+    <string name="font_picker_title">Fuente del documento</string>
+    <string name="export_error_premium_font_message">Tu documento usa una fuente premium pero no eres miembro premium.</string>
+
+    <!-- Etiquetas de albaranes / presupuestos (masculino en FR) + estado Facturado -->
+    <string name="appbar_tag_sent_masc">Enviado</string>
+    <string name="appbar_tag_cancelled_masc">Cancelado</string>
+    <string name="appbar_tag_invoiced">Facturado</string>
+    <string name="appbar_tag_locked">Bloqueada</string>
+
+    <!-- gStore: Etiquetar albaranes -->
+    <string name="gstore_module_delivery_note_tagging_title">Etiquetar albaranes</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Añadir un estado a tus albaranes</string>
+    <string name="gstore_module_delivery_note_tagging_detail">Activa este módulo para añadir un estado a tus albaranes: borrador, enviado, cancelado o facturado.\n\nEl estado « Facturado » se aplica automáticamente cuando un albarán se convierte en factura, pero puedes cambiarlo en cualquier momento.</string>
+
+    <!-- gStore: Etiquetar presupuestos -->
+    <string name="gstore_module_quote_tagging_title">Etiquetar presupuestos</string>
+    <string name="gstore_module_quote_tagging_desc">Añadir un estado a tus presupuestos</string>
+    <string name="gstore_module_quote_tagging_detail">Activa este módulo para añadir un estado a tus presupuestos: borrador, enviado, cancelado o facturado.\n\nEl estado « Facturado » se aplica automáticamente cuando un presupuesto se convierte en factura, pero puedes cambiarlo en cualquier momento.</string>
 </resources>

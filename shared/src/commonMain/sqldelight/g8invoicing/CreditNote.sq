@@ -11,6 +11,19 @@ CREATE TABLE CreditNote (
   labels_snapshot TEXT,
   show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
+  -- No payment_means / payment_bank columns: an avoir reverses the flow
+  -- (seller owes buyer), so payment terms + means + IBAN don't apply.
+  -- Kept dropped in 6.sqm — the columns never make it out of release/1.9.
+  -- Entreprise (issuer maître) émettrice, figée à la création. Sert la
+  -- numérotation par entreprise + le filtrage de la liste des avoirs par
+  -- entreprise courante.
+  original_company_id INTEGER,
+  -- BT-120 VAT exemption reason. Mirror of Invoice.vat_exemption_text — a
+  -- credit note is still a taxable-flow doc under EN16931 so it needs the
+  -- same exemption wording when the issuer is in franchise en base.
+  vat_exemption_text TEXT,
+  -- DocumentFont.id — null = Noto Sans default. See Invoice.font_family.
+  font_family TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -32,17 +45,33 @@ FROM CreditNote
 ORDER BY credit_note_id DESC
 LIMIT 1;
 
+-- Multi-entreprise (étape 2). Numérotation des avoirs indépendante par
+-- entreprise émettrice.
+getLastCreditNoteNumberForCompany:
+SELECT number
+FROM CreditNote
+WHERE original_company_id = :company_id
+ORDER BY credit_note_id DESC
+LIMIT 1;
+
 getAll:
 SELECT *
 FROM CreditNote;
+
+-- Multi-entreprise (étape 2). Filtre par entreprise courante — même
+-- pattern que Invoice.getAllForCompany.
+getAllForCompany:
+SELECT *
+FROM CreditNote
+WHERE original_company_id = :company_id;
 
 getAllIds:
 SELECT credit_note_id
 FROM CreditNote;
 
 save:
-INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO CreditNote (credit_note_id, number, issuing_date, reference, free_field, currency, due_date, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, vat_exemption_text, font_family)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE CreditNote
@@ -53,8 +82,17 @@ SET number = :number,
     currency =: currency,
     due_date =: due_date,
     footer  =: footer,
+    vat_exemption_text = :vat_exemption_text,
+    font_family = :font_family,
     updated_at =: updated_at
 
+WHERE
+    credit_note_id = :credit_note_id;
+
+updateVatExemptionText:
+UPDATE CreditNote
+SET vat_exemption_text = :vat_exemption_text,
+    updated_at =: updated_at
 WHERE
     credit_note_id = :credit_note_id;
 

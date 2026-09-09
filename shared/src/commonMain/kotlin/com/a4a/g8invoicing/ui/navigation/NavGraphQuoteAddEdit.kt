@@ -31,8 +31,10 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.FormValidationDialogHost
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.rememberFormValidationDialogState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
@@ -61,6 +63,8 @@ fun NavGraphBuilder.quoteAddEdit(
         )
     ) { backStackEntry ->
         val scope = rememberCoroutineScope()
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val itemId = backStackEntry.arguments?.getString("itemId")
 
         val quoteViewModel: QuoteAddEditViewModel = koinViewModel(
@@ -91,6 +95,7 @@ fun NavGraphBuilder.quoteAddEdit(
         }
 
         var showDocumentForm by remember { mutableStateOf(false) }
+        val errorDialog = rememberFormValidationDialogState()
 
         // When the bottom-sheet form is open, system back closes it instead
         // of popping back to the doc list.
@@ -128,8 +133,33 @@ fun NavGraphBuilder.quoteAddEdit(
                                     ClientOrIssuerType.DOCUMENT_ISSUER
                                 )
                                 if (updated != null) {
+                                    // Retention toggle transition — same as EDIT_ISSUER: DB
+                                    // rows must be written synchronously before the following
+                                    // reload reads state back, otherwise the retentions block
+                                    // stays out of sync until a subsequent EDIT_ISSUER.
+                                    val hadRetentions = quoteViewModel.quoteUiState.value.retentions.isNotEmpty()
+                                    if (updated.taxWithholdingEnabled && !hadRetentions) {
+                                        quoteViewModel.seedDefaultRetentionsInDb(updated)
+                                    } else if (!updated.taxWithholdingEnabled && hadRetentions) {
+                                        quoteViewModel.clearRetentionsInDb()
+                                    }
+                                    val hadExemptionText = quoteViewModel.quoteUiState.value
+                                        .vatExemptionText?.text?.isNotBlank() == true
+                                    if (updated.vatExempt && !hadExemptionText) {
+                                        quoteViewModel.seedDefaultVatExemptionTextInDb(updated)
+                                    }
                                     quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // Persist via UPDATE (id-preserving) — see
+                                    // NavGraphInvoiceAddEdit for the full story.
+                                    // syncToMaster=false so the follow-up form
+                                    // validate doesn't bump the master and leave
+                                    // originalVersion out of sync.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    quoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -144,10 +174,20 @@ fun NavGraphBuilder.quoteAddEdit(
                     Button(
                         onClick = {
                             val opensForm = pendingIssuerOpensForm
+                            val issuerToAck = pendingIssuerToEdit
                             showVersionMismatchDialog = false
                             pendingIssuerToEdit = null
                             pendingIssuerOpensForm = false
                             if (opensForm) showDocumentForm = true
+                            // Bump the doc snapshot's originalVersion to master so the
+                            // dialog stops re-firing on every reopen. Data stays frozen.
+                            issuerToAck?.let { issuer ->
+                                scope.launch {
+                                    clientOrIssuerAddEditViewModel
+                                        .acknowledgeMasterVersion(issuer)
+                                        ?.let { quoteViewModel.saveDocumentClientOrIssuerInUiState(it) }
+                                }
+                            }
                         }
                     ) {
                         Text(
@@ -183,7 +223,13 @@ fun NavGraphBuilder.quoteAddEdit(
                                 )
                                 if (updated != null) {
                                     quoteViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    quoteViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
+                                    // See the issuer path above.
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_CLIENT,
+                                        updated,
+                                        syncToMaster = false,
+                                    )
+                                    quoteViewModel.reloadDocument()
                                 }
                             }
                         }
@@ -198,10 +244,18 @@ fun NavGraphBuilder.quoteAddEdit(
                     Button(
                         onClick = {
                             val opensForm = pendingClientOpensForm
+                            val clientToAck = pendingClientToEdit
                             showClientVersionMismatchDialog = false
                             pendingClientToEdit = null
                             pendingClientOpensForm = false
                             if (opensForm) showDocumentForm = true
+                            clientToAck?.let { client ->
+                                scope.launch {
+                                    clientOrIssuerAddEditViewModel
+                                        .acknowledgeMasterVersion(client)
+                                        ?.let { quoteViewModel.saveDocumentClientOrIssuerInUiState(it) }
+                                }
+                            }
                         }
                     ) {
                         Text(
@@ -213,6 +267,10 @@ fun NavGraphBuilder.quoteAddEdit(
             )
         }
 
+        // Observe the counter so validating the doc-product tax edit dialog
+        // triggers a recomposition and the picker re-reads the fresh list.
+        val taxRatesRefreshCounter by productAddEditViewModel.taxRatesRefreshCounter.collectAsState()
+
         DocumentAddEditPlatform(
             navController = navController,
             document = quoteUiState,
@@ -222,7 +280,8 @@ fun NavGraphBuilder.quoteAddEdit(
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
             documentProductUiState = documentProduct,
-            taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
+            taxRates = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesFromLocalDb() },
+            taxRatesWithIds = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesWithIdsFromLocalDb() },
             products = productListUiState.products.toMutableList(),
             onValueChange = { pageElement, value ->
                 quoteViewModel.updateUiState(pageElement, value)
@@ -329,6 +388,12 @@ fun NavGraphBuilder.quoteAddEdit(
             },
             onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
+                    // Focus clear + keyboard hide before validate — commits
+                    // any pending email so validateInputs sees the invalid
+                    // value. See standalone NavGraphClientOrIssuerAddEdit
+                    // for the same pattern.
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
@@ -341,15 +406,23 @@ fun NavGraphBuilder.quoteAddEdit(
                                 quoteViewModel.saveDocumentClientOrIssuerInUiState(documentClientUiState)
                                 quoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                // See NavGraphInvoiceAddEdit — fresh StateFlow
+                                // read to catch cleanFieldsForClientType mutations.
+                                val freshClient = clientOrIssuerAddEditViewModel
+                                    .documentClientUiState.value
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, freshClient, syncToMaster = syncToMaster
                                 )
                                 quoteViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -363,15 +436,33 @@ fun NavGraphBuilder.quoteAddEdit(
                                 quoteViewModel.saveDocumentClientOrIssuerInUiState(documentIssuerUiState)
                                 quoteViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
+                                val hadRetentions = quoteViewModel.quoteUiState.value.retentions.isNotEmpty()
+                                val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
+                                val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
+                                val hadExemptionText = quoteViewModel.quoteUiState.value
+                                    .vatExemptionText?.text?.isNotBlank() == true
+                                val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
                                     ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
                                 )
+                                if (turnedOffRetention) {
+                                    quoteViewModel.clearRetentionsInDb()
+                                } else if (turnedOnRetention) {
+                                    quoteViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                }
+                                if (needsExemptionSeed) {
+                                    quoteViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
+                                }
                                 quoteViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
@@ -414,6 +505,9 @@ fun NavGraphBuilder.quoteAddEdit(
             onSelectTaxRate = {
                 productAddEditViewModel.updateTaxRate(it, ProductType.DOCUMENT_PRODUCT)
             },
+            onSaveTaxRates = { rates ->
+                productAddEditViewModel.saveTaxRates(rates)
+            },
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = { showDocumentForm = it },
             onClickDeleteAddress = {
@@ -432,6 +526,17 @@ fun NavGraphBuilder.quoteAddEdit(
             onShowMessage = onShowMessage,
             exportPdfContent = exportPdfContent,
             showProductType = showProductType,
+            onFontSelect = { font ->
+                quoteViewModel.setDocumentFont(font.id)
+            },
+            onSaveRetention = { idx, updated ->
+                quoteViewModel.updateRetentionAt(idx, updated)
+            },
+            onToggleRetentionHidden = { idx ->
+                quoteViewModel.toggleRetentionHiddenAt(idx)
+            },
         )
+
+        FormValidationDialogHost(errorDialog)
     }
 }

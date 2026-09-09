@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.a4a.g8invoicing.ui.screens.Account
 import com.a4a.g8invoicing.ui.screens.ExportResult
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
@@ -19,8 +20,17 @@ fun NavGraphBuilder.account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
 ) {
-    composable(route = Screen.Account.name) {
+    composable(
+        // Optional ?section=... lets callers force-expand a CollapsibleSection
+        // on landing (e.g. Sidebar → Gérer mes entreprises → section=my_companies).
+        route = Screen.Account.name + "?section={section}",
+        arguments = listOf(
+            navArgument("section") { nullable = true },
+        ),
+    ) { backStackEntry ->
+        val section = backStackEntry.arguments?.getString("section")
         var isCategoriesMenuOpen by remember { mutableStateOf(false) }
         var lastBackPressTime by remember { mutableStateOf(0L) }
 
@@ -45,8 +55,10 @@ fun NavGraphBuilder.account(
             onShareContent = onShareContent,
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
+            onRestoreDatabase = onRestoreDatabase,
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
+            expandSection = section,
         )
     }
 }

@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_generic
+import com.a4a.g8invoicing.shared.resources.issuer_bank_identifier_iban
 import com.a4a.g8invoicing.shared.resources.addressed_to
 import com.a4a.g8invoicing.shared.resources.company_identification1
 import com.a4a.g8invoicing.shared.resources.company_identification2
@@ -38,6 +40,7 @@ import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
+import com.a4a.g8invoicing.shared.resources.document_payment_section_title
 import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
@@ -70,6 +73,7 @@ enum class ExportStatusDesktop {
 actual fun ExportPdfPlatform(
     document: DocumentState,
     onDismissRequest: () -> Unit,
+    facturxXmlBytes: ByteArray?,
 ) {
     var exportStatus by remember { mutableStateOf(ExportStatusDesktop.ONGOING) }
     var finalFileName by remember { mutableStateOf("") }
@@ -101,6 +105,12 @@ actual fun ExportPdfPlatform(
         companyId3Label = stringResource(Res.string.company_identification3),
         otherLines = stringResource(Res.string.document_products_other_lines),
         currencyNoticeLabel = stringResource(Res.string.pdf_currency_notice),
+        paymentMeansLabels = com.a4a.g8invoicing.data.models.PaymentMeans.entries.associate {
+            it.chipId to stringResource(it.labelRes)
+        },
+        bankAccountIbanLabel = stringResource(Res.string.issuer_bank_identifier_iban),
+        bankAccountGenericLabel = stringResource(Res.string.issuer_bank_identifier_generic),
+        paymentSectionTitle = stringResource(Res.string.document_payment_section_title),
     )
 
     val fileManager = remember { PdfFileManager() }
@@ -147,7 +157,11 @@ actual fun ExportPdfPlatform(
                     launch(Dispatchers.Default) {
                         try {
                             val pdfGenerator = PdfGenerator(strings, fileManager)
-                            finalFileName = pdfGenerator.generatePdf(document)
+                            finalFileName = if (facturxXmlBytes != null) {
+                                pdfGenerator.generateFacturX(document, facturxXmlBytes)
+                            } else {
+                                pdfGenerator.generatePdf(document)
+                            }
                             exportStatus = ExportStatusDesktop.DONE
                         } catch (e: Exception) {
                             errorMessage = e.message ?: "Unknown error"

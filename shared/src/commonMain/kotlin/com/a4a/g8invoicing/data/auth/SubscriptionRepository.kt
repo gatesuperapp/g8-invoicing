@@ -24,8 +24,9 @@ import kotlinx.serialization.json.Json
  * shared-prefs instance). Subscription status itself isn't sensitive, but reusing
  * the same store keeps the auth-related state colocated.
  *
- * Premium = subscription.status == "active" AND currentPeriodEnd > now.
- * (Trialing/past_due are intentionally NOT premium — strict per plan.)
+ * Premium = subscription.status == "active". Stripe is the source of truth: the status
+ * flips to past_due / unpaid / canceled the moment the subscription is no longer paid,
+ * so a live "active" is a valid entitlement without any further date check.
  */
 class SubscriptionRepository(
     private val authRepository: AuthRepository,
@@ -92,9 +93,7 @@ class SubscriptionRepository(
 
     fun isPremium(): Boolean {
         val s = _state.value as? SubscriptionState.Known ?: return false
-        if (s.status != "active") return false
-        val end = s.currentPeriodEndMs ?: return false
-        return end > clock.now().toEpochMilliseconds()
+        return s.status == "active"
     }
 
     fun clear() {
@@ -115,9 +114,8 @@ class SubscriptionRepository(
 
     private fun tryParseInstant(iso: String): Long? {
         // Backend sends LocalDateTime.toString() (no timezone, e.g. "2027-06-13T20:38:50.123").
-        // Old code only handled full ISO Instant (with Z); that silently failed and made
-        // isPremium evaluate to false even for active subs. Try Instant first (for any future
-        // upgrade to timezone-aware serialization), then LocalDateTime assuming UTC.
+        // Try Instant first (in case backend later switches to timezone-aware serialization),
+        // then LocalDateTime assuming UTC.
         runCatching { return Instant.parse(iso).toEpochMilliseconds() }
         return runCatching {
             LocalDateTime.parse(iso).toInstant(TimeZone.UTC).toEpochMilliseconds()
@@ -129,6 +127,15 @@ class SubscriptionRepository(
         private const val FRESH_WINDOW_MS = 6L * 60L * 60L * 1000L          // 6 hours
         private const val STALE_WINDOW_MS = 7L * 24L * 60L * 60L * 1000L    // 7 days
     }
+}
+
+/**
+ * Same semantics as [SubscriptionRepository.isPremium] but derivable from a state
+ * snapshot — handy for Composables that only observe [SubscriptionRepository.state].
+ */
+fun SubscriptionState.isPremium(): Boolean {
+    val s = this as? SubscriptionState.Known ?: return false
+    return s.status == "active"
 }
 
 sealed class SubscriptionState {

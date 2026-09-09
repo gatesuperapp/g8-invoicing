@@ -32,7 +32,10 @@ fun CollapsibleSection(
     initiallyExpanded: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    var expanded by rememberSaveable(title) { mutableStateOf(initiallyExpanded) }
+    // initiallyExpanded is part of the key so navigating in with a fresh
+    // "expand this section" hint (e.g. Sidebar → Gérer mes entreprises) resets
+    // the saved state, overriding whatever the user had collapsed previously.
+    var expanded by rememberSaveable(title, initiallyExpanded) { mutableStateOf(initiallyExpanded) }
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 90f else 0f,
         label = "chevron",

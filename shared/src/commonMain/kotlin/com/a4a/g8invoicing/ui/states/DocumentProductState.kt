@@ -22,6 +22,19 @@ data class DocumentProductState(
     var productId: Int? = null,
     val linkedDate: String? = null,
     val linkedDocNumber: String? = null,
+    // Origin of [linkedDocNumber] — either a delivery-note number or a
+    // quote number, populated by [InvoiceLocalDataSource.fetchDocumentProducts]
+    // depending on which link table hit. Nullable = unknown (safe default,
+    // callers that only care about display fall back to old behaviour).
+    val linkedDocType: LinkedDocType? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
     var sortOrder: Int? = null // remember product sorting in document
 )
+
+/**
+ * Origin of a `DocumentProductState.linkedDocNumber`. Drives per-line
+ * CII emission (`DeliveryNoteReferencedDocument` vs `AdditionalReferencedDocument`
+ * with TypeCode 130 for a quote), so the receiver knows what type of
+ * source doc the invoice line traces back to.
+ */
+enum class LinkedDocType { DELIVERY_NOTE, QUOTE }

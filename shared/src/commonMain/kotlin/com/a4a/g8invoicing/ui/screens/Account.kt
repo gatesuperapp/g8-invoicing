@@ -42,7 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.CompositionLocalProvider
@@ -52,6 +52,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,7 +75,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
@@ -85,6 +89,7 @@ import com.a4a.g8invoicing.data.currencyDisplayName
 import com.a4a.g8invoicing.data.currencySymbol
 import com.a4a.g8invoicing.ui.screens.shared.CurrencyPicker
 import com.a4a.g8invoicing.data.auth.SubscriptionState
+import com.a4a.g8invoicing.data.auth.isPremium
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.about_language_english
 import com.a4a.g8invoicing.shared.resources.about_terms_of_service_url_1
@@ -99,6 +104,7 @@ import com.a4a.g8invoicing.shared.resources.about_language_system
 import com.a4a.g8invoicing.shared.resources.about_title_language
 import com.a4a.g8invoicing.shared.resources.account_currency_title
 import com.a4a.g8invoicing.shared.resources.account_currency_and_language_title
+import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
 import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.WebsiteFooter
@@ -115,10 +121,16 @@ import com.a4a.g8invoicing.shared.resources.account_auth_title
 import com.a4a.g8invoicing.shared.resources.account_add_company
 import com.a4a.g8invoicing.shared.resources.account_logout
 import com.a4a.g8invoicing.shared.resources.account_my_companies
+import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_edit_link
+import com.a4a.g8invoicing.shared.resources.drawer_my_company
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription
 import com.a4a.g8invoicing.shared.resources.account_manage_subscription_url
 import com.a4a.g8invoicing.shared.resources.account_cancellation_date
 import com.a4a.g8invoicing.shared.resources.account_renewal_date
+import com.a4a.g8invoicing.shared.resources.account_status_canceled_body
+import com.a4a.g8invoicing.shared.resources.account_status_canceled_title
+import com.a4a.g8invoicing.shared.resources.account_status_payment_failed_body
+import com.a4a.g8invoicing.shared.resources.account_status_payment_failed_title
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fab
 import com.a4a.g8invoicing.shared.resources.account_status_premium_fly
 import com.a4a.g8invoicing.shared.resources.about_backup_text
@@ -141,26 +153,33 @@ import com.a4a.g8invoicing.shared.resources.account_delete_success_message
 import com.a4a.g8invoicing.shared.resources.account_delete_success_title
 import com.a4a.g8invoicing.shared.resources.account_section_advanced
 import com.a4a.g8invoicing.shared.resources.drawer_my_account
+import com.a4a.g8invoicing.shared.resources.entreprise_delete_blocked_message
+import com.a4a.g8invoicing.shared.resources.entreprise_delete_blocked_title
 import com.a4a.g8invoicing.shared.resources.ok
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.navigation.Screen
-import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
+import com.a4a.g8invoicing.ui.theme.ColorOrange
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
 import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
+import com.a4a.g8invoicing.ui.theme.textCaption
+import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSecondary
-import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -172,12 +191,19 @@ fun Account(
     onShareContent: (String) -> Unit = {},
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
+    onRestoreDatabase: () -> Unit = {},
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    // Optional hint from the nav arg (?section=my_companies) — when set to a
+    // known section id, the matching CollapsibleSection lands expanded.
+    expandSection: String? = null,
     viewModel: AccountViewModel = koinViewModel(),
+    issuersListViewModel: ClientOrIssuerListViewModel = koinViewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
     val uiState = viewModel.uiState
+    val issuersUiState by issuersListViewModel.issuersUiState.collectAsState()
+    val issuersCount = issuersUiState.clientsOrIssuerList.orEmpty().size
 
     val isDimActive = remember { mutableStateOf(false) }
 
@@ -220,7 +246,9 @@ fun Account(
         }
     }
 
-    Scaffold(
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         containerColor = AppColors.surface,
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
@@ -313,11 +341,34 @@ fun Account(
                     ) {
                         Text(stringResource(Res.string.about_download_database))
                     }
+
+                    // Secondary CTA under the download button — opens the
+                    // restore flow (SAF picker → validation → kill process →
+                    // Application.onCreate applies the swap on next launch).
+                    // TODO(i18n): "Restaurer" hardcoded; extract via the
+                    // translations branch (e.g. `account_restore_database`).
+                    TextButton(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = onRestoreDatabase,
+                    ) {
+                        Text(
+                            text = "Restaurer",
+                            color = ColorVioletLink,
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(30.dp))
 
-                CollapsibleSection(title = stringResource(Res.string.account_my_companies)) {
+                val myCompaniesTitle = if (issuersCount <= 1) {
+                    stringResource(Res.string.drawer_my_company)
+                } else {
+                    stringResource(Res.string.account_my_companies)
+                }
+                CollapsibleSection(
+                    title = myCompaniesTitle,
+                    initiallyExpanded = expandSection == "my_companies",
+                ) {
                     MyCompaniesSection(navController = navController)
                 }
 
@@ -363,32 +414,18 @@ fun Account(
         }
 
         if (showDeleteAccountDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteAccountDialog = false },
-                title = { Text(stringResource(Res.string.account_delete_dialog_title)) },
-                text = { Text(stringResource(Res.string.account_delete_dialog_message)) },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteAccountDialog = false
-                            showDeletionResult = true
-                            viewModel.deleteAccount()
-                        },
-                    ) {
-                        Text(
-                            stringResource(Res.string.account_delete_dialog_confirm),
-                            color = ColorRedLate,
-                        )
-                    }
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = stringResource(Res.string.account_delete_dialog_title),
+                body = stringResource(Res.string.account_delete_dialog_message),
+                confirmText = stringResource(Res.string.account_delete_dialog_confirm),
+                cancelText = stringResource(Res.string.account_delete_dialog_cancel),
+                destructive = true,
+                onConfirm = {
+                    showDeleteAccountDialog = false
+                    showDeletionResult = true
+                    viewModel.deleteAccount()
                 },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteAccountDialog = false }) {
-                        Text(
-                            stringResource(Res.string.account_delete_dialog_cancel),
-                            color = ColorVioletLink,
-                        )
-                    }
-                },
+                onDismiss = { showDeleteAccountDialog = false },
             )
         }
 
@@ -460,42 +497,24 @@ fun Account(
         }
 
         if (showSendDatabaseByEmailDialog && exportedFilePath != null) {
-            AlertDialog(
-                onDismissRequest = { showSendDatabaseByEmailDialog = false },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.CheckCircle,
-                        contentDescription = null,
-                        tint = Color(0xFF4CAF50),
-                    )
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = stringResource(Res.string.account_backup_dialog_title),
+                body = stringResource(Res.string.account_backup_dialog_message),
+                confirmText = stringResource(Res.string.account_backup_dialog_yes),
+                cancelText = stringResource(Res.string.account_backup_dialog_no),
+                onConfirm = {
+                    showSendDatabaseByEmailDialog = false
+                    exportedFilePath?.let { onSendDatabaseByEmail(it) }
                 },
-                title = { Text(stringResource(Res.string.account_backup_dialog_title)) },
-                text = { Text(stringResource(Res.string.account_backup_dialog_message)) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showSendDatabaseByEmailDialog = false
-                        exportedFilePath?.let { onSendDatabaseByEmail(it) }
-                    }) {
-                        Text(stringResource(Res.string.account_backup_dialog_yes), color = ColorVioletLink)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showSendDatabaseByEmailDialog = false }) {
-                        Text(stringResource(Res.string.account_backup_dialog_no), color = ColorVioletLink)
-                    }
-                }
+                onDismiss = { showSendDatabaseByEmailDialog = false },
             )
         }
 
         if (showExportErrorDialog) {
-            AlertDialog(
-                onDismissRequest = { showExportErrorDialog = false },
-                text = { Text(exportErrorMessage ?: "") },
-                confirmButton = {
-                    TextButton(onClick = { showExportErrorDialog = false }) {
-                        Text(stringResource(Res.string.ok), color = ColorVioletLink)
-                    }
-                }
+            com.a4a.g8invoicing.ui.shared.AppInfoDialog(
+                body = exportErrorMessage ?: "",
+                confirmText = stringResource(Res.string.ok),
+                onDismiss = { showExportErrorDialog = false },
             )
         }
     }
@@ -504,30 +523,47 @@ fun Account(
 @Composable
 fun AuthMessageDialog(
     messagePrefix: String,
-    contactEmail: String,
+    contactEmail: String?,
     uriHandler: androidx.compose.ui.platform.UriHandler,
     onDismiss: () -> Unit,
+    showOhNoHeader: Boolean = false,
 ) {
     val annotatedString = buildAnnotatedString {
         append(messagePrefix)
-        pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
-        withStyle(style = SpanStyle(color = ColorVioletLink)) {
-            append(contactEmail)
+        if (contactEmail != null) {
+            pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
+            withStyle(style = SpanStyle(color = ColorVioletLink)) {
+                append(contactEmail)
+            }
+            pop()
         }
-        pop()
     }
     AlertDialog(
         onDismissRequest = onDismiss,
         text = {
-            ClickableText(
-                text = annotatedString,
-                style = MaterialTheme.typography.bodyLarge,
-                onClick = { offset ->
-                    annotatedString
-                        .getStringAnnotations(tag = "email", start = offset, end = offset)
-                        .firstOrNull()?.let { uriHandler.openUri(it.item) }
+            Column {
+                if (showOhNoHeader) {
+                    // Same "oh no" + kaomoji block as the export error dialog
+                    // (alert_dialog_error) — kept at the modal's body text size so
+                    // it stays consistent across the app.
+                    Text(
+                        text = OH_NO_HEADER,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-            )
+                ClickableText(
+                    text = annotatedString,
+                    style = MaterialTheme.typography.bodyLarge,
+                    onClick = { offset ->
+                        annotatedString
+                            .getStringAnnotations(tag = "email", start = offset, end = offset)
+                            .firstOrNull()?.let { uriHandler.openUri(it.item) }
+                    }
+                )
+            }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
@@ -536,6 +572,13 @@ fun AuthMessageDialog(
         },
     )
 }
+
+// TODO(i18n): move these to strings.xml via the `translations` branch post-1.9.
+// Kept as Kotlin constants for now so release/1.9 doesn't have to round-trip through
+// Weblate for shipping.
+private const val OH_NO_HEADER = "𝕠𝕙 𝕟𝕠\n((˃ᯅ˂)ノ)"
+private const val OFFLINE_MESSAGE_FR =
+    "Tu sembles hors-ligne.. ou ta connexion internet (Wi-Fi ou données mobile) est instable."
 
 @Composable
 private fun ColumnScope.LoggedOutContent(
@@ -586,10 +629,18 @@ private fun ColumnScope.LoggedOutContent(
                 unfocusedLabelColor = Color.Black,
                 cursorColor = ColorVioletLight,
             ),
-            supportingText = if (showInvalidEmailError) {
-                { Text(stringResource(Res.string.account_auth_invalid_email)) }
-            } else null,
             modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    // Rendered outside the OutlinedTextField (instead of via supportingText)
+    // so the error text sits flush with the field's left edge — Material3's
+    // default supportingText adds a 16.dp start padding we don't want.
+    if (showInvalidEmailError) {
+        Text(
+            text = stringResource(Res.string.account_auth_invalid_email),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp),
         )
     }
 
@@ -627,12 +678,15 @@ private fun ColumnScope.LoggedOutContent(
     }
 
     val contactEmail = stringResource(Res.string.about_contact_email)
+    val serverErrorPrefix = stringResource(Res.string.account_auth_error)
     if (uiState.errorMessage != null) {
+        val isOffline = uiState.errorMessage == "magic_link_offline"
         AuthMessageDialog(
-            messagePrefix = stringResource(Res.string.account_auth_error),
-            contactEmail = contactEmail,
+            messagePrefix = if (isOffline) OFFLINE_MESSAGE_FR else serverErrorPrefix,
+            contactEmail = if (isOffline) null else contactEmail,
             uriHandler = uriHandler,
             onDismiss = onClearError,
+            showOhNoHeader = true,
         )
     }
     if (uiState.successMessage != null) {
@@ -658,57 +712,124 @@ private fun LoggedInContent(
         Spacer(modifier = Modifier.height(12.dp))
     }
 
-    // Premium status. The "manage" link points to Stripe Customer Portal — managing an
-    // existing subscription is explicitly allowed by Play Store and Apple (the rule only
-    // forbids *selling* via external link).
+    // Subscription section. Stripe status is the source of truth:
+    // - "active"                                → premium badge + renewal/cancellation date + portal link
+    // - "past_due" / "unpaid" / "incomplete"    → payment-failure card + update-card CTA (Stripe Portal)
+    // - "canceled"                              → expired card + resubscribe CTA (Stripe Portal)
+    // - null / anything else                    → nothing (never subscribed, or unknown/offline state)
+    // Managing an existing subscription via Stripe Portal is explicitly allowed by Play
+    // Store and Apple; only *selling* through an external link is forbidden.
     val known = subscriptionState as? SubscriptionState.Known
-    val premiumStatusRes: StringResource? = when {
-        known?.status != "active" -> null
-        known.product == "fly" -> Res.string.account_status_premium_fly
-        known.product == "fab" -> Res.string.account_status_premium_fab
-        else -> null
-    }
+    val manageFallbackUrl = stringResource(Res.string.account_manage_subscription_url)
 
-    if (premiumStatusRes != null) {
-        PremiumBadge(label = stringResource(premiumStatusRes))
-        Spacer(modifier = Modifier.height(8.dp))
-
-        known?.currentPeriodEndMs?.let { ms ->
-            val dateLabel = formatRenewalDate(ms)
-            val text = if (known.cancelAtPeriodEnd) {
-                stringResource(Res.string.account_cancellation_date, dateLabel)
-            } else {
-                stringResource(Res.string.account_renewal_date, dateLabel)
+    when (known?.status) {
+        "active" -> {
+            val premiumStatusRes: StringResource? = when (known.product) {
+                "fly" -> Res.string.account_status_premium_fly
+                "fab" -> Res.string.account_status_premium_fab
+                else -> null
             }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.textSecondary,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            if (premiumStatusRes != null) {
+                PremiumBadge(label = stringResource(premiumStatusRes))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                known.currentPeriodEndMs?.let { ms ->
+                    val dateLabel = formatRenewalDate(ms)
+                    val text = if (known.cancelAtPeriodEnd) {
+                        stringResource(Res.string.account_cancellation_date, dateLabel)
+                    } else {
+                        stringResource(Res.string.account_renewal_date, dateLabel)
+                    }
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.textSecondary,
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                val manageLabel = stringResource(Res.string.account_manage_subscription)
+                Text(
+                    modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
+                    text = manageLabel,
+                    style = MaterialTheme.typography.textSecondary.copy(
+                        color = ColorVioletLight,
+                        textDecoration = TextDecoration.Underline,
+                    ),
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
         }
 
-        val manageLabel = stringResource(Res.string.account_manage_subscription)
-        val manageFallbackUrl = stringResource(Res.string.account_manage_subscription_url)
-        Text(
-            modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
-            text = manageLabel,
-            style = MaterialTheme.typography.textSecondary.copy(
-                color = ColorVioletLight,
-                textDecoration = TextDecoration.Underline,
-            ),
-        )
-        Spacer(modifier = Modifier.height(12.dp))
+        "past_due", "unpaid", "incomplete" -> {
+            // CTA reuses account_manage_subscription — Apple/Play forbid external links to
+            // *sell* a subscription; managing an existing one via Stripe Portal is allowed.
+            SubscriptionAlertBadge(
+                title = stringResource(Res.string.account_status_payment_failed_title),
+                body = stringResource(Res.string.account_status_payment_failed_body),
+                ctaLabel = stringResource(Res.string.account_manage_subscription),
+                onCtaClick = { onOpenManageSubscription(manageFallbackUrl) },
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        "canceled" -> {
+            SubscriptionAlertBadge(
+                title = stringResource(Res.string.account_status_canceled_title),
+                body = stringResource(Res.string.account_status_canceled_body),
+                ctaLabel = stringResource(Res.string.account_manage_subscription),
+                onCtaClick = { onOpenManageSubscription(manageFallbackUrl) },
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        else -> Unit
     }
+
+    // Confirm logout for premium users. Losing premium at logout is a real functional
+    // change (creation buttons block, watermark comes back on new documents), so we
+    // ask before pulling the rug. Non-premium logout stays a single-click action —
+    // asking there would be noise since nothing changes for them.
+    val isPremiumEntitlement = subscriptionState.isPremium()
+    var showLogoutConfirm by remember { mutableStateOf(false) }
 
     // No separator between manage subscription and logout — design choice.
     Text(
-        modifier = Modifier.clickable { onLogout() },
+        modifier = Modifier.clickable {
+            if (isPremiumEntitlement) showLogoutConfirm = true else onLogout()
+        },
         text = stringResource(Res.string.account_logout),
         style = MaterialTheme.typography.textSecondary.copy(
             color = ColorVioletLight,
             textDecoration = TextDecoration.Underline,
         ),
     )
+
+    if (showLogoutConfirm) {
+        // TODO(strings): move the FR literals below to composeResources/values/strings.xml
+        // on the `translations` branch. Suggested keys:
+        //   account_logout_premium_confirm_title  = "Se déconnecter ?"
+        //   account_logout_premium_confirm_body   = "Vos fonctions premium seront indisponibles jusqu'à reconnexion. Vos documents restent sur cet appareil."
+        //   account_logout_premium_confirm_ok     = "Se déconnecter"
+        //   account_logout_premium_confirm_cancel = "Annuler"
+        AlertDialog(
+            onDismissRequest = { showLogoutConfirm = false },
+            title = { Text("Se déconnecter ?") },
+            text = {
+                Text(
+                    "Vos fonctions premium seront indisponibles jusqu'à reconnexion. Vos documents restent sur cet appareil.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLogoutConfirm = false
+                    onLogout()
+                }) { Text("Se déconnecter") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutConfirm = false }) { Text("Annuler") }
+            },
+        )
+    }
 }
 
 @Composable
@@ -729,6 +850,53 @@ private fun PremiumBadge(label: String) {
         Text(
             text = label,
             color = ColorVioletLight,
+        )
+    }
+}
+
+// Card shown when the subscription is in a bad state (past_due, unpaid, incomplete,
+// canceled). Same rounded-container language as PremiumBadge, tinted orange to signal
+// "action needed". The CTA opens the Stripe Customer Portal so the user can update
+// their card or restart their subscription.
+@Composable
+private fun SubscriptionAlertBadge(
+    title: String,
+    body: String,
+    ctaLabel: String,
+    onCtaClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = ColorOrange.copy(alpha = 0.10f),
+                shape = RoundedCornerShape(10.dp),
+            )
+            .border(
+                width = 1.dp,
+                color = ColorOrange.copy(alpha = 0.35f),
+                shape = RoundedCornerShape(10.dp),
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.textBodyBold,
+            color = ColorOrange,
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = body,
+            style = MaterialTheme.typography.textSecondary,
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            modifier = Modifier.clickable { onCtaClick() },
+            text = ctaLabel,
+            style = MaterialTheme.typography.textSecondary.copy(
+                color = ColorVioletLight,
+                textDecoration = TextDecoration.Underline,
+            ),
         )
     }
 }
@@ -869,41 +1037,96 @@ private fun formatRenewalDate(epochMs: Long): String {
 private fun MyCompaniesSection(
     navController: NavController,
     listViewModel: ClientOrIssuerListViewModel = koinViewModel(),
+    modulesRepo: ActivatedModulesRepository = koinInject(),
 ) {
     val issuersUiState by listViewModel.issuersUiState.collectAsState()
     val issuers = issuersUiState.clientsOrIssuerList.orEmpty()
+    val activated by modulesRepo.state.collectAsState()
+    val multiEntrepriseOn = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE in activated
+    val scope = rememberCoroutineScope()
+    // Non-null when the user tapped delete on an entreprise that still has
+    // clients/products/documents attached. Triggers the alert; user can only
+    // dismiss (destructive path is deliberately not offered — data must be
+    // detached or deleted first).
+    var deleteBlocked by remember { mutableStateOf(false) }
+    // Non-null when the user tapped delete on an empty entreprise: hold until
+    // the user confirms via the AlertDialogDeleteDocument prompt. Deleting an
+    // entreprise is irreversible, so the single-tap trash affordance always
+    // routes through the shared confirm dialog first.
+    var pendingDeleteIssuer by remember { mutableStateOf<ClientOrIssuerState?>(null) }
 
+    // Deleting the last remaining entreprise would leave the doc-edit flows
+    // with no issuer to attach — the picker + numbering counter both rely on
+    // at least one existing issuer row. Hide the trash affordance in that
+    // case so the state simply can't be reached from this screen.
+    val canDeleteRow = issuers.size > 1
     issuers.forEach { issuer ->
         IssuerListRow(
             issuer = issuer,
+            showDelete = canDeleteRow,
             onClick = {
                 navController.navigate(
                     Screen.ClientAddEdit.name + "?itemId=${issuer.id}&type=issuer"
                 )
             },
             onDelete = {
-                listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                val issuerId = issuer.id?.toLong()
+                if (issuerId == null) {
+                    pendingDeleteIssuer = issuer
+                } else {
+                    scope.launch {
+                        val attached = listViewModel.countAttachedForIssuer(issuerId)
+                        if (attached == 0L) {
+                            pendingDeleteIssuer = issuer
+                        } else {
+                            deleteBlocked = true
+                        }
+                    }
+                }
             },
         )
         Spacer(modifier = Modifier.height(8.dp))
     }
 
-    // "+ Ajouter une entreprise" — violet plain CTA, no fill, tight to the list.
-    Text(
-        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-        color = ColorVioletLink,
-        modifier = Modifier
-            .padding(start = 4.dp, top = 4.dp)
-            .clickable {
-                navController.navigate(Screen.ClientAddEdit.name + "?type=issuer")
+    pendingDeleteIssuer?.let { issuer ->
+        AlertDialogDeleteDocument(
+            onDismissRequest = { pendingDeleteIssuer = null },
+            onConfirmation = {
+                listViewModel.deleteClientsOrIssuers(listOf(issuer))
+                pendingDeleteIssuer = null
             },
-        text = stringResource(Res.string.account_add_company),
-    )
+        )
+    }
+
+    if (deleteBlocked) {
+        com.a4a.g8invoicing.ui.shared.AppInfoDialog(
+            title = stringResource(Res.string.entreprise_delete_blocked_title),
+            body = stringResource(Res.string.entreprise_delete_blocked_message),
+            confirmText = stringResource(Res.string.ok),
+            onDismiss = { deleteBlocked = false },
+        )
+    }
+
+    // "+ Ajouter une entreprise" — hidden when the multi-entreprise module is off
+    // (single-entreprise UX). The gStore card is where users go to opt in.
+    if (multiEntrepriseOn) {
+        Text(
+            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+            color = ColorVioletLink,
+            modifier = Modifier
+                .padding(start = 4.dp, top = 4.dp)
+                .clickable {
+                    navController.navigate(Screen.ClientAddEdit.name + "?type=issuer")
+                },
+            text = stringResource(Res.string.account_add_company),
+        )
+    }
 }
 
 @Composable
 private fun IssuerListRow(
     issuer: ClientOrIssuerState,
+    showDelete: Boolean,
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -917,18 +1140,36 @@ private fun IssuerListRow(
             .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            modifier = Modifier.weight(1F),
-            text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
-            style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
-        )
-        Icon(
-            modifier = Modifier
-                .size(18.dp)
-                .clickable(onClick = onDelete),
-            imageVector = Icons.Outlined.DeleteOutline,
-            contentDescription = null,
-        )
+        Column(modifier = Modifier.weight(1F)) {
+            Text(
+                text = issuer.name.text + (issuer.firstName?.let { " " + it.text } ?: ""),
+                style = MaterialTheme.typography.textBodySmall.copy(fontWeight = FontWeight.SemiBold),
+            )
+            // "Éditer" affordance mirrors the picker's edit hint (same textCaption
+            // size, underline) — but black instead of the picker's violet since
+            // this block sits on a grey background where violet washes out.
+            // Tapping it fires the same onClick as the row body, so it's purely
+            // a discoverability nudge (the whole surface is already tappable).
+            Text(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .clickable(onClick = onClick),
+                text = stringResource(Res.string.document_bottom_sheet_picker_edit_link),
+                style = MaterialTheme.typography.textCaption.copy(
+                    color = AppColors.textPrimary,
+                    textDecoration = TextDecoration.Underline,
+                ),
+            )
+        }
+        if (showDelete) {
+            Icon(
+                modifier = Modifier
+                    .size(18.dp)
+                    .clickable(onClick = onDelete),
+                imageVector = Icons.Outlined.DeleteOutline,
+                contentDescription = null,
+            )
+        }
     }
 }
 

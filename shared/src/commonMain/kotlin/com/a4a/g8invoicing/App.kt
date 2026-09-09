@@ -7,14 +7,41 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.compose.rememberNavController
+import com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CreditNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
+import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.LocaleManager
+import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
+import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.models.ClientOrIssuerType
+import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.ui.navigation.CategorySidebar
 import com.a4a.g8invoicing.ui.navigation.NavGraph
 import com.a4a.g8invoicing.ui.screens.ExportPdfPlatform
+import com.a4a.g8invoicing.ui.shared.FirstLaunchIssuerNameDialog
+import com.a4a.g8invoicing.ui.shared.Migration19Actions
+import com.a4a.g8invoicing.ui.shared.Migration19Context
+import com.a4a.g8invoicing.ui.shared.OnboardingMigration19Dialog
+import com.a4a.g8invoicing.ui.shared.OrphanRescueDialog
+import com.a4a.g8invoicing.ui.shared.OrphanRescueItem
+import com.a4a.g8invoicing.ui.shared.probeOrphanRescue
+import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.InvoiceState
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 /**
@@ -25,11 +52,86 @@ import org.koin.compose.koinInject
 fun App(
     // Platform-specific callbacks can be passed here
     onSendReminder: (InvoiceState) -> Unit = {},
-    localeManager: LocaleManager = koinInject()
+    localeManager: LocaleManager = koinInject(),
+    currentCompanyRepository: CurrentCompanyRepository = koinInject(),
+    clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface = koinInject(),
+    invoiceDataSource: InvoiceLocalDataSourceInterface = koinInject(),
+    deliveryNoteDataSource: DeliveryNoteLocalDataSourceInterface = koinInject(),
+    creditNoteDataSource: CreditNoteLocalDataSourceInterface = koinInject(),
+    quoteDataSource: QuoteLocalDataSourceInterface = koinInject(),
+    productDataSource: ProductLocalDataSourceInterface = koinInject(),
+    productTaxDataSource: ProductTaxLocalDataSourceInterface = koinInject(),
+    modulesRepo: ActivatedModulesRepository = koinInject(),
 ) {
-    // Initialize locale on first composition
+    // Boot-time initialization: locale + current-entreprise hydration.
+    // If no issuer exists (fresh install), we surface a first-launch dialog
+    // instead of silently seeding one. A null currentCompanyId cascades into
+    // subtle bugs: doc-list flows fall back to unfiltered getAll(), clients
+    // created from the invoice picker attach to company_id=NULL, master lists
+    // that later filter by company see them twice.
+    var needsFirstLaunchIssuer by remember { mutableStateOf(false) }
+    // 1.9 migration wizard — surfaced only for existing installs (has at
+    // least one issuer) that never went through the wizard before. Fresh
+    // installs skip it entirely: we mark the flag as seen right after the
+    // FirstLaunchIssuerNameDialog completes, so a brand-new user never
+    // sees "welcome to 1.9 upgrade" copy that doesn't apply to them.
+    var migration19Context by remember { mutableStateOf<Migration19Context?>(null) }
+    // Orphan-rescue dialog state (safety net for docs whose
+    // original_company_id points at a deleted issuer — see
+    // OrphanRescueDialog KDoc). Null = probe not yet run OR nothing to
+    // fix; non-empty = show dialog. The probe re-runs any time the
+    // migration wizard closes.
+    var orphanRescueItems by remember { mutableStateOf<List<OrphanRescueItem>?>(null) }
+    var orphanRescueIssuers by remember { mutableStateOf<List<ClientOrIssuerState>>(emptyList()) }
+    val bootScope = rememberCoroutineScope()
+
+    suspend fun runOrphanProbe() {
+        probeOrphanRescue(
+            clientOrIssuerDataSource,
+            invoiceDataSource,
+            deliveryNoteDataSource,
+            creditNoteDataSource,
+            quoteDataSource,
+        )?.let { payload ->
+            orphanRescueIssuers = payload.candidates
+            orphanRescueItems = payload.items
+        }
+    }
+
     LaunchedEffect(Unit) {
         localeManager.initializeLocale()
+        val lastIssuerId = clientOrIssuerDataSource.getLastCreatedIssuerId()
+        if (lastIssuerId == null) {
+            needsFirstLaunchIssuer = true
+        } else {
+            currentCompanyRepository.initIfMissing { lastIssuerId }
+            if (!modulesRepo.hasSeenMigration19()) {
+                val issuers = clientOrIssuerDataSource.fetchAll(PersonType.ISSUER).first()
+                if (issuers.isEmpty()) {
+                    // No issuer to hang the wizard on — bail out silently
+                    // and mark the flag so we don't retry every boot.
+                    modulesRepo.markMigration19Seen()
+                    runOrphanProbe()
+                } else {
+                    val clients = clientOrIssuerDataSource.fetchAll(PersonType.CLIENT).first()
+                    val products = productDataSource.fetchAllProducts().first()
+                    // Scan the last 10 invoice footers per issuer once so the
+                    // wizard doesn't hit the DB again mid-flow.
+                    val footersByIssuer = issuers.mapNotNull { issuer ->
+                        val id = issuer.id?.toLong() ?: return@mapNotNull null
+                        id to invoiceDataSource.getRecentFootersForCompany(id)
+                    }.toMap()
+                    migration19Context = Migration19Context(
+                        issuers = issuers,
+                        clients = clients,
+                        products = products,
+                        footersByIssuer = footersByIssuer,
+                    )
+                }
+            } else {
+                runOrphanProbe()
+            }
+        }
     }
 
     // Use Crossfade for smooth transition when language changes
@@ -40,7 +142,124 @@ fun App(
     ) { _ ->
         AppContent(onSendReminder = onSendReminder)
     }
+
+    if (needsFirstLaunchIssuer) {
+        FirstLaunchIssuerNameDialog(
+            onSubmit = { enteredName, enteredCountry ->
+                val issuer = ClientOrIssuerState(
+                    type = ClientOrIssuerType.ISSUER,
+                    name = TextFieldValue(enteredName),
+                    addresses = listOf(
+                        com.a4a.g8invoicing.ui.states.AddressState(
+                            countryCode = enteredCountry,
+                        )
+                    ),
+                )
+                val newId = clientOrIssuerDataSource.createNewAndReturnId(issuer)
+                // setCurrent (not initIfMissing) so a stale Settings entry
+                // from a previous session — Settings survives a DB wipe —
+                // doesn't leave currentCompanyId pointing at a now-nonexistent
+                // issuer.
+                newId?.let { currentCompanyRepository.setCurrent(it) }
+                // Replace the FR-flavoured 5.5/10/20 defaults baked into
+                // TaxRate.sq with the shortlist for the picked country when
+                // we have one on file. No-op otherwise (fallback = keep FR).
+                productTaxDataSource.seedDefaultsForCountryIfPristine(enteredCountry)
+                // Fresh installs never see the 1.9 migration wizard — mark it
+                // as done so we don't ambush them on their second boot.
+                modulesRepo.markMigration19Seen()
+                needsFirstLaunchIssuer = false
+            }
+        )
+    }
+
+    migration19Context?.let { ctx ->
+        OnboardingMigration19Dialog(
+            context = ctx,
+            actions = Migration19Actions(
+                deleteIssuer = { issuer, reassignDocsTo ->
+                    val fromId = issuer.id?.toLong()
+                    if (fromId != null && reassignDocsTo != null) {
+                        clientOrIssuerDataSource.reassignDocumentsToCompany(fromId, reassignDocsTo)
+                    }
+                    clientOrIssuerDataSource.deleteClientOrIssuer(issuer)
+                },
+                docsCountFor = { companyId ->
+                    clientOrIssuerDataSource.countDocumentsForCompany(companyId)
+                },
+                attachClients = { ids, issuerId ->
+                    clientOrIssuerDataSource.bulkAttachToCompany(ids, issuerId)
+                },
+                attachProducts = { ids, issuerId ->
+                    productDataSource.bulkAttachToCompany(ids, issuerId)
+                },
+                saveIssuerBank = { issuer, iban, bic ->
+                    // Master ClientOrIssuer has no payment_iban / payment_bic
+                    // columns — those live on DocumentClientOrIssuer as a
+                    // frozen doc-side snapshot. Persist to the master by
+                    // building an IssuerBankState and letting updateClientOrIssuer
+                    // upsert the IssuerBank table via saveIssuerBanks(banks).
+                    if (iban.isNotBlank() || bic.isNotBlank()) {
+                        val newBank = com.a4a.g8invoicing.ui.states.IssuerBankState(
+                            id = null,
+                            countryCode = issuer.addresses?.firstOrNull()?.countryCode,
+                            identifier = TextFieldValue(iban),
+                            bic = TextFieldValue(bic),
+                            sortOrder = 0,
+                        )
+                        val updated = issuer.copy(banks = listOf(newBank))
+                        clientOrIssuerDataSource.updateClientOrIssuer(updated)
+                    }
+                },
+                updateIssuerName = { issuer, newName ->
+                    clientOrIssuerDataSource.updateClientOrIssuer(
+                        issuer.copy(name = TextFieldValue(newName.trim()))
+                    )
+                },
+                updateIssuerCountry = { issuer, countryCode ->
+                    val existing = issuer.addresses?.firstOrNull()
+                    val updatedAddress = existing?.copy(countryCode = countryCode)
+                        ?: com.a4a.g8invoicing.ui.states.AddressState(countryCode = countryCode)
+                    val otherAddresses = issuer.addresses?.drop(1).orEmpty()
+                    clientOrIssuerDataSource.updateClientOrIssuer(
+                        issuer.copy(addresses = listOf(updatedAddress) + otherAddresses)
+                    )
+                },
+                // Desktop/iOS shell — DB export isn't wired here yet, surface a
+                // "not available" so the wizard's Backup step still lets the
+                // user click Suivant and continue instead of just no-oping.
+                exportDatabase = {
+                    com.a4a.g8invoicing.ui.screens.ExportResult.Error(
+                        "Database export is not available on this platform yet."
+                    )
+                },
+                sendDatabaseByEmail = { /* no-op */ },
+                setClientCountry = { /* no-op on Desktop/iOS shell */ },
+                markSeen = { modulesRepo.markMigration19Seen() },
+            ),
+            showClientCountryStep = false,
+            onDismiss = {
+                migration19Context = null
+                // Wizard just closed — probe for orphans left behind by
+                // the cleanup step (docs whose issuer got deleted without
+                // reassignment in older wizard builds).
+                bootScope.launch { runOrphanProbe() }
+            },
+        )
+    }
+
+    orphanRescueItems?.takeIf { it.isNotEmpty() }?.let { items ->
+        OrphanRescueDialog(
+            initialItems = items,
+            candidates = orphanRescueIssuers,
+            onAssign = { item, companyId ->
+                clientOrIssuerDataSource.assignDocToCompany(item.type, item.id, companyId)
+            },
+            onAllResolved = { orphanRescueItems = null },
+        )
+    }
 }
+
 
 @Composable
 private fun AppContent(

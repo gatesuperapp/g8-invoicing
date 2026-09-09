@@ -23,8 +23,20 @@ data class CreditNoteState(
     override var labelsSnapshot: String? = null,
     override var showCurrencyAndAutoTaxColumn: Boolean = false,
     override var formatLocale: String? = null,
+    override var originalCompanyId: Long? = null,
     var dueDate: String = "",
     var linkedInvoice: InvoiceState? = null,
+    // BT-120 VAT exemption reason — mirror of Invoice.vatExemptionText. An
+    // avoir is still a taxable-flow doc under EN16931 so it needs the same
+    // exemption wording when the issuer is in franchise en base.
+    override var vatExemptionText: TextFieldValue? = null,
+    override var fontFamily: String? = null,
+    // No payment-means / bank / terms fields on credit notes: an avoir
+    // reverses the flow — the seller owes the buyer, not the other way
+    // around, so there's nothing for the buyer to pay. Refund paths (RIB
+    // for a SEPA reverse transfer) exist but are rare and out of scope
+    // for now. Keeping the state minimal avoids the "empty payment box"
+    // artefacts that used to render on the PDF.
     // See InvoiceState.retentions.
     var retentions: List<RetentionState> = emptyList(),
 ) : DocumentState()

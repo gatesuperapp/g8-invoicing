@@ -30,6 +30,7 @@ import kotlinx.coroutines.launch
 class InvoiceAddEditViewModel(
     private val documentDataSource: InvoiceLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
+    private val clientOrIssuerDataSource: com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface,
     private val itemId: String?,
 ) : ViewModel() {
     private var fetchJob: Job? = null
@@ -86,6 +87,23 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    /**
+     * Suspend variant of [reloadDocument] — awaits the refetch before returning.
+     * Callers that need to guarantee state.documentIssuer.banks (or any other
+     * hydrated field) is fresh before continuing MUST use this variant, not the
+     * fire-and-forget [reloadDocument]. The typical case: an EDIT_ISSUER save
+     * mutates the master IssuerBank rows, closes the sheet, and the user
+     * immediately taps back into the issuer — without the await the picker
+     * reads a stale documentIssuer.banks copy from before the reload landed.
+     */
+    suspend fun reloadDocumentAwait() {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        try {
+            documentDataSource.fetch(id)?.let { _documentUiState.value = it }
+        } catch (_: Exception) {
+        }
+    }
+
     // Called by the NavGraph when EDIT_ISSUER turns off the tax-withholding
     // switch: the direct-to-DB update path doesn't go through
     // saveDocumentClientOrIssuerInUiState, so the retention wipe must be
@@ -112,6 +130,16 @@ class InvoiceAddEditViewModel(
         }
     }
 
+    // Same idea for BT-120: when EDIT_ISSUER flips vatExempt ON and the doc
+    // has no wording yet, drop the country-based legal citation straight to
+    // DB so it appears after reloadDocument.
+    suspend fun seedDefaultVatExemptionTextInDb(issuer: ClientOrIssuerState) {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        val country = issuer.addresses?.firstOrNull()?.countryCode
+        val default = com.a4a.g8invoicing.data.models.resolveVatExemptionText(country) ?: return
+        documentDataSource.updateVatExemptionText(id, default)
+    }
+
     private suspend fun createNewInvoiceInVM(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
@@ -126,8 +154,50 @@ class InvoiceAddEditViewModel(
     }
 
     fun updateUiState(screenElement: ScreenElement, value: Any) {
+        // Snapshot the previous frozen bank country BEFORE the state mutation
+        // so the label adapter can compare against the new bank's country.
+        val previousBankCountry = if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
+            _documentUiState.value.documentIssuer?.paymentCountry
+        } else null
+
         _documentUiState.value =
             updateInvoiceUiState(_documentUiState.value, screenElement, value)
+        // Side effect: freezing a new bank on the doc doesn't go through the
+        // Invoice-row autoSave (which only writes the invoice table) — hit the
+        // dedicated DocumentClientOrIssuer.payment_iban/bic write path here.
+        if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
+            val bank = value as? com.a4a.g8invoicing.ui.states.IssuerBankState ?: return
+            val docIssuerId = _documentUiState.value.documentIssuer?.id?.toLong() ?: return
+
+            // Adapt payment_bank_label tokens when the country class flipped
+            // (IBAN ↔ non-IBAN). BicToken gets added on the new bank when the
+            // previous one had no BIC, and stripped when switching to a
+            // non-IBAN account. No-op inside the same class — tokens already
+            // self-hydrate at render time via payment_country. Autosave picks
+            // up the state change and persists payment_bank_label on Invoice.
+            val currentSegments = _documentUiState.value.paymentBankSegments
+            if (currentSegments.isNotEmpty()) {
+                val adaptedSegments = com.a4a.g8invoicing.data.models.adaptPaymentBankSegmentsForCountry(
+                    segments = currentSegments,
+                    previousCountry = previousBankCountry,
+                    currentCountry = bank.countryCode,
+                )
+                if (adaptedSegments != currentSegments) {
+                    _documentUiState.value = _documentUiState.value.copy(
+                        paymentBankSegments = adaptedSegments,
+                    )
+                }
+            }
+
+            viewModelScope.launch {
+                clientOrIssuerDataSource.updateDocumentClientOrIssuerPaymentBank(
+                    documentClientOrIssuerId = docIssuerId,
+                    iban = bank.identifier.text.takeIf { it.isNotEmpty() },
+                    bic = bank.bic.text.takeIf { it.isNotEmpty() },
+                    country = bank.countryCode?.takeIf { it.isNotEmpty() },
+                )
+            }
+        }
     }
 
     // Retention CRUD. Every mutation also refreshes documentTotalPrices so
@@ -171,6 +241,13 @@ class InvoiceAddEditViewModel(
         viewModelScope.launch {
             documentDataSource.updateHideLinkedSourceHeaders(id, next)
         }
+    }
+
+    // Set the document font: state mirror + persist via the standard update
+    // path (writes font_family on the Invoice row alongside the other fields).
+    fun setDocumentFont(fontId: String?) {
+        _documentUiState.value = _documentUiState.value.copy(fontFamily = fontId)
+        updateInvoiceInLocalDb()
     }
 
     private fun updateInvoiceInLocalDb() {
@@ -465,6 +542,71 @@ class InvoiceAddEditViewModel(
 
             ScreenElement.DOCUMENT_FOOTER -> {
                 doc = doc.copy(footerText = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_MEANS_LABEL -> {
+                // Now carries List<PaymentLabelSegment>. Selections are derived
+                // from the tokens present (chip identities), so both fields stay
+                // in sync without a separate DOCUMENT_PAYMENT_MEANS event. OTHER
+                // never appears here — it lives on paymentMeansOtherChecked.
+                @Suppress("UNCHECKED_CAST")
+                val newSegments = value as List<com.a4a.g8invoicing.data.models.PaymentLabelSegment>
+                doc = doc.copy(
+                    paymentMeansSegments = newSegments,
+                    paymentMeansSelections = com.a4a.g8invoicing.data.models
+                        .chipIdsFromSegments(newSegments)
+                        .takeIf { it.isNotEmpty() },
+                )
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_MEANS_HIDDEN -> {
+                doc = doc.copy(paymentMeansHidden = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_MEANS_OTHER -> {
+                doc = doc.copy(paymentMeansOtherChecked = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_BANK_HIDDEN -> {
+                doc = doc.copy(paymentBankHidden = value as Boolean)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_BANK_LABEL -> {
+                @Suppress("UNCHECKED_CAST")
+                doc = doc.copy(
+                    paymentBankSegments = value as List<com.a4a.g8invoicing.data.models.PaymentBankSegment>,
+                )
+            }
+
+            ScreenElement.DOCUMENT_ISSUER_BANK_PICKED -> {
+                val bank = value as com.a4a.g8invoicing.ui.states.IssuerBankState
+                doc.documentIssuer?.let { currentIssuer ->
+                    doc = doc.copy(
+                        documentIssuer = currentIssuer.copy(
+                            paymentIban = bank.identifier.text.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentBic = bank.bic.text.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentCountry = bank.countryCode?.takeIf { it.isNotEmpty() },
+                        )
+                    )
+                }
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_TERMS_RECOVERY_FEES -> {
+                doc = doc.copy(paymentTermsRecoveryFees = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_TERMS_LATE_FEES -> {
+                doc = doc.copy(paymentTermsLateFees = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_PAYMENT_TERMS_DISCOUNT -> {
+                doc = doc.copy(paymentTermsDiscount = value as TextFieldValue)
+            }
+
+            ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+                doc = doc.copy(vatExemptionText = (value as TextFieldValue))
             }
 
             else -> {}

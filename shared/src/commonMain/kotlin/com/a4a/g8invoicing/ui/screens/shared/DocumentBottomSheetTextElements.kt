@@ -1,34 +1,36 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.dismissKeyboardOnUnconsumedTap
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -40,10 +42,13 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 fun DocumentBottomSheetTextElements(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
-    sheetMaxHeight: Dp,
-    isSheetFullScreen: Boolean,
-    onSheetDragUp: () -> Unit,
-    onSheetStepDown: () -> Unit,
+    sheetContentHeight: Dp,
+    // When true, the sheet is at its fullscreen mode. Content-drag downward
+    // past the scroll-top edge should collapse back to half-height (via
+    // onCollapseToHalf) rather than propagate to the sheet's anchoredDraggable
+    // (which would dismiss the sheet in one shot).
+    isSheetExpanded: Boolean,
+    onCollapseToHalf: () -> Unit,
     onValueChange: (ScreenElement, Any) -> Unit,
     clients: MutableList<ClientOrIssuerState>,
     issuers: MutableList<ClientOrIssuerState>,
@@ -71,23 +76,36 @@ fun DocumentBottomSheetTextElements(
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit = { _, _ -> },
     showProductType: Boolean = false,
 ) {
-    val density = LocalDensity.current
-    val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
-    val sheetMaxContentHeight = sheetMaxHeight - topInsetDp
-    val visibleContentHeight by animateDpAsState(
-        targetValue = if (isSheetFullScreen) sheetMaxContentHeight else sheetMaxHeight / 2,
-        label = "text-sheet-content-height",
-    )
-
-    Box(
-        modifier = Modifier
-            .height(sheetMaxContentHeight)
-            .imePadding()
-    ) {
+    // NSC on the content column: when at fullscreen (isSheetExpanded=true)
+    // and the internal verticalScroll surfaces a downward leftover (user
+    // scrolled past the top of the content), we consume it and trigger the
+    // half-height collapse. That way the fullscreen sheet's first
+    // scroll-down step is a mode switch, not an immediate dismissal. Once
+    // in half mode, this NSC is inert (condition false) → next leftover
+    // propagates to the sheet's anchoredDraggable as usual (drag-to-dismiss).
+    val collapseOnFullscreenScrollDown = remember(isSheetExpanded) {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (isSheetExpanded && source == NestedScrollSource.UserInput &&
+                    available.y > 0f
+                ) {
+                    onCollapseToHalf()
+                    return available
+                }
+                return Offset.Zero
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(visibleContentHeight)
+            .height(sheetContentHeight)
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+            .nestedScroll(collapseOnFullscreenScrollDown)
     ) {
         val slideOtherComponent: MutableState<ScreenElement?> = remember { mutableStateOf(null) }
 
@@ -97,33 +115,19 @@ fun DocumentBottomSheetTextElements(
             slideOtherComponent.value = null
         }
 
-        SheetDragHandle(
-            onDragUp = onSheetDragUp,
-            onDragDown = onSheetStepDown,
-            onTap = onSheetStepDown,
-        )
-
         Box(
             modifier = Modifier
                 .background(Color.Transparent)
-                .fillMaxWidth() // Prend toute la largeur
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        localFocusManager.clearFocus() // Efface le focus, ce qui devrait cacher le clavier
-                    }
-                )
+                .fillMaxSize()
+                .dismissKeyboardOnUnconsumedTap()
                 .focusable(false)
         ) {
-            // Keep the main elements list rendered even when a slide-in is open, so
-            // ModalBottomSheet sub-sheets (date, footer…) show it greyed under their
-            // scrim. Non-modal sub-sheets below must fillMaxSize so they cover it.
+            val elementsScrollState = rememberScrollState()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(bottom = 50.dp)
+                    .verticalScroll(elementsScrollState)
+                    .padding(bottom = 24.dp)
             ) {
                 // MAIN ELEMENTS
                 DocumentBottomSheetElementsContent(
@@ -156,6 +160,71 @@ fun DocumentBottomSheetTextElements(
                     ScreenElement.DOCUMENT_DUE_DATE -> (document as InvoiceState).dueDate
                     ScreenElement.DOCUMENT_FOOTER -> {
                         document.footerText
+                    }
+                    ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+                        document.vatExemptionText ?: androidx.compose.ui.text.input.TextFieldValue()
+                    }
+                    ScreenElement.DOCUMENT_PAYMENT_MEANS -> when (document) {
+                        // PaymentPickerParams — see the data class definition below.
+                        // Bundles segments + hidden flag + issuer info (for the IBAN
+                        // dropdown) so the picker branch can fetch banks + show the
+                        // right pre-selection without extra plumbing.
+                        is InvoiceState -> PaymentPickerParams(
+                            segments = document.paymentMeansSegments,
+                            hidden = document.paymentMeansHidden,
+                            masterIssuerId = document.documentIssuer?.originalClientOrIssuerId?.toLong(),
+                            selectedIban = document.documentIssuer?.paymentIban?.text,
+                            bankHidden = document.paymentBankHidden,
+                            hasIssuer = document.documentIssuer != null,
+                            otherChecked = document.paymentMeansOtherChecked,
+                            bankSegments = document.paymentBankSegments,
+                            bankIban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty(),
+                            bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
+                            bankCountry = document.documentIssuer?.paymentCountry,
+                        )
+                        is com.a4a.g8invoicing.ui.states.QuoteState -> PaymentPickerParams(
+                            segments = document.paymentMeansSegments,
+                            hidden = document.paymentMeansHidden,
+                            masterIssuerId = document.documentIssuer?.originalClientOrIssuerId?.toLong(),
+                            selectedIban = document.documentIssuer?.paymentIban?.text,
+                            bankHidden = document.paymentBankHidden,
+                            hasIssuer = document.documentIssuer != null,
+                            otherChecked = document.paymentMeansOtherChecked,
+                            bankSegments = document.paymentBankSegments,
+                            bankIban = document.documentIssuer?.paymentIban?.text?.trim().orEmpty(),
+                            bankBic = document.documentIssuer?.paymentBic?.text?.trim().orEmpty(),
+                            bankCountry = document.documentIssuer?.paymentCountry,
+                        )
+                        // Avoir + BL: the payment picker isn't reachable
+                        // on these doc types (row removed from the form).
+                        else -> PaymentPickerParams(
+                            segments = emptyList(),
+                            hidden = false,
+                            masterIssuerId = null,
+                            selectedIban = null,
+                            bankHidden = false,
+                            hasIssuer = false,
+                        )
+                    }
+                    // DOCUMENT_PAYMENT_TERMS opens the 3-row picker. The
+                    // picker branch reads the 3 current values from
+                    // PaymentTermsPickerParams to seed each sub-editor.
+                    ScreenElement.DOCUMENT_PAYMENT_TERMS -> when (document) {
+                        is InvoiceState -> PaymentTermsPickerParams(
+                            recoveryFees = document.paymentTermsRecoveryFees,
+                            lateFees = document.paymentTermsLateFees,
+                            discount = document.paymentTermsDiscount,
+                        )
+                        is com.a4a.g8invoicing.ui.states.QuoteState -> PaymentTermsPickerParams(
+                            recoveryFees = document.paymentTermsRecoveryFees,
+                            lateFees = document.paymentTermsLateFees,
+                            discount = document.paymentTermsDiscount,
+                        )
+                        else -> PaymentTermsPickerParams(
+                            recoveryFees = androidx.compose.ui.text.input.TextFieldValue(),
+                            lateFees = androidx.compose.ui.text.input.TextFieldValue(),
+                            discount = androidx.compose.ui.text.input.TextFieldValue(),
+                        )
                     }
 
                     else -> {}
@@ -193,7 +262,6 @@ fun DocumentBottomSheetTextElements(
                 showProductType = showProductType,
             )
         }
-    }
     }
 }
 

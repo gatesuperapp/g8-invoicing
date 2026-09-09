@@ -13,6 +13,19 @@ import kotlinx.coroutines.flow.Flow
 interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState?
     fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>>
+
+    /**
+     * Unscoped fetch — returns ALL clients / issuers regardless of the
+     * current-company filter that [fetchAll] applies. Used by the 1.9
+     * migration wizard where we need the whole dataset to attribute
+     * clients across issuers: the current-company filter would otherwise
+     * miss clients that migration 7's backfill attached to a different
+     * issuer than the one initIfMissing picked as the boot default (SQL
+     * ORDER BY updated_at vs id can disagree, leaving the wizard with an
+     * empty client / product list — the exact "wizard found no items but
+     * they weren't lost" symptom).
+     */
+    suspend fun fetchAllUnscoped(type: PersonType): List<ClientOrIssuerState>
     suspend fun createNew(clientOrIssuer: ClientOrIssuerState): Boolean
     suspend fun createNewAndReturnId(clientOrIssuer: ClientOrIssuerState): Long?
     suspend fun duplicateClients(clientsOrIssuers: List<ClientOrIssuerState>)
@@ -23,7 +36,43 @@ interface ClientOrIssuerLocalDataSourceInterface {
     suspend fun getLastCreatedClientId(): Long?
     suspend fun getLastCreatedIssuerId(): Long?
     suspend fun getLastIssuer(): ClientOrIssuerState?
+
+    /**
+     * Fetch the issuer matching [companyId] and wrap it as a
+     * DOCUMENT_ISSUER-typed snapshot ready to be pinned on a brand-new
+     * doc. Called from the 4 createNew() paths once
+     * CurrentCompanyRepository has resolved the current company.
+     */
+    suspend fun getCurrentIssuer(companyId: Long): ClientOrIssuerState?
     suspend fun getMasterVersion(masterId: Long): Int?
+
+    /**
+     * Persists `original_version = <current master version>` on a document's
+     * client/issuer snapshot. Semantically = "the user acknowledged that the
+     * master card had drifted, and chose to keep the frozen data anyway".
+     * Prevents the version-mismatch dialog from re-firing on every reopen
+     * until the master gets edited *again* (which bumps master.version and
+     * re-triggers the mismatch check).
+     *
+     * Returns the version that got written, or null if the master or doc
+     * couldn't be found.
+     */
+    suspend fun acknowledgeDocumentClientOrIssuerVersion(
+        documentClientOrIssuerId: Long,
+        masterId: Long,
+    ): Int?
+
+    // Bank accounts of a master issuer, ordered by sort_order asc.
+    suspend fun getIssuerBanks(issuerId: Long): List<com.a4a.g8invoicing.ui.states.IssuerBankState>
+
+    // Freeze a specific bank on a doc's DocumentClientOrIssuer — invoked
+    // when the user picks a different IBAN inside the payment-means modal.
+    suspend fun updateDocumentClientOrIssuerPaymentBank(
+        documentClientOrIssuerId: Long,
+        iban: String?,
+        bic: String?,
+        country: String?,
+    )
 
     /**
      * Country code (ISO 3166-1 alpha-2, uppercase) of the most recently created address
@@ -49,4 +98,67 @@ interface ClientOrIssuerLocalDataSourceInterface {
     /** Master ids of the 3 most recently used clients or issuers in documents,
      *  most recent first. Powers the "Recents" section in the picker sheets. */
     suspend fun fetchLast3RecentClientOrIssuerIds(type: PersonType): List<Long>
+
+    /**
+     * Move a batch of clients under [companyId] in a single DB transaction.
+     * Used by the 1.9 migration wizard to attach the clients the user
+     * selected for a given issuer, and to move orphans to their picked
+     * issuer in the "à ranger" slide.
+     */
+    suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long)
+
+    /**
+     * Pre-delete guard for an entreprise. Returns the aggregate count of
+     * clients + products + documents (invoice + credit note + delivery note
+     * + quote) still attached to [companyId]. Zero → deletion is safe;
+     * non-zero → the caller shows an alert instead of firing delete.
+     */
+    suspend fun countAttachedForCompany(companyId: Long): Long
+
+    /**
+     * Total documents attached to [companyId] via `original_company_id`.
+     * Sums invoices + delivery notes + credit notes + quotes.
+     */
+    suspend fun countDocumentsForCompany(companyId: Long): Long
+
+    /**
+     * Move every document (invoice + delivery note + credit note + quote)
+     * from [fromCompanyId] to [toCompanyId] by rewriting only their
+     * `original_company_id`. The frozen DocumentClientOrIssuer snapshot is
+     * left untouched, so PDF rendering keeps the original issuer's
+     * coordinates — only listing filters and per-company numbering shift to
+     * the target company.
+     */
+    suspend fun reassignDocumentsToCompany(fromCompanyId: Long, toCompanyId: Long)
+
+    /**
+     * Total docs whose original_company_id is NULL or points at a
+     * ClientOrIssuer row that no longer exists. Called at every boot as a
+     * cheap probe — non-zero opens the orphan-rescue dialog.
+     */
+    suspend fun countOrphanDocs(): Long
+
+    /**
+     * Per-table ids of the orphan documents. Non-empty lists feed the
+     * rescue dialog; the caller fetches full doc previews on the side.
+     */
+    suspend fun getOrphanDocIds(): OrphanDocIds
+
+    /**
+     * Point a single doc at [companyId] (its new original_company_id).
+     * Unlike [reassignDocumentsToCompany] this operates on one doc row,
+     * used by the rescue dialog's per-card "Rattacher" action.
+     */
+    suspend fun assignDocToCompany(type: OrphanDocType, docId: Long, companyId: Long)
+}
+
+enum class OrphanDocType { INVOICE, DELIVERY_NOTE, CREDIT_NOTE, QUOTE }
+
+data class OrphanDocIds(
+    val invoice: List<Long>,
+    val deliveryNote: List<Long>,
+    val creditNote: List<Long>,
+    val quote: List<Long>,
+) {
+    val total: Int get() = invoice.size + deliveryNote.size + creditNote.size + quote.size
 }

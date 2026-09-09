@@ -129,12 +129,13 @@ class OnboardingViewModel(
      * pre-toggled so they don't need to jump there manually.
      */
     fun activateQuoteModule() {
-        val moduleId = if (subscriptionRepository.isPremium())
+        val premium = subscriptionRepository.isPremium()
+        val moduleId = if (premium)
             ActivatedModulesRepository.MODULE_QUOTE
         else
             ActivatedModulesRepository.MODULE_QUOTE_TRIAL
         if (!activatedModules.isActive(moduleId)) {
-            activatedModules.toggle(moduleId)
+            activatedModules.toggle(moduleId, isPremium = premium)
         }
     }
 

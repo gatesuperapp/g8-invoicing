@@ -1,0 +1,60 @@
+-- Bank accounts attached to an issuer (ClientOrIssuer with type='issuer').
+-- Many-to-one — an issuer can hold several accounts.
+--
+-- `identifier` = account identifier as the user typed it. For IBAN countries
+-- (FR, DE, ES, GB, …) it's an IBAN; for non-IBAN countries (US, AU, NZ, ZA…)
+-- it's the domestic account number (BBAN, format chosen by the user). Stored
+-- as a single string — Factur-X BT-84 also expects one string per the spec.
+--
+-- `country_code` = ISO 3166-1 alpha-2. Drives the identifier field label
+-- ("IBAN" vs "Numéro de compte") and any country-specific hint / validation.
+CREATE TABLE IssuerBank (
+  issuer_bank_id INTEGER PRIMARY KEY NOT NULL,
+  issuer_id INTEGER NOT NULL,
+  label TEXT,
+  country_code TEXT,
+  identifier TEXT,
+  bic TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+getForIssuer:
+SELECT *
+FROM IssuerBank
+WHERE issuer_id = :issuer_id
+ORDER BY sort_order ASC, issuer_bank_id ASC;
+
+get:
+SELECT *
+FROM IssuerBank
+WHERE issuer_bank_id = :id;
+
+save:
+INSERT INTO IssuerBank (issuer_bank_id, issuer_id, label, country_code, identifier, bic, sort_order)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE IssuerBank
+SET label = :label,
+    country_code = :country_code,
+    identifier = :identifier,
+    bic = :bic,
+    sort_order = :sort_order,
+    updated_at = datetime('now', 'localtime')
+WHERE issuer_bank_id = :issuer_bank_id;
+
+delete:
+DELETE FROM IssuerBank
+WHERE issuer_bank_id = :id;
+
+deleteForIssuer:
+DELETE FROM IssuerBank
+WHERE issuer_id = :issuer_id;
+
+getLastInsertedRowId:
+SELECT issuer_bank_id
+FROM IssuerBank
+ORDER BY issuer_bank_id DESC
+LIMIT 1;

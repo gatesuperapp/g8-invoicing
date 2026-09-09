@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,13 +13,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,12 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
@@ -46,12 +42,7 @@ import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu1
 import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu2
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_1
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_2
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_3
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_4
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_5
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_6
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_help
-import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_url
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -60,6 +51,7 @@ import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
+import com.a4a.g8invoicing.ui.screens.shared.filterByQuery
 import com.a4a.g8invoicing.shared.resources.corrected_invoice_created_button
 import com.a4a.g8invoicing.shared.resources.corrected_invoice_created_title
 import com.a4a.g8invoicing.shared.resources.credit_note_created_button
@@ -74,8 +66,6 @@ import com.a4a.g8invoicing.ui.shared.animations.BatOpenMouth
 import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.textBody
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -120,6 +110,11 @@ fun InvoiceList(
     // Will recompose all the items when clicking "unselect all"
     val keyToResetCheckboxes = remember { mutableStateOf(false) }
 
+    // Search state — lives at the screen level so the query survives item
+    // taps + list recompositions but resets when leaving the tab.
+    var searchExpanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+
     // Alert dialogs
     val openDeleteAlertDialog = remember { mutableStateOf(false) }
 
@@ -144,6 +139,12 @@ fun InvoiceList(
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
         )
+    }
+
+    // System back closes the search bar first if it's open.
+    PlatformBackHandler(enabled = searchExpanded) {
+        searchQuery = TextFieldValue("")
+        searchExpanded = false
     }
 
     // When items are selected, intercept system back to clear the selection
@@ -187,7 +188,12 @@ fun InvoiceList(
                     }
                 },
                 isCancelCtaDisplayed = false,
-                appBarActions = topBarActions
+                appBarActions = topBarActions,
+                searchEnabled = selectedItems.isEmpty(),
+                searchExpanded = searchExpanded,
+                searchQuery = searchQuery,
+                onSearchToggle = { searchExpanded = !searchExpanded },
+                onSearchQueryChange = { searchQuery = it },
             )
         },
         bottomBar = {
@@ -247,6 +253,11 @@ fun InvoiceList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+                val filteredDocuments = remember(documentsUiState.documentStates, searchQuery.text) {
+                    documentsUiState.documentStates.filterByQuery(searchQuery.text)
+                }
+                val hasActiveQuery = searchQuery.text.isNotBlank()
+
                 // Délai pour éviter le flash de l'animation pendant le chargement
                 var showEmptyState by remember { mutableStateOf(false) }
                 LaunchedEffect(documentsUiState.documentStates.isEmpty()) {
@@ -263,7 +274,7 @@ fun InvoiceList(
                 } else if (documentsUiState.documentStates.isNotEmpty()) {
                     Column {
                         DocumentListContent(
-                            documents = documentsUiState.documentStates,
+                            documents = filteredDocuments,
                             onItemClick = onClickListItem,
                             addDocumentToSelectedList = {
                                 selectedItems.add(it as InvoiceState)
@@ -279,7 +290,10 @@ fun InvoiceList(
                         )
                         Spacer(modifier = Modifier.height(20.dp))
 
-                        if (documentsUiState.documentStates.size == 1)
+                        // Hide the discover-menu hint while the user is searching —
+                        // the list can naturally shrink to 1 result and the hint
+                        // would be irrelevant noise.
+                        if (documentsUiState.documentStates.size == 1 && !hasActiveQuery)
                             DisplayBatHelperMenuAdvice()
                     }
                 }
@@ -333,9 +347,10 @@ fun InvoiceList(
 
 @Composable
 private fun DisplayBatHelperWelcome() {
+    // Advice bubble on the empty invoice tab. Cycles 0 → 1 → 2 → 0 on
+    // every tap: "Clique sur moi …!" → actionable hint #1 → hint #2.
     var visibleText by remember { mutableIntStateOf(0) }
     val numberOfIterations = remember { mutableIntStateOf(1) }
-    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = Modifier
@@ -356,9 +371,7 @@ private fun DisplayBatHelperWelcome() {
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
             ) {
-                if (visibleText < 5) {
-                    visibleText += 1
-                } else visibleText = 0
+                visibleText = if (visibleText < 2) visibleText + 1 else 0
                 numberOfIterations.intValue += 1
             }
         ) {
@@ -371,80 +384,26 @@ private fun DisplayBatHelperWelcome() {
             )
         }
 
-        AnimatedVisibility(
-            visible = visibleText == 0,
-            enter = fadeIn(tween(1000)),
-            exit = fadeOut(tween(100)),
-        ) {
+        // Symmetric 600 ms fade for every transition (0 → 1, 1 → 2, 2 → 0).
+        // fillMaxWidth on the Crossfade + inner Text pins the string to the
+        // centre column so length variation between advice #0/#1/#2 doesn't
+        // shift the block horizontally during the fade.
+        Crossfade(
+            targetState = visibleText,
+            animationSpec = tween(durationMillis = 600),
+            label = "invoiceAdviceText",
+            modifier = Modifier.fillMaxWidth(),
+        ) { state ->
+            val text = when (state) {
+                0 -> stringResource(Res.string.invoice_advice_legal_help)
+                1 -> stringResource(Res.string.invoice_advice_legal_1)
+                2 -> stringResource(Res.string.invoice_advice_legal_2)
+                else -> ""
+            }
             Text(
-                text = stringResource(Res.string.invoice_advice_legal_help),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        AnimatedVisibility(
-            visible = visibleText == 1,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = stringResource(Res.string.invoice_advice_legal_1),
-                textAlign = TextAlign.Center
-            )
-        }
-
-        AnimatedVisibility(
-            visible = visibleText == 2,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = stringResource(Res.string.invoice_advice_legal_2),
-                textAlign = TextAlign.Center
-            )
-        }
-
-
-        AnimatedVisibility(
-            visible = visibleText == 3,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            TextAdvice(uriHandler)
-        }
-
-        AnimatedVisibility(
-            visible = visibleText == 4,
-            enter = fadeIn(
-                tween(
-                    2000,
-                    delayMillis = 100,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-            exit = fadeOut(tween(100)),
-        ) {
-            Text(
-                text = stringResource(Res.string.invoice_advice_legal_6),
-                textAlign = TextAlign.Center
+                text = text,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
@@ -543,33 +502,3 @@ private fun resetSelectedItems(
     keyToResetCheckboxes.value = !keyToResetCheckboxes.value
 }
 
-@Composable
-private fun TextAdvice(uriHandler: UriHandler) {
-    val text3 = stringResource(Res.string.invoice_advice_legal_3)
-    val text4 = stringResource(Res.string.invoice_advice_legal_4)
-    val text5 = stringResource(Res.string.invoice_advice_legal_5)
-    val url = stringResource(Res.string.invoice_advice_legal_url)
-
-    val annotatedString = buildAnnotatedString {
-        append("$text3 ")
-
-        pushStringAnnotation(
-            tag = "link",
-            annotation = url
-        )
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
-            append(text4)
-        }
-        append(text5)
-    }
-
-    ClickableText(
-        text = annotatedString,
-        style = MaterialTheme.typography.textBody.copy(textAlign = TextAlign.Center),
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "link", start = offset, end = offset)
-                .firstOrNull()?.let {
-                    uriHandler.openUri(it.item)
-                }
-        })
-}

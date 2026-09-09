@@ -22,18 +22,97 @@ class ActivatedModulesRepository(
     private val _state = MutableStateFlow(loadFromCache())
     val state: StateFlow<Set<String>> = _state.asStateFlow()
 
+    // Non-free modules that have been activated at least once while the user was premium.
+    // Never cleared on logout — the navigation menu keeps surfacing those categories so
+    // an ex-premium can still access the documents they created (quotes, orders, ...).
+    // Only wiped on explicit account delete (see [wipeAll]).
+    private val _everActivated = MutableStateFlow(loadEverActivatedFromCache())
+    val everActivated: StateFlow<Set<String>> = _everActivated.asStateFlow()
+
     fun isActive(moduleId: String): Boolean = moduleId in _state.value
 
-    fun toggle(moduleId: String) {
+    fun wasEverActivated(moduleId: String): Boolean = moduleId in _everActivated.value
+
+    /**
+     * Toggle a module ON/OFF. When turning a non-free module ON, mark it in the
+     * ever-activated set — this drives the menu-visibility fallback for ex-premium
+     * users. The premium check itself lives in the ViewModel; this method assumes
+     * the caller has already gated the call.
+     */
+    fun toggle(moduleId: String, isPremium: Boolean) {
         val current = _state.value
-        val updated = if (moduleId in current) current - moduleId else current + moduleId
+        val turningOn = moduleId !in current
+        val updated = if (turningOn) current + moduleId else current - moduleId
         _state.value = updated
         settings.putString(KEY_ACTIVATED, updated.joinToString(","))
+
+        if (turningOn && isPremium && moduleId !in FREE_MODULES) {
+            val updatedEver = _everActivated.value + moduleId
+            if (updatedEver != _everActivated.value) {
+                _everActivated.value = updatedEver
+                settings.putString(KEY_EVER_ACTIVATED, updatedEver.joinToString(","))
+            }
+        }
     }
 
     fun clear() {
         _state.value = emptySet()
         settings.remove(KEY_ACTIVATED)
+    }
+
+    /**
+     * Idempotent activation — no-op if [moduleId] is already on. Meant for
+     * server-side / migration-driven activations (e.g. flipping
+     * MODULE_MULTI_ENTREPRISE on for users who had several issuers before
+     * 1.9) where [toggle] would incorrectly turn a re-activated module off.
+     * Bypasses the premium check because the caller is the system, not the
+     * user tapping in the gStore.
+     */
+    fun forceActivate(moduleId: String) {
+        val current = _state.value
+        if (moduleId in current) return
+        val updated = current + moduleId
+        _state.value = updated
+        settings.putString(KEY_ACTIVATED, updated.joinToString(","))
+    }
+
+    // ---- 1.9 migration wizard flag ---------------------------------------
+    //
+    // Set once the user has walked through the 1.9 onboarding wizard (bank
+    // details + new-fields recap + Factur-X annoucement). Users who already
+    // finished it are recognised at boot and skip the wizard. Fresh installs
+    // are handled separately (they see FirstLaunchIssuerNameDialog and we
+    // seed the flag as `true` so they don't ever see the migration wizard
+    // afterwards).
+
+    fun hasSeenMigration19(): Boolean = settings.getBoolean(KEY_ONBOARDING_1_9_SEEN, false)
+
+    fun markMigration19Seen() {
+        settings.putBoolean(KEY_ONBOARDING_1_9_SEEN, true)
+    }
+
+    /**
+     * Clears the "wizard seen" flag so the 1.9 migration wizard fires again
+     * on the next MainCompose boot. Called exclusively from the restore flow
+     * when a pre-1.9 backup gets applied on a device that had already
+     * completed the wizard on the previous DB — that stale flag would
+     * otherwise leave the restored issuers/clients/products/docs unassigned
+     * to a company and skip the reassignment UI.
+     */
+    fun resetMigration19Seen() {
+        settings.putBoolean(KEY_ONBOARDING_1_9_SEEN, false)
+    }
+
+    /**
+     * Nuke both the current activation and the ever-activated history. Only for
+     * account-delete flows — logout must NOT call this, otherwise ex-premium users
+     * lose menu access to their existing documents.
+     */
+    fun wipeAll() {
+        _state.value = emptySet()
+        _everActivated.value = emptySet()
+        settings.remove(KEY_ACTIVATED)
+        settings.remove(KEY_EVER_ACTIVATED)
     }
 
     // ---- Quote trial counter -----------------------------------------------
@@ -67,23 +146,54 @@ class ActivatedModulesRepository(
 
     private fun loadFromCache(): Set<String> {
         val raw = settings.getStringOrNull(KEY_ACTIVATED)
-        val cached = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+        var cached = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
         // One-shot seed of default-on modules on first launch after this migration.
         // Existing users had no MODULE_DELIVERY_NOTE in their set but were seeing the BL
         // category unconditionally — we inject it so the category doesn't disappear from
         // their menu when the module gate goes live.
         if (settings.getStringOrNull(KEY_DEFAULTS_SEEDED) == null) {
-            val seeded = cached + DEFAULT_ACTIVATED_MODULES
-            settings.putString(KEY_ACTIVATED, seeded.joinToString(","))
+            cached = cached + DEFAULT_ACTIVATED_MODULES
+            settings.putString(KEY_ACTIVATED, cached.joinToString(","))
             settings.putString(KEY_DEFAULTS_SEEDED, "1")
-            return seeded
+        }
+        // Per-module one-shot: additive re-seed used when a new "default-on"
+        // module ships after the initial DEFAULTS_SEEDED run. Kept separate
+        // from KEY_DEFAULTS_SEEDED so bumping this doesn't accidentally
+        // re-activate MODULE_DELIVERY_NOTE for users who had explicitly
+        // turned it off. Fires once per install; the user can toggle FONT
+        // off afterwards and their choice will stick.
+        if (settings.getStringOrNull(KEY_FONT_DEFAULT_SEEDED) == null) {
+            if (MODULE_FONT !in cached) {
+                cached = cached + MODULE_FONT
+                settings.putString(KEY_ACTIVATED, cached.joinToString(","))
+            }
+            settings.putString(KEY_FONT_DEFAULT_SEEDED, "1")
         }
         return cached
     }
 
+    private fun loadEverActivatedFromCache(): Set<String> {
+        val raw = settings.getStringOrNull(KEY_EVER_ACTIVATED)
+        val stored = raw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+        // Migration: existing installs that had non-free modules currently ON when this
+        // shipped are grandfathered into the ever-activated set on first read. Without
+        // this, a premium user updating the app would see their category disappear at
+        // next logout because we'd have no history of the ON toggle.
+        if (settings.getStringOrNull(KEY_EVER_ACTIVATED_SEEDED) == null) {
+            val currentRaw = settings.getStringOrNull(KEY_ACTIVATED)
+            val currentActive = currentRaw?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+            val seeded = stored + currentActive.filter { it !in FREE_MODULES }
+            if (seeded.isNotEmpty()) {
+                settings.putString(KEY_EVER_ACTIVATED, seeded.joinToString(","))
+            }
+            settings.putString(KEY_EVER_ACTIVATED_SEEDED, "1")
+            return seeded
+        }
+        return stored
+    }
+
     companion object {
         const val MODULE_ORDERS = "orders"
-        const val MODULE_FACTURX = "facturx"
         const val MODULE_PAYMENTS = "payments"
         const val MODULE_THEMES = "themes"
         // Module that removes the "Document généré avec 𝕘𝟠" footer from invoices and PDFs.
@@ -104,11 +214,51 @@ class ActivatedModulesRepository(
         // Seeded on first load so existing users who used delivery notes before the
         // GStore card existed don't suddenly lose the category.
         const val MODULE_DELIVERY_NOTE = "delivery_note"
+        // Module that unlocks the "Export CII" action on invoices — writes the
+        // structured invoice data as a raw EN 16931 CII XML file, for
+        // international e-invoicing platforms that don't accept the Factur-X
+        // PDF/A-3 container. Independent of client type (works for a
+        // Particulier client too — the XML is just data, no legal claim to
+        // Factur-X compliance on its own). Free for now (pre-launch), will be
+        // moved back behind the premium gate before general rollout.
+        const val MODULE_CII_XML_EXPORT = "cii_xml_export"
+        // Module that unlocks the "Export Factur-X" action on invoices —
+        // writes the standard PDF with the CII XML embedded as
+        // `factur-x.xml` (/AF, AFRelationship=Data) so the file doubles
+        // as a structured e-invoicing payload. Free for now (pre-launch),
+        // same treatment as MODULE_CII_XML_EXPORT.
+        const val MODULE_FACTURX_EXPORT = "facturx_export"
+        // Module that unlocks the multi-entreprise UX (chevron picker in the
+        // menu, "Ajouter une entreprise" button in Mon Compte). Free for
+        // everyone. Off by default for fresh installs and for users with
+        // a single issuer at 1.9 migration time — they see a single-entreprise
+        // shell (tap on the menu name opens the entreprise form directly).
+        // Activated automatically on migration when the DB already holds
+        // multiple issuers, so existing multi-entreprise users don't lose
+        // access.
+        const val MODULE_MULTI_ENTREPRISE = "multi_entreprise"
+
+        // Document font picker. Free module (any user can turn it on), but
+        // some fonts inside are premium-only — the export flow gates them.
+        const val MODULE_FONT = "font"
+
+        // Marquer les BLs / devis. Same tag mechanic as invoices but with a
+        // BL/devis-specific palette (DRAFT / SENT / CANCELLED / INVOICED).
+        // Free during the 1.9 rollout — will move behind the premium gate
+        // in a later release (same trajectory as the export modules).
+        const val MODULE_DELIVERY_NOTE_TAGGING = "delivery_note_tagging"
+        const val MODULE_QUOTE_TAGGING = "quote_tagging"
 
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
         // so adding a future free module is one string.
-        val FREE_MODULES = setOf(MODULE_QUOTE_TRIAL, MODULE_DELIVERY_NOTE)
+        val FREE_MODULES = setOf(
+            MODULE_QUOTE_TRIAL,
+            MODULE_DELIVERY_NOTE,
+            MODULE_WATERMARK_REMOVAL,
+            MODULE_MULTI_ENTREPRISE,
+            MODULE_FONT,
+        )
 
         // Modules seeded into the activated set the first time the app boots after this
         // migration is deployed. Guarded by KEY_DEFAULTS_SEEDED so we don't re-add a
@@ -117,7 +267,11 @@ class ActivatedModulesRepository(
 
         private const val KEY_ACTIVATED = "gstore_activated_modules_v1"
         private const val KEY_DEFAULTS_SEEDED = "gstore_defaults_seeded_v1"
+        private const val KEY_FONT_DEFAULT_SEEDED = "gstore_font_default_seeded_v1"
         private const val KEY_QUOTE_TRIAL_COUNT = "gstore_quote_trial_count_v1"
+        private const val KEY_EVER_ACTIVATED = "gstore_ever_activated_modules_v1"
+        private const val KEY_EVER_ACTIVATED_SEEDED = "gstore_ever_activated_seeded_v1"
+        private const val KEY_ONBOARDING_1_9_SEEN = "onboarding_1_9_seen"
 
         /** Maximum number of "+ new quote" clicks a trial user can make before
          *  the exhausted modal takes over. Not user-configurable. */

@@ -1,19 +1,24 @@
 package com.a4a.g8invoicing.ui.screens.shared
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
@@ -32,13 +37,13 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 fun DocumentBottomSheetProducts(
     document: DocumentState,
     onDismissBottomSheet: () -> Unit,
-    sheetMaxHeight: Dp,
-    isSheetFullScreen: Boolean,
-    onSheetDragUp: () -> Unit,
-    onSheetStepDown: () -> Unit,
+    sheetContentHeight: Dp,
+    isSheetExpanded: Boolean,
+    onCollapseToHalf: () -> Unit,
     documentProductUiState: DocumentProductState,
     products: MutableList<ProductState>,
     taxRates: List<BigDecimal>,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>> = emptyList(),
     onClickProduct: (ProductState) -> Unit,
     onClickNewProduct: () -> Unit,
     onClickDocumentProduct: (DocumentProductState) -> Unit,
@@ -48,6 +53,7 @@ fun DocumentBottomSheetProducts(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit = {},
     showDocumentForm: Boolean = false,
     onShowDocumentForm: (Boolean) -> Unit,
     onOrderChange: (List<DocumentProductState>) -> Unit,
@@ -59,26 +65,37 @@ fun DocumentBottomSheetProducts(
     onSaveRetention: (Int, RetentionState) -> Unit = { _, _ -> },
     onToggleRetentionHidden: (Int) -> Unit = {},
 ) {
-    val density = LocalDensity.current
-    val topInsetDp = with(density) { WindowInsets.safeDrawing.getTop(density).toDp() }
-    // The sheet Surface is held at the max-visible height (fullscreen state minus
-    // the top inset) at all states, so its white background always fills whatever
-    // area the sheet occupies on screen and no preview leaks through during the
-    // Partial→Expanded animation. The visible-content Column inside then animates
-    // between peekHeight and the max to drive the LazyColumn viewport dynamically.
-    val sheetMaxContentHeight = sheetMaxHeight - topInsetDp
-    val visibleContentHeight by animateDpAsState(
-        targetValue = if (isSheetFullScreen) sheetMaxContentHeight else sheetMaxHeight / 2,
-        label = "sheet-content-height",
-    )
-    Box(modifier = Modifier.height(sheetMaxContentHeight)) {
-    Column(modifier = Modifier.fillMaxWidth().height(visibleContentHeight)) {
-    SheetDragHandle(
-        onDragUp = onSheetDragUp,
-        onDragDown = onSheetStepDown,
-        onTap = onSheetStepDown,
-    )
-    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+    // NSC: at fullscreen, downward leftover from the LazyList → collapse to
+    // half instead of dismissing. See DocumentBottomSheetTextElements for
+    // the full rationale.
+    val collapseOnFullscreenScrollDown = remember(isSheetExpanded) {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource,
+            ): Offset {
+                if (isSheetExpanded && source == NestedScrollSource.UserInput &&
+                    available.y > 0f
+                ) {
+                    onCollapseToHalf()
+                    return available
+                }
+                return Offset.Zero
+            }
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(sheetContentHeight)
+            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+            .nestedScroll(collapseOnFullscreenScrollDown)
+    ) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .weight(1f)
+    ) {
         var isProductListVisible by remember { mutableStateOf(false) }
         var typeOfCreation: DocumentBottomSheetTypeOfForm by remember {
             mutableStateOf(
@@ -102,6 +119,7 @@ fun DocumentBottomSheetProducts(
         val retentions = when (document) {
             is InvoiceState -> document.retentions
             is CreditNoteState -> document.retentions
+            is com.a4a.g8invoicing.ui.states.QuoteState -> document.retentions
             else -> emptyList()
         }
         // Which retention row is being edited (null when the form is not in
@@ -158,6 +176,7 @@ fun DocumentBottomSheetProducts(
                 typeOfCreation = typeOfCreation,
                 documentProduct = documentProductUiState,
                 taxRates = taxRates,
+                taxRatesWithIds = taxRatesWithIds,
                 bottomFormOnValueChange = bottomFormOnValueChange,
                 bottomFormPlaceCursor = bottomFormPlaceCursor,
                 onClickCancel = {
@@ -170,6 +189,7 @@ fun DocumentBottomSheetProducts(
                     isProductListVisible = false
                 },
                 onSelectTaxRate = onSelectTaxRate,
+                onSaveTaxRates = onSaveTaxRates,
                 showProductType = showProductType,
                 retention = editingRetention,
                 onRetentionSave = { updated ->
@@ -183,7 +203,5 @@ fun DocumentBottomSheetProducts(
         }
     }
     }
-    }
-
 }
 

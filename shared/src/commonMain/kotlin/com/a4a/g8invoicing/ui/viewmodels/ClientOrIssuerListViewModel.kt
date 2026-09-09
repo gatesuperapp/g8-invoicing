@@ -89,6 +89,14 @@ class ClientOrIssuerListViewModel(
         }
     }
 
+    /**
+     * Count clients + products + documents still attached to an issuer.
+     * Used by the multi-entreprise delete UI to block the trash button when
+     * the entreprise still carries data. Zero → the caller may delete safely.
+     */
+    suspend fun countAttachedForIssuer(issuerId: Long): Long =
+        clientOrIssuerDataSource.countAttachedForCompany(issuerId)
+
     fun duplicateClientsOrIssuers(selectedItems: List<ClientOrIssuerState>) {
         duplicateJob?.cancel()
         duplicateJob = viewModelScope.launch {

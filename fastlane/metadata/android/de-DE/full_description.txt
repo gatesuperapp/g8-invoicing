@@ -1,20 +1,46 @@
-𝕘𝟠 ist eine effiziente und quelloffene Rechnungsstellungs-App.
+Rechne in 10 Sekunden ab und wandle deine Angebote und Lieferscheine in Rechnungen um!
 
-Funktionen:
-- Rechnungen erstellen und verwalten
-- Lieferscheine erstellen und in Rechnungen umwandeln
-- Angebote erstellen und in Rechnungen umwandeln (Premium-Option)
-- Gutschriften erstellen
-- Kunden und Produkte verwalten
-- Individuelle Preise pro Kunde
-- Export von Dokumenten als PDF
-- Keine Registrierung erforderlich
+▸ Angebot, LS → Rechnung
+Wandle Angebote oder Lieferscheine in eine Rechnung um, oder erstelle eine Rechnung direkt. Keine erneute Eingabe.
 
-Perfekt für Landwirt*innen, Freiberufler*innen, kleine Unternehmen und alle, die professionelle Rechnungen erstellen müssen.
-Und 𝕘𝟠 wird die Anforderungen für die elektronische Rechnungsstellung erfüllen – mit Anbindung an eine PDP!
+▸ Geschäftsrechnungen, elektronisches Format
+Erstelle professionelle Rechnungen. Export als PDF, ZUGFeRD, CII-XML: die Standardformate der elektronischen Rechnungsstellung. Import in deine registrierte Plattform oder Buchhaltungssoftware.
 
-Keine Werbung • Keine Tracker • Abonnement optional
+▸ Erweiterte Verwaltung
+Überfällige Rechnungen auf einen Blick sehen und mit einem Tipp Mahnungen versenden.
+Rechnungen mit Tags versehen, „Bezahlt"-Stempel hinzufügen. Gutschriften und Korrekturrechnungen erstellen.
 
-Freie Software 🇫🇷
+▸ Passt zu deinem Beruf
+Preise brutto oder netto, deine Wahl — automatische Berechnung. Beliebige Einheit
+(kg, Stunde, Stück, Bund...). Mehrere Preise pro Produkt je nach Kundschaft.
+Mehrere Unternehmen. Anpassbare USt.
 
-Es wurde viel Arbeit in die Entwicklung dieser App gesteckt, um Ihnen zu helfen, den Verwaltungsaufwand zu vereinfachen und gleichzeitig Ihre Privatsphäre zu schützen. Wenn Sie eine Frage, ein Problem oder eine Anfrage haben, steht Ihnen jederzeit Unterstützung zur Verfügung – wenden Sie sich einfach an Aude unter contact@the-gate.fr
+▸ Personalisierung
+Füge dein Logo hinzu, schreibe deine Beschreibungen, Zahlungsarten, AGB, Fußzeile oder Referenzen.
+Ändere die Schriftart deiner Dokumente ganz nach deinem Stil.
+
+▸ Teilen
+Sende per E-Mail, SMS, Sofortnachricht, QuickShare... oder drucke!
+
+▸ Kein Feature-Wildwuchs
+Aktiviere oder deaktiviere Funktionen nach Bedarf — die App bleibt schlank und effektiv.
+
+━━━━━━━━━━━━━━━━━━
+
+✨ KOSTENLOS
+Rechnungen, Lieferscheine, Gutschriften, Kunden und Produkte unbegrenzt.
+5 Angebote. Mehrere Unternehmen.
+
+🌟 PREMIUM
+Unbegrenzte Angebote. ZUGFeRD- und CII-Export.
+
+━━━━━━━━━━━━━━━━━━
+
+Entwickelt für Erzeuger·innen, Kleinunternehmer·innen, Handwerker·innen, Freelancer und alle kleinen Betriebe.
+
+🦇 Freie und quelloffene Software. Deine Daten bleiben auf deinem Gerät.
+Keine Werbung • Keine Tracker • Kein Datenaustausch mit Dritten
+
+Ein Konto wird nur für das Premium-Abo benötigt.
+
+Eine Frage, eine Idee, ein Bedürfnis? Es gibt immer Support — schreibe Aude unter contact@the-gate.fr

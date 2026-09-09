@@ -25,16 +25,27 @@ fun DocumentListContent(
     addDocumentToSelectedList: (DocumentState) -> Unit = {},
     removeDocumentFromSelectedList: (DocumentState) -> Unit = {},
     keyToResetCheckboxes: Boolean,
+    // false = the doc-type-specific gStore tagging module is off, hide
+    // pastilles + status labels on every row. Defaults to true so invoice
+    // and credit-note lists (no gStore gate) keep rendering tags.
+    tagsEnabled: Boolean = true,
 ) {
     // Skip transient documents that haven't been persisted yet (documentId == null)
-    // so the `key` lambda below never crashes on `!!`. Second-precision timestamps
-    // collide when several docs are inserted in the same batch (e.g. duplicate a
-    // multi-selection): break the tie with documentId so the numerically-newer
-    // duplicate stays on top.
+    // so the `key` lambda below never crashes on `!!`.
+    //
+    // Primary sort = the document's own date (dd/MM/yyyy) so a Sept 2023
+    // facture stays under its Sept 2023 header no matter when it was
+    // entered into the app. Was previously createdDate DESC, which surfaced
+    // freshly-backfilled old invoices at the top of the list.
+    // Same-day tiebreakers: createdDate (batches inserted in one operation
+    // — e.g. duplicating a multi-selection — collide at second precision),
+    // then documentId so the numerically-newer duplicate stays on top.
     val sorted = documents
         .filter { it.documentId != null }
         .sortedWith(
             compareByDescending<DocumentState> { doc ->
+                parseDate(doc.documentDate, "dd/MM/yyyy") ?: 0L
+            }.thenByDescending { doc ->
                 parseDate(doc.createdDate ?: "", "yyyy-MM-dd HH:mm:ss") ?: 0L
             }.thenByDescending { it.documentId ?: 0 }
         )
@@ -85,6 +96,7 @@ fun DocumentListContent(
             ) { document ->
                 DocumentListItem(
                     document = document,
+                    tagsEnabled = tagsEnabled,
                     onItemClick = {
                         document.documentId?.let {
                             onItemClick(it)

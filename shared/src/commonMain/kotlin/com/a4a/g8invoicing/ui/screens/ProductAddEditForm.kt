@@ -10,16 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.stripTrailingZeros
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.product_add_price
-import com.a4a.g8invoicing.shared.resources.product_delete_price
 import com.a4a.g8invoicing.shared.resources.product_description
 import com.a4a.g8invoicing.shared.resources.product_description_input
 import com.a4a.g8invoicing.shared.resources.product_name
@@ -70,6 +64,7 @@ import com.a4a.g8invoicing.shared.resources.product_unit_code_info_modal_title
 import com.a4a.g8invoicing.shared.resources.product_unit_code_label
 import com.a4a.g8invoicing.shared.resources.product_unit_input
 import com.a4a.g8invoicing.ui.shared.DecimalInput
+import com.a4a.g8invoicing.ui.shared.DeleteBlockRow
 import com.a4a.g8invoicing.ui.shared.FormInput
 import com.a4a.g8invoicing.ui.shared.FormUI
 import com.a4a.g8invoicing.ui.shared.ForwardElement
@@ -327,11 +322,16 @@ fun ProductAddEditForm(
 
                 // Afficher "Ajouter un prix" seulement s'il n'y a pas de prix additionnels
                 if (product.additionalPrices.isNullOrEmpty()) {
-                    Spacer(Modifier.padding(bottom = 6.dp))
-                    AddPriceButton(
-                        onClick = onClickAddPrice,
-                        bottomPadding = 16.dp
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                    ) {
+                        AddPriceButton(
+                            onClick = onClickAddPrice,
+                            topPadding = 3.dp,
+                            bottomPadding = 16.dp,
+                        )
+                    }
                 }
             }
 
@@ -355,16 +355,6 @@ fun ProductAddEditForm(
                         modifier = Modifier
                             .background(color = AppColors.surface, shape = RoundedCornerShape(6.dp))
                     ) {
-
-                        // 🗑️ Suppression du prix - padding réduit
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            DeletePriceButton {
-                                onClickDeletePrice(currentPrice.idStr)
-                            }
-                        }
 
                         val priceInputList = remember(
                             currentPrice.clients,
@@ -420,28 +410,31 @@ fun ProductAddEditForm(
                             )
                         }
 
-                        Column(
-                            modifier = Modifier
-                                .offset(y = (-4).dp)
-                        ) {
-                            FormUI(
-                                inputList = priceInputList,
-                                localFocusManager = localFocusManager,
-                                placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
-                                onClickOpenClientSelection = onClickSelectClients,
-                                errors = product.errors
-                            )
-                        }
+                        FormUI(
+                            inputList = priceInputList,
+                            localFocusManager = localFocusManager,
+                            placeCursorAtTheEndOfText = placeCursorAtTheEndOfText,
+                            onClickOpenClientSelection = onClickSelectClients,
+                            errors = product.errors,
+                            trailingContent = {
+                                DeleteBlockRow(onClick = { onClickDeletePrice(currentPrice.idStr) })
+                            },
+                        )
                     }
                 }
             }
 
             // Afficher "Ajouter un prix" après tous les prix additionnels
-            Spacer(Modifier.padding(bottom = 6.dp))
-            AddPriceButton(
-                onClick = onClickAddPrice,
-                bottomPadding = 16.dp
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+            ) {
+                AddPriceButton(
+                    onClick = onClickAddPrice,
+                    topPadding = 3.dp,
+                    bottomPadding = 16.dp,
+                )
+            }
         }
     }
 
@@ -468,11 +461,11 @@ fun ProductAddEditForm(
 }
 
 @Composable
-fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
+fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, topPadding: Dp = 4.dp) {
     val addPriceText = stringResource(Res.string.product_add_price)
     Box(
         modifier = Modifier
-            .padding(start = 4.dp, top = 4.dp, bottom = bottomPadding)
+            .padding(start = 4.dp, top = topPadding, bottom = bottomPadding)
             .background(
                 color = AppColors.surface,
                 shape = RoundedCornerShape(6.dp)
@@ -491,21 +484,3 @@ fun AddPriceButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp) {
 }
 
 
-@Composable
-fun DeletePriceButton(onClick: () -> Unit) {
-    val deletePriceText = stringResource(Res.string.product_delete_price)
-    Box(
-        modifier = Modifier
-            .offset(x = 8.dp, y = (-8).dp)
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            modifier = Modifier.size(18.dp),
-            imageVector = Icons.Outlined.Delete,
-            tint = AppColors.iconPrimary,
-            contentDescription = deletePriceText
-        )
-    }
-}

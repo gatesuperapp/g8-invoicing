@@ -7,6 +7,7 @@ import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.ui.states.AddressState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.EmailState
+import com.a4a.g8invoicing.ui.states.IssuerBankState
 import g8invoicing.ClientOrIssuerEmail
 import g8invoicing.DocumentClientOrIssuerEmail
 import com.a4a.g8invoicing.data.models.ClientOrIssuerType
@@ -14,14 +15,17 @@ import com.a4a.g8invoicing.data.models.PersonType
 import g8invoicing.ClientOrIssuer
 import g8invoicing.ClientOrIssuerAddress
 import g8invoicing.DocumentClientOrIssuerAddress
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ClientOrIssuerLocalDataSource(
     db: Database,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : ClientOrIssuerLocalDataSourceInterface {
     private val clientOrIssuerQueries = db.clientOrIssuerQueries
     private val clientOrIssuerAddressQueries = db.clientOrIssuerAddressQueries
@@ -32,6 +36,8 @@ class ClientOrIssuerLocalDataSource(
         db.linkDocumentClientOrIssuerToAddressQueries
     private val clientOrIssuerEmailQueries = db.clientOrIssuerEmailQueries
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
+    private val issuerBankQueries = db.issuerBankQueries
+    private val productQueries = db.productQueries
 
     override suspend fun fetchClientOrIssuer(id: Long): ClientOrIssuerState? {
         return withContext(DispatcherProvider.IO) {
@@ -40,8 +46,8 @@ class ClientOrIssuerLocalDataSource(
                     ?.let {
                         it.transformIntoEditable(
                             addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
-                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList()
-                        )
+                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                        ).copy(banks = fetchIssuerBanks(it.id))
                     }
             } catch (e: Exception) {
                 null
@@ -49,19 +55,94 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
-    override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>> {
-        return clientOrIssuerQueries.getAll(type.name.lowercase())
-            .asFlow()
-            .map { query ->
-                query.executeAsList()
-                    .map {
-                        it.transformIntoEditable(
-                            addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
-                            emails = fetchClientOrIssuerEmails(it.id)?.toMutableList()
-                        )
-                    }
+    // Read all bank accounts attached to an issuer, ordered stably by sort_order
+    // then id (append-order tie-breaker).
+    internal fun fetchIssuerBanks(issuerId: Long): List<IssuerBankState> {
+        return try {
+            issuerBankQueries.getForIssuer(issuerId).executeAsList().map { row ->
+                IssuerBankState(
+                    id = row.issuer_bank_id.toInt(),
+                    label = row.label?.let { TextFieldValue(text = it) },
+                    countryCode = row.country_code,
+                    identifier = TextFieldValue(text = row.identifier ?: ""),
+                    bic = TextFieldValue(text = row.bic ?: ""),
+                    sortOrder = row.sort_order.toInt(),
+                )
             }
-            .flowOn(DispatcherProvider.IO)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    // Sync the whole bank list for an issuer: wipe + reinsert. Simple, safe on
+    // small lists (users hold 1-3 accounts in practice), and avoids the delta
+    // dance for insert/update/delete/reorder in one shot.
+    internal fun saveIssuerBanks(issuerId: Long, banks: List<IssuerBankState>) {
+        try {
+            issuerBankQueries.deleteForIssuer(issuerId)
+            banks.forEachIndexed { index, bank ->
+                val label = bank.label?.text?.trim().orEmpty().ifEmpty { null }
+                val identifier = bank.identifier.text.trim().ifEmpty { null }
+                val bic = bank.bic.text.trim().ifEmpty { null }
+                val country = bank.countryCode?.trim()?.ifEmpty { null }
+                // Skip fully-empty rows: an unfilled "+ Ajouter un compte"
+                // placeholder should not persist as an empty account.
+                if (label == null && identifier == null && bic == null) return@forEachIndexed
+                issuerBankQueries.save(
+                    issuer_bank_id = null,
+                    issuer_id = issuerId,
+                    label = label,
+                    country_code = country,
+                    identifier = identifier,
+                    bic = bic,
+                    sort_order = index.toLong(),
+                )
+            }
+        } catch (e: Exception) {
+            // Log if needed
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun fetchAllUnscoped(type: PersonType): List<ClientOrIssuerState> {
+        return withContext(DispatcherProvider.IO) {
+            clientOrIssuerQueries.getAll(type.name.lowercase())
+                .executeAsList()
+                .map {
+                    it.transformIntoEditable(
+                        addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
+                        emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                    ).copy(banks = fetchIssuerBanks(it.id))
+                }
+        }
+    }
+
+    override fun fetchAll(type: PersonType): Flow<List<ClientOrIssuerState>> {
+        // Clients are scoped to the entreprise courante; issuers ARE the
+        // entreprises, so the issuer list stays unfiltered.
+        val transform: (List<ClientOrIssuer>) -> List<ClientOrIssuerState> = { rows ->
+            rows.map {
+                it.transformIntoEditable(
+                    addresses = fetchClientOrIssuerAddresses(it.id)?.toMutableList(),
+                    emails = fetchClientOrIssuerEmails(it.id)?.toMutableList(),
+                ).copy(banks = fetchIssuerBanks(it.id))
+            }
+        }
+        return if (type == PersonType.CLIENT) {
+            currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    clientOrIssuerQueries.getAllClientsForCompany(companyId)
+                } else {
+                    clientOrIssuerQueries.getAll(type.name.lowercase())
+                }
+                query.asFlow().map { transform(it.executeAsList()) }
+            }.flowOn(DispatcherProvider.IO)
+        } else {
+            clientOrIssuerQueries.getAll(type.name.lowercase())
+                .asFlow()
+                .map { transform(it.executeAsList()) }
+                .flowOn(DispatcherProvider.IO)
+        }
     }
 
     fun fetchClientOrIssuerAddresses(clientOrIssuerId: Long): List<AddressState>? {
@@ -131,6 +212,7 @@ class ClientOrIssuerLocalDataSource(
                     }
 
                     saveClientOrIssuerEmailRows(newEntityId, clientOrIssuer.emails)
+                    saveIssuerBanks(newEntityId, clientOrIssuer.banks)
 
                     newEntityId
                 }
@@ -141,11 +223,11 @@ class ClientOrIssuerLocalDataSource(
     }
 
     private fun saveClientOrIssuerRow(clientOrIssuer: ClientOrIssuerState) {
+        val isClient = clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+            clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
         clientOrIssuerQueries.save(
             id = null,
-            type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-            ) ClientOrIssuerType.CLIENT.name.lowercase()
+            type = if (isClient) ClientOrIssuerType.CLIENT.name.lowercase()
             else ClientOrIssuerType.ISSUER.name.lowercase(),
             clientOrIssuer.firstName?.text?.trim(),
             clientOrIssuer.name.text.trim(),
@@ -161,7 +243,13 @@ class ClientOrIssuerLocalDataSource(
             clientOrIssuer.logoPath,
             if (clientOrIssuer.vatExempt) 1L else 0L,
             if (clientOrIssuer.intraEuSales) 1L else 0L,
-            if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
+            // Clients rattachés à l'entreprise courante ; issuers ne
+            // s'auto-référencent pas.
+            company_id = if (isClient) currentCompanyRepository.current else null,
+            // Only meaningful on clients (Factur-X gate). Issuers store NULL —
+            // the field doesn't apply on the emitting side.
+            client_type = if (isClient) clientOrIssuer.clientType?.name else null,
+            tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
         )
     }
 
@@ -170,7 +258,8 @@ class ClientOrIssuerLocalDataSource(
         addresses: List<AddressState>?,
     ): Boolean {
         if (addresses.isNullOrEmpty()) return true
-        for (address in addresses) {
+        for ((index, address) in addresses.withIndex()) {
+            if (index > 0 && isAddressEmpty(address)) continue
             clientOrIssuerAddressQueries.save(
                 id = null,
                 address_title = address.addressTitle?.text?.trim(),
@@ -189,6 +278,24 @@ class ClientOrIssuerLocalDataSource(
             )
         }
         return true
+    }
+
+    // Country alone doesn't count — the form auto-seeds COUNTRY_1 with the
+    // cascade fallback (ClientOrIssuerAddEditForm.kt:144 LaunchedEffect) and
+    // the ADDRESS_LINE_1/ZIP/CITY value-typing handlers seed defaultCountry
+    // on any fresh AddressState. So a country-only row on slots ≥ 2 is
+    // almost always a placeholder / ghost slot (e.g. user tapped "+ Ajouter
+    // une adresse" twice and only filled slot 3 → slot 2 has just the
+    // auto-country). Callers therefore skip this check for slot index 0:
+    // every issuer/client must keep at least one address (the country is
+    // legally required on Factur-X / EN 16931), and a country-only first
+    // slot is the natural state right after issuer creation.
+    private fun isAddressEmpty(address: AddressState): Boolean {
+        return address.addressTitle?.text.isNullOrBlank() &&
+            address.addressLine1?.text.isNullOrBlank() &&
+            address.addressLine2?.text.isNullOrBlank() &&
+            address.zipCode?.text.isNullOrBlank() &&
+            address.city?.text.isNullOrBlank()
     }
 
     private fun saveClientOrIssuerEmailRows(
@@ -210,11 +317,11 @@ class ClientOrIssuerLocalDataSource(
     private suspend fun saveInfoInClientOrIssuerTable(clientOrIssuer: ClientOrIssuerState) {
         return withContext(DispatcherProvider.IO) {
             try {
+                val isClient = clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                    clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
                 clientOrIssuerQueries.save(
                     id = null,
-                    type = if (clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
-                        clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
-                    ) ClientOrIssuerType.CLIENT.name.lowercase()
+                    type = if (isClient) ClientOrIssuerType.CLIENT.name.lowercase()
                     else ClientOrIssuerType.ISSUER.name.lowercase(),
                     clientOrIssuer.firstName?.text?.trim(),
                     clientOrIssuer.name.text.trim(),
@@ -230,7 +337,9 @@ class ClientOrIssuerLocalDataSource(
                     clientOrIssuer.logoPath,
                     if (clientOrIssuer.vatExempt) 1L else 0L,
                     if (clientOrIssuer.intraEuSales) 1L else 0L,
-                    if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
+                    company_id = if (isClient) currentCompanyRepository.current else null,
+                    client_type = if (isClient) clientOrIssuer.clientType?.name else null,
+                    tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                 )
             } catch (e: Exception) {
                 // Log error if needed
@@ -248,7 +357,8 @@ class ClientOrIssuerLocalDataSource(
 
         return withContext(DispatcherProvider.IO) {
             try {
-                for (address in addresses) {
+                for ((index, address) in addresses.withIndex()) {
+                    if (index > 0 && isAddressEmpty(address)) continue
                     clientOrIssuerAddressQueries.save(
                         id = null,
                         address_title = address.addressTitle?.text?.trim(),
@@ -329,7 +439,8 @@ class ClientOrIssuerLocalDataSource(
     ) {
         return withContext(DispatcherProvider.IO) {
             try {
-                addresses?.forEach { address ->
+                addresses?.forEachIndexed { index, address ->
+                    if (index > 0 && isAddressEmpty(address)) return@forEachIndexed
                     documentClientOrIssuerAddressQueries.save(
                         id = null,
                         original_address_id = address.originalAddressId?.toLong(),
@@ -391,6 +502,8 @@ class ClientOrIssuerLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             try {
                 clientOrIssuer.id?.let {
+                    val isClient = clientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                        clientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
                     clientOrIssuerQueries.update(
                         id = it.toLong(),
                         type = clientOrIssuer.type?.name?.lowercase(),
@@ -408,8 +521,12 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = clientOrIssuer.logoPath,
                         vat_exempt = if (clientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (clientOrIssuer.intraEuSales) 1L else 0L,
+                        client_type = if (isClient) clientOrIssuer.clientType?.name else null,
                         tax_withholding_enabled = if (clientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
+                    // Bank accounts live in their own table; simplest robust sync
+                    // is delete-all-then-reinsert (small lists, rare edits).
+                    saveIssuerBanks(it.toLong(), clientOrIssuer.banks)
                 }
 
                 // Addresses to delete
@@ -462,6 +579,23 @@ class ClientOrIssuerLocalDataSource(
     ) {
         return withContext(DispatcherProvider.IO) {
             try {
+                // Re-derive the frozen payment_iban/payment_bic from the current
+                // bank list. Users edit banks through the section (add a BIC to
+                // an existing account, add a 2nd account) without touching the
+                // top-level paymentIban/paymentBic fields — those would drift
+                // to stale values on save without this sync. Matching rule:
+                // keep the same bank if its IBAN is still present; otherwise
+                // fall back to the first bank of the (edited) list.
+                val syncedBank = documentClientOrIssuer.banks.firstOrNull { bank ->
+                    val current = documentClientOrIssuer.paymentIban?.text?.trim().orEmpty()
+                    current.isNotEmpty() && bank.identifier.text.trim() == current
+                } ?: documentClientOrIssuer.banks.firstOrNull()
+                val syncedIban = syncedBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: documentClientOrIssuer.paymentIban?.text?.trim()
+                val syncedBic = syncedBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: documentClientOrIssuer.paymentBic?.text?.trim()
+                val syncedCountry = syncedBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+                    ?: documentClientOrIssuer.paymentCountry?.trim()?.takeIf { it.isNotEmpty() }
                 documentClientOrIssuer.id?.let {
                     documentClientOrIssuerQueries.update(
                         id = it.toLong(),
@@ -486,6 +620,12 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = documentClientOrIssuer.logoPath,
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+                        payment_iban = syncedIban,
+                        payment_bic = syncedBic,
+                        payment_country = syncedCountry,
+                        client_type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+                            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+                        ) documentClientOrIssuer.clientType?.name else null,
                         tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
                 }
@@ -522,6 +662,7 @@ class ClientOrIssuerLocalDataSource(
                     // For new addresses: create document address only (master will be created in syncToMaster block)
                     documentClientOrIssuer.id?.let { docClientId ->
                         addressesToCreate.forEach { address ->
+                            if (isAddressEmpty(address)) return@forEach
                             // Create document address without master link (will be set during sync)
                             documentClientOrIssuerAddressQueries.save(
                                 id = null,
@@ -550,6 +691,26 @@ class ClientOrIssuerLocalDataSource(
                 documentClientOrIssuer.id?.toLong()?.let { docClientId ->
                     documentClientOrIssuerEmailQueries.deleteByDocumentClientOrIssuerId(docClientId)
                     saveInfoInDocumentClientOrIssuerEmailTable(docClientId, documentClientOrIssuer.emails)
+                }
+
+                // Banks are always master-owned resources (they live in the
+                // IssuerBank table, keyed to the master issuer). When the user
+                // edits banks from the doc-embedded issuer form (add/remove a
+                // bank, add a BIC), those edits must persist to the master
+                // regardless of the sync-to-master switch — which only controls
+                // propagation of name/phone/company-id/address fields. Empty
+                // list = state wasn't hydrated (older code paths, race
+                // conditions) → keep master intact rather than wipe.
+                // NB: the UI enforces the invariant "no bank edits with switch
+                // OFF" via a confirmation modal (see NavGraphInvoiceAddEdit),
+                // so reaching this path with switch OFF + bank changes only
+                // happens when the user has already accepted the force-sync.
+                val isIssuerEdit = documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER ||
+                    documentClientOrIssuer.type == ClientOrIssuerType.ISSUER
+                if (isIssuerEdit && documentClientOrIssuer.banks.isNotEmpty()) {
+                    documentClientOrIssuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                        saveIssuerBanks(masterId, documentClientOrIssuer.banks)
+                    }
                 }
 
                 // Sync to master table if syncToMaster is true and there's an originalClientOrIssuerId
@@ -581,8 +742,15 @@ class ClientOrIssuerLocalDataSource(
                         logo_path = documentClientOrIssuer.logoPath,
                         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
                         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+                        client_type = if (masterType == ClientOrIssuerType.CLIENT.name.lowercase()) {
+                            documentClientOrIssuer.clientType?.name
+                        } else {
+                            null
+                        },
                         tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
                     )
+                    // Banks handled unconditionally above — master-owned resource,
+                    // not gated by syncToMaster.
 
                     // Emails: supprimer et recréer dans table maître
                     clientOrIssuerEmailQueries.deleteByClientOrIssuerId(masterId)
@@ -683,6 +851,85 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
+    override suspend fun countAttachedForCompany(companyId: Long): Long {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                val clients = clientOrIssuerQueries
+                    .countClientsForCompany(companyId).executeAsOne()
+                val products = productQueries
+                    .countProductsForCompany(companyId).executeAsOne()
+                val docs = clientOrIssuerQueries
+                    .countDocumentsForCompany(companyId).executeAsOne()
+                clients + products + docs
+            } catch (cause: Throwable) {
+                0L
+            }
+        }
+    }
+
+    override suspend fun countDocumentsForCompany(companyId: Long): Long {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.countDocumentsForCompany(companyId).executeAsOne()
+            } catch (cause: Throwable) {
+                0L
+            }
+        }
+    }
+
+    override suspend fun reassignDocumentsToCompany(fromCompanyId: Long, toCompanyId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.transaction {
+                    clientOrIssuerQueries.reassignInvoicesToCompany(toCompanyId, fromCompanyId)
+                    clientOrIssuerQueries.reassignDeliveryNotesToCompany(toCompanyId, fromCompanyId)
+                    clientOrIssuerQueries.reassignCreditNotesToCompany(toCompanyId, fromCompanyId)
+                    clientOrIssuerQueries.reassignQuotesToCompany(toCompanyId, fromCompanyId)
+                }
+            } catch (cause: Throwable) {
+            }
+        }
+    }
+
+    override suspend fun countOrphanDocs(): Long {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.countOrphanDocs().executeAsOne()
+            } catch (cause: Throwable) {
+                0L
+            }
+        }
+    }
+
+    override suspend fun getOrphanDocIds(): OrphanDocIds {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                OrphanDocIds(
+                    invoice = clientOrIssuerQueries.getOrphanInvoiceIds().executeAsList(),
+                    deliveryNote = clientOrIssuerQueries.getOrphanDeliveryNoteIds().executeAsList(),
+                    creditNote = clientOrIssuerQueries.getOrphanCreditNoteIds().executeAsList(),
+                    quote = clientOrIssuerQueries.getOrphanQuoteIds().executeAsList(),
+                )
+            } catch (cause: Throwable) {
+                OrphanDocIds(emptyList(), emptyList(), emptyList(), emptyList())
+            }
+        }
+    }
+
+    override suspend fun assignDocToCompany(type: OrphanDocType, docId: Long, companyId: Long) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                when (type) {
+                    OrphanDocType.INVOICE -> clientOrIssuerQueries.assignInvoiceToCompany(companyId, docId)
+                    OrphanDocType.DELIVERY_NOTE -> clientOrIssuerQueries.assignDeliveryNoteToCompany(companyId, docId)
+                    OrphanDocType.CREDIT_NOTE -> clientOrIssuerQueries.assignCreditNoteToCompany(companyId, docId)
+                    OrphanDocType.QUOTE -> clientOrIssuerQueries.assignQuoteToCompany(companyId, docId)
+                }
+            } catch (cause: Throwable) {
+            }
+        }
+    }
+
     override suspend fun deleteDocumentClientOrIssuer(documentClientOrIssuer: ClientOrIssuerState) {
         return withContext(DispatcherProvider.IO) {
             try {
@@ -753,9 +1000,26 @@ class ClientOrIssuerLocalDataSource(
                             companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
                             companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
                             logoPath = issuer.logo_path,
+                            // Legal / regime flags must be copied from the master —
+                            // otherwise a new invoice always defaults to vatExempt=false /
+                            // intraEuSales=false, ignoring the toggles the user just
+                            // set on their entreprise from Mon Compte.
                             vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
                             intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
                             taxWithholdingEnabled = issuer.tax_withholding_enabled != 0L,
+                            banks = fetchIssuerBanks(issuer.id),
+                            // Freeze the first bank (sort_order = 0) on the new doc.
+                            // The payment-means picker on the invoice lets the user
+                            // swap in a different bank later — this seeds the pick
+                            // so the block renders correctly on a brand-new doc.
+                            paymentIban = fetchIssuerBanks(issuer.id).firstOrNull()
+                                ?.identifier?.text?.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentBic = fetchIssuerBanks(issuer.id).firstOrNull()
+                                ?.bic?.text?.takeIf { it.isNotEmpty() }
+                                ?.let { TextFieldValue(text = it) },
+                            paymentCountry = fetchIssuerBanks(issuer.id).firstOrNull()
+                                ?.countryCode,
                         )
                     }
                 }
@@ -765,11 +1029,97 @@ class ClientOrIssuerLocalDataSource(
         }
     }
 
+    override suspend fun getCurrentIssuer(companyId: Long): ClientOrIssuerState? {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                clientOrIssuerQueries.get(companyId).executeAsOneOrNull()?.let { issuer ->
+                    val banks = fetchIssuerBanks(issuer.id)
+                    val firstBank = banks.firstOrNull()
+                    ClientOrIssuerState(
+                        id = null, // Nouveau document, pas encore d'ID
+                        type = ClientOrIssuerType.DOCUMENT_ISSUER,
+                        originalClientOrIssuerId = issuer.id.toInt(),
+                        originalVersion = issuer.version?.toInt() ?: 1,
+                        firstName = issuer.first_name?.let { TextFieldValue(text = it) },
+                        name = TextFieldValue(text = issuer.name),
+                        phone = issuer.phone?.let { TextFieldValue(text = it) },
+                        emails = fetchClientOrIssuerEmails(issuer.id),
+                        addresses = fetchClientOrIssuerAddresses(issuer.id),
+                        notes = issuer.notes?.let { TextFieldValue(text = it) },
+                        companyId1Label = issuer.company_id1_label?.let { TextFieldValue(text = it) },
+                        companyId1Number = issuer.company_id1_number?.let { TextFieldValue(text = it) },
+                        companyId2Label = issuer.company_id2_label?.let { TextFieldValue(text = it) },
+                        companyId2Number = issuer.company_id2_number?.let { TextFieldValue(text = it) },
+                        companyId3Label = issuer.company_id3_label?.let { TextFieldValue(text = it) },
+                        companyId3Number = issuer.company_id3_number?.let { TextFieldValue(text = it) },
+                        logoPath = issuer.logo_path,
+                        // Copy the regime flags from the master row (see getLastIssuer).
+                        vatExempt = (issuer.vat_exempt ?: 0L) != 0L,
+                        intraEuSales = (issuer.intra_eu_sales ?: 0L) != 0L,
+                        taxWithholdingEnabled = issuer.tax_withholding_enabled != 0L,
+                        banks = banks,
+                        // Freeze the first bank (sort_order = 0) — same seed as
+                        // getLastIssuer; the payment-means picker can swap it later.
+                        paymentIban = firstBank?.identifier?.text?.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentBic = firstBank?.bic?.text?.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentCountry = firstBank?.countryCode,
+                    )
+                }
+            } catch (_: Exception) {
+                null
+            }
+        }
+    }
+
+    override suspend fun getIssuerBanks(issuerId: Long): List<IssuerBankState> {
+        return withContext(DispatcherProvider.IO) { fetchIssuerBanks(issuerId) }
+    }
+
+    override suspend fun updateDocumentClientOrIssuerPaymentBank(
+        documentClientOrIssuerId: Long,
+        iban: String?,
+        bic: String?,
+        country: String?,
+    ) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                documentClientOrIssuerQueries.updatePaymentBank(
+                    id = documentClientOrIssuerId,
+                    payment_iban = iban?.takeIf { it.isNotEmpty() },
+                    payment_bic = bic?.takeIf { it.isNotEmpty() },
+                    payment_country = country?.takeIf { it.isNotEmpty() },
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
     override suspend fun getMasterVersion(masterId: Long): Int? {
         return withContext(DispatcherProvider.IO) {
             try {
                 clientOrIssuerQueries.get(masterId).executeAsOneOrNull()?.version?.toInt()
             } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    override suspend fun acknowledgeDocumentClientOrIssuerVersion(
+        documentClientOrIssuerId: Long,
+        masterId: Long,
+    ): Int? {
+        return withContext(DispatcherProvider.IO) {
+            try {
+                val version = clientOrIssuerQueries.get(masterId)
+                    .executeAsOneOrNull()?.version ?: return@withContext null
+                documentClientOrIssuerQueries.updateOriginalVersion(
+                    id = documentClientOrIssuerId,
+                    original_version = version,
+                )
+                version.toInt()
+            } catch (_: Exception) {
                 null
             }
         }
@@ -843,6 +1193,17 @@ class ClientOrIssuerLocalDataSource(
                 .executeAsList()
                 .mapNotNull { it }
         }
+
+    override suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long) {
+        if (ids.isEmpty()) return
+        withContext(DispatcherProvider.IO) {
+            clientOrIssuerQueries.transaction {
+                ids.forEach { id ->
+                    clientOrIssuerQueries.updateCompanyId(companyId, id)
+                }
+            }
+        }
+    }
 }
 
 fun ClientOrIssuerAddress.transformIntoEditable(): AddressState {
@@ -901,6 +1262,7 @@ fun ClientOrIssuer.transformIntoEditable(
         logoPath = clientOrIssuer.logo_path,
         vatExempt = (clientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (clientOrIssuer.intra_eu_sales ?: 0L) != 0L,
+        clientType = com.a4a.g8invoicing.data.models.ClientType.fromDb(clientOrIssuer.client_type),
         taxWithholdingEnabled = clientOrIssuer.tax_withholding_enabled != 0L,
     )
 }

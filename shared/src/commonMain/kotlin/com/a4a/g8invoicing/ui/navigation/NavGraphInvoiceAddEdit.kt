@@ -31,8 +31,10 @@ import com.a4a.g8invoicing.shared.resources.version_mismatch_message
 import com.a4a.g8invoicing.shared.resources.version_mismatch_title
 import com.a4a.g8invoicing.ui.screens.shared.DocumentAddEditPlatform
 import com.a4a.g8invoicing.ui.screens.shared.DocumentBottomSheetTypeOfForm
+import com.a4a.g8invoicing.ui.shared.FormValidationDialogHost
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
+import com.a4a.g8invoicing.ui.shared.rememberFormValidationDialogState
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerAddEditViewModel
@@ -61,6 +63,8 @@ fun NavGraphBuilder.invoiceAddEdit(
         )
     ) { backStackEntry ->
         val scope = rememberCoroutineScope()
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+        val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val itemId = backStackEntry.arguments?.getString("itemId")
 
         val invoiceViewModel: InvoiceAddEditViewModel = koinViewModel(
@@ -94,6 +98,11 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showDocumentForm by remember { mutableStateOf(false) }
 
+        // Pre-save error recap modal for the client/issuer sub-form hosted
+        // in the bottom sheet. Populated with the fresh state.errors when
+        // validateInputs returns false; dismissed via its own confirm button.
+        val errorDialog = rememberFormValidationDialogState()
+
         // When the bottom-sheet form is open, system back closes it instead
         // of popping back to the doc list.
         PlatformBackHandler(enabled = showDocumentForm) {
@@ -102,6 +111,13 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         var showVersionMismatchDialog by remember { mutableStateOf(false) }
         var pendingIssuerToEdit by remember { mutableStateOf<ClientOrIssuerState?>(null) }
+        // Fires when the user tries to save an issuer edit with the sync-to-
+        // master switch OFF AND they've modified banks. Banks are a master-
+        // owned resource — nothing to persist them doc-side, so we prompt to
+        // force-sync (whole fiche syncs, banks included) or cancel and let
+        // the user reconsider. See TaskCreate #12.
+        var showBankChangesModal by remember { mutableStateOf(false) }
+        var pendingForceSyncSave by remember { mutableStateOf<(() -> Unit)?>(null) }
         // Whether the pending dialog was triggered by the edit-link flow (open
         // the form after the user's choice) or by the refresh-from-master icon
         // (don't open the form — refresh is a standalone action).
@@ -112,132 +128,140 @@ fun NavGraphBuilder.invoiceAddEdit(
 
         // Version mismatch dialog for issuer
         if (showVersionMismatchDialog && pendingIssuerToEdit != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    // Dismiss by scrim tap / system back = abort the edit intent.
-                    // The form stays closed, matching the "cancel" affordance
-                    // rather than "keep current".
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = stringResource(Res.string.version_mismatch_title),
+                body = stringResource(Res.string.version_mismatch_message),
+                confirmText = stringResource(Res.string.version_mismatch_load_latest),
+                cancelText = stringResource(Res.string.version_mismatch_keep_current),
+                onConfirm = {
+                    // Dismiss the dialog synchronously so the bottom-sheet form
+                    // takes over immediately; the master fetch keeps running in
+                    // the background and updates the state when it lands.
+                    val opensForm = pendingIssuerOpensForm
                     showVersionMismatchDialog = false
                     pendingIssuerToEdit = null
                     pendingIssuerOpensForm = false
-                },
-                title = { Text(stringResource(Res.string.version_mismatch_title)) },
-                text = { Text(stringResource(Res.string.version_mismatch_message)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            // Dismiss the dialog synchronously so the bottom-sheet form
-                            // takes over immediately; the master fetch keeps running in
-                            // the background and updates the state when it lands.
-                            val opensForm = pendingIssuerOpensForm
-                            showVersionMismatchDialog = false
-                            pendingIssuerToEdit = null
-                            pendingIssuerOpensForm = false
-                            if (opensForm) showDocumentForm = true
-                            scope.launch {
-                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
-                                    ClientOrIssuerType.DOCUMENT_ISSUER
-                                )
-                                if (updated != null) {
-                                    // Retention toggle transition: write DB rows synchronously
-                                    // before saveDocumentClientOrIssuerInLocalDb reloads state.
-                                    // saveDocumentClientOrIssuerInUiState only seeds in state
-                                    // (async), which the subsequent reload wipes out — the
-                                    // refresh flow would then look silent until the user runs
-                                    // through EDIT_ISSUER.
-                                    val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
-                                    if (updated.taxWithholdingEnabled && !hadRetentions) {
-                                        invoiceViewModel.seedDefaultRetentionsInDb(updated)
-                                    } else if (!updated.taxWithholdingEnabled && hadRetentions) {
-                                        invoiceViewModel.clearRetentionsInDb()
-                                    }
-                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
-                                }
+                    if (opensForm) showDocumentForm = true
+                    scope.launch {
+                        val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                            ClientOrIssuerType.DOCUMENT_ISSUER
+                        )
+                        if (updated != null) {
+                            // Retention toggle transition: write DB rows synchronously
+                            // before saveDocumentClientOrIssuerInLocalDb reloads state.
+                            // saveDocumentClientOrIssuerInUiState only seeds in state
+                            // (async), which the subsequent reload wipes out — the
+                            // refresh flow would then look silent until the user runs
+                            // through EDIT_ISSUER.
+                            val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
+                            if (updated.taxWithholdingEnabled && !hadRetentions) {
+                                invoiceViewModel.seedDefaultRetentionsInDb(updated)
+                            } else if (!updated.taxWithholdingEnabled && hadRetentions) {
+                                invoiceViewModel.clearRetentionsInDb()
                             }
+                            val hadExemptionText = invoiceViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                            if (updated.vatExempt && !hadExemptionText) {
+                                invoiceViewModel.seedDefaultVatExemptionTextInDb(updated)
+                            }
+                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                            // Persist via UPDATE (id-preserving) instead of the
+                            // delete + reinsert saveDocumentClientOrIssuerInLocalDb
+                            // does. That destructive path was invalidating the
+                            // doc-issuer id, which then caused the subsequent
+                            // form-validate → sync-to-master → updateOriginalVersion
+                            // to miss its target row: master.version bumped by +1,
+                            // doc.originalVersion stayed behind, the mismatch
+                            // dialog re-fired on next open. syncToMaster=false
+                            // here because we're syncing master DOWN to the doc,
+                            // not the other way round.
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_ISSUER,
+                                updated,
+                                syncToMaster = false,
+                            )
+                            invoiceViewModel.reloadDocument()
                         }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.textCta
-                        )
                     }
                 },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            val opensForm = pendingIssuerOpensForm
-                            showVersionMismatchDialog = false
-                            pendingIssuerToEdit = null
-                            pendingIssuerOpensForm = false
-                            if (opensForm) showDocumentForm = true
+                onDismiss = {
+                    // "Keep current" — bump the doc snapshot's originalVersion
+                    // to master so the dialog stops re-firing on every reopen.
+                    // Same behavior for scrim tap / back gesture: the master
+                    // fetch has landed, keeping the frozen data is a valid
+                    // final choice, not an abort.
+                    val opensForm = pendingIssuerOpensForm
+                    val issuerToAck = pendingIssuerToEdit
+                    showVersionMismatchDialog = false
+                    pendingIssuerToEdit = null
+                    pendingIssuerOpensForm = false
+                    if (opensForm) showDocumentForm = true
+                    issuerToAck?.let { issuer ->
+                        scope.launch {
+                            clientOrIssuerAddEditViewModel
+                                .acknowledgeMasterVersion(issuer)
+                                ?.let { invoiceViewModel.saveDocumentClientOrIssuerInUiState(it) }
                         }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.textCta
-                        )
                     }
-                }
+                },
             )
         }
 
         // Version mismatch dialog for client
         if (showClientVersionMismatchDialog && pendingClientToEdit != null) {
-            AlertDialog(
-                onDismissRequest = {
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = stringResource(Res.string.version_mismatch_client_title),
+                body = stringResource(Res.string.version_mismatch_client_message),
+                confirmText = stringResource(Res.string.version_mismatch_load_latest),
+                cancelText = stringResource(Res.string.version_mismatch_keep_current),
+                onConfirm = {
+                    // Dismiss the dialog synchronously so a back tap on the
+                    // bottom-sheet form doesn't slip the dialog back on top
+                    // while loadLatestMasterVersion is still suspended.
+                    val opensForm = pendingClientOpensForm
                     showClientVersionMismatchDialog = false
                     pendingClientToEdit = null
                     pendingClientOpensForm = false
-                },
-                title = { Text(stringResource(Res.string.version_mismatch_client_title)) },
-                text = { Text(stringResource(Res.string.version_mismatch_client_message)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            // Dismiss the dialog synchronously so a back tap on the
-                            // bottom-sheet form doesn't slip the dialog back on top
-                            // while loadLatestMasterVersion is still suspended.
-                            val opensForm = pendingClientOpensForm
-                            showClientVersionMismatchDialog = false
-                            pendingClientToEdit = null
-                            pendingClientOpensForm = false
-                            if (opensForm) showDocumentForm = true
-                            scope.launch {
-                                val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT
-                                )
-                                if (updated != null) {
-                                    invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
-                                    invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(updated)
-                                }
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.version_mismatch_load_latest),
-                            style = MaterialTheme.typography.textCta
+                    if (opensForm) showDocumentForm = true
+                    scope.launch {
+                        val updated = clientOrIssuerAddEditViewModel.loadLatestMasterVersion(
+                            ClientOrIssuerType.DOCUMENT_CLIENT
                         )
+                        if (updated != null) {
+                            invoiceViewModel.saveDocumentClientOrIssuerInUiState(updated)
+                            // See the issuer path above — UPDATE (id-preserving)
+                            // instead of delete + reinsert, and syncToMaster=false
+                            // so the follow-up form validate doesn't bump the
+                            // master and desynchronise originalVersion.
+                            clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                ClientOrIssuerType.DOCUMENT_CLIENT,
+                                updated,
+                                syncToMaster = false,
+                            )
+                            invoiceViewModel.reloadDocument()
+                        }
                     }
                 },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            val opensForm = pendingClientOpensForm
-                            showClientVersionMismatchDialog = false
-                            pendingClientToEdit = null
-                            pendingClientOpensForm = false
-                            if (opensForm) showDocumentForm = true
+                onDismiss = {
+                    val opensForm = pendingClientOpensForm
+                    val clientToAck = pendingClientToEdit
+                    showClientVersionMismatchDialog = false
+                    pendingClientToEdit = null
+                    pendingClientOpensForm = false
+                    if (opensForm) showDocumentForm = true
+                    clientToAck?.let { client ->
+                        scope.launch {
+                            clientOrIssuerAddEditViewModel
+                                .acknowledgeMasterVersion(client)
+                                ?.let { invoiceViewModel.saveDocumentClientOrIssuerInUiState(it) }
                         }
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.version_mismatch_keep_current),
-                            style = MaterialTheme.typography.textCta
-                        )
                     }
-                }
+                },
             )
         }
+
+        // Observe the counter so validating the doc-product tax edit dialog
+        // triggers a recomposition and the picker re-reads the fresh list.
+        val taxRatesRefreshCounter by productAddEditViewModel.taxRatesRefreshCounter.collectAsState()
 
         DocumentAddEditPlatform(
             navController = navController,
@@ -248,7 +272,8 @@ fun NavGraphBuilder.invoiceAddEdit(
             documentClientUiState = documentClientUiState,
             documentIssuerUiState = documentIssuerUiState,
             documentProductUiState = documentProduct,
-            taxRates = productAddEditViewModel.fetchTaxRatesFromLocalDb(),
+            taxRates = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesFromLocalDb() },
+            taxRatesWithIds = remember(taxRatesRefreshCounter) { productAddEditViewModel.fetchTaxRatesWithIdsFromLocalDb() },
             products = productListUiState.products.toMutableList(),
             onValueChange = { pageElement, value ->
                 invoiceViewModel.updateUiState(pageElement, value)
@@ -360,6 +385,15 @@ fun NavGraphBuilder.invoiceAddEdit(
             },
             onClickDoneForm = { typeOfCreation, syncToMaster ->
                 scope.launch {
+                    // Mirror the standalone-form flow: clear focus + hide the
+                    // keyboard before validating so the email field's
+                    // onFocusChanged fires — that's how tryAddEmail commits a
+                    // pending value and sets _pendingEmailIsValid. Without
+                    // this, a user who types an invalid email and clicks
+                    // Valider without leaving the field would sneak past
+                    // validation entirely.
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
                     when (typeOfCreation) {
                         DocumentBottomSheetTypeOfForm.NEW_CLIENT -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
@@ -372,16 +406,32 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 invoiceViewModel.saveDocumentClientOrIssuerInUiState(documentClientUiState)
                                 invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(documentClientUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_CLIENT -> {
                             documentClientUiState.type = ClientOrIssuerType.DOCUMENT_CLIENT
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_CLIENT)) {
+                                // Re-read from the ViewModel's StateFlow directly
+                                // instead of relying on the collectAsState delegate:
+                                // validateInputs() above just mutated
+                                // _documentClientUiState.value via
+                                // cleanFieldsForClientType(), and the Compose snapshot
+                                // exposed by `documentClientUiState` may not have
+                                // caught up in this same synchronous block. The
+                                // stale snapshot was silently dropping the just-
+                                // picked clientType (Professionnel / Particulier)
+                                // on save.
+                                val freshClient = clientOrIssuerAddEditViewModel
+                                    .documentClientUiState.value
                                 clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_CLIENT, documentClientUiState, syncToMaster = syncToMaster
+                                    ClientOrIssuerType.DOCUMENT_CLIENT, freshClient, syncToMaster = syncToMaster
                                 )
                                 invoiceViewModel.reloadDocument()
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentClientUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.NEW_ISSUER -> {
@@ -395,23 +445,59 @@ fun NavGraphBuilder.invoiceAddEdit(
                                 invoiceViewModel.saveDocumentClientOrIssuerInUiState(documentIssuerUiState)
                                 invoiceViewModel.saveDocumentClientOrIssuerInLocalDb(documentIssuerUiState)
                                 showDocumentForm = false
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.EDIT_ISSUER -> {
                             if (clientOrIssuerAddEditViewModel.validateInputs(ClientOrIssuerType.DOCUMENT_ISSUER)) {
-                                val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
-                                val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
-                                val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
-                                clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
-                                    ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = syncToMaster
+                                val originalBanks = invoiceViewModel.documentUiState.value
+                                    .documentIssuer?.banks.orEmpty()
+                                val banksChanged = !banksSemanticallyEqual(
+                                    originalBanks,
+                                    documentIssuerUiState.banks,
                                 )
-                                if (turnedOffRetention) {
-                                    invoiceViewModel.clearRetentionsInDb()
-                                } else if (turnedOnRetention) {
-                                    invoiceViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                // doIssuerSave captures everything the save needs so both
+                                // the direct path and the modal's confirm path can call
+                                // the same closure with the effective syncToMaster value.
+                                // reloadDocumentAwait (suspending) — not the fire-and-
+                                // forget reloadDocument — so document.documentIssuer.banks
+                                // is guaranteed fresh before the sheet closes; without
+                                // the await, tapping the issuer picker again immediately
+                                // after save reads a stale banks list.
+                                val doIssuerSave: suspend (Boolean) -> Unit = { effectiveSync ->
+                                    val hadRetentions = invoiceViewModel.documentUiState.value.retentions.isNotEmpty()
+                                    val turnedOffRetention = !documentIssuerUiState.taxWithholdingEnabled && hadRetentions
+                                    val turnedOnRetention = documentIssuerUiState.taxWithholdingEnabled && !hadRetentions
+                                    val hadExemptionText = invoiceViewModel.documentUiState.value.vatExemptionText?.text?.isNotBlank() == true
+                                    val needsExemptionSeed = documentIssuerUiState.vatExempt && !hadExemptionText
+                                    clientOrIssuerAddEditViewModel.updateClientOrIssuerInLocalDb(
+                                        ClientOrIssuerType.DOCUMENT_ISSUER, documentIssuerUiState, syncToMaster = effectiveSync
+                                    )
+                                    if (turnedOffRetention) {
+                                        invoiceViewModel.clearRetentionsInDb()
+                                    } else if (turnedOnRetention) {
+                                        invoiceViewModel.seedDefaultRetentionsInDb(documentIssuerUiState)
+                                    }
+                                    if (needsExemptionSeed) {
+                                        invoiceViewModel.seedDefaultVatExemptionTextInDb(documentIssuerUiState)
+                                    }
+                                    invoiceViewModel.reloadDocumentAwait()
+                                    showDocumentForm = false
                                 }
-                                invoiceViewModel.reloadDocument()
-                                showDocumentForm = false
+                                if (!syncToMaster && banksChanged) {
+                                    // Stash the confirm action for the modal to invoke
+                                    // with syncToMaster forced ON — banks can't persist
+                                    // without hitting the master IssuerBank table.
+                                    pendingForceSyncSave = {
+                                        scope.launch { doIssuerSave(true) }
+                                    }
+                                    showBankChangesModal = true
+                                } else {
+                                    doIssuerSave(syncToMaster)
+                                }
+                            } else {
+                                errorDialog.showFrom(clientOrIssuerAddEditViewModel.documentIssuerUiState.value.errors)
                             }
                         }
                         DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT -> {
@@ -456,6 +542,9 @@ fun NavGraphBuilder.invoiceAddEdit(
             onSelectTaxRate = {
                 productAddEditViewModel.updateTaxRate(it, ProductType.DOCUMENT_PRODUCT)
             },
+            onSaveTaxRates = { rates ->
+                productAddEditViewModel.saveTaxRates(rates)
+            },
             showDocumentForm = showDocumentForm,
             onShowDocumentForm = { showDocumentForm = it },
             onClickDeleteAddress = {
@@ -482,8 +571,50 @@ fun NavGraphBuilder.invoiceAddEdit(
             onToggleRetentionHidden = { idx ->
                 invoiceViewModel.toggleRetentionHiddenAt(idx)
             },
+            onFontSelect = { font ->
+                invoiceViewModel.setDocumentFont(font.id)
+            },
         )
+
+        FormValidationDialogHost(errorDialog)
+
+        if (showBankChangesModal) {
+            com.a4a.g8invoicing.ui.shared.AppConfirmDialog(
+                title = "Modification des comptes bancaires",
+                body = "Tu as modifié les comptes bancaires. Pour les enregistrer, la fiche entreprise doit être mise à jour. Confirmer ?",
+                confirmText = "Mettre à jour",
+                cancelText = "Annuler",
+                onConfirm = {
+                    val action = pendingForceSyncSave
+                    showBankChangesModal = false
+                    pendingForceSyncSave = null
+                    action?.invoke()
+                },
+                onDismiss = {
+                    showBankChangesModal = false
+                    pendingForceSyncSave = null
+                },
+            )
+        }
     }
+}
+
+// True when two bank lists carry the same payload (identifier / bic / label /
+// country) in the same order. Ignores DB ids and sort_order — those aren't
+// user-visible edits.
+private fun banksSemanticallyEqual(
+    a: List<com.a4a.g8invoicing.ui.states.IssuerBankState>,
+    b: List<com.a4a.g8invoicing.ui.states.IssuerBankState>,
+): Boolean {
+    if (a.size != b.size) return false
+    a.forEachIndexed { i, left ->
+        val right = b[i]
+        if (left.identifier.text.trim() != right.identifier.text.trim()) return false
+        if (left.bic.text.trim() != right.bic.text.trim()) return false
+        if ((left.label?.text?.trim().orEmpty()) != (right.label?.text?.trim().orEmpty())) return false
+        if ((left.countryCode?.trim().orEmpty()) != (right.countryCode?.trim().orEmpty())) return false
+    }
+    return true
 }
 
 suspend fun createNewClientOrIssuer(

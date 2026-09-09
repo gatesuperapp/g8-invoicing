@@ -41,6 +41,10 @@ object AppColors {
     val accent        = Color(0xFF932092)   // brand violet (buttons, links)
     val buttonActive  = Color(0xFF932092)
     val buttonDisabled= Color(0xFFC1C1C1)
+    // Destructive affordances — "Supprimer" row inside form blocks, icon
+    // + label share this deep red so the intent reads at a glance without
+    // shouting like the invoice-late red.
+    val dangerAccent  = Color(0xFFB71C1C)   // Material Red 900
 
     // Document statuses — shared between the tag pill (list item + AppBar dropdown)
     // and the invoice list row text (price + status label). Reminded / draft / sent

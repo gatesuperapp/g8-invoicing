@@ -1,0 +1,32 @@
+CREATE TABLE LinkQuoteToTag (
+    id INTEGER PRIMARY KEY NOT NULL,
+    quote_id INTEGER NOT NULL,
+    tag_id INTEGER NOT NULL,
+    updated_by_user_at TEXT,
+
+  FOREIGN KEY(tag_id)
+         REFERENCES QuoteTag(quote_tag_id)
+         ON DELETE CASCADE
+);
+
+saveQuoteTag:
+INSERT OR REPLACE
+INTO LinkQuoteToTag (id, quote_id, tag_id, updated_by_user_at)
+VALUES (?, ?, ?, NULL );
+
+updateQuoteTag:
+UPDATE LinkQuoteToTag
+SET quote_id = :quote_id,
+    tag_id = :tag_id,
+    updated_by_user_at = (datetime('now', 'localtime'))
+WHERE
+    quote_id = :quote_id;
+
+getQuoteTag:
+SELECT *
+FROM LinkQuoteToTag
+WHERE quote_id = :quote_id;
+
+delete:
+DELETE FROM LinkQuoteToTag
+WHERE quote_id = :id;

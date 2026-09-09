@@ -120,22 +120,18 @@ fun LogoPickerComponent(
 
     // Error dialog
     if (errorMessage != null) {
-        AlertDialog(
-            onDismissRequest = { errorMessage = null },
-            title = { Text(errorTitle) },
-            text = { Text(errorMessage!!) },
-            confirmButton = {
-                TextButton(onClick = { errorMessage = null }) {
-                    Text(errorDismissText, color = Color.Black)
-                }
-            }
+        AppInfoDialog(
+            title = errorTitle,
+            body = errorMessage!!,
+            confirmText = errorDismissText,
+            onDismiss = { errorMessage = null },
         )
     }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(start = 26.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
         verticalAlignment = Alignment.Top
     ) {
         // Label

@@ -28,3 +28,16 @@ expect fun getSystemLocaleCode(): String
  * Empty string when the device locale exposes no country (rare — treat as unknown).
  */
 expect fun getSystemCountryCode(): String
+
+/**
+ * Localised display name for an ISO 3166-1 alpha-2 country code, in the
+ * given app language (`languageCode` = "fr" | "en" | "de" | "es" …).
+ * Returns null when the platform locale layer doesn't know that code so
+ * callers can fall back to their own hardcoded curated map.
+ *
+ * Powers CountryCodes.displayNameOf so pickers (address, bank account,
+ * onboarding, migration wizard) show country names in the current app
+ * language instead of the frozen FR labels the curated map was seeded
+ * with.
+ */
+expect fun getLocalizedCountryName(code: String, languageCode: String): String?

@@ -45,6 +45,22 @@ data class PdfStrings(
     // created with showCurrencyAndAutoTaxColumn=true and the currency isn't EUR. The
     // %1$s placeholder receives the ISO code — never translated.
     val currencyNoticeLabel: String,
+    // Payment means block (BT-81) mode labels keyed by chip identity (enum
+    // name like "TRANSFER", "PAYPAL"). Chip identity, not UN/CEFACT code,
+    // because PayPal + Stripe share code 68. Resolved at construction time
+    // from Compose Resources so PDF generation stays synchronous. The block's
+    // prefix is not stored here — it's a per-document user label on
+    // Invoice/CreditNote state (paymentMeansLabel), rendered as
+    // "<userLabel> : <joined modes>".
+    val paymentMeansLabels: Map<String, String>,
+    // Label prefix for the bank identifier line — "IBAN :" for IBAN countries,
+    // localised "N° de compte :" for non-IBAN countries (US, AU, NZ, ZA…).
+    val bankAccountIbanLabel: String,
+    val bankAccountGenericLabel: String,
+    // Fallback header for the greyed payment box on documents that don't carry
+    // a due date (credit notes). Invoices override it with "<dueDate label>
+    // <date>" built from the frozen dueDate string above.
+    val paymentSectionTitle: String,
 )
 
 /**
@@ -78,8 +94,8 @@ expect class PdfFileManager() {
     fun openOrShare(filePath: String)
 
     /**
-     * Load raw bytes for a bundled asset (e.g. embedded helvetica.ttf). Returns
-     * null when the asset isn't available on the current platform.
+     * Load raw bytes for a bundled asset (e.g. the embedded default typeface).
+     * Returns null when the asset isn't available on the current platform.
      */
     fun loadAssetBytes(assetName: String): ByteArray?
 
@@ -104,6 +120,15 @@ expect class PdfGenerator(strings: PdfStrings, fileManager: PdfFileManager) {
      * Returns the final file name.
      */
     fun generatePdf(document: DocumentState): String
+
+    /**
+     * Generate a Factur-X 1.0 PDF (EN 16931 CII payload embedded in a
+     * regular PDF with AFRelationship=Data and file name `factur-x.xml`).
+     * The [xmlBytes] should be the UTF-8 encoded CII XML from
+     * [com.a4a.g8invoicing.facturx.CiiXmlBuilder]. Returns the final file
+     * name.
+     */
+    fun generateFacturX(document: DocumentState, xmlBytes: ByteArray): String
 }
 
 /**

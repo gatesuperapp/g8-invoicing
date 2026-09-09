@@ -9,11 +9,16 @@ import com.a4a.g8invoicing.data.util.DateUtils
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_default_footer
+import com.a4a.g8invoicing.shared.resources.payment_terms_discount_default
+import com.a4a.g8invoicing.shared.resources.payment_terms_late_fees_default
+import com.a4a.g8invoicing.shared.resources.payment_terms_recovery_fees_default
+import com.a4a.g8invoicing.shared.resources.document_payment_means_default_label
 import com.a4a.g8invoicing.shared.resources.invoice_watermark_default
 import com.a4a.g8invoicing.shared.resources.retention_default_label
 import com.a4a.g8invoicing.shared.resources.retention_default_mx_isr
 import com.a4a.g8invoicing.shared.resources.retention_default_mx_iva
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.shared.resources.invoice_default_number
 import org.jetbrains.compose.resources.getString
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
@@ -23,6 +28,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.EmailState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.LinkedDocType
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.states.DocumentTotalPrices
 import com.a4a.g8invoicing.ui.states.InvoiceState
@@ -34,6 +40,7 @@ import g8invoicing.DocumentClientOrIssuerAddressQueries
 import g8invoicing.DocumentClientOrIssuerEmailQueries
 import g8invoicing.DocumentClientOrIssuerQueries
 import g8invoicing.DocumentProductQueries
+import g8invoicing.GetLastInsertedInvoicePaymentTerms
 import g8invoicing.Invoice
 import g8invoicing.InvoiceRetention
 import g8invoicing.LinkCreditNoteDocumentProductToDeliveryNoteQueries
@@ -48,7 +55,9 @@ import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkInvoiceDocumentProductToQuoteQueries
 import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
 import g8invoicing.LinkInvoiceToDocumentProductQueries
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -56,7 +65,9 @@ class InvoiceLocalDataSource(
     db: Database,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val activatedModules: ActivatedModulesRepository,
+    private val subscriptionRepository: SubscriptionRepository,
     private val currencyManager: CurrencyManager,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : InvoiceLocalDataSourceInterface {
     private val invoiceQueries = db.invoiceQueries
     private val invoiceTagQueries = db.invoiceTagQueries
@@ -81,11 +92,28 @@ class InvoiceLocalDataSource(
     // Called from ViewModel
     // This function performs DB operations, so it needs Dispatchers.IO.
     override suspend fun createNew(): Long? {
-        // Récupérer l'émetteur depuis la table maître (avec emails et adresses)
-        val existingIssuer = clientOrIssuerDataSource.getLastIssuer()
+        // Résout l'entreprise courante (menu latéral). Fallback getLastIssuer()
+        // pour les installs qui n'ont pas encore Settings hydratée — ne devrait
+        // jamais tomber ici post-migration 6→7, sécurité seulement.
+        val currentCompanyId = currentCompanyRepository.current
+        val existingIssuer = currentCompanyId
+            ?.let { clientOrIssuerDataSource.getCurrentIssuer(it) }
+            ?: clientOrIssuerDataSource.getLastIssuer()
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
 
+        // Per-issuer reuse: pull payment_terms / payment_means / payment_bank
+        // from the most recent invoice for the same master issuer, so the new
+        // invoice inherits whatever the user last set on THIS company (not the
+        // last global invoice, which might belong to a different émetteur).
+        // getLastIssuer() returns a DOCUMENT_ISSUER shell with id=null and the
+        // master pointer on originalClientOrIssuerId — that's the id our SQL
+        // filters on.
+        // Null when no prior invoice matches → fall back to defaults.
+        val reuse = existingIssuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
         // Reuse the last invoice's retentions for this master issuer; fall
         // back to country defaults. Keyed on originalClientOrIssuerId since
         // the fresh DOCUMENT_ISSUER shell has no id yet.
@@ -110,9 +138,55 @@ class InvoiceLocalDataSource(
             val todayFormatted = DateUtils.getCurrentDateFormatted()
             val dueDateFormatted = DateUtils.getDatePlusDaysFormatted(30)
 
+            // Language guard for every reused text field. Chip IDs and the
+            // "Autre" boolean below aren't localised text, so they carry over
+            // regardless — only the payment_means_label prose (custom prefix
+            // in front of the chip list) and the payment_bank_label prose
+            // (bank-details label) need to match the app locale to avoid
+            // French wording landing on a doc the user is now generating in
+            // English. Payment terms rely on the same guard.
+            val currentAppLocale = AppLocaleHolder.languageCode
+            val reuseSameLanguage = reuse?.format_locale == currentAppLocale
+            val reusableWithLang = reuse.takeIf { reuseSameLanguage }
+
+            val reusedSelections = reuse?.payment_means_selections
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                ?.takeIf { it.isNotEmpty() }
+            val reusedSegments = reusableWithLang?.payment_means_label?.let {
+                com.a4a.g8invoicing.data.models.parsePaymentLabel(it)
+            }?.takeIf { it.isNotEmpty() }
+            // Bank label: reuse under the same language guard as the rest, then
+            // adapt tokens to the current bank's country class. Freezes on the
+            // new doc's DocumentClientOrIssuer will pick the master's first
+            // bank (see saveDocumentClientOrIssuerInDbAndLink) — so the
+            // "current country" for the adapter is that first bank's country.
+            val currentBankCountry = existingIssuer?.banks?.firstOrNull()?.countryCode
+            val reusedBankSegments = reusableWithLang?.payment_bank_label?.let {
+                val parsed = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(it)
+                com.a4a.g8invoicing.data.models.adaptPaymentBankSegmentsForCountry(
+                    segments = parsed,
+                    previousCountry = reusableWithLang.payment_bank_country,
+                    currentCountry = currentBankCountry,
+                )
+            }?.takeIf { it.isNotEmpty() }
+            // 3-way payment terms — each field is seeded independently from
+            // the last invoice's corresponding column (so a user who only
+            // customised "pénalités de retard" keeps the other two on their
+            // localised defaults instead of getting blanks). Language guard
+            // above; a user who switched from FR to EN gets fresh EN defaults
+            // instead of their old French wording.
+            val reusedRecoveryFees = reusableWithLang?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+            val reusedLateFees = reusableWithLang?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+            val reusedDiscount = reusableWithLang?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+            val lastTerms = getLastInvoicePaymentTerms()
+                ?.takeIf { it.format_locale == currentAppLocale }
+
             val newInvoiceState = InvoiceState(
                 documentNumber = TextFieldValue(
-                    getLastDocumentNumber()?.let { incrementDocumentNumber(it) }
+                    getLastDocumentNumber(currentCompanyId)?.let { incrementDocumentNumber(it) }
                         ?: getString(Res.string.invoice_default_number)
                 ),
                 documentDate = todayFormatted,
@@ -126,7 +200,51 @@ class InvoiceLocalDataSource(
                 labelsSnapshot = frozenLabels,
                 showCurrencyAndAutoTaxColumn = true,
                 formatLocale = AppLocaleHolder.languageCode,
+                paymentMeansSelections = reusedSelections ?: setOf(
+                    com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                    com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                    com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                ),
+                paymentMeansOtherChecked = (reuse?.payment_means_other_checked ?: 0L) != 0L,
+                paymentMeansSegments = reusedSegments
+                    ?: com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                paymentBankSegments = reusedBankSegments ?: emptyList(),
+                paymentTermsRecoveryFees = TextFieldValue(
+                    reusedRecoveryFees
+                        ?: lastTerms?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+                        ?: getString(Res.string.payment_terms_recovery_fees_default)
+                ),
+                paymentTermsLateFees = TextFieldValue(
+                    reusedLateFees
+                        ?: lastTerms?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+                        ?: getString(Res.string.payment_terms_late_fees_default)
+                ),
+                paymentTermsDiscount = TextFieldValue(
+                    reusedDiscount
+                        ?: lastTerms?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+                        ?: getString(Res.string.payment_terms_discount_default)
+                ),
+                // Frozen at creation. Falls back to the master id of the
+                // resolved issuer when currentCompanyRepository has nothing
+                // yet — keeps original_company_id NOT NULL for numbering.
+                originalCompanyId = currentCompanyId
+                    ?: existingIssuer?.originalClientOrIssuerId?.toLong(),
+                // BT-120 seed via the shared helper — reuses the previous
+                // invoice's wording when the master's country hasn't changed,
+                // otherwise resolves the country-based citation (national /
+                // EU art. 284 / generic non-registered).
+                vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                    issuer = existingIssuer,
+                    previousVatText = reuse?.vat_exemption_text,
+                    previousIssuerCountry = reuse?.issuer_country_code,
+                ),
                 retentions = reusedRetentions,
+                // Reuse the last invoice's picked typeface so users don't
+                // have to re-pick on every new doc. Null (no invoices yet)
+                // → DocumentFont.Default resolves at render time.
+                fontFamily = getExistingFont(),
             )
 
             saveInfoInInvoiceTable(newInvoiceState)
@@ -184,24 +302,29 @@ class InvoiceLocalDataSource(
         }
     }
 
-    // Compute the watermark to freeze on a newly-created invoice. Returns null when the
-    // user is currently premium with the watermark-removal module active — that invoice
-    // will then render without watermark forever, even if the user later un-activates
-    // the module. Conversely, an invoice created now without removal keeps its watermark
-    // forever, even if the user activates removal later. The "freeze at creation"
-    // behavior is the whole point of persisting the string in the DB.
+    // Compute the watermark to freeze on a newly-created invoice. Returns null
+    // when the watermark-removal module is active — the invoice then renders
+    // without a watermark forever, even if the user later un-activates the
+    // module. Conversely, an invoice created without removal keeps its
+    // watermark forever, even if the module is activated later. Freezing at
+    // creation is the whole point of persisting the string in the DB.
+    // Module is free since the 1.9 gStore pass — no premium gate here.
     private suspend fun computeWatermark(): String? {
-        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) {
-            null
-        } else {
-            getString(Res.string.invoice_watermark_default)
-        }
+        return if (activatedModules.isActive(ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL)) null
+        else getString(Res.string.invoice_watermark_default)
     }
 
     // --- Synchronous private helpers for createNew (called from Dispatchers.IO context) ---
-    private fun getLastDocumentNumber(): String? {
+    // companyId non-null → the new invoice's number continues that entreprise's
+    // counter (multi-entreprise). Null falls back to the global counter for
+    // installs where the CurrentCompanyRepository isn't hydrated yet.
+    private fun getLastDocumentNumber(companyId: Long?): String? {
         try {
-            return invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+            return if (companyId != null) {
+                invoiceQueries.getLastInvoiceNumberForCompany(companyId).executeAsOneOrNull()?.number
+            } else {
+                invoiceQueries.getLastInvoiceNumber().executeAsOneOrNull()?.number
+            }
         } catch (e: Exception) {
             //Log.e(ContentValues.TAG, "Error: ${e.message}")
         }
@@ -218,6 +341,58 @@ class InvoiceLocalDataSource(
         return footer
     }
 
+    private fun getExistingFont(): String? {
+        return try {
+            invoiceQueries.getLastInsertedInvoiceFont().executeAsOneOrNull()?.font_family
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // Last invoice's 3 payment-terms columns — used by createNew() to seed
+    // each field independently (per-field last-used, not a blanket copy of
+    // the paragraph). Null when there are no invoices yet; callers fall
+    // back to the localised payment_terms_*_default per field.
+    private fun getLastInvoicePaymentTerms(): GetLastInsertedInvoicePaymentTerms? {
+        return try {
+            invoiceQueries.getLastInsertedInvoicePaymentTerms().executeAsOneOrNull()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Seed the 3 payment-terms fields for a brand-new invoice: last-invoice
+     * value if non-empty AND written in the same app language, else the
+     * localised default. Called by convertDeliveryNotesToInvoice /
+     * convertQuotesToInvoice — createNew has its own per-issuer variant.
+     *
+     * Language guard: previously-frozen terms are only carried over when the
+     * previous doc's format_locale matches the current app language. If the
+     * user has since switched language, we let getString() serve the
+     * defaults in the new language instead of showing a stale FR wording on
+     * an EN invoice.
+     */
+    private suspend fun seedPaymentTermsForNewInvoice(): Triple<TextFieldValue, TextFieldValue, TextFieldValue> {
+        val last = getLastInvoicePaymentTerms()
+        val sameLanguage = last?.format_locale == AppLocaleHolder.languageCode
+        val reusable = last.takeIf { sameLanguage }
+        return Triple(
+            TextFieldValue(
+                reusable?.payment_terms_recovery_fees?.takeIf { it.isNotEmpty() }
+                    ?: getString(Res.string.payment_terms_recovery_fees_default)
+            ),
+            TextFieldValue(
+                reusable?.payment_terms_late_fees?.takeIf { it.isNotEmpty() }
+                    ?: getString(Res.string.payment_terms_late_fees_default)
+            ),
+            TextFieldValue(
+                reusable?.payment_terms_discount?.takeIf { it.isNotEmpty() }
+                    ?: getString(Res.string.payment_terms_discount_default)
+            ),
+        )
+    }
+
     // --- fetch ---
     // Correctly uses withContext(Dispatchers.IO).
     // Internal fetch* helpers are synchronous and will run on this IO context.
@@ -228,13 +403,15 @@ class InvoiceLocalDataSource(
                     ?.let {
                         it.transformIntoEditableInvoice(
                             fetchDocumentProducts(it.invoice_id),// Synchronous, runs on this IO context
-                            fetchClientAndIssuer( // Synchronous, runs on this IO context
-                                it.invoice_id,
-                                linkInvoiceToDocumentClientOrIssuerQueries,
-                                linkDocumentClientOrIssuerToAddressQueries,
-                                documentClientOrIssuerQueries,
-                                documentClientOrIssuerAddressQueries,
-                                documentClientOrIssuerEmailQueries
+                            hydrateBanksOnDocIssuer(
+                                fetchClientAndIssuer(
+                                    it.invoice_id,
+                                    linkInvoiceToDocumentClientOrIssuerQueries,
+                                    linkDocumentClientOrIssuerToAddressQueries,
+                                    documentClientOrIssuerQueries,
+                                    documentClientOrIssuerAddressQueries,
+                                    documentClientOrIssuerEmailQueries
+                                )
                             ),
                             fetchTag(it.invoice_id)  // Synchronous, runs on this IO context
                         )
@@ -246,18 +423,44 @@ class InvoiceLocalDataSource(
         }
     }
 
+    // Populate DOCUMENT_ISSUER states with their master's bank accounts. Needed
+    // by the doc-embedded issuer form + the payment picker: the doc-frozen
+    // snapshot only stores the *picked* IBAN/BIC, not the whole list. Fetching
+    // banks here surfaces every account so the picker can offer them and the
+    // form can edit them (edits then sync back to master on save).
+    private suspend fun hydrateBanksOnDocIssuer(
+        states: List<ClientOrIssuerState>?,
+    ): List<ClientOrIssuerState>? = states?.map { state ->
+        if (state.type == ClientOrIssuerType.DOCUMENT_ISSUER &&
+            state.originalClientOrIssuerId != null
+        ) {
+            state.copy(
+                banks = clientOrIssuerDataSource
+                    .getIssuerBanks(state.originalClientOrIssuerId!!.toLong())
+            )
+        } else state
+    }
+
 
     // --- fetchAll (returning Flow) ---
     // Flow construction
     // The .map block executes on the collector's context.
     // This Flow is collected on Dispatchers.IO (e.g., using .flowOn(Dispatchers.IO) in ViewModel)
     // because internal fetch* helpers are synchronous DB calls.
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAll(): Flow<List<InvoiceState>>? {
         try {
-            return invoiceQueries.getAll()
-                .asFlow()
-                .map { // This .map runs on the collector's dispatcher
-                    it.executeAsList()
+            // Scoped to the entreprise courante — re-emits when the user
+            // switches company. Falls back to the global list only when the
+            // repository has no hydrated value (pre-migration safety).
+            return currentCompanyRepository.state.flatMapLatest { companyId ->
+                val query = if (companyId != null) {
+                    invoiceQueries.getAllForCompany(companyId)
+                } else {
+                    invoiceQueries.getAll()
+                }
+                query.asFlow().map { rows -> // This .map runs on the collector's dispatcher
+                    rows.executeAsList()
                         .map { document ->
                             val products = fetchDocumentProducts(document.invoice_id)
                             val clientAndIssuer = fetchClientAndIssuer(
@@ -277,6 +480,7 @@ class InvoiceLocalDataSource(
                             )
                         }
                 }
+            }
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error fetchAll: ${e.message}")
         }
@@ -303,21 +507,25 @@ class InvoiceLocalDataSource(
                         .executeAsOneOrNull() // DB call
                     val linkedDate: String?
                     val linkedDocNumber: String?
+                    val linkedDocType: LinkedDocType?
                     if (dnInfo != null) {
                         linkedDate = dnInfo.delivery_date
                         linkedDocNumber = dnInfo.delivery_note_number
+                        linkedDocType = LinkedDocType.DELIVERY_NOTE
                     } else {
                         val qInfo = linkInvoiceDocumentProductToQuoteQueries
                             .getInfoLinkedToDocumentProduct(it.document_product_id)
                             .executeAsOneOrNull() // DB call
                         linkedDate = qInfo?.delivery_date
                         linkedDocNumber = qInfo?.quote_number
+                        linkedDocType = qInfo?.let { LinkedDocType.QUOTE }
                     }
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()// DB call
                         .transformIntoEditableDocumentProduct(
                             linkedDate,
                             linkedDocNumber,
+                            linkedDocType,
                             sortOrder = it.sort_order?.toInt() // Passer le sort_order de la table de liaison
                         )
                 }.toMutableList()
@@ -376,6 +584,23 @@ class InvoiceLocalDataSource(
             showCurrencyAndAutoTaxColumn = this.show_currency_and_auto_tax_column != 0L,
             formatLocale = this.format_locale,
             hideLinkedSourceHeaders = this.hide_linked_source_headers != 0L,
+            paymentMeansSelections = this.payment_means_selections
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?.toSet()
+                ?.takeIf { it.isNotEmpty() },
+            paymentMeansOtherChecked = this.payment_means_other_checked != 0L,
+            paymentMeansSegments = com.a4a.g8invoicing.data.models.parsePaymentLabel(this.payment_means_label),
+            paymentMeansHidden = this.payment_means_hidden != 0L,
+            paymentBankHidden = this.payment_bank_hidden != 0L,
+            paymentBankSegments = com.a4a.g8invoicing.data.models.parsePaymentBankLabel(this.payment_bank_label),
+            paymentTermsRecoveryFees = TextFieldValue(text = this.payment_terms_recovery_fees ?: ""),
+            paymentTermsLateFees = TextFieldValue(text = this.payment_terms_late_fees ?: ""),
+            paymentTermsDiscount = TextFieldValue(text = this.payment_terms_discount ?: ""),
+            originalCompanyId = this.original_company_id,
+            vatExemptionText = this.vat_exemption_text?.let { TextFieldValue(text = it) },
+            fontFamily = this.font_family,
             retentions = retentions,
         )
     }
@@ -386,7 +611,17 @@ class InvoiceLocalDataSource(
     override suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val newCompanyId = currentCompanyRepository.current
+            ?: deliveryNotes.firstOrNull()?.originalCompanyId
         val issuer = deliveryNotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Reuse the previous invoice's BT-120 wording for this master issuer
+        // (see createNew for the full rationale on why per-issuer reuse beats
+        // re-seeding the country default on every new doc). Full row so the
+        // helper can check issuer_country_code before carrying the text over.
+        val reuse = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
         // Same seed rule as createNew (reuse → country defaults).
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
             if (issuer?.taxWithholdingEnabled == true) {
@@ -405,11 +640,12 @@ class InvoiceLocalDataSource(
                 )
             } else emptyList()
         return withContext(DispatcherProvider.IO) {
-            val docNumber = getLastDocumentNumber()?.let {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.invoice_default_number)
 
             try {
+                val seededTerms = seedPaymentTermsForNewInvoice()
                 val newInvoiceState = InvoiceState(
                     documentNumber = TextFieldValue(docNumber),
                     documentDate = DateUtils.getCurrentDateFormatted(),
@@ -427,6 +663,23 @@ class InvoiceLocalDataSource(
                     labelsSnapshot = frozenLabels,
                     showCurrencyAndAutoTaxColumn = true,
                     formatLocale = AppLocaleHolder.languageCode,
+                    paymentMeansSelections = setOf(
+                        com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                    ),
+                    paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                    paymentTermsRecoveryFees = seededTerms.first,
+                    paymentTermsLateFees = seededTerms.second,
+                    paymentTermsDiscount = seededTerms.third,
+                    originalCompanyId = newCompanyId,
+                    vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                        issuer = issuer,
+                        previousVatText = reuse?.vat_exemption_text,
+                        previousIssuerCountry = reuse?.issuer_country_code,
+                    ),
                     retentions = reusedRetentions,
                 )
                 saveInfoInInvoiceTable(newInvoiceState) // DB call
@@ -461,29 +714,49 @@ class InvoiceLocalDataSource(
     override suspend fun convertQuotesToInvoice(quotes: List<QuoteState>): Long? {
         val frozenWatermark = computeWatermark()
         val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val newCompanyId = currentCompanyRepository.current
+            ?: quotes.firstOrNull()?.originalCompanyId
         val issuer = quotes.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        // Retention hierarchy on convert:
+        //   1. the quote's own retentions (user's most recent intent — they may
+        //      have edited label / rate on the quote and expect that to carry
+        //      over verbatim to the resulting facture),
+        //   2. the last invoice for the same master issuer (reuse across docs),
+        //   3. country defaults.
+        // Reset ids to null so saveRetentionsForInvoice inserts fresh rows on
+        // the new invoice rather than referencing the quote's row ids.
+        val quoteRetentions = quotes.firstOrNull { it.retentions.isNotEmpty() }
+            ?.retentions
+            ?.map { it.copy(id = null) }
+        val reuse = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
         val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
             if (issuer?.taxWithholdingEnabled == true) {
-                issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
-                    invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
-                        .executeAsOneOrNull()?.let { row ->
-                            invoiceRetentionQueries.getForInvoice(row.invoice_id)
-                                .executeAsList()
-                                .map { it.transformIntoRetentionState() }
-                        }
-                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
-                    issuer,
-                    getString(Res.string.retention_default_label),
-                    getString(Res.string.retention_default_mx_isr),
-                    getString(Res.string.retention_default_mx_iva),
-                )
+                quoteRetentions
+                    ?: issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                        invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
+                            .executeAsOneOrNull()?.let { row ->
+                                invoiceRetentionQueries.getForInvoice(row.invoice_id)
+                                    .executeAsList()
+                                    .map { it.transformIntoRetentionState() }
+                            }
+                    }
+                    ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                        issuer,
+                        getString(Res.string.retention_default_label),
+                        getString(Res.string.retention_default_mx_isr),
+                        getString(Res.string.retention_default_mx_iva),
+                    )
             } else emptyList()
         return withContext(DispatcherProvider.IO) {
-            val docNumber = getLastDocumentNumber()?.let {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
                 incrementDocumentNumber(it)
             } ?: getString(Res.string.invoice_default_number)
 
             try {
+                val seededTerms = seedPaymentTermsForNewInvoice()
                 val newInvoiceState = InvoiceState(
                     documentNumber = TextFieldValue(docNumber),
                     documentDate = DateUtils.getCurrentDateFormatted(),
@@ -496,9 +769,30 @@ class InvoiceLocalDataSource(
                         quotes.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
                             ?: currencyManager.currentCurrency
                     ),
+                    // Flag the new invoice as post-1.8 layout so the footer
+                    // renders the payment/due-date band + hairline separator.
+                    // Missing default = legacy (false) which suppressed both.
+                    showCurrencyAndAutoTaxColumn = true,
                     footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)),
                     watermarkText = frozenWatermark,
                     labelsSnapshot = frozenLabels,
+                    paymentMeansSelections = setOf(
+                        com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                    ),
+                    paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                    paymentTermsRecoveryFees = seededTerms.first,
+                    paymentTermsLateFees = seededTerms.second,
+                    paymentTermsDiscount = seededTerms.third,
+                    originalCompanyId = newCompanyId,
+                    vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                        issuer = issuer,
+                        previousVatText = reuse?.vat_exemption_text,
+                        previousIssuerCountry = reuse?.issuer_country_code,
+                    ),
                     retentions = reusedRetentions,
                 )
                 saveInfoInInvoiceTable(newInvoiceState)
@@ -561,6 +855,17 @@ class InvoiceLocalDataSource(
                     due_date = document.dueDate,
                     payment_status = document.paymentStatus.toLong(),
                     footer = document.footerText.text,
+                    payment_means_selections = document.paymentMeansSelections?.joinToString(","),
+                    payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
+                    payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
+                    payment_terms_recovery_fees = document.paymentTermsRecoveryFees.text.takeIf { it.isNotEmpty() },
+                    payment_terms_late_fees = document.paymentTermsLateFees.text.takeIf { it.isNotEmpty() },
+                    payment_terms_discount = document.paymentTermsDiscount.text.takeIf { it.isNotEmpty() },
+                    payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
+                    payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
+                    payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                    vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                    font_family = document.fontFamily,
                     updated_at = DateUtils.getCurrentTimestamp()
                 )
                 document.documentId?.toLong()?.let { id ->
@@ -590,6 +895,22 @@ class InvoiceLocalDataSource(
                 invoiceQueries.updateHideLinkedSourceHeaders(
                     invoice_id = invoiceId,
                     hide_linked_source_headers = if (hide) 1L else 0L,
+                    updated_at = DateUtils.getCurrentTimestamp(),
+                )
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    // Dedicated write so the seed-on-EDIT_ISSUER path (see
+    // InvoiceAddEditViewModel.seedDefaultVatExemptionTextInDb) can persist
+    // before reloadDocument reads the row back into state.
+    override suspend fun updateVatExemptionText(invoiceId: Long, text: String?) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                invoiceQueries.updateVatExemptionText(
+                    invoice_id = invoiceId,
+                    vat_exemption_text = text?.trim()?.takeIf { it.isNotEmpty() },
                     updated_at = DateUtils.getCurrentTimestamp(),
                 )
             } catch (_: Exception) {
@@ -628,7 +949,12 @@ class InvoiceLocalDataSource(
             val createdIds = mutableListOf<Long>()
             try {
                 documents.forEach { originalDocument ->
-                    val docNumber = getLastDocumentNumber()?.let { // DB Call
+                    // Duplicate keeps the source's company (per-company counter);
+                    // fall back to CurrentCompanyRepository if the source was
+                    // pre-migration and has no originalCompanyId yet.
+                    val docCompanyId = originalDocument.originalCompanyId
+                        ?: currentCompanyRepository.current
+                    val docNumber = getLastDocumentNumber(docCompanyId)?.let { // DB Call
                         incrementDocumentNumber(it)
                     } ?: getString(Res.string.invoice_default_number)
 
@@ -760,8 +1086,41 @@ class InvoiceLocalDataSource(
             val masterIssuer = documentClientOrIssuer.copy(type = ClientOrIssuerType.ISSUER)
             clientOrIssuerDataSource.createNew(masterIssuer)
             val masterId = clientOrIssuerDataSource.getLastCreatedIssuerId()
-            // Lier au master
-            documentClientOrIssuer.copy(originalClientOrIssuerId = masterId?.toInt())
+            // Seed the doc's frozen payment_iban / payment_bic from the first
+            // bank the user typed in. Without this the master row saves the
+            // bank correctly but the doc's snapshot stays null, so the invoice
+            // renders nothing under the "IBAN :" / "BIC :" slot until the user
+            // manually picks a bank in the payment-means modal.
+            val firstBank = documentClientOrIssuer.banks.firstOrNull()
+            val seededIban = firstBank?.identifier?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededBic = firstBank?.bic?.text?.trim()?.takeIf { it.isNotEmpty() }
+                ?.let { TextFieldValue(it) }
+            val seededCountry = firstBank?.countryCode?.trim()?.takeIf { it.isNotEmpty() }
+            documentClientOrIssuer.copy(
+                originalClientOrIssuerId = masterId?.toInt(),
+                paymentIban = seededIban ?: documentClientOrIssuer.paymentIban,
+                paymentBic = seededBic ?: documentClientOrIssuer.paymentBic,
+                paymentCountry = seededCountry ?: documentClientOrIssuer.paymentCountry,
+            )
+        } else if (
+            (documentClientOrIssuer.type == ClientOrIssuerType.ISSUER ||
+                documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_ISSUER) &&
+            documentClientOrIssuer.paymentIban?.text.isNullOrEmpty() &&
+            documentClientOrIssuer.banks.isNotEmpty()
+        ) {
+            // Existing issuer picked for the doc: banks are hydrated on the
+            // state but payment_iban/payment_bic haven't been picked yet →
+            // default to the first bank so the invoice's "IBAN :" line
+            // renders straight away.
+            val firstBank = documentClientOrIssuer.banks.first()
+            documentClientOrIssuer.copy(
+                paymentIban = firstBank.identifier.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentBic = firstBank.bic.text.trim().takeIf { it.isNotEmpty() }
+                    ?.let { TextFieldValue(it) },
+                paymentCountry = firstBank.countryCode?.trim()?.takeIf { it.isNotEmpty() },
+            )
         } else {
             documentClientOrIssuer
         }
@@ -973,6 +1332,18 @@ class InvoiceLocalDataSource(
                 show_currency_and_auto_tax_column = if (document.showCurrencyAndAutoTaxColumn) 1L else 0L,
                 format_locale = document.formatLocale,
                 hide_linked_source_headers = if (document.hideLinkedSourceHeaders) 1L else 0L,
+                payment_means_selections = document.paymentMeansSelections?.joinToString(","),
+                payment_means_label = com.a4a.g8invoicing.data.models.serializePaymentLabel(document.paymentMeansSegments),
+                payment_means_hidden = if (document.paymentMeansHidden) 1L else 0L,
+                payment_terms_recovery_fees = document.paymentTermsRecoveryFees.text.takeIf { it.isNotEmpty() },
+                payment_terms_late_fees = document.paymentTermsLateFees.text.takeIf { it.isNotEmpty() },
+                payment_terms_discount = document.paymentTermsDiscount.text.takeIf { it.isNotEmpty() },
+                payment_bank_hidden = if (document.paymentBankHidden) 1L else 0L,
+                payment_means_other_checked = if (document.paymentMeansOtherChecked) 1L else 0L,
+                payment_bank_label = com.a4a.g8invoicing.data.models.serializePaymentBankLabel(document.paymentBankSegments),
+                original_company_id = document.originalCompanyId,
+                vat_exemption_text = document.vatExemptionText?.text?.trim()?.takeIf { it.isNotEmpty() },
+                font_family = document.fontFamily,
             )
         } catch (e: Exception) {
             //Log.e("InvoiceDS", "Error saveInfoInInvoiceTable: ${e.message}")
@@ -1060,6 +1431,17 @@ class InvoiceLocalDataSource(
         }
     }
 
+    override suspend fun getRecentFootersForCompany(companyId: Long, limit: Int): List<String> {
+        return withContext(DispatcherProvider.IO) {
+            // The .sq query caps at 10 rows; [limit] is applied client-side so
+            // callers can further trim without a new query variant.
+            invoiceQueries.getRecentFootersForCompany(companyId)
+                .executeAsList()
+                .mapNotNull { it }
+                .take(limit)
+        }
+    }
+
 } // End of InvoiceLocalDataSource
 
 // --- Global helper functions (outside the class) ---
@@ -1071,7 +1453,15 @@ fun incrementDocumentNumber(docNumber: String): String {
     val numberToIncrement = docNumber.takeLastWhile { it.isDigit() }
     if (numberToIncrement.isNotEmpty()) {
         val firstPartOfDocNumber = docNumber.substringBeforeLast(numberToIncrement)
-        return firstPartOfDocNumber + (numberToIncrement.toInt() + 1).toString().padStart(3, '0')
+        val incremented = (numberToIncrement.toInt() + 1).toString()
+        // Pad to the trailing digit block's ORIGINAL length so we preserve
+        // whatever zero-padding the user picked:
+        //   F00GJ3   → F00GJ4    (1-digit trailer → keep 1 digit)
+        //   F00GJ003 → F00GJ004  (3-digit padding preserved)
+        //   f00368   → f00369    (5-digit padding preserved)
+        // padStart is a no-op when the incremented value already exceeds the
+        // original length (e.g. F999 → F1000), so overflow is handled cleanly.
+        return firstPartOfDocNumber + incremented.padStart(numberToIncrement.length, '0')
     } else return docNumber
 }
 
@@ -1388,6 +1778,14 @@ private fun saveInfoInDocumentClientOrIssuerTable(
         logo_path = documentClientOrIssuer.logoPath,
         vat_exempt = if (documentClientOrIssuer.vatExempt) 1L else 0L,
         intra_eu_sales = if (documentClientOrIssuer.intraEuSales) 1L else 0L,
+        payment_iban = documentClientOrIssuer.paymentIban?.text?.trim(),
+        payment_bic = documentClientOrIssuer.paymentBic?.text?.trim(),
+        payment_country = documentClientOrIssuer.paymentCountry?.trim()?.ifEmpty { null },
+        // Frozen only on the client-side snapshot; issuers keep NULL. Drives
+        // the Factur-X export gate deterministically per doc.
+        client_type = if (documentClientOrIssuer.type == ClientOrIssuerType.CLIENT ||
+            documentClientOrIssuer.type == ClientOrIssuerType.DOCUMENT_CLIENT
+        ) documentClientOrIssuer.clientType?.name else null,
         tax_withholding_enabled = if (documentClientOrIssuer.taxWithholdingEnabled) 1L else 0L,
     )
 }
@@ -1400,7 +1798,22 @@ private fun saveInfoInDocumentClientOrIssuerAddressTables(
     documentClientOrIssuerId: Long,
     addresses: List<AddressState>?,
 ) {
-    addresses?.forEach { address ->
+    addresses?.forEachIndexed { index, address ->
+        // Skip rows on slots ≥ 2 without meaningful content. Country doesn't
+        // count on those — the form auto-seeds it (LaunchedEffect + address
+        // value-typing handlers that seed defaultCountryCode on any fresh
+        // AddressState), so a country-only slot ≥ 2 is almost always a ghost
+        // slot (user tapped "+ Ajouter une adresse" twice and only filled
+        // slot 3 → slot 2 is just the auto-country). Slot 0 is always kept:
+        // every issuer/client must carry at least one address (country is
+        // required for Factur-X / EN 16931). Mirrors the master-side
+        // isAddressEmpty in ClientOrIssuerLocalDataSource.
+        val hasContent = !address.addressTitle?.text.isNullOrBlank() ||
+            !address.addressLine1?.text.isNullOrBlank() ||
+            !address.addressLine2?.text.isNullOrBlank() ||
+            !address.zipCode?.text.isNullOrBlank() ||
+            !address.city?.text.isNullOrBlank()
+        if (index > 0 && !hasContent) return@forEachIndexed
         // 1: Save address
         documentClientOrIssuerAddressQueries.save( // DB call
             id = null,
@@ -1477,6 +1890,10 @@ fun DocumentClientOrIssuer.transformIntoEditable(
         logoPath = documentClientOrIssuer.logo_path,
         vatExempt = (documentClientOrIssuer.vat_exempt ?: 0L) != 0L,
         intraEuSales = (documentClientOrIssuer.intra_eu_sales ?: 0L) != 0L,
+        paymentIban = documentClientOrIssuer.payment_iban?.let { TextFieldValue(text = it) },
+        paymentBic = documentClientOrIssuer.payment_bic?.let { TextFieldValue(text = it) },
+        paymentCountry = documentClientOrIssuer.payment_country,
+        clientType = com.a4a.g8invoicing.data.models.ClientType.fromDb(documentClientOrIssuer.client_type),
         taxWithholdingEnabled = documentClientOrIssuer.tax_withholding_enabled != 0L,
     )
 }

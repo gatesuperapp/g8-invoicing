@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PostAdd
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.outlined.AutoFixHigh
 import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Email
@@ -46,6 +47,10 @@ data class AppBarAction(
     val icon: ImageVector? = null,
     val iconColor: Color? = null,
     val iconBorder: Color? = null,
+    // Optional override for the icon's rendered size. Defaults to the shared
+    // 24dp in DocumentBottomBar. Set per-action when a glyph reads visually
+    // heavier at the default size (e.g. the wand+stars needs a nudge down).
+    val iconSizeDp: Int = 24,
     val label: String? = null,
     val description: String = "",
     val tag: DocumentTag? = null,
@@ -178,6 +183,18 @@ fun actionTag() =
         isSecondary = false,
     )
 
+// Distinct sentinel so BottomBarActionView can pick the BL/Devis dropdown
+// palette (masculine SENT / CANCELLED + INVOICED) instead of the invoice one.
+@Composable
+fun actionTagBLDevis() =
+    AppBarAction(
+        name = "TAG_BLDEVIS",
+        icon = Icons.Outlined.Sell,
+        description = stringResource(Res.string.appbar_label_description),
+        label = stringResource(Res.string.appbar_tag),
+        isSecondary = false,
+    )
+
 @Composable
 fun actionTagUndefined() =
     AppBarAction(
@@ -256,6 +273,58 @@ fun actionTagCancelled() =
         onClick = {} // see ButtonWithDropdownMenu
     )
 
+// BL/Devis palette. Same enum values as invoices, but the labels drop the
+// feminine agreement ("Envoyé" / "Annulé") and add an INVOICED entry that
+// invoices never carry.
+@Composable
+fun actionTagSentMasc() =
+    AppBarAction(
+        tag = DocumentTag.SENT,
+        icon = Icons.Filled.Circle,
+        iconColor = ColorSent,
+        description = stringResource(Res.string.appbar_tag_sent_masc),
+        label = stringResource(Res.string.appbar_tag_sent_masc),
+        onClick = {}
+    )
+
+@Composable
+fun actionTagCancelledMasc() =
+    AppBarAction(
+        tag = DocumentTag.CANCELLED,
+        icon = Icons.Filled.Circle,
+        iconColor = ColorCancelled,
+        description = stringResource(Res.string.appbar_tag_cancelled_masc),
+        label = stringResource(Res.string.appbar_tag_cancelled_masc),
+        onClick = {}
+    )
+
+@Composable
+fun actionTagInvoiced() =
+    AppBarAction(
+        tag = DocumentTag.INVOICED,
+        icon = Icons.Filled.Circle,
+        iconColor = ColorGreenPaid,
+        description = stringResource(Res.string.appbar_tag_invoiced),
+        label = stringResource(Res.string.appbar_tag_invoiced),
+        onClick = {}
+    )
+
+// Invoice-only "verrouillée" tag. Icon field carries a neutral placeholder
+// (the caller special-cases DocumentTag.LOCKED to render a 🔒 emoji Text at
+// the pill's size instead of the coloured circle); iconColor stays surface
+// so the fallback rendering doesn't paint a coloured dot over the emoji.
+@Composable
+fun actionTagLocked() =
+    AppBarAction(
+        tag = DocumentTag.LOCKED,
+        icon = Icons.Filled.Circle,
+        iconColor = Color.White,
+        iconBorder = ColorGreyDraft,
+        description = stringResource(Res.string.appbar_tag_locked),
+        label = stringResource(Res.string.appbar_tag_locked),
+        onClick = {}
+    )
+
 @Composable
 fun actionSendReminder(onClick: () -> Unit) =
     AppBarAction(
@@ -297,4 +366,18 @@ fun actionStyle(onClick: () -> Unit) =
         isSecondary = false,
         alignmentLeft = false,
         onClick = onClick
+    )
+
+@Composable
+fun actionFont(onClick: () -> Unit) =
+    AppBarAction(
+        icon = Icons.Outlined.AutoFixHigh,
+        // Wand+stars glyph reads slightly heavier than the other bar icons at
+        // 24dp — pull it down ~10% so the row stays visually balanced.
+        iconSizeDp = 22,
+        label = stringResource(Res.string.action_font_label),
+        description = stringResource(Res.string.action_font_description),
+        isSecondary = false,
+        alignmentLeft = false,
+        onClick = onClick,
     )

@@ -22,14 +22,15 @@ class GStoreViewModel(
         // Free modules bypass the premium check. Defense-in-depth: UI should already
         // prevent premium-only toggles for non-premium users via the pill + hint dialog,
         // but never trust UI alone.
-        if (moduleId !in ActivatedModulesRepository.FREE_MODULES && !isPremium()) return
-        activatedModules.toggle(moduleId)
+        val premium = isPremium()
+        if (moduleId !in ActivatedModulesRepository.FREE_MODULES && !premium) return
+        activatedModules.toggle(moduleId, isPremium = premium)
     }
 
     /**
-     * Force-refresh subscription state from /v1/account. Called on screen resume so that
-     * a stale cached entry (e.g. one persisted with a null currentPeriodEndMs due to
-     * the old parser bug) gets corrected without requiring a trip via the Account screen.
+     * Force-refresh subscription state from /v1/account. Called on screen resume so the
+     * switch state reflects the latest backend truth without waiting for the 6h cache to
+     * expire.
      */
     fun refreshSubscription() {
         viewModelScope.launch {

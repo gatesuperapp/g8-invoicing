@@ -1,0 +1,53 @@
+CREATE TABLE QuoteRetention (
+  id INTEGER PRIMARY KEY NOT NULL,
+  quote_id INTEGER NOT NULL,
+  label TEXT NOT NULL,
+  rate REAL NOT NULL,
+  sort_order INTEGER,
+  hidden INTEGER NOT NULL DEFAULT 0,
+
+  FOREIGN KEY(quote_id)
+        REFERENCES Quote(quote_id)
+        ON DELETE CASCADE
+);
+
+getForQuote:
+SELECT *
+FROM QuoteRetention
+WHERE quote_id = :quote_id
+ORDER BY sort_order ASC, id ASC;
+
+save:
+INSERT INTO QuoteRetention (id, quote_id, label, rate, sort_order, hidden)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateOne:
+UPDATE QuoteRetention
+SET label = :label,
+    rate = :rate,
+    sort_order = :sort_order,
+    hidden = :hidden
+WHERE id = :id;
+
+deleteOne:
+DELETE FROM QuoteRetention
+WHERE id = :id;
+
+deleteAllForQuote:
+DELETE FROM QuoteRetention
+WHERE quote_id = :quote_id;
+
+-- Symmetric to InvoiceRetention.getLastInvoiceIdWithRetentionsForIssuer:
+-- id of the most recently created quote for this master issuer that owns
+-- at least one retention line. Seeds a fresh quote's retentions from the
+-- previous quote for the same issuer (rather than falling back to
+-- country defaults every time).
+getLastQuoteIdWithRetentionsForIssuer:
+SELECT q.quote_id, q.created_at
+FROM Quote q
+JOIN LinkQuoteToDocumentClientOrIssuer l ON l.quote_id = q.quote_id
+JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+JOIN QuoteRetention qr ON qr.quote_id = q.quote_id
+WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+ORDER BY q.quote_id DESC
+LIMIT 1;

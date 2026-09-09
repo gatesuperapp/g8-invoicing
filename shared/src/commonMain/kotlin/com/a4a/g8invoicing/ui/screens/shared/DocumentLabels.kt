@@ -10,6 +10,7 @@ import com.a4a.g8invoicing.shared.resources.company_identification3
 import com.a4a.g8invoicing.shared.resources.credit_note_number
 import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
+import com.a4a.g8invoicing.shared.resources.document_payment_section_title
 import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.document_table_description
 import com.a4a.g8invoicing.shared.resources.document_table_quantity
@@ -25,6 +26,15 @@ import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
 import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
+import com.a4a.g8invoicing.shared.resources.pdf_payment_means_prefix
+import com.a4a.g8invoicing.shared.resources.payment_means_10
+import com.a4a.g8invoicing.shared.resources.payment_means_30
+import com.a4a.g8invoicing.shared.resources.payment_means_42
+import com.a4a.g8invoicing.shared.resources.payment_means_48
+import com.a4a.g8invoicing.shared.resources.payment_means_58
+import com.a4a.g8invoicing.shared.resources.payment_means_other
+import com.a4a.g8invoicing.shared.resources.payment_means_paypal
+import com.a4a.g8invoicing.shared.resources.payment_means_stripe
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -57,6 +67,7 @@ internal object DocumentLabels {
         "credit_note_number" to Res.string.credit_note_number,
         "delivery_note_number" to Res.string.delivery_note_number,
         "document_date_label" to Res.string.document_date_label,
+        "document_payment_section_title" to Res.string.document_payment_section_title,
         "document_reference_label" to Res.string.document_reference_label,
         "document_table_description" to Res.string.document_table_description,
         "document_table_quantity" to Res.string.document_table_quantity,
@@ -72,6 +83,17 @@ internal object DocumentLabels {
         "invoice_pdf_due_date" to Res.string.invoice_pdf_due_date,
         "label_separator" to Res.string.label_separator,
         "pdf_currency_notice" to Res.string.pdf_currency_notice,
+        // Payment-means block (1.9). Frozen so a FR invoice keeps its FR mode
+        // labels even after the user switches the app to another language.
+        "pdf_payment_means_prefix" to Res.string.pdf_payment_means_prefix,
+        "payment_means_30" to Res.string.payment_means_30,
+        "payment_means_42" to Res.string.payment_means_42,
+        "payment_means_48" to Res.string.payment_means_48,
+        "payment_means_58" to Res.string.payment_means_58,
+        "payment_means_10" to Res.string.payment_means_10,
+        "payment_means_paypal" to Res.string.payment_means_paypal,
+        "payment_means_stripe" to Res.string.payment_means_stripe,
+        "payment_means_other" to Res.string.payment_means_other,
     )
 
     /**
@@ -108,6 +130,20 @@ internal object DocumentLabels {
             "de" to "Währung: %1\$s",
             "es" to "Moneda: %1\$s",
         ),
+        "pdf_payment_means_prefix" to mapOf(
+            "fr" to "Moyens de paiement acceptés :",
+            "en" to "Accepted payment means:",
+            "de" to "Akzeptierte Zahlungsmittel:",
+            "es" to "Medios de pago aceptados:",
+        ),
+        "payment_means_30" to mapOf("fr" to "Virement", "en" to "Bank transfer", "de" to "Überweisung", "es" to "Transferencia"),
+        "payment_means_42" to mapOf("fr" to "Chèque", "en" to "Cheque", "de" to "Scheck", "es" to "Cheque"),
+        "payment_means_48" to mapOf("fr" to "CB", "en" to "Card", "de" to "Karte", "es" to "Tarjeta"),
+        "payment_means_58" to mapOf("fr" to "SEPA", "en" to "SEPA", "de" to "SEPA", "es" to "SEPA"),
+        "payment_means_10" to mapOf("fr" to "Espèces", "en" to "Cash", "de" to "Bargeld", "es" to "Efectivo"),
+        "payment_means_paypal" to mapOf("fr" to "PayPal", "en" to "PayPal", "de" to "PayPal", "es" to "PayPal"),
+        "payment_means_stripe" to mapOf("fr" to "Stripe", "en" to "Stripe", "de" to "Stripe", "es" to "Stripe"),
+        "payment_means_other" to mapOf("fr" to "Autre", "en" to "Other", "de" to "Andere", "es" to "Otro"),
     )
 
     /** Look up a hardcoded locale fallback; null when the key/lang combo isn't known. */

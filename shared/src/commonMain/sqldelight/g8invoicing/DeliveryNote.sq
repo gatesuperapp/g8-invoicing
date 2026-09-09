@@ -10,6 +10,12 @@ CREATE TABLE DeliveryNote (
   labels_snapshot TEXT,
   show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
+  -- Entreprise (issuer maître) émettrice, figée à la création. Sert la
+  -- numérotation par entreprise + le filtrage de la liste des BL par
+  -- entreprise courante.
+  original_company_id INTEGER,
+  -- DocumentFont.id — null = Noto Sans default. See Invoice.font_family.
+  font_family TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -31,17 +37,33 @@ FROM DeliveryNote
 ORDER BY delivery_note_id DESC
 LIMIT 1;
 
+-- Multi-entreprise (étape 2). Numérotation des BL indépendante par
+-- entreprise émettrice.
+getLastDeliveryNoteNumberForCompany:
+SELECT number
+FROM DeliveryNote
+WHERE original_company_id = :company_id
+ORDER BY delivery_note_id DESC
+LIMIT 1;
+
 getAll:
 SELECT *
 FROM DeliveryNote;
+
+-- Multi-entreprise (étape 2). Filtre par entreprise courante — même
+-- pattern que Invoice.getAllForCompany.
+getAllForCompany:
+SELECT *
+FROM DeliveryNote
+WHERE original_company_id = :company_id;
 
 getAllIds:
 SELECT delivery_note_id
 FROM DeliveryNote;
 
 save:
-INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale)
-VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?);
+INSERT INTO DeliveryNote (delivery_note_id, number, delivery_date, reference,  free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, font_family)
+VALUES (?,  ?,  ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE DeliveryNote
@@ -51,6 +73,7 @@ SET number = :number,
     free_field = :free_field,
     currency =: currency,
     footer  =: footer,
+    font_family = :font_family,
     updated_at =: updated_at
 WHERE
     delivery_note_id = :delivery_note_id;

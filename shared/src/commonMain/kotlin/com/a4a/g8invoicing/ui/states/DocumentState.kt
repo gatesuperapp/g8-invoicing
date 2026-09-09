@@ -48,4 +48,21 @@ abstract class DocumentState {
     // legacy doc; the renderer falls back to the current app language for
     // those (same as before the feature landed).
     abstract var formatLocale: String?
+    // Company (issuer master) that emitted this document, frozen at
+    // creation from CurrentCompanyRepository. Drives per-company
+    // numbering + list filtering. Null = pre-migration legacy doc; the
+    // 6→7 migration backfilled from the master issuer already pinned on
+    // DocumentClientOrIssuer.
+    abstract var originalCompanyId: Long?
+    // BT-120 VAT exemption reason surfaced in the text menu when the doc's
+    // issuer is in the franchise en base regime. Persisted on Invoice /
+    // CreditNote (open on the two doc types that end up in Factur-X); the
+    // Quote / DeliveryNote overrides are non-persisted stubs kept null.
+    open var vatExemptionText: TextFieldValue? = null
+
+    // Frozen typeface for preview + PDF. null = free Noto Sans default
+    // (see DocumentFont.Default). Every doc type (invoice, credit note,
+    // delivery note, quote) carries its own pick so old docs keep
+    // rendering with the font in effect when they were issued.
+    abstract var fontFamily: String?
 }

@@ -15,6 +15,12 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 interface ProductLocalDataSourceInterface {
     suspend fun fetchProduct(id: Long): ProductState?
     fun fetchAllProducts(): Flow<List<ProductState>>
+
+    /** Unscoped fetch — returns ALL products regardless of the current-
+     *  company filter that [fetchAllProducts] applies. See the twin
+     *  ClientOrIssuerLocalDataSource.fetchAllUnscoped for the rationale
+     *  (migration wizard needs the whole dataset). */
+    suspend fun fetchAllProductsUnscoped(): List<ProductState>
     /** Insert a new Product row (+ its default price row). Returns the row id of
      * the created Product, or null if the insert failed. Callers building a
      * DocumentProduct in the same flow need the id to backfill
@@ -51,4 +57,10 @@ interface ProductLocalDataSourceInterface {
      * onboarding "Do you sell only services / only goods / a mix?" answer to
      * preseed the type on all existing products (which had null type pre-1.8). */
     suspend fun updateAllProductTypes(newType: ProductNature)
+
+    /** Move a batch of products under [companyId] in a single DB transaction.
+     *  Used by the 1.9 migration wizard to attach the products the user
+     *  selected for a given issuer, and to move orphans to their picked
+     *  issuer in the "à ranger" slide. */
+    suspend fun bulkAttachToCompany(ids: List<Long>, companyId: Long)
 }

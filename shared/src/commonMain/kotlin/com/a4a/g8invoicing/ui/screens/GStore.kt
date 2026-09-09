@@ -15,22 +15,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Business
+import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.RequestQuote
+import androidx.compose.material.icons.outlined.Sell
+import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,13 +57,34 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.data.auth.isPremium
+import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.account_website_label
 import com.a4a.g8invoicing.shared.resources.account_website_url
 import com.a4a.g8invoicing.shared.resources.gstore_footer_free
+import com.a4a.g8invoicing.shared.resources.gstore_module_cii_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_cii_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_cii_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_facturx_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_font_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_font_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_font_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_deactivate_blocked
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_multi_entreprise_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_title
@@ -82,6 +109,8 @@ import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textTiny
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import kotlinx.coroutines.flow.first
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 private data class GStoreModule(
@@ -97,13 +126,6 @@ private data class GStoreModule(
 )
 
 private val MODULES = listOf(
-    GStoreModule(
-        id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
-        titleRes = Res.string.gstore_module_watermark_title,
-        descRes = Res.string.gstore_module_watermark_desc,
-        detailRes = Res.string.gstore_module_watermark_detail,
-        icon = Icons.Outlined.WaterDrop,
-    ),
     GStoreModule(
         id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE,
         titleRes = Res.string.gstore_module_delivery_note_title,
@@ -131,6 +153,64 @@ private val MODULES = listOf(
         icon = Icons.Outlined.RequestQuote,
         isFree = true,
     ),
+    // Raw CII XML export for international e-invoicing platforms that don't
+    // accept Factur-X yet. Premium-only.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_CII_XML_EXPORT,
+        titleRes = Res.string.gstore_module_cii_title,
+        descRes = Res.string.gstore_module_cii_desc,
+        detailRes = Res.string.gstore_module_cii_detail,
+        icon = Icons.Outlined.Code,
+    ),
+    // Factur-X hybrid PDF: visual PDF invoice + embedded CII XML
+    // (factur-x.xml, AFRelationship=Alternative). Premium-only.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_FACTURX_EXPORT,
+        titleRes = Res.string.gstore_module_facturx_title,
+        descRes = Res.string.gstore_module_facturx_desc,
+        detailRes = Res.string.gstore_module_facturx_detail,
+        icon = Icons.Outlined.Code,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_WATERMARK_REMOVAL,
+        titleRes = Res.string.gstore_module_watermark_title,
+        descRes = Res.string.gstore_module_watermark_desc,
+        detailRes = Res.string.gstore_module_watermark_detail,
+        icon = Icons.Outlined.WaterDrop,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_FONT,
+        titleRes = Res.string.gstore_module_font_title,
+        descRes = Res.string.gstore_module_font_desc,
+        detailRes = Res.string.gstore_module_font_detail,
+        icon = Icons.Outlined.TextFields,
+        isFree = true,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_DELIVERY_NOTE_TAGGING,
+        titleRes = Res.string.gstore_module_delivery_note_tagging_title,
+        descRes = Res.string.gstore_module_delivery_note_tagging_desc,
+        detailRes = Res.string.gstore_module_delivery_note_tagging_detail,
+        icon = Icons.Outlined.Sell,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_QUOTE_TAGGING,
+        titleRes = Res.string.gstore_module_quote_tagging_title,
+        descRes = Res.string.gstore_module_quote_tagging_desc,
+        detailRes = Res.string.gstore_module_quote_tagging_detail,
+        icon = Icons.Outlined.Sell,
+    ),
+    // Pinned last per product ordering — feature-y modules read first, then
+    // watermark, then multi-entreprise (which reshapes the whole app menu).
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE,
+        titleRes = Res.string.gstore_module_multi_entreprise_title,
+        descRes = Res.string.gstore_module_multi_entreprise_desc,
+        detailRes = Res.string.gstore_module_multi_entreprise_detail,
+        icon = Icons.Outlined.Business,
+        isFree = true,
+    ),
 )
 
 private val IconBackground = Color(0xFFEFE3F0) // light lavender, matches mockup
@@ -146,19 +226,13 @@ fun GStore(
 ) {
     val activated by viewModel.activatedState.collectAsState()
     // Refresh /v1/account on every screen resume so the switch state reflects the latest
-    // backend truth (e.g. after a subscription change in the Stripe Portal, or to
-    // correct a stale cache entry persisted before the date-parser fix).
+    // backend truth (e.g. after a subscription change in the Stripe Portal).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refreshSubscription()
     }
     // Reactive premium check — recomposes when /v1/account lands after screen open.
     val subscriptionState by viewModel.subscriptionState.collectAsState()
-    val isPremium = remember(subscriptionState) {
-        (subscriptionState as? com.a4a.g8invoicing.data.auth.SubscriptionState.Known)?.let { s ->
-            s.status == "active" &&
-                (s.currentPeriodEndMs ?: 0L) > kotlin.time.Clock.System.now().toEpochMilliseconds()
-        } ?: false
-    }
+    val isPremium = remember(subscriptionState) { subscriptionState.isPremium() }
     val isDimActive = remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
     val websiteUrl = stringResource(Res.string.account_website_url)
@@ -171,10 +245,43 @@ fun GStore(
     val premiumOnlyMessage = stringResource(Res.string.gstore_premium_only_message)
     val onPremiumHint: () -> Unit = { showPremiumHint = true }
 
+    // Guard the multi-entreprise toggle: turning it OFF while more than one
+    // issuer exists in the DB would strand the extras (menu picker gone,
+    // sidebar collapsed). Fetch the current issuer count on screen open;
+    // deactivation attempts route to the blocking dialog below instead of
+    // the plain toggle path.
+    val clientOrIssuerDataSource: com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface =
+        koinInject()
+    var issuerCount by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        issuerCount = clientOrIssuerDataSource
+            .fetchAll(PersonType.ISSUER)
+            .first()
+            .size
+    }
+    var showMultiEntrepriseBlockedDialog by remember { mutableStateOf(false) }
+
     // Tapping a card opens a fullscreen detail dialog for that module. Null = no dialog.
     var selectedModule: GStoreModule? by remember { mutableStateOf(null) }
 
-    Scaffold(
+    // Route every module toggle here so the multi-entreprise guard sits in
+    // one place. Deactivation-with-multiple-issuers → dialog; everything
+    // else falls through to the VM's toggle path (which itself gates on
+    // FREE_MODULES / premium).
+    val onModuleToggle: (String) -> Unit = { moduleId ->
+        val isDeactivating = moduleId in activated
+        if (moduleId == ActivatedModulesRepository.MODULE_MULTI_ENTREPRISE &&
+            isDeactivating && issuerCount > 1
+        ) {
+            showMultiEntrepriseBlockedDialog = true
+        } else {
+            viewModel.toggleModule(moduleId)
+        }
+    }
+
+    ScaffoldWithDimmedOverlay(
+        isDimmed = isDimActive.value,
+        onDismissDim = { isDimActive.value = false },
         topBar = {
             com.a4a.g8invoicing.ui.navigation.TopBar(
                 title = stringResource(Res.string.gstore_title),
@@ -197,55 +304,56 @@ fun GStore(
         // The trial "Devis découverte" card is hidden for premium users — they
         // already have unlimited quotes via MODULE_QUOTE, so surfacing a "5 free"
         // tile alongside the paid one would be confusing.
-        val visibleModules = remember(isPremium) {
-            if (isPremium) MODULES.filter { it.id != ActivatedModulesRepository.MODULE_QUOTE_TRIAL }
-            else MODULES
-        }
-        Column(
+        // Show every module regardless of subscription. A premium user with
+        // MODULE_QUOTE_TRIAL previously activated (from before they upgraded)
+        // needs the tile to stay in the gStore so they can turn it off — the
+        // trial counter otherwise keeps ticking under the hood next to their
+        // paid MODULE_QUOTE, and the tile disappearing left no way to reach it.
+        val visibleModules = MODULES
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 28.dp,
+                bottom = 4.dp,
+            ),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(top = 24.dp),
+                .padding(padding),
         ) {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                // weight(1f) with default fill=true so the grid takes ALL remaining
-                // Column height (minus the footer, which sits below with no weight).
-                // The previous fill=false + Spacer(weight=1f) split the leftover space
-                // 50/50 and clipped the grid at mid-column when more than one row
-                // fit, hiding the bottom of the second row.
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            ) {
-                items(visibleModules) { module ->
-                    GStoreModuleCard(
-                        title = stringResource(module.titleRes),
-                        description = stringResource(module.descRes),
-                        icon = module.icon,
-                        isPremium = isPremium,
-                        isFree = module.isFree,
-                        isActivated = module.id in activated,
-                        onToggle = { viewModel.toggleModule(module.id) },
-                        onPremiumHint = onPremiumHint,
-                        onClick = { selectedModule = module },
-                    )
-                }
+            items(visibleModules) { module ->
+                GStoreModuleCard(
+                    title = stringResource(module.titleRes),
+                    description = stringResource(module.descRes),
+                    icon = module.icon,
+                    isPremium = isPremium,
+                    isFree = module.isFree,
+                    isActivated = module.id in activated,
+                    onToggle = { onModuleToggle(module.id) },
+                    onPremiumHint = onPremiumHint,
+                    onClick = { selectedModule = module },
+                )
             }
 
-            // Footer: info pointer to the-gate.fr root — only for non-premium users.
-            // Premium users don't see a "manage your account on …" line here because
-            // account management lives in Mon Compte → Customer Portal.
+            // Footer scrolls with the grid — sits just after the last card row
+            // with breathing space, so it's only in view once the user has
+            // scrolled past all modules. Only shown to non-premium users;
+            // premium account management lives in Mon Compte → Customer Portal.
             if (!isPremium) {
-                WebsiteFooter(
-                    prefix = stringResource(Res.string.gstore_footer_free),
-                    linkLabel = websiteLabel,
-                    onClickLink = { uriHandler.openUri(websiteUrl) },
-                )
-                Spacer(modifier = Modifier.height(20.dp))
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        WebsiteFooter(
+                            prefix = stringResource(Res.string.gstore_footer_free),
+                            linkLabel = websiteLabel,
+                            onClickLink = { uriHandler.openUri(websiteUrl) },
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                }
             }
         }
     }
@@ -258,7 +366,7 @@ fun GStore(
             isPremium = isPremium,
             isFree = module.isFree,
             isActivated = module.id in activated,
-            onToggle = { viewModel.toggleModule(module.id) },
+            onToggle = { onModuleToggle(module.id) },
             onPremiumHint = onPremiumHint,
             onDismiss = { selectedModule = null },
         )
@@ -268,6 +376,19 @@ fun GStore(
         PremiumHintDialog(
             message = premiumOnlyMessage,
             onDismiss = { showPremiumHint = false },
+        )
+    }
+
+    if (showMultiEntrepriseBlockedDialog) {
+        // Reuse PremiumHintDialog's compact centered look — matches the
+        // existing "you tapped a locked switch" vocabulary the user
+        // already recognises from the premium gate. Explains the rule
+        // in one line without pretending to offer an override.
+        PremiumHintDialog(
+            message = stringResource(
+                Res.string.gstore_module_multi_entreprise_deactivate_blocked
+            ),
+            onDismiss = { showMultiEntrepriseBlockedDialog = false },
         )
     }
 }
@@ -365,8 +486,11 @@ private fun GStoreModuleCard(
             // premium-only hint snackbar instead of being silently swallowed by a
             // disabled Switch. The grayed uncheckedTrack color for non-premium keeps the
             // "off / not-yours" affordance without hiding the tap target.
+            // The visible checked state combines the preference (isActivated) with the
+            // entitlement (isUnlocked) — a locked module retombes visually to OFF at
+            // logout / subscription loss without erasing the preference.
             Switch(
-                checked = isActivated,
+                checked = isActivated && isUnlocked,
                 onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
@@ -472,7 +596,7 @@ private fun ModuleDetailDialog(
                 // modal, per design. Same colors + always-enabled behaviour as on the
                 // card so non-premium taps consistently trigger the hint snackbar.
                 Switch(
-                    checked = isActivated,
+                    checked = isActivated && isUnlocked,
                     onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,

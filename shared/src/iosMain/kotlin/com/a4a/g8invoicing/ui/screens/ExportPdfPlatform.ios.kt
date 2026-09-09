@@ -24,6 +24,7 @@ import com.a4a.g8invoicing.ui.states.DocumentState
 actual fun ExportPdfPlatform(
     document: DocumentState,
     onDismissRequest: () -> Unit,
+    facturxXmlBytes: ByteArray?,
 ) {
     Column(
         modifier = Modifier

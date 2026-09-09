@@ -2,6 +2,7 @@ package com.a4a.g8invoicing
 
 import android.app.Application
 import androidx.annotation.StringRes
+import com.a4a.g8invoicing.data.RestoreManager
 import com.a4a.g8invoicing.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -24,6 +25,12 @@ class G8Invoicing : Application() {
 
         super.onCreate()
         instance = this
+
+        // Pending-import must run BEFORE startKoin: SQLDelight opens the DB
+        // lazily via the driver, but any code that reaches for the file after
+        // this point would race the swap. Running here means Koin/SQLDelight
+        // sees whatever landed post-restore as the sole reality.
+        RestoreManager.applyPendingRestoreIfAny(this)
 
         startKoin {
             androidLogger()

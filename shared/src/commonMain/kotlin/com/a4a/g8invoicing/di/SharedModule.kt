@@ -17,6 +17,7 @@ import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrencyManager
+import com.a4a.g8invoicing.data.CurrentCompanyRepository
 import com.a4a.g8invoicing.data.LocaleManager
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -25,6 +26,7 @@ import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.AuthApiClient
 import com.a4a.g8invoicing.data.auth.AuthRepository
+import com.a4a.g8invoicing.data.auth.SubscriptionRepository
 import com.a4a.g8invoicing.data.auth.TokenStorage
 import com.a4a.g8invoicing.ui.screens.AccountViewModel
 import com.a4a.g8invoicing.ui.screens.GStoreViewModel
@@ -64,8 +66,17 @@ val sharedModule = module {
     // Currency Manager (singleton)
     single { CurrencyManager() }
 
+    // Which company (issuer master) the user is currently working under.
+    // Drives scoping of clients/products/docs and numbering per company.
+    single { CurrentCompanyRepository() }
+
     // Unit code repository (localised names / short forms / search index)
     single { UnitCodeRepository() }
+
+    // Factur-X: CII XML file writer + share sheet (Android + Desktop only;
+    // iOS is a stub until PDFKit port). Injected into whatever screen fires
+    // "Export CII".
+    single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
 
     // Database
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
@@ -88,6 +99,7 @@ val sharedModule = module {
     single { TokenStorage() }
     single { AuthApiClient(get()) }
     single { AuthRepository(get(), get(), get()) }
+    single { SubscriptionRepository(get(), get(), get()) }
 
     // Queries
     single { get<Database>().invoiceQueries }
@@ -98,13 +110,13 @@ val sharedModule = module {
 
     // Data Sources
     single { ActivatedModulesRepository(get()) }
-    single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get()) }
-    single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get()) }
+    single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
+    single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
-    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get()) }
-    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get()) }
-    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get()) }
-    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get()) }
+    single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
 
     // ViewModels
@@ -134,12 +146,12 @@ val sharedModule = module {
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = params.getOrNull()
-        InvoiceAddEditViewModel(get(), get(), itemId)
+        InvoiceAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { CreditNoteListViewModel(get()) }
     viewModel { params ->
         val itemId: String? = params.getOrNull()
-        CreditNoteAddEditViewModel(get(), get(), itemId)
+        CreditNoteAddEditViewModel(get(), get(), get(), itemId)
     }
     viewModel { AccountViewModel(get(), get()) }
     viewModel { GStoreViewModel(get(), get()) }

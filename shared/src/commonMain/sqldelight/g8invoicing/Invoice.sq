@@ -13,6 +13,55 @@ CREATE TABLE Invoice (
   show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
   format_locale TEXT,
   hide_linked_source_headers INTEGER NOT NULL DEFAULT 0,
+  -- Payment-means chip selections, stored as comma-separated chip identities
+  -- ("TRANSFER,CHEQUE" ou "PAYPAL,STRIPE"). Chip identity (not UN/CEFACT code)
+  -- because PayPal + Stripe share code 68 — code alone can't tell them apart
+  -- at reload. UN/CEFACT 4461 codes are derived at Factur-X export time via
+  -- unCefactCodesForExport(), with fallback [1] "Instrument not defined" when
+  -- nothing is checked. Nullable ; vide = pas de mention rendue sur le PDF.
+  payment_means_selections TEXT,
+  -- Editable prefix rendered before the joined payment-means list on the
+  -- PDF/preview. Empty string = opt-out (whole block skipped).
+  payment_means_label TEXT,
+  -- Eye toggle in the payment-means picker. 1 = the whole block (label + list)
+  -- is hidden on preview + PDF. Codes stay persisted so Factur-X BT-81 data is
+  -- preserved regardless.
+  payment_means_hidden INTEGER NOT NULL DEFAULT 0,
+  -- BT-20 Payment Terms — split en 3 mentions distinctes pour aligner sur
+  -- Factur-X BR-FR-05 SubjectCodes (PMT / PMD / AAB). Chaque champ est
+  -- éditable indépendamment via le picker à 3 lignes ; le CII XML émet un
+  -- <IncludedNote> par code, le PDF concatène pour un rendu unique.
+  -- Seed sur createNew() : dernier texte utilisé sur ce champ précis →
+  -- fallback payment_terms_*_default.
+  payment_terms_recovery_fees TEXT,
+  payment_terms_late_fees TEXT,
+  payment_terms_discount TEXT,
+  -- Eye toggle on the "Afficher les coordonnées bancaires" switch inside the
+  -- payment-means picker. 1 = IBAN/BIC line hidden on preview + PDF. Frozen
+  -- fields on DocumentClientOrIssuer stay populated (BT-84/86 preserved).
+  payment_bank_hidden INTEGER NOT NULL DEFAULT 0,
+  -- "Autre" chip state — separate flag rather than a sentinel in
+  -- payment_means_selections. Keeps selections column 100% UN/CEFACT-clean and
+  -- enforces that OTHER is UI-only (never rendered on the invoice or exported).
+  payment_means_other_checked INTEGER NOT NULL DEFAULT 0,
+  -- Editable bank-details label: JSON-serialised PaymentBankSegment list.
+  -- Null / empty = fall back to defaultPaymentBankSegments().
+  payment_bank_label TEXT,
+  -- Entreprise (issuer maître) émettrice, figée à la création. Sert la
+  -- numérotation par entreprise + le filtrage de la liste des factures par
+  -- entreprise courante.
+  original_company_id INTEGER,
+  -- BT-120 VAT exemption reason — required text on invoices whose issuer is in
+  -- the franchise en base regime (tax category E). Per-doc so the user can
+  -- override the wording per operation (art. 293 B vs 261-4 vs 275…). Seeded
+  -- from the issuer's country at createNew(); null on issuers whose country
+  -- has no reliable auto-fill.
+  vat_exemption_text TEXT,
+
+  -- Document typeface id (DocumentFont.id). NULL → free Noto Sans default.
+  -- Frozen per doc so old invoices keep rendering with the font in effect
+  -- when they were issued, even if the user later switches their pick.
+  font_family TEXT,
 
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime')),
@@ -35,17 +84,34 @@ FROM Invoice
 ORDER BY invoice_id DESC
 LIMIT 1;
 
+-- Multi-entreprise (étape 2). Numérotation par entreprise : chaque compteur
+-- de factures suit indépendamment par entreprise émettrice, pas globalement.
+getLastInvoiceNumberForCompany:
+SELECT number
+FROM Invoice
+WHERE original_company_id = :company_id
+ORDER BY invoice_id DESC
+LIMIT 1;
+
 getAll:
 SELECT *
 FROM Invoice;
+
+-- Multi-entreprise (étape 2). Liste des factures de l'entreprise courante,
+-- utilisée par InvoiceLocalDataSource.fetchAll() une fois combinée avec
+-- CurrentCompanyRepository.state.
+getAllForCompany:
+SELECT *
+FROM Invoice
+WHERE original_company_id = :company_id;
 
 getAllIds:
 SELECT invoice_id
 FROM Invoice;
 
 save:
-INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers)
-VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Invoice (invoice_id, number, issuing_date, reference, free_field, currency, due_date, footer, payment_status, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, hide_linked_source_headers, payment_means_selections, payment_means_label, payment_means_hidden, payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount, payment_bank_hidden, payment_means_other_checked, payment_bank_label, original_company_id, vat_exemption_text, font_family)
+VALUES (?,  ?,  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 update:
 UPDATE Invoice
@@ -57,13 +123,90 @@ SET number = :number,
     due_date =: due_date,
     payment_status =: payment_status,
     footer  =: footer,
+    payment_means_selections = :payment_means_selections,
+    payment_means_label = :payment_means_label,
+    payment_means_hidden = :payment_means_hidden,
+    payment_terms_recovery_fees = :payment_terms_recovery_fees,
+    payment_terms_late_fees = :payment_terms_late_fees,
+    payment_terms_discount = :payment_terms_discount,
+    payment_bank_hidden = :payment_bank_hidden,
+    payment_means_other_checked = :payment_means_other_checked,
+    payment_bank_label = :payment_bank_label,
+    vat_exemption_text = :vat_exemption_text,
+    font_family = :font_family,
     updated_at =: updated_at
 WHERE
     invoice_id = :invoice_id;
 
+-- Font seeded on createNew() from the most recently created invoice, so the
+-- user's picked font persists across new invoices without them having to
+-- re-pick every time. NULL = user has never picked (fall back to
+-- DocumentFont.Default at read time).
+getLastInsertedInvoiceFont:
+SELECT font_family
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+-- Fetch the last invoice's 3 payment-terms fields so createNew() can seed
+-- each one from the most recent non-empty value (per-field, so if the user
+-- has only ever customised the "pénalités de retard" one, the other two
+-- fall back to their default rather than getting an empty seed).
+-- Also pulls format_locale so the caller can gate the reuse: payment_terms_*
+-- are only carried over from a doc written in the current app language;
+-- otherwise the caller falls back to the localised default string.
+getLastInsertedInvoicePaymentTerms:
+SELECT payment_terms_recovery_fees, payment_terms_late_fees, payment_terms_discount,
+       format_locale
+FROM Invoice
+ORDER BY invoice_id DESC
+LIMIT 1;
+
+-- Most recent invoice attached to a specific master issuer, so a new invoice
+-- for the same company seeds its payment terms/means/bank labels + chip
+-- selections from the last one — reused text is per-issuer, not global.
+-- Three extra columns for the caller's gating logic:
+--   • format_locale — reuse payment_terms_* / payment_means_label /
+--     payment_bank_label only when it matches the current app language.
+--   • issuer_country_code — reuse vat_exemption_text only when the frozen
+--     previous-doc issuer country matches the current issuer country (else
+--     the master's country changed between docs and the old mention is now
+--     stale). Sub-select because DocumentClientOrIssuer has no direct
+--     country column — it lives on the joined address row (1:N link, first
+--     address wins).
+--   • payment_bank_country — country of the frozen bank on the previous
+--     doc. Reused so the label adapter can swap IBAN/BIC tokens for a
+--     "N° de compte" arrangement (or vice-versa) when the bank's country
+--     class changed between docs.
+getLastInvoicePaymentReuseForIssuer:
+SELECT i.payment_terms_recovery_fees, i.payment_terms_late_fees, i.payment_terms_discount,
+       i.payment_means_selections,
+       i.payment_means_label, i.payment_means_other_checked, i.payment_bank_label,
+       i.vat_exemption_text,
+       i.format_locale,
+       (SELECT a.country_code
+        FROM LinkDocumentClientOrIssuerToAddress la
+        JOIN DocumentClientOrIssuerAddress a ON a.id = la.address_id
+        WHERE la.document_client_or_issuer_id = dci.id
+        LIMIT 1) AS issuer_country_code,
+       dci.payment_country AS payment_bank_country
+FROM Invoice i
+JOIN LinkInvoiceToDocumentClientOrIssuer l ON l.invoice_id = i.invoice_id
+JOIN DocumentClientOrIssuer dci ON dci.id = l.document_client_or_issuer_id
+WHERE dci.type = 'issuer' AND dci.original_client_id = :master_issuer_id
+ORDER BY i.invoice_id DESC
+LIMIT 1;
+
 updateHideLinkedSourceHeaders:
 UPDATE Invoice
 SET hide_linked_source_headers = :hide_linked_source_headers,
+    updated_at =: updated_at
+WHERE
+    invoice_id = :invoice_id;
+
+updateVatExemptionText:
+UPDATE Invoice
+SET vat_exemption_text = :vat_exemption_text,
     updated_at =: updated_at
 WHERE
     invoice_id = :invoice_id;
@@ -96,6 +239,19 @@ SELECT footer
 FROM Invoice
 ORDER BY invoice_id DESC
 LIMIT 1;
+
+-- Feed the 1.9 migration wizard's IBAN/BIC auto-detection: the wizard
+-- scans the last 10 invoice footers of an issuer and pattern-matches
+-- against IBAN/BIC labels (see IbanExtractor.kt). Scoped by
+-- original_company_id so multi-issuer users get per-issuer prefill.
+getRecentFootersForCompany:
+SELECT footer
+FROM Invoice
+WHERE original_company_id = :company_id
+  AND footer IS NOT NULL
+  AND footer != ''
+ORDER BY invoice_id DESC
+LIMIT 10;
 
 countAll:
 SELECT COUNT(*) FROM Invoice;

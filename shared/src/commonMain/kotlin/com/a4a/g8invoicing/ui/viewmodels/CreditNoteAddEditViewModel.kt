@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 class CreditNoteAddEditViewModel(
     private val documentDataSource: CreditNoteLocalDataSourceInterface,
     private val documentProductDataSource: ProductLocalDataSourceInterface,
+    private val clientOrIssuerDataSource: com.a4a.g8invoicing.data.ClientOrIssuerLocalDataSourceInterface,
     private val itemId: String?,
 ) : ViewModel() {
     private var fetchJob: Job? = null
@@ -106,6 +107,14 @@ class CreditNoteAddEditViewModel(
         }
     }
 
+    // See InvoiceAddEditViewModel.seedDefaultVatExemptionTextInDb.
+    suspend fun seedDefaultVatExemptionTextInDb(issuer: ClientOrIssuerState) {
+        val id = _documentUiState.value.documentId?.toLong() ?: return
+        val country = issuer.addresses?.firstOrNull()?.countryCode
+        val default = com.a4a.g8invoicing.data.models.resolveVatExemptionText(country) ?: return
+        documentDataSource.updateVatExemptionText(id, default)
+    }
+
     private suspend fun createNewCreditNote(): Long? {
         var documentId: Long? = null
         val createNewJob = viewModelScope.launch {
@@ -135,6 +144,13 @@ class CreditNoteAddEditViewModel(
         viewModelScope.launch {
             updateCreditNoteInLocalDb()
         }
+    }
+
+    // Mirror of InvoiceAddEditViewModel.setDocumentFont — updates the
+    // credit-note state + persists font_family via the standard update path.
+    fun setDocumentFont(fontId: String?) {
+        _documentUiState.value = _documentUiState.value.copy(fontFamily = fontId)
+        viewModelScope.launch { updateCreditNoteInLocalDb() }
     }
 
     suspend fun saveDocumentProductInLocalDbAndGetId(documentProduct: DocumentProductState): Int? {
@@ -363,6 +379,19 @@ class CreditNoteAddEditViewModel(
     fun updateUiState(screenElement: ScreenElement, value: Any) {
         _documentUiState.value =
             updateCreditNoteUiState(_documentUiState.value, screenElement, value)
+        // See InvoiceAddEditViewModel.updateUiState for rationale.
+        if (screenElement == ScreenElement.DOCUMENT_ISSUER_BANK_PICKED) {
+            val bank = value as? com.a4a.g8invoicing.ui.states.IssuerBankState ?: return
+            val docIssuerId = _documentUiState.value.documentIssuer?.id?.toLong() ?: return
+            viewModelScope.launch {
+                clientOrIssuerDataSource.updateDocumentClientOrIssuerPaymentBank(
+                    documentClientOrIssuerId = docIssuerId,
+                    iban = bank.identifier.text.takeIf { it.isNotEmpty() },
+                    bic = bank.bic.text.takeIf { it.isNotEmpty() },
+                    country = bank.countryCode?.takeIf { it.isNotEmpty() },
+                )
+            }
+        }
     }
 
     fun updateTextFieldCursorOfCreditNoteState(pageElement: ScreenElement) {
@@ -432,6 +461,30 @@ fun updateCreditNoteUiState(
 
         ScreenElement.DOCUMENT_FOOTER -> {
             doc = doc.copy(footerText = value as TextFieldValue)
+        }
+
+        ScreenElement.DOCUMENT_VAT_EXEMPTION -> {
+            doc = doc.copy(vatExemptionText = value as TextFieldValue)
+        }
+
+        // No payment-means / bank handlers on the credit-note ViewModel:
+        // CreditNoteState has no such fields anymore (an avoir has no
+        // payment context). Any stray fires from a shared UI path are
+        // swallowed silently (see the else branch at the bottom).
+
+        ScreenElement.DOCUMENT_ISSUER_BANK_PICKED -> {
+            val bank = value as com.a4a.g8invoicing.ui.states.IssuerBankState
+            doc.documentIssuer?.let { currentIssuer ->
+                doc = doc.copy(
+                    documentIssuer = currentIssuer.copy(
+                        paymentIban = bank.identifier.text.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentBic = bank.bic.text.takeIf { it.isNotEmpty() }
+                            ?.let { TextFieldValue(text = it) },
+                        paymentCountry = bank.countryCode?.takeIf { it.isNotEmpty() },
+                    )
+                )
+            }
         }
 
         else -> {}

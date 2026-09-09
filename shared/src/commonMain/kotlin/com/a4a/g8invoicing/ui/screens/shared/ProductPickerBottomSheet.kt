@@ -76,6 +76,7 @@ import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
 import com.a4a.g8invoicing.ui.theme.textSection
+import com.a4a.g8invoicing.util.normalizeForSearch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -132,9 +133,12 @@ fun ProductPickerBottomSheet(
     val filteredAlphaSorted = remember(query.text, nonNullProducts) {
         val q = query.text.trim()
         val filtered = if (q.isEmpty()) nonNullProducts
-        else nonNullProducts.filter {
-            it.name.text.contains(q, ignoreCase = true) ||
-                (it.description?.text?.contains(q, ignoreCase = true) == true)
+        else {
+            val nq = q.normalizeForSearch()
+            nonNullProducts.filter {
+                it.name.text.normalizeForSearch().contains(nq) ||
+                    (it.description?.text?.normalizeForSearch()?.contains(nq) == true)
+            }
         }
         filtered.sortedBy { it.name.text.trim().lowercase() }
     }
@@ -152,6 +156,12 @@ fun ProductPickerBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         contentWindowInsets = { WindowInsets(0) },
+        // Grey pill handle, matches the outer BottomSheetScaffold (SheetDragHandle).
+        dragHandle = {
+            androidx.compose.material3.BottomSheetDefaults.DragHandle(
+                color = androidx.compose.ui.graphics.Color(0xFFE0E0E0),
+            )
+        },
     ) {
         Column(
             modifier = Modifier
@@ -231,7 +241,7 @@ fun ProductPickerBottomSheet(
                         ) {
                             Text(
                                 text = stringResource(Res.string.document_bottom_sheet_picker_title_product),
-                                style = MaterialTheme.typography.textScreenTitle,
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(start = 12.dp),
                             )
                             Spacer(Modifier.weight(1f))

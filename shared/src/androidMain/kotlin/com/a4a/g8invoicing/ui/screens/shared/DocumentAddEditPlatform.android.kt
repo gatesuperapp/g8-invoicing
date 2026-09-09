@@ -21,6 +21,7 @@ actual fun DocumentAddEditPlatform(
     documentIssuerUiState: ClientOrIssuerState,
     documentProductUiState: DocumentProductState,
     taxRates: List<BigDecimal>,
+    taxRatesWithIds: List<Pair<Long, BigDecimal>>,
     products: MutableList<ProductState>,
     onValueChange: (ScreenElement, Any) -> Unit,
     onSelectProduct: (ProductState, Int?) -> Unit,
@@ -37,6 +38,7 @@ actual fun DocumentAddEditPlatform(
     onClickDoneForm: (DocumentBottomSheetTypeOfForm, syncToMaster: Boolean) -> Unit,
     onClickCancelForm: () -> Unit,
     onSelectTaxRate: (BigDecimal?) -> Unit,
+    onSaveTaxRates: (List<Pair<Long?, BigDecimal>>) -> Unit,
     showDocumentForm: Boolean,
     onShowDocumentForm: (Boolean) -> Unit,
     onClickDeleteAddress: (ClientOrIssuerType) -> Unit,
@@ -51,6 +53,7 @@ actual fun DocumentAddEditPlatform(
     onToggleHideLinkedSourceHeaders: (() -> Unit)?,
     onSaveRetention: (Int, com.a4a.g8invoicing.ui.states.RetentionState) -> Unit,
     onToggleRetentionHidden: (Int) -> Unit,
+    onFontSelect: (com.a4a.g8invoicing.ui.theme.DocumentFont) -> Unit,
 ) {
     // Android uses the mobile DocumentAddEdit with bottom sheets
     DocumentAddEdit(
@@ -63,6 +66,7 @@ actual fun DocumentAddEditPlatform(
         documentIssuerUiState = documentIssuerUiState,
         documentProductUiState = documentProductUiState,
         taxRates = taxRates,
+        taxRatesWithIds = taxRatesWithIds,
         products = products,
         onValueChange = onValueChange,
         onSelectProduct = onSelectProduct,
@@ -79,6 +83,7 @@ actual fun DocumentAddEditPlatform(
         onClickDoneForm = onClickDoneForm,
         onClickCancelForm = onClickCancelForm,
         onSelectTaxRate = onSelectTaxRate,
+        onSaveTaxRates = onSaveTaxRates,
         showDocumentForm = showDocumentForm,
         onShowDocumentForm = onShowDocumentForm,
         onClickDeleteAddress = onClickDeleteAddress,
@@ -93,5 +98,6 @@ actual fun DocumentAddEditPlatform(
         onToggleHideLinkedSourceHeaders = onToggleHideLinkedSourceHeaders,
         onSaveRetention = onSaveRetention,
         onToggleRetentionHidden = onToggleRetentionHidden,
+        onFontSelect = onFontSelect,
     )
 }
