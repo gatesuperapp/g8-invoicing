@@ -887,8 +887,23 @@
     <string name="onboarding_19_welcome_body">This version wraps up the standardised fields. Let's set them up together.</string>
     <string name="onboarding_19_welcome_cta">Let's go</string>
     <string name="onboarding_19_cleanup_title">Looks like you manage %1$d businesses</string>
-    <string name="onboarding_19_cleanup_body">Is that right? Otherwise, delete the ones you don't use. Don't worry — your documents won't be affected.</string>
+    <string name="onboarding_19_cleanup_body">Is that right? Otherwise, delete the ones you don't use.</string>
     <string name="onboarding_19_cleanup_cta">Continue</string>
+    <string name="onboarding_19_cleanup_reassign_title">This company has documents</string>
+    <string name="onboarding_19_cleanup_reassign_message">%1$d document(s) are attached to %2$s. Which company do you want to reassign them to?</string>
+    <string name="onboarding_19_cleanup_reassign_confirm">Reassign and delete company</string>
+
+    <!-- 1.9 orphan rescue dialog -->
+    <string name="orphan_rescue_title">Small hiccup</string>
+    <string name="orphan_rescue_message">During the previous version upgrade, %1$d document(s) weren't attached to a company. Reassign them or they'll stay hidden from your lists.</string>
+    <string name="orphan_rescue_card_client">Client:</string>
+    <string name="orphan_rescue_card_products">Products:</string>
+    <string name="orphan_rescue_card_assign_to">Assign to:</string>
+    <string name="orphan_rescue_card_cta">Attach</string>
+    <string name="orphan_rescue_doc_type_invoice">Invoice</string>
+    <string name="orphan_rescue_doc_type_delivery_note">Delivery note</string>
+    <string name="orphan_rescue_doc_type_credit_note">Credit note</string>
+    <string name="orphan_rescue_doc_type_quote">Quote</string>
     <string name="onboarding_19_attach_intro_body">We'll link your clients and products to each business. This lets you switch between businesses and use a specific document numbering per company.</string>
     <string name="onboarding_19_attach_intro_cta">Let's go</string>
     <string name="onboarding_19_attach_step_title">Business %1$d: %2$s</string>

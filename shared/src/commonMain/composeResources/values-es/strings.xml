@@ -893,8 +893,23 @@ Une erreur s'est produite :
     <string name="onboarding_19_welcome_body">Esta versión termina de implantar los campos normalizados. Vamos a configurarlos juntos.</string>
     <string name="onboarding_19_welcome_cta">Adelante</string>
     <string name="onboarding_19_cleanup_title">Parece que gestionas %1$d empresas</string>
-    <string name="onboarding_19_cleanup_body">¿Es así? Si no, elimina las que no uses. Tranquilo·a, tus documentos no se verán afectados.</string>
+    <string name="onboarding_19_cleanup_body">¿Es así? Si no, elimina las que no uses.</string>
     <string name="onboarding_19_cleanup_cta">Continuar</string>
+    <string name="onboarding_19_cleanup_reassign_title">Esta empresa tiene documentos</string>
+    <string name="onboarding_19_cleanup_reassign_message">%1$d documento(s) están vinculados a %2$s. ¿A qué empresa quieres reasignarlos?</string>
+    <string name="onboarding_19_cleanup_reassign_confirm">Reasignar y eliminar la empresa</string>
+
+    <!-- 1.9 orphan rescue dialog -->
+    <string name="orphan_rescue_title">Pequeño contratiempo</string>
+    <string name="orphan_rescue_message">Durante la actualización anterior, %1$d documento(s) no se vincularon a ninguna empresa. Vincúlalos o permanecerán ocultos en tus listas.</string>
+    <string name="orphan_rescue_card_client">Cliente:</string>
+    <string name="orphan_rescue_card_products">Productos:</string>
+    <string name="orphan_rescue_card_assign_to">Asignar a:</string>
+    <string name="orphan_rescue_card_cta">Vincular</string>
+    <string name="orphan_rescue_doc_type_invoice">Factura</string>
+    <string name="orphan_rescue_doc_type_delivery_note">Albarán</string>
+    <string name="orphan_rescue_doc_type_credit_note">Nota de crédito</string>
+    <string name="orphan_rescue_doc_type_quote">Presupuesto</string>
     <string name="onboarding_19_attach_intro_body">Vamos a vincular tus clientes y productos a tus empresas. Así podrás cambiar entre empresas y tener una numeración específica por empresa.</string>
     <string name="onboarding_19_attach_intro_cta">Adelante</string>
     <string name="onboarding_19_attach_step_title">Empresa %1$d: %2$s</string>
