@@ -887,8 +887,23 @@ Es ist ein Fehler aufgetreten :
     <string name="onboarding_19_welcome_body">Diese Version schließt die standardisierten Felder ab. Wir richten sie gemeinsam ein.</string>
     <string name="onboarding_19_welcome_cta">Los geht's</string>
     <string name="onboarding_19_cleanup_title">Es sieht so aus, als hättest du %1$d Unternehmen</string>
-    <string name="onboarding_19_cleanup_body">Stimmt das? Sonst kannst du die ungenutzten löschen. Keine Sorge, deine Dokumente bleiben unberührt.</string>
+    <string name="onboarding_19_cleanup_body">Stimmt das? Sonst kannst du die ungenutzten löschen.</string>
     <string name="onboarding_19_cleanup_cta">Weiter</string>
+    <string name="onboarding_19_cleanup_reassign_title">Dieses Unternehmen hat Dokumente</string>
+    <string name="onboarding_19_cleanup_reassign_message">%1$d Dokument(e) sind %2$s zugeordnet. Welchem Unternehmen möchtest du sie zuordnen?</string>
+    <string name="onboarding_19_cleanup_reassign_confirm">Zuordnen und Unternehmen löschen</string>
+
+    <!-- 1.9 orphan rescue dialog -->
+    <string name="orphan_rescue_title">Kleine Panne</string>
+    <string name="orphan_rescue_message">Beim vorherigen Versions-Upgrade wurden %1$d Dokument(e) keinem Unternehmen zugeordnet. Ordne sie zu, sonst bleiben sie in deinen Listen unsichtbar.</string>
+    <string name="orphan_rescue_card_client">Kunde:</string>
+    <string name="orphan_rescue_card_products">Produkte:</string>
+    <string name="orphan_rescue_card_assign_to">Zuordnen zu:</string>
+    <string name="orphan_rescue_card_cta">Zuordnen</string>
+    <string name="orphan_rescue_doc_type_invoice">Rechnung</string>
+    <string name="orphan_rescue_doc_type_delivery_note">Lieferschein</string>
+    <string name="orphan_rescue_doc_type_credit_note">Gutschrift</string>
+    <string name="orphan_rescue_doc_type_quote">Angebot</string>
     <string name="onboarding_19_attach_intro_body">Wir ordnen deine Kunden und Produkte den Unternehmen zu. So kannst du zwischen Unternehmen wechseln und pro Unternehmen eigene Nummernkreise nutzen.</string>
     <string name="onboarding_19_attach_intro_cta">Los geht's</string>
     <string name="onboarding_19_attach_step_title">Unternehmen %1$d: %2$s</string>
