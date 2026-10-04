@@ -12,10 +12,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -171,23 +173,31 @@ private fun AppDialogShell(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
-                .background(AppColors.surface, shape = RoundedCornerShape(16.dp))
-                .padding(horizontal = 24.dp, vertical = 24.dp),
-        ) {
-            Column(
+        // Pin LocalContentColor to the themed text colour — without this,
+        // bodyContent slot Text() calls (e.g. the restore ConfirmationDialog
+        // annotated-string body) fall back to a hardcoded black and read as
+        // black-on-dark in dark mode. The surface itself is drawn via
+        // Box.background, not Material3 Surface, so we provide the content
+        // color manually.
+        CompositionLocalProvider(LocalContentColor provides AppColors.textPrimary) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // Long bodies (multi-line explanations, error lists) stay
-                    // reachable on short devices without breaking the padded
-                    // layout above.
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.Start,
+                    .padding(horizontal = 32.dp)
+                    .background(AppColors.surface, shape = RoundedCornerShape(16.dp))
+                    .padding(horizontal = 24.dp, vertical = 24.dp),
             ) {
-                content()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // Long bodies (multi-line explanations, error lists) stay
+                        // reachable on short devices without breaking the padded
+                        // layout above.
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.Start,
+                ) {
+                    content()
+                }
             }
         }
     }
