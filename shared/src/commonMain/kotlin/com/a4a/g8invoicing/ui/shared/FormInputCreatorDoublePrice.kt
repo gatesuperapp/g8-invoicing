@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.util.calculatePriceWithTax
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.shared.resources.product_price_with_tax
 import com.a4a.g8invoicing.shared.resources.product_price_without_tax
 import org.jetbrains.compose.resources.stringResource
@@ -153,7 +155,8 @@ fun FormInputCreatorDoublePrice(
                     priceWithoutTaxInput.onValueChange(textPriceWithoutTax.toString())
                     priceWithTaxInput.onValueChange(textPriceWithTax.toString())
                 },
-                textStyle = LocalTextStyle.current,
+                textStyle = LocalTextStyle.current.copy(color = AppColors.textPrimary),
+                cursorBrush = SolidColor(AppColors.textPrimary),
                 keyboardOptions = KeyboardOptions(
                     imeAction = keyboardOption,
                     keyboardType = priceWithoutTaxInput.keyboardType
@@ -196,7 +199,7 @@ fun FormInputCreatorDoublePrice(
                         priceWithoutTaxInput.onValueChange(textPriceWithoutTax ?: "")
                         priceWithTaxInput.onValueChange(textPriceWithTax ?: "")
                     },
-                    textStyle = LocalTextStyle.current,
+                    textStyle = LocalTextStyle.current.copy(color = AppColors.textPrimary),
                     keyboardOptions = KeyboardOptions(
                         imeAction = keyboardOption,
                         keyboardType = priceWithTaxInput.keyboardType

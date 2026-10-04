@@ -40,6 +40,11 @@ fun NavGraph(
     onSendDatabaseByEmail: (String) -> Unit = {},
     onRestoreDatabase: () -> Unit = {},
     onComposeEmail: (String, String, String) -> Unit = { _, _, _ -> },
+    // Dark-mode wiring — read from DataStore in MainCompose and forwarded
+    // down to the Account screen (Apparence section toggle). Persisted via
+    // onSetDarkMode so the choice survives across launches.
+    isDarkMode: Boolean = false,
+    onSetDarkMode: (Boolean) -> Unit = {},
 ) {
     val handleCategoryClick: (Category) -> Unit = { category ->
         navController.navigateAndReplaceStartDestination(category)
@@ -72,6 +77,8 @@ fun NavGraph(
             onExportDatabase = onExportDatabase,
             onSendDatabaseByEmail = onSendDatabaseByEmail,
             onRestoreDatabase = onRestoreDatabase,
+            isDarkMode = isDarkMode,
+            onSetDarkMode = onSetDarkMode,
         )
 
         // gStore (premium modules showcase, no commercial CTA)

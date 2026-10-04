@@ -76,7 +76,6 @@ import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_i
 import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
@@ -88,8 +87,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 private val RowGrey = Color(0xFFF0F0F0)
-private val SelectedViolet = ColorVioletLight.copy(alpha = 0.08f)
-private val SelectedVioletText = ColorVioletLight
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -247,11 +244,13 @@ fun ClientOrIssuerPickerBottomSheet(
                                 .fillMaxWidth()
                                 .height(52.dp)
                                 .focusRequester(focusRequester),
-                            textStyle = MaterialTheme.typography.textBodySmall,
+                            textStyle = MaterialTheme.typography.textBodySmall.copy(
+                                color = AppColors.textPrimary,
+                            ),
                             placeholder = {
                                 Text(
                                     text = stringResource(Res.string.currency_picker_search),
-                                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.Gray),
+                                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
                                 )
                             },
                             leadingIcon = {
@@ -275,12 +274,14 @@ fun ClientOrIssuerPickerBottomSheet(
                             singleLine = true,
                             shape = RoundedCornerShape(8.dp),
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = RowGrey,
-                                unfocusedContainerColor = RowGrey,
+                                focusedContainerColor = AppColors.inputSurface,
+                                unfocusedContainerColor = AppColors.inputSurface,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
-                                cursorColor = Color.Black,
+                                cursorColor = AppColors.accent,
+                                focusedTextColor = AppColors.textPrimary,
+                                unfocusedTextColor = AppColors.textPrimary,
                             ),
                         )
                     } else {
@@ -469,7 +470,7 @@ private fun ClientOrIssuerPickerRow(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(6.dp))
-            .background(SelectedViolet)
+            .background(AppColors.accent.copy(alpha = 0.08f))
             .clickable { onClick() }
             .padding(vertical = 10.dp, horizontal = 12.dp)
     } else {
@@ -505,7 +506,7 @@ private fun ClientOrIssuerPickerRow(
                 Text(
                     text = stringResource(Res.string.document_bottom_sheet_picker_edit_link),
                     style = MaterialTheme.typography.textCaption.copy(
-                        color = SelectedVioletText,
+                        color = AppColors.accent,
                         textDecoration = TextDecoration.Underline,
                     ),
                     modifier = Modifier.padding(top = 7.dp),

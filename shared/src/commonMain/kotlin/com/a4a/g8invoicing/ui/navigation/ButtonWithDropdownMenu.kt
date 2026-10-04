@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -38,6 +39,14 @@ fun ButtonWithDropdownMenu(
 
     Button(
         contentPadding = PaddingValues(0.dp),
+        // Same transparent-container treatment as the sibling Buttons in
+        // BottomBarActionView so the Marquer / Plus chips blend into the
+        // BottomAppBar surface instead of drawing a dark primary rectangle
+        // behind the icon.
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
         onClick = {
             onChangeBackground()
             isExpanded = true

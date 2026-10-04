@@ -331,8 +331,13 @@ actual fun ExportPdfPlatform(
 
             LinearProgressIndicator(
                 modifier = Modifier.width(64.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                // The export modal is intentionally always-dark (Color.Black
+                // bg with Color.White text). Anchor the loader to Color.White
+                // too — before, we picked `colorScheme.secondary` which is
+                // the brand teal green and drew as a green bar over the
+                // black modal regardless of theme.
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.24f),
             )
         }
 

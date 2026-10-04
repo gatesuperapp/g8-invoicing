@@ -1,21 +1,14 @@
-Facturez en 10 secondes & convertissez vos devis et bons de livraison en factures !
+▸ Factures pros, format électronique
+Créez des factures professionnelles. Exportez en PDF ou Factur-X ou CII-XML : des formats normés, standards de la  facturation électronique.
 
 ▸ Devis, BL → Facture
-Transformez des devis ou des bons de livraison en facture,
-ou créez directement une facture. Évitez la ressaisie.
-
-▸ Factures pros, format électronique
-Créez des factures professionnelles. Exportez en PDF ou Factur-X ou CII-XML :
-des formats normés, standards de la  facturation électronique.
+Transformez des devis ou des bons de livraison en facture, ou créez directement une facture. Évitez la ressaisie.
 
 ▸ Gestion avancée
-Visualisez en un instant les factures en retard, et relancez en un clic.
-Marquez vos factures avec des tags, ajoutez un tampon "Payé". Générez des avoirs et factures rectificatives.
+Visualisez en un instant les factures en retard, et relancez en un clic. Marquez vos factures avec des tags, ajoutez un tampon "Payé". Générez des avoirs et factures rectificatives.
 
 ▸ Adaptée à votre métier
-Prix en HT ou TTC au choix, calcul automatique. N'importe quelle unité
-(kg, heure, pièce, botte...). Plusieurs prix possibles par produit selon le·la
-client·e. Gestion de plusieurs entreprises. TVA personnalisable.
+Prix en HT ou TTC au choix, calcul automatique. N'importe quelle unité (kg, heure, pièce, botte...). Plusieurs prix possibles par produit selon le·la client·e. Gestion de plusieurs entreprises. TVA personnalisable.
 
 ▸ Personnalisation
 Ajoutez votre logo, écrivez vos descriptions, moyens de paiement, conditions de vente, pied de page ou références.

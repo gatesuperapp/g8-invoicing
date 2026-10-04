@@ -52,6 +52,7 @@ import com.a4a.g8invoicing.shared.resources.currency_picker_all
 import com.a4a.g8invoicing.shared.resources.currency_picker_empty
 import com.a4a.g8invoicing.shared.resources.currency_picker_recent
 import com.a4a.g8invoicing.shared.resources.currency_picker_search
+import com.a4a.g8invoicing.ui.theme.AppColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -139,9 +140,9 @@ fun CurrencyPicker(
                 placeholder = { Text(stringResource(Res.string.currency_picker_search)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Black,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
+                    focusedBorderColor = AppColors.textPrimary,
+                    unfocusedBorderColor = AppColors.textPrimary,
+                    cursorColor = AppColors.textPrimary,
                 ),
             )
 

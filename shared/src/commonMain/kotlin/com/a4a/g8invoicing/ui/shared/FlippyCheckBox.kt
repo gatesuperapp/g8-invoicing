@@ -66,10 +66,14 @@ fun FlippyCheckBox(
                         shape = CircleShape
                     )
             ) {
+                // Checkbox fill + tick colours flip with the theme so the
+                // selection indicator stays legible on dark surfaces (fill
+                // stays "surface" so the check reads as a solid coche in
+                // textPrimary — off-white in dark, near-black in light).
                 MaterialTheme(
                     colorScheme = lightColorScheme(
-                        primary = backgroundColorWhenSelectionOn ?: Color.White,
-                        onPrimary = Color.Black,
+                        primary = backgroundColorWhenSelectionOn ?: AppColors.surface,
+                        onPrimary = AppColors.textPrimary,
                     )
                 ) {
                     Checkbox(

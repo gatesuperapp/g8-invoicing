@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore by preferencesDataStore("settings")
 
 // Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "1.9"
+const val CURRENT_APP_VERSION = "2.0"
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")
@@ -29,6 +29,43 @@ object PrefKeys {
     // from LAST_SEEN_VERSION because the standard WhatsNew flow shouldn't
     // fire again for users updating from 1.8 → 1.8.1.
     val HAS_SEEN_EINVOICE_INTRO = booleanPreferencesKey("has_seen_einvoice_intro")
+    // 2.0 dark-mode preference. Absent = follow the system setting. Present
+    // = user has explicitly picked light (false) or dark (true) via the
+    // Apparence toggle in Mon Compte and that choice overrides the system.
+    val DARK_MODE = booleanPreferencesKey("dark_mode")
+    // 2.0 dark-mode migration prompt — one-shot, upgraders only. Fresh
+    // installs flip this at the same time as HAS_SEEN_POPUP (see
+    // initializeVersionTracking).
+    val HAS_SEEN_DARKMODE_MIGRATION_20 = booleanPreferencesKey("has_seen_darkmode_migration_20")
+}
+
+// Dark mode preference — emits null when the user hasn't explicitly chosen
+// (fall back to isSystemInDarkTheme() at read time), or the stored boolean
+// once the Apparence toggle has been used.
+fun darkModePreference(context: Context) =
+    context.dataStore.data.map { prefs -> prefs[PrefKeys.DARK_MODE] }
+
+suspend fun setDarkMode(context: Context, enabled: Boolean) {
+    context.dataStore.edit { prefs ->
+        prefs[PrefKeys.DARK_MODE] = enabled
+    }
+}
+
+// Fires for anyone whose HAS_SEEN_DARKMODE_MIGRATION_20 is not yet true.
+// Can't gate on LAST_SEEN_VERSION like the other "fire on upgrade" prompts
+// because the 1.9 migration wizard writes LAST_SEEN_VERSION = CURRENT_APP_VERSION
+// in its markSeen block (via setSeenOnboarding18), which would mask the
+// upgrade signal for users crossing 1.x → 2.0. Fresh installs still skip
+// the modal — initializeVersionTracking flips HAS_SEEN immediately.
+fun shouldShowDarkModeMigration20(context: Context) =
+    context.dataStore.data.map { prefs ->
+        !(prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] ?: false)
+    }
+
+suspend fun setSeenDarkModeMigration20(context: Context) {
+    context.dataStore.edit { prefs ->
+        prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] = true
+    }
 }
 
 // Écrire le flag (pour la popup d'export DB)
@@ -84,6 +121,7 @@ suspend fun initializeVersionTracking(context: Context) {
         // n'apparaisse jamais (l'utilisateur découvre l'appli avec la
         // facturation électronique déjà intégrée aux features).
         setSeenEInvoiceIntro(context)
+        setSeenDarkModeMigration20(context)
         // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
         // The onboarding must run for fresh installs too (with the empty-issuer
         // path skipping the per-issuer loop) so a user quitting via the Home

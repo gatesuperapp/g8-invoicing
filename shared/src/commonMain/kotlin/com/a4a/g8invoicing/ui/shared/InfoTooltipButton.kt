@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.info_tooltip_ok
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textCta
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.stringResource
@@ -88,14 +88,14 @@ fun InfoTooltipButton(
         modifier = modifier
             .size(20.dp)
             .clip(CircleShape)
-            .background(ColorVioletLink.copy(alpha = 0.15f))
+            .background(AppColors.accent.copy(alpha = 0.15f))
             .clickable { open = true }
             .semantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = glyph,
-            color = ColorVioletLink,
+            color = AppColors.accent,
             fontSize = 13.sp,
             fontWeight = FontWeight.Bold,
             style = androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(

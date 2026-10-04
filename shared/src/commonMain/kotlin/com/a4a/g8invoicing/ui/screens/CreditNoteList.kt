@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.appbar_credit_notes
+import com.a4a.g8invoicing.shared.resources.credit_note_empty_cta
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -145,29 +147,44 @@ fun CreditNoteList(
                 val filteredDocuments = remember(documentsUiState.documentStates, searchQuery.text) {
                     documentsUiState.documentStates.filterByQuery(searchQuery.text)
                 }
-                // No need to have pull to refresh because it's a flow,
-                // thus the list is updated when anything changes in db
-                DocumentListContent(
-                    documents = filteredDocuments,
-                    onItemClick = onClickListItem,
-                    addDocumentToSelectedList = {
-                        selectedItems.add(it as CreditNoteState)
-                        selectedMode.value = true
-                    },
-                    removeDocumentFromSelectedList = {
-                        selectedItems.remove(it as CreditNoteState)
-                        if (selectedItems.isEmpty()) {
-                            selectedMode.value = false
-                        }
-                    },
-                    keyToResetCheckboxes = keyToResetCheckboxes.value,
-                    // Credit notes ship no gStore tagging module and no
-                    // draft/sent workflow — every row shows the neutral
-                    // undefined pill (white + grey border) with no status
-                    // label under the price. Matches the "module off"
-                    // treatment used by Quote / DeliveryNote.
-                    tagsEnabled = false,
-                )
+
+                var showEmptyState by remember { mutableStateOf(false) }
+                LaunchedEffect(documentsUiState.documentStates.isEmpty()) {
+                    if (documentsUiState.documentStates.isEmpty()) {
+                        kotlinx.coroutines.delay(300)
+                        showEmptyState = true
+                    } else {
+                        showEmptyState = false
+                    }
+                }
+
+                if (documentsUiState.documentStates.isEmpty() && showEmptyState) {
+                    EmptyListMascot(stringResource(Res.string.credit_note_empty_cta))
+                } else if (documentsUiState.documentStates.isNotEmpty()) {
+                    // No need to have pull to refresh because it's a flow,
+                    // thus the list is updated when anything changes in db
+                    DocumentListContent(
+                        documents = filteredDocuments,
+                        onItemClick = onClickListItem,
+                        addDocumentToSelectedList = {
+                            selectedItems.add(it as CreditNoteState)
+                            selectedMode.value = true
+                        },
+                        removeDocumentFromSelectedList = {
+                            selectedItems.remove(it as CreditNoteState)
+                            if (selectedItems.isEmpty()) {
+                                selectedMode.value = false
+                            }
+                        },
+                        keyToResetCheckboxes = keyToResetCheckboxes.value,
+                        // Credit notes ship no gStore tagging module and no
+                        // draft/sent workflow — every row shows the neutral
+                        // undefined pill (white + grey border) with no status
+                        // label under the price. Matches the "module off"
+                        // treatment used by Quote / DeliveryNote.
+                        tagsEnabled = false,
+                    )
+                }
             }
         }
 

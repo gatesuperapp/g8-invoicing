@@ -34,6 +34,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
@@ -46,7 +47,6 @@ import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorGreyo
 import org.jetbrains.compose.resources.stringResource
 import com.a4a.g8invoicing.ui.theme.ColorLoudGrey
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textCaption
 
@@ -132,8 +132,20 @@ fun FormInputCreatorText(
                     onValueChange = {
                         input.onValueChange(it)
                     },
-                    textStyle = if (isEditableLabel) MaterialTheme.typography.textBodyBold
-                    else LocalTextStyle.current,
+                    // Explicit `color = AppColors.textPrimary`: without it,
+                    // BasicTextField's textStyle inherits from LocalTextStyle
+                    // (bodyLarge, Color.Unspecified) and falls back to
+                    // LocalContentColor — which, depending on how the Form
+                    // surface upstream provides ambient colors, can end up
+                    // anchored to black on dark theme too. Pinning the token
+                    // guarantees the typed text flips light in dark mode.
+                    textStyle = if (isEditableLabel)
+                        MaterialTheme.typography.textBodyBold.copy(color = AppColors.textPrimary)
+                    else LocalTextStyle.current.copy(color = AppColors.textPrimary),
+                    // Pin the cursor to the text colour — Material3's default
+                    // picks colorScheme.primary, which is near-black in dark
+                    // mode and renders as an invisible cursor on #272229.
+                    cursorBrush = SolidColor(AppColors.textPrimary),
                     keyboardOptions = KeyboardOptions(
                         // Multiline inputs (client notes) opt out of the
                         // Next/Done imeAction so Enter inserts a newline
@@ -221,9 +233,13 @@ fun FormInputCreatorText(
     }
 }
 
-// The handle is the "drop" shaped under the cursor, useful to navigate in the text
-// The background is the color when text is selected
-val customTextSelectionColors = TextSelectionColors(
-    handleColor = ColorVioletLight,
-    backgroundColor = ColorLoudGrey
-)
+// The handle is the "drop" shaped under the cursor, useful to navigate in the text.
+// The background is the color when text is selected.
+// Composable getter so `handleColor` swaps with the theme accent — top-level
+// `val` initialization can't read AppColors (its getter is @Composable).
+val customTextSelectionColors: TextSelectionColors
+    @Composable
+    get() = TextSelectionColors(
+        handleColor = AppColors.accent,
+        backgroundColor = ColorLoudGrey,
+    )

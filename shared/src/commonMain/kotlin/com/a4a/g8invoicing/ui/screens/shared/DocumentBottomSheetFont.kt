@@ -37,7 +37,6 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.font_picker_title
 import com.a4a.g8invoicing.shared.resources.gstore_premium_badge
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.DocumentFont
 import com.a4a.g8invoicing.ui.theme.regularFamily
 import com.a4a.g8invoicing.ui.theme.textBodyBold
@@ -126,7 +125,7 @@ private fun FontRow(
     // Blue tint on the selected row mirrors the picker's currentSelected
     // treatment for issuers/clients (see ClientOrIssuerPickerBottomSheet's
     // SelectedViolet). Same violet at a lower opacity so it stays readable.
-    val background = if (isSelected) SelectedFontHighlight else AppColors.surface
+    val background = if (isSelected) AppColors.accent.copy(alpha = 0.08f) else AppColors.surface
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -165,20 +164,21 @@ private fun PremiumPill() {
     // hero, the pastille is a footnote.
     Box(
         modifier = Modifier
-            .background(PremiumPillBackground, shape = RoundedCornerShape(50))
+            // Same treatment as GStore.IconBackground — the pill fill tracks
+            // the theme accent so the pastille stays legible on both light
+            // (soft lavender wash) and dark (subtle violet chip).
+            .background(AppColors.accent.copy(alpha = 0.12f), shape = RoundedCornerShape(50))
             .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
         Text(
             text = stringResource(Res.string.gstore_premium_badge),
             fontSize = 8.sp,
             fontWeight = FontWeight.SemiBold,
-            color = ColorVioletLight,
+            color = AppColors.accent,
         )
     }
 }
 
-// Shared with GStore.IconBackground / picker's SelectedViolet — kept local
-// (rather than moved to AppColors) to avoid ballooning the palette until we
-// have a second consumer inside a bottom sheet.
-private val PremiumPillBackground = androidx.compose.ui.graphics.Color(0xFFEFE3F0)
-private val SelectedFontHighlight = ColorVioletLight.copy(alpha = 0.08f)
+// PremiumPillBackground removed — the pill now reads `AppColors.accent` at
+// 12% alpha, matching GStore's IconBackground so both surfaces stay in sync
+// across themes without a hardcoded lavender constant.

@@ -54,8 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.a4a.g8invoicing.data.models.CountryCodes
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.first_launch_gstore_intro
-import com.a4a.g8invoicing.shared.resources.first_launch_gstore_premium
 import com.a4a.g8invoicing.shared.resources.first_launch_issuer_default_name
 import com.a4a.g8invoicing.shared.resources.first_launch_issuer_placeholder
 import com.a4a.g8invoicing.shared.resources.first_launch_issuer_skip
@@ -68,8 +66,11 @@ import com.a4a.g8invoicing.shared.resources.first_launch_settings_intro
 import com.a4a.g8invoicing.shared.resources.first_launch_settings_name_label
 import com.a4a.g8invoicing.shared.resources.first_launch_welcome_amigo
 import com.a4a.g8invoicing.shared.resources.first_launch_welcome_title
+import com.a4a.g8invoicing.shared.resources.account_dark_mode_switch
+import com.a4a.g8invoicing.shared.resources.onboarding_darkmode_body
 import com.a4a.g8invoicing.shared.resources.onboarding_issuer_country_pick
 import com.a4a.g8invoicing.shared.resources.onboarding_previous
+import com.a4a.g8invoicing.shared.resources.onboarding_yes
 import com.a4a.g8invoicing.ui.screens.shared.CountryPicker
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
@@ -81,25 +82,18 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Fresh-install onboarding — 5 slides that funnel the user into a valid
- * first-issuer state before the app proper opens.
+ * Fresh-install onboarding wizard that funnels the user into a valid first
+ * issuer before the app proper opens: Welcome → Liberty → Settings (name +
+ * country) → optional dark-mode slide → confetti.
  *
- * 1. Welcome — animated rhino + brand line + amigo tag.
- * 2. Liberty — ✌️ + "you can manage everything from your phone" +
- *    open-source / offline reassurance.
- * 3. gStore — 🕹️ + a-la-carte modules pitch.
- * 4. Settings — single form with the 2 configuration fields (business
- *    name + country) and a discreet "Plus tard" link.
- * 5. Completion — confetti burst + "Bonne facturation !" then dismiss.
- *
- * Non-dismissable: the outer app can't render until we return an issuer.
- * Both the country field and the skip link still produce a saved issuer —
- * falling back to "Mon entreprise" for the name and the system country
- * for the locale — because we cannot leave the app without one.
+ * Non-dismissable: the outer app can't render until an issuer exists. The
+ * country field and the skip link both still produce a saved issuer, falling
+ * back to "Mon entreprise" + the system country when the user bails early.
  */
 @Composable
 fun FirstLaunchIssuerNameDialog(
     onSubmit: suspend (name: String, countryCode: String) -> Unit,
+    onEnableDarkMode: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val defaultCountry = remember { CountryCodes.pickDefaultForNewAddress(null) }
@@ -170,20 +164,26 @@ fun FirstLaunchIssuerNameDialog(
             ) {
                 when (step) {
                     Step.Welcome -> WelcomeStep(onNext = { step = Step.Liberty })
-                    Step.Liberty -> LibertyStep(onNext = { step = Step.Gstore })
-                    Step.Gstore -> GstoreStep(onNext = { step = Step.Settings })
+                    Step.Liberty -> LibertyStep(onNext = { step = Step.Settings })
                     Step.Settings -> SettingsStep(
                         name = name,
                         onNameChange = { name = it },
                         placeholder = namePlaceholder,
                         country = country,
                         onOpenPicker = { showCountryPicker = true },
-                        onSubmit = { step = Step.Completion },
+                        onSubmit = { step = Step.DarkMode },
                         onSkip = {
                             name = TextFieldValue(text = "", selection = TextRange(0))
                             country = defaultCountry
+                            step = Step.DarkMode
+                        },
+                    )
+                    Step.DarkMode -> DarkModeStep(
+                        onEnable = {
+                            onEnableDarkMode()
                             step = Step.Completion
                         },
+                        onSkip = { step = Step.Completion },
                     )
                     Step.Completion -> CompletionStep(onDone = finishOnboarding)
                 }
@@ -200,16 +200,16 @@ fun FirstLaunchIssuerNameDialog(
     }
 }
 
-private enum class Step { Welcome, Liberty, Gstore, Settings, Completion }
+private enum class Step { Welcome, Liberty, Settings, DarkMode, Completion }
 
 private fun previousStep(step: Step): Step = when (step) {
     Step.Welcome -> Step.Welcome
     Step.Liberty -> Step.Welcome
-    Step.Gstore -> Step.Liberty
-    Step.Settings -> Step.Gstore
+    Step.Settings -> Step.Liberty
+    Step.DarkMode -> Step.Settings
     // Not reachable — TopBar hides the back button on the completion
     // slide since we're already about to persist and dismiss.
-    Step.Completion -> Step.Settings
+    Step.Completion -> Step.DarkMode
 }
 
 @Composable
@@ -298,37 +298,6 @@ private fun LibertyStep(onNext: () -> Unit) {
 }
 
 @Composable
-private fun GstoreStep(onNext: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp), initialDelayMs = 1000L) }
-        Spacer(Modifier.height(24.dp))
-        Text(
-            text = stringResource(Res.string.first_launch_gstore_intro),
-            style = MaterialTheme.typography.textBody,
-            textAlign = TextAlign.Start,
-            lineHeight = 24.sp,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(20.dp))
-        Text(
-            text = stringResource(Res.string.first_launch_gstore_premium),
-            style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-            textAlign = TextAlign.Start,
-            lineHeight = 22.sp,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Spacer(Modifier.height(40.dp))
-        PrimaryCta(
-            text = stringResource(Res.string.first_launch_next),
-            onClick = onNext,
-        )
-    }
-}
-
-@Composable
 private fun SettingsStep(
     name: TextFieldValue,
     onNameChange: (TextFieldValue) -> Unit,
@@ -387,6 +356,39 @@ private fun SettingsStep(
                 colors = ButtonDefaults.textButtonColors(contentColor = AppColors.textLink),
             ) { Text(stringResource(Res.string.first_launch_issuer_skip)) }
         }
+    }
+}
+
+@Composable
+private fun DarkModeStep(
+    onEnable: () -> Unit,
+    onSkip: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        LottieMascotSlot { BatSmilingEyes(modifier = Modifier.size(120.dp), initialDelayMs = 1000L) }
+        Spacer(Modifier.height(28.dp))
+        StepTitle(stringResource(Res.string.account_dark_mode_switch))
+        Spacer(Modifier.height(20.dp))
+        Text(
+            text = stringResource(Res.string.onboarding_darkmode_body),
+            style = MaterialTheme.typography.textBody.copy(color = AppColors.textSecondary),
+            textAlign = TextAlign.Center,
+            lineHeight = 24.sp,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(40.dp))
+        PrimaryCta(
+            text = stringResource(Res.string.onboarding_yes),
+            onClick = onEnable,
+        )
+        Spacer(Modifier.height(8.dp))
+        TextButton(
+            onClick = onSkip,
+            colors = ButtonDefaults.textButtonColors(contentColor = AppColors.textLink),
+        ) { Text(stringResource(Res.string.first_launch_issuer_skip)) }
     }
 }
 

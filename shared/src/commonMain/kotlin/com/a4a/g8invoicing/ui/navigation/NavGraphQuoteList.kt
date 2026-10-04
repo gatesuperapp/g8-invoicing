@@ -41,7 +41,6 @@ import com.a4a.g8invoicing.ui.screens.QuoteList
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.currentTimeMillis
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
@@ -191,7 +190,7 @@ private fun QuoteExPremiumDialog(onDismiss: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 Text(
                     text = "Vos devis existants restent accessibles et exportables. Pour créer ou dupliquer de nouveaux devis, il faut être membre premium.",
-                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                     lineHeight = 20.sp,
                     textAlign = TextAlign.Center,
                 )
@@ -202,7 +201,7 @@ private fun QuoteExPremiumDialog(onDismiss: () -> Unit) {
                         .fillMaxWidth()
                         .clickable(onClick = onDismiss),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ColorVioletLink,
+                        containerColor = AppColors.accent,
                         contentColor = Color.White,
                     ),
                 ) { Text("D'accord") }
@@ -233,7 +232,7 @@ private fun QuoteTrialExhaustedDialog(onDismiss: () -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 Text(
                     text = stringResource(Res.string.gstore_quote_trial_exhausted_body),
-                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                     lineHeight = 20.sp,
                     textAlign = TextAlign.Center,
                 )
@@ -244,7 +243,7 @@ private fun QuoteTrialExhaustedDialog(onDismiss: () -> Unit) {
                         .fillMaxWidth()
                         .clickable(onClick = onDismiss),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = ColorVioletLink,
+                        containerColor = AppColors.accent,
                         contentColor = Color.White,
                     ),
                 ) { Text(stringResource(Res.string.gstore_quote_trial_exhausted_cta)) }

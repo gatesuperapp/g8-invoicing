@@ -198,11 +198,18 @@ fun ProductPickerBottomSheet(
                                 .fillMaxWidth()
                                 .height(52.dp)
                                 .focusRequester(focusRequester),
-                            textStyle = MaterialTheme.typography.textBodySmall,
+                            // Same theme-aware recipe as the TopBar search:
+                            // typed text + placeholder + cursor all track the
+                            // theme, and the filled container reads through
+                            // `AppColors.inputSurface` so the field never
+                            // renders white-on-white in dark mode.
+                            textStyle = MaterialTheme.typography.textBodySmall.copy(
+                                color = AppColors.textPrimary,
+                            ),
                             placeholder = {
                                 Text(
                                     text = stringResource(Res.string.currency_picker_search),
-                                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.Gray),
+                                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textMuted),
                                 )
                             },
                             leadingIcon = {
@@ -226,12 +233,14 @@ fun ProductPickerBottomSheet(
                             singleLine = true,
                             shape = RoundedCornerShape(8.dp),
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = RowGrey,
-                                unfocusedContainerColor = RowGrey,
+                                focusedContainerColor = AppColors.inputSurface,
+                                unfocusedContainerColor = AppColors.inputSurface,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
-                                cursorColor = Color.Black,
+                                cursorColor = AppColors.accent,
+                                focusedTextColor = AppColors.textPrimary,
+                                unfocusedTextColor = AppColors.textPrimary,
                             ),
                         )
                     } else {

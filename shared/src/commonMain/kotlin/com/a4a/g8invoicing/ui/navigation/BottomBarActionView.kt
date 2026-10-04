@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +48,16 @@ fun BottomBarActionView(
         }
     }
 
+    // Transparent Buttons so they blend with the BottomAppBar surface instead
+    // of drawing the default `colorScheme.primary` container behind each icon
+    // — that container reads as a bright rectangle on dark theme (primary is
+    // near-white to match the brand). Icons + labels inherit onSurface via
+    // LocalContentColor so they read correctly against both themes.
+    val transparentButtonColors = ButtonDefaults.buttonColors(
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    )
+
     ViewWithLayout {
         if (appBarActions !== null) {
             Row(
@@ -60,6 +72,7 @@ fun BottomBarActionView(
                             Button(
                                 contentPadding = PaddingValues(0.dp),
                                 shape = RoundedCornerShape(4.dp),
+                                colors = transparentButtonColors,
                                 onClick = {
                                     onChangeBackground()
                                     isExpanded = true
@@ -81,6 +94,7 @@ fun BottomBarActionView(
                             Button(
                                 contentPadding = PaddingValues(0.dp),
                                 shape = RoundedCornerShape(4.dp),
+                                colors = transparentButtonColors,
                                 onClick = action.onClick
                             ) {
                                 AddIconAndLabelInColumn(
@@ -100,6 +114,7 @@ fun BottomBarActionView(
                         Button(
                             contentPadding = PaddingValues(0.dp),
                             shape = RoundedCornerShape(4.dp),
+                            colors = transparentButtonColors,
                             onClick = action.onClick
                         ) {
                             if (action.name == "TAG") {

@@ -45,7 +45,7 @@ import com.a4a.g8invoicing.shared.resources.database_export_dialog_title
 import com.a4a.g8invoicing.shared.resources.database_export_dialog_where
 import com.a4a.g8invoicing.shared.resources.no
 import com.a4a.g8invoicing.shared.resources.yes
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
 
 @Composable

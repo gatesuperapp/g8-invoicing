@@ -66,7 +66,11 @@ fun CustomChip(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFF5F5F5))
+            // Chip fill + text tied to the theme (same treatment as
+            // EmailChip). Legacy #F5F5F5 stayed white on white in dark mode
+            // and made the label vanish — surfaceMuted keeps the light-mode
+            // grey while flipping to a readable subtle chip on dark.
+            .background(AppColors.surfaceMuted)
             .clickable { onChipClick() }
             .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -74,6 +78,7 @@ fun CustomChip(
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
+            color = AppColors.textPrimary,
             lineHeight = 16.sp,
             modifier = Modifier.weight(1f, fill = false)
         )

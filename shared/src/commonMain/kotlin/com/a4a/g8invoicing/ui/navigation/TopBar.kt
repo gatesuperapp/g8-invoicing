@@ -61,14 +61,11 @@ import com.a4a.g8invoicing.shared.resources.currency_picker_search
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCta
 import org.jetbrains.compose.resources.stringResource
 
 //Provides back arrow navigation and eventually screen titles.
-
-private val SearchFieldGrey = Color(0xFFF0F0F0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -199,12 +196,12 @@ fun TopBar(
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = SearchFieldGrey,
-                                    unfocusedContainerColor = SearchFieldGrey,
+                                    focusedContainerColor = AppColors.inputSurface,
+                                    unfocusedContainerColor = AppColors.inputSurface,
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
                                     disabledIndicatorColor = Color.Transparent,
-                                    cursorColor = ColorVioletLight,
+                                    cursorColor = AppColors.accent,
                                 ),
                             )
                         }
@@ -297,11 +294,11 @@ fun TopBar(
                             OutlinedButton(
                                 onClick = action.onClick,
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = ColorVioletLight
+                                    contentColor = AppColors.accent
                                 ),
                                 border = androidx.compose.foundation.BorderStroke(
                                     width = 1.dp,
-                                    color = ColorVioletLight
+                                    color = AppColors.accent
                                 )
                             ) {
                                 action.icon?.let {

@@ -60,7 +60,7 @@ fun DocumentBottomSheetProductListChosenItem(
             .background(if (isDragging) AppColors.surfaceMuted else AppColors.surfaceSubtle)
             .clickable(
                 interactionSource = rowInteractionSource,
-                indication = ripple(color = Color.Black, bounded = false)
+                indication = ripple(color = AppColors.ripple, bounded = false)
             ) {
                 onClickDocumentProduct()
             }

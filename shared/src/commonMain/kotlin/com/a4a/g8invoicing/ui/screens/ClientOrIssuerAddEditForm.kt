@@ -111,7 +111,6 @@ import com.a4a.g8invoicing.ui.shared.ScreenElement
 import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textSection
@@ -711,7 +710,7 @@ fun ClientOrIssuerAddEditForm(
                     modifier = Modifier.scale(0.8f),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
-                        checkedTrackColor = ColorVioletLink,
+                        checkedTrackColor = AppColors.switchCheckedTrack,
                         checkedBorderColor = Color.Transparent,
                         uncheckedBorderColor = Color.Transparent,
                     ),
@@ -761,7 +760,7 @@ fun ClientOrIssuerAddEditForm(
                         modifier = Modifier.scale(0.8f),
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
-                            checkedTrackColor = ColorVioletLink,
+                            checkedTrackColor = AppColors.switchCheckedTrack,
                             checkedBorderColor = Color.Transparent,
                             uncheckedBorderColor = Color.Transparent,
                         ),
@@ -806,7 +805,7 @@ fun ClientOrIssuerAddEditForm(
                         modifier = Modifier.scale(0.8f),
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
-                            checkedTrackColor = ColorVioletLink,
+                            checkedTrackColor = AppColors.switchCheckedTrack,
                             checkedBorderColor = Color.Transparent,
                             uncheckedBorderColor = Color.Transparent,
                         ),
@@ -896,7 +895,7 @@ fun ClientOrIssuerAddEditForm(
                     modifier = Modifier.scale(0.8f),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
-                        checkedTrackColor = ColorVioletLink,
+                        checkedTrackColor = AppColors.switchCheckedTrack,
                         checkedBorderColor = Color.Transparent,
                         uncheckedBorderColor = Color.Transparent,
                     ),
@@ -965,7 +964,7 @@ fun AddAddressButton(onClick: () -> Unit, bottomPadding: Dp = 0.dp, topPadding: 
     ) {
         Text(
             style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-            color = ColorVioletLink,
+            color = AppColors.accent,
             text = AnnotatedString(text),
         )
     }

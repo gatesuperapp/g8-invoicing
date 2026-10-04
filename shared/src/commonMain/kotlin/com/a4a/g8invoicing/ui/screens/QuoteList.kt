@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -37,6 +38,7 @@ import com.a4a.g8invoicing.shared.resources.appbar_quotes
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert1
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert2
+import com.a4a.g8invoicing.shared.resources.quote_empty_cta
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -177,32 +179,46 @@ fun QuoteList(
                 }
                 val hasActiveQuery = searchQuery.text.isNotBlank()
 
-                Column {
-                    // No need to have pull to refresh because it's a flow,
-                    // thus the list is updated when anything changes in db
-                    DocumentListContent(
-                        documents = filteredDocuments,
-                        onItemClick = onClickListItem,
-                        addDocumentToSelectedList = {
-                            selectedItems.add(it as QuoteState)
-                            selectedMode.value = true
-                        },
-                        removeDocumentFromSelectedList = {
-                            selectedItems.remove(it as QuoteState)
-                            if (selectedItems.isEmpty()) {
-                                selectedMode.value = false
-                            }
-                        },
-                        keyToResetCheckboxes = keyToResetCheckboxes.value,
-                        tagsEnabled = isTagPickerEnabled,
-                    )
+                var showEmptyState by remember { mutableStateOf(false) }
+                LaunchedEffect(documentsUiState.quoteStates.isEmpty()) {
+                    if (documentsUiState.quoteStates.isEmpty()) {
+                        kotlinx.coroutines.delay(300)
+                        showEmptyState = true
+                    } else {
+                        showEmptyState = false
+                    }
+                }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                if (documentsUiState.quoteStates.isEmpty() && showEmptyState) {
+                    EmptyListMascot(stringResource(Res.string.quote_empty_cta))
+                } else if (documentsUiState.quoteStates.isNotEmpty()) {
+                    Column {
+                        // No need to have pull to refresh because it's a flow,
+                        // thus the list is updated when anything changes in db
+                        DocumentListContent(
+                            documents = filteredDocuments,
+                            onItemClick = onClickListItem,
+                            addDocumentToSelectedList = {
+                                selectedItems.add(it as QuoteState)
+                                selectedMode.value = true
+                            },
+                            removeDocumentFromSelectedList = {
+                                selectedItems.remove(it as QuoteState)
+                                if (selectedItems.isEmpty()) {
+                                    selectedMode.value = false
+                                }
+                            },
+                            keyToResetCheckboxes = keyToResetCheckboxes.value,
+                            tagsEnabled = isTagPickerEnabled,
+                        )
 
-                    // Skip the convert hint while searching (single-result queries
-                    // would trigger it out of context).
-                    if (documentsUiState.quoteStates.size == 1 && !hasActiveQuery)
-                        DisplayBatHelperAdvice()
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Skip the convert hint while searching (single-result queries
+                        // would trigger it out of context).
+                        if (documentsUiState.quoteStates.size == 1 && !hasActiveQuery)
+                            DisplayBatHelperAdvice()
+                    }
                 }
             }
         }

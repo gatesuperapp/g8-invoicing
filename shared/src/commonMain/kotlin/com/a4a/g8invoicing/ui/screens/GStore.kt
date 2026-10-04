@@ -101,7 +101,6 @@ import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.WebsiteFooter
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
@@ -213,7 +212,10 @@ private val MODULES = listOf(
     ),
 )
 
-private val IconBackground = Color(0xFFEFE3F0) // light lavender, matches mockup
+// IconBackground moved inline as `AppColors.accent.copy(alpha = 0.12f)` so
+// it tracks the theme accent — near-identical lavender on light (#932092 @
+// 12% on white ≈ #F1E1F1, matches the legacy #EFE3F0 mockup) and a subtle
+// violet-tinted dark chip in dark mode.
 
 @Composable
 fun GStore(
@@ -409,7 +411,7 @@ private fun PremiumHintDialog(
         ) {
             Text(
                 text = message,
-                style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                 lineHeight = 20.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
@@ -453,7 +455,7 @@ private fun GStoreModuleCard(
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .background(IconBackground, shape = RoundedCornerShape(10.dp)),
+                        .background(AppColors.accent.copy(alpha = 0.12f), shape = RoundedCornerShape(10.dp)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Icon(
@@ -494,9 +496,9 @@ private fun GStoreModuleCard(
                 onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = ColorVioletLight,
-                    uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
+                    checkedTrackColor = AppColors.switchCheckedTrack,
+                    uncheckedThumbColor = AppColors.switchUncheckedThumb,
+                    uncheckedTrackColor = if (isUnlocked) AppColors.switchUncheckedTrackLocked else AppColors.switchUncheckedTrack,
                     uncheckedBorderColor = Color.Transparent,
                 ),
             )
@@ -561,7 +563,7 @@ private fun ModuleDetailDialog(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .background(IconBackground, shape = RoundedCornerShape(10.dp)),
+                            .background(AppColors.accent.copy(alpha = 0.12f), shape = RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -586,7 +588,7 @@ private fun ModuleDetailDialog(
 
                 Text(
                     text = detail,
-                    style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                    style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                     lineHeight = 20.sp,
                 )
 
@@ -600,7 +602,7 @@ private fun ModuleDetailDialog(
                     onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
-                        checkedTrackColor = ColorVioletLight,
+                        checkedTrackColor = AppColors.switchCheckedTrack,
                         uncheckedThumbColor = Color.White,
                         uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
                         uncheckedBorderColor = Color.Transparent,
@@ -615,14 +617,14 @@ private fun ModuleDetailDialog(
 private fun PremiumPill() {
     Box(
         modifier = Modifier
-            .background(IconBackground, shape = RoundedCornerShape(50))
+            .background(AppColors.accent.copy(alpha = 0.12f), shape = RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {
         Text(
             text = stringResource(Res.string.gstore_premium_badge),
             style = MaterialTheme.typography.textTiny.copy(
                 fontWeight = FontWeight.SemiBold,
-                color = ColorVioletLight,
+                color = AppColors.accent,
             ),
         )
     }

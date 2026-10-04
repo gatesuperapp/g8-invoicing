@@ -115,7 +115,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Neues Produkt</string>
     <string name="document_products_other_lines">Weitere Zeilen</string>
-    <string name="document_product_advice">Um ein Produkt zu ändern, klicke auf das graue Rechteck …</string>
+    <string name="document_product_advice">Um ein Produkt zu ändern, klicke auf das graue Rechteck</string>
     <string name="document_product_advice_2">Die Änderung wirkt sich ausschließlich auf dieses Dokument aus …</string>
     <string name="document_product_advice_3">Sie beeinflusst nicht das gespeicherte Produkt im Reiter "Produkte".</string>
 
@@ -297,10 +297,12 @@
     <string name="first_launch_settings_intro">Bevor ich dir das Feld überlasse, brauche ich 2 Angaben, um die Oberfläche einzurichten:</string>
     <string name="first_launch_settings_name_label">Name deines Unternehmens</string>
     <string name="first_launch_settings_country_label">Land</string>
-    <string name="first_launch_settings_cta">Los geht's</string>
+    <string name="first_launch_settings_cta">Bestätigen</string>
     <string name="first_launch_issuer_placeholder">Name des Unternehmens</string>
     <string name="first_launch_issuer_skip">Später</string>
     <string name="first_launch_issuer_default_name">Mein Unternehmen</string>
+    <string name="onboarding_darkmode_body">Möchtest du den dunklen Modus aktivieren?</string>
+    <string name="onboarding_darkmode_migration_body">Der dunkle Modus ist jetzt verfügbar. Möchtest du ihn aktivieren?</string>
     <!-- Account Screen -->
     <string name="account_share_content">Ich nutze die App 𝕘𝟠, um meine Lieferscheine und Rechnungen in null Komma nix zu erstellen! Außerdem handelt es sich um eine freie und engagierte Software. Möchtest du sie testen? Sie ist kostenlos und im Play Store erhältlich (https://play.google.com/store/apps/details?id=com.a4a.g8invoicing) sowie auf F-Droid: https://f-droid.org/de/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -351,6 +353,8 @@
     <string name="client_type_individual">Privatperson</string>
     <string name="client_type_professional">Geschäftskunde</string>
     <string name="account_section_advanced">Erweitert</string>
+    <string name="account_appearance_title">Erscheinungsbild</string>
+    <string name="account_dark_mode_switch">Dunkler Modus</string>
     <string name="account_delete_cta">Mein Konto löschen</string>
     <string name="account_delete_dialog_title">Konto endgültig löschen?</string>
     <string name="account_delete_dialog_message">Diese Aktion ist unwiderruflich. Ihr Abonnement wird sofort gekündigt, Ihr Konto wird von unseren Servern entfernt und Sie werden abgemeldet. Lokal auf Ihrem Gerät gespeicherte Rechnungen und Daten bleiben unverändert.</string>
@@ -424,11 +428,14 @@
     <string name="ok">OK</string>
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">Ich habe diesen Move beim Hip-Hop gelernt, super stylisch, ich weiß. Ich muss noch daran arbeiten, ich bin nicht besonders schnell, meiner Meinung nach bremst meine Flughaut die Welle. Nun, was ich dir sagen wollte …\n\n …</string>
+    <string name="delivery_note_empty_cta">Tippe auf «Erstellen», um deinen ersten Lieferschein anzulegen</string>
+    <string name="quote_empty_cta">Tippe auf «Erstellen», um dein erstes Angebot anzulegen</string>
+    <string name="credit_note_empty_cta">Tippe auf «Erstellen», um deine erste Gutschrift anzulegen</string>
     <string name="delivery_note_advice_convert1">Wenn du aus einem oder mehreren Lieferscheinen eine Rechnung erstellen willst, kannst du sie in der Liste über langes Drücken (oder Klicken auf den ○) auswählen \n\n …</string>
     <string name="delivery_note_advice_convert2">und dann auf In Rechnung stellen klicken. Sie erscheint dann im Reiter Rechnungen oben in der Liste mit einer gegenüber der vorherigen Rechnung um 1 erhöhten Nummer. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Klicke auf mich!</string>
-    <string name="invoice_advice_legal_1">Tippe auf «Menü» &gt; gStore, um die gewünschten Funktionen zu aktivieren. Tippe auf «Erstellen», um deine erste Rechnung anzulegen…</string>
+    <string name="invoice_advice_legal_1">Tippe auf «Erstellen», um deine erste Rechnung anzulegen</string>
     <string name="invoice_advice_legal_2">Alle Dokumente, die du erstellst, werden automatisch im Hintergrund gespeichert. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Willkommen bei 𝕘𝟠, genannt: The Gate!\n\n Ich bin Kleine Hufnase, deine neue Freundin ♡</string>
 

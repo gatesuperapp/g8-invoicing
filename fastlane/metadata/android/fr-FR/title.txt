@@ -1,1 +1,1 @@
-facture, devis, bon livraison
+g8 : bon de livraison, facture

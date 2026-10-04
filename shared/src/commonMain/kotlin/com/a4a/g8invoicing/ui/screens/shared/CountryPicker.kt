@@ -39,6 +39,7 @@ import com.a4a.g8invoicing.shared.resources.country_picker_all
 import com.a4a.g8invoicing.shared.resources.country_picker_empty
 import com.a4a.g8invoicing.shared.resources.country_picker_recent
 import com.a4a.g8invoicing.shared.resources.country_picker_search
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
@@ -121,9 +122,9 @@ fun CountryPicker(
                 placeholder = { Text(stringResource(Res.string.country_picker_search)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Black,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
+                    focusedBorderColor = AppColors.textPrimary,
+                    unfocusedBorderColor = AppColors.textPrimary,
+                    cursorColor = AppColors.textPrimary,
                 ),
             )
 

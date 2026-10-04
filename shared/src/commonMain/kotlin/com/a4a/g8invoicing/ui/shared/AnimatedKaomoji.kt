@@ -116,6 +116,10 @@ private fun AnimatedKaomojiFrames(
     Text(
         text = frames[frameIndex],
         fontSize = fontSize,
+        // Explicit textPrimary so the animated kaomoji stays legible in dark
+        // mode — the default LocalContentColor inside a Dialog can resolve
+        // to a tone that renders the mascot as a low-contrast smudge.
+        color = com.a4a.g8invoicing.ui.theme.AppColors.textPrimary,
         // Monospace keeps each glyph in a fixed cell so the mascot doesn't
         // resize/shift between frames — even when the eye or flower chars
         // have different intrinsic widths in a proportional font.

@@ -69,7 +69,7 @@ fun ProductListItem(
             .clip(RoundedCornerShape(5.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = Color.Black, bounded = false),
+                indication = ripple(color = AppColors.ripple, bounded = false),
             ) {
                 //onItemClick()
             }
