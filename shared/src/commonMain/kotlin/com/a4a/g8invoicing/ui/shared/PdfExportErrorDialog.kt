@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 /**
  * Error modal used by every PDF-family export path (classic PDF + Factur-X)
@@ -59,7 +59,7 @@ fun PdfExportErrorDialog(
         pushStringAnnotation(tag = "mailto", annotation = mailtoUrl)
         withStyle(
             SpanStyle(
-                color = ColorVioletLink,
+                color = AppColors.accent,
                 textDecoration = TextDecoration.Underline,
             ),
         ) {
@@ -79,6 +79,7 @@ fun PdfExportErrorDialog(
                 Text(
                     text = OH_NO_HEADER,
                     style = MaterialTheme.typography.bodyLarge,
+                    color = AppColors.textPrimary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -86,11 +87,14 @@ fun PdfExportErrorDialog(
                 Text(
                     text = FRIENDLY_MESSAGE,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = AppColors.textPrimary,
                 )
                 Spacer(Modifier.height(12.dp))
                 ClickableText(
                     text = annotated,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = AppColors.textPrimary,
+                    ),
                     onClick = { offset ->
                         annotated
                             .getStringAnnotations(tag = "mailto", start = offset, end = offset)
@@ -102,7 +106,7 @@ fun PdfExportErrorDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("OK", color = ColorVioletLink)
+                Text("OK", color = AppColors.accent)
             }
         },
     )

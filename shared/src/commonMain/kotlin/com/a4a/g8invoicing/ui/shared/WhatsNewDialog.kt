@@ -52,7 +52,6 @@ import com.a4a.g8invoicing.shared.resources.whats_new_watermark_title
 import com.a4a.g8invoicing.shared.resources.whats_new_watermark_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textDisplay
@@ -176,7 +175,7 @@ fun WhatsNewDialog(
 
                                     Text(
                                         text = stringResource(Res.string.whats_new_discover),
-                                        style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                                         textAlign = TextAlign.Center,
                                     )
                                 }
@@ -208,7 +207,7 @@ fun WhatsNewDialog(
 
                                     Text(
                                         text = page.description,
-                                        style = MaterialTheme.typography.textBodySmall.copy(color = Color.DarkGray),
+                                        style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
                                         textAlign = TextAlign.Center,
                                         lineHeight = 20.sp,
                                     )
@@ -230,7 +229,7 @@ fun WhatsNewDialog(
                                     .size(if (isSelected) 10.dp else 8.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isSelected) ColorVioletLight else AppColors.surfaceMuted
+                                        if (isSelected) AppColors.accent else AppColors.surfaceMuted
                                     )
                                     .clickable {
                                         coroutineScope.launch {
@@ -248,7 +247,7 @@ fun WhatsNewDialog(
                         TextButton(onClick = onDismiss) {
                             Text(
                                 text = stringResource(Res.string.whats_new_done),
-                                color = ColorVioletLight,
+                                color = AppColors.accent,
                                 fontWeight = FontWeight.Bold
                             )
                         }

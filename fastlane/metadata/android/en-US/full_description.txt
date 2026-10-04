@@ -1,23 +1,19 @@
-Invoice in 10 seconds and convert your quotes and delivery notes into invoices!
-
-▸ Quote, DN → Invoice
-Turn quotes or delivery notes into an invoice, or create an invoice directly. No re-typing.
+Convert your quotes and delivery notes into invoices. Offline-first.
 
 ▸ Pro invoices, electronic format
 Create professional invoices. Export as PDF, Factur-X or CII-XML: the standard formats for electronic invoicing. Import into your registered platform or accounting software.
 
+▸ Quote, DN → Invoice
+Turn quotes or delivery notes into an invoice. No re-typing.
+
 ▸ Advanced management
-See overdue invoices at a glance and send reminders in one tap.
-Tag your invoices, add a "Paid" stamp. Generate credit notes and corrective invoices.
+See overdue invoices at a glance and send reminders in one tap. Tag your invoices, add a "Paid" stamp. Generate credit notes and corrective invoices.
 
 ▸ Fits your trade
-Prices excl. or incl. tax, your choice — automatic calculation. Any unit
-(kg, hour, piece, bunch...). Multiple prices per product depending on the
-customer. Multi-business support. Custom VAT rates.
+Prices excl. or incl. tax, your choice — automatic calculation. Any unit (kg, hour, piece, bunch...). Multiple prices per product depending on the customer. Multi-business support. Custom VAT rates.
 
 ▸ Personalisation
-Add your logo, write your descriptions, payment methods, terms of sale, footer or references.
-Change the font of your documents to match your style.
+Add your logo, write your descriptions, payment methods, terms of sale, footer or references. Change the font of your documents to match your style.
 
 ▸ Sharing
 Send by email, SMS, instant messaging, QuickShare... or print!

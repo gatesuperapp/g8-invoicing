@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -64,6 +65,7 @@ import com.a4a.g8invoicing.ui.shared.OnboardingDialog
 import com.a4a.g8invoicing.ui.shared.WhatsNewDialog
 import com.a4a.g8invoicing.ui.shared.animations.BatOpenMouth
 import com.a4a.g8invoicing.ui.shared.animations.BatSmilingEyes
+import com.a4a.g8invoicing.ui.shared.animations.LottieMascotHalo
 import com.a4a.g8invoicing.ui.states.InvoiceState
 import com.a4a.g8invoicing.ui.states.InvoicesUiState
 import org.jetbrains.compose.resources.stringResource
@@ -366,20 +368,21 @@ private fun DisplayBatHelperWelcome() {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            Modifier.clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) {
-                visibleText = if (visibleText < 2) visibleText + 1 else 0
-                numberOfIterations.intValue += 1
-            }
+        LottieMascotHalo(
+            modifier = Modifier
+                .size(320.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    visibleText = if (visibleText < 2) visibleText + 1 else 0
+                    numberOfIterations.intValue += 1
+                }
         ) {
             BatSmilingEyes(
                 modifier = Modifier
-                    .width(150.dp)
-                    .height(150.dp)
-                    .align(Alignment.Center),
+                    .width(110.dp)
+                    .height(110.dp),
                 iterations = numberOfIterations.intValue
             )
         }
@@ -428,22 +431,23 @@ private fun DisplayBatHelperMenuAdvice() {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            Modifier.clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }
-            ) {
-                if (visibleText < 3) {
-                    visibleText += 1
-                } else visibleText = 0
-                numberOfIterations.intValue += 1
-            }
+        LottieMascotHalo(
+            modifier = Modifier
+                .size(180.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    if (visibleText < 3) {
+                        visibleText += 1
+                    } else visibleText = 0
+                    numberOfIterations.intValue += 1
+                }
         ) {
             BatOpenMouth(
                 modifier = Modifier
                     .width(100.dp)
-                    .height(45.dp)
-                    .align(Alignment.Center),
+                    .height(45.dp),
                 iterations = numberOfIterations.intValue
             )
         }

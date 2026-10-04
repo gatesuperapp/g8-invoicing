@@ -136,8 +136,11 @@ fun FormInputCreatorEmailList(
                                 tryAddEmail()
                             }
                         },
-                    textStyle = LocalTextStyle.current,
-                    cursorBrush = SolidColor(Color.Black),
+                    textStyle = LocalTextStyle.current.copy(color = AppColors.textPrimary),
+                    // Cursor tied to the theme accent so it stays visible in
+                    // both light and dark modes — SolidColor(Color.Black) was
+                    // invisible on the dark surface.
+                    cursorBrush = SolidColor(AppColors.accent),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done
@@ -179,13 +182,17 @@ fun EmailChip(
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFF5F5F5))
+            // Chip fill tied to `surfaceMuted` (light #F5F5F5 unchanged;
+            // dark = a subtly-brighter card layer) so the chip reads on
+            // both themes and the label below picks a legible tone.
+            .background(AppColors.surfaceMuted)
             .padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
+            color = AppColors.textPrimary,
             lineHeight = 16.sp,
             modifier = Modifier.weight(1f, fill = false),
         )

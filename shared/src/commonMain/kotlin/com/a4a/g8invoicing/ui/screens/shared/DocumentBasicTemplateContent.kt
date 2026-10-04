@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,46 +47,53 @@ fun DocumentBasicTemplateContent(
     // Avoid a one-frame flash where the template renders with the app's current locale
     // before the actual document state (with its frozen labels) arrives from the DB.
     // We keep an empty white page of the same dimensions so layout doesn't jump.
+    // Paper background is `documentPaper` (fixed white in both themes) so what the
+    // user sees on screen matches what the PDF exports, dark mode or not.
     if (document.documentId == null) {
         Box(
             modifier = Modifier
                 .width(screenWidth)
                 .padding(pagePadding)
-                .background(AppColors.surface)
+                .background(AppColors.documentPaper)
                 .heightIn(min = screenWidth * 1.28f)
         )
         return
     }
 
-    Box(
-        modifier = Modifier
-            .width(screenWidth)
-            .padding(
-                start = pagePadding,
-                top = pagePadding,
-                bottom = pagePadding,
-                end = pagePadding
-            )
-            .background(AppColors.surface)
-            .heightIn(min = screenWidth * 1.28f)
-            .customCombinedClickable(
-                onClick = {
-                    onClickRestOfThePage()
-                }
-            )
-        //.aspectRatio(1f / 1.414f)
-    ) {
-        Column(
+    // Force dark ink on the white paper regardless of the surrounding theme.
+    // Without this, text styles that inherit LocalContentColor (Typography's
+    // textForDocuments* families set no color) would render off-white in dark
+    // mode and disappear against the fixed-white paper.
+    CompositionLocalProvider(LocalContentColor provides AppColors.documentInk) {
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(screenWidth)
                 .padding(
-                    start = 20.dp,
-                    top = 30.dp,
-                    bottom = 20.dp,
-                    end = 20.dp
+                    start = pagePadding,
+                    top = pagePadding,
+                    bottom = pagePadding,
+                    end = pagePadding
                 )
-                .background(AppColors.surface)
+                .background(AppColors.documentPaper)
+                .heightIn(min = screenWidth * 1.28f)
+                .customCombinedClickable(
+                    onClick = {
+                        onClickRestOfThePage()
+                    }
+                )
+            //.aspectRatio(1f / 1.414f)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = 20.dp,
+                        top = 30.dp,
+                        bottom = 20.dp,
+                        end = 20.dp
+                    )
+                    .background(AppColors.documentPaper)
+            ) {
 
             DocumentBasicTemplateHeader(document, onClickElement, selectedItem, labels)
 
@@ -168,6 +177,7 @@ fun DocumentBasicTemplateContent(
                 onClickElement = { onClickElement(ScreenElement.DOCUMENT_FOOTER) },
                 labels = labels,
             )
+            }
         }
     }
 }

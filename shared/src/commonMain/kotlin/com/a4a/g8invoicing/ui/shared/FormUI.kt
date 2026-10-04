@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientRef
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 
@@ -222,7 +223,7 @@ fun RowWithLabelAndInput(
         modifier = Modifier
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = Color.Black, bounded = true),
+                indication = ripple(color = AppColors.ripple, bounded = true),
                 onClick = {
                     when (formInput.inputType) {
                         is ForwardElement -> {

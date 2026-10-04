@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import com.a4a.g8invoicing.data.PrefKeys
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.darkModePreference
 import com.a4a.g8invoicing.data.dataStore
 import com.a4a.g8invoicing.data.initializeVersionTracking
 import com.a4a.g8invoicing.data.models.CountryCodes
@@ -331,9 +333,25 @@ fun MainCompose(
     val shouldShow by shouldShowWhatsNew(context).collectAsState(initial = null)
     val shouldShowOnboarding by shouldShowOnboarding18(context).collectAsState(initial = null)
     val shouldShowEInvoice by shouldShowEInvoiceIntro(context).collectAsState(initial = null)
+    val shouldShowDarkModeMigration by com.a4a.g8invoicing.data.shouldShowDarkModeMigration20(context)
+        .collectAsState(initial = null)
+    // Dark mode resolution: the Apparence toggle stores an explicit boolean
+    // when the user picks one, else we follow the OS setting. Hoisted up here
+    // (above the overlay renders) so modals outside the main G8InvoicingTheme
+    // block can wrap themselves in it and still react to the preference flip.
+    val darkModeOverride by darkModePreference(context).collectAsState(initial = null)
+    val systemDark = isSystemInDarkTheme()
     var showWhatsNew by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
     var showEInvoiceIntro by remember { mutableStateOf(false) }
+    var showDarkModeMigration by remember { mutableStateOf(false) }
+    // While the 2.0 migration prompt is up and the user hasn't yet made an
+    // explicit theme choice, hold the whole UI in light mode so the modal
+    // (and the app behind it) match 1.x's historical look — the switch to
+    // dark should feel user-initiated when they tap "Oui". Once the pref is
+    // written (via Oui or via Mon Compte), that choice wins.
+    val useDarkTheme = darkModeOverride
+        ?: if (showDarkModeMigration) false else systemDark
     // Backup reminder: shown once when the user has >3 rows in any main table.
     // Suppressed while onboarding / what's new are pending to avoid stacking
     // modals at cold start.
@@ -469,7 +487,7 @@ fun MainCompose(
         )
     }
 
-    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, versionTrackingDone, migration19Context) {
+    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, shouldShowDarkModeMigration, versionTrackingDone, migration19Context) {
         // Wait until every DataStore flag has emitted its real value —
         // guarding against the initial=null race that used to flip
         // showBackupDialog on a version upgrade before the onboarding flag
@@ -480,6 +498,7 @@ fun MainCompose(
         val whatsNew = shouldShow ?: return@LaunchedEffect
         val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
         val eInvoice = shouldShowEInvoice ?: return@LaunchedEffect
+        val darkModeMigration = shouldShowDarkModeMigration ?: return@LaunchedEffect
         // 1.8 onboarding is allowed to surface even while migration19 is
         // pending — the two run in sequence (1.8 → 1.9), gated by
         // `onboarding18Pending` at the render site. What's New / e-invoice /
@@ -494,7 +513,6 @@ fun MainCompose(
         // completes 1.9 — this catches users who defer / dismiss 1.9.
         if (onboarding) setSeenOnboarding18(context)
         showOnboarding = false
-        showWhatsNew = whatsNew && !migration19Pending
         // 1.8.1 e-invoice popup: only when the device is set to country=FR.
         // Country (not language) — the e-invoice obligation follows where the
         // phone is used, not which UI language the user picked. Reads a
@@ -505,11 +523,24 @@ fun MainCompose(
         // onboarding wizard is pending. Mark SEEN=true immediately per product
         // decision.
         val systemCountry = com.a4a.g8invoicing.SystemRegionSnapshot.formatCountry
-        if (eInvoice && !migration19Pending && systemCountry == "FR") {
+        val eInvoiceWillShow = eInvoice && !migration19Pending && systemCountry == "FR"
+        if (eInvoiceWillShow) {
             showEInvoiceIntro = true
             setSeenEInvoiceIntro(context)
         }
-        if (!whatsNew && !migration19Pending && !showEInvoiceIntro) {
+        // Mark the 2.0 dark-mode prompt as seen eagerly so a mid-flight app
+        // kill or tap-outside dismiss doesn't re-trigger it on next launch.
+        val darkModeMigrationWillShow = darkModeMigration && !migration19Pending && !eInvoiceWillShow
+        if (darkModeMigrationWillShow) {
+            showDarkModeMigration = true
+            com.a4a.g8invoicing.data.setSeenDarkModeMigration20(context)
+            // The in-app WhatsNew popup would double up with the migration
+            // dialog (both announce dark mode) — mark it seen so it stays
+            // silent on this release. Future upgrades resume as usual.
+            setSeenWhatsNew(context)
+        }
+        showWhatsNew = whatsNew && !migration19Pending && !darkModeMigrationWillShow
+        if (!whatsNew && !migration19Pending && !showEInvoiceIntro && !showDarkModeMigration) {
             showBackupDialog = shouldShowBackupPopupNow(
                 context,
                 invoiceQueries,
@@ -547,6 +578,22 @@ fun MainCompose(
                 }
             },
         )
+    }
+
+    if (showDarkModeMigration) {
+        // Wrapped in the theme so the modal flips to the dark palette together
+        // with the rest of the app when the user taps "Oui" (which writes
+        // darkModeOverride=true and recomputes useDarkTheme).
+        G8InvoicingTheme(useDarkTheme = useDarkTheme) {
+            com.a4a.g8invoicing.ui.shared.DarkModeMigrationDialog(
+                onDismiss = { showDarkModeMigration = false },
+                onSetDarkMode = { enable ->
+                    coroutineScope.launch {
+                        com.a4a.g8invoicing.data.setDarkMode(context, enable)
+                    }
+                },
+            )
+        }
     }
 
     if (showBackupDialog) {
@@ -662,7 +709,7 @@ fun MainCompose(
         )
     }
 
-    G8InvoicingTheme {
+    G8InvoicingTheme(useDarkTheme = useDarkTheme) {
         // Use Crossfade for smooth transition when language changes
         Crossfade(
             targetState = localeManager.currentLanguage,
@@ -734,19 +781,27 @@ fun MainCompose(
                             context.startActivity(intent)
                         }
                     },
+                    isDarkMode = useDarkTheme,
+                    onSetDarkMode = { enabled ->
+                        coroutineScope.launch {
+                            com.a4a.g8invoicing.data.setDarkMode(context, enabled)
+                        }
+                    },
                 )
             }
         }
     }
 
-    // Restore flow overlay — must sit outside NavGraph so its intermediate
-    // "Terminer" AlertDialog survives any navigation the user triggers between
-    // tapping "restaurer" and confirming. Killing the process from this
-    // callback nukes any half-composed screen anyway.
-    DatabaseRestoreFlow(
-        active = showRestoreFlow,
-        onDismiss = { showRestoreFlow = false },
-    )
+    // Restore flow overlay — sits outside NavGraph so its intermediate
+    // "Terminer" AlertDialog survives any navigation the user triggers before
+    // confirming. Wrapped in the theme so LocalAppColors resolves correctly
+    // on the restore dialogs when dark mode is on.
+    G8InvoicingTheme(useDarkTheme = useDarkTheme) {
+        DatabaseRestoreFlow(
+            active = showRestoreFlow,
+            onDismiss = { showRestoreFlow = false },
+        )
+    }
 
     // First-launch onboarding overlay. Rendered AFTER G8InvoicingTheme so it
     // stacks on top of NavGraph — the composable is no longer a Dialog (see
@@ -779,7 +834,12 @@ fun MainCompose(
                 // Fresh installs never see the 1.9 migration wizard.
                 modulesRepo.markMigration19Seen()
                 needsFirstLaunchIssuer = false
-            }
+            },
+            onEnableDarkMode = {
+                coroutineScope.launch {
+                    com.a4a.g8invoicing.data.setDarkMode(context, true)
+                }
+            },
         )
     }
 }

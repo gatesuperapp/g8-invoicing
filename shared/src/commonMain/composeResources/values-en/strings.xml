@@ -115,7 +115,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>
     <string name="document_products_other_lines">Other lines</string>
-    <string name="document_product_advice">To edit a product, click on the grey box…</string>
+    <string name="document_product_advice">To edit a product, click on the grey box</string>
     <string name="document_product_advice_2">The change only applies to this document…</string>
     <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
 
@@ -296,10 +296,12 @@
     <string name="first_launch_settings_intro">Before I hand things over, I need 2 pieces of info to set up your interface:</string>
     <string name="first_launch_settings_name_label">Your business name</string>
     <string name="first_launch_settings_country_label">Country</string>
-    <string name="first_launch_settings_cta">Let's go</string>
+    <string name="first_launch_settings_cta">Confirm</string>
     <string name="first_launch_issuer_placeholder">Business name</string>
     <string name="first_launch_issuer_skip">Later</string>
     <string name="first_launch_issuer_default_name">My business</string>
+    <string name="onboarding_darkmode_body">Want to enable dark mode?</string>
+    <string name="onboarding_darkmode_migration_body">Dark mode is now available, want to turn it on?</string>
     <!-- Account Screen -->
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -350,6 +352,8 @@
     <string name="client_type_individual">Individual</string>
     <string name="client_type_professional">Professional</string>
     <string name="account_section_advanced">Advanced</string>
+    <string name="account_appearance_title">Appearance</string>
+    <string name="account_dark_mode_switch">Dark mode</string>
     <string name="account_delete_cta">Delete my account</string>
     <string name="account_delete_dialog_title">Permanently delete your account?</string>
     <string name="account_delete_dialog_message">This action is irreversible. Your subscription will be cancelled immediately, your account will be removed from our servers and you will be signed out. Invoices and data stored locally on your device will remain intact.</string>
@@ -423,11 +427,14 @@
     <string name="ok">OK</string>
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">I learned this move in hip-hop, super cool I know. I still need to practice, I'm not super fast, I think my patagium slows down the wave. Anyway, I wanted to tell you \n\n …</string>
+    <string name="delivery_note_empty_cta">Tap «Create» to make your first delivery note</string>
+    <string name="quote_empty_cta">Tap «Create» to make your first quote</string>
+    <string name="credit_note_empty_cta">Tap «Create» to make your first credit note</string>
     <string name="delivery_note_advice_convert1">that if you want to convert one or more delivery notes into an invoice, you can select them from the list by long pressing (or by clicking on the ○) \n\n …</string>
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
-    <string name="invoice_advice_legal_1">Tap «Menu» &gt; gStore to enable the features you prefer. Tap «Create» to make your first invoice…</string>
+    <string name="invoice_advice_legal_1">Tap «Create» to make your first invoice</string>
     <string name="invoice_advice_legal_2">Every document you create is saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡</string>
 

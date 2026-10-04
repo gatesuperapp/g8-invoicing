@@ -69,7 +69,6 @@ import com.a4a.g8invoicing.ui.shared.TextInput
 import com.a4a.g8invoicing.shared.resources.document_form_sync_product_to_master
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import org.jetbrains.compose.resources.stringResource
@@ -336,7 +335,7 @@ fun DocumentBottomSheetProductAddEditForm(
                     modifier = Modifier.scale(0.8f),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
-                        checkedTrackColor = ColorVioletLink,
+                        checkedTrackColor = AppColors.switchCheckedTrack,
                         checkedBorderColor = Color.Transparent,
                         uncheckedBorderColor = Color.Transparent,
                     ),

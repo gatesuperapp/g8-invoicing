@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.document_product_advice
 import com.a4a.g8invoicing.shared.resources.document_products_other_lines
 import com.a4a.g8invoicing.ui.shared.animations.BatWavyArms
+import com.a4a.g8invoicing.ui.shared.animations.LottieMascotHalo
 import com.a4a.g8invoicing.ui.states.DocumentProductState
 import com.a4a.g8invoicing.ui.states.RetentionState
 import com.a4a.g8invoicing.ui.theme.textBodySmall
@@ -221,9 +223,10 @@ private fun BatHelperAdvice() {
             )
         }
 
-        Box(
-            Modifier
+        LottieMascotHalo(
+            modifier = Modifier
                 .padding(bottom = 32.dp)
+                .size(200.dp)
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() },
@@ -235,8 +238,7 @@ private fun BatHelperAdvice() {
             BatWavyArms(
                 modifier = Modifier
                     .width(80.dp)
-                    .height(50.dp)
-                    .align(Alignment.Center),
+                    .height(50.dp),
                 iterations = numberOfIterations.intValue,
             )
         }

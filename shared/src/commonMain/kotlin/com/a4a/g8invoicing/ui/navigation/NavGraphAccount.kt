@@ -21,6 +21,8 @@ fun NavGraphBuilder.account(
     onExportDatabase: () -> ExportResult = { ExportResult.Error("Not available on this platform") },
     onSendDatabaseByEmail: (String) -> Unit = {},
     onRestoreDatabase: () -> Unit = {},
+    isDarkMode: Boolean = false,
+    onSetDarkMode: (Boolean) -> Unit = {},
 ) {
     composable(
         // Optional ?section=... lets callers force-expand a CollapsibleSection
@@ -59,6 +61,8 @@ fun NavGraphBuilder.account(
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
             expandSection = section,
+            isDarkMode = isDarkMode,
+            onSetDarkMode = onSetDarkMode,
         )
     }
 }

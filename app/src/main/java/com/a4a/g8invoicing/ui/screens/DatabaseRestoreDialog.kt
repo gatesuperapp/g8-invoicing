@@ -5,18 +5,18 @@ import android.net.Uri
 import android.os.Process
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -34,10 +35,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.a4a.g8invoicing.data.RestoreManager
 import com.a4a.g8invoicing.ui.shared.AppConfirmDialog
 import com.a4a.g8invoicing.ui.shared.AppInfoDialog
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.AppColors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -186,21 +189,37 @@ private fun PickFileDialog(onPick: () -> Unit, onCancel: () -> Unit) {
 
 @Composable
 private fun ValidatingDialog() {
-    // No-button loader — doesn't map onto AppInfoDialog / AppConfirmDialog
-    // (both mandate a CTA). Kept as raw AlertDialog for that reason. Same
-    // exception as Account.kt's deletion-in-progress loader.
-    AlertDialog(
+    // No-button loader — AppInfoDialog / AppConfirmDialog mandate a CTA so
+    // this builds its shell inline, keyed off AppColors so it tracks the
+    // dark-mode palette instead of falling back to Material3 defaults.
+    Dialog(
         onDismissRequest = { /* not dismissable during validation */ },
-        title = null,
-        text = {
-            Column {
-                CircularProgressIndicator(modifier = Modifier.height(32.dp))
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .background(AppColors.surface, shape = RoundedCornerShape(16.dp))
+                .padding(horizontal = 24.dp, vertical = 24.dp),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(
+                    modifier = Modifier.height(32.dp),
+                    color = AppColors.accent,
+                )
                 Spacer(Modifier.height(12.dp))
-                Text(RestoreCopy.VALIDATING)
+                Text(
+                    text = RestoreCopy.VALIDATING,
+                    color = AppColors.textPrimary,
+                )
             }
-        },
-        confirmButton = {},
-    )
+        }
+    }
 }
 
 @Composable
@@ -223,7 +242,7 @@ private fun ErrorDialog(message: String, onDismiss: () -> Unit) {
         pushStringAnnotation(tag = "mailto", annotation = mailtoUrl)
         withStyle(
             SpanStyle(
-                color = ColorVioletLink,
+                color = AppColors.accent,
                 textDecoration = TextDecoration.Underline,
             ),
         ) {
@@ -232,43 +251,33 @@ private fun ErrorDialog(message: String, onDismiss: () -> Unit) {
         pop()
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(RestoreCopy.ERROR_TITLE) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-            ) {
-                Text(
-                    text = RESTORE_OH_NO_HEADER,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(16.dp))
-                Text(
-                    text = RESTORE_FRIENDLY_MESSAGE,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Spacer(Modifier.height(12.dp))
-                ClickableText(
-                    text = annotated,
-                    style = MaterialTheme.typography.bodySmall,
-                    onClick = { offset ->
-                        annotated
-                            .getStringAnnotations(tag = "mailto", start = offset, end = offset)
-                            .firstOrNull()
-                            ?.let { uriHandler.openUri(it.item) }
-                    },
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(RestoreCopy.OK, color = ColorVioletLink)
-            }
+    AppInfoDialog(
+        title = RestoreCopy.ERROR_TITLE,
+        confirmText = RestoreCopy.OK,
+        onDismiss = onDismiss,
+        bodyContent = {
+            Text(
+                text = RESTORE_OH_NO_HEADER,
+                style = MaterialTheme.typography.bodyLarge.copy(color = AppColors.textPrimary),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = RESTORE_FRIENDLY_MESSAGE,
+                style = MaterialTheme.typography.bodyMedium.copy(color = AppColors.textSecondary),
+            )
+            Spacer(Modifier.height(12.dp))
+            ClickableText(
+                text = annotated,
+                style = MaterialTheme.typography.bodySmall.copy(color = AppColors.textSecondary),
+                onClick = { offset ->
+                    annotated
+                        .getStringAnnotations(tag = "mailto", start = offset, end = offset)
+                        .firstOrNull()
+                        ?.let { uriHandler.openUri(it.item) }
+                },
+            )
         },
     )
 }

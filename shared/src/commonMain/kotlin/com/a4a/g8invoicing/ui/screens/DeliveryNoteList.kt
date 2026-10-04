@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -37,6 +38,7 @@ import com.a4a.g8invoicing.shared.resources.appbar_delivery_notes
 import com.a4a.g8invoicing.shared.resources.delivery_note_advice_convert
 import com.a4a.g8invoicing.shared.resources.delivery_note_advice_convert1
 import com.a4a.g8invoicing.shared.resources.delivery_note_advice_convert2
+import com.a4a.g8invoicing.shared.resources.delivery_note_empty_cta
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.TopBar
@@ -177,32 +179,50 @@ fun DeliveryNoteList(
                 }
                 val hasActiveQuery = searchQuery.text.isNotBlank()
 
-                Column {
-                    // No need to have pull to refresh because it's a flow,
-                    // thus the list is updated when anything changes in db
-                    DocumentListContent(
-                        documents = filteredDocuments,
-                        onItemClick = onClickListItem,
-                        addDocumentToSelectedList = {
-                            selectedItems.add(it as DeliveryNoteState)
-                            selectedMode.value = true
-                        },
-                        removeDocumentFromSelectedList = {
-                            selectedItems.remove(it as DeliveryNoteState)
-                            if (selectedItems.isEmpty()) {
-                                selectedMode.value = false
-                            }
-                        },
-                        keyToResetCheckboxes = keyToResetCheckboxes.value,
-                        tagsEnabled = isTagPickerEnabled,
-                    )
+                // Short delay before showing the empty-state mascot — the first
+                // DB-flow emission is `[]` and gets corrected ~instantly on
+                // cold start, so without the gate the mascot flashes in and
+                // out. Mirrors InvoiceList.showEmptyState.
+                var showEmptyState by remember { mutableStateOf(false) }
+                LaunchedEffect(documentsUiState.deliveryNoteStates.isEmpty()) {
+                    if (documentsUiState.deliveryNoteStates.isEmpty()) {
+                        kotlinx.coroutines.delay(300)
+                        showEmptyState = true
+                    } else {
+                        showEmptyState = false
+                    }
+                }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                if (documentsUiState.deliveryNoteStates.isEmpty() && showEmptyState) {
+                    EmptyListMascot(stringResource(Res.string.delivery_note_empty_cta))
+                } else if (documentsUiState.deliveryNoteStates.isNotEmpty()) {
+                    Column {
+                        // No need to have pull to refresh because it's a flow,
+                        // thus the list is updated when anything changes in db
+                        DocumentListContent(
+                            documents = filteredDocuments,
+                            onItemClick = onClickListItem,
+                            addDocumentToSelectedList = {
+                                selectedItems.add(it as DeliveryNoteState)
+                                selectedMode.value = true
+                            },
+                            removeDocumentFromSelectedList = {
+                                selectedItems.remove(it as DeliveryNoteState)
+                                if (selectedItems.isEmpty()) {
+                                    selectedMode.value = false
+                                }
+                            },
+                            keyToResetCheckboxes = keyToResetCheckboxes.value,
+                            tagsEnabled = isTagPickerEnabled,
+                        )
 
-                    // Skip the convert hint while searching (single-result queries
-                    // would trigger it out of context).
-                    if (documentsUiState.deliveryNoteStates.size == 1 && !hasActiveQuery)
-                        DisplayBatHelperAdvice()
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // Skip the convert hint while searching (single-result queries
+                        // would trigger it out of context).
+                        if (documentsUiState.deliveryNoteStates.size == 1 && !hasActiveQuery)
+                            DisplayBatHelperAdvice()
+                    }
                 }
             }
         }

@@ -39,7 +39,6 @@ import com.a4a.g8invoicing.shared.resources.document_payment_bank_show_switch
 import com.a4a.g8invoicing.shared.resources.document_payment_means_edit_prefix
 import com.a4a.g8invoicing.shared.resources.document_payment_means_show_switch
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import org.jetbrains.compose.resources.stringResource
 
@@ -133,7 +132,7 @@ fun PaymentMeansMultiSelect(
         Spacer(Modifier.height(28.dp))
 
         // Show/hide row — sync-to-master switch pattern (textBodyBold label,
-        // Switch scale 0.8f + ColorVioletLink track).
+        // Switch scale 0.8f + AppColors.accent track).
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -153,7 +152,7 @@ fun PaymentMeansMultiSelect(
                 modifier = Modifier.scale(0.8f),
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = ColorVioletLink,
+                    checkedTrackColor = AppColors.switchCheckedTrack,
                     checkedBorderColor = Color.Transparent,
                     uncheckedBorderColor = Color.Transparent,
                 ),
@@ -166,7 +165,7 @@ fun PaymentMeansMultiSelect(
             Text(
                 text = stringResource(Res.string.document_payment_means_edit_prefix),
                 style = MaterialTheme.typography.bodySmall.copy(
-                    color = ColorVioletLink,
+                    color = AppColors.accent,
                     textDecoration = TextDecoration.Underline,
                 ),
                 modifier = Modifier
@@ -199,7 +198,7 @@ fun PaymentMeansMultiSelect(
                 modifier = Modifier.scale(0.8f),
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = ColorVioletLink,
+                    checkedTrackColor = AppColors.switchCheckedTrack,
                     checkedBorderColor = Color.Transparent,
                     uncheckedBorderColor = Color.Transparent,
                 ),
@@ -229,7 +228,7 @@ fun PaymentMeansMultiSelect(
                 Text(
                     text = stringResource(Res.string.document_payment_bank_edit_prefix),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        color = ColorVioletLink,
+                        color = AppColors.accent,
                         textDecoration = TextDecoration.Underline,
                     ),
                     modifier = Modifier
@@ -247,8 +246,8 @@ private fun PaymentMeansChip(
     active: Boolean,
     onClick: () -> Unit,
 ) {
-    val bg = if (active) ColorVioletLink.copy(alpha = 0.12f) else AppColors.surfaceMuted
-    val fg = if (active) ColorVioletLink else AppColors.textMuted
+    val bg = if (active) AppColors.accent.copy(alpha = 0.12f) else AppColors.surfaceMuted
+    val fg = if (active) AppColors.accent else AppColors.textMuted
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))

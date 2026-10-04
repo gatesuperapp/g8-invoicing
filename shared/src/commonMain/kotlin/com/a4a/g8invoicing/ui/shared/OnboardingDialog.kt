@@ -523,7 +523,7 @@ private fun DevisIntroStep(
     onLaterGstore: () -> Unit,
     onNoDevis: () -> Unit,
 ) {
-    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray)
+    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = AppColors.textSecondary)
     val body = buildAnnotatedString {
         withStyle(bold) { append(stringResource(Res.string.onboarding_devis_body_bold)) }
         append(stringResource(Res.string.onboarding_devis_body_after_bold))
@@ -567,7 +567,7 @@ private fun DevisIntroStep(
 
 @Composable
 private fun FacturXIntroStep(onNext: () -> Unit) {
-    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray)
+    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = AppColors.textSecondary)
     val body = buildAnnotatedString {
         append(stringResource(Res.string.onboarding_facturx_body_before_bold))
         withStyle(bold) { append(stringResource(Res.string.onboarding_facturx_body_bold)) }
@@ -656,7 +656,7 @@ private fun IssuerCleanupStep(
 ) {
     var pendingDelete by remember { mutableStateOf<ClientOrIssuerState?>(null) }
     var pendingDetails by remember { mutableStateOf<ClientOrIssuerState?>(null) }
-    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray)
+    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = AppColors.textSecondary)
     val body = buildAnnotatedString {
         append(stringResource(Res.string.onboarding_cleanup_body_part1))
         withStyle(bold) { append(stringResource(Res.string.onboarding_cleanup_body_bold_delete_here)) }
@@ -1176,7 +1176,7 @@ private fun ClientCountryDoneSkippedStep() {
 
 @Composable
 private fun UnitCodeInfoStep() {
-    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray)
+    val bold = SpanStyle(fontWeight = FontWeight.Bold, color = AppColors.textSecondary)
     val body = buildAnnotatedString {
         append(stringResource(Res.string.onboarding_unitcode_part1))
         withStyle(bold) { append(stringResource(Res.string.onboarding_unitcode_bold1)) }

@@ -26,6 +26,7 @@ import com.a4a.g8invoicing.ui.navigation.TopBar
 import com.a4a.g8invoicing.ui.shared.ForwardElement
 import com.a4a.g8invoicing.ui.shared.FormInputCreatorGoForward
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -74,7 +75,7 @@ fun Settings(
                 modifier = Modifier
                     .clickable(
                         interactionSource = interactionSource,
-                        indication = ripple(color = Color.Black, bounded = true),
+                        indication = ripple(color = AppColors.ripple, bounded = true),
                         onClick = {
                         }
                     )

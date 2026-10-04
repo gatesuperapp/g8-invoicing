@@ -1,1 +1,1 @@
-invoice, quote, delivery note
+g8: delivery note, invoice

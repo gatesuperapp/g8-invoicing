@@ -221,8 +221,11 @@ actual fun ExportCiiPlatform(
 
             LinearProgressIndicator(
                 modifier = Modifier.width(64.dp),
-                color = MaterialTheme.colorScheme.secondary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                // Same rationale as ExportPdfPlatform: modal is always-dark,
+                // anchor the loader to Color.White instead of the brand teal
+                // (colorScheme.secondary) which paints green on both themes.
+                color = Color.White,
+                trackColor = Color.White.copy(alpha = 0.24f),
             )
         }
 

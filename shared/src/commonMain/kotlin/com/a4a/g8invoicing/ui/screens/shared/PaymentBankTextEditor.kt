@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -33,7 +34,6 @@ import com.a4a.g8invoicing.data.models.paymentBankTokenSpans
 import com.a4a.g8invoicing.data.models.rebuildPaymentBankSegments
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 
 /**
  * Protected text editor for the bank-details block. IBAN and BIC lines are
@@ -62,8 +62,9 @@ fun PaymentBankTextEditor(
     val tokenSpans = remember(segments, identifierLabel, iban, bic) {
         paymentBankTokenSpans(segments, identifierLabel, iban, bic)
     }
-    val visualTransformation = remember(tokenSpans) {
-        PaymentBankTokenVisualTransformation(tokenSpans)
+    val tokenTint = AppColors.accent
+    val visualTransformation = remember(tokenSpans, tokenTint) {
+        PaymentBankTokenVisualTransformation(tokenSpans, tokenTint)
     }
 
     CompositionLocalProvider(LocalTextSelectionColors provides customTextSelectionColors) {
@@ -90,7 +91,8 @@ fun PaymentBankTextEditor(
                         onSegmentsChange(rebuilt)
                     }
                 },
-                cursorBrush = SolidColor(Color.Black),
+                textStyle = LocalTextStyle.current.copy(color = AppColors.textPrimary),
+                cursorBrush = SolidColor(AppColors.accent),
                 visualTransformation = visualTransformation,
             )
         }
@@ -99,6 +101,7 @@ fun PaymentBankTextEditor(
 
 private class PaymentBankTokenVisualTransformation(
     private val tokenSpans: List<com.a4a.g8invoicing.data.models.PaymentBankTokenSpan>,
+    private val tokenColor: androidx.compose.ui.graphics.Color,
 ) : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val builder = AnnotatedString.Builder(text)
@@ -108,8 +111,8 @@ private class PaymentBankTokenVisualTransformation(
             if (start >= end) continue
             builder.addStyle(
                 style = SpanStyle(
-                    background = ColorVioletLink.copy(alpha = 0.12f),
-                    color = ColorVioletLink,
+                    background = tokenColor.copy(alpha = 0.12f),
+                    color = tokenColor,
                     fontWeight = FontWeight.SemiBold,
                 ),
                 start = start,

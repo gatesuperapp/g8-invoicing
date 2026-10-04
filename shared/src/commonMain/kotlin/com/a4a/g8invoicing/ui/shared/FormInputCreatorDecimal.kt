@@ -17,9 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
+import com.a4a.g8invoicing.ui.theme.AppColors
 
 @Composable
 fun FormInputCreatorDecimal(
@@ -54,7 +56,8 @@ fun FormInputCreatorDecimal(
                 text = decimalFormatter.cleanup(it)
                 input.onValueChange(it.replace(",", "."))
             },
-            textStyle = LocalTextStyle.current,
+            textStyle = LocalTextStyle.current.copy(color = AppColors.textPrimary),
+            cursorBrush = SolidColor(AppColors.textPrimary),
             keyboardOptions = KeyboardOptions(
                 imeAction = keyboardOption,
                 keyboardType = input.keyboardType

@@ -172,6 +172,12 @@ private fun StepMascot(text: String) {
         Text(
             text = text,
             fontSize = 22.sp,
+            // Explicit textPrimary — inside the wizard's white Dialog the
+            // ambient LocalContentColor stays dark on light theme but the
+            // rendered PDF/font stack sometimes anchors kaomoji glyphs to
+            // pure black regardless of theme, so we pin the tone here to
+            // stay legible on dark surfaces too.
+            color = com.a4a.g8invoicing.ui.theme.AppColors.textPrimary,
             // Monospace prevents glyph-width jitter across kaomoji frames.
             fontFamily = FontFamily.Monospace,
             textAlign = TextAlign.Center,

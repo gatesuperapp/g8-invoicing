@@ -16,7 +16,7 @@ import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_invoice_1
 import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_invoice_2
 import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_invoice_3
 import com.a4a.g8invoicing.shared.resources.alert_dialog_delete_url
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
+import com.a4a.g8invoicing.ui.theme.AppColors
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -62,7 +62,7 @@ fun DeleteInvoiceLink(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append("$deleteInvoice1 ")
         pushStringAnnotation(tag = "link", annotation = deleteUrl)
-        withStyle(style = SpanStyle(color = ColorVioletLink)) {
+        withStyle(style = SpanStyle(color = AppColors.accent)) {
             append(deleteInvoice2)
         }
         append(deleteInvoice3)
@@ -70,7 +70,7 @@ fun DeleteInvoiceLink(uriHandler: UriHandler) {
 
     ClickableText(
         text = annotatedString,
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyMedium.copy(color = AppColors.textPrimary),
         onClick = { offset ->
             annotatedString.getStringAnnotations(tag = "link", start = offset, end = offset)
                 .firstOrNull()?.let { uriHandler.openUri(it.item) }

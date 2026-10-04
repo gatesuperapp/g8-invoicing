@@ -42,6 +42,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -58,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -119,6 +122,8 @@ import com.a4a.g8invoicing.shared.resources.account_auth_send_link
 import com.a4a.g8invoicing.shared.resources.account_auth_subtitle
 import com.a4a.g8invoicing.shared.resources.account_auth_title
 import com.a4a.g8invoicing.shared.resources.account_add_company
+import com.a4a.g8invoicing.shared.resources.account_appearance_title
+import com.a4a.g8invoicing.shared.resources.account_dark_mode_switch
 import com.a4a.g8invoicing.shared.resources.account_logout
 import com.a4a.g8invoicing.shared.resources.account_my_companies
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_edit_link
@@ -164,10 +169,9 @@ import com.a4a.g8invoicing.ui.theme.ColorDarkGrayTransp
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
 import com.a4a.g8invoicing.ui.theme.ColorOrange
 import com.a4a.g8invoicing.ui.theme.ColorRedLate
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
+import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
@@ -197,6 +201,12 @@ fun Account(
     // Optional hint from the nav arg (?section=my_companies) — when set to a
     // known section id, the matching CollapsibleSection lands expanded.
     expandSection: String? = null,
+    // Dark-mode toggle wiring (Apparence section). `isDarkMode` reflects the
+    // effective state used by the theme wrapper (system default or explicit
+    // override). `onSetDarkMode` persists an explicit override in DataStore
+    // so the choice survives across launches.
+    isDarkMode: Boolean = false,
+    onSetDarkMode: (Boolean) -> Unit = {},
     viewModel: AccountViewModel = koinViewModel(),
     issuersListViewModel: ClientOrIssuerListViewModel = koinViewModel(),
 ) {
@@ -234,7 +244,7 @@ fun Account(
     )
     val brushSize = 400f
     val ctaBrush = Brush.linearGradient(
-        colors = listOf(ColorVioletLight, ColorHotPink),
+        colors = listOf(AppColors.accent, ColorHotPink),
         start = Offset(brushOffset, brushOffset),
         end = Offset(brushOffset + brushSize, brushOffset + brushSize),
         tileMode = TileMode.Mirror
@@ -353,7 +363,7 @@ fun Account(
                     ) {
                         Text(
                             text = "Restaurer",
-                            color = ColorVioletLink,
+                            color = AppColors.accent,
                         )
                     }
                 }
@@ -378,6 +388,15 @@ fun Account(
                     CurrencySelector()
                     Spacer(modifier = Modifier.height(8.dp))
                     LanguageSelector()
+                }
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                CollapsibleSection(title = stringResource(Res.string.account_appearance_title)) {
+                    AppearanceSection(
+                        isDarkMode = isDarkMode,
+                        onSetDarkMode = onSetDarkMode,
+                    )
                 }
 
                 // "Avancé" — only relevant while logged in, since the only action
@@ -432,6 +451,9 @@ fun Account(
         if (showDeletionResult) {
             val contactEmail = stringResource(Res.string.about_contact_email)
             val errorPrefix = stringResource(Res.string.account_delete_error)
+            // Capture the theme accent in a plain local — remember{}'s lambda
+            // isn't @Composable so AppColors can't be read from inside it.
+            val accentColor = AppColors.accent
 
             // Errors include a tappable mailto: contact@the-gate.fr — same construction
             // as AuthMessageDialog, inlined here so we can drop it into the same dialog
@@ -440,7 +462,7 @@ fun Account(
                 if (uiState.deleteErrorMessage == null) null else buildAnnotatedString {
                     append(errorPrefix)
                     pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
-                    withStyle(style = SpanStyle(color = ColorVioletLink)) { append(contactEmail) }
+                    withStyle(style = SpanStyle(color = accentColor)) { append(contactEmail) }
                     pop()
                 }
             }
@@ -467,14 +489,16 @@ fun Account(
                             modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                            CircularProgressIndicator(color = ColorVioletLight)
+                            CircularProgressIndicator(color = AppColors.accent)
                         }
                         uiState.accountDeleted -> Text(
                             stringResource(Res.string.account_delete_success_message)
                         )
                         errorAnnotated != null -> ClickableText(
                             text = errorAnnotated,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                color = AppColors.textPrimary,
+                            ),
                             onClick = { offset ->
                                 errorAnnotated
                                     .getStringAnnotations(tag = "email", start = offset, end = offset)
@@ -489,7 +513,7 @@ fun Account(
                     // we don't want the user to dismiss the dialog mid-call.
                     if (!uiState.isDeleting) {
                         TextButton(onClick = closeAndReset) {
-                            Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                            Text(stringResource(Res.string.ok), color = AppColors.accent)
                         }
                     }
                 },
@@ -532,7 +556,7 @@ fun AuthMessageDialog(
         append(messagePrefix)
         if (contactEmail != null) {
             pushStringAnnotation(tag = "email", annotation = "mailto:$contactEmail")
-            withStyle(style = SpanStyle(color = ColorVioletLink)) {
+            withStyle(style = SpanStyle(color = AppColors.accent)) {
                 append(contactEmail)
             }
             pop()
@@ -545,10 +569,14 @@ fun AuthMessageDialog(
                 if (showOhNoHeader) {
                     // Same "oh no" + kaomoji block as the export error dialog
                     // (alert_dialog_error) — kept at the modal's body text size so
-                    // it stays consistent across the app.
+                    // it stays consistent across the app. Explicit `color`
+                    // because inheritance from AlertDialog's onSurface can pick
+                    // up the wrong tone on dark mode and turn the kaomoji into
+                    // a smudge — pinning to textPrimary keeps it legible.
                     Text(
                         text = OH_NO_HEADER,
                         style = MaterialTheme.typography.bodyLarge,
+                        color = AppColors.textPrimary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -556,7 +584,13 @@ fun AuthMessageDialog(
                 }
                 ClickableText(
                     text = annotatedString,
-                    style = MaterialTheme.typography.bodyLarge,
+                    // Force AppColors.textPrimary — ClickableText's inherited
+                    // color falls back to the ambient AlertDialog text colour,
+                    // which stays anchored dark on dark theme when the
+                    // prefix span has no explicit color of its own.
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color = AppColors.textPrimary,
+                    ),
                     onClick = { offset ->
                         annotatedString
                             .getStringAnnotations(tag = "email", start = offset, end = offset)
@@ -567,7 +601,7 @@ fun AuthMessageDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text(stringResource(Res.string.ok), color = ColorVioletLink)
+                Text(stringResource(Res.string.ok), color = AppColors.accent)
             }
         },
     )
@@ -602,7 +636,7 @@ private fun ColumnScope.LoggedOutContent(
 
     val violetSelectionColors = TextSelectionColors(
         handleColor = Color.Transparent,
-        backgroundColor = ColorVioletLight.copy(alpha = 0.3f),
+        backgroundColor = AppColors.accent.copy(alpha = 0.3f),
     )
     val trimmedEmail = email.trim()
     val emailIsValid = FormInputsValidator.isEmailValid(trimmedEmail)
@@ -623,11 +657,11 @@ private fun ColumnScope.LoggedOutContent(
             isError = showInvalidEmailError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = ColorVioletLight,
-                unfocusedBorderColor = Color.Black,
-                focusedLabelColor = ColorVioletLight,
-                unfocusedLabelColor = Color.Black,
-                cursorColor = ColorVioletLight,
+                focusedBorderColor = AppColors.accent,
+                unfocusedBorderColor = AppColors.textPrimary,
+                focusedLabelColor = AppColors.accent,
+                unfocusedLabelColor = AppColors.textPrimary,
+                cursorColor = AppColors.accent,
             ),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -662,7 +696,7 @@ private fun ColumnScope.LoggedOutContent(
             && trimmedEmail.isNotEmpty(),
         contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp),
         colors = ButtonDefaults.textButtonColors(
-            contentColor = ColorVioletLight,
+            contentColor = AppColors.accent,
             disabledContentColor = ColorDarkGrayTransp,
         ),
     ) {
@@ -670,7 +704,7 @@ private fun ColumnScope.LoggedOutContent(
             CircularProgressIndicator(
                 modifier = Modifier.height(18.dp).width(18.dp),
                 strokeWidth = 2.dp,
-                color = ColorVioletLight,
+                color = AppColors.accent,
             )
         } else {
             Text(stringResource(Res.string.account_auth_send_link))
@@ -752,7 +786,7 @@ private fun LoggedInContent(
                     modifier = Modifier.clickable { onOpenManageSubscription(manageFallbackUrl) },
                     text = manageLabel,
                     style = MaterialTheme.typography.textSecondary.copy(
-                        color = ColorVioletLight,
+                        color = AppColors.accent,
                         textDecoration = TextDecoration.Underline,
                     ),
                 )
@@ -799,7 +833,7 @@ private fun LoggedInContent(
         },
         text = stringResource(Res.string.account_logout),
         style = MaterialTheme.typography.textSecondary.copy(
-            color = ColorVioletLight,
+            color = AppColors.accent,
             textDecoration = TextDecoration.Underline,
         ),
     )
@@ -837,19 +871,19 @@ private fun PremiumBadge(label: String) {
     Box(
         modifier = Modifier
             .background(
-                color = ColorVioletLight.copy(alpha = 0.08f),
+                color = AppColors.accent.copy(alpha = 0.08f),
                 shape = RoundedCornerShape(10.dp),
             )
             .border(
                 width = 1.dp,
-                color = ColorVioletLight.copy(alpha = 0.25f),
+                color = AppColors.accent.copy(alpha = 0.25f),
                 shape = RoundedCornerShape(10.dp),
             )
             .padding(horizontal = 14.dp, vertical = 10.dp),
     ) {
         Text(
             text = label,
-            color = ColorVioletLight,
+            color = AppColors.accent,
         )
     }
 }
@@ -894,7 +928,7 @@ private fun SubscriptionAlertBadge(
             modifier = Modifier.clickable { onCtaClick() },
             text = ctaLabel,
             style = MaterialTheme.typography.textSecondary.copy(
-                color = ColorVioletLight,
+                color = AppColors.accent,
                 textDecoration = TextDecoration.Underline,
             ),
         )
@@ -934,7 +968,7 @@ private fun CurrencySelector(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = displayLabel, color = Color.Black)
+        Text(text = displayLabel, color = AppColors.textPrimary)
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
@@ -992,7 +1026,7 @@ private fun LanguageSelector(
     ) {
         Text(
             text = getDisplayName(currentLanguage),
-            color = Color.Black
+            color = AppColors.textPrimary
         )
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -1021,6 +1055,46 @@ private fun LanguageSelector(
                 }
             }
         }
+    }
+}
+
+// "Apparence" section — single row hosting the Mode sombre switch. Mirrors
+// the sync-to-master switch pattern used by PaymentMeansMultiSelect
+// (textBodyBold label taking the remaining width, Switch scale(0.8f) with
+// violet track / white thumb / transparent borders) so this new toggle
+// doesn't invent a style.
+@Composable
+private fun AppearanceSection(
+    isDarkMode: Boolean,
+    onSetDarkMode: (Boolean) -> Unit,
+) {
+    // Row starts flush with the top of the CollapsibleSection's content —
+    // same rhythm as the Backup section, where the intro Text sits directly
+    // under the 12dp Spacer that CollapsibleSection already provides.
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = stringResource(Res.string.account_dark_mode_switch),
+            style = MaterialTheme.typography.textBody,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 15.dp),
+        )
+        Switch(
+            checked = isDarkMode,
+            onCheckedChange = onSetDarkMode,
+            modifier = Modifier.scale(0.8f),
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = AppColors.switchCheckedTrack,
+                checkedBorderColor = Color.Transparent,
+                uncheckedBorderColor = Color.Transparent,
+            ),
+        )
     }
 }
 
@@ -1112,7 +1186,7 @@ private fun MyCompaniesSection(
     if (multiEntrepriseOn) {
         Text(
             style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
-            color = ColorVioletLink,
+            color = AppColors.accent,
             modifier = Modifier
                 .padding(start = 4.dp, top = 4.dp)
                 .clickable {
@@ -1182,6 +1256,10 @@ private fun LegalLinksFooter(uriHandler: androidx.compose.ui.platform.UriHandler
     // Template like "Lire les %1$s et la %2$s" (FR) or "%1$s und %2$s lesen" (DE).
     // We walk the placeholders in appearance order to preserve grammar per locale.
     val template = stringResource(Res.string.account_legal_line)
+    // Capture AppColors.textSecondary in a local because buildAnnotatedString's
+    // lambda is not @Composable — the token getter can only be read from a
+    // composable context, so we resolve it here and pass the plain Color in.
+    val neutralInkColor = AppColors.textSecondary
 
     val annotated = buildAnnotatedString {
         var cursor = 0
@@ -1190,25 +1268,25 @@ private fun LegalLinksFooter(uriHandler: androidx.compose.ui.platform.UriHandler
             val nextPrivacy = template.indexOf("%2\$s", cursor)
             val next = listOf(nextTerms, nextPrivacy).filter { it >= 0 }.minOrNull() ?: -1
             if (next < 0) {
-                withStyle(SpanStyle(color = Color.DarkGray)) {
+                withStyle(SpanStyle(color = neutralInkColor)) {
                     append(template.substring(cursor))
                 }
                 break
             }
             if (next > cursor) {
-                withStyle(SpanStyle(color = Color.DarkGray)) {
+                withStyle(SpanStyle(color = neutralInkColor)) {
                     append(template.substring(cursor, next))
                 }
             }
             if (next == nextTerms) {
                 pushStringAnnotation(tag = "terms", annotation = termsUrl)
-                withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+                withStyle(SpanStyle(color = AppColors.accent, fontWeight = FontWeight.SemiBold)) {
                     append(termsLabel)
                 }
                 pop()
             } else {
                 pushStringAnnotation(tag = "policy", annotation = privacyUrl)
-                withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+                withStyle(SpanStyle(color = AppColors.accent, fontWeight = FontWeight.SemiBold)) {
                     append(privacyLabel)
                 }
                 pop()

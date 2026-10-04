@@ -162,7 +162,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
     <string name="document_products_other_lines">Autres lignes</string>
-    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé</string>
     <string name="document_product_advice_2">La modification s'applique uniquement à ce document …</string>
     <string name="document_product_advice_3">Elle n'impacte pas le produit enregistré dans l'onglet "Produits".</string>
 
@@ -548,10 +548,15 @@
     <string name="first_launch_settings_intro">Avant de te laisser la main, il me faut 2 infos pour paramétrer l'interface :</string>
     <string name="first_launch_settings_name_label">Nom de ton entreprise</string>
     <string name="first_launch_settings_country_label">Pays</string>
-    <string name="first_launch_settings_cta">C'est parti</string>
+    <string name="first_launch_settings_cta">Valider</string>
     <string name="first_launch_issuer_placeholder">Ferme des Trois Chênes</string>
     <string name="first_launch_issuer_skip">Plus tard</string>
     <string name="first_launch_issuer_default_name">Mon entreprise</string>
+
+    <!-- 2.0 dark-mode prompts: shown as a slide in the first-launch wizard,
+         and as a dismissable modal for existing users on upgrade -->
+    <string name="onboarding_darkmode_body">Souhaites-tu activer le mode sombre ?</string>
+    <string name="onboarding_darkmode_migration_body">Le mode sombre est désormais disponible, souhaites-tu l'activer ?</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
@@ -685,6 +690,8 @@
     <string name="client_type_individual">Particulier</string>
     <string name="client_type_professional">Professionnel</string>
     <string name="account_section_advanced">Avancé</string>
+    <string name="account_appearance_title">Apparence</string>
+    <string name="account_dark_mode_switch">Mode sombre</string>
     <string name="account_delete_cta">Supprimer mon compte</string>
     <string name="account_delete_dialog_title">Supprimer définitivement ton compte ?</string>
     <string name="account_delete_dialog_message">Cette action est irréversible. Ton abonnement sera annulé immédiatement, ton compte sera supprimé de nos serveurs et tu seras déconnecté·e. Tes factures et données enregistrées localement sur ton appareil resteront intactes.</string>
@@ -766,6 +773,9 @@
 
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">J'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="delivery_note_empty_cta">Clique sur «Créer» pour créer ton premier bon de livraison</string>
+    <string name="quote_empty_cta">Clique sur «Créer» pour créer ton premier devis</string>
+    <string name="credit_note_empty_cta">Clique sur «Créer» pour créer ton premier avoir</string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
@@ -776,7 +786,7 @@
 
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi, je te guide …</string>
-    <string name="invoice_advice_legal_1">Clique sur «Menu» &gt; gStore pour activer les fonctionnalités que tu préfères. Clique sur «Créer» pour créer ta première facture…</string>
+    <string name="invoice_advice_legal_1">Clique sur «Créer» pour créer ta première facture</string>
     <string name="invoice_advice_legal_2">Tous les documents que tu crées s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
 
     <!-- Held for the upcoming onboarding screen — moved out of the Invoice-tab

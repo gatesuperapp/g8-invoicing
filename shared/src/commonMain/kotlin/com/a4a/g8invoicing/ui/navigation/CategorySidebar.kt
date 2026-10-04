@@ -64,7 +64,6 @@ import com.a4a.g8invoicing.ui.shared.InitImageContext
 import com.a4a.g8invoicing.ui.shared.loadLogoBitmap
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
 import com.a4a.g8invoicing.ui.viewmodels.ClientOrIssuerListViewModel
 import kotlin.math.abs
 import org.jetbrains.compose.resources.stringResource
@@ -353,7 +352,7 @@ private fun PillRow(
             .then(
                 if (selected) {
                     Modifier.background(
-                        color = ColorVioletLight.copy(alpha = 0.10f),
+                        color = AppColors.accent.copy(alpha = 0.10f),
                         shape = RoundedCornerShape(8.dp),
                     )
                 } else {
@@ -482,7 +481,7 @@ private fun IssuerPickerRow(
             .then(
                 if (isCurrent) {
                     Modifier.background(
-                        color = ColorVioletLight.copy(alpha = 0.10f),
+                        color = AppColors.accent.copy(alpha = 0.10f),
                         shape = RoundedCornerShape(8.dp),
                     )
                 } else {

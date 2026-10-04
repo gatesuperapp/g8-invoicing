@@ -16,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textSecondary
 
 @Composable
@@ -25,9 +25,14 @@ fun WebsiteFooter(
     linkLabel: String,
     onClickLink: () -> Unit,
 ) {
+    // Capture theme colours in locals because buildAnnotatedString's lambda
+    // is not @Composable — AppColors' getter can only be read from a
+    // composable context, so we resolve it here and hand the plain Color in.
+    val prefixColor = AppColors.textSecondary
+    val linkColor = AppColors.accent
     val annotated = buildAnnotatedString {
-        withStyle(SpanStyle(color = Color.DarkGray)) { append(prefix) }
-        withStyle(SpanStyle(color = ColorVioletLight, fontWeight = FontWeight.SemiBold)) {
+        withStyle(SpanStyle(color = prefixColor)) { append(prefix) }
+        withStyle(SpanStyle(color = linkColor, fontWeight = FontWeight.SemiBold)) {
             append(linkLabel)
         }
     }

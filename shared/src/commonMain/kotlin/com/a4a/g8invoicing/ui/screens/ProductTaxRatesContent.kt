@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
@@ -106,7 +107,14 @@ fun ProductTaxRatesContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            if (isCurrentTaxRate) Color(0xFFF0F0F0) else Color.Transparent
+                            // Selected-row highlight: violet-tinted accent
+                            // wash (same recipe as the client picker) so the
+                            // selection stays legible in both themes — the
+                            // legacy hardcoded #F0F0F0 rendered as a bright
+                            // white patch on dark surfaces and swallowed the
+                            // percentage label sitting on top.
+                            if (isCurrentTaxRate) AppColors.accent.copy(alpha = 0.10f)
+                            else Color.Transparent
                         )
                         .clickable {
                             chosenOption = taxRate
@@ -164,7 +172,7 @@ fun ProductTaxRatesContent(
                 Box(
                     modifier = Modifier
                         .background(
-                            color = Color(0xFFf7f7f7),
+                            color = AppColors.surfaceMuted,
                             shape = RoundedCornerShape(6.dp)
                         )
                 ) {
@@ -229,7 +237,7 @@ fun ProductTaxRatesEditContent(
                 .align(Alignment.End)
                 .padding(top = 2.dp)
                 .background(
-                    color = Color(0xFFf7f7f7),
+                    color = AppColors.surfaceSubtle,
                     shape = RoundedCornerShape(6.dp)
                 )
                 .clickable(enabled = true) {
@@ -238,7 +246,7 @@ fun ProductTaxRatesEditContent(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
-                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textSecondary),
+                style = MaterialTheme.typography.textBodySmall.copy(color = AppColors.textPrimary),
                 text = AnnotatedString(stringResource(Res.string.tax_rate_add_rate)),
             )
         }
@@ -349,13 +357,14 @@ private fun TaxRateEditRow(
                     // No autofill dataset makes sense for a VAT rate — opt out so the
                     // system doesn't offer credit-card or password suggestions.
                     .clearAndSetSemantics {},
-                textStyle = LocalTextStyle.current,
+                textStyle = LocalTextStyle.current.copy(color = AppColors.textPrimary),
+                cursorBrush = SolidColor(AppColors.accent),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
                 decorationBox = { innerTextField ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         innerTextField()
-                        Text("%", style = LocalTextStyle.current)
+                        Text("%", style = LocalTextStyle.current.copy(color = AppColors.textPrimary))
                     }
                 }
             )

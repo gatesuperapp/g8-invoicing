@@ -115,7 +115,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
     <string name="document_products_other_lines">Otras líneas</string>
-    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
+    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris</string>
     <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
     <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
 
@@ -299,10 +299,12 @@
     <string name="first_launch_settings_intro">Antes de dejarte, necesito 2 datos para configurar la interfaz:</string>
     <string name="first_launch_settings_name_label">Nombre de tu empresa</string>
     <string name="first_launch_settings_country_label">País</string>
-    <string name="first_launch_settings_cta">¡Vamos!</string>
+    <string name="first_launch_settings_cta">Confirmar</string>
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
     <string name="first_launch_issuer_skip">Más tarde</string>
     <string name="first_launch_issuer_default_name">Mi empresa</string>
+    <string name="onboarding_darkmode_body">¿Quieres activar el modo oscuro?</string>
+    <string name="onboarding_darkmode_migration_body">El modo oscuro ya está disponible, ¿quieres activarlo?</string>
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
@@ -352,6 +354,8 @@
     <string name="client_type_individual">Particular</string>
     <string name="client_type_professional">Profesional</string>
     <string name="account_section_advanced">Avanzado</string>
+    <string name="account_appearance_title">Apariencia</string>
+    <string name="account_dark_mode_switch">Modo oscuro</string>
     <string name="account_delete_cta">Eliminar mi cuenta</string>
     <string name="account_delete_dialog_title">¿Eliminar definitivamente tu cuenta?</string>
     <string name="account_delete_dialog_message">Esta acción es irreversible. Tu suscripción se cancelará de inmediato, tu cuenta se eliminará de nuestros servidores y se cerrará tu sesión. Tus facturas y datos guardados localmente en tu dispositivo permanecerán intactos.</string>
@@ -425,11 +429,14 @@
     <string name="ok">OK</string>
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">Aprendí este movimiento en el hip-hop, súper estiloso lo sé. Todavía tengo que practicarlo, no soy muy rápido, creo que mi patagio frena la ola. En fin, quería decirte \n\n …   </string>
+    <string name="delivery_note_empty_cta">Toca «Crear» para hacer tu primer albarán</string>
+    <string name="quote_empty_cta">Toca «Crear» para hacer tu primer presupuesto</string>
+    <string name="credit_note_empty_cta">Toca «Crear» para hacer tu primer abono</string>
     <string name="delivery_note_advice_convert1">que si quieres convertir uno o varios albaranes en una factura, puedes seleccionarlos en la lista haciendo clic largo (o haciendo clic en ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
-    <string name="invoice_advice_legal_1">Toca «Menú» &gt; gStore para activar las funciones que prefieras. Toca «Crear» para hacer tu primera factura…</string>
+    <string name="invoice_advice_legal_1">Toca «Crear» para hacer tu primera factura</string>
     <string name="invoice_advice_legal_2">Todos los documentos que creas se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡</string>
 

@@ -1,10 +1,8 @@
-¡Factura en 10 segundos y convierte tus presupuestos y albaranes en facturas!
+▸ Facturas profesionales, formato electrónico
+Crea facturas profesionales. Retenciones fiscales en la fuente (IRPF, ISR, ReteFuente…). Exporta en PDF, Factur-X o CII-XML: los formatos base de la facturación electrónica. Importa en tu plataforma acreditada o software de contabilidad.
 
 ▸ Presupuesto, Albarán → Factura
 Transforma presupuestos o albaranes en una factura, o crea una factura directamente. Sin volver a escribir.
-
-▸ Facturas profesionales, formato electrónico
-Crea facturas profesionales. Retenciones fiscales en la fuente (IRPF, ISR, ReteFuente…). Exporta en PDF, Factur-X o CII-XML: los formatos base de la facturación electrónica. Importa en tu plataforma acreditada o software de contabilidad.
 
 ▸ Gestión avanzada
 Visualiza al instante las facturas vencidas y envía recordatorios con un toque.

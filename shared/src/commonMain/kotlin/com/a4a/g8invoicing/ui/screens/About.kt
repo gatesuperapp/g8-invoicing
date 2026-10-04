@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,10 +108,9 @@ import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.shared.CollapsibleSection
 import com.a4a.g8invoicing.ui.shared.GeneralBottomBar
 import com.a4a.g8invoicing.ui.shared.animations.BatKiss
+import com.a4a.g8invoicing.ui.shared.animations.LottieMascotHalo
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.ColorHotPink
-import com.a4a.g8invoicing.ui.theme.ColorVioletLight
-import com.a4a.g8invoicing.ui.theme.ColorVioletLink
 import com.a4a.g8invoicing.ui.theme.textBodyBold
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
@@ -153,7 +153,7 @@ fun About(
     )
     val brushSize = 400f
     val brush = Brush.linearGradient(
-        colors = listOf(ColorVioletLight, ColorHotPink),
+        colors = listOf(AppColors.accent, ColorHotPink),
         start = Offset(offset, offset),
         end = Offset(offset + brushSize, offset + brushSize),
         tileMode = TileMode.Mirror
@@ -305,9 +305,10 @@ fun About(
                 val numberOfIterations = remember { mutableIntStateOf(2) }
                 var visibleText by remember { mutableStateOf(false) }
 
-                Box(
+                LottieMascotHalo(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
+                        .size(220.dp)
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
@@ -319,8 +320,7 @@ fun About(
                     BatKiss(
                         modifier = Modifier
                             .width(250.dp)
-                            .height(170.dp)
-                            .align(Alignment.Center),
+                            .height(170.dp),
                         iterations = numberOfIterations.intValue
                     )
                 }
@@ -367,7 +367,7 @@ private fun LicensesSection(uriHandler: UriHandler) {
         if (idx >= 0) {
             append(codeTemplate.substring(0, idx))
             pushStringAnnotation(tag = "code", annotation = codeUrl)
-            withStyle(SpanStyle(color = ColorVioletLight)) {
+            withStyle(SpanStyle(color = AppColors.accent)) {
                 append(codeUrl)
             }
             pop()
@@ -389,7 +389,7 @@ private fun LicensesSection(uriHandler: UriHandler) {
             text = codeAnnotated,
             // bodyMedium matches the NOTICE body below — user asked the intro
             // and the fine-print licence text to read at the same size.
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(color = AppColors.textPrimary),
             onClick = { offset ->
                 codeAnnotated.getStringAnnotations(tag = "code", start = offset, end = offset)
                     .firstOrNull()?.let { uriHandler.openUri(it.item) }
@@ -409,6 +409,7 @@ private fun LicensesSection(uriHandler: UriHandler) {
             // NOTICE.
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                color = AppColors.textPrimary,
             ),
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -435,17 +436,19 @@ private fun MarkdownishText(md: String) {
                     text = para.removePrefix("# ").trim(),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                        color = AppColors.textPrimary,
                     ),
                 )
                 para.startsWith("## ") -> Text(
                     text = para.removePrefix("## ").trim(),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                        color = AppColors.textPrimary,
                     ),
                 )
                 else -> Text(
                     text = parseBoldSpans(para),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.copy(color = AppColors.textPrimary),
                 )
             }
             if (i < paragraphs.lastIndex) Spacer(modifier = Modifier.height(12.dp))
@@ -478,13 +481,13 @@ private fun TermsOfService(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append("$termsHeader ")
         pushStringAnnotation(tag = "terms", annotation = termsUrl)
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
+        withStyle(style = SpanStyle(color = AppColors.accent)) {
             append("$termsText ")
         }
         pop()
         append("$termsHeader2 ")
         pushStringAnnotation(tag = "policy", annotation = policyUrl)
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
+        withStyle(style = SpanStyle(color = AppColors.accent)) {
             append(policyText)
         }
         pop()
@@ -492,7 +495,7 @@ private fun TermsOfService(uriHandler: UriHandler) {
 
     ClickableText(
         text = annotatedString,
-        style = MaterialTheme.typography.bodyLarge,
+        style = MaterialTheme.typography.bodyLarge.copy(color = AppColors.textPrimary),
         onClick = { offset ->
             annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset)
                 .firstOrNull()?.let {
@@ -516,7 +519,7 @@ private fun WebsiteText(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append(intro)
         pushStringAnnotation(tag = "website", annotation = link)
-        withStyle(style = SpanStyle(color = ColorVioletLink)) {
+        withStyle(style = SpanStyle(color = AppColors.accent)) {
             append(cta)
         }
         pop()
@@ -525,7 +528,7 @@ private fun WebsiteText(uriHandler: UriHandler) {
 
     ClickableText(
         text = annotatedString,
-        style = MaterialTheme.typography.bodyLarge,
+        style = MaterialTheme.typography.bodyLarge.copy(color = AppColors.textPrimary),
         onClick = { offset ->
             annotatedString.getStringAnnotations(tag = "website", start = offset, end = offset)
                 .firstOrNull()?.let { uriHandler.openUri(it.item) }
@@ -542,7 +545,7 @@ private fun CommunityText(uriHandler: UriHandler) {
     val annotatedString = buildAnnotatedString {
         append("$communityText ")
         pushStringAnnotation(tag = "forum", annotation = communityLink)
-        withStyle(style = SpanStyle(color = ColorVioletLight)) {
+        withStyle(style = SpanStyle(color = AppColors.accent)) {
             append(communityCta)
         }
         pop()
@@ -550,7 +553,7 @@ private fun CommunityText(uriHandler: UriHandler) {
 
     ClickableText(
         text = annotatedString,
-        style = MaterialTheme.typography.bodyLarge,
+        style = MaterialTheme.typography.bodyLarge.copy(color = AppColors.textPrimary),
         onClick = { offset ->
             annotatedString.getStringAnnotations(tag = "forum", start = offset, end = offset)
                 .firstOrNull()?.let {
@@ -600,13 +603,13 @@ private fun AssistanceText(
         val annotatedString = buildAnnotatedString {
             append(moreLead)
             pushStringAnnotation(tag = "forum", annotation = forumLink)
-            withStyle(style = SpanStyle(color = ColorVioletLight)) {
+            withStyle(style = SpanStyle(color = AppColors.accent)) {
                 append(forumLinkText)
             }
             pop()
             append(moreMiddle)
             pushStringAnnotation(tag = "tutorials", annotation = tutorialsLink)
-            withStyle(style = SpanStyle(color = ColorVioletLight)) {
+            withStyle(style = SpanStyle(color = AppColors.accent)) {
                 append(tutorialsLinkText)
             }
             pop()
@@ -615,7 +618,7 @@ private fun AssistanceText(
 
         ClickableText(
             text = annotatedString,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyLarge.copy(color = AppColors.textPrimary),
             onClick = { offset ->
                 annotatedString.getStringAnnotations(tag = "forum", start = offset, end = offset)
                     .firstOrNull()?.let { uriHandler.openUri(it.item) }

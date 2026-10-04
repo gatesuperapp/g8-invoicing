@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textSection
 import com.a4a.g8invoicing.data.AppLocaleHolder
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
@@ -123,9 +124,9 @@ fun UnitCodePicker(
                 placeholder = { Text(stringResource(Res.string.unit_picker_search)) },
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Black,
-                    unfocusedBorderColor = Color.Black,
-                    cursorColor = Color.Black,
+                    focusedBorderColor = AppColors.textPrimary,
+                    unfocusedBorderColor = AppColors.textPrimary,
+                    cursorColor = AppColors.textPrimary,
                 ),
             )
 
