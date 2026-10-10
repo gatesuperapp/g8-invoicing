@@ -1018,7 +1018,10 @@ private fun OupsDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
-        textContentColor = Color.Black,
+        // Theme-aware body text — hardcoded Color.Black rendered the recap
+        // near-black on a dark surface in dark mode. onSurface tracks both
+        // themes via Material3's colorScheme.
+        textContentColor = MaterialTheme.colorScheme.onSurface,
         text = {
             // Scrollable so the modal stays usable on short devices when
             // all three blockers fire at once (🪄 + 💸 + a long list of
