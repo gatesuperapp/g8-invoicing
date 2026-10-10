@@ -70,13 +70,6 @@ fun PdfExportErrorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        // Explicit theme-aware container + content colors — without them the
-        // dialog inherits Material3's own defaults, which in some rendered
-        // paths drop LocalContentColor back to a hardcoded dark tone and the
-        // body text ends up near-black in dark mode.
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface,
         text = {
             Column(
                 modifier = Modifier
@@ -86,7 +79,7 @@ fun PdfExportErrorDialog(
                 Text(
                     text = OH_NO_HEADER,
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = AppColors.textPrimary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -94,13 +87,13 @@ fun PdfExportErrorDialog(
                 Text(
                     text = FRIENDLY_MESSAGE,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = AppColors.textPrimary,
                 )
                 Spacer(Modifier.height(12.dp))
                 ClickableText(
                     text = annotated,
                     style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = AppColors.textPrimary,
                     ),
                     onClick = { offset ->
                         annotated
