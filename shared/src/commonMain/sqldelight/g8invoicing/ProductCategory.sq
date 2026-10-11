@@ -6,6 +6,9 @@ CREATE TABLE ProductCategory (
   -- shifts later.
   color INTEGER NOT NULL DEFAULT 0,
   sort_order INTEGER NOT NULL DEFAULT 0,
+  -- Scoped to the entreprise courante — same pattern as Product.company_id.
+  -- Multi-entreprise users keep a separate category list per company.
+  company_id INTEGER,
   created_at TEXT DEFAULT (datetime('now', 'localtime')),
   updated_at TEXT DEFAULT (datetime('now', 'localtime'))
 );
@@ -20,10 +23,16 @@ SELECT *
 FROM ProductCategory
 ORDER BY sort_order ASC, product_category_id ASC;
 
+getAllCategoriesForCompany:
+SELECT *
+FROM ProductCategory
+WHERE company_id = :company_id
+ORDER BY sort_order ASC, product_category_id ASC;
+
 saveCategory:
 INSERT
-INTO ProductCategory (name, color, sort_order)
-VALUES (:name, :color, :sort_order);
+INTO ProductCategory (name, color, sort_order, company_id)
+VALUES (:name, :color, :sort_order, :company_id);
 
 updateCategory:
 UPDATE ProductCategory
