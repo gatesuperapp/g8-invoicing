@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.appbar_invoices
+import com.a4a.g8invoicing.shared.resources.appbar_tag_cancelled
+import com.a4a.g8invoicing.shared.resources.appbar_tag_draft
+import com.a4a.g8invoicing.shared.resources.appbar_tag_late
+import com.a4a.g8invoicing.shared.resources.appbar_tag_locked
+import com.a4a.g8invoicing.shared.resources.appbar_tag_paid
+import com.a4a.g8invoicing.shared.resources.appbar_tag_reminded
+import com.a4a.g8invoicing.shared.resources.appbar_tag_sent
 import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu
 import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu1
 import com.a4a.g8invoicing.shared.resources.invoice_advice_bottom_menu2
@@ -46,7 +54,14 @@ import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_2
 import com.a4a.g8invoicing.shared.resources.invoice_advice_legal_help
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.navigation.TagFilterOption
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.theme.ColorCancelled
+import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
+import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
+import com.a4a.g8invoicing.ui.theme.ColorRedLate
+import com.a4a.g8invoicing.ui.theme.ColorReminded
+import com.a4a.g8invoicing.ui.theme.ColorSent
 import com.a4a.g8invoicing.ui.navigation.actionNew
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
@@ -116,6 +131,24 @@ fun InvoiceList(
     // taps + list recompositions but resets when leaving the tab.
     var searchExpanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+
+    // Status filter — saveable ordinal so the pick survives detail-screen
+    // round-trips (NavBackStackEntry stays alive). Resolves back to the
+    // DocumentTag enum on read.
+    var selectedTagFilterOrdinal by rememberSaveable { mutableStateOf<Int?>(null) }
+    val selectedTagFilter: DocumentTag? = selectedTagFilterOrdinal
+        ?.let { DocumentTag.entries.getOrNull(it) }
+    // Localized labels + status dot colours for the invoice tag filter.
+    // Hoisted into the composition so stringResource calls stay valid.
+    val tagFilterOptions = listOf(
+        TagFilterOption(DocumentTag.DRAFT, stringResource(Res.string.appbar_tag_draft), ColorGreyDraft),
+        TagFilterOption(DocumentTag.SENT, stringResource(Res.string.appbar_tag_sent), ColorSent),
+        TagFilterOption(DocumentTag.PAID, stringResource(Res.string.appbar_tag_paid), ColorGreenPaid),
+        TagFilterOption(DocumentTag.LATE, stringResource(Res.string.appbar_tag_late), ColorRedLate),
+        TagFilterOption(DocumentTag.REMINDED, stringResource(Res.string.appbar_tag_reminded), ColorReminded),
+        TagFilterOption(DocumentTag.CANCELLED, stringResource(Res.string.appbar_tag_cancelled), ColorCancelled),
+        TagFilterOption(DocumentTag.LOCKED, stringResource(Res.string.appbar_tag_locked), ColorGreyDraft),
+    )
 
     // Alert dialogs
     val openDeleteAlertDialog = remember { mutableStateOf(false) }
@@ -196,6 +229,10 @@ fun InvoiceList(
                 searchQuery = searchQuery,
                 onSearchToggle = { searchExpanded = !searchExpanded },
                 onSearchQueryChange = { searchQuery = it },
+                tagFilterEnabled = selectedItems.isEmpty(),
+                tagFilterOptions = tagFilterOptions,
+                selectedTagFilter = selectedTagFilter,
+                onTagFilterChange = { picked -> selectedTagFilterOrdinal = picked?.ordinal },
             )
         },
         bottomBar = {
@@ -255,8 +292,15 @@ fun InvoiceList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                val filteredDocuments = remember(documentsUiState.documentStates, searchQuery.text) {
-                    documentsUiState.documentStates.filterByQuery(searchQuery.text)
+                val filteredDocuments = remember(
+                    documentsUiState.documentStates, searchQuery.text, selectedTagFilter,
+                ) {
+                    documentsUiState.documentStates
+                        .filterByQuery(searchQuery.text)
+                        .let { list ->
+                            val tag = selectedTagFilter ?: return@let list
+                            list.filter { it.documentTag == tag }
+                        }
                 }
                 val hasActiveQuery = searchQuery.text.isNotBlank()
 

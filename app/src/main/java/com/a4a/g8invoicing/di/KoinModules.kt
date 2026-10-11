@@ -21,6 +21,8 @@ import com.a4a.g8invoicing.data.models.UnitCodeRepository
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSource
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.ProductCategoryLocalDataSource
+import com.a4a.g8invoicing.data.ProductCategoryLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSource
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
@@ -130,6 +132,7 @@ val appModule = module {
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
+    single<ProductCategoryLocalDataSourceInterface> { ProductCategoryLocalDataSource(get()) }
     single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get(), get(), get()) }
@@ -149,11 +152,11 @@ val appModule = module {
         val type: String? = if (params.size() > 1) params[1] else null
         ClientOrIssuerAddEditViewModel(get(), itemId, type)
     }
-    viewModel { ProductListViewModel(get()) }
+    viewModel { ProductListViewModel(get(), get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null
         val type: String? = if (params.size() > 1) params[1] else null
-        ProductAddEditViewModel(get(), get(), get(), get(), itemId, type)
+        ProductAddEditViewModel(get(), get(), get(), get(), get(), itemId, type)
     }
     viewModel { DeliveryNoteListViewModel(get(), get()) }
     viewModel { params ->

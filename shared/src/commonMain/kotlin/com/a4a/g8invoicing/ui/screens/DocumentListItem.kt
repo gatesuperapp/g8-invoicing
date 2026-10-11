@@ -101,7 +101,7 @@ fun DocumentListItem(
             .clip(RoundedCornerShape(5.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = AppColors.ripple, bounded = false),
+                indication = ripple(color = AppColors.ripple, bounded = true),
             ) {
                 //onItemClick()
             }

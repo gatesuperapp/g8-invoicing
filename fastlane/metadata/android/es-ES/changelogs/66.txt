@@ -1,0 +1,1 @@
+Filtra las facturas por estado. Nuevo módulo premium: categorías de productos.

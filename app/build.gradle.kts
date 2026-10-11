@@ -24,7 +24,6 @@ android {
         }
         create("beta") {
             applicationIdSuffix = ".beta"
-            versionNameSuffix = "-beta"
         }
     }
 
@@ -33,8 +32,8 @@ android {
         minSdk = 26
 
         targetSdk = 36
-        versionCode = 64
-        versionName = "2.0"
+        versionCode = 66
+        versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

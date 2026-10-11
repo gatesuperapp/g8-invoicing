@@ -276,8 +276,13 @@ fun NavGraph(
                 onClickBack = {
                     navigateBack(navController)
                 },
-                onClickForward = {
-                    navController.navigate(Screen.ProductTaxRates.name) {
+                onClickForward = { element ->
+                    val target = when (element) {
+                        com.a4a.g8invoicing.ui.shared.ScreenElement.PRODUCT_CATEGORY ->
+                            Screen.ProductCategories.name
+                        else -> Screen.ProductTaxRates.name
+                    }
+                    navController.navigate(target) {
                         popUpTo("ProductCreation") {
                             saveState = true
                         }
@@ -288,6 +293,19 @@ fun NavGraph(
             )
 
             productTaxRates(
+                navController = navController,
+                onClickBackOrSelect = {
+                    navController.navigate(Screen.ProductAddEdit.name) {
+                        popUpTo("ProductCreation") {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+
+            productCategories(
                 navController = navController,
                 onClickBackOrSelect = {
                     navController.navigate(Screen.ProductAddEdit.name) {

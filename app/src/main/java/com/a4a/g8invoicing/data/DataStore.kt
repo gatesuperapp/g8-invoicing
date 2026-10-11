@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore by preferencesDataStore("settings")
 
 // Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "2.0"
+const val CURRENT_APP_VERSION = "2.1"
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")
@@ -55,11 +55,20 @@ suspend fun setDarkMode(context: Context, enabled: Boolean) {
 // Can't gate on LAST_SEEN_VERSION like the other "fire on upgrade" prompts
 // because the 1.9 migration wizard writes LAST_SEEN_VERSION = CURRENT_APP_VERSION
 // in its markSeen block (via setSeenOnboarding18), which would mask the
-// upgrade signal for users crossing 1.x → 2.0. Fresh installs still skip
-// the modal — initializeVersionTracking flips HAS_SEEN immediately.
+// upgrade signal for users crossing 1.x → 2.0.
+//
+// Fresh installs still need to be excluded though — the Flow collector can
+// emit before initializeVersionTracking's eager setSeenDarkModeMigration20
+// write propagates. Guard by also requiring a prior-session signal
+// (LAST_SEEN_VERSION tracked, or legacy HAS_SEEN_POPUP touched). A real
+// fresh install has neither at boot and the modal stays silent.
 fun shouldShowDarkModeMigration20(context: Context) =
     context.dataStore.data.map { prefs ->
-        !(prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] ?: false)
+        val hasSeen = prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] ?: false
+        if (hasSeen) return@map false
+        val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
+        val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
+        lastSeenVersion != null || hasSeenPopup
     }
 
 suspend fun setSeenDarkModeMigration20(context: Context) {
@@ -113,20 +122,27 @@ suspend fun initializeVersionTracking(context: Context) {
     val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
     val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
 
-    // Seulement pour les vraies nouvelles installations
+    // Seulement pour les vraies nouvelles installations. Les trois writes
+    // partagent le même .edit {} pour éviter la race que les versions
+    // précédentes voyaient : chaque .edit {} fait émettre le Flow, et le
+    // moindre interval où LAST_SEEN_VERSION est écrit avant
+    // HAS_SEEN_DARKMODE_MIGRATION_20 déclenche la modale "Mode sombre !"
+    // (shouldShowDarkModeMigration20 interprète lastSeenVersion != null
+    // comme un upgrade). Un write atomique fait émettre un seul snapshot.
+    //
+    // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
+    // The onboarding must run for fresh installs too (with the empty-issuer
+    // path skipping the per-issuer loop) so a user quitting via the Home
+    // button during Welcome can resume the wizard on next launch. The flag
+    // is only flipped once the user reaches Terminer (see commit()).
     if (lastSeenVersion == null && !hasSeenPopup) {
-        setSeenWhatsNew(context)
-        // Le popup e-invoice cible les mises à jour depuis 1.8/antérieur :
-        // pour les fresh installs on flip SEEN=true directement pour qu'il
-        // n'apparaisse jamais (l'utilisateur découvre l'appli avec la
-        // facturation électronique déjà intégrée aux features).
-        setSeenEInvoiceIntro(context)
-        setSeenDarkModeMigration20(context)
-        // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
-        // The onboarding must run for fresh installs too (with the empty-issuer
-        // path skipping the per-issuer loop) so a user quitting via the Home
-        // button during Welcome can resume the wizard on next launch. The flag
-        // is only flipped once the user reaches Terminer (see commit()).
+        context.dataStore.edit { prefs ->
+            prefs[PrefKeys.LAST_SEEN_VERSION] = CURRENT_APP_VERSION
+            // E-invoice popup cible les upgrades depuis 1.8/antérieur :
+            // pour les fresh installs on flip SEEN=true directement.
+            prefs[PrefKeys.HAS_SEEN_EINVOICE_INTRO] = true
+            prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] = true
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
@@ -69,7 +69,10 @@ fun FormValidationErrorDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.form_validation_dialog_title)) },
-        textContentColor = Color.Black,
+        // Theme-aware body text — hardcoded Color.Black rendered the error
+        // list near-black on a dark surface in dark mode. onSurface tracks
+        // both themes via Material3's colorScheme.
+        textContentColor = MaterialTheme.colorScheme.onSurface,
         text = {
             Column(
                 modifier = Modifier

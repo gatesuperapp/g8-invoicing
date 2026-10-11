@@ -1,12 +1,15 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.theme.AppColors
@@ -23,7 +26,15 @@ fun ClientOrIssuerListContent(
     isCheckboxDisplayed: Boolean = true,
     currentClientOrIssuerId: Int? = null,
 ) {
+    // Same visual pattern as DocumentListContent / ProductListContent:
+    // screen-coloured container shows through a 1dp gap between rows
+    // (via spacedBy) so items read as discrete cards rather than a
+    // continuous slab with hard divider lines.
     LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.screen),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
         contentPadding = PaddingValues(bottom = 150.dp)
     ) {
         items(
@@ -70,10 +81,6 @@ fun ClientOrIssuerListContent(
                 },
                 isCheckboxDisplayed,
                 keyToResetCheckbox = keyToResetCheckboxes
-            )
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                color = AppColors.divider,
             )
         }
     }

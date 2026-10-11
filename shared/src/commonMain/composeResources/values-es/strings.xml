@@ -973,4 +973,20 @@ Une erreur s'est produite :
     <string name="gstore_module_quote_tagging_title">Etiquetar presupuestos</string>
     <string name="gstore_module_quote_tagging_desc">Añadir un estado a tus presupuestos</string>
     <string name="gstore_module_quote_tagging_detail">Activa este módulo para añadir un estado a tus presupuestos: borrador, enviado, cancelado o facturado.\n\nEl estado « Facturado » se aplica automáticamente cuando un presupuesto se convierte en factura, pero puedes cambiarlo en cualquier momento.</string>
+
+    <!-- gStore: Categorías de productos (2.1 premium) -->
+    <string name="gstore_module_product_categories_title">Categorías de productos</string>
+    <string name="gstore_module_product_categories_desc">Organiza tus productos con tus propias categorías.</string>
+    <string name="gstore_module_product_categories_detail">Activa este módulo para definir tus propias categorías de productos.\n\nDesde la ficha de un producto, puedes asignarle una categoría; desde la lista de productos, puedes seleccionar varios y clasificarlos de una vez.\n\nPuedes filtrar tus productos por categoría.</string>
+
+    <!-- Categorías de productos (2.1) -->
+    <string name="product_category">Categoría</string>
+    <string name="product_categories_title">Categorías</string>
+    <string name="product_categories_add_cta">Añadir una categoría</string>
+    <string name="product_categories_name_placeholder">Nombre de la categoría</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">¿Eliminar esta categoría?</string>
+    <string name="product_categories_delete_confirm_body">Los productos que estaban en esta categoría seguirán existiendo, pero ya no tendrán categoría.</string>
+    <string name="product_categories_color_picker_title">Elegir un color</string>
+    <string name="product_categories_empty_hint">Toca el botón de ajustes de abajo para añadir categorías</string>
 </resources>

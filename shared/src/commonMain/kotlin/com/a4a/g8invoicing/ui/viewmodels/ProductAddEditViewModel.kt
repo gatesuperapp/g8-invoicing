@@ -11,6 +11,7 @@ import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.data.models.UnitCode
 import com.a4a.g8invoicing.data.models.UnitCodeRepository
+import com.a4a.g8invoicing.data.ProductCategoryLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductTaxLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
@@ -19,6 +20,7 @@ import com.a4a.g8invoicing.data.util.calculatePriceWithTax
 import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.ClientRef
 import com.a4a.g8invoicing.ui.states.DocumentProductState
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.states.ProductPrice
 import com.a4a.g8invoicing.ui.states.ProductState
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -32,6 +34,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 class ProductAddEditViewModel(
     private val dataSource: ProductLocalDataSourceInterface,
     private val taxDataSource: ProductTaxLocalDataSourceInterface,
+    private val categoryDataSource: ProductCategoryLocalDataSourceInterface,
     private val clientOrIssuerDataSource: ClientOrIssuerLocalDataSourceInterface,
     private val unitCodeRepository: UnitCodeRepository,
     private val itemId: String?,
@@ -46,6 +49,12 @@ class ProductAddEditViewModel(
     // Counter to trigger recomposition after saving tax rates
     private val _taxRatesRefreshCounter = MutableStateFlow(0)
     val taxRatesRefreshCounter: StateFlow<Int> = _taxRatesRefreshCounter.asStateFlow()
+
+    // Same pattern as tax rates — bumped after saveCategories writes so the
+    // Categories picker screen can force a reload (otherwise the fetched list
+    // is cached in `remember` and stale rows persist across picker opens).
+    private val _categoriesRefreshCounter = MutableStateFlow(0)
+    val categoriesRefreshCounter: StateFlow<Int> = _categoriesRefreshCounter.asStateFlow()
 
     private val _productUiState = mutableStateOf(ProductState())
     val productUiState: State<ProductState> = _productUiState
@@ -147,7 +156,24 @@ class ProductAddEditViewModel(
     }
 
     fun setDocumentProductUiState(documentProduct: DocumentProductState) {
+        // Doc products are hydrated from the DocumentProduct table which
+        // doesn't store the category — it lives on the master Product row.
+        // When re-opening a doc product for edit, back-fill the category by
+        // looking it up via productId so the form chip renders the right
+        // value instead of "Aucune".
         _documentProductUiState.value = documentProduct
+        val masterId = documentProduct.productId
+        if (documentProduct.category == null && masterId != null) {
+            viewModelScope.launch {
+                val master = dataSource.fetchProduct(masterId.toLong())
+                val category = master?.category ?: return@launch
+                if (_documentProductUiState.value.id == documentProduct.id &&
+                    _documentProductUiState.value.category == null) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(category = category)
+                }
+            }
+        }
     }
 
     fun setDocumentProductUiStateWithProduct(product: ProductState, clientId: Int? = null) {
@@ -179,6 +205,7 @@ class ProductAddEditViewModel(
             unitCode = product.unitCode,
             type = product.type,
             productId = product.id,
+            category = product.category,
         )
         if (product.unitCode == null && !product.unit?.text.isNullOrBlank()) {
             viewModelScope.launch {
@@ -216,6 +243,9 @@ class ProductAddEditViewModel(
             unit = _documentProductUiState.value.unit,
             unitCode = _documentProductUiState.value.unitCode,
             type = _documentProductUiState.value.type,
+            // Carry the category picked while adding from a document so the
+            // master row created on save inherits it.
+            category = _documentProductUiState.value.category,
         )
     }
 
@@ -340,6 +370,53 @@ class ProductAddEditViewModel(
                 _taxRatesRefreshCounter.value++
             } catch (e: Exception) {
                 // Error handling
+            }
+        }
+    }
+
+    // ---------------- Product categories (2.1 premium) ----------------
+
+    fun updateCategory(category: ProductCategoryState?) {
+        _productUiState.value = _productUiState.value.copy(category = category)
+    }
+
+    suspend fun fetchCategoriesFromLocalDb(): List<ProductCategoryState> =
+        categoryDataSource.fetchAllCategories()
+
+    fun saveCategories(categories: List<ProductCategoryState>) {
+        viewModelScope.launch {
+            try {
+                val existing = categoryDataSource.fetchAllCategories()
+                val existingIds = existing.mapNotNull { it.id?.toLong() }.toSet()
+                val newIds = categories.mapNotNull { it.id?.toLong() }.toSet()
+
+                // Delete rows the user removed. FK on Product.product_category_id
+                // is ON DELETE SET NULL so products just lose their category.
+                existingIds.forEach { id ->
+                    if (id !in newIds) categoryDataSource.deleteCategory(id)
+                }
+
+                categories.forEachIndexed { index, category ->
+                    val reordered = category.copy(sortOrder = index)
+                    if (category.id != null && category.id.toLong() in existingIds) {
+                        categoryDataSource.updateCategory(reordered)
+                    } else if (category.id == null) {
+                        categoryDataSource.saveCategory(reordered)
+                    }
+                }
+
+                // Refresh the attached category on the current product if the
+                // user just edited the one we're pointing at (name / colour
+                // change should propagate without a reload).
+                val currentCategoryId = _productUiState.value.category?.id
+                if (currentCategoryId != null) {
+                    val refreshed = categoryDataSource.fetchCategory(currentCategoryId.toLong())
+                    _productUiState.value = _productUiState.value.copy(category = refreshed)
+                }
+
+                _categoriesRefreshCounter.value++
+            } catch (e: Exception) {
+                // Silent — categories UI shows the stale list until next open.
             }
         }
     }
@@ -772,6 +849,16 @@ private fun updateDocumentProductUiState(
 
         ScreenElement.DOCUMENT_PRODUCT_TYPE -> {
             updated = updated.copy(type = value as ProductNature)
+        }
+
+        ScreenElement.DOCUMENT_PRODUCT_CATEGORY -> {
+            // UI-only field on the doc product state. The picker funnels through
+            // bottomFormOnValueChange(Any) so a null pick ("Aucune") is encoded
+            // as an empty ProductCategoryState (id == null) — unwrap here.
+            val picked = value as? ProductCategoryState
+            updated = updated.copy(
+                category = picked?.takeIf { it.id != null },
+            )
         }
 
         else -> {}

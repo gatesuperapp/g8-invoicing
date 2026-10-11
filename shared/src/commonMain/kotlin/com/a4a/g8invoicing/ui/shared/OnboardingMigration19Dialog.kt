@@ -1757,7 +1757,7 @@ private fun EInvoiceStep19(onNext: () -> Unit) {
 
 @Composable
 private fun FinalStep19(onDone: () -> Unit) {
-    // Auto-dismiss celebration: kaomoji + confetti + title. 5 s hold, then a
+    // Auto-dismiss celebration: kaomoji + confetti + title. 3 s hold, then a
     // 700 ms fade. Tapping anywhere on the slide fast-forwards to the fade —
     // mirrors FirstLaunchIssuerNameDialog.CompletionStep so the two "you're
     // done" moments feel identical whether the user came in via fresh install
@@ -1769,10 +1769,10 @@ private fun FinalStep19(onDone: () -> Unit) {
         label = "migration19FinalFade",
     )
     // Split into two effects so a tap-to-skip triggers onDone right after the
-    // fade — the previous single-effect version stayed blocked on delay(5000)
-    // even after the user tapped, leaving a ~4 s blank screen post-fade.
+    // fade — the previous single-effect version stayed blocked on the hold
+    // delay even after the user tapped, leaving a blank screen post-fade.
     LaunchedEffect(Unit) {
-        delay(5000L)
+        delay(3000L)
         if (!fadingOut) fadingOut = true
     }
     LaunchedEffect(fadingOut) {
@@ -1791,7 +1791,7 @@ private fun FinalStep19(onDone: () -> Unit) {
                 indication = null,
             ) { if (!fadingOut) fadingOut = true },
     ) {
-        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 5000)
+        ConfettiBurst(modifier = Modifier.fillMaxSize(), durationMs = 3000)
         Column(
             modifier = Modifier
                 .fillMaxSize()

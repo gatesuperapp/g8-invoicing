@@ -195,6 +195,19 @@ fun actionTagBLDevis() =
         isSecondary = false,
     )
 
+// Product list bulk "Marquer" (2.1 category module). No dropdown — the primary
+// button directly fires [onClick] which opens the category picker dialog.
+@Composable
+fun actionTagCategory(onClick: () -> Unit) =
+    AppBarAction(
+        name = "TAG_CATEGORY",
+        icon = Icons.Outlined.Sell,
+        description = stringResource(Res.string.appbar_label_description),
+        label = stringResource(Res.string.appbar_tag),
+        isSecondary = false,
+        onClick = onClick,
+    )
+
 @Composable
 fun actionTagUndefined() =
     AppBarAction(

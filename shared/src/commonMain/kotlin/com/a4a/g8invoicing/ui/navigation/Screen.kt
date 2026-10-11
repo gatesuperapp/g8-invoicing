@@ -7,6 +7,7 @@ enum class Screen {
     ProductList,
     ProductAddEdit,
     ProductTaxRates,
+    ProductCategories,
     DocumentProductAddEdit,
     DocumentProductTaxRates,
     InvoiceAddEdit,

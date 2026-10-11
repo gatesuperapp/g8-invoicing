@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.theme.textTiny
 
 @Composable
@@ -37,6 +38,8 @@ fun BottomBarActionView(
     onChangeBackground: () -> Unit,
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    productCategoriesForBulk: List<ProductCategoryState> = emptyList(),
+    onPickBulkCategory: (ProductCategoryState?) -> Unit = {},
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -149,6 +152,13 @@ fun BottomBarActionView(
                                         onClickTag(it)
                                     },
                                     onChangeBackground = onChangeBackground
+                                )
+                            } else if (action.name == "TAG_CATEGORY") {
+                                ButtonWithCategoryDropdown(
+                                    action = action,
+                                    categories = productCategoriesForBulk,
+                                    onPick = onPickBulkCategory,
+                                    onChangeBackground = onChangeBackground,
                                 )
                             } else {
                                 AddIconAndLabelInColumn(

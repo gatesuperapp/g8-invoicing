@@ -70,7 +70,7 @@ fun RetentionLineRow(
             .background(AppColors.surfaceSubtle)
             .clickable(
                 interactionSource = rowInteractionSource,
-                indication = ripple(color = AppColors.ripple, bounded = false),
+                indication = ripple(color = AppColors.ripple, bounded = true),
                 onClick = onClick,
             )
             // start=8dp aligns the label with the left edge of the product

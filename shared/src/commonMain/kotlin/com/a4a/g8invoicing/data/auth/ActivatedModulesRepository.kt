@@ -249,6 +249,14 @@ class ActivatedModulesRepository(
         const val MODULE_DELIVERY_NOTE_TAGGING = "delivery_note_tagging"
         const val MODULE_QUOTE_TAGGING = "quote_tagging"
 
+        // Product categories (release 2.1). Premium module. Lets the user
+        // define their own category list from a management screen, assign
+        // one category per product in the product form (new row below the
+        // name block), and bulk-assign from the product list bottom bar
+        // ("Marquer"). Each category carries a pastel colour used as a chip
+        // under the product name in the list.
+        const val MODULE_PRODUCT_CATEGORIES = "product_categories"
+
         // Modules available to everyone regardless of subscription status. The UI hides
         // the PREMIUM pill and the ViewModel's premium check skips these. Kept as a Set
         // so adding a future free module is one string.

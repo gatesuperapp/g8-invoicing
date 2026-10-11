@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,12 +80,6 @@ fun DocumentBottomSheetProductListChosenContent(
     }
 
     val lazyListState = rememberLazyListState()
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { lazyListState.layoutInfo }.collect { info ->
-            val total = info.visibleItemsInfo.sumOf { it.size }
-            println("[SCROLL] viewport=${info.viewportSize.height}px visibleContentSum=${total}px totalItems=${info.totalItemsCount} visibleItems=${info.visibleItemsInfo.size} canFwd=${lazyListState.canScrollForward} canBack=${lazyListState.canScrollBackward}")
-        }
-    }
     val reorderableLazyListState = rememberReorderableLazyListState(lazyListState) { from, to ->
         val fromKey = from.key
         val toKey = to.key
@@ -186,7 +179,10 @@ fun DocumentBottomSheetProductListChosenContent(
                 onToggleHidden = { onToggleRetentionHidden(idx) },
             )
         }
-        if (showBatHelperAdvice) {
+        // `list` lags documentProducts by a frame; without this guard the
+        // mascot can be the only item on first composition, and the LazyColumn
+        // then anchors on it when the product row syncs in next frame.
+        if (showBatHelperAdvice && list.isNotEmpty()) {
             item(key = "bat_helper_advice") {
                 BatHelperAdvice()
             }

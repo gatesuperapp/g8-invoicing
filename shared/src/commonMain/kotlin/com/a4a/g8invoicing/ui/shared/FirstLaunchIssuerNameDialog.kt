@@ -439,9 +439,14 @@ private fun CompactTextField(
 
 @Composable
 private fun CompletionStep(onDone: () -> Unit) {
-    // 3 s confetti burst then a 700 ms fade before the parent pops the
-    // dialog. Tapping anywhere on the slide fast-forwards to the fade so
-    // an eager user isn't held hostage by the celebration.
+    // ~2.3 s hold then a 700 ms fade — total ~3 s blocking the parent's
+    // buttons behind the celebration. Tapping anywhere on the slide
+    // fast-forwards to the fade.
+    //
+    // Split into two effects so a tap-to-skip actually accelerates onDone:
+    // the single-effect version stayed blocked on the hold delay even after
+    // the user tapped, leaving buttons unresponsive until the full hold
+    // elapsed — fine visually (alpha=0) but the parent couldn't react.
     var fadingOut by remember { mutableStateOf(false) }
     val alpha by animateFloatAsState(
         targetValue = if (fadingOut) 0f else 1f,
@@ -449,10 +454,14 @@ private fun CompletionStep(onDone: () -> Unit) {
         label = "completionFade",
     )
     LaunchedEffect(Unit) {
-        delay(3000L)
-        fadingOut = true
-        delay(700L)
-        onDone()
+        delay(2300L)
+        if (!fadingOut) fadingOut = true
+    }
+    LaunchedEffect(fadingOut) {
+        if (fadingOut) {
+            delay(700L)
+            onDone()
+        }
     }
     // A no-indication clickable across the whole slide lets the user tap
     // to fade out early. Idempotent — repeat taps do nothing extra.

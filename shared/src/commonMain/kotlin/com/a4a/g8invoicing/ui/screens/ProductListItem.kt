@@ -6,11 +6,14 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.a4a.g8invoicing.ui.screens.shared.resolveCategoryColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
@@ -69,7 +72,7 @@ fun ProductListItem(
             .clip(RoundedCornerShape(5.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = AppColors.ripple, bounded = false),
+                indication = ripple(color = AppColors.ripple, bounded = true),
             ) {
                 //onItemClick()
             }
@@ -109,7 +112,7 @@ fun ProductListItem(
             if (isCheckboxDisplayed) {
                 Column {
                     FlippyCheckBox(
-                        fillColorWhenSelectionOff = AppColors.surface, // was actionTagUndefined().iconColor
+                        fillColorWhenSelectionOff = AppColors.surface,
                         backgroundColorWhenSelectionOn = if (checkedState.value) AppColors.surfaceMuted else AppColors.surface,
                         onItemCheckboxClick = {
                             checkedState.value = !checkedState.value
@@ -146,17 +149,46 @@ fun ProductListItem(
                         text = displayPrice?.let { formatAmount(it, currencyCode) } ?: " - "
                     )
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (!product.description?.text.isNullOrEmpty())
-                            product.description!!.text else " - ",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.textSecondary,
-                    )
+                // Description row — omitted entirely when the product has no
+                // description, so the row collapses to just name + chip. Mixed
+                // row heights across the list is fine per the spec.
+                product.description?.text?.takeIf { it.isNotBlank() }?.let { desc ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = desc,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.textSecondary,
+                        )
+                    }
+                }
+
+                // Category chip — coloured background behind the category
+                // name. Not clickable: taps still bubble to the row click.
+                // Text is pinned to a near-black regardless of theme because
+                // the chip backgrounds are mid-saturation Material-300ish
+                // tones that read best with dark ink on top (matches how
+                // Material tag/badge components themselves handle onColor —
+                // low-tone text on a lifted container).
+                product.category?.let { category ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 4.dp, end = 20.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(resolveCategoryColor(category.color))
+                                .padding(horizontal = 10.dp, vertical = 2.dp),
+                        ) {
+                            Text(
+                                text = category.name,
+                                style = MaterialTheme.typography.textSecondary.copy(
+                                    color = Color(0xFF1A1A1A),
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                 }
             }
         }

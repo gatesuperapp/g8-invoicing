@@ -412,6 +412,11 @@ class ForwardElement(
     // exactly 2 lines with ellipsis (payment means / payment terms / VAT
     // exemption).
     val maxLines: Int? = null,
+    // ARGB colour (packed Long, same encoding as product-category storage).
+    // When non-null, the row renders [text] inside a filled chip tinted with
+    // this colour instead of as plain text — used by the product-form
+    // "Catégorie" row so the colour signal shows up directly in the form.
+    val chipColor: Long? = null,
 )
 
 data class ListPicker(

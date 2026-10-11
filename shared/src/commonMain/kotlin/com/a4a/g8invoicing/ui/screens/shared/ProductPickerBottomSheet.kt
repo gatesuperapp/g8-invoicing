@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,10 +32,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,10 +56,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -63,6 +72,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.shared.resources.product_categories_none
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
+import androidx.compose.runtime.collectAsState
 import com.a4a.g8invoicing.data.formatAmount
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.currency_picker_search
@@ -70,11 +83,14 @@ import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_empty_p
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_recent
 import com.a4a.g8invoicing.shared.resources.document_bottom_sheet_picker_title_product
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
+import com.a4a.g8invoicing.ui.shared.drawScrollThumb
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBody
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCaption
 import com.a4a.g8invoicing.ui.theme.textScreenTitle
+import com.a4a.g8invoicing.ui.theme.textSecondary
 import com.a4a.g8invoicing.ui.theme.textSection
 import com.a4a.g8invoicing.util.normalizeForSearch
 import org.jetbrains.compose.resources.stringResource
@@ -90,6 +106,13 @@ fun ProductPickerBottomSheet(
     onSelect: (ProductState) -> Unit,
     onClickNew: () -> Unit,
     onDismiss: () -> Unit,
+    // Hoisted filter state — callers can preserve the user's pick across
+    // picker open / close cycles by holding onto these at a higher scope
+    // (e.g. the DocumentBottomSheetProducts composable, which outlives the
+    // picker). Default = internal rememberSaveable so standalone call sites
+    // still work without extra wiring.
+    filterCategoryId: Int? = null,
+    onFilterCategoryIdChange: ((Int?) -> Unit)? = null,
 ) {
     val currencyManager: CurrencyManager = koinInject()
     val currencyCode = currencyManager.currentCurrency
@@ -114,6 +137,35 @@ fun ProductPickerBottomSheet(
 
     val nonNullProducts = remember(products) { products.filter { it.id != null } }
 
+    // Category filter — hidden entirely when the 2.1 module is off. Pulls
+    // the available categories from the product list itself (distinct
+    // referenced categories) so we don't need a second Koin injection for
+    // what is just a derived view.
+    val modulesRepo: ActivatedModulesRepository = koinInject()
+    val activatedModules by modulesRepo.state.collectAsState()
+    val categoriesModuleOn =
+        ActivatedModulesRepository.MODULE_PRODUCT_CATEGORIES in activatedModules
+    val availableCategories = remember(nonNullProducts) {
+        nonNullProducts.mapNotNull { it.category }.distinctBy { it.id }
+    }
+    // When the caller doesn't hoist the filter, we fall back to internal
+    // saveable state so the picker still remembers across dismiss / reopen.
+    var internalFilterId by rememberSaveable { mutableStateOf<Int?>(null) }
+    val selectedCategoryFilterId: Int? = if (onFilterCategoryIdChange != null) {
+        filterCategoryId
+    } else {
+        internalFilterId
+    }
+    val setFilterId: (Int?) -> Unit = { newId ->
+        if (onFilterCategoryIdChange != null) onFilterCategoryIdChange(newId)
+        else internalFilterId = newId
+    }
+    val selectedCategoryFilter: ProductCategoryState? = remember(
+        selectedCategoryFilterId, availableCategories,
+    ) {
+        selectedCategoryFilterId?.let { id -> availableCategories.firstOrNull { it.id == id } }
+    }
+
     // Aligned with the alphabet-header threshold below (>= 10). Under that
     // count the whole list fits on screen — a "Récents" shortcut on top of
     // it saves no scrolling, just adds noise.
@@ -130,9 +182,9 @@ fun ProductPickerBottomSheet(
         recentIds.mapNotNull { rid -> nonNullProducts.firstOrNull { it.id?.toLong() == rid } }
     }
 
-    val filteredAlphaSorted = remember(query.text, nonNullProducts) {
+    val filteredAlphaSorted = remember(query.text, nonNullProducts, selectedCategoryFilter) {
         val q = query.text.trim()
-        val filtered = if (q.isEmpty()) nonNullProducts
+        val textFiltered = if (q.isEmpty()) nonNullProducts
         else {
             val nq = q.normalizeForSearch()
             nonNullProducts.filter {
@@ -140,7 +192,10 @@ fun ProductPickerBottomSheet(
                     (it.description?.text?.normalizeForSearch()?.contains(nq) == true)
             }
         }
-        filtered.sortedBy { it.name.text.trim().lowercase() }
+        val filterId = selectedCategoryFilter?.id
+        val categoryFiltered = if (filterId == null) textFiltered
+        else textFiltered.filter { it.category?.id == filterId }
+        categoryFiltered.sortedBy { it.name.text.trim().lowercase() }
     }
 
     val grouped = remember(filteredAlphaSorted) {
@@ -163,6 +218,12 @@ fun ProductPickerBottomSheet(
             )
         },
     ) {
+        // System back collapses the search bar first (clearing the query) before
+        // dismissing the whole picker — same pattern as the product list TopBar.
+        PlatformBackHandler(enabled = searchExpanded) {
+            query = TextFieldValue("")
+            searchExpanded = false
+        }
         Column(
             modifier = Modifier
                 .fillMaxHeight(0.85f)
@@ -254,6 +315,91 @@ fun ProductPickerBottomSheet(
                                 modifier = Modifier.padding(start = 12.dp),
                             )
                             Spacer(Modifier.weight(1f))
+                            // Category filter — left of the search glyph when
+                            // the 2.1 module is on + at least one product
+                            // carries a category.
+                            if (categoriesModuleOn && availableCategories.isNotEmpty()) {
+                                var menuOpen by remember { mutableStateOf(false) }
+                                Box {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clickable { menuOpen = true },
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.FilterList,
+                                            contentDescription = null,
+                                            tint = if (selectedCategoryFilter != null)
+                                                AppColors.accent else AppColors.iconPrimary,
+                                            modifier = Modifier.size(22.dp),
+                                        )
+                                    }
+                                    // Lifted surface + selected-row wash — same recipe as the
+                                    // TopBar filter dropdown so the two filters look identical.
+                                    val selectedRowBg = AppColors.accent.copy(alpha = 0.15f)
+                                    val filterScrollState = rememberScrollState()
+                                    DropdownMenu(
+                                        expanded = menuOpen,
+                                        onDismissRequest = { menuOpen = false },
+                                        modifier = Modifier
+                                            .widthIn(min = 200.dp, max = 280.dp)
+                                            .heightIn(max = 320.dp)
+                                            .drawScrollThumb(filterScrollState),
+                                        containerColor = AppColors.surface,
+                                        shadowElevation = 8.dp,
+                                        scrollState = filterScrollState,
+                                    ) {
+                                        DropdownMenuItem(
+                                            modifier = Modifier.background(
+                                                if (selectedCategoryFilter == null) selectedRowBg else Color.Transparent,
+                                            ),
+                                            text = {
+                                                Text(
+                                                    text = stringResource(Res.string.product_categories_none),
+                                                    color = AppColors.textPrimary,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                )
+                                            },
+                                            onClick = {
+                                                setFilterId(null)
+                                                menuOpen = false
+                                            },
+                                        )
+                                        availableCategories.forEach { category ->
+                                            val isSelected = selectedCategoryFilter?.id == category.id
+                                            DropdownMenuItem(
+                                                modifier = Modifier.background(
+                                                    if (isSelected) selectedRowBg else Color.Transparent,
+                                                ),
+                                                text = {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(10.dp)
+                                                                .clip(CircleShape)
+                                                                .background(resolveCategoryColor(category.color)),
+                                                        )
+                                                        Spacer(Modifier.width(8.dp))
+                                                        Text(
+                                                            text = category.name,
+                                                            color = AppColors.textPrimary,
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis,
+                                                        )
+                                                    }
+                                                },
+                                                onClick = {
+                                                    setFilterId(category.id)
+                                                    menuOpen = false
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(Modifier.width(4.dp))
+                            }
                             Box(
                                 modifier = Modifier
                                     .size(36.dp)
@@ -343,7 +489,9 @@ fun ProductPickerBottomSheet(
                     contentPadding = PaddingValues(top = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    val showRecent = query.text.isBlank() && recentEntries.isNotEmpty()
+                    val showRecent = query.text.isBlank() &&
+                        selectedCategoryFilter == null &&
+                        recentEntries.isNotEmpty()
                     if (showRecent) {
                         stickyHeader(key = "header-recent") {
                             RecentProductsHeader(stringResource(Res.string.document_bottom_sheet_picker_recent))
@@ -442,6 +590,27 @@ private fun ProductPickerRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+            }
+            // Category chip — same style as ProductListItem so the picker reads
+            // like a condensed version of the full list. Shown only when the
+            // product has an assigned category.
+            product.category?.let { category ->
+                Box(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(resolveCategoryColor(category.color))
+                        .padding(horizontal = 10.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = category.name,
+                        style = MaterialTheme.typography.textSecondary.copy(
+                            color = Color(0xFF1A1A1A),
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
         Text(
