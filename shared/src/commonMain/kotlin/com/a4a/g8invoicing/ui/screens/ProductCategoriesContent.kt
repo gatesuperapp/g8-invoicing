@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.product_categories_add_cta
 import com.a4a.g8invoicing.shared.resources.product_categories_empty_hint
+import com.a4a.g8invoicing.shared.resources.product_categories_none
 import com.a4a.g8invoicing.shared.resources.product_categories_name_placeholder
 import com.a4a.g8invoicing.ui.screens.shared.CATEGORY_COLOR_UNSET
 import com.a4a.g8invoicing.ui.screens.shared.CategoryColorPickerDialog
@@ -119,9 +120,25 @@ fun ProductCategoriesContent(
                     ),
                 )
             } else {
+                // "No category" dash row at the top — mirrors the TVA picker
+                // so the user can clear an existing category pick on a product
+                // without going through the gear/edit screen. Only rendered
+                // in the picker (ProductCategoriesContent), never in the
+                // edit list (ProductCategoriesEditContent).
+                CategoryRow(
+                    isFirst = true,
+                    isLast = sortedCategories.isEmpty(),
+                    isSelected = chosenId == null,
+                    leading = null,
+                    label = stringResource(Res.string.product_categories_none),
+                    onClick = {
+                        chosenId = null
+                        onSelectCategory(null)
+                    },
+                )
                 sortedCategories.forEachIndexed { index, category ->
                     CategoryRow(
-                        isFirst = index == 0,
+                        isFirst = false,
                         isLast = index == sortedCategories.lastIndex,
                         isSelected = chosenId == category.id,
                         leading = category.color,
