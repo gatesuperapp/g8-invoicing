@@ -341,6 +341,18 @@ fun MainCompose(
     // block can wrap themselves in it and still react to the preference flip.
     val darkModeOverride by darkModePreference(context).collectAsState(initial = null)
     val systemDark = isSystemInDarkTheme()
+    // Separate "has the Flow emitted yet?" sentinel. darkModeOverride can
+    // legitimately be null when the user hasn't picked an explicit theme
+    // (fall-back to system), so we can't use null-ness alone to tell "pref
+    // still loading" from "no explicit choice". Without this guard the first
+    // frame always resolves useDarkTheme to systemDark — producing the dark
+    // flash the user sees on launch when their preference is light but the
+    // system is dark.
+    var isDarkModePrefLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        darkModePreference(context).first()
+        isDarkModePrefLoaded = true
+    }
     var showWhatsNew by remember { mutableStateOf(false) }
     var showOnboarding by remember { mutableStateOf(false) }
     var showEInvoiceIntro by remember { mutableStateOf(false) }
@@ -709,6 +721,14 @@ fun MainCompose(
         )
     }
 
+    // Hold the main scaffold off-screen until the DataStore has emitted the
+    // user's theme preference. Rendering before means the first frame falls
+    // back to isSystemInDarkTheme() which flashes the "wrong" palette for the
+    // one frame before the override lands. The Android launch window already
+    // shows @color/splash_bg (same tone as AppColors.screen in both themes),
+    // so no Compose placeholder is needed — the system window is visually
+    // continuous with the first scaffold frame.
+    if (!isDarkModePrefLoaded) return
     G8InvoicingTheme(useDarkTheme = useDarkTheme) {
         // Use Crossfade for smooth transition when language changes
         Crossfade(

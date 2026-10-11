@@ -55,11 +55,20 @@ suspend fun setDarkMode(context: Context, enabled: Boolean) {
 // Can't gate on LAST_SEEN_VERSION like the other "fire on upgrade" prompts
 // because the 1.9 migration wizard writes LAST_SEEN_VERSION = CURRENT_APP_VERSION
 // in its markSeen block (via setSeenOnboarding18), which would mask the
-// upgrade signal for users crossing 1.x → 2.0. Fresh installs still skip
-// the modal — initializeVersionTracking flips HAS_SEEN immediately.
+// upgrade signal for users crossing 1.x → 2.0.
+//
+// Fresh installs still need to be excluded though — the Flow collector can
+// emit before initializeVersionTracking's eager setSeenDarkModeMigration20
+// write propagates. Guard by also requiring a prior-session signal
+// (LAST_SEEN_VERSION tracked, or legacy HAS_SEEN_POPUP touched). A real
+// fresh install has neither at boot and the modal stays silent.
 fun shouldShowDarkModeMigration20(context: Context) =
     context.dataStore.data.map { prefs ->
-        !(prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] ?: false)
+        val hasSeen = prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] ?: false
+        if (hasSeen) return@map false
+        val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
+        val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
+        lastSeenVersion != null || hasSeenPopup
     }
 
 suspend fun setSeenDarkModeMigration20(context: Context) {
