@@ -144,7 +144,10 @@ fun QuoteList(
                 searchQuery = searchQuery,
                 onSearchToggle = { searchExpanded = !searchExpanded },
                 onSearchQueryChange = { searchQuery = it },
-                tagFilterEnabled = selectedItems.isEmpty(),
+                // Only expose the status filter when the "Marquer devis" module
+                // is active — otherwise there's no status to filter against,
+                // every row is DRAFT by default.
+                tagFilterEnabled = isTagPickerEnabled && selectedItems.isEmpty(),
                 tagFilterOptions = tagFilterOptions,
                 selectedTagFilter = selectedTagFilter,
                 onTagFilterChange = { picked -> selectedTagFilterOrdinal = picked?.ordinal },
