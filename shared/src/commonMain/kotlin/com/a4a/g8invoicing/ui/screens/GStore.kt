@@ -210,9 +210,6 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_product_categories_desc,
         detailRes = Res.string.gstore_module_product_categories_detail,
         icon = Icons.Outlined.Label,
-        // TODO 2.1: flip back to premium before tagging the release. Kept free
-        // for QA so the switch is reachable without a premium account.
-        isFree = true,
     ),
     // Pinned last per product ordering — feature-y modules read first, then
     // watermark, then multi-entreprise (which reshapes the whole app menu).

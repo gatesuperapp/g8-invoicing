@@ -266,10 +266,6 @@ class ActivatedModulesRepository(
             MODULE_WATERMARK_REMOVAL,
             MODULE_MULTI_ENTREPRISE,
             MODULE_FONT,
-            // TODO 2.1: ship as premium — kept free during QA so the toggle is
-            // reachable without a premium account. Move back to premium before
-            // tagging the release.
-            MODULE_PRODUCT_CATEGORIES,
         )
 
         // Modules seeded into the activated set the first time the app boots after this
