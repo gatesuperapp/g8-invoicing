@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.G8Invoicing" parent="Theme.AppCompat.Light.NoActionBar" />
+    <!-- DayNight parent so the Android launch-window background follows the
+         system dark setting. windowBackground points at @color/splash_bg
+         (defined in values + values-night), which matches AppColors.screen —
+         the launch window and the Compose splash therefore render as one
+         continuous surface, so the user never sees the system-grey screen
+         between process start and the first Compose frame. -->
+    <style name="Theme.G8Invoicing" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/splash_bg</item>
+    </style>
 </resources>

@@ -2,4 +2,8 @@
 <!-- Use only for the splash screen. Other colors handled in Color.kt -->
 <resources>
     <color name="white">#FFFFFF</color>
+    <!-- Light-mode splash background. Matches AppColors.screen so the Android
+         launch window and the Compose splash render as one continuous
+         surface — no visible flash between the two. -->
+    <color name="splash_bg">#F9F9F9</color>
 </resources>
