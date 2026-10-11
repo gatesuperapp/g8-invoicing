@@ -24,7 +24,6 @@ android {
         }
         create("beta") {
             applicationIdSuffix = ".beta"
-            versionNameSuffix = "-beta"
         }
     }
 
@@ -33,7 +32,7 @@ android {
         minSdk = 26
 
         targetSdk = 36
-        versionCode = 65
+        versionCode = 66
         versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
