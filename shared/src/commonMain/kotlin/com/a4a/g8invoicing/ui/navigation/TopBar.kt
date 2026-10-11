@@ -579,6 +579,7 @@ private fun BackArrow(
         Screen.InvoiceList.name,
         Screen.DeliveryNoteList.name,
         Screen.CreditNoteList.name,
+        Screen.QuoteList.name,
         Screen.ProductList.name,
         Screen.ClientOrIssuerList.name,
         Screen.About.name,
