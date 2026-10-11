@@ -23,6 +23,9 @@ data class ProductState(
     val defaultPriceWithTax: BigDecimal? = null,
     // This list would be populated on demand, not when initially fetching all products
     val additionalPrices: List<ProductPrice>? = null,
+    // 2.1 premium module — one category per product, user-defined. Hydrated
+    // from ProductCategory via the categoryId FK on save.
+    val category: ProductCategoryState? = null,
     val errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
 )
 

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -102,6 +103,10 @@ fun DocumentBottomSheetProducts(
                 DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT
             )
         }
+        // Picker filter hoisted here so it survives picker close/reopen
+        // cycles within the same document edit session. Lives as long as
+        // this composable (one edit session); drops when the parent dismounts.
+        var pickerFilterCategoryId by rememberSaveable { mutableStateOf<Int?>(null) }
 
         // Back inside the products picker goes back to the chosen list
         // rather than dismissing the whole sheet.
@@ -157,6 +162,8 @@ fun DocumentBottomSheetProducts(
                 products = params.second ?: emptyList(),
                 clientId = document.documentClient?.originalClientOrIssuerId,
                 onDismiss = { isProductListVisible = false },
+                filterCategoryId = pickerFilterCategoryId,
+                onFilterCategoryIdChange = { pickerFilterCategoryId = it },
                 onSelect = {
                     onClickProduct(it)
                     typeOfCreation = DocumentBottomSheetTypeOfForm.ADD_EXISTING_PRODUCT

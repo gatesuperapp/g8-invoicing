@@ -2,7 +2,9 @@ package com.a4a.g8invoicing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.states.ProductState
+import com.a4a.g8invoicing.data.ProductCategoryLocalDataSourceInterface
 import com.a4a.g8invoicing.data.ProductLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.states.ProductsUiState
 import com.a4a.g8invoicing.shared.resources.Res
@@ -17,6 +19,7 @@ import org.jetbrains.compose.resources.getString
 
 class ProductListViewModel(
     private val productDataSource: ProductLocalDataSourceInterface,
+    private val categoryDataSource: ProductCategoryLocalDataSourceInterface,
 ) : ViewModel() {
 
     private val _productsUiState = MutableStateFlow(ProductsUiState())
@@ -71,6 +74,20 @@ class ProductListViewModel(
             } catch (e: Exception) {
                 // Error handling
             }
+        }
+    }
+
+    suspend fun fetchCategories(): List<ProductCategoryState> =
+        categoryDataSource.fetchAllCategories()
+
+    fun markCategoryOnProducts(
+        products: List<ProductState>,
+        categoryId: Int?,
+    ) {
+        viewModelScope.launch {
+            val ids = products.mapNotNull { it.id?.toLong() }
+            if (ids.isEmpty()) return@launch
+            categoryDataSource.assignCategoryToProducts(ids, categoryId?.toLong())
         }
     }
 }

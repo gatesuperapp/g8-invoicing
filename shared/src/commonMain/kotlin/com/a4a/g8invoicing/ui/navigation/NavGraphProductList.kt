@@ -56,6 +56,10 @@ fun NavGraphBuilder.productList(
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,
             onClickBack = { onClickBack() },
+            onBulkMarkCategory = { products, category ->
+                viewModel.markCategoryOnProducts(products, category?.id)
+            },
+            fetchCategories = { viewModel.fetchCategories() },
             isCategoriesMenuOpen = isCategoriesMenuOpen,
             onCategoriesMenuOpenChange = { isCategoriesMenuOpen = it },
             showCategoryButton = showCategoryButton

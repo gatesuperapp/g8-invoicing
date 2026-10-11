@@ -23,12 +23,14 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import org.koin.compose.koinInject
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,10 +50,15 @@ import com.a4a.g8invoicing.shared.resources.document_modal_new_product
 import com.a4a.g8invoicing.shared.resources.document_modal_product_back
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
 import com.a4a.g8invoicing.shared.resources.document_modal_product_save
+import com.a4a.g8invoicing.shared.resources.product_categories_title
 import com.a4a.g8invoicing.shared.resources.tax_rate_edit_dialog_title
+import com.a4a.g8invoicing.data.ProductCategoryLocalDataSourceInterface
 import com.a4a.g8invoicing.ui.screens.ClientOrIssuerAddEditForm
+import com.a4a.g8invoicing.ui.screens.ProductCategoriesContent
+import com.a4a.g8invoicing.ui.screens.ProductCategoriesEditContent
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesContent
 import com.a4a.g8invoicing.ui.screens.ProductTaxRatesEditContent
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.shared.FormInputsValidator
 import com.a4a.g8invoicing.ui.shared.PlatformBackHandler
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -106,6 +113,10 @@ fun DocumentBottomSheetForm(
 
     // State to manage visibility of the tax selection screen
     var isTaxSelectionVisible by remember { mutableStateOf(false) }
+    // 2.1 — category selection follows the same in-place swap pattern. Back
+    // in the header pops back to the product form instead of dismissing the
+    // whole sheet.
+    var isCategorySelectionVisible by remember { mutableStateOf(false) }
     // Sync-to-master checkbox lives here so it persists across in-sheet navigations
     // (tax selection, full-screen text) but resets when the sheet mounts a different
     // client / issuer / product snapshot. Default ON for client / issuer edits
@@ -158,6 +169,10 @@ fun DocumentBottomSheetForm(
                     isTaxSelectionVisible = false
                     scope.launch { sheetState.expand() }
                 }
+                isCategorySelectionVisible -> {
+                    isCategorySelectionVisible = false
+                    scope.launch { sheetState.expand() }
+                }
                 fullScreenElementToShow.value != null -> {
                     // Navigate back from full screen text editor but keep sheet open.
                     // Back discards the typed text — only Done persists it.
@@ -176,6 +191,10 @@ fun DocumentBottomSheetForm(
                     isTaxSelectionVisible = false
                     scope.launch { sheetState.expand() }
                 }
+                isCategorySelectionVisible -> {
+                    isCategorySelectionVisible = false
+                    scope.launch { sheetState.expand() }
+                }
                 fullScreenElementToShow.value != null -> {
                     fullScreenEditorText = TextFieldValue("")
                     fullScreenElementToShow.value = null
@@ -189,6 +208,7 @@ fun DocumentBottomSheetForm(
             DocumentBottomSheetHeader(
                 typeOfCreation = typeOfCreation,
                 isTaxSelectionVisible = isTaxSelectionVisible,
+                isCategorySelectionVisible = isCategorySelectionVisible,
                 fullScreenElementCurrentlyShown = fullScreenElementToShow.value,
                 isDoneButtonEnabled = calculateIsDoneButtonEnabled( // Calculate if the done button should be enabled
                     typeOfCreation,
@@ -200,9 +220,11 @@ fun DocumentBottomSheetForm(
                 onClickCancelOrBack = { // Handles both "Cancel" and "Back" from sub-screens
                     handleBackNavigation(
                         isTaxSelectionVisible = isTaxSelectionVisible,
+                        isCategorySelectionVisible = isCategorySelectionVisible,
                         fullScreenElementToShowState = fullScreenElementToShow, // Pass the MutableState
                         onDismissSheet = onClickCancel,
                         onNavigateBackFromTaxSelection = { isTaxSelectionVisible = false },
+                        onNavigateBackFromCategorySelection = { isCategorySelectionVisible = false },
                         onNavigateBackFromFullScreen = {
                             // Clear typed text immediately so it doesn't flash on re-open
                             fullScreenEditorText = TextFieldValue("")
@@ -271,6 +293,7 @@ fun DocumentBottomSheetForm(
                 taxRates = taxRates,
                 taxRatesWithIds = taxRatesWithIds,
                 isTaxSelectionVisible = isTaxSelectionVisible,
+                isCategorySelectionVisible = isCategorySelectionVisible,
                 fullScreenElementCurrentlyShown = fullScreenElementToShow.value,
                 currentTaxRate = documentProduct.taxRate,
                 fullScreenTextForEditor = fullScreenEditorText, // Pass the current text for the editor
@@ -292,6 +315,17 @@ fun DocumentBottomSheetForm(
                     // fullScreenEditorText is initialized by the LaunchedEffect
                 },
                 onNavigateToTaxSelection = { isTaxSelectionVisible = true }, // Callback to show tax selection
+                onNavigateToCategorySelection = { isCategorySelectionVisible = true },
+                onPickCategory = { picked ->
+                    // Fires on category row tap in the picker; mirrors
+                    // onSelectTaxRate's self-dismiss and re-expand behaviour.
+                    isCategorySelectionVisible = false
+                    bottomFormOnValueChange(
+                        ScreenElement.DOCUMENT_PRODUCT_CATEGORY,
+                        picked ?: ProductCategoryState(),
+                        null,
+                    )
+                },
                 showProductType = showProductType,
                 syncToMasterChecked = syncToMasterChecked,
                 onSyncToMasterChange = { syncToMasterChecked = it },
@@ -340,13 +374,16 @@ private fun calculateIsDoneButtonEnabled(
  */
 private fun handleBackNavigation(
     isTaxSelectionVisible: Boolean,
+    isCategorySelectionVisible: Boolean,
     fullScreenElementToShowState: MutableState<ScreenElement?>, // Receive the MutableState to modify it
     onDismissSheet: () -> Unit,
     onNavigateBackFromTaxSelection: () -> Unit,
+    onNavigateBackFromCategorySelection: () -> Unit,
     onNavigateBackFromFullScreen: () -> Unit
 ) {
     when {
         isTaxSelectionVisible -> onNavigateBackFromTaxSelection()
+        isCategorySelectionVisible -> onNavigateBackFromCategorySelection()
         fullScreenElementToShowState.value != null -> onNavigateBackFromFullScreen()
         else -> onDismissSheet()
     }
@@ -360,6 +397,7 @@ private fun handleBackNavigation(
 private fun DocumentBottomSheetHeader(
     typeOfCreation: DocumentBottomSheetTypeOfForm?,
     isTaxSelectionVisible: Boolean,
+    isCategorySelectionVisible: Boolean,
     fullScreenElementCurrentlyShown: ScreenElement?,
     isDoneButtonEnabled: Boolean,
     onClickCancelOrBack: () -> Unit,
@@ -397,7 +435,8 @@ private fun DocumentBottomSheetHeader(
                     .align(Alignment.TopStart)
                     .padding(top = 32.dp)
                     .clickable { onClickCancelOrBack() },
-                text = if (!isTaxSelectionVisible && fullScreenElementCurrentlyShown == null) {
+                text = if (!isTaxSelectionVisible && !isCategorySelectionVisible &&
+                    fullScreenElementCurrentlyShown == null) {
                     cancelText
                 } else {
                     backText
@@ -405,12 +444,14 @@ private fun DocumentBottomSheetHeader(
             )
 
             // Modal Title
+            val categoriesTitle = stringResource(Res.string.product_categories_title)
             Text(
                 modifier = Modifier
                     .padding(bottom = 20.dp) // Consistent padding
                     .align(Alignment.TopCenter),
                 style = MaterialTheme.typography.titleMedium,
-                text = when (typeOfCreation) {
+                text = if (isCategorySelectionVisible) categoriesTitle
+                else when (typeOfCreation) {
                     DocumentBottomSheetTypeOfForm.NEW_CLIENT -> newClientText
                     DocumentBottomSheetTypeOfForm.NEW_ISSUER -> newIssuerText
                     DocumentBottomSheetTypeOfForm.NEW_PRODUCT -> newProductText
@@ -437,10 +478,11 @@ private fun DocumentBottomSheetHeader(
                             onClickDoneMain() // Main form submission
                         }
                     },
-                text = if (!isTaxSelectionVisible) { // Only show "Save" if not in tax selection
+                text = if (!isTaxSelectionVisible && !isCategorySelectionVisible) {
+                    // Only show "Save" on the main form (not in picker sub-screens)
                     saveText
                 } else {
-                    "" // No "Save" text during tax selection
+                    ""
                 }
             )
         }
@@ -460,6 +502,7 @@ private fun DocumentBottomSheetContent(
     taxRates: List<BigDecimal>?,
     taxRatesWithIds: List<Pair<Long, BigDecimal>>,
     isTaxSelectionVisible: Boolean,
+    isCategorySelectionVisible: Boolean,
     fullScreenElementCurrentlyShown: ScreenElement?,
     currentTaxRate: BigDecimal?,
     fullScreenTextForEditor: TextFieldValue, // Current text for the full screen editor
@@ -475,6 +518,8 @@ private fun DocumentBottomSheetContent(
     onPendingEmailValidationResult: (ClientOrIssuerType, Boolean) -> Unit,
     onNavigateToFullScreenText: (ScreenElement) -> Unit, // Callback to request full screen view
     onNavigateToTaxSelection: (ScreenElement) -> Unit, // Callback to request tax selection view
+    onNavigateToCategorySelection: (ScreenElement) -> Unit,
+    onPickCategory: (ProductCategoryState?) -> Unit,
     showProductType: Boolean = false,
     syncToMasterChecked: Boolean,
     onSyncToMasterChange: (Boolean) -> Unit,
@@ -483,6 +528,11 @@ private fun DocumentBottomSheetContent(
     retentionRateText: String,
     onRetentionRateTextChange: (String) -> Unit,
 ) {
+    // Hoisted here so the product form's scroll position survives when
+    // DocumentBottomSheetTaxSelection / DocumentBottomSheetCategorySelection
+    // temporarily replace the add-edit form inside the sheet.
+    val productFormScrollState = rememberScrollState()
+
     // Determine which form or view to show based on the current state
     when {
         typeOfCreation == DocumentBottomSheetTypeOfForm.EDIT_RETENTION -> {
@@ -555,6 +605,11 @@ private fun DocumentBottomSheetContent(
                     onSelectTaxRate = onSelectTaxRate,
                     onSaveTaxRates = onSaveTaxRates,
                 )
+            } else if (isCategorySelectionVisible) {
+                DocumentBottomSheetCategorySelection(
+                    currentCategoryId = documentProduct.category?.id,
+                    onPickCategory = onPickCategory,
+                )
             } else if (fullScreenElementCurrentlyShown != null) {
                 // If not in tax selection, but in full-screen text mode
                 DocumentBottomSheetLargeText(
@@ -572,7 +627,13 @@ private fun DocumentBottomSheetContent(
                     placeCursorAtTheEndOfText = { screenElement ->
                         bottomFormPlaceCursor(screenElement, null)
                     },
-                    onClickForward = onNavigateToTaxSelection,
+                    onClickForward = { element ->
+                        when (element) {
+                            ScreenElement.DOCUMENT_PRODUCT_CATEGORY ->
+                                onNavigateToCategorySelection(element)
+                            else -> onNavigateToTaxSelection(element)
+                        }
+                    },
                     showFullScreenText = onNavigateToFullScreenText,
                     showProductType = showProductType,
                     // Sync switch: any flow where the user can tweak an existing
@@ -586,6 +647,7 @@ private fun DocumentBottomSheetContent(
                         documentProduct.productId != null,
                     syncToMasterChecked = syncToMasterChecked,
                     onSyncToMasterChange = onSyncToMasterChange,
+                    scrollState = productFormScrollState,
                 )
             }
         }
@@ -683,4 +745,137 @@ private fun TaxRateEditSheet(
             }
         },
     )
+}
+
+/**
+ * In-place category picker — mirror of [DocumentBottomSheetTaxSelection].
+ * Renders [ProductCategoriesContent] over the main sheet area (the parent
+ * swaps content when isCategorySelectionVisible = true) and lets the user tap
+ * the gear to open a nested edit sheet on top. Picking a row funnels back
+ * through [onPickCategory] which hides this view and writes the selection
+ * to the DocumentProductState.
+ */
+@Composable
+fun DocumentBottomSheetCategorySelection(
+    currentCategoryId: Int?,
+    onPickCategory: (ProductCategoryState?) -> Unit,
+) {
+    val categoryDataSource: ProductCategoryLocalDataSourceInterface = koinInject()
+    // null initial so we can tell "still loading" apart from "truly empty";
+    // rendering the picker with an eagerly-emitted emptyList() would flash
+    // the "Aucune catégorie" hint for a frame before the Flow lands.
+    val categoriesOrNull: List<ProductCategoryState>? by categoryDataSource
+        .fetchAllCategoriesFlow()
+        .collectAsState(initial = null)
+    val scope = rememberCoroutineScope()
+    var showEditSheet by remember { mutableStateOf(false) }
+
+    // Content inlined with no wrapper — ProductCategoriesContent in
+    // isDisplayedInBottomSheet mode fills the same half-height area as the
+    // product form, so the sheet height stays constant when the parent swaps
+    // in this picker (same recipe as DocumentBottomSheetTaxSelection).
+    // Always render the content so the sheet doesn't resize while the Flow
+    // loads; isLoading suppresses the "aucune catégorie" hint for the one
+    // frame between mount and first emission.
+    ProductCategoriesContent(
+        categories = categoriesOrNull.orEmpty(),
+        currentCategoryId = currentCategoryId,
+        onSelectCategory = onPickCategory,
+        onClickEditCategories = { showEditSheet = true },
+        isDisplayedInBottomSheet = true,
+        isLoading = categoriesOrNull == null,
+    )
+
+    if (showEditSheet) {
+        val categories = categoriesOrNull.orEmpty()
+        CategoryEditSheet(
+            categories = categories,
+            onDismiss = { showEditSheet = false },
+            onSave = { edited ->
+                scope.launch {
+                    persistCategoryEdits(
+                        dataSource = categoryDataSource,
+                        before = categories,
+                        after = edited,
+                    )
+                }
+                showEditSheet = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun CategoryEditSheet(
+    categories: List<ProductCategoryState>,
+    onDismiss: () -> Unit,
+    onSave: (List<ProductCategoryState>) -> Unit,
+) {
+    var editing by remember(categories) { mutableStateOf(categories) }
+    DocumentBottomSheetFormSimple(
+        onClickCancel = onDismiss,
+        onClickDone = {
+            // Match ProductCategories screen: silently drop empty-name rows.
+            onSave(editing.filter { it.name.isNotBlank() })
+        },
+        bottomSheetTitle = stringResource(Res.string.product_categories_title),
+        screenElement = ScreenElement.DOCUMENT_PRODUCT_CATEGORY,
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(AppColors.divider)
+                    .windowInsetsPadding(WindowInsets.ime)
+                    .verticalScroll(rememberScrollState())
+                    .padding(bottom = 100.dp),
+            ) {
+                ProductCategoriesEditContent(
+                    categories = editing,
+                    onUpdateCategory = { index, next ->
+                        editing = editing.toMutableList().apply { this[index] = next }
+                    },
+                    onAddCategory = {
+                        editing = editing + ProductCategoryState(
+                            id = null,
+                            name = "",
+                            color = pickUnusedCategoryColor(editing),
+                        )
+                    },
+                    onDeleteCategory = { index ->
+                        editing = editing.toMutableList().apply { removeAt(index) }
+                    },
+                )
+            }
+        },
+    )
+}
+
+private fun pickUnusedCategoryColor(current: List<ProductCategoryState>): Long {
+    val palette = com.a4a.g8invoicing.ui.screens.shared.CategoryPastelPalette
+    val unset = com.a4a.g8invoicing.ui.screens.shared.CATEGORY_COLOR_UNSET
+    val used = current.map { if (it.color == unset) palette.first() else it.color }.toSet()
+    return palette.firstOrNull { it !in used } ?: palette.first()
+}
+
+private suspend fun persistCategoryEdits(
+    dataSource: ProductCategoryLocalDataSourceInterface,
+    before: List<ProductCategoryState>,
+    after: List<ProductCategoryState>,
+) {
+    val afterIds = after.mapNotNull { it.id }.toSet()
+    before.forEach { prior ->
+        val priorId = prior.id ?: return@forEach
+        if (priorId !in afterIds) dataSource.deleteCategory(priorId.toLong())
+    }
+    after.forEach { next ->
+        val id = next.id
+        if (id == null) {
+            dataSource.saveCategory(next)
+        } else {
+            val prior = before.firstOrNull { it.id == id }
+            if (prior != null && (prior.name != next.name || prior.color != next.color)) {
+                dataSource.updateCategory(next)
+            }
+        }
+    }
 }

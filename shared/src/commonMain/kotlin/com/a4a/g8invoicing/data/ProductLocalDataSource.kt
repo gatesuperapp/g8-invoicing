@@ -15,10 +15,12 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.RoundingMode
 import g8invoicing.DocumentProduct
 import g8invoicing.Product
+import g8invoicing.ProductCategoryQueries
 import g8invoicing.ProductPriceQueries
 import g8invoicing.TaxRateQueries
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -29,13 +31,14 @@ class ProductLocalDataSource(
 ) : ProductLocalDataSourceInterface {
     private val productQueries = db.productQueries
     private val taxQueries = db.taxRateQueries
+    private val categoryQueries = db.productCategoryQueries
     private val documentProductQueries = db.documentProductQueries
     private val productPriceQueries = db.productPriceQueries
 
     override suspend fun fetchProduct(id: Long): ProductState? {
         return withContext(DispatcherProvider.IO) {
             productQueries.getProduct(id).executeAsOneOrNull()
-                ?.transformIntoEditableProduct(taxQueries, productPriceQueries)
+                ?.transformIntoEditableProduct(taxQueries, productPriceQueries, categoryQueries)
         }
     }
 
@@ -43,7 +46,7 @@ class ProductLocalDataSource(
         return withContext(DispatcherProvider.IO) {
             productQueries.getAllProducts()
                 .executeAsList()
-                .map { it.transformIntoEditableProduct(taxQueries, productPriceQueries) }
+                .map { it.transformIntoEditableProduct(taxQueries, productPriceQueries, categoryQueries) }
         }
     }
 
@@ -51,16 +54,19 @@ class ProductLocalDataSource(
     override fun fetchAllProducts(): Flow<List<ProductState>> {
         // Scoped to the entreprise courante — re-emits when the user switches
         // company. Falls back to the global list when the repository has no
-        // hydrated value (pre-migration safety).
+        // hydrated value (pre-migration safety). Combined with the categories
+        // Flow so renaming a category (which only updates ProductCategory
+        // rows, not Product rows) still refreshes the chips in the list.
         return currentCompanyRepository.state.flatMapLatest { companyId ->
-            val query = if (companyId != null) {
-                productQueries.getAllProductsForCompany(companyId)
+            val productFlow = if (companyId != null) {
+                productQueries.getAllProductsForCompany(companyId).asFlow()
             } else {
-                productQueries.getAllProducts()
+                productQueries.getAllProducts().asFlow()
             }
-            query.asFlow().map { rows ->
-                rows.executeAsList()
-                    .map { it.transformIntoEditableProduct(taxQueries, productPriceQueries) }
+            val categoryFlow = categoryQueries.getAllCategories().asFlow()
+            combine(productFlow, categoryFlow) { productsQuery, _ ->
+                productsQuery.executeAsList()
+                    .map { it.transformIntoEditableProduct(taxQueries, productPriceQueries, categoryQueries) }
             }
         }
     }
@@ -81,6 +87,7 @@ class ProductLocalDataSource(
                         unit_code = product.unitCode,
                         type = product.type?.name,
                         company_id = currentCompanyRepository.current,
+                        product_category_id = product.category?.id?.toLong(),
                     )
 
                     val lastInsertedProductId = productQueries.lastInsertRowId().executeAsOne()
@@ -137,6 +144,7 @@ class ProductLocalDataSource(
                                 unit_code = product.unitCode,
                                 type = product.type?.name,
                                 company_id = currentCompanyRepository.current,
+                                product_category_id = product.category?.id?.toLong(),
                             )
 
                             val newProductId = productQueries.lastInsertRowId().executeAsOne()
@@ -189,7 +197,8 @@ class ProductLocalDataSource(
                         },
                         unit = product.unit?.text,
                         unit_code = product.unitCode,
-                        type = product.type?.name
+                        type = product.type?.name,
+                        product_category_id = product.category?.id?.toLong(),
                     )
 
                     productPriceQueries.deleteAllPricesForProduct(productId)
@@ -318,6 +327,12 @@ class ProductLocalDataSource(
             val masterId = documentProduct.productId?.toLong() ?: return@withContext
             try {
                 productQueries.transaction {
+                    // Preserve the master's current category — DocumentProductState
+                    // doesn't carry the category concept, so we read it back from
+                    // the row we're about to update.
+                    val existingCategoryId = productQueries.getProduct(masterId)
+                        .executeAsOneOrNull()
+                        ?.product_category_id
                     productQueries.updateProduct(
                         id = masterId,
                         name = documentProduct.name.text,
@@ -328,6 +343,7 @@ class ProductLocalDataSource(
                         unit = documentProduct.unit?.text,
                         unit_code = documentProduct.unitCode,
                         type = documentProduct.type?.name,
+                        product_category_id = existingCategoryId,
                     )
                     // Replace only the default price row (client_id IS NULL) so
                     // per-client "additional prices" on the master survive the sync.
@@ -358,7 +374,7 @@ class ProductLocalDataSource(
         withContext(DispatcherProvider.IO) {
             productQueries.lastInsertRowId().executeAsOneOrNull()
                 ?.let { productQueries.getProduct(it).executeAsOneOrNull() }
-                ?.transformIntoEditableProduct(taxQueries, productPriceQueries)
+                ?.transformIntoEditableProduct(taxQueries, productPriceQueries, categoryQueries)
         }
 
     override suspend fun updateAllProductTypes(newType: ProductNature) {
@@ -382,11 +398,23 @@ class ProductLocalDataSource(
 fun Product.transformIntoEditableProduct(
     taxQueries: TaxRateQueries,
     productPriceQueries: ProductPriceQueries,
+    categoryQueries: ProductCategoryQueries,
 ): ProductState {
 
     val taxRate = this.product_tax_id
         ?.let { taxQueries.getTaxRate(it).executeAsOneOrNull() }
         ?.let { BigDecimal.fromDouble(it) }
+
+    val category = this.product_category_id
+        ?.let { categoryQueries.getCategory(it).executeAsOneOrNull() }
+        ?.let { row ->
+            com.a4a.g8invoicing.ui.states.ProductCategoryState(
+                id = row.product_category_id.toInt(),
+                name = row.name,
+                color = row.color,
+                sortOrder = row.sort_order.toInt(),
+            )
+        }
 
     val rows = productPriceQueries
         .getAdditionalPricesWithClients(this.id)
@@ -453,7 +481,8 @@ fun Product.transformIntoEditableProduct(
         unit = this.unit?.let { TextFieldValue(it) } ?: TextFieldValue(""),
         unitCode = this.unit_code,
         type = ProductNature.fromString(this.type),
-        additionalPrices = additionalPrices
+        additionalPrices = additionalPrices,
+        category = category,
     )
 }
 

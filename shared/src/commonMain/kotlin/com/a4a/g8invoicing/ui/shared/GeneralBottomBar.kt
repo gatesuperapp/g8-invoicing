@@ -2,6 +2,7 @@ package com.a4a.g8invoicing.ui.shared
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.navigation.BottomBarAction
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
@@ -15,6 +16,7 @@ import com.a4a.g8invoicing.ui.navigation.actionNew
 import com.a4a.g8invoicing.ui.navigation.actionSendReminder
 import com.a4a.g8invoicing.ui.navigation.actionTag
 import com.a4a.g8invoicing.ui.navigation.actionTagBLDevis
+import com.a4a.g8invoicing.ui.navigation.actionTagCategory
 import com.a4a.g8invoicing.ui.navigation.actionUnselectAll
 
 @Composable
@@ -37,6 +39,11 @@ fun GeneralBottomBar(
     // BL/Devis-only. When true, adds the "Marquer" bottom-bar entry on the
     // selection bar. Gated by the corresponding gStore module in the caller.
     isTagPickerEnabled: Boolean = false,
+    // Products-only (2.1 premium module). Adds a "Marquer" bottom-bar entry
+    // that opens the product-category picker instead of a status dropdown.
+    isProductCategoryPickerEnabled: Boolean = false,
+    productCategoriesForBulk: List<ProductCategoryState> = emptyList(),
+    onPickBulkCategory: (ProductCategoryState?) -> Unit = {},
     onChangeBackground: () -> Unit,
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
@@ -96,6 +103,16 @@ fun GeneralBottomBar(
                 actionDelete(onClickDelete),
                 actionConvert(onClickConvert)
             )
+        } else if (isProductCategoryPickerEnabled) {
+            arrayOf(
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                // Marquer button renders ButtonWithCategoryDropdown in
+                // BottomBarActionView — the outer onClick is dead-weight,
+                // the nested dropdown button handles the tap.
+                actionTagCategory {},
+            )
         } else {
             arrayOf(
                 actionUnselectAll(onClickUnselectAll),
@@ -107,6 +124,8 @@ fun GeneralBottomBar(
         onClickTag,
         onChangeBackground,
         isCategoriesMenuOpen,
-        onCategoriesMenuOpenChange
+        onCategoriesMenuOpenChange,
+        productCategoriesForBulk,
+        onPickBulkCategory,
     )
 }

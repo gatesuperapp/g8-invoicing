@@ -28,7 +28,13 @@ data class DocumentProductState(
     // callers that only care about display fall back to old behaviour).
     val linkedDocType: LinkedDocType? = null,
     var errors: MutableList<Pair<ScreenElement, String?>> = mutableListOf(),
-    var sortOrder: Int? = null // remember product sorting in document
+    var sortOrder: Int? = null, // remember product sorting in document
+    // UI-only: category picked while the user is in the add-new-product-from-doc
+    // flow. Not persisted in the document_product table — document lines don't
+    // show categories anywhere. On save, the view model propagates this to the
+    // master products row (either the one being created when productId is null
+    // or the existing one when sync-to-master is on).
+    var category: ProductCategoryState? = null,
 )
 
 /**

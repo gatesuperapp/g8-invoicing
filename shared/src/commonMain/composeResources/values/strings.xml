@@ -569,7 +569,7 @@
     <string name="gstore_module_orders_title">Bon de commande</string>
     <string name="gstore_module_orders_desc">Gère les commandes de tes clients</string>
     <string name="gstore_module_watermark_title">Mention g8</string>
-    <string name="gstore_module_watermark_desc">Retirer la mention g8 de tes documents</string>
+    <string name="gstore_module_watermark_desc">Retirer la mention g8 des documents</string>
     <string name="gstore_module_watermark_detail">Le filigrane « Fait avec g8, application mobile de facturation » est affiché par défaut dans les documents. Il permet de soutenir le projet en le faisant connaître :) Tu peux cependant le retirer en activant ce module.</string>
     <string name="invoice_watermark_default">Fait avec g8 (www.the-gate.fr), application mobile de facturation</string>
     <string name="gstore_module_payments_title">Paiements</string>
@@ -1069,7 +1069,7 @@ Une erreur s'est produite :
 
     <!-- Font picker (module Polices) -->
     <string name="gstore_module_font_title">Polices</string>
-    <string name="gstore_module_font_desc">Changer la police de tes documents.</string>
+    <string name="gstore_module_font_desc">Changer la police des documents.</string>
     <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
     <string name="action_font_label">Style</string>
     <string name="action_font_description">Choisir la police du document</string>
@@ -1087,11 +1087,27 @@ Une erreur s'est produite :
 
     <!-- gStore: Marquer les BLs -->
     <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>
-    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut à tes bons de livraison</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut aux bons de livraison</string>
     <string name="gstore_module_delivery_note_tagging_detail">Active ce module pour ajouter un statut à tes bons de livraison : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un bon de livraison est converti en facture, mais tu peux le modifier à tout moment.</string>
 
     <!-- gStore: Marquer les Devis -->
     <string name="gstore_module_quote_tagging_title">Marquer les devis</string>
-    <string name="gstore_module_quote_tagging_desc">Ajouter un statut à tes devis</string>
+    <string name="gstore_module_quote_tagging_desc">Ajouter un statut aux devis</string>
     <string name="gstore_module_quote_tagging_detail">Active ce module pour ajouter un statut à tes devis : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un devis est converti en facture, mais tu peux le modifier à tout moment.</string>
+
+    <!-- gStore: Catégories produits (release 2.1 premium) -->
+    <string name="gstore_module_product_categories_title">Catégories produits</string>
+    <string name="gstore_module_product_categories_desc">Classe les produits avec tes propres catégories.</string>
+    <string name="gstore_module_product_categories_detail">Active ce module pour définir tes propres catégories de produits.\n\nDepuis la fiche d'un produit, tu peux lui attribuer une catégorie ; depuis la liste des produits, tu peux en sélectionner plusieurs et les classer d'un coup.\n\nTu peux filtrer tes produits par catégorie.</string>
+
+    <!-- Product categories (2.1) -->
+    <string name="product_category">Catégorie</string>
+    <string name="product_categories_title">Catégories</string>
+    <string name="product_categories_add_cta">Ajouter une catégorie</string>
+    <string name="product_categories_name_placeholder">Nom de la catégorie</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">Supprimer cette catégorie ?</string>
+    <string name="product_categories_delete_confirm_body">Les produits qui portaient cette catégorie resteront, mais ils n'auront plus de catégorie.</string>
+    <string name="product_categories_color_picker_title">Choisir une couleur</string>
+    <string name="product_categories_empty_hint">Clique sur le bouton Réglages ci-dessous pour ajouter des catégories</string>
 </resources>

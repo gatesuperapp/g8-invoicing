@@ -1,13 +1,11 @@
 package com.a4a.g8invoicing.ui.navigation
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.a4a.g8invoicing.ui.theme.AppColors
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 
 @Composable
 fun BottomBarAction(
@@ -18,10 +16,10 @@ fun BottomBarAction(
     onChangeBackground: () -> Unit,
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
+    productCategoriesForBulk: List<ProductCategoryState> = emptyList(),
+    onPickBulkCategory: (ProductCategoryState?) -> Unit = {},
 ) {
     BottomAppBar(
-        modifier = Modifier
-            .border(1.dp, AppColors.surfaceMuted),
         actions = {
             BottomBarActionView(
                 navController,
@@ -30,7 +28,9 @@ fun BottomBarAction(
                 onClickTag,
                 onChangeBackground,
                 isCategoriesMenuOpen,
-                onCategoriesMenuOpenChange
+                onCategoriesMenuOpenChange,
+                productCategoriesForBulk,
+                onPickBulkCategory,
             )
         },
         contentPadding = PaddingValues(

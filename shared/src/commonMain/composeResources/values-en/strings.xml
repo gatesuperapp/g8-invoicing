@@ -967,4 +967,20 @@
     <string name="gstore_module_quote_tagging_title">Tag quotes</string>
     <string name="gstore_module_quote_tagging_desc">Add a status to your quotes</string>
     <string name="gstore_module_quote_tagging_detail">Turn this module on to add a status to your quotes: draft, sent, cancelled or invoiced.\n\nThe « Invoiced » status is applied automatically when a quote is converted into an invoice, but you can change it at any time.</string>
+
+    <!-- gStore: Product categories (2.1 premium) -->
+    <string name="gstore_module_product_categories_title">Product categories</string>
+    <string name="gstore_module_product_categories_desc">Organise your products with your own categories.</string>
+    <string name="gstore_module_product_categories_detail">Turn this module on to define your own product categories.\n\nFrom a product sheet, you can assign a category to it; from the product list, you can select several products and categorise them in bulk.\n\nYou can filter your products by category.</string>
+
+    <!-- Product categories (2.1) -->
+    <string name="product_category">Category</string>
+    <string name="product_categories_title">Categories</string>
+    <string name="product_categories_add_cta">Add a category</string>
+    <string name="product_categories_name_placeholder">Category name</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">Delete this category?</string>
+    <string name="product_categories_delete_confirm_body">Products that were in this category will stay, but they will no longer have a category.</string>
+    <string name="product_categories_color_picker_title">Pick a colour</string>
+    <string name="product_categories_empty_hint">Tap the Settings button below to add categories</string>
 </resources>

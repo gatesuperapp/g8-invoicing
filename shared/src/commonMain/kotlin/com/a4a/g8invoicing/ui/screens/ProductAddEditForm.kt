@@ -18,6 +18,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +51,9 @@ import androidx.compose.runtime.LaunchedEffect
 import org.koin.compose.koinInject
 import com.a4a.g8invoicing.ui.screens.shared.ProductNaturePicker
 import com.a4a.g8invoicing.ui.screens.shared.UnitCodePicker
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
+import com.a4a.g8invoicing.shared.resources.product_category
+import com.a4a.g8invoicing.shared.resources.product_categories_none
 import com.a4a.g8invoicing.shared.resources.product_tax
 import com.a4a.g8invoicing.shared.resources.product_type_goods
 import com.a4a.g8invoicing.shared.resources.product_type_info_desc
@@ -100,6 +104,15 @@ fun ProductAddEditForm(
     var unitPickerOpen by remember { mutableStateOf(false) }
     var typePickerOpen by remember { mutableStateOf(false) }
 
+    // Product categories gate — read live from the gStore module repo so the
+    // extra "Catégorie" row (new block below the main info card) appears /
+    // disappears without having to restart the screen when the user toggles
+    // the premium module on in another tab.
+    val modulesRepo: ActivatedModulesRepository = koinInject()
+    val activatedModules by modulesRepo.state.collectAsState()
+    val categoriesModuleOn =
+        ActivatedModulesRepository.MODULE_PRODUCT_CATEGORIES in activatedModules
+
     // Resolve the localised name for the currently-selected unit code. Recomputes
     // on locale change (AppLocaleHolder.languageCode as a key) and on code
     // change. Compose Resources' getString is suspend so we live-update state
@@ -137,6 +150,8 @@ fun ProductAddEditForm(
     val productPriceDefaultLabel = stringResource(Res.string.product_price_default)
     val productPricePlaceholder = stringResource(Res.string.product_price_input)
     val productPriceClient = stringResource(Res.string.product_price_client)
+    val productCategoryLabel = stringResource(Res.string.product_category)
+    val productCategoriesNoneLabel = stringResource(Res.string.product_categories_none)
 
     Column(
         modifier = Modifier
@@ -179,6 +194,10 @@ fun ProductAddEditForm(
                         // rebuilds once resolveName finishes — otherwise the row
                         // caches a stale "-" until an unrelated field changes.
                         unitCodeDisplay,
+                        // Same reason for category: rebuild when the picker
+                        // returns a selection or the module toggle flips.
+                        product.category,
+                        categoriesModuleOn,
                     ) {
                         listOfNotNull(
                             FormInput(
@@ -206,6 +225,22 @@ fun ProductAddEditForm(
                                 ),
                                 pageElement = ScreenElement.PRODUCT_DESCRIPTION
                             ),
+                            // 2.1 premium category row — placed right after
+                            // description so it reads as part of the product
+                            // identity block (not after price). When the user
+                            // has picked a category, the row renders the name
+                            // inside a filled chip so the colour signal shows
+                            // up directly in the form (chipColor path on the
+                            // ForwardElement — plain "Aucune" text otherwise).
+                            if (categoriesModuleOn) FormInput(
+                                label = productCategoryLabel,
+                                inputType = ForwardElement(
+                                    text = product.category?.name ?: productCategoriesNoneLabel,
+                                    isMultiline = false,
+                                    chipColor = product.category?.color,
+                                ),
+                                pageElement = ScreenElement.PRODUCT_CATEGORY,
+                            ) else null,
                             FormInput(
                                 label = productUnitLabel,
                                 inputType = TextInput(
@@ -300,7 +335,7 @@ fun ProductAddEditForm(
                                     }
                                 ),
                                 pageElement = ScreenElement.PRODUCT_DEFAULT_PRICE_WITHOUT_TAX
-                            )
+                            ),
                         )
                     }
 

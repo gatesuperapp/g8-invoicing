@@ -1,9 +1,12 @@
 package com.a4a.g8invoicing.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.a4a.g8invoicing.ui.states.ProductState
 import com.a4a.g8invoicing.ui.theme.AppColors
@@ -18,7 +21,16 @@ fun ProductListContent(
     keyToUnselectAll: Boolean = false,
     clientId: Int? = null, // ID du client pour afficher son prix spécifique
 ) {
-    LazyColumn {
+    // Same recipe as DocumentListContent: screen-coloured container +
+    // 1dp spacedBy between rows. Each ProductListItem paints its own
+    // surface background on top, so the gap shows the screen hue and
+    // reads as a visible separator without a hard divider line.
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.screen),
+        verticalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
         items(
             // Skip transient products that haven't been persisted yet (id == null)
             // so the `key` lambda below never crashes on `!!`.
@@ -43,11 +55,6 @@ fun ProductListContent(
                 displayCheckboxes,
                 keyToUnselectAll,
                 clientId = clientId
-            )
-
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                color = AppColors.divider,
             )
         }
     }

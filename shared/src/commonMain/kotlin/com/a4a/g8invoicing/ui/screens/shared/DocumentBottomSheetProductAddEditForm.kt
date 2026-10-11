@@ -17,6 +17,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.models.ProductNature
 import com.a4a.g8invoicing.data.models.UnitCode
 import com.a4a.g8invoicing.data.models.UnitCodeRepository
@@ -42,6 +44,8 @@ import com.a4a.g8invoicing.shared.resources.document_product_quantity
 import com.a4a.g8invoicing.shared.resources.document_product_quantity_input
 import com.a4a.g8invoicing.shared.resources.product_description
 import com.a4a.g8invoicing.shared.resources.product_description_input
+import com.a4a.g8invoicing.shared.resources.product_categories_none
+import com.a4a.g8invoicing.shared.resources.product_category
 import com.a4a.g8invoicing.shared.resources.product_name
 import com.a4a.g8invoicing.shared.resources.product_name_input
 import com.a4a.g8invoicing.shared.resources.product_price
@@ -86,6 +90,11 @@ fun DocumentBottomSheetProductAddEditForm(
     showSyncToMasterSwitch: Boolean = false,
     syncToMasterChecked: Boolean = false,
     onSyncToMasterChange: (Boolean) -> Unit = {},
+    // Hoisted from the parent so the scroll position survives round-trips
+    // into the TVA / Catégorie pickers (which temporarily replace this
+    // composable in the sheet). A local rememberScrollState() would get a
+    // fresh instance on remount and snap back to the top.
+    scrollState: androidx.compose.foundation.ScrollState = rememberScrollState(),
 ) {
     val localFocusManager = LocalFocusManager.current
 
@@ -111,9 +120,17 @@ fun DocumentBottomSheetProductAddEditForm(
     val taxLabel = stringResource(Res.string.product_tax)
     val priceLabel = stringResource(Res.string.product_price)
     val pricePlaceholder = stringResource(Res.string.product_price_input)
+    val categoryLabel = stringResource(Res.string.product_category)
+    val categoriesNoneLabel = stringResource(Res.string.product_categories_none)
 
     var unitPickerOpen by remember { mutableStateOf(false) }
     var typePickerOpen by remember { mutableStateOf(false) }
+
+    // 2.1 category module — gates both the row rendering and the picker.
+    val modulesRepo: ActivatedModulesRepository = koinInject()
+    val activatedModules by modulesRepo.state.collectAsState()
+    val categoriesModuleOn =
+        ActivatedModulesRepository.MODULE_PRODUCT_CATEGORIES in activatedModules
 
     // See ProductAddEditForm for the same pattern — resolve the localised name
     // of the currently-selected unit code asynchronously.
@@ -132,7 +149,7 @@ fun DocumentBottomSheetProductAddEditForm(
         modifier = Modifier
             .fillMaxHeight(0.5f)
             .background(AppColors.surfaceMuted.copy(alpha = 0.4f))
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .padding(12.dp)
             .imePadding()
     ) {
@@ -165,6 +182,10 @@ fun DocumentBottomSheetProductAddEditForm(
                 // rebuilt the list) triggers another rebuild with the new label
                 // — otherwise the cached FormInput keeps the stale "-".
                 unitCodeDisplay,
+                // Rebuild when the picked category or module gate flips so the
+                // chip renders with the new tint without needing another edit.
+                documentProduct.category,
+                categoriesModuleOn,
             ) {
                 listOfNotNull(
                     FormInput(
@@ -205,6 +226,19 @@ fun DocumentBottomSheetProductAddEditForm(
                         ),
                         pageElement = ScreenElement.DOCUMENT_PRODUCT_DESCRIPTION
                     ),
+                    // 2.1 category row — same chip rendering as the main
+                    // product form, gated on the module toggle. Tap opens a
+                    // nested bottom-sheet picker (see categoryPickerOpen path
+                    // below) instead of navigating.
+                    if (categoriesModuleOn) FormInput(
+                        label = categoryLabel,
+                        inputType = ForwardElement(
+                            text = documentProduct.category?.name ?: categoriesNoneLabel,
+                            isMultiline = false,
+                            chipColor = documentProduct.category?.color,
+                        ),
+                        pageElement = ScreenElement.DOCUMENT_PRODUCT_CATEGORY,
+                    ) else null,
                     FormInput(
                         label = unitLabel,
                         inputType = TextInput(
@@ -299,6 +333,9 @@ fun DocumentBottomSheetProductAddEditForm(
                     when (element) {
                         ScreenElement.DOCUMENT_PRODUCT_UNIT_CODE -> unitPickerOpen = true
                         ScreenElement.DOCUMENT_PRODUCT_TYPE -> typePickerOpen = true
+                        // DOCUMENT_PRODUCT_CATEGORY falls through to the parent
+                        // so the main sheet can swap in the category picker in
+                        // place (matches the TVA selection pattern).
                         else -> onClickForward(element)
                     }
                 },

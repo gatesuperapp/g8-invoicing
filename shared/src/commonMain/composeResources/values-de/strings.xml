@@ -971,4 +971,20 @@ Es ist ein Fehler aufgetreten :
     <string name="gstore_module_quote_tagging_title">Angebote markieren</string>
     <string name="gstore_module_quote_tagging_desc">Deinen Angeboten einen Status hinzufügen</string>
     <string name="gstore_module_quote_tagging_detail">Aktiviere dieses Modul, um deinen Angeboten einen Status hinzuzufügen: Entwurf, Gesendet, Storniert oder In Rechnung gestellt.\n\nDer Status „In Rechnung gestellt“ wird automatisch gesetzt, wenn ein Angebot in eine Rechnung umgewandelt wird. Du kannst ihn jederzeit ändern.</string>
+
+    <!-- gStore: Produktkategorien (2.1 Premium) -->
+    <string name="gstore_module_product_categories_title">Produktkategorien</string>
+    <string name="gstore_module_product_categories_desc">Organisiere deine Produkte mit eigenen Kategorien.</string>
+    <string name="gstore_module_product_categories_detail">Aktiviere dieses Modul, um deine eigenen Produktkategorien festzulegen.\n\nIn der Produktansicht kannst du einem Produkt eine Kategorie zuweisen; in der Produktliste kannst du mehrere Produkte auswählen und sie gemeinsam kategorisieren.\n\nDu kannst deine Produkte nach Kategorie filtern.</string>
+
+    <!-- Produktkategorien (2.1) -->
+    <string name="product_category">Kategorie</string>
+    <string name="product_categories_title">Kategorien</string>
+    <string name="product_categories_add_cta">Kategorie hinzufügen</string>
+    <string name="product_categories_name_placeholder">Name der Kategorie</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">Diese Kategorie löschen?</string>
+    <string name="product_categories_delete_confirm_body">Produkte, die in dieser Kategorie waren, bleiben erhalten, haben aber keine Kategorie mehr.</string>
+    <string name="product_categories_color_picker_title">Farbe wählen</string>
+    <string name="product_categories_empty_hint">Tippe auf die Einstellungstaste unten, um Kategorien hinzuzufügen</string>
 </resources>

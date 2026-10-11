@@ -10,13 +10,21 @@ CREATE TABLE Product (
   -- rattaché à l'entreprise depuis laquelle il a été créé. Backfill par la
   -- migration 6 sur l'issuer implicite le plus récent.
   company_id INTEGER,
+  -- 2.1 catégorie produit (module premium "product_categories"). Nullable
+  -- parce que la fonctionnalité peut rester désactivée + aucune catégorie
+  -- par défaut. SET NULL on parent delete pour que supprimer une catégorie
+  -- ne détruise pas les produits qui la portent.
+  product_category_id INTEGER,
 
   created_at REAL DEFAULT (datetime('now', 'localtime')),
   updated_at REAL DEFAULT (datetime('now', 'localtime')),
 
     FOREIGN KEY(product_tax_id)
           REFERENCES TaxRate(product_tax_id)
-          ON DELETE CASCADE
+          ON DELETE CASCADE,
+    FOREIGN KEY(product_category_id)
+          REFERENCES ProductCategory(product_category_id)
+          ON DELETE SET NULL
 );
 
 getProduct:
@@ -29,8 +37,8 @@ SELECT *
 FROM Product;
 
 saveProduct:
-INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type, company_id)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO Product (id, name, description, product_tax_id, unit, unit_code, type, company_id, product_category_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 updateProduct:
 UPDATE Product
@@ -39,9 +47,18 @@ SET name = :name,
     product_tax_id = :product_tax_id,
     unit = :unit,
     unit_code = :unit_code,
-    type = :type
+    type = :type,
+    product_category_id = :product_category_id
 WHERE
     id = :id;
+
+-- Bulk-assign a category to the given products (nullable → clears the
+-- category). Used by the product-list bottom bar's "Marquer" action.
+updateProductCategoryId:
+UPDATE Product
+SET product_category_id = :product_category_id,
+    updated_at = datetime('now', 'localtime')
+WHERE id = :id;
 
 deleteProduct:
 DELETE FROM Product

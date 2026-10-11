@@ -18,10 +18,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.draw.clip
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.foundation.text.KeyboardActions
@@ -59,7 +70,11 @@ import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.currency_picker_search
 import com.a4a.g8invoicing.shared.resources.document_modal_product_cancel
+import com.a4a.g8invoicing.shared.resources.product_categories_none
+import com.a4a.g8invoicing.ui.screens.shared.resolveCategoryColor
 import com.a4a.g8invoicing.ui.shared.customTextSelectionColors
+import com.a4a.g8invoicing.ui.shared.drawScrollThumb
+import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodySmall
 import com.a4a.g8invoicing.ui.theme.textCta
@@ -90,6 +105,13 @@ fun TopBar(
     searchQuery: TextFieldValue = TextFieldValue(""),
     onSearchToggle: () -> Unit = {},
     onSearchQueryChange: (TextFieldValue) -> Unit = {},
+    // Optional category filter rendered just before the search icon. The
+    // caller owns the state: pass [categoryFilterOptions] = empty to hide
+    // the icon entirely. [selectedCategory] = null means "all categories".
+    categoryFilterEnabled: Boolean = false,
+    categoryFilterOptions: List<ProductCategoryState> = emptyList(),
+    selectedCategoryFilter: ProductCategoryState? = null,
+    onCategoryFilterChange: (ProductCategoryState?) -> Unit = {},
 ) {
     val focusRequester = remember { FocusRequester() }
     // Guards the "focus lost → collapse" reaction against the very first
@@ -210,6 +232,93 @@ fun TopBar(
             }
         },
         actions = {
+            // Category filter — rendered to the LEFT of the search icon.
+            // Hidden while the search field is expanded (clutters the row).
+            // Caller controls visibility via categoryFilterEnabled.
+            if (categoryFilterEnabled && !searchExpanded) {
+                var menuOpen by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.FilterList,
+                            contentDescription = null,
+                            tint = if (selectedCategoryFilter != null) AppColors.accent
+                            else MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                    // Dropdown matches the list's own surface colour (so the
+                    // menu + list read as the same palette), then a bumped
+                    // shadowElevation draws a soft grey halo around the menu
+                    // to lift it visually above the list. drawScrollThumb on
+                    // the DropdownMenu's own scrollState gives the user a
+                    // right-edge indicator when the category list overflows.
+                    val selectedRowBg = AppColors.accent.copy(alpha = 0.15f)
+                    val filterScrollState = rememberScrollState()
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        // widthIn matches the invoice "Marquer" status dropdown
+                        // feel — floor so single-word categories don't make a
+                        // skinny menu, cap so a long category name ellipses
+                        // instead of blowing the dropdown wider than the row.
+                        modifier = Modifier
+                            .widthIn(min = 200.dp, max = 280.dp)
+                            .heightIn(max = 320.dp)
+                            .drawScrollThumb(filterScrollState),
+                        containerColor = AppColors.surface,
+                        shadowElevation = 8.dp,
+                        scrollState = filterScrollState,
+                    ) {
+                        DropdownMenuItem(
+                            modifier = Modifier.background(
+                                if (selectedCategoryFilter == null) selectedRowBg else Color.Transparent,
+                            ),
+                            text = {
+                                Text(
+                                    text = stringResource(Res.string.product_categories_none),
+                                    color = AppColors.textPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                            onClick = {
+                                onCategoryFilterChange(null)
+                                menuOpen = false
+                            },
+                        )
+                        categoryFilterOptions.forEach { category ->
+                            val isSelected = selectedCategoryFilter?.id == category.id
+                            DropdownMenuItem(
+                                modifier = Modifier.background(
+                                    if (isSelected) selectedRowBg else Color.Transparent,
+                                ),
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(10.dp)
+                                                .clip(CircleShape)
+                                                .background(resolveCategoryColor(category.color)),
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = category.name,
+                                            color = AppColors.textPrimary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onCategoryFilterChange(category)
+                                    menuOpen = false
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
             // Search magnifier appears before any other action so it stays in
             // the same on-screen spot regardless of selection-mode juggling.
             //
@@ -392,10 +501,11 @@ private fun BackArrow(
     )
 
     // Show back arrow if:
-    // - Current screen is ProductTaxRates, OR
+    // - Current screen is ProductTaxRates / ProductCategories, OR
     // - There's a previous screen AND current screen is NOT a main list screen
     val showBackButton =
         currentRoute == Screen.ProductTaxRates.name ||
+        currentRoute == Screen.ProductCategories.name ||
         (navController.previousBackStackEntry != null &&
          currentRoute != null &&
          noBackArrowScreens.none { currentRoute.startsWith(it) })

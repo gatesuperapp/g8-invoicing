@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.RequestQuote
+import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.material.icons.outlined.WaterDrop
@@ -78,6 +79,9 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_product_categories_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_product_categories_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_product_categories_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_quote_tagging_title
@@ -199,6 +203,16 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_quote_tagging_desc,
         detailRes = Res.string.gstore_module_quote_tagging_detail,
         icon = Icons.Outlined.Sell,
+    ),
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_PRODUCT_CATEGORIES,
+        titleRes = Res.string.gstore_module_product_categories_title,
+        descRes = Res.string.gstore_module_product_categories_desc,
+        detailRes = Res.string.gstore_module_product_categories_detail,
+        icon = Icons.Outlined.Label,
+        // TODO 2.1: flip back to premium before tagging the release. Kept free
+        // for QA so the switch is reachable without a premium account.
+        isFree = true,
     ),
     // Pinned last per product ordering — feature-y modules read first, then
     // watermark, then multi-entreprise (which reshapes the whole app menu).
@@ -595,16 +609,17 @@ private fun ModuleDetailDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Switch sits directly under the text — not pushed to the bottom of the
-                // modal, per design. Same colors + always-enabled behaviour as on the
-                // card so non-premium taps consistently trigger the hint snackbar.
+                // modal, per design. Shares the theme-aware token set with the
+                // card version above so the greys track dark mode instead of
+                // falling back to the legacy hardcoded light-mode hexes.
                 Switch(
                     checked = isActivated && isUnlocked,
                     onCheckedChange = { if (isUnlocked) onToggle() else onPremiumHint() },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = AppColors.switchCheckedTrack,
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = if (isUnlocked) Color(0xFFB8B5BC) else Color(0xFFE5E2E7),
+                        uncheckedThumbColor = AppColors.switchUncheckedThumb,
+                        uncheckedTrackColor = if (isUnlocked) AppColors.switchUncheckedTrackLocked else AppColors.switchUncheckedTrack,
                         uncheckedBorderColor = Color.Transparent,
                     ),
                 )
