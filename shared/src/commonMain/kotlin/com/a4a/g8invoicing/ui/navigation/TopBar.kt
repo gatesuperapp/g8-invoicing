@@ -112,6 +112,14 @@ fun TopBar(
     categoryFilterOptions: List<ProductCategoryState> = emptyList(),
     selectedCategoryFilter: ProductCategoryState? = null,
     onCategoryFilterChange: (ProductCategoryState?) -> Unit = {},
+    // Optional status/tag filter rendered just before the search icon —
+    // mirrors the category filter visually (same width cap, scroll thumb,
+    // elevation) but shows document-status dots instead of category chips.
+    // Caller passes the options list; selectedTagFilter = null means "all".
+    tagFilterEnabled: Boolean = false,
+    tagFilterOptions: List<TagFilterOption> = emptyList(),
+    selectedTagFilter: DocumentTag? = null,
+    onTagFilterChange: (DocumentTag?) -> Unit = {},
 ) {
     val focusRequester = remember { FocusRequester() }
     // Guards the "focus lost → collapse" reaction against the very first
@@ -311,6 +319,84 @@ fun TopBar(
                                 },
                                 onClick = {
                                     onCategoryFilterChange(category)
+                                    menuOpen = false
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Tag/status filter — same visual recipe as the category filter
+            // above, but renders the document-tag options (DRAFT, SENT,
+            // PAID…) each with its own coloured dot. Enabled by callers that
+            // show lists of invoices / BLs / quotes.
+            if (tagFilterEnabled && !searchExpanded) {
+                var menuOpen by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.FilterList,
+                            contentDescription = null,
+                            tint = if (selectedTagFilter != null) AppColors.accent
+                            else MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                    val selectedRowBg = AppColors.accent.copy(alpha = 0.15f)
+                    val tagFilterScrollState = rememberScrollState()
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        modifier = Modifier
+                            .widthIn(min = 200.dp, max = 280.dp)
+                            .heightIn(max = 320.dp)
+                            .drawScrollThumb(tagFilterScrollState),
+                        containerColor = AppColors.surface,
+                        shadowElevation = 8.dp,
+                        scrollState = tagFilterScrollState,
+                    ) {
+                        DropdownMenuItem(
+                            modifier = Modifier.background(
+                                if (selectedTagFilter == null) selectedRowBg else Color.Transparent,
+                            ),
+                            text = {
+                                Text(
+                                    text = stringResource(Res.string.product_categories_none),
+                                    color = AppColors.textPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
+                            onClick = {
+                                onTagFilterChange(null)
+                                menuOpen = false
+                            },
+                        )
+                        tagFilterOptions.forEach { option ->
+                            val isSelected = selectedTagFilter == option.tag
+                            DropdownMenuItem(
+                                modifier = Modifier.background(
+                                    if (isSelected) selectedRowBg else Color.Transparent,
+                                ),
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(10.dp)
+                                                .clip(CircleShape)
+                                                .background(option.dotColor),
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = option.label,
+                                            color = AppColors.textPrimary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onTagFilterChange(option.tag)
                                     menuOpen = false
                                 },
                             )
@@ -519,3 +605,16 @@ private fun BackArrow(
         }
     }
 }
+
+/**
+ * One row in the TopBar's tag/status filter dropdown. The caller supplies
+ * the display [label] (localized) and the [dotColor] (status pastille) so
+ * the TopBar stays agnostic of DocumentTag → label / colour mapping, which
+ * differs between invoice / BL / quote lists (feminine vs masculine labels,
+ * invoiced-only option, etc.).
+ */
+data class TagFilterOption(
+    val tag: DocumentTag,
+    val label: String,
+    val dotColor: Color,
+)

@@ -26,6 +26,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,13 +36,22 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.shared.resources.Res
 import com.a4a.g8invoicing.shared.resources.appbar_quotes
+import com.a4a.g8invoicing.shared.resources.appbar_tag_cancelled_masc
+import com.a4a.g8invoicing.shared.resources.appbar_tag_draft
+import com.a4a.g8invoicing.shared.resources.appbar_tag_invoiced
+import com.a4a.g8invoicing.shared.resources.appbar_tag_sent_masc
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert1
 import com.a4a.g8invoicing.shared.resources.quote_advice_convert2
 import com.a4a.g8invoicing.shared.resources.quote_empty_cta
 import com.a4a.g8invoicing.ui.navigation.Category
 import com.a4a.g8invoicing.ui.navigation.DocumentTag
+import com.a4a.g8invoicing.ui.navigation.TagFilterOption
 import com.a4a.g8invoicing.ui.navigation.TopBar
+import com.a4a.g8invoicing.ui.theme.ColorCancelled
+import com.a4a.g8invoicing.ui.theme.ColorGreenPaid
+import com.a4a.g8invoicing.ui.theme.ColorGreyDraft
+import com.a4a.g8invoicing.ui.theme.ColorSent
 import com.a4a.g8invoicing.ui.screens.shared.ScaffoldWithDimmedOverlay
 import com.a4a.g8invoicing.ui.screens.shared.filterByQuery
 import com.a4a.g8invoicing.ui.shared.AlertDialogDeleteDocument
@@ -92,6 +102,17 @@ fun QuoteList(
     var searchExpanded by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
 
+    // Status filter — devis uses masculine labels + Invoiced instead of Paid.
+    var selectedTagFilterOrdinal by rememberSaveable { mutableStateOf<Int?>(null) }
+    val selectedTagFilter: DocumentTag? = selectedTagFilterOrdinal
+        ?.let { DocumentTag.entries.getOrNull(it) }
+    val tagFilterOptions = listOf(
+        TagFilterOption(DocumentTag.DRAFT, stringResource(Res.string.appbar_tag_draft), ColorGreyDraft),
+        TagFilterOption(DocumentTag.SENT, stringResource(Res.string.appbar_tag_sent_masc), ColorSent),
+        TagFilterOption(DocumentTag.CANCELLED, stringResource(Res.string.appbar_tag_cancelled_masc), ColorCancelled),
+        TagFilterOption(DocumentTag.INVOICED, stringResource(Res.string.appbar_tag_invoiced), ColorGreenPaid),
+    )
+
     // System back closes the search bar first if it's open.
     PlatformBackHandler(enabled = searchExpanded) {
         searchQuery = TextFieldValue("")
@@ -123,6 +144,10 @@ fun QuoteList(
                 searchQuery = searchQuery,
                 onSearchToggle = { searchExpanded = !searchExpanded },
                 onSearchQueryChange = { searchQuery = it },
+                tagFilterEnabled = selectedItems.isEmpty(),
+                tagFilterOptions = tagFilterOptions,
+                selectedTagFilter = selectedTagFilter,
+                onTagFilterChange = { picked -> selectedTagFilterOrdinal = picked?.ordinal },
             )
         },
         bottomBar = {
@@ -174,8 +199,15 @@ fun QuoteList(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                val filteredDocuments = remember(documentsUiState.quoteStates, searchQuery.text) {
-                    documentsUiState.quoteStates.filterByQuery(searchQuery.text)
+                val filteredDocuments = remember(
+                    documentsUiState.quoteStates, searchQuery.text, selectedTagFilter,
+                ) {
+                    documentsUiState.quoteStates
+                        .filterByQuery(searchQuery.text)
+                        .let { list ->
+                            val tag = selectedTagFilter ?: return@let list
+                            list.filter { it.documentTag == tag }
+                        }
                 }
                 val hasActiveQuery = searchQuery.text.isNotBlank()
 
