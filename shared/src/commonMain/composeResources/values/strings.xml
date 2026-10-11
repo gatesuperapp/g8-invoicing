@@ -470,6 +470,12 @@
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvre les nouveautés...</string>
+
+    <!-- WhatsNew 2.1 slides -->
+    <string name="whats_new_21_status_filter_title">Filtre par statut</string>
+    <string name="whats_new_21_status_filter_description">Nouvelle version 2.1 : tu peux désormais filtrer tes factures selon leur statut.</string>
+    <string name="whats_new_21_product_categories_title">Catégories de produits</string>
+    <string name="whats_new_21_product_categories_description">Un nouveau module est disponible pour les membres premium : la possibilité de classer tes produits selon des catégories que tu définis.</string>
     <string name="whats_new_gstore_title">𝕘Store</string>
     <string name="whats_new_gstore_description">Un petit magasin pour débloquer des fonctionnalités.</string>
     <string name="whats_new_watermark_title">Fait avec 𝕘8</string>

@@ -37,19 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.a4a.g8invoicing.shared.resources.Res
+import com.a4a.g8invoicing.shared.resources.whats_new_21_product_categories_description
+import com.a4a.g8invoicing.shared.resources.whats_new_21_product_categories_title
+import com.a4a.g8invoicing.shared.resources.whats_new_21_status_filter_description
+import com.a4a.g8invoicing.shared.resources.whats_new_21_status_filter_title
 import com.a4a.g8invoicing.shared.resources.whats_new_close
-import com.a4a.g8invoicing.shared.resources.whats_new_companies_title
-import com.a4a.g8invoicing.shared.resources.whats_new_companies_description
-import com.a4a.g8invoicing.shared.resources.whats_new_currency_title
-import com.a4a.g8invoicing.shared.resources.whats_new_currency_description
 import com.a4a.g8invoicing.shared.resources.whats_new_discover
 import com.a4a.g8invoicing.shared.resources.whats_new_done
-import com.a4a.g8invoicing.shared.resources.whats_new_spanish_title
-import com.a4a.g8invoicing.shared.resources.whats_new_spanish_description
-import com.a4a.g8invoicing.shared.resources.whats_new_gstore_title
-import com.a4a.g8invoicing.shared.resources.whats_new_gstore_description
-import com.a4a.g8invoicing.shared.resources.whats_new_watermark_title
-import com.a4a.g8invoicing.shared.resources.whats_new_watermark_description
 import com.a4a.g8invoicing.shared.resources.whats_new_welcome
 import com.a4a.g8invoicing.ui.theme.AppColors
 import com.a4a.g8invoicing.ui.theme.textBodyBold
@@ -71,34 +65,23 @@ fun WhatsNewDialog(
     appVersion: String = "",
     onDismiss: () -> Unit
 ) {
-    // Page de bienvenue + pages de fonctionnalités
-    val welcomeTitle = stringResource(Res.string.whats_new_welcome, "$appVersion - Rosa Canina")
+    // Page de bienvenue + pages de fonctionnalités. 2.1 ships two new
+    // slides: le filtre par statut dans les factures, et le module premium
+    // de catégories de produits. Les pages des versions précédentes
+    // (2.0 Rosa Canina, 1.9, 1.8…) ont déjà été vues par les upgraders
+    // concernés — on garde la modale focalisée sur les nouveautés 2.1.
+    val welcomeTitle = stringResource(Res.string.whats_new_welcome, appVersion)
 
     val featurePages = listOf(
         WhatsNewPage(
-            emoji = "💎",
-            title = stringResource(Res.string.whats_new_gstore_title),
-            description = stringResource(Res.string.whats_new_gstore_description)
+            emoji = "🔎",
+            title = stringResource(Res.string.whats_new_21_status_filter_title),
+            description = stringResource(Res.string.whats_new_21_status_filter_description)
         ),
         WhatsNewPage(
-            emoji = "✍️",
-            title = stringResource(Res.string.whats_new_watermark_title),
-            description = stringResource(Res.string.whats_new_watermark_description)
-        ),
-        WhatsNewPage(
-            emoji = "🇪🇸",
-            title = stringResource(Res.string.whats_new_spanish_title),
-            description = stringResource(Res.string.whats_new_spanish_description)
-        ),
-        WhatsNewPage(
-            emoji = "💱",
-            title = stringResource(Res.string.whats_new_currency_title),
-            description = stringResource(Res.string.whats_new_currency_description)
-        ),
-        WhatsNewPage(
-            emoji = "🏢",
-            title = stringResource(Res.string.whats_new_companies_title),
-            description = stringResource(Res.string.whats_new_companies_description)
+            emoji = "🏷️",
+            title = stringResource(Res.string.whats_new_21_product_categories_title),
+            description = stringResource(Res.string.whats_new_21_product_categories_description)
         )
     )
 
@@ -158,7 +141,7 @@ fun WhatsNewDialog(
                                     verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = "((„• ֊ •„)♡",
+                                        text = "((˃ᯅ˂)ノ)",
                                         style = MaterialTheme.typography.textHeadline,
                                         textAlign = TextAlign.Center,
                                     )
