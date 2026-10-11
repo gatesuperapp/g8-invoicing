@@ -122,20 +122,27 @@ suspend fun initializeVersionTracking(context: Context) {
     val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
     val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
 
-    // Seulement pour les vraies nouvelles installations
+    // Seulement pour les vraies nouvelles installations. Les trois writes
+    // partagent le même .edit {} pour éviter la race que les versions
+    // précédentes voyaient : chaque .edit {} fait émettre le Flow, et le
+    // moindre interval où LAST_SEEN_VERSION est écrit avant
+    // HAS_SEEN_DARKMODE_MIGRATION_20 déclenche la modale "Mode sombre !"
+    // (shouldShowDarkModeMigration20 interprète lastSeenVersion != null
+    // comme un upgrade). Un write atomique fait émettre un seul snapshot.
+    //
+    // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
+    // The onboarding must run for fresh installs too (with the empty-issuer
+    // path skipping the per-issuer loop) so a user quitting via the Home
+    // button during Welcome can resume the wizard on next launch. The flag
+    // is only flipped once the user reaches Terminer (see commit()).
     if (lastSeenVersion == null && !hasSeenPopup) {
-        setSeenWhatsNew(context)
-        // Le popup e-invoice cible les mises à jour depuis 1.8/antérieur :
-        // pour les fresh installs on flip SEEN=true directement pour qu'il
-        // n'apparaisse jamais (l'utilisateur découvre l'appli avec la
-        // facturation électronique déjà intégrée aux features).
-        setSeenEInvoiceIntro(context)
-        setSeenDarkModeMigration20(context)
-        // NB: HAS_SEEN_ONBOARDING_1_8 is intentionally NOT set here anymore.
-        // The onboarding must run for fresh installs too (with the empty-issuer
-        // path skipping the per-issuer loop) so a user quitting via the Home
-        // button during Welcome can resume the wizard on next launch. The flag
-        // is only flipped once the user reaches Terminer (see commit()).
+        context.dataStore.edit { prefs ->
+            prefs[PrefKeys.LAST_SEEN_VERSION] = CURRENT_APP_VERSION
+            // E-invoice popup cible les upgrades depuis 1.8/antérieur :
+            // pour les fresh installs on flip SEEN=true directement.
+            prefs[PrefKeys.HAS_SEEN_EINVOICE_INTRO] = true
+            prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] = true
+        }
     }
 }
 
