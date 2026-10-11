@@ -5,24 +5,44 @@ import com.a4a.g8invoicing.Database
 import com.a4a.g8invoicing.data.util.DispatcherProvider
 import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import g8invoicing.ProductCategory
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ProductCategoryLocalDataSource(
     db: Database,
+    private val currentCompanyRepository: CurrentCompanyRepository,
 ) : ProductCategoryLocalDataSourceInterface {
     private val productCategoryQueries = db.productCategoryQueries
     private val productQueries = db.productQueries
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun fetchAllCategoriesFlow(): Flow<List<ProductCategoryState>> =
-        productCategoryQueries.getAllCategories().asFlow().map { query ->
-            query.executeAsList().map { it.toState() }
+        // Scoped to the entreprise courante — same pattern as
+        // ProductLocalDataSource.fetchAllProducts. Falls back to the global
+        // list when the repository has no hydrated value (pre-migration
+        // safety for first-boot windows before CurrentCompanyRepository
+        // emits).
+        currentCompanyRepository.state.flatMapLatest { companyId ->
+            val query = if (companyId != null) {
+                productCategoryQueries.getAllCategoriesForCompany(companyId)
+            } else {
+                productCategoryQueries.getAllCategories()
+            }
+            query.asFlow().map { it.executeAsList().map { row -> row.toState() } }
         }
 
     override suspend fun fetchAllCategories(): List<ProductCategoryState> =
         withContext(DispatcherProvider.IO) {
-            productCategoryQueries.getAllCategories().executeAsList().map { it.toState() }
+            val companyId = currentCompanyRepository.current
+            val rows = if (companyId != null) {
+                productCategoryQueries.getAllCategoriesForCompany(companyId).executeAsList()
+            } else {
+                productCategoryQueries.getAllCategories().executeAsList()
+            }
+            rows.map { it.toState() }
         }
 
     override suspend fun fetchCategory(id: Long): ProductCategoryState? =
@@ -38,6 +58,7 @@ class ProductCategoryLocalDataSource(
                         name = category.name,
                         color = category.color,
                         sort_order = category.sortOrder.toLong(),
+                        company_id = currentCompanyRepository.current,
                     )
                 }
                 productCategoryQueries.lastInsertRowId().executeAsOne()
