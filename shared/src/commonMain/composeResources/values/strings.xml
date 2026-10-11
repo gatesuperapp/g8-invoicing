@@ -473,7 +473,7 @@
 
     <!-- WhatsNew 2.1 slides -->
     <string name="whats_new_21_status_filter_title">Filtre par statut</string>
-    <string name="whats_new_21_status_filter_description">Nouvelle version 2.1 : tu peux désormais filtrer tes factures selon leur statut.</string>
+    <string name="whats_new_21_status_filter_description">Tu peux désormais filtrer tes factures selon leur statut.</string>
     <string name="whats_new_21_product_categories_title">Catégories de produits</string>
     <string name="whats_new_21_product_categories_description">Un nouveau module est disponible pour les membres premium : la possibilité de classer tes produits selon des catégories que tu définis.</string>
     <string name="whats_new_gstore_title">𝕘Store</string>

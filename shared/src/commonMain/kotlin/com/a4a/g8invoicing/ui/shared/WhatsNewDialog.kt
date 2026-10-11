@@ -141,7 +141,7 @@ fun WhatsNewDialog(
                                     verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = "((˃ᯅ˂)ノ)",
+                                        text = "((„• ֊ •„)♡",
                                         style = MaterialTheme.typography.textHeadline,
                                         textAlign = TextAlign.Center,
                                     )
