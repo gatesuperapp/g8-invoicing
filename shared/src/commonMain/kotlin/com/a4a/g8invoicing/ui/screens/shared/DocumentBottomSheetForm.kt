@@ -811,7 +811,22 @@ private fun CategoryEditSheet(
     onDismiss: () -> Unit,
     onSave: (List<ProductCategoryState>) -> Unit,
 ) {
-    var editing by remember(categories) { mutableStateOf(categories) }
+    // First-time creation inside the document flow: seed two visibly-
+    // different swatches so the user lands on a form-like list ready to
+    // type into (CategoryEditRow auto-focuses the first blank row when
+    // autoFocus is true). Matches the ProductCategories screen's gear
+    // behaviour from the Products tab.
+    val palette = com.a4a.g8invoicing.ui.screens.shared.CategoryPastelPalette
+    var editing by remember(categories) {
+        mutableStateOf(
+            if (categories.isEmpty()) {
+                listOf(
+                    ProductCategoryState(id = null, name = "", color = palette[0]),
+                    ProductCategoryState(id = null, name = "", color = palette[3]),
+                )
+            } else categories
+        )
+    }
     DocumentBottomSheetFormSimple(
         onClickCancel = onDismiss,
         onClickDone = {
