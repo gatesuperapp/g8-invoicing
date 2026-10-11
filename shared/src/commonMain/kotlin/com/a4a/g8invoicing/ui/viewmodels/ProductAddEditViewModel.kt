@@ -156,7 +156,24 @@ class ProductAddEditViewModel(
     }
 
     fun setDocumentProductUiState(documentProduct: DocumentProductState) {
+        // Doc products are hydrated from the DocumentProduct table which
+        // doesn't store the category — it lives on the master Product row.
+        // When re-opening a doc product for edit, back-fill the category by
+        // looking it up via productId so the form chip renders the right
+        // value instead of "Aucune".
         _documentProductUiState.value = documentProduct
+        val masterId = documentProduct.productId
+        if (documentProduct.category == null && masterId != null) {
+            viewModelScope.launch {
+                val master = dataSource.fetchProduct(masterId.toLong())
+                val category = master?.category ?: return@launch
+                if (_documentProductUiState.value.id == documentProduct.id &&
+                    _documentProductUiState.value.category == null) {
+                    _documentProductUiState.value =
+                        _documentProductUiState.value.copy(category = category)
+                }
+            }
+        }
     }
 
     fun setDocumentProductUiStateWithProduct(product: ProductState, clientId: Int? = null) {
