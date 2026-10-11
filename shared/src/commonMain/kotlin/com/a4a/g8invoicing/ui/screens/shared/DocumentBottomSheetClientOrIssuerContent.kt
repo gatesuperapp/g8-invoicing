@@ -47,7 +47,7 @@ fun DocumentClientOrIssuerContent(
             .background(AppColors.surfaceMuted)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(color = AppColors.ripple, bounded = false)
+                indication = ripple(color = AppColors.ripple, bounded = true)
             ) {
                 onClickItem(item)
             }

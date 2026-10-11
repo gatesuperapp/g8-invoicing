@@ -27,10 +27,10 @@ fun ButtonAddOrChoose(
     isPickerButton: Boolean,
     buttonText: String,
 ) {
+    // Clickable sits AFTER background/border so the ripple is bounded to the
+    // visible button rect — otherwise the outer padding would be click-eligible
+    // and the ripple would overflow above / left / right of the button.
     var myModifier = Modifier
-        .clickable(
-            onClick = onClickNew
-        )
         .padding(
             start = 20.dp,
             end = 20.dp,
@@ -53,6 +53,7 @@ fun ButtonAddOrChoose(
             )
         )
     }
+    myModifier = myModifier.clickable(onClick = onClickNew)
 
     Row(
         modifier = myModifier,
