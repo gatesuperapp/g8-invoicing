@@ -22,6 +22,7 @@ import com.a4a.g8invoicing.shared.resources.document_tax_label
 import com.a4a.g8invoicing.shared.resources.document_total_with_tax
 import com.a4a.g8invoicing.shared.resources.document_total_without_tax
 import com.a4a.g8invoicing.shared.resources.invoice_number
+import com.a4a.g8invoicing.shared.resources.sales_order_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.invoice_pdf_due_date
 import com.a4a.g8invoicing.shared.resources.label_separator
@@ -79,6 +80,7 @@ internal object DocumentLabels {
         "document_total_with_tax" to Res.string.document_total_with_tax,
         "document_total_without_tax" to Res.string.document_total_without_tax,
         "invoice_number" to Res.string.invoice_number,
+        "sales_order_number" to Res.string.sales_order_number,
         "invoice_paid" to Res.string.invoice_paid,
         "invoice_pdf_due_date" to Res.string.invoice_pdf_due_date,
         "label_separator" to Res.string.label_separator,

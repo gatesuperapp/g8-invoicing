@@ -46,6 +46,7 @@ import com.a4a.g8invoicing.shared.resources.document_reference_label
 import com.a4a.g8invoicing.shared.resources.pdf_currency_notice
 import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.quote_number
+import com.a4a.g8invoicing.shared.resources.sales_order_number
 import com.a4a.g8invoicing.shared.resources.invoice_paid
 import com.a4a.g8invoicing.shared.resources.label_separator
 import com.a4a.g8invoicing.shared.resources.document_table_description
@@ -85,6 +86,7 @@ actual fun ExportPdfPlatform(
         deliveryNoteNumber = stringResource(Res.string.delivery_note_number),
         creditNoteNumber = stringResource(Res.string.credit_note_number),
         quoteNumber = stringResource(Res.string.quote_number),
+        salesOrderNumber = stringResource(Res.string.sales_order_number),
         documentDate = stringResource(Res.string.document_date_label),
         documentReference = stringResource(Res.string.document_reference_label),
         tableDescription = stringResource(Res.string.document_table_description),

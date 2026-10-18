@@ -40,6 +40,8 @@ fun BottomBarActionView(
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     productCategoriesForBulk: List<ProductCategoryState> = emptyList(),
     onPickBulkCategory: (ProductCategoryState?) -> Unit = {},
+    onClickConvertToInvoice: () -> Unit = {},
+    onClickConvertToDeliveryNote: () -> Unit = {},
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -158,6 +160,15 @@ fun BottomBarActionView(
                                     action = action,
                                     categories = productCategoriesForBulk,
                                     onPick = onPickBulkCategory,
+                                    onChangeBackground = onChangeBackground,
+                                )
+                            } else if (action.name == "CONVERT_SALES_ORDER") {
+                                ButtonWithDropdownMenu(
+                                    action,
+                                    listOf(
+                                        actionConvertToDeliveryNote(onClickConvertToDeliveryNote),
+                                        actionConvertToInvoice(onClickConvertToInvoice),
+                                    ),
                                     onChangeBackground = onChangeBackground,
                                 )
                             } else {

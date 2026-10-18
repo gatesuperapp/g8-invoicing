@@ -55,6 +55,8 @@ import g8invoicing.LinkInvoiceDocumentProductToDeliveryNoteQueries
 import g8invoicing.LinkInvoiceDocumentProductToQuoteQueries
 import g8invoicing.LinkInvoiceToDocumentClientOrIssuerQueries
 import g8invoicing.LinkInvoiceToDocumentProductQueries
+import g8invoicing.LinkSalesOrderToDocumentClientOrIssuerQueries
+import g8invoicing.LinkSalesOrderToDocumentProductQueries
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -83,6 +85,8 @@ class InvoiceLocalDataSource(
         db.linkInvoiceDocumentProductToDeliveryNoteQueries
     private val linkInvoiceDocumentProductToQuoteQueries =
         db.linkInvoiceDocumentProductToQuoteQueries
+    private val linkInvoiceDocumentProductToSalesOrderQueries =
+        db.linkInvoiceDocumentProductToSalesOrderQueries
     private val linkInvoiceToDocumentClientOrIssuerQueries =
         db.linkInvoiceToDocumentClientOrIssuerQueries
     private val invoiceRetentionQueries = db.invoiceRetentionQueries
@@ -516,9 +520,18 @@ class InvoiceLocalDataSource(
                         val qInfo = linkInvoiceDocumentProductToQuoteQueries
                             .getInfoLinkedToDocumentProduct(it.document_product_id)
                             .executeAsOneOrNull() // DB call
-                        linkedDate = qInfo?.delivery_date
-                        linkedDocNumber = qInfo?.quote_number
-                        linkedDocType = qInfo?.let { LinkedDocType.QUOTE }
+                        if (qInfo != null) {
+                            linkedDate = qInfo.delivery_date
+                            linkedDocNumber = qInfo.quote_number
+                            linkedDocType = LinkedDocType.QUOTE
+                        } else {
+                            val soInfo = linkInvoiceDocumentProductToSalesOrderQueries
+                                .getInfoLinkedToDocumentProduct(it.document_product_id)
+                                .executeAsOneOrNull()
+                            linkedDate = soInfo?.sales_order_date
+                            linkedDocNumber = soInfo?.sales_order_number
+                            linkedDocType = soInfo?.let { LinkedDocType.SALES_ORDER }
+                        }
                     }
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()// DB call
@@ -826,6 +839,124 @@ class InvoiceLocalDataSource(
                             )
                         }
                         quote.documentIssuer?.let {
+                            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                                documentClientOrIssuer = it,
+                                documentId = id,
+                            )
+                        }
+                    }
+                }
+                newInvoiceId
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+    // --- convertSalesOrdersToInvoice ---
+    // Same shape as convertQuotesToInvoice: writes traceability rows on
+    // LinkInvoiceDocumentProductToSalesOrder so each invoice product remembers
+    // which sales order it was cloned from.
+    override suspend fun convertSalesOrdersToInvoice(
+        salesOrders: List<com.a4a.g8invoicing.ui.states.SalesOrderState>,
+    ): Long? {
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val newCompanyId = currentCompanyRepository.current
+            ?: salesOrders.firstOrNull()?.originalCompanyId
+        val issuer = salesOrders.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        val reuse = issuer?.originalClientOrIssuerId?.toLong()?.let { masterId ->
+            invoiceQueries.getLastInvoicePaymentReuseForIssuer(masterId)
+                .executeAsOneOrNull()
+        }
+        val reusedRetentions: List<com.a4a.g8invoicing.ui.states.RetentionState> =
+            if (issuer?.taxWithholdingEnabled == true) {
+                issuer.originalClientOrIssuerId?.toLong()?.let { masterId ->
+                    invoiceRetentionQueries.getLastInvoiceIdWithRetentionsForIssuer(masterId)
+                        .executeAsOneOrNull()?.let { row ->
+                            invoiceRetentionQueries.getForInvoice(row.invoice_id)
+                                .executeAsList()
+                                .map { it.transformIntoRetentionState() }
+                        }
+                } ?: com.a4a.g8invoicing.data.models.defaultRetentionsForIssuer(
+                    issuer,
+                    getString(Res.string.retention_default_label),
+                    getString(Res.string.retention_default_mx_isr),
+                    getString(Res.string.retention_default_mx_iva),
+                )
+            } else emptyList()
+        return withContext(DispatcherProvider.IO) {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
+                incrementDocumentNumber(it)
+            } ?: getString(Res.string.invoice_default_number)
+
+            try {
+                val seededTerms = seedPaymentTermsForNewInvoice()
+                val newInvoiceState = InvoiceState(
+                    documentNumber = TextFieldValue(docNumber),
+                    documentDate = DateUtils.getCurrentDateFormatted(),
+                    dueDate = DateUtils.getDatePlusDaysFormatted(30),
+                    reference = salesOrders.firstOrNull { it.reference != null }?.reference,
+                    freeField = salesOrders.firstOrNull { it.freeField != null }?.freeField,
+                    documentIssuer = issuer,
+                    documentClient = salesOrders.firstOrNull { it.documentClient != null }?.documentClient,
+                    currency = TextFieldValue(
+                        salesOrders.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
+                            ?: currencyManager.currentCurrency
+                    ),
+                    showCurrencyAndAutoTaxColumn = true,
+                    footerText = TextFieldValue(getExistingFooter() ?: getString(Res.string.document_default_footer)),
+                    watermarkText = frozenWatermark,
+                    labelsSnapshot = frozenLabels,
+                    paymentMeansSelections = setOf(
+                        com.a4a.g8invoicing.data.models.PaymentMeans.TRANSFER.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CHEQUE.chipId,
+                        com.a4a.g8invoicing.data.models.PaymentMeans.CASH.chipId,
+                    ),
+                    paymentMeansSegments = com.a4a.g8invoicing.data.models.defaultPaymentSegments(
+                        getString(Res.string.document_payment_means_default_label)
+                    ),
+                    paymentTermsRecoveryFees = seededTerms.first,
+                    paymentTermsLateFees = seededTerms.second,
+                    paymentTermsDiscount = seededTerms.third,
+                    originalCompanyId = newCompanyId,
+                    vatExemptionText = com.a4a.g8invoicing.data.models.resolveVatExemptionForNewDoc(
+                        issuer = issuer,
+                        previousVatText = reuse?.vat_exemption_text,
+                        previousIssuerCountry = reuse?.issuer_country_code,
+                    ),
+                    retentions = reusedRetentions,
+                )
+                saveInfoInInvoiceTable(newInvoiceState)
+
+                val newInvoiceId = invoiceQueries.getLastInsertedRowId().executeAsOneOrNull()
+                newInvoiceId?.let { id ->
+                    saveRetentionsForInvoice(id, reusedRetentions)
+                    saveTag(id, salesOrders.first().copy(documentTag = DocumentTag.DRAFT))
+
+                    salesOrders.forEach { salesOrder ->
+                        salesOrder.documentProducts?.forEach { documentProduct ->
+                            val newDocProductId = saveDocumentProductInDbAndLinkToDocument(
+                                documentProduct = documentProduct,
+                                documentId = id,
+                                deliveryNoteDate = null,
+                                deliveryNoteNumber = null,
+                            )
+                            newDocProductId?.let { pid ->
+                                linkInvoiceDocumentProductToSalesOrderQueries.saveInfoLinkedToDocumentProduct(
+                                    document_product_id = pid.toLong(),
+                                    sales_order_number = salesOrder.documentNumber.text,
+                                    sales_order_date = salesOrder.documentDate,
+                                )
+                            }
+                        }
+                        salesOrder.documentClient?.let {
+                            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                                documentClientOrIssuer = it,
+                                documentId = id,
+                            )
+                        }
+                        salesOrder.documentIssuer?.let {
                             saveDocumentClientOrIssuerInDbAndLinkToDocument(
                                 documentClientOrIssuer = it,
                                 documentId = id,
@@ -1579,6 +1710,12 @@ fun linkDocumentProductToParentDocument(
                 (result?.maxOrder ?: -1L) + 1L
             }
 
+            is LinkSalesOrderToDocumentProductQueries -> {
+                val result = linkQueries.getMaxSortOrderForSalesOrder(parentId)
+                    .executeAsOneOrNull()
+                (result?.maxOrder ?: -1L) + 1L
+            }
+
             else -> {
                 //Log.w("GlobalHelpers", "Unsupported query type for linkDocumentProductToParentDocument (sort order): ${linkQueries::class.simpleName}")
                 0L // Default sort order if type is unknown, or handle error
@@ -1610,6 +1747,15 @@ fun linkDocumentProductToParentDocument(
                     credit_note_id = parentId,
                     document_product_id = documentProductId,
                     sort_order = sortOrder
+                )
+            }
+
+            is LinkSalesOrderToDocumentProductQueries -> {
+                linkQueries.saveProductLinkedToSalesOrder(
+                    id = null,
+                    sales_order_id = parentId,
+                    document_product_id = documentProductId,
+                    sort_order = sortOrder,
                 )
             }
 
@@ -1696,6 +1842,14 @@ fun linkDocumentClientOrIssuerToDocument(
                     id = null,
                     quote_id = documentId,
                     document_client_or_issuer_id = documentClientOrIssuerId
+                )
+            }
+
+            is LinkSalesOrderToDocumentClientOrIssuerQueries -> {
+                linkQueries.saveDocumentClientOrIssuerLinkedToSalesOrder(
+                    id = null,
+                    sales_order_id = documentId,
+                    document_client_or_issuer_id = documentClientOrIssuerId,
                 )
             }
 
@@ -1925,6 +2079,10 @@ fun fetchClientAndIssuer(
             linkQueries.getDocumentClientOrIssuerLinkedToQuote(
                 documentId
             ).executeAsList().map { it.document_client_or_issuer_id }
+        else if (linkQueries is LinkSalesOrderToDocumentClientOrIssuerQueries)
+            linkQueries.getDocumentClientOrIssuerLinkedToSalesOrder(
+                documentId
+            ).executeAsList().map { it.document_client_or_issuer_id }
         else emptyList()
 
 
@@ -2045,6 +2203,14 @@ fun updateDocumentProductsOrderInDb(
                         sort_order = newSortOrder,
                         id = documentId,
                         document_product_id = documentProductId
+                    )
+                }
+
+                is LinkSalesOrderToDocumentProductQueries -> {
+                    linkQueries.updateSortOrderForDocumentProduct(
+                        sort_order = newSortOrder,
+                        id = documentId,
+                        document_product_id = documentProductId,
                     )
                 }
 

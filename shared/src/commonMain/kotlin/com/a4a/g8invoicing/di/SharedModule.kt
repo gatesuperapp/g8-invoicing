@@ -14,6 +14,8 @@ import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.QuoteLocalDataSource
 import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.SalesOrderLocalDataSource
+import com.a4a.g8invoicing.data.SalesOrderLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.InvoiceLocalDataSourceInterface
 import com.a4a.g8invoicing.data.CurrencyManager
@@ -48,6 +50,8 @@ import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.SalesOrderAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.SalesOrderListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.OnboardingViewModel
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceListViewModel
@@ -108,6 +112,7 @@ val sharedModule = module {
     single { get<Database>().productQueries }
     single { get<Database>().deliveryNoteQueries }
     single { get<Database>().quoteQueries }
+    single { get<Database>().salesOrderQueries }
     single { get<Database>().clientOrIssuerQueries }
 
     // Data Sources
@@ -120,6 +125,7 @@ val sharedModule = module {
     }
     single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<SalesOrderLocalDataSourceInterface> { SalesOrderLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
@@ -147,6 +153,11 @@ val sharedModule = module {
     viewModel { params ->
         val itemId: String? = params.getOrNull()
         QuoteAddEditViewModel(get(), get(), itemId)
+    }
+    viewModel { SalesOrderListViewModel(get(), get(), get()) }
+    viewModel { params ->
+        val itemId: String? = params.getOrNull()
+        SalesOrderAddEditViewModel(get(), get(), itemId)
     }
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->

@@ -110,6 +110,7 @@ fun CategorySidebar(
         add(Category.Products)
         add(Category.CreditNotes)
         if (hasQuoteAccess) add(Category.Quotes)
+        if (ActivatedModulesRepository.MODULE_SALES_ORDER in activatedModules) add(Category.SalesOrders)
         if (ActivatedModulesRepository.MODULE_DELIVERY_NOTE in activatedModules) add(Category.DeliveryNotes)
         add(Category.Invoices)
     }

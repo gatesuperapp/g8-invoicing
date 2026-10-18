@@ -1,0 +1,75 @@
+-- Migration 9 → 10 (release 2.2) — Bon de commande (free module). New
+-- document type that mirrors Delivery Note (products + client + issuer +
+-- status tags). Converts both to Invoice and to Delivery Note, hence two
+-- traceability junctions mirroring LinkInvoiceDocumentProductToDeliveryNote.
+
+CREATE TABLE SalesOrder (
+  sales_order_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  sales_order_date TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  footer TEXT,
+  watermark_text TEXT,
+  labels_snapshot TEXT,
+  show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
+  format_locale TEXT,
+  original_company_id INTEGER,
+  font_family TEXT,
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
+CREATE TABLE LinkSalesOrderToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+  sort_order INTEGER,
+  FOREIGN KEY(document_product_id)
+        REFERENCES DocumentProduct(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE LinkSalesOrderToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+  FOREIGN KEY(document_client_or_issuer_id)
+        REFERENCES DocumentClientOrIssuer(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE SalesOrderTag (
+  sales_order_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO SalesOrderTag (sales_order_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'CANCELLED'),
+(4, 'INVOICED');
+
+CREATE TABLE LinkSalesOrderToTag (
+  id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_id INTEGER NOT NULL,
+  tag_id INTEGER NOT NULL,
+  updated_by_user_at TEXT,
+  FOREIGN KEY(tag_id)
+         REFERENCES SalesOrderTag(sales_order_tag_id)
+         ON DELETE CASCADE
+);
+
+CREATE TABLE LinkInvoiceDocumentProductToSalesOrder (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_number TEXT,
+  sales_order_date TEXT
+);
+
+CREATE TABLE LinkDeliveryNoteDocumentProductToSalesOrder (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_number TEXT,
+  sales_order_date TEXT
+);

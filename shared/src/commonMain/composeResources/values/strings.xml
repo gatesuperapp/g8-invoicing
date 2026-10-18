@@ -5,6 +5,7 @@
     <string name="delivery_note_default_number">BL001</string>
     <string name="credit_note_default_number">FA001</string>
     <string name="quote_default_number">D001</string>
+    <string name="sales_order_default_number">BC001</string>
 
     <!-- Currency -->
 
@@ -58,6 +59,7 @@
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
     <string name="quote_number">Devis N°</string>
+    <string name="sales_order_number">Bon de commande N°</string>
     <string name="document_date">Date</string>
     <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d'émission</string>
@@ -127,6 +129,8 @@
     <string name="credit_note_created_button">Voir mon avoir</string>
     <string name="corrected_invoice_created_title">Ta facture rectificative a bien été créée !</string>
     <string name="corrected_invoice_created_button">Voir ma facture rectificative</string>
+    <string name="delivery_note_created_body">Ton bon de livraison a bien été créé !</string>
+    <string name="delivery_note_created_button">Voir mon bon de livraison</string>
 
     <!-- Document Form Strings -->
     <string name="document_number_short">N°</string>
@@ -497,6 +501,7 @@
     <string name="appbar_invoices">Factures</string>
     <string name="appbar_credit_notes">Avoirs</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
+    <string name="appbar_sales_orders">Bons de commande</string>
     <string name="appbar_quotes">Devis</string>
     <string name="appbar_products">Produits</string>
     <string name="appbar_client_list">Client·es</string>
@@ -520,6 +525,8 @@
     <string name="appbar_create_credit_note">Créer avoir</string>
     <string name="appbar_convert">Convertir</string>
     <string name="appbar_convert_label">Facturer</string>
+    <string name="appbar_convert_to_invoice">Facture</string>
+    <string name="appbar_convert_to_delivery_note">Bon de livraison</string>
     <string name="appbar_unselect_all">Annuler sélection</string>
     <string name="appbar_unselect_all_label">Retour</string>
     <string name="appbar_edit">Modifier la facture</string>
@@ -780,6 +787,7 @@
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">J'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_empty_cta">Clique sur «Créer» pour créer ton premier bon de livraison</string>
+    <string name="sales_order_empty_cta">Clique sur «Créer» pour créer ton premier bon de commande</string>
     <string name="quote_empty_cta">Clique sur «Créer» pour créer ton premier devis</string>
     <string name="credit_note_empty_cta">Clique sur «Créer» pour créer ton premier avoir</string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>

@@ -15,6 +15,14 @@ data class DeliveryNotesUiState(
     val createdInvoiceId: Long? = null
 )
 
+data class SalesOrdersUiState(
+    val salesOrderStates: List<SalesOrderState> = listOf(),
+    val userMessages: List<Message> = listOf(),
+    val isFetchingSalesOrders: Boolean = false,
+    val createdInvoiceId: Long? = null,
+    val createdDeliveryNoteId: Long? = null,
+)
+
 data class QuotesUiState(
     val quoteStates: List<QuoteState> = listOf(),
     val userMessages: List<Message> = listOf(),

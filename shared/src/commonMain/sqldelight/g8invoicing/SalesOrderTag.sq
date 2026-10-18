@@ -1,0 +1,33 @@
+CREATE TABLE SalesOrderTag (
+  sales_order_tag_id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL
+);
+
+INSERT INTO SalesOrderTag (sales_order_tag_id, name)
+VALUES (1, 'DRAFT'),
+(2, 'SENT'),
+(3, 'CANCELLED'),
+(4, 'INVOICED');
+
+getTagId:
+SELECT sales_order_tag_id
+FROM SalesOrderTag
+WHERE name = :name;
+
+getTag:
+SELECT name
+FROM SalesOrderTag
+WHERE sales_order_tag_id = :sales_order_tag_id;
+
+getAllTags:
+SELECT *
+FROM SalesOrderTag;
+
+saveTag:
+INSERT
+INTO SalesOrderTag (sales_order_tag_id, name)
+VALUES (?, ?);
+
+deleteTagById:
+DELETE FROM SalesOrderTag
+WHERE sales_order_tag_id = :id;

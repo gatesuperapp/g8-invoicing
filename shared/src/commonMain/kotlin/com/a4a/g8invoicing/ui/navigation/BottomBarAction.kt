@@ -18,6 +18,8 @@ fun BottomBarAction(
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     productCategoriesForBulk: List<ProductCategoryState> = emptyList(),
     onPickBulkCategory: (ProductCategoryState?) -> Unit = {},
+    onClickConvertToInvoice: () -> Unit = {},
+    onClickConvertToDeliveryNote: () -> Unit = {},
 ) {
     BottomAppBar(
         actions = {
@@ -31,6 +33,8 @@ fun BottomBarAction(
                 onCategoriesMenuOpenChange,
                 productCategoriesForBulk,
                 onPickBulkCategory,
+                onClickConvertToInvoice,
+                onClickConvertToDeliveryNote,
             )
         },
         contentPadding = PaddingValues(

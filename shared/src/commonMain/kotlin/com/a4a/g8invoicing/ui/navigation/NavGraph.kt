@@ -111,6 +111,31 @@ fun NavGraph(
             showCategoryButton = showCategoryButton
         )
 
+        // Sales Orders (Bons de commande)
+        salesOrderList(
+            navController = navController,
+            onClickCategory = handleCategoryClick,
+            onClickListItem = {
+                val params = "?itemId=$it"
+                navController.navigate(Screen.SalesOrderAddEdit.name + params)
+            },
+            onClickNew = {
+                navController.navigate(Screen.SalesOrderAddEdit.name)
+            },
+            onClickBack = {
+                navigateBack(navController)
+            },
+            onClickViewCreatedInvoice = { invoiceId ->
+                val params = "?itemId=$invoiceId"
+                navController.navigate(Screen.InvoiceAddEdit.name + params)
+            },
+            onClickViewCreatedDeliveryNote = { deliveryNoteId ->
+                val params = "?itemId=$deliveryNoteId"
+                navController.navigate(Screen.DeliveryNoteAddEdit.name + params)
+            },
+            showCategoryButton = showCategoryButton,
+        )
+
         // Quotes
         quoteList(
             navController = navController,
@@ -207,6 +232,16 @@ fun NavGraph(
             exportPdfContent = { document, onDismiss ->
                 exportPdfContent(document, onDismiss)
             }
+        )
+
+        salesOrderAddEdit(
+            navController = navController,
+            onClickBack = {
+                navigateBack(navController)
+            },
+            exportPdfContent = { document, onDismiss ->
+                exportPdfContent(document, onDismiss)
+            },
         )
 
         quoteAddEdit(

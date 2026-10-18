@@ -42,4 +42,8 @@ interface DeliveryNoteLocalDataSourceInterface {
         tagUpdateCase: TagUpdateOrCreationCase,
     )
 
+    suspend fun convertSalesOrdersToDeliveryNote(
+        salesOrders: List<com.a4a.g8invoicing.ui.states.SalesOrderState>,
+    ): Long?
+
 }
