@@ -38,6 +38,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -152,6 +154,21 @@ fun FormInputCreatorText(
                         // instead of jumping to the next field.
                         imeAction = if (input.isMultiline) ImeAction.Default else keyboardOption,
                         keyboardType = input.keyboardType,
+                        // Match the OS keyboard behaviour of every other app:
+                        // auto-capitalise the first letter of each sentence
+                        // (first char after . ! ? or newline). Skip for input
+                        // types where auto-cap would be noise or outright
+                        // wrong — emails, URIs, passwords, phones, numbers.
+                        capitalization = when (input.keyboardType) {
+                            KeyboardType.Email,
+                            KeyboardType.Password,
+                            KeyboardType.NumberPassword,
+                            KeyboardType.Uri,
+                            KeyboardType.Phone,
+                            KeyboardType.Number,
+                            KeyboardType.Decimal -> KeyboardCapitalization.None
+                            else -> KeyboardCapitalization.Sentences
+                        },
                     ),
                     keyboardActions = formActions,
                     minLines = input.minLines,

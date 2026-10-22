@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -417,7 +418,10 @@ private fun CompactTextField(
         // Next used to fire onSubmit() and skip the user straight past the
         // Country picker to the Completion slide, which surprised users who
         // tapped it expecting to jump into the country dropdown.
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+            capitalization = KeyboardCapitalization.Sentences,
+        ),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = Modifier
             .fillMaxWidth()

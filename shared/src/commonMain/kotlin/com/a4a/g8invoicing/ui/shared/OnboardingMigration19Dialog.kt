@@ -69,6 +69,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -2288,7 +2289,10 @@ private fun CompactTextField19(
         singleLine = true,
         textStyle = MaterialTheme.typography.textBody.copy(color = AppColors.textPrimary),
         cursorBrush = SolidColor(AppColors.accent),
-        keyboardOptions = KeyboardOptions(imeAction = imeAction),
+        keyboardOptions = KeyboardOptions(
+            imeAction = imeAction,
+            capitalization = KeyboardCapitalization.Sentences,
+        ),
         keyboardActions = KeyboardActions(),
         modifier = Modifier
             .fillMaxWidth()
