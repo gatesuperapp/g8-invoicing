@@ -94,7 +94,11 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FirstLaunchIssuerNameDialog(
     onSubmit: suspend (name: String, countryCode: String) -> Unit,
-    onEnableDarkMode: () -> Unit = {},
+    // Signals the user's explicit pick on the dark-mode slide. true = tap on
+    // "Oui, active-le", false = tap on "Plus tard" (we persist light rather
+    // than falling back to the system theme — the user said "later", not
+    // "follow my system settings").
+    onPickDarkMode: (enable: Boolean) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val defaultCountry = remember { CountryCodes.pickDefaultForNewAddress(null) }
@@ -181,10 +185,13 @@ fun FirstLaunchIssuerNameDialog(
                     )
                     Step.DarkMode -> DarkModeStep(
                         onEnable = {
-                            onEnableDarkMode()
+                            onPickDarkMode(true)
                             step = Step.Completion
                         },
-                        onSkip = { step = Step.Completion },
+                        onSkip = {
+                            onPickDarkMode(false)
+                            step = Step.Completion
+                        },
                     )
                     Step.Completion -> CompletionStep(onDone = finishOnboarding)
                 }
