@@ -225,6 +225,13 @@
     <string name="whats_new_done">Let's go!</string>
     <string name="whats_new_welcome">Welcome to %1$s!</string>
     <string name="whats_new_discover">Lots of new features</string>
+
+    <!-- WhatsNew 2.2 slides -->
+    <string name="whats_new_22_dashboard_title">Dashboard</string>
+    <string name="whats_new_22_dashboard_description">See your sales amount and best-selling products month by month, with visual charts. Access a monthly statement per client of all your documents. (premium module)</string>
+    <string name="whats_new_22_sales_order_title">Sales orders</string>
+    <string name="whats_new_22_sales_order_description">Create sales orders and convert them into an invoice or delivery note. (premium module)</string>
+
     <string name="whats_new_gstore_title">𝕘Store</string>
     <string name="whats_new_gstore_description">A little shop to unlock features.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>

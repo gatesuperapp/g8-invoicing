@@ -470,6 +470,13 @@
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvre les nouveautés...</string>
+
+    <!-- WhatsNew 2.2 slides -->
+    <string name="whats_new_22_dashboard_title">Tableau de bord</string>
+    <string name="whats_new_22_dashboard_description">Visualise mois par mois le montant de tes ventes et tes produits les plus vendus, avec des courbes visuelles. Accède à un relevé mensuel par client de tous tes documents. (module premium)</string>
+    <string name="whats_new_22_sales_order_title">Bons de commande</string>
+    <string name="whats_new_22_sales_order_description">Crée des BC et convertis-les en facture ou en bon de livraison. (module premium)</string>
+
     <string name="whats_new_gstore_title">𝕘Store</string>
     <string name="whats_new_gstore_description">Un petit magasin pour débloquer des fonctionnalités.</string>
     <string name="whats_new_watermark_title">Fait avec 𝕘8</string>
