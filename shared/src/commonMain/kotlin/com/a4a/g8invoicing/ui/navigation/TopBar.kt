@@ -578,10 +578,12 @@ private fun BackArrow(
     val noBackArrowScreens = listOf(
         Screen.InvoiceList.name,
         Screen.DeliveryNoteList.name,
+        Screen.SalesOrderList.name,
         Screen.CreditNoteList.name,
         Screen.QuoteList.name,
         Screen.ProductList.name,
         Screen.ClientOrIssuerList.name,
+        Screen.Dashboard.name,
         Screen.About.name,
         Screen.Account.name,
         Screen.GStore.name

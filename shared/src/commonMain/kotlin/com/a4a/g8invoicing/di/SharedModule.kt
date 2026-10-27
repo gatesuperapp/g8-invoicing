@@ -50,6 +50,7 @@ import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.DeliveryNoteListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.DashboardViewModel
 import com.a4a.g8invoicing.ui.viewmodels.SalesOrderAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.SalesOrderListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.InvoiceAddEditViewModel
@@ -83,6 +84,11 @@ val sharedModule = module {
     // iOS is a stub until PDFKit port). Injected into whatever screen fires
     // "Export CII".
     single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
+
+    // Dashboard CSV/PDF export — mirrors the CII manager pattern. Platform
+    // actuals handle save + share; the Dashboard tab consumes the shared
+    // interface via Koin.
+    single { com.a4a.g8invoicing.ui.screens.DashboardExportFileManager() }
 
     // Database
     single<SqlDriver> { get<DatabaseDriverFactory>().createDriver() }
@@ -159,6 +165,7 @@ val sharedModule = module {
         val itemId: String? = params.getOrNull()
         SalesOrderAddEditViewModel(get(), get(), itemId)
     }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = params.getOrNull()

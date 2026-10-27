@@ -1,0 +1,1 @@
+Dos nuevos módulos premium en el 𝕘Store: Panel de control (ventas por mes, productos más vendidos con gráfico a 12 meses, extracto por cliente exportable en PDF/CSV) y Pedidos de venta (convertibles en factura o albarán).

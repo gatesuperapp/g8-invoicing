@@ -23,7 +23,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.LocalShipping
+import androidx.compose.material.icons.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.RequestQuote
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material.icons.outlined.Sell
@@ -76,9 +78,15 @@ import com.a4a.g8invoicing.shared.resources.gstore_module_font_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_dashboard_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_dashboard_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_dashboard_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_delivery_note_tagging_title
+import com.a4a.g8invoicing.shared.resources.gstore_module_sales_order_desc
+import com.a4a.g8invoicing.shared.resources.gstore_module_sales_order_detail
+import com.a4a.g8invoicing.shared.resources.gstore_module_sales_order_title
 import com.a4a.g8invoicing.shared.resources.gstore_module_product_categories_desc
 import com.a4a.g8invoicing.shared.resources.gstore_module_product_categories_detail
 import com.a4a.g8invoicing.shared.resources.gstore_module_product_categories_title
@@ -210,6 +218,24 @@ private val MODULES = listOf(
         descRes = Res.string.gstore_module_product_categories_desc,
         detailRes = Res.string.gstore_module_product_categories_detail,
         icon = Icons.Outlined.Label,
+    ),
+    // Dashboard — per-month sales summary, top products, per-client
+    // statements. Premium — reads across every doc the user has.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_DASHBOARD,
+        titleRes = Res.string.gstore_module_dashboard_title,
+        descRes = Res.string.gstore_module_dashboard_desc,
+        detailRes = Res.string.gstore_module_dashboard_detail,
+        icon = Icons.Outlined.Dashboard,
+    ),
+    // Bons de commande — pre-sale document that converts to invoice OR BL.
+    // Premium.
+    GStoreModule(
+        id = ActivatedModulesRepository.MODULE_SALES_ORDER,
+        titleRes = Res.string.gstore_module_sales_order_title,
+        descRes = Res.string.gstore_module_sales_order_desc,
+        detailRes = Res.string.gstore_module_sales_order_detail,
+        icon = Icons.Outlined.ReceiptLong,
     ),
     // Pinned last per product ordering — feature-y modules read first, then
     // watermark, then multi-entreprise (which reshapes the whole app menu).

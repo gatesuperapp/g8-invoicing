@@ -106,6 +106,7 @@ fun CategorySidebar(
 
     val topCategories = listOf(Category.G8, Category.MyAccount, Category.GStore)
     val subCategories = buildList {
+        if (ActivatedModulesRepository.MODULE_DASHBOARD in activatedModules) add(Category.Dashboard)
         add(Category.Clients)
         add(Category.Products)
         add(Category.CreditNotes)

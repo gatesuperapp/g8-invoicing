@@ -61,6 +61,7 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.DashboardViewModel
 import com.a4a.g8invoicing.ui.viewmodels.SalesOrderAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.SalesOrderListViewModel
 import org.koin.android.ext.koin.androidApplication
@@ -133,6 +134,10 @@ val appModule = module {
     // into whatever screen fires "Export CII".
     single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
 
+    // Dashboard CSV export — mirrors the CII manager Android actual (write
+    // to Downloads/g8 + ACTION_SEND share sheet).
+    single { com.a4a.g8invoicing.ui.screens.DashboardExportFileManager() }
+
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
@@ -181,6 +186,7 @@ val appModule = module {
         val itemId: String? = if (params.size() > 0) params[0] else null
         SalesOrderAddEditViewModel(get(), get(), itemId)
     }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null

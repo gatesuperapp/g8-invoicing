@@ -169,12 +169,15 @@ class ActivatedModulesRepository(
             }
             settings.putString(KEY_FONT_DEFAULT_SEEDED, "1")
         }
+        // No-op one-shot flags preserved so beta users who already got the
+        // seed don't flip-flop. The old auto-activate branches are gone now
+        // that both modules are premium — new installs that haven't seen
+        // the seed start without them.
         if (settings.getStringOrNull(KEY_SALES_ORDER_DEFAULT_SEEDED) == null) {
-            if (MODULE_SALES_ORDER !in cached) {
-                cached = cached + MODULE_SALES_ORDER
-                settings.putString(KEY_ACTIVATED, cached.joinToString(","))
-            }
             settings.putString(KEY_SALES_ORDER_DEFAULT_SEEDED, "1")
+        }
+        if (settings.getStringOrNull(KEY_DASHBOARD_DEFAULT_SEEDED) == null) {
+            settings.putString(KEY_DASHBOARD_DEFAULT_SEEDED, "1")
         }
         return cached
     }
@@ -221,10 +224,16 @@ class ActivatedModulesRepository(
         // Seeded on first load so existing users who used delivery notes before the
         // GStore card existed don't suddenly lose the category.
         const val MODULE_DELIVERY_NOTE = "delivery_note"
-        // Module that unlocks the "Bons de commande" category and menu. Free-tier,
-        // default-ON — identical rollout treatment to MODULE_DELIVERY_NOTE. A sales
-        // order can be converted both to an invoice and to a delivery note.
+        // Module that unlocks the "Bons de commande" category and menu —
+        // sales-order document type that converts to Invoice OR Delivery
+        // Note. Premium. (Was free + default-ON during the 2.2 beta; the
+        // existing seed flag below keeps beta users' activation intact.)
         const val MODULE_SALES_ORDER = "sales_order"
+        // Module that unlocks the "Tableau de bord" category — per-month
+        // sales summary, top products, per-client statements. Premium.
+        // Same ex-beta note as MODULE_SALES_ORDER: free seed stays in place
+        // so testers don't suddenly lose the tab.
+        const val MODULE_DASHBOARD = "dashboard"
         // Module that unlocks the "Export CII" action on invoices — writes the
         // structured invoice data as a raw EN 16931 CII XML file, for
         // international e-invoicing platforms that don't accept the Factur-X
@@ -274,7 +283,6 @@ class ActivatedModulesRepository(
         val FREE_MODULES = setOf(
             MODULE_QUOTE_TRIAL,
             MODULE_DELIVERY_NOTE,
-            MODULE_SALES_ORDER,
             MODULE_WATERMARK_REMOVAL,
             MODULE_MULTI_ENTREPRISE,
             MODULE_FONT,
@@ -282,13 +290,16 @@ class ActivatedModulesRepository(
 
         // Modules seeded into the activated set the first time the app boots after this
         // migration is deployed. Guarded by KEY_DEFAULTS_SEEDED so we don't re-add a
-        // module the user has explicitly toggled off.
-        val DEFAULT_ACTIVATED_MODULES = setOf(MODULE_DELIVERY_NOTE, MODULE_SALES_ORDER)
+        // module the user has explicitly toggled off. MODULE_SALES_ORDER and
+        // MODULE_DASHBOARD intentionally omitted — they're premium now; new
+        // installs discover them via the gStore and have to toggle them on.
+        val DEFAULT_ACTIVATED_MODULES = setOf(MODULE_DELIVERY_NOTE)
 
         private const val KEY_ACTIVATED = "gstore_activated_modules_v1"
         private const val KEY_DEFAULTS_SEEDED = "gstore_defaults_seeded_v1"
         private const val KEY_FONT_DEFAULT_SEEDED = "gstore_font_default_seeded_v1"
         private const val KEY_SALES_ORDER_DEFAULT_SEEDED = "gstore_sales_order_default_seeded_v1"
+        private const val KEY_DASHBOARD_DEFAULT_SEEDED = "gstore_dashboard_default_seeded_v1"
         private const val KEY_QUOTE_TRIAL_COUNT = "gstore_quote_trial_count_v1"
         private const val KEY_EVER_ACTIVATED = "gstore_ever_activated_modules_v1"
         private const val KEY_EVER_ACTIVATED_SEEDED = "gstore_ever_activated_seeded_v1"

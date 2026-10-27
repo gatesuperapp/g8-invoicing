@@ -23,5 +23,6 @@ enum class Screen {
     Account,
     GStore,
     Settings,
-    About
+    About,
+    Dashboard
 }

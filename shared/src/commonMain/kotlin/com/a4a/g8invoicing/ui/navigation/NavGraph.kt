@@ -111,6 +111,14 @@ fun NavGraph(
             showCategoryButton = showCategoryButton
         )
 
+        // Dashboard (Tableau de bord)
+        dashboard(
+            navController = navController,
+            onClickCategory = handleCategoryClick,
+            onClickBack = { navigateBack(navController) },
+            showCategoryButton = showCategoryButton,
+        )
+
         // Sales Orders (Bons de commande)
         salesOrderList(
             navController = navController,

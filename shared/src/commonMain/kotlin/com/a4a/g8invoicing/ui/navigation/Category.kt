@@ -28,4 +28,5 @@ sealed class Category(
     data object SalesOrders : Category(Screen.SalesOrderList.name, Res.string.appbar_sales_orders, null, null)
     data object Quotes : Category(Screen.QuoteList.name, Res.string.appbar_quotes, null, null)
     data object Invoices : Category(Screen.InvoiceList.name, Res.string.appbar_invoices, null, null)
+    data object Dashboard : Category(Screen.Dashboard.name, Res.string.appbar_dashboard, null, null)
 }
