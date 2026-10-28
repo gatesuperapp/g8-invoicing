@@ -652,6 +652,17 @@
     <string name="gstore_module_delivery_note_title">Delivery notes</string>
     <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
     <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted.\n\nThe delivery note number will be shown on the matching invoice for accounting traceability.\n\nYou can convert a delivery note into an invoice, and group several DNs into a single invoice.</string>
+
+    <!-- gStore sales-order module -->
+    <string name="gstore_module_sales_order_title">Sales orders</string>
+    <string name="gstore_module_sales_order_desc">Create and convert into an invoice or DN</string>
+    <string name="gstore_module_sales_order_detail">Enable this module to create sales orders, send them to your clients, and convert them — into either an invoice or a delivery note — from the sales order menu.\n\nHandy for formalising the commercial agreement before delivery or invoicing. The sales order number is carried over on the generated invoice and DN for traceability.</string>
+
+    <!-- gStore dashboard module -->
+    <string name="gstore_module_dashboard_title">Dashboard</string>
+    <string name="gstore_module_dashboard_desc">See your sales, best-selling products and per-client statement</string>
+    <string name="gstore_module_dashboard_detail">Enable this module to see at a glance: your total sales per month, your best-selling products with their 12-month chart, and a month-by-month statement for each client (invoices, credit notes, DNs, SOs, quotes) — exportable to PDF or CSV.</string>
+
     <string name="gstore_module_multi_entreprise_title">Multi-business</string>
     <string name="gstore_module_multi_entreprise_desc">Manage several businesses</string>
     <string name="gstore_module_multi_entreprise_detail">Enable this module if you invoice under several businesses (different registration numbers, separate activities…).\n\nYou'll be able to add more businesses from "My account" and switch between them from the menu.\n\nYour clients, products, numbering and bank details will be kept separate per business.</string>
@@ -990,4 +1001,39 @@
     <string name="product_categories_delete_confirm_body">Products that were in this category will stay, but they will no longer have a category.</string>
     <string name="product_categories_color_picker_title">Pick a colour</string>
     <string name="product_categories_empty_hint">Tap the Settings button below to add categories</string>
+
+    <!-- 2.2 Sales orders (gStore premium) -->
+    <string name="appbar_sales_orders">Sales orders</string>
+    <string name="sales_order_default_number">SO001</string>
+    <string name="sales_order_number">Sales order N°</string>
+    <string name="sales_order_empty_cta">Tap "Create" to make your first sales order</string>
+    <string name="appbar_convert_to_invoice">Invoice</string>
+    <string name="appbar_convert_to_delivery_note">Delivery note</string>
+    <string name="delivery_note_created_body">Your delivery note has been created!</string>
+    <string name="delivery_note_created_button">View my delivery note</string>
+
+    <!-- 2.2 Dashboard (gStore premium) -->
+    <string name="appbar_dashboard">Dashboard</string>
+    <string name="dashboard_tab_invoices">Invoices</string>
+    <string name="dashboard_tab_products">Products</string>
+    <string name="dashboard_tab_statements">Statement</string>
+    <string name="dashboard_summary_total">Total sales</string>
+    <string name="dashboard_summary_paid">Total paid</string>
+    <string name="dashboard_summary_to_pay">To pay</string>
+    <string name="dashboard_summary_late">Overdue</string>
+    <string name="dashboard_late_cta">Remind</string>
+    <string name="dashboard_section_months">Last 12 months</string>
+    <string name="dashboard_count_invoices">invoice(s)</string>
+    <string name="dashboard_count_paid">paid</string>
+    <string name="dashboard_count_pending">pending</string>
+    <string name="dashboard_sales_chart_title">Sales per month</string>
+    <string name="dashboard_products_empty">No invoices yet — come back here as soon as an invoice is issued to see your best-selling products.</string>
+    <string name="dashboard_products_top_section">Best-selling products</string>
+    <string name="dashboard_products_chart_title">Product sales per month</string>
+    <string name="dashboard_products_see_more">See more</string>
+    <string name="dashboard_products_see_less">See less</string>
+    <string name="dashboard_statements_empty">No client with a document yet.</string>
+    <string name="dashboard_statements_empty_period">No document on this period.</string>
+    <string name="dashboard_statements_export_pdf">Export PDF</string>
+    <string name="dashboard_statements_export_csv">Export CSV</string>
 </resources>
