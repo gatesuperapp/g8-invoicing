@@ -21,7 +21,7 @@
     <string name="document_payment_means_default_label">Accepted payment means:</string>
     <string name="document_payment_means_hide_list_a11y">Hide the payment means list</string>
     <string name="document_payment_means_show_list_a11y">Show the payment means list</string>
-    <string name="document_payment_means_show_switch">Show accepted payment means on the invoice</string>
+    <string name="document_payment_means_show_switch">Show accepted payment means on the document</string>
     <string name="document_payment_means_edit_prefix">Edit text</string>
     <!-- Document labels -->
     <string name="invoice_number">Invoice No.</string>
@@ -33,7 +33,7 @@
     <string name="document_reference">Reference</string>
     <string name="document_reference_label">Reference: </string>
     <string name="addressed_to">Addressed to</string>
-    <string name="invoice_pdf_due_date">Payment due by </string>
+    <string name="invoice_pdf_due_date">Payment due date: </string>
     <string name="document_payment_section_title">Payment</string>
     <string name="invoice_paid">Paid ✔</string>
     <string name="pdf_currency_notice">Currency: %1$s</string>
@@ -115,7 +115,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">New product</string>
     <string name="document_products_other_lines">Other lines</string>
-    <string name="document_product_advice">To edit a product, click on the grey box…</string>
+    <string name="document_product_advice">To edit a product, click on the grey box</string>
     <string name="document_product_advice_2">The change only applies to this document…</string>
     <string name="document_product_advice_3">It does not affect the product saved in the "Products" tab.</string>
 
@@ -296,17 +296,19 @@
     <string name="first_launch_welcome_title">Welcome to 𝕘𝟠 aka The Gate!</string>
     <string name="first_launch_welcome_amigo">I'm Little Rhino, your new amigo ♡</string>
     <string name="first_launch_next">Next</string>
-    <string name="first_launch_liberty_body1">I'll help you manage everything from your phone: invoices, delivery notes, clients, products… and convert documents into invoices!</string>
+    <string name="first_launch_liberty_body1">I'll help you manage everything from your phone: invoices, delivery notes, clients, products…</string>
     <string name="first_launch_liberty_body2">The app works offline, the account is optional and your data isn't shared with third parties ♡</string>
     <string name="first_launch_gstore_intro">Some features are enabled on demand from the 𝕘Store tab: quotes, DNs, e-invoicing exports and more.</string>
     <string name="first_launch_gstore_premium">Some modules are reserved for premium members 🌟. You can become a premium member on the g8 website.</string>
     <string name="first_launch_settings_intro">Before I hand things over, I need 2 pieces of info to set up your interface:</string>
     <string name="first_launch_settings_name_label">Your business name</string>
     <string name="first_launch_settings_country_label">Country</string>
-    <string name="first_launch_settings_cta">Let's go</string>
+    <string name="first_launch_settings_cta">Confirm</string>
     <string name="first_launch_issuer_placeholder">Business name</string>
     <string name="first_launch_issuer_skip">Later</string>
     <string name="first_launch_issuer_default_name">My business</string>
+    <string name="onboarding_darkmode_body">Want to enable dark mode?</string>
+    <string name="onboarding_darkmode_migration_body">Dark mode is now available, want to turn it on?</string>
     <!-- Account Screen -->
     <string name="account_share_content">I use the 𝕘𝟠 app to create my delivery notes and invoices in no time! Plus it's free and open-source software. Want to try it? It's free and available on the Play Store: https://play.google.com/store/apps/details?id=com.a4a.g8invoicing or on F-Droid : https://f-droid.org/fr/packages/com.a4a.g8invoicing/</string>
     <string name="account_bat_love">𝕠𝕟𝕖 𝕝𝕠𝕧𝕖</string>
@@ -357,6 +359,8 @@
     <string name="client_type_individual">Individual</string>
     <string name="client_type_professional">Professional</string>
     <string name="account_section_advanced">Advanced</string>
+    <string name="account_appearance_title">Appearance</string>
+    <string name="account_dark_mode_switch">Dark mode</string>
     <string name="account_delete_cta">Delete my account</string>
     <string name="account_delete_dialog_title">Permanently delete your account?</string>
     <string name="account_delete_dialog_message">This action is irreversible. Your subscription will be cancelled immediately, your account will be removed from our servers and you will be signed out. Invoices and data stored locally on your device will remain intact.</string>
@@ -430,11 +434,14 @@
     <string name="ok">OK</string>
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">I learned this move in hip-hop, super cool I know. I still need to practice, I'm not super fast, I think my patagium slows down the wave. Anyway, I wanted to tell you \n\n …</string>
+    <string name="delivery_note_empty_cta">Tap «Create» to make your first delivery note</string>
+    <string name="quote_empty_cta">Tap «Create» to make your first quote</string>
+    <string name="credit_note_empty_cta">Tap «Create» to make your first credit note</string>
     <string name="delivery_note_advice_convert1">that if you want to convert one or more delivery notes into an invoice, you can select them from the list by long pressing (or by clicking on the ○) \n\n …</string>
     <string name="delivery_note_advice_convert2">and click on "Invoice". It will appear in the "Invoices" tab at the top of the list with the number incremented from the previous invoice. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖</string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Click on me…!</string>
-    <string name="invoice_advice_legal_1">Tap «Menu» &gt; gStore to enable the features you prefer. Tap «Create» to make your first invoice…</string>
+    <string name="invoice_advice_legal_1">Tap «Create» to make your first invoice</string>
     <string name="invoice_advice_legal_2">Every document you create is saved automatically in the background. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">Welcome to 𝕘𝟠 aka The Gate!\n\n I'm Little Horseshoe, your new amigo ♡</string>
 
@@ -645,6 +652,17 @@
     <string name="gstore_module_delivery_note_title">Delivery notes</string>
     <string name="gstore_module_delivery_note_desc">Create delivery notes and convert them into invoices</string>
     <string name="gstore_module_delivery_note_detail">Enable this module to create delivery notes, send them to your clients, and convert them into an invoice once accepted.\n\nThe delivery note number will be shown on the matching invoice for accounting traceability.\n\nYou can convert a delivery note into an invoice, and group several DNs into a single invoice.</string>
+
+    <!-- gStore sales-order module -->
+    <string name="gstore_module_sales_order_title">Sales orders</string>
+    <string name="gstore_module_sales_order_desc">Create and convert into an invoice or DN</string>
+    <string name="gstore_module_sales_order_detail">Enable this module to create sales orders, send them to your clients, and convert them — into either an invoice or a delivery note — from the sales order menu.\n\nHandy for formalising the commercial agreement before delivery or invoicing. The sales order number is carried over on the generated invoice and DN for traceability.</string>
+
+    <!-- gStore dashboard module -->
+    <string name="gstore_module_dashboard_title">Dashboard</string>
+    <string name="gstore_module_dashboard_desc">See your sales, best-selling products and per-client statement</string>
+    <string name="gstore_module_dashboard_detail">Enable this module to see at a glance: your total sales per month, your best-selling products with their 12-month chart, and a month-by-month statement for each client (invoices, credit notes, DNs, SOs, quotes) — exportable to PDF or CSV.</string>
+
     <string name="gstore_module_multi_entreprise_title">Multi-business</string>
     <string name="gstore_module_multi_entreprise_desc">Manage several businesses</string>
     <string name="gstore_module_multi_entreprise_detail">Enable this module if you invoice under several businesses (different registration numbers, separate activities…).\n\nYou'll be able to add more businesses from "My account" and switch between them from the menu.\n\nYour clients, products, numbering and bank details will be kept separate per business.</string>
@@ -667,26 +685,22 @@
     <string name="cii_validation_confirm">Got it</string>
     <string name="cii_validation_issuer_missing">Add an issuer</string>
     <string name="cii_validation_issuer_name">Issuer name</string>
-    <string name="cii_validation_issuer_siren">Issuer company ID (SIREN / SIRET / VAT reg.)</string>
-    <string name="cii_validation_issuer_siren_format">Issuer SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
-    <string name="cii_validation_issuer_vat">Issuer VAT number</string>
-    <string name="cii_validation_issuer_vat_format">The issuer VAT number doesn't match the format for the selected country</string>
     <string name="cii_validation_issuer_address">Complete issuer address (street, ZIP, city)</string>
     <string name="cii_validation_client_missing">Add a client</string>
     <string name="cii_validation_client_name">Client name</string>
     <string name="cii_validation_client_type">Specify whether the client is a business or individual</string>
-    <string name="cii_validation_client_siren">Client company ID (business client)</string>
-    <string name="cii_validation_client_siren_format">Client SIREN must be exactly 9 digits (or 14 for a SIRET)</string>
-    <string name="cii_validation_client_vat_format">The client VAT number doesn't match the format for the selected country</string>
+    <string name="cii_validation_issuer_company_id_label_mismatch">The field « %1$s » on the issuer contains a value in the wrong format (%2$s expected). Fix the value or rename the field.</string>
+    <string name="cii_validation_client_company_id_label_mismatch">The field « %1$s » on the client contains a value in the wrong format (%2$s expected). Fix the value or rename the field.</string>
+    <string name="form_validation_dialog_title">Oops</string>
     <string name="cii_validation_client_email">Add an email to the client (electronic address required for an individual client)</string>
     <string name="cii_validation_client_address">Complete client address (street, ZIP, city)</string>
     <string name="cii_validation_products_empty">Add at least one product to the invoice</string>
     <string name="cii_validation_line_name">Line %1$d: missing product name</string>
     <string name="cii_validation_line_price">Line %1$d: missing unit price</string>
-    <string name="cii_validation_line_tax_rate">Line %1$d: missing VAT rate</string>
-    <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s %% is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_line_tax_rate_invalid">Line %1$d: VAT rate %2$s % is not allowed in France (allowed values: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Payment due date</string>
     <string name="cii_validation_vat_exemption_text">VAT exemption reason (fill in the text menu)</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">The issuer has no VAT number. Add a VAT number to the issuer — otherwise the invoice will be rejected on receipt. If you're VAT-exempt, turn on the option on your company.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">VAT exemption</string>
@@ -960,6 +974,7 @@
     <string name="appbar_tag_sent_masc">Sent</string>
     <string name="appbar_tag_cancelled_masc">Cancelled</string>
     <string name="appbar_tag_invoiced">Invoiced</string>
+    <string name="appbar_tag_locked">Locked</string>
 
     <!-- gStore: Tag delivery notes -->
     <string name="gstore_module_delivery_note_tagging_title">Tag delivery notes</string>
@@ -970,4 +985,55 @@
     <string name="gstore_module_quote_tagging_title">Tag quotes</string>
     <string name="gstore_module_quote_tagging_desc">Add a status to your quotes</string>
     <string name="gstore_module_quote_tagging_detail">Turn this module on to add a status to your quotes: draft, sent, cancelled or invoiced.\n\nThe « Invoiced » status is applied automatically when a quote is converted into an invoice, but you can change it at any time.</string>
+
+    <!-- gStore: Product categories (2.1 premium) -->
+    <string name="gstore_module_product_categories_title">Product categories</string>
+    <string name="gstore_module_product_categories_desc">Organise your products with your own categories.</string>
+    <string name="gstore_module_product_categories_detail">Turn this module on to define your own product categories.\n\nFrom a product sheet, you can assign a category to it; from the product list, you can select several products and categorise them in bulk.\n\nYou can filter your products by category.</string>
+
+    <!-- Product categories (2.1) -->
+    <string name="product_category">Category</string>
+    <string name="product_categories_title">Categories</string>
+    <string name="product_categories_add_cta">Add a category</string>
+    <string name="product_categories_name_placeholder">Category name</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">Delete this category?</string>
+    <string name="product_categories_delete_confirm_body">Products that were in this category will stay, but they will no longer have a category.</string>
+    <string name="product_categories_color_picker_title">Pick a colour</string>
+    <string name="product_categories_empty_hint">Tap the Settings button below to add categories</string>
+
+    <!-- 2.2 Sales orders (gStore premium) -->
+    <string name="appbar_sales_orders">Sales orders</string>
+    <string name="sales_order_default_number">SO001</string>
+    <string name="sales_order_number">Sales order N°</string>
+    <string name="sales_order_empty_cta">Tap "Create" to make your first sales order</string>
+    <string name="appbar_convert_to_invoice">Invoice</string>
+    <string name="appbar_convert_to_delivery_note">Delivery note</string>
+    <string name="delivery_note_created_body">Your delivery note has been created!</string>
+    <string name="delivery_note_created_button">View my delivery note</string>
+
+    <!-- 2.2 Dashboard (gStore premium) -->
+    <string name="appbar_dashboard">Dashboard</string>
+    <string name="dashboard_tab_invoices">Invoices</string>
+    <string name="dashboard_tab_products">Products</string>
+    <string name="dashboard_tab_statements">Statement</string>
+    <string name="dashboard_summary_total">Total sales</string>
+    <string name="dashboard_summary_paid">Total paid</string>
+    <string name="dashboard_summary_to_pay">To pay</string>
+    <string name="dashboard_summary_late">Overdue</string>
+    <string name="dashboard_late_cta">Remind</string>
+    <string name="dashboard_section_months">Last 12 months</string>
+    <string name="dashboard_count_invoices">invoice(s)</string>
+    <string name="dashboard_count_paid">paid</string>
+    <string name="dashboard_count_pending">pending</string>
+    <string name="dashboard_sales_chart_title">Sales per month</string>
+    <string name="dashboard_products_empty">No invoices yet — come back here as soon as an invoice is issued to see your best-selling products.</string>
+    <string name="dashboard_products_top_section">Best-selling products</string>
+    <string name="dashboard_products_chart_title">Product sales per month</string>
+    <string name="dashboard_products_see_more">See more</string>
+    <string name="dashboard_products_see_less">See less</string>
+    <string name="dashboard_statements_empty">No client with a document yet.</string>
+    <string name="dashboard_statements_empty_period">No document on this period.</string>
+    <string name="dashboard_statements_export_pdf">Export PDF</string>
+    <string name="dashboard_statements_export_csv">Export CSV</string>
 </resources>

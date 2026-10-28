@@ -5,6 +5,7 @@
     <string name="delivery_note_default_number">BL001</string>
     <string name="credit_note_default_number">FA001</string>
     <string name="quote_default_number">D001</string>
+    <string name="sales_order_default_number">BC001</string>
 
     <!-- Currency -->
 
@@ -46,7 +47,7 @@
     <!-- Row label paired with the show/hide switch below the chips inside the
          payment-means picker. When the switch is on, the payment-means block is
          rendered on the invoice/credit-note preview + PDF. -->
-    <string name="document_payment_means_show_switch">Afficher les modes de paiement acceptés sur la facture</string>
+    <string name="document_payment_means_show_switch">Afficher les modes de paiement acceptés sur le document</string>
     <!-- Underlined link below the show/hide switch — opens a text modal where
          the user can rewrite the label prefix. The joined mode list keeps auto-
          appending after whatever the user types. -->
@@ -58,13 +59,14 @@
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
     <string name="quote_number">Devis N°</string>
+    <string name="sales_order_number">Bon de commande N°</string>
     <string name="document_date">Date</string>
     <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d'émission</string>
     <string name="document_reference">Référence</string>
     <string name="document_reference_label">Référence : </string>
     <string name="addressed_to">Adressé à</string>
-    <string name="invoice_pdf_due_date">À régler avant le </string>
+    <string name="invoice_pdf_due_date">Date limite de paiement : </string>
     <string name="document_payment_section_title">Paiement</string>
     <string name="invoice_paid">Payée ✔</string>
     <string name="pdf_currency_notice">Devise : %1$s</string>
@@ -127,6 +129,8 @@
     <string name="credit_note_created_button">Voir mon avoir</string>
     <string name="corrected_invoice_created_title">Ta facture rectificative a bien été créée !</string>
     <string name="corrected_invoice_created_button">Voir ma facture rectificative</string>
+    <string name="delivery_note_created_body">Ton bon de livraison a bien été créé !</string>
+    <string name="delivery_note_created_button">Voir mon bon de livraison</string>
 
     <!-- Document Form Strings -->
     <string name="document_number_short">N°</string>
@@ -162,7 +166,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nouveau produit</string>
     <string name="document_products_other_lines">Autres lignes</string>
-    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé …</string>
+    <string name="document_product_advice">Pour modifier un produit, clique sur le rectangle grisé</string>
     <string name="document_product_advice_2">La modification s'applique uniquement à ce document …</string>
     <string name="document_product_advice_3">Elle n'impacte pas le produit enregistré dans l'onglet "Produits".</string>
 
@@ -471,6 +475,12 @@
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvre les nouveautés...</string>
 
+    <!-- WhatsNew 2.1 slides (kept for reference, no longer surfaced) -->
+    <string name="whats_new_21_status_filter_title">Filtre par statut</string>
+    <string name="whats_new_21_status_filter_description">Tu peux désormais filtrer tes factures selon leur statut.</string>
+    <string name="whats_new_21_product_categories_title">Catégories de produits</string>
+    <string name="whats_new_21_product_categories_description">Un nouveau module est disponible pour les membres premium : la possibilité de classer tes produits selon des catégories que tu définis.</string>
+
     <!-- WhatsNew 2.2 slides -->
     <string name="whats_new_22_dashboard_title">Tableau de bord</string>
     <string name="whats_new_22_dashboard_description">Visualise mois par mois le montant de tes ventes et tes produits les plus vendus, avec des courbes visuelles. Accède à un relevé mensuel par client de tous tes documents. (module premium)</string>
@@ -498,7 +508,33 @@
     <string name="appbar_invoices">Factures</string>
     <string name="appbar_credit_notes">Avoirs</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
+    <string name="appbar_sales_orders">Bons de commande</string>
     <string name="appbar_quotes">Devis</string>
+    <string name="appbar_dashboard">Tableau de bord</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_tab_invoices">Factures</string>
+    <string name="dashboard_tab_products">Produits</string>
+    <string name="dashboard_tab_statements">Relevé</string>
+    <string name="dashboard_summary_total">Total des ventes</string>
+    <string name="dashboard_summary_paid">Total payé</string>
+    <string name="dashboard_summary_to_pay">À payer</string>
+    <string name="dashboard_summary_late">En retard</string>
+    <string name="dashboard_late_cta">Relancer</string>
+    <string name="dashboard_section_months">12 derniers mois</string>
+    <string name="dashboard_count_invoices">facture(s)</string>
+    <string name="dashboard_count_paid">payée(s)</string>
+    <string name="dashboard_count_pending">en attente</string>
+    <string name="dashboard_sales_chart_title">Ventes par mois</string>
+    <string name="dashboard_products_empty">Aucune facture pour l'instant — reviens ici dès qu'une facture est émise pour voir tes produits les plus vendus.</string>
+    <string name="dashboard_products_top_section">Produits les plus vendus</string>
+    <string name="dashboard_products_chart_title">Ventes de produits par mois</string>
+    <string name="dashboard_products_see_more">Voir plus</string>
+    <string name="dashboard_products_see_less">Voir moins</string>
+    <string name="dashboard_statements_empty">Aucun client avec un document pour l'instant.</string>
+    <string name="dashboard_statements_empty_period">Aucun document sur cette période.</string>
+    <string name="dashboard_statements_export_pdf">Exporter PDF</string>
+    <string name="dashboard_statements_export_csv">Exporter CSV</string>
     <string name="appbar_products">Produits</string>
     <string name="appbar_client_list">Client·es</string>
     <string name="appbar_new">Nouveau</string>
@@ -521,6 +557,8 @@
     <string name="appbar_create_credit_note">Créer avoir</string>
     <string name="appbar_convert">Convertir</string>
     <string name="appbar_convert_label">Facturer</string>
+    <string name="appbar_convert_to_invoice">Facture</string>
+    <string name="appbar_convert_to_delivery_note">Bon de livraison</string>
     <string name="appbar_unselect_all">Annuler sélection</string>
     <string name="appbar_unselect_all_label">Retour</string>
     <string name="appbar_edit">Modifier la facture</string>
@@ -548,17 +586,22 @@
     <string name="first_launch_welcome_title">Bienvenue sur 𝕘𝟠 aka The Gate</string>
     <string name="first_launch_welcome_amigo">Je suis Petit Rhino, ton nouvel amigo</string>
     <string name="first_launch_next">Suivant</string>
-    <string name="first_launch_liberty_body1">Je t'aide à tout gérer depuis ton téléphone : factures, bons de livraison, clients, produits… et à convertir des documents en facture !</string>
+    <string name="first_launch_liberty_body1">Je t'aide à tout gérer depuis ton téléphone : factures, bons de livraison, clients, produits…</string>
     <string name="first_launch_liberty_body2">L'application fonctionne hors ligne, le compte est facultatif et tes données ne sont pas partagées à des tiers ♡</string>
     <string name="first_launch_gstore_intro">Certaines fonctionnalités s'activent à la demande depuis l'onglet 𝕘Store : devis, BL, export aux formats de la facturation électronique et +.</string>
     <string name="first_launch_gstore_premium">L'appli reste ainsi légère et personnalisable.</string>
     <string name="first_launch_settings_intro">Avant de te laisser la main, il me faut 2 infos pour paramétrer l'interface :</string>
     <string name="first_launch_settings_name_label">Nom de ton entreprise</string>
     <string name="first_launch_settings_country_label">Pays</string>
-    <string name="first_launch_settings_cta">C'est parti</string>
+    <string name="first_launch_settings_cta">Valider</string>
     <string name="first_launch_issuer_placeholder">Ferme des Trois Chênes</string>
     <string name="first_launch_issuer_skip">Plus tard</string>
     <string name="first_launch_issuer_default_name">Mon entreprise</string>
+
+    <!-- 2.0 dark-mode prompts: shown as a slide in the first-launch wizard,
+         and as a dismissable modal for existing users on upgrade -->
+    <string name="onboarding_darkmode_body">Souhaites-tu activer le mode sombre ?</string>
+    <string name="onboarding_darkmode_migration_body">Le mode sombre est désormais disponible, souhaites-tu l'activer ?</string>
 
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
@@ -571,7 +614,7 @@
     <string name="gstore_module_orders_title">Bon de commande</string>
     <string name="gstore_module_orders_desc">Gère les commandes de tes clients</string>
     <string name="gstore_module_watermark_title">Mention g8</string>
-    <string name="gstore_module_watermark_desc">Retirer la mention g8 de tes documents</string>
+    <string name="gstore_module_watermark_desc">Retirer la mention g8 des documents</string>
     <string name="gstore_module_watermark_detail">Le filigrane « Fait avec g8, application mobile de facturation » est affiché par défaut dans les documents. Il permet de soutenir le projet en le faisant connaître :) Tu peux cependant le retirer en activant ce module.</string>
     <string name="invoice_watermark_default">Fait avec g8 (www.the-gate.fr), application mobile de facturation</string>
     <string name="gstore_module_payments_title">Paiements</string>
@@ -590,6 +633,12 @@
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
     <string name="gstore_module_delivery_note_detail">Active ce module pour créer des bons de livraison, les envoyer à tes client·es et les convertir en facture une fois acceptés.\n\nLe numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\nTu peux convertir un bon de livraison en facture, et grouper plusieurs BLs en une seule facture.</string>
+    <string name="gstore_module_sales_order_title">Bons de commande</string>
+    <string name="gstore_module_sales_order_desc">Créer et convertir en facture ou BL</string>
+    <string name="gstore_module_sales_order_detail">Active ce module pour créer des bons de commande, les envoyer à tes client·es et les convertir — soit en facture, soit en bon de livraison — depuis le menu du bon de commande.\n\nUtile pour matérialiser l'accord commercial avant livraison ou facturation. Le numéro de bon de commande est repris sur la facture et le BL générés pour la traçabilité.</string>
+    <string name="gstore_module_dashboard_title">Tableau de bord</string>
+    <string name="gstore_module_dashboard_desc">Visualise tes ventes, tes produits les plus vendus et le relevé par client</string>
+    <string name="gstore_module_dashboard_detail">Active ce module pour voir en un coup d'œil : le total des ventes par mois, tes produits les plus vendus avec leur courbe sur 12 mois, et un relevé mois par mois de chaque client (factures, avoirs, BL, BC, devis) — exportable en PDF ou CSV.</string>
     <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
     <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises</string>
     <string name="gstore_module_multi_entreprise_detail">Active ce module si tu factures sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nTu pourras ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nTes clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
@@ -618,28 +667,24 @@
     <string name="cii_validation_title">Oups</string>
     <string name="cii_validation_intro">Pour créer une facture électronique valide, complète les champs suivants :</string>
     <string name="cii_validation_confirm">D'accord</string>
+    <string name="form_validation_dialog_title">Oups</string>
     <string name="cii_validation_issuer_missing">Ajouter un émetteur</string>
     <string name="cii_validation_issuer_name">Nom de l'émetteur</string>
-    <string name="cii_validation_issuer_siren">SIREN / SIRET de l'émetteur</string>
-    <string name="cii_validation_issuer_siren_format">Le SIREN de l'émetteur doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
-    <string name="cii_validation_issuer_vat">Numéro de TVA de l'émetteur</string>
-    <string name="cii_validation_issuer_vat_format">Le numéro de TVA de l'émetteur n'est pas au bon format pour le pays sélectionné</string>
     <string name="cii_validation_issuer_address">Adresse complète de l'émetteur (rue, code postal, ville)</string>
     <string name="cii_validation_client_missing">Ajouter un client</string>
     <string name="cii_validation_client_name">Nom du client</string>
     <string name="cii_validation_client_type">Préciser si le client est un professionnel ou un particulier</string>
-    <string name="cii_validation_client_siren">SIREN / SIRET du client (client professionnel)</string>
-    <string name="cii_validation_client_siren_format">Le SIREN du client doit contenir exactement 9 chiffres (ou 14 pour un SIRET)</string>
-    <string name="cii_validation_client_vat_format">Le numéro de TVA du client n'est pas au bon format pour le pays sélectionné</string>
+    <string name="cii_validation_issuer_company_id_label_mismatch">Le champ « %1$s » de l'émetteur contient une valeur au mauvais format (%2$s attendu). Corrige la valeur ou renomme le champ.</string>
+    <string name="cii_validation_client_company_id_label_mismatch">Le champ « %1$s » du client contient une valeur au mauvais format (%2$s attendu). Corrige la valeur ou renomme le champ.</string>
     <string name="cii_validation_client_email">Ajouter un email au client (adresse électronique nécessaire pour un client particulier)</string>
     <string name="cii_validation_client_address">Adresse complète du client (rue, code postal, ville)</string>
     <string name="cii_validation_products_empty">Ajouter au moins un produit à la facture</string>
     <string name="cii_validation_line_name">Ligne %1$d : nom du produit manquant</string>
     <string name="cii_validation_line_price">Ligne %1$d : prix unitaire manquant</string>
-    <string name="cii_validation_line_tax_rate">Ligne %1$d : taux de TVA manquant</string>
-    <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s %% non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_line_tax_rate_invalid">Ligne %1$d : taux de TVA %2$s % non autorisé en France (valeurs acceptées : 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Date d'échéance de paiement</string>
     <string name="cii_validation_vat_exemption_text">Mention d'exonération de TVA (à renseigner dans le menu texte)</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">L'émetteur n'a pas de numéro de TVA. Ajoute un n° de TVA à l'émetteur — sans ça la facture sera rejetée à la réception. Si tu es en franchise de TVA, active l'option dans ton entreprise.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">Exonération de TVA</string>
@@ -696,6 +741,8 @@
     <string name="client_type_individual">Particulier</string>
     <string name="client_type_professional">Professionnel</string>
     <string name="account_section_advanced">Avancé</string>
+    <string name="account_appearance_title">Apparence</string>
+    <string name="account_dark_mode_switch">Mode sombre</string>
     <string name="account_delete_cta">Supprimer mon compte</string>
     <string name="account_delete_dialog_title">Supprimer définitivement ton compte ?</string>
     <string name="account_delete_dialog_message">Cette action est irréversible. Ton abonnement sera annulé immédiatement, ton compte sera supprimé de nos serveurs et tu seras déconnecté·e. Tes factures et données enregistrées localement sur ton appareil resteront intactes.</string>
@@ -777,6 +824,10 @@
 
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">J'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
+    <string name="delivery_note_empty_cta">Clique sur «Créer» pour créer ton premier bon de livraison</string>
+    <string name="sales_order_empty_cta">Clique sur «Créer» pour créer ton premier bon de commande</string>
+    <string name="quote_empty_cta">Clique sur «Créer» pour créer ton premier devis</string>
+    <string name="credit_note_empty_cta">Clique sur «Créer» pour créer ton premier avoir</string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">et cliquer sur «Facturer». Elle apparaîtra dans l'onglet «Factures» en haut de liste avec le numéro incrémenté par rapport à la facture précédente. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
 
@@ -787,7 +838,7 @@
 
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">Clique sur moi, je te guide …</string>
-    <string name="invoice_advice_legal_1">Clique sur «Menu» &gt; gStore pour activer les fonctionnalités que tu préfères. Clique sur «Créer» pour créer ta première facture…</string>
+    <string name="invoice_advice_legal_1">Clique sur «Créer» pour créer ta première facture</string>
     <string name="invoice_advice_legal_2">Tous les documents que tu crées s'enregistrent automatiquement en arrière-plan. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
 
     <!-- Held for the upcoming onboarding screen — moved out of the Invoice-tab
@@ -1070,7 +1121,7 @@ Une erreur s'est produite :
 
     <!-- Font picker (module Polices) -->
     <string name="gstore_module_font_title">Polices</string>
-    <string name="gstore_module_font_desc">Changer la police de tes documents.</string>
+    <string name="gstore_module_font_desc">Changer la police des documents.</string>
     <string name="gstore_module_font_detail">Active ce module pour débloquer des polices pour tes documents. Certaines polices sont gratuites, d'autres sont réservées aux membres premium.\n\nPolices disponibles : Noto Sans, Noto Serif, Arimo, Cabin, Source Sans, Lato, Inter, Spectral, Onest et IBM Plex Sans.</string>
     <string name="action_font_label">Style</string>
     <string name="action_font_description">Choisir la police du document</string>
@@ -1081,14 +1132,34 @@ Une erreur s'est produite :
     <string name="appbar_tag_sent_masc">Envoyé</string>
     <string name="appbar_tag_cancelled_masc">Annulé</string>
     <string name="appbar_tag_invoiced">Facturé</string>
+    <!-- Statut "Verrouillée" (factures uniquement) — la pastille rend
+         l'emoji cadenas 🔒 dans la liste et DocumentAddEdit masque la
+         bottom bar (texte / style / ligne) quand le doc porte ce tag. -->
+    <string name="appbar_tag_locked">Verrouillée</string>
 
     <!-- gStore: Marquer les BLs -->
     <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>
-    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut à tes bons de livraison</string>
+    <string name="gstore_module_delivery_note_tagging_desc">Ajouter un statut aux bons de livraison</string>
     <string name="gstore_module_delivery_note_tagging_detail">Active ce module pour ajouter un statut à tes bons de livraison : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un bon de livraison est converti en facture, mais tu peux le modifier à tout moment.</string>
 
     <!-- gStore: Marquer les Devis -->
     <string name="gstore_module_quote_tagging_title">Marquer les devis</string>
-    <string name="gstore_module_quote_tagging_desc">Ajouter un statut à tes devis</string>
+    <string name="gstore_module_quote_tagging_desc">Ajouter un statut aux devis</string>
     <string name="gstore_module_quote_tagging_detail">Active ce module pour ajouter un statut à tes devis : brouillon, envoyé, annulé ou facturé.\n\nLe statut « Facturé » est appliqué automatiquement lorsqu'un devis est converti en facture, mais tu peux le modifier à tout moment.</string>
+
+    <!-- gStore: Catégories produits (release 2.1 premium) -->
+    <string name="gstore_module_product_categories_title">Catégories produits</string>
+    <string name="gstore_module_product_categories_desc">Classe les produits avec tes propres catégories.</string>
+    <string name="gstore_module_product_categories_detail">Active ce module pour définir tes propres catégories de produits.\n\nDepuis la fiche d'un produit, tu peux lui attribuer une catégorie ; depuis la liste des produits, tu peux en sélectionner plusieurs et les classer d'un coup.\n\nTu peux filtrer tes produits par catégorie.</string>
+
+    <!-- Product categories (2.1) -->
+    <string name="product_category">Catégorie</string>
+    <string name="product_categories_title">Catégories</string>
+    <string name="product_categories_add_cta">Ajouter une catégorie</string>
+    <string name="product_categories_name_placeholder">Nom de la catégorie</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">Supprimer cette catégorie ?</string>
+    <string name="product_categories_delete_confirm_body">Les produits qui portaient cette catégorie resteront, mais ils n'auront plus de catégorie.</string>
+    <string name="product_categories_color_picker_title">Choisir une couleur</string>
+    <string name="product_categories_empty_hint">Clique sur le bouton Réglages ci-dessous pour ajouter des catégories</string>
 </resources>

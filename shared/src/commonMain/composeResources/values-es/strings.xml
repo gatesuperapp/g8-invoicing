@@ -21,7 +21,7 @@
     <string name="document_payment_means_default_label">Medios de pago aceptados:</string>
     <string name="document_payment_means_hide_list_a11y">Ocultar la lista de medios de pago</string>
     <string name="document_payment_means_show_list_a11y">Mostrar la lista de medios de pago</string>
-    <string name="document_payment_means_show_switch">Mostrar los medios de pago aceptados en la factura</string>
+    <string name="document_payment_means_show_switch">Mostrar los medios de pago aceptados en el documento</string>
     <string name="document_payment_means_edit_prefix">Editar el texto</string>
     <!-- Document labels -->
     <string name="invoice_number">Factura Nº</string>
@@ -33,7 +33,7 @@
     <string name="document_reference">Referencia</string>
     <string name="document_reference_label">Referencia: </string>
     <string name="addressed_to">Dirigido a</string>
-    <string name="invoice_pdf_due_date">A pagar antes del </string>
+    <string name="invoice_pdf_due_date">Fecha límite de pago: </string>
     <string name="document_payment_section_title">Pago</string>
     <string name="invoice_paid">Pagado ✔</string>
     <string name="pdf_currency_notice">Moneda: %1$s</string>
@@ -115,7 +115,7 @@
     <!-- Product Bottom Sheet Strings -->
     <string name="document_bottom_sheet_list_add_new_product">Nuevo producto</string>
     <string name="document_products_other_lines">Otras líneas</string>
-    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris …</string>
+    <string name="document_product_advice">Para modificar un producto, haz clic en el rectángulo gris</string>
     <string name="document_product_advice_2">La modificación solo se aplica a este documento …</string>
     <string name="document_product_advice_3">No afecta al producto guardado en la pestaña "Productos".</string>
 
@@ -299,17 +299,19 @@
     <string name="first_launch_welcome_title">¡Bienvenido·a a 𝕘𝟠 aka The Gate!</string>
     <string name="first_launch_welcome_amigo">Soy Petit Rhino, tu nuevo amigo ♡</string>
     <string name="first_launch_next">Siguiente</string>
-    <string name="first_launch_liberty_body1">Te ayudo a gestionar todo desde tu móvil: facturas, albaranes, clientes, productos… ¡y a convertir documentos en factura!</string>
+    <string name="first_launch_liberty_body1">Te ayudo a gestionar todo desde tu móvil: facturas, albaranes, clientes, productos…</string>
     <string name="first_launch_liberty_body2">La app funciona sin conexión, la cuenta es opcional y tus datos no se comparten con terceros ♡</string>
     <string name="first_launch_gstore_intro">Algunas funciones se activan a demanda desde la pestaña 𝕘Store: presupuestos, albaranes, exportación a formatos de facturación electrónica y +.</string>
     <string name="first_launch_gstore_premium">Algunos módulos están reservados a los miembros premium 🌟. Puedes hacerte miembro premium en la web de g8.</string>
     <string name="first_launch_settings_intro">Antes de dejarte, necesito 2 datos para configurar la interfaz:</string>
     <string name="first_launch_settings_name_label">Nombre de tu empresa</string>
     <string name="first_launch_settings_country_label">País</string>
-    <string name="first_launch_settings_cta">¡Vamos!</string>
+    <string name="first_launch_settings_cta">Confirmar</string>
     <string name="first_launch_issuer_placeholder">Nombre de la empresa</string>
     <string name="first_launch_issuer_skip">Más tarde</string>
     <string name="first_launch_issuer_default_name">Mi empresa</string>
+    <string name="onboarding_darkmode_body">¿Quieres activar el modo oscuro?</string>
+    <string name="onboarding_darkmode_migration_body">El modo oscuro ya está disponible, ¿quieres activarlo?</string>
     <!-- gStore (premium modules showcase) -->
     <string name="gstore_title">𝕘Store</string>
     <string name="gstore_subtitle_free">Descubre los módulos disponibles con una cuenta g8 premium.</string>
@@ -359,6 +361,8 @@
     <string name="client_type_individual">Particular</string>
     <string name="client_type_professional">Profesional</string>
     <string name="account_section_advanced">Avanzado</string>
+    <string name="account_appearance_title">Apariencia</string>
+    <string name="account_dark_mode_switch">Modo oscuro</string>
     <string name="account_delete_cta">Eliminar mi cuenta</string>
     <string name="account_delete_dialog_title">¿Eliminar definitivamente tu cuenta?</string>
     <string name="account_delete_dialog_message">Esta acción es irreversible. Tu suscripción se cancelará de inmediato, tu cuenta se eliminará de nuestros servidores y se cerrará tu sesión. Tus facturas y datos guardados localmente en tu dispositivo permanecerán intactos.</string>
@@ -432,11 +436,14 @@
     <string name="ok">OK</string>
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">Aprendí este movimiento en el hip-hop, súper estiloso lo sé. Todavía tengo que practicarlo, no soy muy rápido, creo que mi patagio frena la ola. En fin, quería decirte \n\n …   </string>
+    <string name="delivery_note_empty_cta">Toca «Crear» para hacer tu primer albarán</string>
+    <string name="quote_empty_cta">Toca «Crear» para hacer tu primer presupuesto</string>
+    <string name="credit_note_empty_cta">Toca «Crear» para hacer tu primer abono</string>
     <string name="delivery_note_advice_convert1">que si quieres convertir uno o varios albaranes en una factura, puedes seleccionarlos en la lista haciendo clic largo (o haciendo clic en ○) \n\n …   </string>
     <string name="delivery_note_advice_convert2">y hacer clic en «Facturar». Aparecerá en la pestaña «Facturas» en la parte superior de la lista con el número incrementado respecto a la factura anterior. \n\n 𝕡𝕣𝕒𝕚𝕤𝕖 𝕞𝕖 </string>
     <!-- Invoice List Advice -->
     <string name="invoice_advice_legal_help">¡Haz clic sobre mí …!</string>
-    <string name="invoice_advice_legal_1">Toca «Menú» &gt; gStore para activar las funciones que prefieras. Toca «Crear» para hacer tu primera factura…</string>
+    <string name="invoice_advice_legal_1">Toca «Crear» para hacer tu primera factura</string>
     <string name="invoice_advice_legal_2">Todos los documentos que creas se guardan automáticamente en segundo plano. \n\n 𝕓𝕖𝕔𝕒𝕦𝕤𝕖 𝕚𝕞 𝕒 𝕓𝕒𝕥 𝕓𝕠𝕤𝕤 </string>
     <string name="onboarding_intro_amigo">¡Bienvenido a 𝕘𝟠 aka The Gate!\n\n Soy Petit Rhino, tu nuevo amigo ♡</string>
 
@@ -655,6 +662,17 @@ Une erreur s'est produite :
     <string name="gstore_module_delivery_note_title">Albaranes</string>
     <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
     <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados.\n\nEl número de albarán se indicará en la factura correspondiente para la trazabilidad contable.\n\nPuedes convertir un albarán en factura y agrupar varios albaranes en una sola factura.</string>
+
+    <!-- gStore sales-order module -->
+    <string name="gstore_module_sales_order_title">Pedidos de venta</string>
+    <string name="gstore_module_sales_order_desc">Crear y convertir en factura o albarán</string>
+    <string name="gstore_module_sales_order_detail">Activa este módulo para crear pedidos de venta, enviarlos a tus clientes y convertirlos — en factura o en albarán — desde el menú del pedido.\n\nÚtil para formalizar el acuerdo comercial antes de la entrega o la facturación. El número del pedido de venta se incluye en la factura y el albarán generados para la trazabilidad.</string>
+
+    <!-- gStore dashboard module -->
+    <string name="gstore_module_dashboard_title">Panel de control</string>
+    <string name="gstore_module_dashboard_desc">Visualiza tus ventas, productos más vendidos y extracto por cliente</string>
+    <string name="gstore_module_dashboard_detail">Activa este módulo para ver de un vistazo: el total de ventas por mes, tus productos más vendidos con su gráfico a 12 meses y un extracto mes a mes de cada cliente (facturas, notas de crédito, albaranes, pedidos de venta, presupuestos) — exportable en PDF o CSV.</string>
+
     <string name="gstore_module_multi_entreprise_title">Multiempresa</string>
     <string name="gstore_module_multi_entreprise_desc">Gestionar varias empresas</string>
     <string name="gstore_module_multi_entreprise_detail">Activa este módulo si facturas bajo varias empresas (distintos NIF/CIF, actividades separadas…).\n\nPodrás añadir más empresas desde «Mi cuenta» y cambiar entre ellas desde el menú.\n\nTus clientes, productos, numeración y datos bancarios se mantendrán separados por empresa.</string>
@@ -677,26 +695,22 @@ Une erreur s'est produite :
     <string name="cii_validation_confirm">Entendido</string>
     <string name="cii_validation_issuer_missing">Añadir un emisor</string>
     <string name="cii_validation_issuer_name">Nombre del emisor</string>
-    <string name="cii_validation_issuer_siren">Identificador fiscal del emisor (SIREN / CIF / NIF)</string>
-    <string name="cii_validation_issuer_siren_format">El SIREN del emisor debe contener exactamente 9 dígitos (o 14 para un SIRET)</string>
-    <string name="cii_validation_issuer_vat">Número de IVA del emisor</string>
-    <string name="cii_validation_issuer_vat_format">El número de IVA del emisor no tiene el formato correcto para el país seleccionado</string>
     <string name="cii_validation_issuer_address">Dirección completa del emisor (calle, C.P., ciudad)</string>
     <string name="cii_validation_client_missing">Añadir un cliente</string>
     <string name="cii_validation_client_name">Nombre del cliente</string>
     <string name="cii_validation_client_type">Indicar si el cliente es empresa o particular</string>
-    <string name="cii_validation_client_siren">Identificador fiscal del cliente (cliente empresa)</string>
-    <string name="cii_validation_client_siren_format">El SIREN del cliente debe contener exactamente 9 dígitos (o 14 para un SIRET)</string>
-    <string name="cii_validation_client_vat_format">El número de IVA del cliente no tiene el formato correcto para el país seleccionado</string>
+    <string name="cii_validation_issuer_company_id_label_mismatch">El campo « %1$s » del emisor contiene un valor con el formato incorrecto (%2$s esperado). Corrige el valor o renombra el campo.</string>
+    <string name="cii_validation_client_company_id_label_mismatch">El campo « %1$s » del cliente contiene un valor con el formato incorrecto (%2$s esperado). Corrige el valor o renombra el campo.</string>
+    <string name="form_validation_dialog_title">Vaya</string>
     <string name="cii_validation_client_email">Añadir un email al cliente (dirección electrónica necesaria para un cliente particular)</string>
     <string name="cii_validation_client_address">Dirección completa del cliente (calle, C.P., ciudad)</string>
     <string name="cii_validation_products_empty">Añadir al menos un producto a la factura</string>
     <string name="cii_validation_line_name">Línea %1$d: falta el nombre del producto</string>
     <string name="cii_validation_line_price">Línea %1$d: falta el precio unitario</string>
-    <string name="cii_validation_line_tax_rate">Línea %1$d: falta el tipo de IVA</string>
-    <string name="cii_validation_line_tax_rate_invalid">Línea %1$d: el tipo de IVA %2$s %% no está permitido en Francia (valores aceptados: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
+    <string name="cii_validation_line_tax_rate_invalid">Línea %1$d: el tipo de IVA %2$s % no está permitido en Francia (valores aceptados: 0, 2.1, 5.5, 8.5, 10, 13, 20)</string>
     <string name="cii_validation_due_date">Fecha de vencimiento del pago</string>
     <string name="cii_validation_vat_exemption_text">Motivo de exención del IVA (indícalo en el menú de textos)</string>
+    <string name="cii_validation_issuer_vat_id_missing_for_std_rated">El emisor no tiene número de IVA. Añade un número de IVA al emisor — de lo contrario la factura será rechazada en recepción. Si estás en régimen de exención, activa la opción en tu empresa.</string>
 
     <!-- Text menu: VAT exemption editor (BT-120) — only shown when issuer.vatExempt -->
     <string name="document_vat_exemption_label">Exención de IVA</string>
@@ -966,6 +980,7 @@ Une erreur s'est produite :
     <string name="appbar_tag_sent_masc">Enviado</string>
     <string name="appbar_tag_cancelled_masc">Cancelado</string>
     <string name="appbar_tag_invoiced">Facturado</string>
+    <string name="appbar_tag_locked">Bloqueada</string>
 
     <!-- gStore: Etiquetar albaranes -->
     <string name="gstore_module_delivery_note_tagging_title">Etiquetar albaranes</string>
@@ -976,4 +991,55 @@ Une erreur s'est produite :
     <string name="gstore_module_quote_tagging_title">Etiquetar presupuestos</string>
     <string name="gstore_module_quote_tagging_desc">Añadir un estado a tus presupuestos</string>
     <string name="gstore_module_quote_tagging_detail">Activa este módulo para añadir un estado a tus presupuestos: borrador, enviado, cancelado o facturado.\n\nEl estado « Facturado » se aplica automáticamente cuando un presupuesto se convierte en factura, pero puedes cambiarlo en cualquier momento.</string>
+
+    <!-- gStore: Categorías de productos (2.1 premium) -->
+    <string name="gstore_module_product_categories_title">Categorías de productos</string>
+    <string name="gstore_module_product_categories_desc">Organiza tus productos con tus propias categorías.</string>
+    <string name="gstore_module_product_categories_detail">Activa este módulo para definir tus propias categorías de productos.\n\nDesde la ficha de un producto, puedes asignarle una categoría; desde la lista de productos, puedes seleccionar varios y clasificarlos de una vez.\n\nPuedes filtrar tus productos por categoría.</string>
+
+    <!-- Categorías de productos (2.1) -->
+    <string name="product_category">Categoría</string>
+    <string name="product_categories_title">Categorías</string>
+    <string name="product_categories_add_cta">Añadir una categoría</string>
+    <string name="product_categories_name_placeholder">Nombre de la categoría</string>
+    <string name="product_categories_none">—</string>
+    <string name="product_categories_delete_confirm_title">¿Eliminar esta categoría?</string>
+    <string name="product_categories_delete_confirm_body">Los productos que estaban en esta categoría seguirán existiendo, pero ya no tendrán categoría.</string>
+    <string name="product_categories_color_picker_title">Elegir un color</string>
+    <string name="product_categories_empty_hint">Toca el botón de ajustes de abajo para añadir categorías</string>
+
+    <!-- 2.2 Pedidos de venta (gStore premium) -->
+    <string name="appbar_sales_orders">Pedidos de venta</string>
+    <string name="sales_order_default_number">PV001</string>
+    <string name="sales_order_number">Pedido de venta N°</string>
+    <string name="sales_order_empty_cta">Toca «Crear» para crear tu primer pedido de venta</string>
+    <string name="appbar_convert_to_invoice">Factura</string>
+    <string name="appbar_convert_to_delivery_note">Albarán</string>
+    <string name="delivery_note_created_body">¡Tu albarán ha sido creado!</string>
+    <string name="delivery_note_created_button">Ver mi albarán</string>
+
+    <!-- 2.2 Panel de control (gStore premium) -->
+    <string name="appbar_dashboard">Panel de control</string>
+    <string name="dashboard_tab_invoices">Facturas</string>
+    <string name="dashboard_tab_products">Productos</string>
+    <string name="dashboard_tab_statements">Extracto</string>
+    <string name="dashboard_summary_total">Total de ventas</string>
+    <string name="dashboard_summary_paid">Total cobrado</string>
+    <string name="dashboard_summary_to_pay">Por cobrar</string>
+    <string name="dashboard_summary_late">Vencidas</string>
+    <string name="dashboard_late_cta">Recordar</string>
+    <string name="dashboard_section_months">Últimos 12 meses</string>
+    <string name="dashboard_count_invoices">factura(s)</string>
+    <string name="dashboard_count_paid">pagada(s)</string>
+    <string name="dashboard_count_pending">pendiente</string>
+    <string name="dashboard_sales_chart_title">Ventas por mes</string>
+    <string name="dashboard_products_empty">Aún no hay facturas — vuelve aquí cuando emitas una factura para ver tus productos más vendidos.</string>
+    <string name="dashboard_products_top_section">Productos más vendidos</string>
+    <string name="dashboard_products_chart_title">Ventas de productos por mes</string>
+    <string name="dashboard_products_see_more">Ver más</string>
+    <string name="dashboard_products_see_less">Ver menos</string>
+    <string name="dashboard_statements_empty">Aún no hay ningún cliente con documento.</string>
+    <string name="dashboard_statements_empty_period">Sin documentos en este periodo.</string>
+    <string name="dashboard_statements_export_pdf">Exportar PDF</string>
+    <string name="dashboard_statements_export_csv">Exportar CSV</string>
 </resources>
