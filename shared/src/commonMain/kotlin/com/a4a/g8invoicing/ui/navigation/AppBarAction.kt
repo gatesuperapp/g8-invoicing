@@ -145,6 +145,37 @@ fun actionConvert(onClick: () -> Unit) =
         onClick = onClick
     )
 
+// Sentinel for the Sales Order "Convertir" button which, unlike the single-target
+// Delivery Note convert, opens a dropdown with two destinations (Facture / BL).
+// BottomBarActionView detects the name and renders ButtonWithConvertDropdown.
+@Composable
+fun actionConvertSalesOrder() =
+    AppBarAction(
+        name = "CONVERT_SALES_ORDER",
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
+        description = stringResource(Res.string.appbar_convert),
+        label = stringResource(Res.string.appbar_convert_label),
+    )
+
+// Items rendered inside the Sales Order convert dropdown.
+@Composable
+fun actionConvertToInvoice(onClick: () -> Unit) =
+    AppBarAction(
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
+        description = stringResource(Res.string.appbar_convert_to_invoice),
+        label = stringResource(Res.string.appbar_convert_to_invoice),
+        onClick = onClick,
+    )
+
+@Composable
+fun actionConvertToDeliveryNote(onClick: () -> Unit) =
+    AppBarAction(
+        icon = Icons.AutoMirrored.Filled.ArrowForward,
+        description = stringResource(Res.string.appbar_convert_to_delivery_note),
+        label = stringResource(Res.string.appbar_convert_to_delivery_note),
+        onClick = onClick,
+    )
+
 @Composable
 fun actionMore() =
     AppBarAction(

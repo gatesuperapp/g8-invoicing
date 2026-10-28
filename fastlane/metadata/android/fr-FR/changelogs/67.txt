@@ -1,0 +1,1 @@
+Deux nouveaux modules premium dans le 𝕘Store : Tableau de bord (ventes par mois, produits les plus vendus avec courbe 12 mois, relevé par client exportable PDF/CSV) et Bons de commande (convertibles en facture ou en bon de livraison).

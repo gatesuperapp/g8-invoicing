@@ -1,0 +1,90 @@
+CREATE TABLE SalesOrder (
+  sales_order_id INTEGER PRIMARY KEY NOT NULL,
+  number TEXT,
+  sales_order_date TEXT,
+  reference TEXT,
+  free_field TEXT,
+  currency TEXT,
+  footer TEXT,
+  watermark_text TEXT,
+  labels_snapshot TEXT,
+  show_currency_and_auto_tax_column INTEGER NOT NULL DEFAULT 0,
+  format_locale TEXT,
+  original_company_id INTEGER,
+  font_family TEXT,
+
+  created_at TEXT DEFAULT (datetime('now', 'localtime')),
+  updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+  deleted_at TEXT DEFAULT (datetime('now', 'localtime')));
+
+get:
+SELECT *
+FROM SalesOrder
+WHERE sales_order_id = :id;
+
+getId:
+SELECT sales_order_id
+FROM SalesOrder
+WHERE sales_order_id = :id;
+
+getLastSalesOrderNumber:
+SELECT number
+FROM SalesOrder
+ORDER BY sales_order_id DESC
+LIMIT 1;
+
+getLastSalesOrderNumberForCompany:
+SELECT number
+FROM SalesOrder
+WHERE original_company_id = :company_id
+ORDER BY sales_order_id DESC
+LIMIT 1;
+
+getAll:
+SELECT *
+FROM SalesOrder;
+
+getAllForCompany:
+SELECT *
+FROM SalesOrder
+WHERE original_company_id = :company_id;
+
+getAllIds:
+SELECT sales_order_id
+FROM SalesOrder;
+
+save:
+INSERT INTO SalesOrder (sales_order_id, number, sales_order_date, reference, free_field, currency, footer, watermark_text, labels_snapshot, show_currency_and_auto_tax_column, format_locale, original_company_id, font_family)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE SalesOrder
+SET number = :number,
+    sales_order_date = :sales_order_date,
+    reference = :reference,
+    free_field = :free_field,
+    currency =: currency,
+    footer  =: footer,
+    font_family = :font_family,
+    updated_at =: updated_at
+WHERE
+    sales_order_id = :sales_order_id;
+
+delete:
+DELETE FROM SalesOrder
+WHERE sales_order_id = :id;
+
+getLastInsertedRowId:
+SELECT sales_order_id
+FROM SalesOrder
+ORDER BY sales_order_id DESC
+LIMIT 1;
+
+getLastInsertedFooter:
+SELECT footer
+FROM SalesOrder
+ORDER BY sales_order_id DESC
+LIMIT 1;
+
+countAll:
+SELECT COUNT(*) FROM SalesOrder;

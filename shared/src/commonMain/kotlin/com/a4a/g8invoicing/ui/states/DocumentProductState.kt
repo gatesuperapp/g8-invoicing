@@ -43,4 +43,4 @@ data class DocumentProductState(
  * with TypeCode 130 for a quote), so the receiver knows what type of
  * source doc the invoice line traces back to.
  */
-enum class LinkedDocType { DELIVERY_NOTE, QUOTE }
+enum class LinkedDocType { DELIVERY_NOTE, QUOTE, SALES_ORDER }

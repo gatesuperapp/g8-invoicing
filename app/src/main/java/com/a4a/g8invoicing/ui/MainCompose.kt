@@ -855,9 +855,9 @@ fun MainCompose(
                 modulesRepo.markMigration19Seen()
                 needsFirstLaunchIssuer = false
             },
-            onEnableDarkMode = {
+            onPickDarkMode = { enable ->
                 coroutineScope.launch {
-                    com.a4a.g8invoicing.data.setDarkMode(context, true)
+                    com.a4a.g8invoicing.data.setDarkMode(context, enable)
                 }
             },
         )

@@ -31,6 +31,7 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun duplicate(documents: List<InvoiceState>): List<Long>
     suspend fun convertDeliveryNotesToInvoice(deliveryNotes: List<DeliveryNoteState>): Long?
     suspend fun convertQuotesToInvoice(quotes: List<com.a4a.g8invoicing.ui.states.QuoteState>): Long?
+    suspend fun convertSalesOrdersToInvoice(salesOrders: List<com.a4a.g8invoicing.ui.states.SalesOrderState>): Long?
     suspend fun update(document: InvoiceState)
     suspend fun updateHideLinkedSourceHeaders(invoiceId: Long, hide: Boolean)
     suspend fun updateVatExemptionText(invoiceId: Long, text: String?)

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.annotation.StringRes
 import com.a4a.g8invoicing.data.RestoreManager
 import com.a4a.g8invoicing.di.appModule
+import com.a4a.g8invoicing.ui.shared.AndroidPdfContext
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -37,6 +38,16 @@ class G8Invoicing : Application() {
             androidContext(this@G8Invoicing)
             modules(appModule)
         }
+
+        // Seed the KMP-side Context holder once, with the application context.
+        // Historically ExportPdfPlatform / ExportCiiPlatform set this lazily
+        // from a LaunchedEffect — fine for the invoice/BL export flows that
+        // only need the file manager AFTER landing on those screens, but the
+        // Dashboard's CSV export fires on a direct button tap without ever
+        // routing through a PDF composable, which left the holder null and
+        // crashed on first click. Application context is safe to hold here —
+        // no activity leak, lives as long as the process.
+        AndroidPdfContext.context = applicationContext
     }
 }
 

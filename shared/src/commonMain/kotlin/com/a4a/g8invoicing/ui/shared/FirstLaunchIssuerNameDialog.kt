@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -93,7 +94,11 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FirstLaunchIssuerNameDialog(
     onSubmit: suspend (name: String, countryCode: String) -> Unit,
-    onEnableDarkMode: () -> Unit = {},
+    // Signals the user's explicit pick on the dark-mode slide. true = tap on
+    // "Oui, active-le", false = tap on "Plus tard" (we persist light rather
+    // than falling back to the system theme — the user said "later", not
+    // "follow my system settings").
+    onPickDarkMode: (enable: Boolean) -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     val defaultCountry = remember { CountryCodes.pickDefaultForNewAddress(null) }
@@ -180,10 +185,13 @@ fun FirstLaunchIssuerNameDialog(
                     )
                     Step.DarkMode -> DarkModeStep(
                         onEnable = {
-                            onEnableDarkMode()
+                            onPickDarkMode(true)
                             step = Step.Completion
                         },
-                        onSkip = { step = Step.Completion },
+                        onSkip = {
+                            onPickDarkMode(false)
+                            step = Step.Completion
+                        },
                     )
                     Step.Completion -> CompletionStep(onDone = finishOnboarding)
                 }
@@ -417,7 +425,10 @@ private fun CompactTextField(
         // Next used to fire onSubmit() and skip the user straight past the
         // Country picker to the Completion slide, which surprised users who
         // tapped it expecting to jump into the country dropdown.
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+            capitalization = KeyboardCapitalization.Sentences,
+        ),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = Modifier
             .fillMaxWidth()

@@ -1,0 +1,1 @@
+Two new premium modules in the 𝕘Store: Dashboard (monthly sales, top products with 12-month chart, per-client statement exportable to PDF/CSV) and Sales Orders (convertible to invoice or delivery note).

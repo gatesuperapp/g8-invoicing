@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore by preferencesDataStore("settings")
 
 // Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "2.1"
+const val CURRENT_APP_VERSION = "2.2"
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")

@@ -32,6 +32,7 @@ import com.a4a.g8invoicing.shared.resources.delivery_note_number
 import com.a4a.g8invoicing.shared.resources.document_date_label
 import com.a4a.g8invoicing.shared.resources.invoice_number
 import com.a4a.g8invoicing.shared.resources.quote_number
+import com.a4a.g8invoicing.shared.resources.sales_order_number
 import com.a4a.g8invoicing.ui.shared.ImageStorage
 import com.a4a.g8invoicing.ui.shared.InitImageContext
 import com.a4a.g8invoicing.ui.shared.ScreenElement
@@ -40,6 +41,7 @@ import com.a4a.g8invoicing.ui.states.ClientOrIssuerState
 import com.a4a.g8invoicing.ui.states.CreditNoteState
 import com.a4a.g8invoicing.ui.states.DeliveryNoteState
 import com.a4a.g8invoicing.ui.states.QuoteState
+import com.a4a.g8invoicing.ui.states.SalesOrderState
 import com.a4a.g8invoicing.ui.states.DocumentState
 import com.a4a.g8invoicing.ui.theme.subTitleForDocuments
 import com.a4a.g8invoicing.ui.theme.textForDocumentsSecondary
@@ -101,6 +103,7 @@ fun DocumentBasicTemplateHeader(
                     is DeliveryNoteState -> documentLabel(labels, "delivery_note_number", Res.string.delivery_note_number)
                     is CreditNoteState -> documentLabel(labels, "credit_note_number", Res.string.credit_note_number)
                     is QuoteState -> documentLabel(labels, "quote_number", Res.string.quote_number)
+                    is SalesOrderState -> documentLabel(labels, "sales_order_number", Res.string.sales_order_number)
                     else -> documentLabel(labels, "invoice_number", Res.string.invoice_number)
                 } + " " + document.documentNumber.text
             )

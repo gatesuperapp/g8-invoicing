@@ -1,8 +1,8 @@
 ▸ Geschäftsrechnungen, elektronisches Format
 Erstelle professionelle Rechnungen. Export als PDF, ZUGFeRD, CII-XML: die Standardformate der elektronischen Rechnungsstellung. Import in deine registrierte Plattform oder Buchhaltungssoftware.
 
-▸ Angebot, LS → Rechnung
-Wandle Angebote oder Lieferscheine in eine Rechnung um, oder erstelle eine Rechnung direkt. Keine erneute Eingabe.
+▸ Angebot, AB, LS → Rechnung
+Wandle Angebote, Auftragsbestätigungen oder Lieferscheine in eine Rechnung um, oder erstelle eine Rechnung direkt. Keine erneute Eingabe.
 
 ▸ Erweiterte Verwaltung
 Überfällige Rechnungen auf einen Blick sehen und mit einem Tipp Mahnungen versenden.
@@ -28,7 +28,7 @@ Rechnungen, Lieferscheine, Gutschriften, Kunden und Produkte unbegrenzt.
 5 Angebote. Mehrere Unternehmen.
 
 🌟 PREMIUM
-Unbegrenzte Angebote. ZUGFeRD- und CII-Export.
+Unbegrenzte Angebote. ZUGFeRD- und CII-Export. Auftragsbestätigungen. Dashboard, Export monatlicher Kundenauszüge.
 
 ━━━━━━━━━━━━━━━━━━
 

@@ -3,8 +3,8 @@ Convert your quotes and delivery notes into invoices. Offline-first.
 ▸ Pro invoices, electronic format
 Create professional invoices. Export as PDF, Factur-X or CII-XML: the standard formats for electronic invoicing. Import into your registered platform or accounting software.
 
-▸ Quote, DN → Invoice
-Turn quotes or delivery notes into an invoice. No re-typing.
+▸ Quote, SO, DN → Invoice
+Turn quotes, sales orders or delivery notes into an invoice, or create an invoice directly. No re-typing.
 
 ▸ Advanced management
 See overdue invoices at a glance and send reminders in one tap. Tag your invoices, add a "Paid" stamp. Generate credit notes and corrective invoices.
@@ -28,7 +28,7 @@ Unlimited invoices, delivery notes, credit notes, clients and products.
 5 quotes. Multi-business.
 
 🌟 PREMIUM
-Unlimited quotes. Factur-X and CII export.
+Unlimited quotes. Factur-X and CII export. Sales orders. Dashboard, monthly statement export.
 
 ━━━━━━━━━━━━━━━━━━
 

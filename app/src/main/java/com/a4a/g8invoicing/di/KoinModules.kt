@@ -13,6 +13,8 @@ import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSource
 import com.a4a.g8invoicing.data.DeliveryNoteLocalDataSourceInterface
 import com.a4a.g8invoicing.data.QuoteLocalDataSource
 import com.a4a.g8invoicing.data.QuoteLocalDataSourceInterface
+import com.a4a.g8invoicing.data.SalesOrderLocalDataSource
+import com.a4a.g8invoicing.data.SalesOrderLocalDataSourceInterface
 import com.a4a.g8invoicing.data.InvoiceLocalDataSource
 import com.a4a.g8invoicing.data.CurrencyManager
 import com.a4a.g8invoicing.data.CurrentCompanyRepository
@@ -59,6 +61,9 @@ import com.a4a.g8invoicing.ui.viewmodels.ProductAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.ProductListViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteAddEditViewModel
 import com.a4a.g8invoicing.ui.viewmodels.QuoteListViewModel
+import com.a4a.g8invoicing.ui.viewmodels.DashboardViewModel
+import com.a4a.g8invoicing.ui.viewmodels.SalesOrderAddEditViewModel
+import com.a4a.g8invoicing.ui.viewmodels.SalesOrderListViewModel
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -129,6 +134,10 @@ val appModule = module {
     // into whatever screen fires "Export CII".
     single { com.a4a.g8invoicing.facturx.CiiXmlFileManager() }
 
+    // Dashboard CSV export — mirrors the CII manager Android actual (write
+    // to Downloads/g8 + ACTION_SEND share sheet).
+    single { com.a4a.g8invoicing.ui.screens.DashboardExportFileManager() }
+
     single<ClientOrIssuerLocalDataSourceInterface> { ClientOrIssuerLocalDataSource(get(), get()) }
     single<ProductLocalDataSourceInterface> { ProductLocalDataSource(get(), get()) }
     single<ProductTaxLocalDataSourceInterface> { ProductTaxLocalDataSource(get()) }
@@ -137,6 +146,7 @@ val appModule = module {
     }
     single<DeliveryNoteLocalDataSourceInterface> { DeliveryNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<QuoteLocalDataSourceInterface> { QuoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
+    single<SalesOrderLocalDataSourceInterface> { SalesOrderLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<InvoiceLocalDataSourceInterface> { InvoiceLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<CreditNoteLocalDataSourceInterface> { CreditNoteLocalDataSource(get(), get(), get(), get(), get(), get()) }
     single<AlertDialogDataSourceInterface> { AlertDialogLocalDataSource(get()) }
@@ -144,6 +154,7 @@ val appModule = module {
     single { get<Database>().invoiceQueries }
     single { get<Database>().productQueries }
     single { get<Database>().deliveryNoteQueries }
+    single { get<Database>().salesOrderQueries }
     single { get<Database>().clientOrIssuerQueries }
 
     // ViewModels
@@ -170,6 +181,12 @@ val appModule = module {
         val itemId: String? = if (params.size() > 0) params[0] else null
         QuoteAddEditViewModel(get(), get(), itemId)
     }
+    viewModel { SalesOrderListViewModel(get(), get(), get()) }
+    viewModel { params ->
+        val itemId: String? = if (params.size() > 0) params[0] else null
+        SalesOrderAddEditViewModel(get(), get(), itemId)
+    }
+    viewModel { DashboardViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { InvoiceListViewModel(get(), get(), get(), get(), get(), get()) }
     viewModel { params ->
         val itemId: String? = if (params.size() > 0) params[0] else null

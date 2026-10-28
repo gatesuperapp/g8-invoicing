@@ -1,0 +1,28 @@
+CREATE TABLE LinkSalesOrderToDocumentClientOrIssuer (
+  id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_id INTEGER NOT NULL,
+  document_client_or_issuer_id INTEGER NOT NULL,
+
+    FOREIGN KEY(document_client_or_issuer_id)
+          REFERENCES DocumentClientOrIssuer(id)
+          ON DELETE CASCADE
+);
+
+getDocumentClientOrIssuerLinkedToSalesOrder:
+SELECT *
+FROM LinkSalesOrderToDocumentClientOrIssuer
+WHERE sales_order_id = :sales_order_id;
+
+saveDocumentClientOrIssuerLinkedToSalesOrder:
+INSERT
+INTO LinkSalesOrderToDocumentClientOrIssuer (id, sales_order_id, document_client_or_issuer_id)
+VALUES (?, ?, ?);
+
+deleteDocumentClientOrIssuerLinkedToSalesOrder:
+DELETE FROM LinkSalesOrderToDocumentClientOrIssuer
+WHERE  sales_order_id = :sales_order_id
+AND document_client_or_issuer_id = :document_client_or_issuer_id;
+
+deleteAllDocumentClientOrIssuerLinkedToASalesOrder:
+DELETE FROM LinkSalesOrderToDocumentClientOrIssuer
+WHERE  sales_order_id = :sales_order_id;

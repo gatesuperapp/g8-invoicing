@@ -1,0 +1,19 @@
+CREATE TABLE LinkInvoiceDocumentProductToSalesOrder (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_number TEXT,
+  sales_order_date TEXT
+);
+
+getInfoLinkedToDocumentProduct:
+SELECT *
+FROM LinkInvoiceDocumentProductToSalesOrder
+WHERE document_product_id = :document_product_id;
+
+saveInfoLinkedToDocumentProduct:
+INSERT
+INTO LinkInvoiceDocumentProductToSalesOrder (document_product_id, sales_order_number, sales_order_date)
+VALUES (?, ?, ?);
+
+deleteInfoLinkedToDocumentProduct:
+DELETE FROM LinkInvoiceDocumentProductToSalesOrder
+WHERE  document_product_id = :document_product_id;

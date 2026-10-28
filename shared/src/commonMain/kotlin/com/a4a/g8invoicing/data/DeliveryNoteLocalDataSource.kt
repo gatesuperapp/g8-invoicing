@@ -48,6 +48,8 @@ class DeliveryNoteLocalDataSource(
     private val documentClientOrIssuerEmailQueries = db.documentClientOrIssuerEmailQueries
     private val deliveryNoteTagQueries = db.deliveryNoteTagQueries
     private val linkDeliveryNoteToTagQueries = db.linkDeliveryNoteToTagQueries
+    private val linkDeliveryNoteDocumentProductToSalesOrderQueries =
+        db.linkDeliveryNoteDocumentProductToSalesOrderQueries
 
     // Freeze watermark at creation; see InvoiceLocalDataSource.computeWatermark for rationale.
     private suspend fun computeWatermark(): String? {
@@ -225,10 +227,16 @@ class DeliveryNoteLocalDataSource(
                 ).executeAsList()
             return if (listOfIds.isNotEmpty()) {
                 listOfIds.map {
+                    val soInfo = linkDeliveryNoteDocumentProductToSalesOrderQueries
+                        .getInfoLinkedToDocumentProduct(it.document_product_id)
+                        .executeAsOneOrNull()
                     documentProductQueries.getDocumentProduct(it.document_product_id)
                         .executeAsOne()
                         .transformIntoEditableDocumentProduct(
-                            sortOrder = it.sort_order?.toInt()
+                            linkedDate = soInfo?.sales_order_date,
+                            linkedDocNumber = soInfo?.sales_order_number,
+                            linkedDocType = soInfo?.let { com.a4a.g8invoicing.ui.states.LinkedDocType.SALES_ORDER },
+                            sortOrder = it.sort_order?.toInt(),
                         )
                 }.toMutableList()
             } else null
@@ -710,6 +718,85 @@ class DeliveryNoteLocalDataSource(
             )
         } catch (e: Exception) {
             //Log.e("DeliveryNoteDS", "Error saveTag for documentId $documentId: ${e.message}")
+        }
+    }
+
+    // Creates a new DeliveryNote from one or more SalesOrder rows. Mirrors
+    // InvoiceLocalDataSource.convertQuotesToInvoice: writes trace rows to
+    // LinkDeliveryNoteDocumentProductToSalesOrder so each BL product remembers
+    // which Bon de commande it was cloned from. Auto-tags the source orders
+    // via SalesOrderLocalDataSource.setTag in the ViewModel.
+    override suspend fun convertSalesOrdersToDeliveryNote(
+        salesOrders: List<com.a4a.g8invoicing.ui.states.SalesOrderState>,
+    ): Long? {
+        val frozenWatermark = computeWatermark()
+        val frozenLabels = DocumentLabels.captureSnapshotJson()
+        val newCompanyId = currentCompanyRepository.current
+            ?: salesOrders.firstOrNull()?.originalCompanyId
+        val issuer = salesOrders.firstOrNull { it.documentIssuer != null }?.documentIssuer
+        return withContext(DispatcherProvider.IO) {
+            val docNumber = getLastDocumentNumber(newCompanyId)?.let {
+                incrementDocumentNumber(it)
+            } ?: getString(Res.string.delivery_note_default_number)
+
+            try {
+                val newDeliveryNoteState = DeliveryNoteState(
+                    documentNumber = TextFieldValue(docNumber),
+                    documentDate = DateUtils.getCurrentDateFormatted(),
+                    reference = salesOrders.firstOrNull { it.reference != null }?.reference,
+                    freeField = salesOrders.firstOrNull { it.freeField != null }?.freeField,
+                    documentIssuer = issuer,
+                    documentClient = salesOrders.firstOrNull { it.documentClient != null }?.documentClient,
+                    currency = TextFieldValue(
+                        salesOrders.firstOrNull()?.currency?.text?.takeIf { it.isNotEmpty() }
+                            ?: currencyManager.currentCurrency
+                    ),
+                    footerText = TextFieldValue(getExistingFooter() ?: ""),
+                    watermarkText = frozenWatermark,
+                    labelsSnapshot = frozenLabels,
+                    showCurrencyAndAutoTaxColumn = true,
+                    formatLocale = AppLocaleHolder.languageCode,
+                    originalCompanyId = newCompanyId,
+                )
+                saveInfoInDocumentTable(newDeliveryNoteState)
+
+                val newDeliveryNoteId = deliveryNoteQueries.getLastInsertedRowId()
+                    .executeAsOneOrNull()
+                newDeliveryNoteId?.let { id ->
+                    saveTag(id, DocumentTag.DRAFT)
+
+                    salesOrders.forEach { salesOrder ->
+                        salesOrder.documentProducts?.forEach { documentProduct ->
+                            val newDocProductId = saveDocumentProductInDbAndLinkToDocument(
+                                documentProduct = documentProduct,
+                                documentId = id,
+                            )
+                            newDocProductId?.let { pid ->
+                                linkDeliveryNoteDocumentProductToSalesOrderQueries.saveInfoLinkedToDocumentProduct(
+                                    document_product_id = pid.toLong(),
+                                    sales_order_number = salesOrder.documentNumber.text,
+                                    sales_order_date = salesOrder.documentDate,
+                                )
+                            }
+                        }
+                        salesOrder.documentClient?.let {
+                            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                                documentClientOrIssuer = it,
+                                documentId = id,
+                            )
+                        }
+                        salesOrder.documentIssuer?.let {
+                            saveDocumentClientOrIssuerInDbAndLinkToDocument(
+                                documentClientOrIssuer = it,
+                                documentId = id,
+                            )
+                        }
+                    }
+                }
+                newDeliveryNoteId
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 }

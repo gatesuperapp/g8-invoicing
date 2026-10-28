@@ -1,0 +1,39 @@
+CREATE TABLE LinkSalesOrderToDocumentProduct (
+  id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_id INTEGER NOT NULL,
+  document_product_id INTEGER NOT NULL,
+  sort_order INTEGER,
+
+    FOREIGN KEY(document_product_id)
+          REFERENCES DocumentProduct(id)
+          ON DELETE CASCADE
+);
+
+getDocumentProductsLinkedToSalesOrder:
+SELECT *
+FROM LinkSalesOrderToDocumentProduct
+WHERE sales_order_id = :sales_order_id;
+
+saveProductLinkedToSalesOrder:
+INSERT
+INTO LinkSalesOrderToDocumentProduct (id, sales_order_id, document_product_id, sort_order)
+VALUES (?, ?, ?, ?);
+
+deleteProductLinkedToSalesOrder:
+DELETE FROM LinkSalesOrderToDocumentProduct
+WHERE  sales_order_id = :sales_order_id
+AND document_product_id = :document_product_id;
+
+deleteAllProductsLinkedToASalesOrder:
+DELETE FROM LinkSalesOrderToDocumentProduct
+WHERE  sales_order_id = :sales_order_id;
+
+getMaxSortOrderForSalesOrder:
+SELECT MAX(sort_order) AS maxOrder
+FROM LinkSalesOrderToDocumentProduct
+WHERE sales_order_id = :sales_order_id;
+
+updateSortOrderForDocumentProduct:
+UPDATE LinkSalesOrderToDocumentProduct
+SET sort_order = :sort_order
+WHERE sales_order_id = :id AND document_product_id = :document_product_id;

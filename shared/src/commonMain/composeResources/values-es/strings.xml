@@ -227,6 +227,13 @@
     <string name="whats_new_done">¡Adelante!</string>
     <string name="whats_new_welcome">Bienvenido a la versión %1$s</string>
     <string name="whats_new_discover">Descubre las novedades...</string>
+
+    <!-- WhatsNew 2.2 slides -->
+    <string name="whats_new_22_dashboard_title">Panel de control</string>
+    <string name="whats_new_22_dashboard_description">Visualiza mes a mes el importe de tus ventas y tus productos más vendidos, con gráficos visuales. Accede a un extracto mensual por cliente de todos tus documentos. (módulo premium)</string>
+    <string name="whats_new_22_sales_order_title">Pedidos de venta</string>
+    <string name="whats_new_22_sales_order_description">Crea pedidos de venta y conviértelos en factura o albarán. (módulo premium)</string>
+
     <string name="whats_new_gstore_title">𝕘Store</string>
     <string name="whats_new_gstore_description">Una pequeña tienda para desbloquear funciones.</string>
     <string name="whats_new_spanish_title">Hola, qué tal ?</string>
@@ -655,6 +662,17 @@ Une erreur s'est produite :
     <string name="gstore_module_delivery_note_title">Albaranes</string>
     <string name="gstore_module_delivery_note_desc">Crear albaranes y convertirlos en factura</string>
     <string name="gstore_module_delivery_note_detail">Activa este módulo para crear albaranes, enviarlos a tus clientes y convertirlos en factura una vez aceptados.\n\nEl número de albarán se indicará en la factura correspondiente para la trazabilidad contable.\n\nPuedes convertir un albarán en factura y agrupar varios albaranes en una sola factura.</string>
+
+    <!-- gStore sales-order module -->
+    <string name="gstore_module_sales_order_title">Pedidos de venta</string>
+    <string name="gstore_module_sales_order_desc">Crear y convertir en factura o albarán</string>
+    <string name="gstore_module_sales_order_detail">Activa este módulo para crear pedidos de venta, enviarlos a tus clientes y convertirlos — en factura o en albarán — desde el menú del pedido.\n\nÚtil para formalizar el acuerdo comercial antes de la entrega o la facturación. El número del pedido de venta se incluye en la factura y el albarán generados para la trazabilidad.</string>
+
+    <!-- gStore dashboard module -->
+    <string name="gstore_module_dashboard_title">Panel de control</string>
+    <string name="gstore_module_dashboard_desc">Visualiza tus ventas, productos más vendidos y extracto por cliente</string>
+    <string name="gstore_module_dashboard_detail">Activa este módulo para ver de un vistazo: el total de ventas por mes, tus productos más vendidos con su gráfico a 12 meses y un extracto mes a mes de cada cliente (facturas, notas de crédito, albaranes, pedidos de venta, presupuestos) — exportable en PDF o CSV.</string>
+
     <string name="gstore_module_multi_entreprise_title">Multiempresa</string>
     <string name="gstore_module_multi_entreprise_desc">Gestionar varias empresas</string>
     <string name="gstore_module_multi_entreprise_detail">Activa este módulo si facturas bajo varias empresas (distintos NIF/CIF, actividades separadas…).\n\nPodrás añadir más empresas desde «Mi cuenta» y cambiar entre ellas desde el menú.\n\nTus clientes, productos, numeración y datos bancarios se mantendrán separados por empresa.</string>
@@ -989,4 +1007,39 @@ Une erreur s'est produite :
     <string name="product_categories_delete_confirm_body">Los productos que estaban en esta categoría seguirán existiendo, pero ya no tendrán categoría.</string>
     <string name="product_categories_color_picker_title">Elegir un color</string>
     <string name="product_categories_empty_hint">Toca el botón de ajustes de abajo para añadir categorías</string>
+
+    <!-- 2.2 Pedidos de venta (gStore premium) -->
+    <string name="appbar_sales_orders">Pedidos de venta</string>
+    <string name="sales_order_default_number">PV001</string>
+    <string name="sales_order_number">Pedido de venta N°</string>
+    <string name="sales_order_empty_cta">Toca «Crear» para crear tu primer pedido de venta</string>
+    <string name="appbar_convert_to_invoice">Factura</string>
+    <string name="appbar_convert_to_delivery_note">Albarán</string>
+    <string name="delivery_note_created_body">¡Tu albarán ha sido creado!</string>
+    <string name="delivery_note_created_button">Ver mi albarán</string>
+
+    <!-- 2.2 Panel de control (gStore premium) -->
+    <string name="appbar_dashboard">Panel de control</string>
+    <string name="dashboard_tab_invoices">Facturas</string>
+    <string name="dashboard_tab_products">Productos</string>
+    <string name="dashboard_tab_statements">Extracto</string>
+    <string name="dashboard_summary_total">Total de ventas</string>
+    <string name="dashboard_summary_paid">Total cobrado</string>
+    <string name="dashboard_summary_to_pay">Por cobrar</string>
+    <string name="dashboard_summary_late">Vencidas</string>
+    <string name="dashboard_late_cta">Recordar</string>
+    <string name="dashboard_section_months">Últimos 12 meses</string>
+    <string name="dashboard_count_invoices">factura(s)</string>
+    <string name="dashboard_count_paid">pagada(s)</string>
+    <string name="dashboard_count_pending">pendiente</string>
+    <string name="dashboard_sales_chart_title">Ventas por mes</string>
+    <string name="dashboard_products_empty">Aún no hay facturas — vuelve aquí cuando emitas una factura para ver tus productos más vendidos.</string>
+    <string name="dashboard_products_top_section">Productos más vendidos</string>
+    <string name="dashboard_products_chart_title">Ventas de productos por mes</string>
+    <string name="dashboard_products_see_more">Ver más</string>
+    <string name="dashboard_products_see_less">Ver menos</string>
+    <string name="dashboard_statements_empty">Aún no hay ningún cliente con documento.</string>
+    <string name="dashboard_statements_empty_period">Sin documentos en este periodo.</string>
+    <string name="dashboard_statements_export_pdf">Exportar PDF</string>
+    <string name="dashboard_statements_export_csv">Exportar CSV</string>
 </resources>

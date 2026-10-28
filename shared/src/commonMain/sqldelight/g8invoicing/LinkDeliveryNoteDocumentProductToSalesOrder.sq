@@ -1,0 +1,19 @@
+CREATE TABLE LinkDeliveryNoteDocumentProductToSalesOrder (
+  document_product_id INTEGER PRIMARY KEY NOT NULL,
+  sales_order_number TEXT,
+  sales_order_date TEXT
+);
+
+getInfoLinkedToDocumentProduct:
+SELECT *
+FROM LinkDeliveryNoteDocumentProductToSalesOrder
+WHERE document_product_id = :document_product_id;
+
+saveInfoLinkedToDocumentProduct:
+INSERT
+INTO LinkDeliveryNoteDocumentProductToSalesOrder (document_product_id, sales_order_number, sales_order_date)
+VALUES (?, ?, ?);
+
+deleteInfoLinkedToDocumentProduct:
+DELETE FROM LinkDeliveryNoteDocumentProductToSalesOrder
+WHERE  document_product_id = :document_product_id;

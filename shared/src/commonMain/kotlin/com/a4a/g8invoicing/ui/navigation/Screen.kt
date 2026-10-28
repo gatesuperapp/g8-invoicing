@@ -16,10 +16,13 @@ enum class Screen {
     CreditNoteList,
     DeliveryNoteList,
     DeliveryNoteAddEdit,
+    SalesOrderList,
+    SalesOrderAddEdit,
     QuoteList,
     QuoteAddEdit,
     Account,
     GStore,
     Settings,
-    About
+    About,
+    Dashboard
 }

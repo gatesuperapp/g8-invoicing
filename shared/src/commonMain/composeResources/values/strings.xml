@@ -5,6 +5,7 @@
     <string name="delivery_note_default_number">BL001</string>
     <string name="credit_note_default_number">FA001</string>
     <string name="quote_default_number">D001</string>
+    <string name="sales_order_default_number">BC001</string>
 
     <!-- Currency -->
 
@@ -58,6 +59,7 @@
     <string name="delivery_note_number">Bon de livraison N°</string>
     <string name="credit_note_number">Avoir N°</string>
     <string name="quote_number">Devis N°</string>
+    <string name="sales_order_number">Bon de commande N°</string>
     <string name="document_date">Date</string>
     <string name="document_date_label">Date : </string>
     <string name="document_date_emitting">Date d'émission</string>
@@ -127,6 +129,8 @@
     <string name="credit_note_created_button">Voir mon avoir</string>
     <string name="corrected_invoice_created_title">Ta facture rectificative a bien été créée !</string>
     <string name="corrected_invoice_created_button">Voir ma facture rectificative</string>
+    <string name="delivery_note_created_body">Ton bon de livraison a bien été créé !</string>
+    <string name="delivery_note_created_button">Voir mon bon de livraison</string>
 
     <!-- Document Form Strings -->
     <string name="document_number_short">N°</string>
@@ -471,11 +475,18 @@
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
     <string name="whats_new_discover">Découvre les nouveautés...</string>
 
-    <!-- WhatsNew 2.1 slides -->
+    <!-- WhatsNew 2.1 slides (kept for reference, no longer surfaced) -->
     <string name="whats_new_21_status_filter_title">Filtre par statut</string>
     <string name="whats_new_21_status_filter_description">Tu peux désormais filtrer tes factures selon leur statut.</string>
     <string name="whats_new_21_product_categories_title">Catégories de produits</string>
     <string name="whats_new_21_product_categories_description">Un nouveau module est disponible pour les membres premium : la possibilité de classer tes produits selon des catégories que tu définis.</string>
+
+    <!-- WhatsNew 2.2 slides -->
+    <string name="whats_new_22_dashboard_title">Tableau de bord</string>
+    <string name="whats_new_22_dashboard_description">Visualise mois par mois le montant de tes ventes et tes produits les plus vendus, avec des courbes visuelles. Accède à un relevé mensuel par client de tous tes documents. (module premium)</string>
+    <string name="whats_new_22_sales_order_title">Bons de commande</string>
+    <string name="whats_new_22_sales_order_description">Crée des BC et convertis-les en facture ou en bon de livraison. (module premium)</string>
+
     <string name="whats_new_gstore_title">𝕘Store</string>
     <string name="whats_new_gstore_description">Un petit magasin pour débloquer des fonctionnalités.</string>
     <string name="whats_new_watermark_title">Fait avec 𝕘8</string>
@@ -497,7 +508,33 @@
     <string name="appbar_invoices">Factures</string>
     <string name="appbar_credit_notes">Avoirs</string>
     <string name="appbar_delivery_notes">Bons de livraison</string>
+    <string name="appbar_sales_orders">Bons de commande</string>
     <string name="appbar_quotes">Devis</string>
+    <string name="appbar_dashboard">Tableau de bord</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_tab_invoices">Factures</string>
+    <string name="dashboard_tab_products">Produits</string>
+    <string name="dashboard_tab_statements">Relevé</string>
+    <string name="dashboard_summary_total">Total des ventes</string>
+    <string name="dashboard_summary_paid">Total payé</string>
+    <string name="dashboard_summary_to_pay">À payer</string>
+    <string name="dashboard_summary_late">En retard</string>
+    <string name="dashboard_late_cta">Relancer</string>
+    <string name="dashboard_section_months">12 derniers mois</string>
+    <string name="dashboard_count_invoices">facture(s)</string>
+    <string name="dashboard_count_paid">payée(s)</string>
+    <string name="dashboard_count_pending">en attente</string>
+    <string name="dashboard_sales_chart_title">Ventes par mois</string>
+    <string name="dashboard_products_empty">Aucune facture pour l'instant — reviens ici dès qu'une facture est émise pour voir tes produits les plus vendus.</string>
+    <string name="dashboard_products_top_section">Produits les plus vendus</string>
+    <string name="dashboard_products_chart_title">Ventes de produits par mois</string>
+    <string name="dashboard_products_see_more">Voir plus</string>
+    <string name="dashboard_products_see_less">Voir moins</string>
+    <string name="dashboard_statements_empty">Aucun client avec un document pour l'instant.</string>
+    <string name="dashboard_statements_empty_period">Aucun document sur cette période.</string>
+    <string name="dashboard_statements_export_pdf">Exporter PDF</string>
+    <string name="dashboard_statements_export_csv">Exporter CSV</string>
     <string name="appbar_products">Produits</string>
     <string name="appbar_client_list">Client·es</string>
     <string name="appbar_new">Nouveau</string>
@@ -520,6 +557,8 @@
     <string name="appbar_create_credit_note">Créer avoir</string>
     <string name="appbar_convert">Convertir</string>
     <string name="appbar_convert_label">Facturer</string>
+    <string name="appbar_convert_to_invoice">Facture</string>
+    <string name="appbar_convert_to_delivery_note">Bon de livraison</string>
     <string name="appbar_unselect_all">Annuler sélection</string>
     <string name="appbar_unselect_all_label">Retour</string>
     <string name="appbar_edit">Modifier la facture</string>
@@ -594,6 +633,12 @@
     <string name="gstore_module_delivery_note_title">Bons de livraison</string>
     <string name="gstore_module_delivery_note_desc">Créer des bons de livraison et les convertir en facture</string>
     <string name="gstore_module_delivery_note_detail">Active ce module pour créer des bons de livraison, les envoyer à tes client·es et les convertir en facture une fois acceptés.\n\nLe numéro de bon de livraison sera indiqué dans la facture correspondante pour la traçabilité comptable.\n\nTu peux convertir un bon de livraison en facture, et grouper plusieurs BLs en une seule facture.</string>
+    <string name="gstore_module_sales_order_title">Bons de commande</string>
+    <string name="gstore_module_sales_order_desc">Créer et convertir en facture ou BL</string>
+    <string name="gstore_module_sales_order_detail">Active ce module pour créer des bons de commande, les envoyer à tes client·es et les convertir — soit en facture, soit en bon de livraison — depuis le menu du bon de commande.\n\nUtile pour matérialiser l'accord commercial avant livraison ou facturation. Le numéro de bon de commande est repris sur la facture et le BL générés pour la traçabilité.</string>
+    <string name="gstore_module_dashboard_title">Tableau de bord</string>
+    <string name="gstore_module_dashboard_desc">Visualise tes ventes, tes produits les plus vendus et le relevé par client</string>
+    <string name="gstore_module_dashboard_detail">Active ce module pour voir en un coup d'œil : le total des ventes par mois, tes produits les plus vendus avec leur courbe sur 12 mois, et un relevé mois par mois de chaque client (factures, avoirs, BL, BC, devis) — exportable en PDF ou CSV.</string>
     <string name="gstore_module_multi_entreprise_title">Multi-entreprise</string>
     <string name="gstore_module_multi_entreprise_desc">Gérer plusieurs entreprises</string>
     <string name="gstore_module_multi_entreprise_detail">Active ce module si tu factures sous plusieurs entreprises (SIRET différents, activités séparées…).\n\nTu pourras ajouter d'autres entreprises depuis « Mon compte » et basculer entre elles depuis le menu.\n\nTes clients, produits, numérotations et coordonnées bancaires seront distincts par entreprise.</string>
@@ -780,6 +825,7 @@
     <!-- Delivery Note List Advice -->
     <string name="delivery_note_advice_convert">J'ai appris ce move au hip-hop, super stylé je sais. Je dois encore le bosser j'suis pas hyper rapide, à mon avis mon patagium freine la vague. Bref je voulais te dire \n\n …   </string>
     <string name="delivery_note_empty_cta">Clique sur «Créer» pour créer ton premier bon de livraison</string>
+    <string name="sales_order_empty_cta">Clique sur «Créer» pour créer ton premier bon de commande</string>
     <string name="quote_empty_cta">Clique sur «Créer» pour créer ton premier devis</string>
     <string name="credit_note_empty_cta">Clique sur «Créer» pour créer ton premier avoir</string>
     <string name="delivery_note_advice_convert1">que si tu veux convertir un ou plusieurs bons de livraison en une facture, tu peux les sélectionner dans la liste en faisant un clic long (ou en cliquant sur le ○) \n\n …   </string>

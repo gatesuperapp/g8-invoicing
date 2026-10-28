@@ -9,6 +9,7 @@ import com.a4a.g8invoicing.ui.navigation.DocumentTag
 import com.a4a.g8invoicing.ui.navigation.actionArrowRight
 import com.a4a.g8invoicing.ui.navigation.actionCategories
 import com.a4a.g8invoicing.ui.navigation.actionConvert
+import com.a4a.g8invoicing.ui.navigation.actionConvertSalesOrder
 import com.a4a.g8invoicing.ui.navigation.actionCreateCorrectedInvoice
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
@@ -33,8 +34,11 @@ fun GeneralBottomBar(
     onClickCategory: (Category) -> Unit = {},
     onClickTag: (DocumentTag) -> Unit = {},
     onClickConvert: () -> Unit = {},
+    onClickConvertToInvoice: () -> Unit = {},
+    onClickConvertToDeliveryNote: () -> Unit = {},
     onClickSendReminder: () -> Unit = {},
     isConvertible: Boolean = false,
+    isSalesOrder: Boolean = false,
     isInvoice: Boolean = false,
     // BL/Devis-only. When true, adds the "Marquer" bottom-bar entry on the
     // selection bar. Gated by the corresponding gStore module in the caller.
@@ -88,6 +92,21 @@ fun GeneralBottomBar(
                 actionTag(),
                 actionSendReminder(onClickSendReminder)
             )
+        } else if (isSalesOrder && isTagPickerEnabled) {
+            arrayOf(
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                actionConvertSalesOrder(),
+                actionTagBLDevis()
+            )
+        } else if (isSalesOrder) {
+            arrayOf(
+                actionUnselectAll(onClickUnselectAll),
+                actionDuplicate(onClickDuplicate),
+                actionDelete(onClickDelete),
+                actionConvertSalesOrder()
+            )
         } else if (isConvertible && isTagPickerEnabled) {
             arrayOf(
                 actionUnselectAll(onClickUnselectAll),
@@ -127,5 +146,7 @@ fun GeneralBottomBar(
         onCategoriesMenuOpenChange,
         productCategoriesForBulk,
         onPickBulkCategory,
+        onClickConvertToInvoice,
+        onClickConvertToDeliveryNote,
     )
 }
