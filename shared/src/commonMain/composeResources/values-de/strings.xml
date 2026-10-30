@@ -979,6 +979,11 @@ Es ist ein Fehler aufgetreten :
     <string name="appbar_tag_cancelled_masc">Storniert</string>
     <string name="appbar_tag_invoiced">In Rechnung gestellt</string>
     <string name="appbar_tag_locked">Gesperrt</string>
+    <string name="appbar_lock_action">Sperren</string>
+    <string name="whats_new_23_lock_decoupled_title">Sperre unabhängig vom Status</string>
+    <string name="whats_new_23_lock_decoupled_description">Das Sperren einer Rechnung ist jetzt vom Status entkoppelt. Eine Rechnung kann „Bezahlt" oder „Versendet" bleiben und gleichzeitig gesperrt sein. Verwende dafür die Schaltfläche „Sperren" in der Auswahlleiste.</string>
+    <string name="whats_new_23_lock_migration_title">Deine gesperrten Rechnungen</string>
+    <string name="whats_new_23_lock_migration_description">Sie wurden automatisch auf den Status „Versendet" umgestellt und bleiben gesperrt. Du kannst sie wie gewohnt über die Schaltfläche „Markieren" als „Bezahlt" kennzeichnen.</string>
 
     <!-- gStore: Lieferscheine markieren -->
     <string name="gstore_module_delivery_note_tagging_title">Lieferscheine markieren</string>

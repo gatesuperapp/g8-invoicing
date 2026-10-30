@@ -975,6 +975,11 @@
     <string name="appbar_tag_cancelled_masc">Cancelled</string>
     <string name="appbar_tag_invoiced">Invoiced</string>
     <string name="appbar_tag_locked">Locked</string>
+    <string name="appbar_lock_action">Lock</string>
+    <string name="whats_new_23_lock_decoupled_title">Lock independent from status</string>
+    <string name="whats_new_23_lock_decoupled_description">Locking an invoice is now decoupled from its status. An invoice can stay "Paid" or "Sent" while being locked. Use the "Lock" button in the selection bar.</string>
+    <string name="whats_new_23_lock_migration_title">Your locked invoices</string>
+    <string name="whats_new_23_lock_migration_description">They have been automatically moved to the "Sent" status while staying locked. You can mark them "Paid" using the usual "Mark" button.</string>
 
     <!-- gStore: Tag delivery notes -->
     <string name="gstore_module_delivery_note_tagging_title">Tag delivery notes</string>
