@@ -65,7 +65,6 @@ private fun frenchStatus(tag: String?): String = when (tag) {
     "cancelled" -> "Annulée"
     "draft" -> "Brouillon"
     "invoiced" -> "Facturée"
-    "locked" -> "Verrouillée"
     else -> ""
 }
 

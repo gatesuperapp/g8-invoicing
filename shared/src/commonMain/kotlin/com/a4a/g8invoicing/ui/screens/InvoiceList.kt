@@ -42,7 +42,6 @@ import com.a4a.g8invoicing.shared.resources.appbar_invoices
 import com.a4a.g8invoicing.shared.resources.appbar_tag_cancelled
 import com.a4a.g8invoicing.shared.resources.appbar_tag_draft
 import com.a4a.g8invoicing.shared.resources.appbar_tag_late
-import com.a4a.g8invoicing.shared.resources.appbar_tag_locked
 import com.a4a.g8invoicing.shared.resources.appbar_tag_paid
 import com.a4a.g8invoicing.shared.resources.appbar_tag_reminded
 import com.a4a.g8invoicing.shared.resources.appbar_tag_sent
@@ -98,6 +97,7 @@ fun InvoiceList(
     onClickViewCreatedCorrectedInvoice: (Long) -> Unit = {},
     onDismissCorrectedInvoiceCreatedDialog: () -> Unit = {},
     onClickTag: (List<InvoiceState>, DocumentTag) -> Unit,
+    onClickLock: (List<InvoiceState>) -> Unit,
     onClickNew: () -> Unit,
     onClickCategory: (Category) -> Unit,
     onClickListItem: (Int) -> Unit,
@@ -147,7 +147,6 @@ fun InvoiceList(
         TagFilterOption(DocumentTag.LATE, stringResource(Res.string.appbar_tag_late), ColorRedLate),
         TagFilterOption(DocumentTag.REMINDED, stringResource(Res.string.appbar_tag_reminded), ColorReminded),
         TagFilterOption(DocumentTag.CANCELLED, stringResource(Res.string.appbar_tag_cancelled), ColorCancelled),
-        TagFilterOption(DocumentTag.LOCKED, stringResource(Res.string.appbar_tag_locked), ColorGreyDraft),
     )
 
     // Alert dialogs
@@ -261,6 +260,10 @@ fun InvoiceList(
                     },
                     onClickTag = {
                         onClickTag(selectedItems.toList(), it)
+                        resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
+                    },
+                    onClickLock = {
+                        onClickLock(selectedItems.toList())
                         resetSelectedItems(selectedItems, selectedMode, keyToResetCheckboxes)
                     },
                     onClickSendReminder = {

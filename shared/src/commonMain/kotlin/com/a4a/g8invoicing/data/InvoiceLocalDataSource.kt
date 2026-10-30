@@ -615,6 +615,7 @@ class InvoiceLocalDataSource(
             vatExemptionText = this.vat_exemption_text?.let { TextFieldValue(text = it) },
             fontFamily = this.font_family,
             retentions = retentions,
+            isLocked = this.is_locked != 0L,
         )
     }
 
@@ -1102,6 +1103,7 @@ class InvoiceLocalDataSource(
                         labelsSnapshot = frozenLabels,
                         showCurrencyAndAutoTaxColumn = true,
                         formatLocale = AppLocaleHolder.languageCode,
+                        isLocked = false,
                     )
 
                     saveInfoInInvoiceTable(duplicatedDocumentState) // DB Call
@@ -1167,6 +1169,28 @@ class InvoiceLocalDataSource(
                 }
             } catch (e: Exception) {
                 //Log.e("InvoiceDS", "Error markAsPaid: ${e.message}")
+            }
+        }
+    }
+
+    // --- setLocked ---
+    // Toggles the orthogonal is_locked flag. Independent from the invoice
+    // tag so a locked + paid invoice stays paid; the lock just freezes
+    // DocumentAddEdit's bottom bar + prepends a padlock to the status label.
+    override suspend fun setLocked(documents: List<InvoiceState>, locked: Boolean) {
+        withContext(DispatcherProvider.IO) {
+            try {
+                documents.forEach {
+                    it.documentId?.toLong()?.let { id ->
+                        invoiceQueries.updateIsLocked(
+                            invoice_id = id,
+                            is_locked = if (locked) 1L else 0L,
+                            updated_at = DateUtils.getCurrentTimestamp()
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                //Log.e("InvoiceDS", "Error setLocked: ${e.message}")
             }
         }
     }

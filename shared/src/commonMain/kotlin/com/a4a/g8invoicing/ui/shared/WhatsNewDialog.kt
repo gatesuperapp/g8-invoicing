@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -37,10 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.whats_new_22_dashboard_description
-import com.a4a.g8invoicing.shared.resources.whats_new_22_dashboard_title
-import com.a4a.g8invoicing.shared.resources.whats_new_22_sales_order_description
-import com.a4a.g8invoicing.shared.resources.whats_new_22_sales_order_title
+import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_decoupled_description
+import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_decoupled_title
+import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_migration_description
+import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_migration_title
 import com.a4a.g8invoicing.shared.resources.whats_new_close
 import com.a4a.g8invoicing.shared.resources.whats_new_discover
 import com.a4a.g8invoicing.shared.resources.whats_new_done
@@ -65,24 +67,25 @@ fun WhatsNewDialog(
     appVersion: String = "",
     onDismiss: () -> Unit
 ) {
-    // Page de bienvenue + pages de fonctionnalités. 2.2 ships two new
-    // premium modules in the gStore: Tableau de bord (per-month sales +
-    // top products + per-client statements) and Bons de commande (sales
-    // orders that convert to invoice OR delivery note). Earlier release
-    // pages (2.1 catégories/filtre, 2.0 dark mode, 1.9…) have already
-    // been seen by the matching upgraders — kept focused on 2.2 news.
+    // Page de bienvenue + pages de fonctionnalités. 2.3 reshapes
+    // "Verrouillée" from a status tag into an orthogonal flag: invoices
+    // keep their classic status (payée / envoyée / en retard / …) and
+    // the lock stacks on top via a dedicated "Verrouiller" button. The
+    // migration auto-rebases pre-2.3 locked invoices onto "Envoyée" so
+    // nothing loses its mutually-exclusive status silently — slide 2
+    // tells the user where their locked docs ended up.
     val welcomeTitle = stringResource(Res.string.whats_new_welcome, appVersion)
 
     val featurePages = listOf(
         WhatsNewPage(
-            emoji = "📊",
-            title = stringResource(Res.string.whats_new_22_dashboard_title),
-            description = stringResource(Res.string.whats_new_22_dashboard_description)
+            emoji = "🔓",
+            title = stringResource(Res.string.whats_new_23_lock_decoupled_title),
+            description = stringResource(Res.string.whats_new_23_lock_decoupled_description)
         ),
         WhatsNewPage(
-            emoji = "🧾",
-            title = stringResource(Res.string.whats_new_22_sales_order_title),
-            description = stringResource(Res.string.whats_new_22_sales_order_description)
+            emoji = "🔒",
+            title = stringResource(Res.string.whats_new_23_lock_migration_title),
+            description = stringResource(Res.string.whats_new_23_lock_migration_description)
         )
     )
 
@@ -91,11 +94,25 @@ fun WhatsNewDialog(
     val pagerState = rememberPagerState(pageCount = { totalPages })
     val coroutineScope = rememberCoroutineScope()
 
+    // Modal hauteur = ~50 % de la fenêtre, clampée [420, 560] pour éviter
+    // la micro-modale sur grand écran paysage et le pavé déborde sur
+    // téléphone compact. Toutes les slides partagent la même hauteur (pas
+    // de jump en swipe) ; si une traduction (DE, ES) dépasse, la Column
+    // de la page scrolle en interne via verticalScroll.
+    val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val dialogHeight = with(density) {
+        val windowHeightPx = windowInfo.containerSize.height
+        if (windowHeightPx > 0) (windowHeightPx * 0.5f).toInt().toDp()
+            .coerceIn(420.dp, 560.dp)
+        else 460.dp
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(420.dp)
+                .height(dialogHeight)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = AppColors.surface)
@@ -137,6 +154,7 @@ fun WhatsNewDialog(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
+                                        .verticalScroll(rememberScrollState())
                                         .padding(horizontal = 24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
@@ -169,6 +187,7 @@ fun WhatsNewDialog(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxSize()
+                                        .verticalScroll(rememberScrollState())
                                         .padding(horizontal = 24.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.Center
@@ -199,6 +218,11 @@ fun WhatsNewDialog(
                             }
                         }
                     }
+
+                    // Breathing room entre la fin du texte de la page et la
+                    // rangée des dots — sans ce spacer la description colle
+                    // visuellement aux indicateurs sur les pages à 4-5 lignes.
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Indicateurs de page (dots) cliquables - toujours en bas
                     Row(

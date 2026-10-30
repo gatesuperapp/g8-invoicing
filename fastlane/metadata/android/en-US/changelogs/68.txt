@@ -1,0 +1,1 @@
+Invoice locking is now independent from the status: you can now mark an invoice "Paid" (or "Sent") and keep it locked at the same time.

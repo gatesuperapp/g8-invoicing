@@ -9,9 +9,9 @@ VALUES (1, 'DRAFT'),
 (3, 'PAID'),
 (4, 'LATE'),
 (5, 'REMINDED'),
-(6, 'CANCELLED'),
--- User-set "verrouillée" tag added in 1.9. See DocumentTag enum.
-(7, 'LOCKED');
+(6, 'CANCELLED');
+-- "Verrouillée" was tag_id = 7 in 1.9–2.2; reshaped in 2.2.1 into an
+-- orthogonal Invoice.is_locked flag. See migration 10.sqm.
 
 getTagId:
 SELECT invoice_tag_id

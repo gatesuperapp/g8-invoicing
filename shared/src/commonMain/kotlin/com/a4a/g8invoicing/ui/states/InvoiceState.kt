@@ -96,4 +96,10 @@ data class InvoiceState(
     // from documentProducts (never mixed / reordered together). Sorted by
     // sortOrder when > 1 line — Mexican CFDI needs ISR before IVA retention.
     var retentions: List<RetentionState> = emptyList(),
+    // "Verrouillée" flag — orthogonal to [documentTag]. A locked invoice
+    // keeps its classic status (DRAFT / SENT / PAID / LATE / …) and the
+    // list row still shows the matching coloured pill; the padlock just
+    // prefixes the status label under the price and DocumentAddEdit's
+    // bottom bar is frozen so items / text / style can't be edited.
+    var isLocked: Boolean = false,
 ) : DocumentState()

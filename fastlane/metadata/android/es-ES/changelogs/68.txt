@@ -1,0 +1,1 @@
+Bloqueo de facturas independiente del estado: ahora puedes marcar una factura como «Pagada» (o «Enviada») y mantenerla bloqueada al mismo tiempo.

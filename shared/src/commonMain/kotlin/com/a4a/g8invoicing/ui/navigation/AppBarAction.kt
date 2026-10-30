@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.Brush
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.IndeterminateCheckBox
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -353,20 +354,21 @@ fun actionTagInvoiced() =
         onClick = {}
     )
 
-// Invoice-only "verrouillée" tag. Icon field carries a neutral placeholder
-// (the caller special-cases DocumentTag.LOCKED to render a 🔒 emoji Text at
-// the pill's size instead of the coloured circle); iconColor stays surface
-// so the fallback rendering doesn't paint a coloured dot over the emoji.
+// Invoice-only "Verrouiller" bottom-bar action. Orthogonal to the status
+// tag (DRAFT / SENT / PAID / …) — the handler toggles Invoice.is_locked
+// across the current selection, leaving the classic tag untouched. Lives
+// as its own icon next to Marquer so users see the two actions are
+// independent. On narrow phones the row runs out of horizontal space;
+// [isSecondary=true] moves this entry into the "Plus" overflow menu so
+// nothing clips at the edge of the bar.
 @Composable
-fun actionTagLocked() =
+fun actionLock(isSecondary: Boolean = false, onClick: () -> Unit) =
     AppBarAction(
-        tag = DocumentTag.LOCKED,
-        icon = Icons.Filled.Circle,
-        iconColor = Color.White,
-        iconBorder = ColorGreyDraft,
-        description = stringResource(Res.string.appbar_tag_locked),
-        label = stringResource(Res.string.appbar_tag_locked),
-        onClick = {}
+        icon = Icons.Outlined.Lock,
+        description = stringResource(Res.string.appbar_lock_action),
+        label = stringResource(Res.string.appbar_lock_action),
+        isSecondary = isSecondary,
+        onClick = onClick,
     )
 
 @Composable

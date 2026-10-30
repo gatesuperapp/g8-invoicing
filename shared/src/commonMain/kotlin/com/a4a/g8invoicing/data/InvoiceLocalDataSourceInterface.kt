@@ -41,6 +41,7 @@ interface InvoiceLocalDataSourceInterface {
     suspend fun setTag(documents: List<InvoiceState>, tag: DocumentTag, tagUpdateCase: TagUpdateOrCreationCase)
     suspend fun deleteTag(invoiceId: Long)
     suspend fun markAsPaid(documents: List<InvoiceState>, tag: DocumentTag)
+    suspend fun setLocked(documents: List<InvoiceState>, locked: Boolean)
     suspend fun updateDocumentProductsOrderInDb(documentId: Long, orderedProducts: List<DocumentProductState>)
 
     /**

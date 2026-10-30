@@ -473,7 +473,7 @@
     <string name="whats_new_close">Fermer</string>
     <string name="whats_new_done">C'est parti !</string>
     <string name="whats_new_welcome">Bienvenue sur la version %1$s</string>
-    <string name="whats_new_discover">Découvre les nouveautés...</string>
+    <string name="whats_new_discover">Une petite amélioration t'attend...</string>
 
     <!-- WhatsNew 2.1 slides (kept for reference, no longer surfaced) -->
     <string name="whats_new_21_status_filter_title">Filtre par statut</string>
@@ -1132,10 +1132,24 @@ Une erreur s'est produite :
     <string name="appbar_tag_sent_masc">Envoyé</string>
     <string name="appbar_tag_cancelled_masc">Annulé</string>
     <string name="appbar_tag_invoiced">Facturé</string>
-    <!-- Statut "Verrouillée" (factures uniquement) — la pastille rend
-         l'emoji cadenas 🔒 dans la liste et DocumentAddEdit masque la
-         bottom bar (texte / style / ligne) quand le doc porte ce tag. -->
+    <!-- Statut "Verrouillée" (factures uniquement) — le label 🔒 préfixe
+         le statut classique sous le prix dans la liste et DocumentAddEdit
+         fige sa bottom bar (texte / style / ligne) quand le drapeau
+         isLocked est posé. -->
     <string name="appbar_tag_locked">Verrouillée</string>
+    <!-- Verbe infinitif pour le bouton standalone "Verrouiller" de la
+         sélection sur la liste des factures. Toggle le drapeau isLocked
+         en orthogonal du statut classique (payée / envoyée / …). -->
+    <string name="appbar_lock_action">Verrouiller</string>
+
+    <!-- WhatsNew 2.3 : refonte du verrouillage, désormais orthogonal au
+         statut (payée / envoyée / …). Les factures verrouillées de 2.2
+         ont été migrées sur le statut "Envoyée" tout en gardant leur
+         verrou. -->
+    <string name="whats_new_23_lock_decoupled_title">Verrouillage indépendant du statut</string>
+    <string name="whats_new_23_lock_decoupled_description">Le verrouillage des factures est désormais décorrélé du statut. Une facture peut rester « Payée » ou « Envoyée » tout en étant verrouillée. L'action se fait via le bouton « Verrouiller » dans la barre de sélection.</string>
+    <string name="whats_new_23_lock_migration_title">Tes factures verrouillées</string>
+    <string name="whats_new_23_lock_migration_description">Elles ont été automatiquement basculées sur le statut « Envoyée » tout en restant verrouillées. Tu peux les marquer « Payée » grâce au bouton habituel « Marquer ».</string>
 
     <!-- gStore: Marquer les BLs -->
     <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>

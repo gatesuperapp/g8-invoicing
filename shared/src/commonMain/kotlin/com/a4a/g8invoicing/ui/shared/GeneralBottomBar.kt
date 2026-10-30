@@ -1,6 +1,7 @@
 package com.a4a.g8invoicing.ui.shared
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.a4a.g8invoicing.ui.states.ProductCategoryState
 import com.a4a.g8invoicing.ui.navigation.BottomBarAction
@@ -13,6 +14,7 @@ import com.a4a.g8invoicing.ui.navigation.actionConvertSalesOrder
 import com.a4a.g8invoicing.ui.navigation.actionCreateCorrectedInvoice
 import com.a4a.g8invoicing.ui.navigation.actionDelete
 import com.a4a.g8invoicing.ui.navigation.actionDuplicate
+import com.a4a.g8invoicing.ui.navigation.actionLock
 import com.a4a.g8invoicing.ui.navigation.actionNew
 import com.a4a.g8invoicing.ui.navigation.actionSendReminder
 import com.a4a.g8invoicing.ui.navigation.actionTag
@@ -52,7 +54,23 @@ fun GeneralBottomBar(
     isCategoriesMenuOpen: Boolean = false,
     onCategoriesMenuOpenChange: (Boolean) -> Unit = {},
     showCategoryButton: Boolean = true, // Hidden on desktop when sidebar is shown
+    // Invoice-only: fired when the user picks the "Verrouillée" row inside the
+    // Marquer dropdown. Toggles Invoice.is_locked independently of the tag.
+    onClickLock: (() -> Unit)? = null,
 ) {
+    // On narrow phones the invoice selection bar runs out of room:
+    // unselect + duplicate + delete + arrow + corrected + tag + lock
+    // (+ send reminder on 1-selection) is 7–8 icons on the right side
+    // alone, and the row starts clipping. Move the "Verrouiller" entry
+    // into the Plus overflow once the window drops below the threshold —
+    // tag + the destructive icons stay primary so the common paths don't
+    // move. Threshold tuned on Redmi (fits at ~390–412dp) + Galaxy S8
+    // (360dp needs the overflow).
+    val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val lockInOverflow = with(density) {
+        windowInfo.containerSize.width.toDp()
+    } < 380.dp
     BottomBarAction(
         navController,
         appBarActions =
@@ -80,7 +98,8 @@ fun GeneralBottomBar(
                 actionDelete(onClickDelete),
                 actionArrowRight(onClickCreateCreditNote),
                 actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
-                actionTag()
+                actionTag(),
+                actionLock(isSecondary = lockInOverflow) { onClickLock?.invoke() },
             )
         } else if (isInvoice && numberOfItemsSelected == 1) {
             arrayOf(
@@ -90,6 +109,7 @@ fun GeneralBottomBar(
                 actionArrowRight(onClickCreateCreditNote),
                 actionCreateCorrectedInvoice(onClickCreateCorrectedInvoice),
                 actionTag(),
+                actionLock(isSecondary = lockInOverflow) { onClickLock?.invoke() },
                 actionSendReminder(onClickSendReminder)
             )
         } else if (isSalesOrder && isTagPickerEnabled) {

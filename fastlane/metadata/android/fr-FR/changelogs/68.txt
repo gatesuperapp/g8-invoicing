@@ -1,0 +1,1 @@
+Verrouillage des factures indépendant du statut : il est désormais possible de marquer une facture « Payée » (ou « Envoyée ») tout en la verrouillant.

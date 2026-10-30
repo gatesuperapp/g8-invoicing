@@ -258,6 +258,16 @@ class FakeInvoiceDataSource : InvoiceLocalDataSourceInterface {
         invoicesFlow.value = invoices.toList()
     }
 
+    override suspend fun setLocked(documents: List<InvoiceState>, locked: Boolean) {
+        documents.forEach { doc ->
+            val index = invoices.indexOfFirst { it.documentId == doc.documentId }
+            if (index >= 0) {
+                invoices[index] = invoices[index].copy(isLocked = locked)
+            }
+        }
+        invoicesFlow.value = invoices.toList()
+    }
+
     override suspend fun updateDocumentProductsOrderInDb(
         documentId: Long,
         orderedProducts: List<DocumentProductState>

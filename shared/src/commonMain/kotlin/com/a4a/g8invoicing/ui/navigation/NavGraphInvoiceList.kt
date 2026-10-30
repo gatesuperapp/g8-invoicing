@@ -94,6 +94,7 @@ fun NavGraphBuilder.invoiceList(
                 viewModel.setTag(selectedDocuments, tag, TagUpdateOrCreationCase.UPDATED_BY_USER)
                 viewModel.markAsPaid(selectedDocuments, tag)
             },
+            onClickLock = viewModel::toggleLock,
             onClickNew = { onClickNew() },
             onClickCategory = onClickCategory,
             onClickListItem = onClickListItem,

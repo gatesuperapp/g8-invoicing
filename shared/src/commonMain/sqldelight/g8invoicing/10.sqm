@@ -1,0 +1,28 @@
+-- Migration 10 → 11 (release 2.2.1) — reshape "Verrouillée" from a tag into
+-- an orthogonal flag. 1.9 shipped LOCKED as a 7th InvoiceTag row, mutually
+-- exclusive with the classic statuses (DRAFT / SENT / PAID / LATE / …).
+-- That blocked users from locking a paid invoice because the lock would
+-- erase the "payée" chip. The new model keeps the classic tag intact and
+-- stores locking as a boolean column on Invoice itself.
+--
+-- Any invoice that was tagged LOCKED gets its tag rebased onto SENT (the
+-- user picked that fallback so no row loses its mutually-exclusive status
+-- in a way we'd have to guess at — SENT is safer than PAID). The is_locked
+-- flag is set so the lock survives the migration.
+--
+-- The InvoiceTag(7, 'LOCKED') row is deleted — no code will produce it
+-- again, and any dangling LinkInvoiceToTag.tag_id = 7 would otherwise fail
+-- enumValueOf("LOCKED") at fetch time (LOCKED is removed from the Kotlin
+-- enum in the same release).
+
+ALTER TABLE Invoice ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0;
+
+UPDATE Invoice
+SET is_locked = 1
+WHERE invoice_id IN (
+  SELECT invoice_id FROM LinkInvoiceToTag WHERE tag_id = 7
+);
+
+UPDATE LinkInvoiceToTag SET tag_id = 2 WHERE tag_id = 7;
+
+DELETE FROM InvoiceTag WHERE invoice_tag_id = 7;

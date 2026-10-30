@@ -162,6 +162,22 @@ class InvoiceListViewModel(
         }
     }
 
+    // Toggles the orthogonal "Verrouillée" flag across the picked invoices.
+    // Target state is the inverse of the first doc's current lock state so a
+    // mixed selection snaps to a single value in one tap.
+    fun toggleLock(selectedDocuments: List<InvoiceState>) {
+        setTagJob?.cancel()
+        setTagJob = viewModelScope.launch {
+            try {
+                val target = !(selectedDocuments.firstOrNull()?.isLocked ?: false)
+                selectedDocuments.forEach { it.isLocked = target }
+                invoiceDataSource.setLocked(selectedDocuments, target)
+            } catch (e: Exception) {
+                // Error handling
+            }
+        }
+    }
+
     // Used to display download db popup to existing users
     fun hasUserData(): Boolean {
         return invoiceQueries.countAll().executeAsOne() > 3 ||

@@ -390,10 +390,10 @@ fun DocumentAddEdit(
                 // visible so the preview layout doesn't shift under the
                 // user, but every clickable action is stripped — no way to
                 // add/change items or text from within DocumentAddEdit.
-                // Tag toggle-off (via bulk-select > Marquer > un autre tag)
-                // re-enables edits.
-                val isLocked = document.documentTag ==
-                    com.a4a.g8invoicing.ui.navigation.DocumentTag.LOCKED
+                // Toggle-off from the invoice list's bulk-select > Marquer
+                // > Verrouiller row re-enables edits.
+                val isLocked = (document as? com.a4a.g8invoicing.ui.states.InvoiceState)
+                    ?.isLocked == true
                 DocumentAddEditBottomBar(
                     onClickElements = { currentSheet = BottomSheetType.ELEMENTS },
                     onClickItems = { currentSheet = BottomSheetType.ITEMS },

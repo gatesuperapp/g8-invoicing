@@ -1,0 +1,1 @@
+Rechnungssperre jetzt unabhängig vom Status: Du kannst eine Rechnung als „Bezahlt" (oder „Versendet") markieren und gleichzeitig gesperrt lassen.

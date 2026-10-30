@@ -195,7 +195,7 @@ class DashboardViewModel(
             .toSet()
 
         val everyRelevant = invoices
-            .filter { it.documentTag != DocumentTag.DRAFT && it.documentTag != DocumentTag.CANCELLED && it.documentTag != DocumentTag.LOCKED }
+            .filter { it.documentTag != DocumentTag.DRAFT && it.documentTag != DocumentTag.CANCELLED }
             .mapNotNull { inv ->
                 val date = parseIssuingDate(inv.documentDate) ?: return@mapNotNull null
                 InvoiceAgg(
@@ -283,13 +283,14 @@ class DashboardViewModel(
 
         // Any invoice that landed in a client's hands counts as "sold" —
         // paid or still open (sent / reminded / late). Mirrors the Factures
-        // tab summary so the two blocks reconcile. DRAFT (never sent),
-        // CANCELLED (voided), LOCKED (archived) are deliberately excluded.
-        // BL / Devis / BC / Avoirs don't participate — they're not revenue.
+        // tab summary so the two blocks reconcile. DRAFT (never sent) and
+        // CANCELLED (voided) are deliberately excluded; the orthogonal
+        // "Verrouillée" flag does NOT exclude — a locked paid invoice
+        // still counts as revenue. BL / Devis / BC / Avoirs don't
+        // participate — they're not revenue.
         val relevantInvoices = invoices.filter {
             it.documentTag != DocumentTag.DRAFT &&
-                it.documentTag != DocumentTag.CANCELLED &&
-                it.documentTag != DocumentTag.LOCKED
+                it.documentTag != DocumentTag.CANCELLED
         }
 
         // Walk every qualifying invoice once, keep the date so we can later
