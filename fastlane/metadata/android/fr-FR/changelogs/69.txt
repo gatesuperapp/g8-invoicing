@@ -1,0 +1,1 @@
+Correction d'un bug important apparu dans la version 1.7 : supprimer un produit de la liste « Produits » supprimait ses lignes de l'aperçu des documents existants. Les PDF déjà générés n'étaient pas touchés.

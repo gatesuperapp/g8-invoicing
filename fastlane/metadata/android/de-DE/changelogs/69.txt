@@ -1,0 +1,1 @@
+Behebung eines wichtigen Fehlers, der mit Version 1.7 aufgetreten ist: Beim Löschen eines Produkts aus der Liste „Produkte" wurden dessen Zeilen aus der Vorschau bestehender Dokumente entfernt. Bereits erstellte PDFs waren nicht betroffen.

@@ -1,0 +1,1 @@
+Fix for an important bug introduced in version 1.7: deleting a product from the "Products" list was removing its lines from the preview of existing documents. PDFs already generated were not affected.

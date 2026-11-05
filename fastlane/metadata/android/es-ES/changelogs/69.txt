@@ -1,0 +1,1 @@
+Corrección de un error importante aparecido en la versión 1.7: eliminar un producto de la lista «Productos» borraba sus líneas de la vista previa de los documentos existentes. Los PDF ya generados no se vieron afectados.
