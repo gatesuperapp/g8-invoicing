@@ -14,7 +14,7 @@ CREATE TABLE DocumentProduct (
 
   FOREIGN KEY(product_id)
             REFERENCES Product(id)
-            ON DELETE CASCADE
+            ON DELETE SET NULL
 );
 
 getDocumentProduct:

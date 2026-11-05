@@ -1,0 +1,65 @@
+-- Migration 11 → 12 (release 2.4).
+-- Tighten two FK policies, from ON DELETE CASCADE to ON DELETE SET NULL:
+--   (1) DocumentProduct.product_id → Product(id)
+--   (2) Product.product_tax_id → TaxRate(product_tax_id)
+--
+-- SQLite doesn't allow altering a FK in place, so both tables are
+-- recreated. Foreign keys are OFF during SQLDelight's Schema.migrate run
+-- (AndroidSqliteDriver sets PRAGMA foreign_keys=ON only onOpen, after the
+-- migration), so DROP does not cascade onto Link* tables referencing
+-- DocumentProduct nor onto DocumentProduct referencing Product. Same
+-- pattern as 1.sqm.
+
+CREATE TABLE DocumentProduct_new (
+  id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  quantity REAL NOT NULL,
+  description TEXT,
+  price_without_tax REAL,
+  tax_rate REAL,
+  unit TEXT,
+  unit_code TEXT,
+  type TEXT,
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  product_id INTEGER,
+  FOREIGN KEY(product_id)
+      REFERENCES Product(id)
+      ON DELETE SET NULL
+);
+
+INSERT INTO DocumentProduct_new (id, name, quantity, description, price_without_tax, tax_rate, unit, unit_code, type, created_at, updated_at, product_id)
+SELECT id, name, quantity, description, price_without_tax, tax_rate, unit, unit_code, type, created_at, updated_at, product_id
+FROM DocumentProduct;
+
+DROP TABLE DocumentProduct;
+
+ALTER TABLE DocumentProduct_new RENAME TO DocumentProduct;
+
+CREATE TABLE Product_new (
+  id INTEGER PRIMARY KEY NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  unit TEXT,
+  unit_code TEXT,
+  type TEXT,
+  product_tax_id INTEGER,
+  company_id INTEGER,
+  product_category_id INTEGER,
+  created_at REAL DEFAULT (datetime('now', 'localtime')),
+  updated_at REAL DEFAULT (datetime('now', 'localtime')),
+  FOREIGN KEY(product_tax_id)
+      REFERENCES TaxRate(product_tax_id)
+      ON DELETE SET NULL,
+  FOREIGN KEY(product_category_id)
+      REFERENCES ProductCategory(product_category_id)
+      ON DELETE SET NULL
+);
+
+INSERT INTO Product_new (id, name, description, unit, unit_code, type, product_tax_id, company_id, product_category_id, created_at, updated_at)
+SELECT id, name, description, unit, unit_code, type, product_tax_id, company_id, product_category_id, created_at, updated_at
+FROM Product;
+
+DROP TABLE Product;
+
+ALTER TABLE Product_new RENAME TO Product;

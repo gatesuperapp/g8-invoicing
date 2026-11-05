@@ -980,6 +980,10 @@
     <string name="whats_new_23_lock_decoupled_description">Locking an invoice is now decoupled from its status. An invoice can stay "Paid" or "Sent" while being locked. Use the "Lock" button in the selection bar.</string>
     <string name="whats_new_23_lock_migration_title">Your locked invoices</string>
     <string name="whats_new_23_lock_migration_description">They have been automatically moved to the "Sent" status while staying locked. You can mark them "Paid" using the usual "Mark" button.</string>
+    <!-- WhatsNew 2.4 slide: DocumentProduct cascade fix -->
+    <string name="whats_new_24_product_delete_fix_title">Important bug fixed</string>
+    <string name="whats_new_24_product_delete_fix_description">A fix has just been shipped for a bug that was removing product lines from documents when deleting a product in the "Products" category. PDF documents already generated were not touched (preview only).\n\nThis is a regression that appeared in version 1.7 (July 2026). If you may have been affected, write to contact@the-gate.fr for help.\n\nSorry for the trouble, and thanks to the producer who reported it today ♡</string>
+    <string name="product_delete_fix_contact_cta">Contact support</string>
 
     <!-- gStore: Tag delivery notes -->
     <string name="gstore_module_delivery_note_tagging_title">Tag delivery notes</string>

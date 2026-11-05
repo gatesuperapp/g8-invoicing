@@ -986,6 +986,10 @@ Une erreur s'est produite :
     <string name="whats_new_23_lock_decoupled_description">El bloqueo de las facturas ya no depende de su estado. Una factura puede seguir «Pagada» o «Enviada» y estar bloqueada al mismo tiempo. Usa el botón «Bloquear» en la barra de selección.</string>
     <string name="whats_new_23_lock_migration_title">Tus facturas bloqueadas</string>
     <string name="whats_new_23_lock_migration_description">Se han pasado automáticamente al estado «Enviada» pero siguen bloqueadas. Puedes marcarlas como «Pagada» con el botón habitual «Marcar».</string>
+    <!-- WhatsNew 2.4 slide: DocumentProduct cascade fix -->
+    <string name="whats_new_24_product_delete_fix_title">Error importante corregido</string>
+    <string name="whats_new_24_product_delete_fix_description">Se acaba de aplicar una corrección por un error que eliminaba líneas de productos de los documentos al eliminar un producto en la categoría «Productos». Los PDF ya generados no se vieron afectados (solo la vista previa).\n\nEs una regresión que apareció en la versión 1.7 (julio de 2026). Si te has podido ver afectado/a, escríbenos a contact@the-gate.fr para obtener ayuda.\n\nPerdón por las molestias, y gracias al productor que lo señaló hoy ♡</string>
+    <string name="product_delete_fix_contact_cta">Contactar con soporte</string>
 
     <!-- gStore: Etiquetar albaranes -->
     <string name="gstore_module_delivery_note_tagging_title">Etiquetar albaranes</string>

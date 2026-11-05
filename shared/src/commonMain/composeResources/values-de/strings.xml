@@ -984,6 +984,10 @@ Es ist ein Fehler aufgetreten :
     <string name="whats_new_23_lock_decoupled_description">Das Sperren einer Rechnung ist jetzt vom Status entkoppelt. Eine Rechnung kann „Bezahlt" oder „Versendet" bleiben und gleichzeitig gesperrt sein. Verwende dafür die Schaltfläche „Sperren" in der Auswahlleiste.</string>
     <string name="whats_new_23_lock_migration_title">Deine gesperrten Rechnungen</string>
     <string name="whats_new_23_lock_migration_description">Sie wurden automatisch auf den Status „Versendet" umgestellt und bleiben gesperrt. Du kannst sie wie gewohnt über die Schaltfläche „Markieren" als „Bezahlt" kennzeichnen.</string>
+    <!-- WhatsNew 2.4 slide: DocumentProduct cascade fix -->
+    <string name="whats_new_24_product_delete_fix_title">Wichtiger Fehler behoben</string>
+    <string name="whats_new_24_product_delete_fix_description">Soeben wurde ein Fehler behoben, der beim Löschen eines Produkts in der Kategorie „Produkte" Produktzeilen aus Dokumenten entfernte. Bereits erstellte PDF-Dokumente waren nicht betroffen (nur die Vorschau).\n\nEs handelt sich um eine Regression, die in Version 1.7 (Juli 2026) aufgetreten ist. Falls du betroffen sein könntest, schreib an contact@the-gate.fr, um Hilfe zu erhalten.\n\nSorry für den Ärger, und danke an den Erzeuger, der es heute gemeldet hat ♡</string>
+    <string name="product_delete_fix_contact_cta">Support kontaktieren</string>
 
     <!-- gStore: Lieferscheine markieren -->
     <string name="gstore_module_delivery_note_tagging_title">Lieferscheine markieren</string>

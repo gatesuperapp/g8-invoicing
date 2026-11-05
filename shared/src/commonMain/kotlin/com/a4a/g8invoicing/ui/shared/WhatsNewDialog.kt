@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,10 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.a4a.g8invoicing.shared.resources.Res
-import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_decoupled_description
-import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_decoupled_title
-import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_migration_description
-import com.a4a.g8invoicing.shared.resources.whats_new_23_lock_migration_title
 import com.a4a.g8invoicing.shared.resources.whats_new_close
 import com.a4a.g8invoicing.shared.resources.whats_new_discover
 import com.a4a.g8invoicing.shared.resources.whats_new_done
@@ -67,27 +64,17 @@ fun WhatsNewDialog(
     appVersion: String = "",
     onDismiss: () -> Unit
 ) {
-    // Page de bienvenue + pages de fonctionnalités. 2.3 reshapes
-    // "Verrouillée" from a status tag into an orthogonal flag: invoices
-    // keep their classic status (payée / envoyée / en retard / …) and
-    // the lock stacks on top via a dedicated "Verrouiller" button. The
-    // migration auto-rebases pre-2.3 locked invoices onto "Envoyée" so
-    // nothing loses its mutually-exclusive status silently — slide 2
-    // tells the user where their locked docs ended up.
+    val featurePages = emptyList<WhatsNewPage>()
+    // Dialog no-ops when there is nothing to show (2.4 ships its single
+    // notice via a dedicated dialog in MainCompose, so the list is empty).
+    // LaunchedEffect-wrapped onDismiss so the state write happens off the
+    // composition thread; a direct call would loop recomposition.
+    if (featurePages.isEmpty()) {
+        LaunchedEffect(Unit) { onDismiss() }
+        return
+    }
+    // Page de bienvenue + pages de fonctionnalités.
     val welcomeTitle = stringResource(Res.string.whats_new_welcome, appVersion)
-
-    val featurePages = listOf(
-        WhatsNewPage(
-            emoji = "🔓",
-            title = stringResource(Res.string.whats_new_23_lock_decoupled_title),
-            description = stringResource(Res.string.whats_new_23_lock_decoupled_description)
-        ),
-        WhatsNewPage(
-            emoji = "🔒",
-            title = stringResource(Res.string.whats_new_23_lock_migration_title),
-            description = stringResource(Res.string.whats_new_23_lock_migration_description)
-        )
-    )
 
     // Total pages = 1 (welcome) + feature pages
     val totalPages = 1 + featurePages.size

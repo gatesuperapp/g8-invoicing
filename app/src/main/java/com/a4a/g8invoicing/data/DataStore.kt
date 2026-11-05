@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore by preferencesDataStore("settings")
 
 // Version actuelle de l'app (à mettre à jour à chaque release)
-const val CURRENT_APP_VERSION = "2.3"
+const val CURRENT_APP_VERSION = "2.4"
 
 object PrefKeys {
     val HAS_SEEN_POPUP = booleanPreferencesKey("has_seen_popup")
@@ -37,6 +37,13 @@ object PrefKeys {
     // installs flip this at the same time as HAS_SEEN_POPUP (see
     // initializeVersionTracking).
     val HAS_SEEN_DARKMODE_MIGRATION_20 = booleanPreferencesKey("has_seen_darkmode_migration_20")
+    // 2.4 product-delete regression notice — one-shot, upgraders only.
+    // Independent from the standard What's New because setSeenOnboarding18
+    // silently writes LAST_SEEN_VERSION = CURRENT_APP_VERSION, so any user
+    // crossing the pre-1.9 → 2.4 jump would skip the What's New dialog
+    // entirely. This flag fires the notice on its own, regardless of the
+    // What's New state.
+    val HAS_SEEN_PRODUCT_DELETE_WARNING_24 = booleanPreferencesKey("has_seen_product_delete_warning_24")
 }
 
 // Dark mode preference — emits null when the user hasn't explicitly chosen
@@ -74,6 +81,24 @@ fun shouldShowDarkModeMigration20(context: Context) =
 suspend fun setSeenDarkModeMigration20(context: Context) {
     context.dataStore.edit { prefs ->
         prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] = true
+    }
+}
+
+// Fires once for every user who already had the app before 2.4. Same
+// "prior-session signal required" guard as shouldShowDarkModeMigration20 so
+// genuine fresh installs stay silent.
+fun shouldShowProductDeleteWarning24(context: Context) =
+    context.dataStore.data.map { prefs ->
+        val hasSeen = prefs[PrefKeys.HAS_SEEN_PRODUCT_DELETE_WARNING_24] ?: false
+        if (hasSeen) return@map false
+        val lastSeenVersion = prefs[PrefKeys.LAST_SEEN_VERSION]
+        val hasSeenPopup = prefs[PrefKeys.HAS_SEEN_POPUP] ?: false
+        lastSeenVersion != null || hasSeenPopup
+    }
+
+suspend fun setSeenProductDeleteWarning24(context: Context) {
+    context.dataStore.edit { prefs ->
+        prefs[PrefKeys.HAS_SEEN_PRODUCT_DELETE_WARNING_24] = true
     }
 }
 
@@ -142,6 +167,10 @@ suspend fun initializeVersionTracking(context: Context) {
             // pour les fresh installs on flip SEEN=true directement.
             prefs[PrefKeys.HAS_SEEN_EINVOICE_INTRO] = true
             prefs[PrefKeys.HAS_SEEN_DARKMODE_MIGRATION_20] = true
+            // 2.4 product-delete regression notice targets existing users
+            // only (they may have deleted a product between 1.7 and 2.3).
+            // Fresh 2.4 installs have nothing to warn about.
+            prefs[PrefKeys.HAS_SEEN_PRODUCT_DELETE_WARNING_24] = true
         }
     }
 }

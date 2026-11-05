@@ -42,10 +42,12 @@ import com.a4a.g8invoicing.data.models.PersonType
 import com.a4a.g8invoicing.data.resetOnboarding18Seen
 import com.a4a.g8invoicing.data.setSeenEInvoiceIntro
 import com.a4a.g8invoicing.data.setSeenOnboarding18
+import com.a4a.g8invoicing.data.setSeenProductDeleteWarning24
 import com.a4a.g8invoicing.data.setSeenWhatsNew
 import com.a4a.g8invoicing.data.shouldShowBackupPopupNow
 import com.a4a.g8invoicing.data.shouldShowEInvoiceIntro
 import com.a4a.g8invoicing.data.shouldShowOnboarding18
+import com.a4a.g8invoicing.data.shouldShowProductDeleteWarning24
 import com.a4a.g8invoicing.data.shouldShowWhatsNew
 import com.a4a.g8invoicing.data.auth.ActivatedModulesRepository
 import com.a4a.g8invoicing.data.auth.AuthRepository
@@ -335,6 +337,8 @@ fun MainCompose(
     val shouldShowEInvoice by shouldShowEInvoiceIntro(context).collectAsState(initial = null)
     val shouldShowDarkModeMigration by com.a4a.g8invoicing.data.shouldShowDarkModeMigration20(context)
         .collectAsState(initial = null)
+    val shouldShowProductDeleteWarning by com.a4a.g8invoicing.data.shouldShowProductDeleteWarning24(context)
+        .collectAsState(initial = null)
     // Dark mode resolution: the Apparence toggle stores an explicit boolean
     // when the user picks one, else we follow the OS setting. Hoisted up here
     // (above the overlay renders) so modals outside the main G8InvoicingTheme
@@ -357,6 +361,7 @@ fun MainCompose(
     var showOnboarding by remember { mutableStateOf(false) }
     var showEInvoiceIntro by remember { mutableStateOf(false) }
     var showDarkModeMigration by remember { mutableStateOf(false) }
+    var showProductDeleteWarning by remember { mutableStateOf(false) }
     // While the 2.0 migration prompt is up and the user hasn't yet made an
     // explicit theme choice, hold the whole UI in light mode so the modal
     // (and the app behind it) match 1.x's historical look — the switch to
@@ -499,7 +504,7 @@ fun MainCompose(
         )
     }
 
-    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, shouldShowDarkModeMigration, versionTrackingDone, migration19Context) {
+    LaunchedEffect(shouldShow, shouldShowOnboarding, shouldShowEInvoice, shouldShowDarkModeMigration, shouldShowProductDeleteWarning, versionTrackingDone, migration19Context) {
         // Wait until every DataStore flag has emitted its real value —
         // guarding against the initial=null race that used to flip
         // showBackupDialog on a version upgrade before the onboarding flag
@@ -511,6 +516,7 @@ fun MainCompose(
         val onboarding = shouldShowOnboarding ?: return@LaunchedEffect
         val eInvoice = shouldShowEInvoice ?: return@LaunchedEffect
         val darkModeMigration = shouldShowDarkModeMigration ?: return@LaunchedEffect
+        val productDeleteWarning = shouldShowProductDeleteWarning ?: return@LaunchedEffect
         // 1.8 onboarding is allowed to surface even while migration19 is
         // pending — the two run in sequence (1.8 → 1.9), gated by
         // `onboarding18Pending` at the render site. What's New / e-invoice /
@@ -540,19 +546,36 @@ fun MainCompose(
             showEInvoiceIntro = true
             setSeenEInvoiceIntro(context)
         }
-        // Mark the 2.0 dark-mode prompt as seen eagerly so a mid-flight app
-        // kill or tap-outside dismiss doesn't re-trigger it on next launch.
-        val darkModeMigrationWillShow = darkModeMigration && !migration19Pending && !eInvoiceWillShow
-        if (darkModeMigrationWillShow) {
-            showDarkModeMigration = true
+        // The 2.0 dark-mode migration prompt is retired in 2.4 — users
+        // jumping from pre-2.0 (1.6 / 1.7 / 1.8) straight to 2.4 no longer
+        // see it. Still mark the flags seen when the flow would have fired,
+        // so future launches don't re-check on every cold start.
+        val darkModeMigrationWillShow = false
+        if (darkModeMigration && !migration19Pending && !eInvoiceWillShow) {
             com.a4a.g8invoicing.data.setSeenDarkModeMigration20(context)
-            // The in-app WhatsNew popup would double up with the migration
-            // dialog (both announce dark mode) — mark it seen so it stays
-            // silent on this release. Future upgrades resume as usual.
             setSeenWhatsNew(context)
         }
-        showWhatsNew = whatsNew && !migration19Pending && !darkModeMigrationWillShow
-        if (!whatsNew && !migration19Pending && !showEInvoiceIntro && !showDarkModeMigration) {
+        // 2.4 product-delete regression warning — surface after migration19 /
+        // e-invoice / dark-mode have cleared, but before What's New and the
+        // backup nag. Dedicated flag independent from LAST_SEEN_VERSION so
+        // upgraders from pre-1.9 (who have setSeenOnboarding18 write
+        // LAST_SEEN_VERSION = CURRENT_APP_VERSION and skip the What's New)
+        // still see this warning. Mark seen eagerly so a kill mid-dialog
+        // does not re-fire on next launch.
+        val productDeleteWarningWillShow = productDeleteWarning &&
+            !migration19Pending &&
+            !eInvoiceWillShow &&
+            !darkModeMigrationWillShow
+        if (productDeleteWarningWillShow) {
+            showProductDeleteWarning = true
+            setSeenProductDeleteWarning24(context)
+            // The 2.4 What's New has no feature slides (the regression notice
+            // is this dedicated dialog), so mark it seen to keep the empty
+            // What's New dialog silent on this release.
+            setSeenWhatsNew(context)
+        }
+        showWhatsNew = whatsNew && !migration19Pending && !darkModeMigrationWillShow && !productDeleteWarningWillShow
+        if (!whatsNew && !migration19Pending && !showEInvoiceIntro && !showDarkModeMigration && !productDeleteWarningWillShow) {
             showBackupDialog = shouldShowBackupPopupNow(
                 context,
                 invoiceQueries,
@@ -604,6 +627,25 @@ fun MainCompose(
                         com.a4a.g8invoicing.data.setDarkMode(context, enable)
                     }
                 },
+            )
+        }
+    }
+
+    if (showProductDeleteWarning) {
+        val contactEmail = stringResource(Res.string.about_contact_email)
+        G8InvoicingTheme(useDarkTheme = useDarkTheme) {
+            com.a4a.g8invoicing.ui.shared.ProductDeleteFixDialog(
+                onContactSupport = {
+                    val intent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("mailto:")
+                        putExtra(Intent.EXTRA_EMAIL, arrayOf(contactEmail))
+                        putExtra(Intent.EXTRA_SUBJECT, "[g8] Bug suppression produit")
+                    }
+                    if (intent.resolveActivity(context.packageManager) != null) {
+                        context.startActivity(intent)
+                    }
+                },
+                onDismiss = { showProductDeleteWarning = false },
             )
         }
     }

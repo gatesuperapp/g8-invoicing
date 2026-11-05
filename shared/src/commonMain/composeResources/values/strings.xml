@@ -1150,6 +1150,11 @@ Une erreur s'est produite :
     <string name="whats_new_23_lock_decoupled_description">Le verrouillage des factures est désormais décorrélé du statut. Une facture peut rester « Payée » ou « Envoyée » tout en étant verrouillée. L'action se fait via le bouton « Verrouiller » dans la barre de sélection.</string>
     <string name="whats_new_23_lock_migration_title">Tes factures verrouillées</string>
     <string name="whats_new_23_lock_migration_description">Elles ont été automatiquement basculées sur le statut « Envoyée » tout en restant verrouillées. Tu peux les marquer « Payée » grâce au bouton habituel « Marquer ».</string>
+    <!-- Dedicated product-delete regression dialog (2.4). Shown once to
+         every upgrader at cold start, independent of the What's New flow. -->
+    <string name="whats_new_24_product_delete_fix_title">Bug important corrigé</string>
+    <string name="whats_new_24_product_delete_fix_description">Une correction vient d'être faite suite à un bug impactant : lors de la suppression d'un produit dans la catégorie « Produits », les lignes correspondant à ce produit étaient supprimées dans les documents. Les documents PDF déjà générés n'étaient pas touchés (uniquement l'aperçu).\n\nCette régression était apparue dans la version 1.7 (juillet 2026). Si tu as pu être impacté.e, écris à contact@the-gate.fr pour obtenir de l'aide.\n\nDésolé pour ce souci, et merci au maraîcher qui l'a signalé ce jour ♡</string>
+    <string name="product_delete_fix_contact_cta">Contacter l'assistance</string>
 
     <!-- gStore: Marquer les BLs -->
     <string name="gstore_module_delivery_note_tagging_title">Marquer les BLs</string>

@@ -21,7 +21,7 @@ CREATE TABLE Product (
 
     FOREIGN KEY(product_tax_id)
           REFERENCES TaxRate(product_tax_id)
-          ON DELETE CASCADE,
+          ON DELETE SET NULL,
     FOREIGN KEY(product_category_id)
           REFERENCES ProductCategory(product_category_id)
           ON DELETE SET NULL
